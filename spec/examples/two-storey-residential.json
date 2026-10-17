@@ -36,7 +36,7 @@
     },
     "jurisdiction": {
       "authority": "rajuk",
-      "rulePack": "rajuk@2026.1",
+      "rulePack": "rajuk@2008.1",
       "seismicZone": 2
     }
   },
@@ -94,7 +94,7 @@
     {
       "id": "dev-001",
       "phaseId": "foundation",
-      "ruleRef": "rajuk@2026.1#setback-front",
+      "ruleRef": "rajuk@2008.1#setback-schedule",
       "ruleTitle": "Front setback",
       "expected": "3.0 m",
       "actual": "2.4 m",

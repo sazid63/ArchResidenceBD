@@ -29,3 +29,5 @@ jobs:
         run: python tools/codegen/generate_spec.py --check
       - name: Flow book freshness
         run: uv run --directory core python ../tools/flow/render_book.py --check
+      - name: Rule pack freshness
+        run: uv run --directory core python ../tools/rules/render_pack.py --check

@@ -49,7 +49,7 @@ pack's `gaps` array (open items only). Items marked **RESOLVED** are kept for th
 - (11) The “+0.05 FAR per 0.30 m extra road width” bonus: the text does not state whether a partial step
   (< 0.30 m) earns a pro-rata bonus. Working reading: full steps only, capped at the next printed table step
   (also see §54(4) and §54(7)). Needs engineer confirmation.
-- (13) Use change → lesser of the two use FARs; reading recorded (used by provision `s51-6-8`).
+- (13) Use change → lesser of the two use FARs; reading recorded (used by provision `s51-9-14-road-width`).
 - (15) “নিম্নের ছক” (the lower table): the word was identified from sentence context, but the printed glyph for
   the ম্ন conjunct is missing from this edition (renders as a dotted circle). Reading is probable, not proven.
 - To resolve: engineer confirmation for (11); second-edition check for (15).
