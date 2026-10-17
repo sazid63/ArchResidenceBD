@@ -137,6 +137,9 @@ quality gates.
 - **DXF annotations**: decide whether the DXF deliverable needs dimension/text entities (our own
   DXF writer or a post-pass) or whether geometry-only DXF + annotated PDF is the accepted split.
   (W3.3 "full drawing set" should settle this.)
+- **Branding rule on user-facing output**: sheet furniture and title blocks carry **NativeCAD**
+  (+ ArchResidenceBD); "FreeCAD" is confined to About/licences attribution and internal engineering
+  docs (plan §3, §5.3). The spike sheet's "Created by" field carries `NativeCAD (ArchResidenceBD)`.
 - **Views to test in W2.5**: `DrawViewSection` headless (untested here), hidden-line style
   (`HardHidden`), centre marks, multi-sheet/multi-page PDFs, A3 sheets.
 - **Batch behaviour**: N sheets in one `freecadcmd` run vs one process per sheet (startup is

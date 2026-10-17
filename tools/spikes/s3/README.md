@@ -55,6 +55,8 @@ invalid.
   `page.svg`, `page.dxf` and the raster preview are byte-identical across runs.
 - Register `osifont` via `QFontDatabase.addApplicationFont` before rendering, or sheet text falls
   back to a default font.
+- **Branding:** everything user-facing (drawing title blocks included) carries **NativeCAD** —
+  "FreeCAD" is the engine and stays in About/licences attribution + internal docs only (plan §5.3).
 - `freecadcmd` runs a script **exactly once**; duplicated console output under PowerShell `2>&1`
   is a capture artifact (verified with a file-append run counter). Redirect with `*>` and read the
   file when in doubt.

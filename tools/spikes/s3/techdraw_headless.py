@@ -162,7 +162,7 @@ FIELDS = {
     "<tspan>YYYY-MM-DD</tspan>": "<tspan>2026-10-17</tspan>",
     "<tspan>X / Y</tspan>": "<tspan>1 / 1</tspan>",
     "<tspan>1 : 1</tspan>": "<tspan>1 : 30</tspan>",
-    "<tspan>A. Nemesis</tspan>": "<tspan>FreeCAD headless toolchain</tspan>",
+    "<tspan>A. Nemesis</tspan>": "<tspan>NativeCAD (ArchResidenceBD)</tspan>",
     "<tspan>Component Drawing</tspan>": "<tspan>Spike drawing</tspan>",
     "<tspan>In preparation</tspan>": "<tspan>Spike evidence</tspan>",
     "<tspan>Stainless steel Mat.No. 1.4301</tspan>": "<tspan>RC pad + RC columns (spike)</tspan>",
