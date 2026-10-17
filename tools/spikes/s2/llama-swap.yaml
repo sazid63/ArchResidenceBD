@@ -1,0 +1,78 @@
+# ArchResidenceBD spike S2 - llama-swap fleet config
+#
+# The three-row fleet of plan section 5 (fixed roster):
+#   chat   = Archie-Chat-4B base (Qwen3-4B-Instruct-2507)
+#   repair = Archie-Repair-4B archetype (Qwen2.5-Coder-3B, the P1 training base placeholder)
+#   (speculative decoding was measured in spike S2 and rejected: 8% acceptance,
+#    3.5x slower on GPU draft, 11x slower on CPU draft - see docs/spikes/S2-serve.md)
+#   embed  = Qwen3-Embedding-0.6B   (CPU-side, never swaps out)
+#   rerank = Qwen3-Reranker-0.6B    (CPU-side, never swaps out)
+#
+# Policies under test:
+#   * one GPU model in VRAM at a time  -> group "gpu-models" (swap: true, exclusive: true)
+#   * CPU services stay resident while GPU models swap -> group "cpu-services" (persistent: true)
+#   * embed/rerank are pinned to CPU with `-ngl 0`: without it, llama.cpp's auto-fit
+#     offloads them to VRAM too and crowds the chat model out on a 6 GB card (S2 finding)
+#
+# Start (from the repo root):
+#   $env:S2_ROOT = "$PWD\data\downloads\s2"
+#   & "$env:S2_ROOT\bin\llama-swap\llama-swap.exe" -config tools\spikes\s2\llama-swap.yaml -listen 127.0.0.1:8787
+
+healthCheckTimeout: 500
+logLevel: info
+logTimeFormat: "rfc3339"
+sendLoadingState: true
+
+macros:
+  "llama-server": "${env.S2_ROOT}\\bin\\llama\\llama-server.exe"
+  "models": "${env.S2_ROOT}\\models"
+
+models:
+  "chat":
+    name: "Archie Chat (Qwen3-4B-Instruct-2507 Q4_K_M)"
+    cmd: |
+      ${llama-server} --host 127.0.0.1 --port ${PORT}
+      -m ${models}\Qwen3-4B-Instruct-2507-Q4_K_M.gguf
+      -ngl 99 -c 8192 -np 1 --no-webui
+    ttl: 0
+
+  "repair":
+    name: "Archie Repair (Qwen2.5-Coder-3B-Instruct Q4_K_M)"
+    cmd: |
+      ${llama-server} --host 127.0.0.1 --port ${PORT}
+      -m ${models}\qwen2.5-coder-3b-instruct-q4_k_m.gguf
+      -ngl 99 -c 8192 -np 1 --no-webui
+    ttl: 0
+
+  "embed":
+    name: "Embedder (Qwen3-Embedding-0.6B Q8_0, CPU)"
+    cmd: |
+      ${llama-server} --host 127.0.0.1 --port ${PORT}
+      -m ${models}\Qwen3-Embedding-0.6B-Q8_0.gguf
+      -ngl 0 -c 2048 --embeddings --pooling last --no-webui
+    ttl: 0
+
+  "rerank":
+    name: "Reranker (Qwen3-Reranker-0.6B Q8_0, CPU)"
+    cmd: |
+      ${llama-server} --host 127.0.0.1 --port ${PORT}
+      -m ${models}\Qwen3-Reranker-0.6B.Q8_0.gguf
+      -ngl 0 -c 2048 --reranking --no-webui
+    capabilities:
+      reranker: true
+    ttl: 0
+
+routing:
+  router:
+    use: group
+    settings:
+      groups:
+        "gpu-models":
+          swap: true
+          exclusive: true
+          members: ["chat", "repair"]
+        "cpu-services":
+          swap: false
+          exclusive: false
+          persistent: true
+          members: ["embed", "rerank"]
