@@ -138,8 +138,9 @@ quality gates.
   DXF writer or a post-pass) or whether geometry-only DXF + annotated PDF is the accepted split.
   (W3.3 "full drawing set" should settle this.)
 - **Branding rule on user-facing output**: sheet furniture and title blocks carry **NativeCAD**
-  (+ ArchResidenceBD); "FreeCAD" is confined to About/licences attribution and internal engineering
-  docs (plan §3, §5.3). The spike sheet's "Created by" field carries `NativeCAD (ArchResidenceBD)`.
+  (+ ArchResidenceBD); the engine name is confined to the app's Licences screen (required LGPL
+  notices as legal text; ADR-0004) and internal engineering docs. The spike sheet's "Created by"
+  field carries `NativeCAD (ArchResidenceBD)`.
   Enforcement is in the pipeline, not by convention: the composer strips the template's engine XML
   plumbing (`xmlns:freecad` + `freecad:*` attributes), then **asserts** the composed sheet carries
   no engine token; the DXF's engine banner line (`FreeCAD v1.1 …`) is scrubbed and the whole file
@@ -148,7 +149,8 @@ quality gates.
   `tools/ci/brand_guard.py` (CI) fails on any engine token in `app/`.
   Remaining known scope: the *embedded engine GUI* (S6) still shows engine strings in parts of its
   own dialogs — that residue is S6/W2.13's deliverable to measure and minimize; the plan accepts
-  ~95 % branding coverage there. About/licences attribution is required (LGPL-2.1) and stays.
+  ~95 % branding coverage there. The LGPL-2.1 notices stay required, but only as legal text on the
+  app's Licences screen — never branding (ADR-0004).
 - **Views to test in W2.5**: `DrawViewSection` headless (untested here), hidden-line style
   (`HardHidden`), centre marks, multi-sheet/multi-page PDFs, A3 sheets.
 - **Batch behaviour**: N sheets in one `freecadcmd` run vs one process per sheet (startup is

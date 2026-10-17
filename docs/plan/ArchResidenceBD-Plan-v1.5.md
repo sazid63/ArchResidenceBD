@@ -9,6 +9,7 @@
 - v1.3 — final consolidation
 - v1.4 — owner-approved improvements folded in (Appendix A1); fleet roster fixed — no new model members; v1.5 bench approved
 - v1.5 — one-app **NativeCAD** integration (branded, embedded, invisible engine); left navigation + Project Setup + Source Registry; BOQ cost types (labour / machinery / subcontract) + machinery rate cards; Claude-style soft theme with the **no-sharp-edges** corner policy; Work Breakdown added (Appendix C) *(this document)*
+- v1.5.1 — branding/attribution policy: required licensing notices confined to the app's **Licences** screen; engine name kept out of branding, UI copy and generated documents (ADR-0004). No functional change.
 
 ---
 
@@ -51,7 +52,7 @@ A self-contained Windows desktop app that acts as an **AI civil engineer for Ban
 - **Rule coverage v1:** RAJUK/Dhaka + Chattogram, Khulna, Rajshahi, Sylhet.
 - **Users:** Simple mode + Pro mode.
 - **Models published open** on Hugging Face.
-- **NativeCAD is the CAD.** The built-in CAD workspace is branded **NativeCAD**; the engine is bundled FreeCAD (LGPL-2.1) presented as NativeCAD, with required attribution confined to About/licences: *"NativeCAD is powered by FreeCAD (LGPL-2.1, © FreeCAD contributors)."* Naming caution on record: avoid "ArchCAD" (ArchiCAD trademark proximity); "NativeCAD" checked — one unrelated commercial use (a file-conversion module), different category, low risk, and renameable anytime (it is a string).
+- **NativeCAD is the CAD.** The built-in CAD workspace is branded **NativeCAD**; the engine is bundled open-source CAD (LGPL-2.1) presented as NativeCAD, with the licence's required notices confined to the app's **Licences** screen — legal text only, never branding; no engine name in UI copy or generated documents (ADR-0004). Naming caution on record: avoid "ArchCAD" (ArchiCAD trademark proximity); "NativeCAD" checked — one unrelated commercial use (a file-conversion module), different category, low risk, and renameable anytime (it is a string).
 - **Theme:** soft, warm, friendly, eye-soothing, but colourful (Claude-style feel). **No sharp edges — every UI/UX corner is rounded.** Design tokens v0 (§5.1) govern the whole product: app, installer, dialogs, NativeCAD chrome, reports.
 
 ## 4. The Fleet (models)
@@ -89,7 +90,7 @@ Fleet of specialists — separate models, each with the right base and its own n
 - **Engine (invisible):** bundled FreeCAD (unmodified core) + our addon, running as isolated worker processes inside the app folder; native RPC/MCP; two workers (interactive preview / batch design); crash-isolated — if CAD dies, the app survives. No external FreeCAD, ever; the app talks only to its own engine.
 - **NativeCAD workspace (primary CAD surface, ours):** 3D viewport streaming from the engine (glTF/tessellation), phase model tree, parametric edit panels (member sizes, rebar, openings, dimensions), Design button, phase toggles — fully themed, 100% corner policy.
 - **Full CAD tab (power surface):** branded FreeCAD build — "NativeCAD" name / splash / icons via FreeCAD's branding system (precedent: branded distributions such as Ondsel ES) + theme stylesheet best effort (~95%); embedded via window reparenting; if a machine refuses embedding → fallback opens it in its own window from inside the app (still one app, zero installs). Spike S6 in P0.
-- **Legality:** LGPL-2.1 — bundling, branding, embedding allowed with notices; we ship the licence text and keep attribution in About; engine unmodified; our addon is separate. 
+- **Legality:** LGPL-2.1 — bundling, branding, embedding allowed with notices; the licence text ships, and the required notices live only on the app's Licences screen (ADR-0004) — never in branding or UI copy; engine unmodified; our addon is separate. 
 - Keeps: FreeCAD-Reinforcement workbench (real rebar), TechDraw sheets, PyNite 3D FEM at v1.5, exports FCStd/DXF/IFC, federation (shared datum; per-phase FCStd files; master via App::Link; regenerate only changed phases).
 
 **5.4 Building Spec** — JSON-Schema single source of truth → generates Python validators, TypeScript types, UI forms, and docs. Versioned projects, locked revisions, dependency DAG with conservative stale-flagging, provenance per field, and an incremental ≡ full-rebuild equivalence gate.
@@ -170,7 +171,7 @@ Automated guards enforced in CI: Bangla rendering regression tests (glyph shapin
 - **NativeCAD embedding (window reparenting)** → isolated in one tab; spike S6 first; fallback = standalone window from inside the app; primary workspace surface unaffected.
 - **Branding / stylesheet limits in FreeCAD's own GUI** → ~95% theme coverage there; our NativeCAD workspace carries the design; stubborn dialogs replaced over time.
 - **FreeCAD version coupling** → pin version; test addon per upgrade.
-- **LGPL compliance** → licence text shipped; attribution in About; engine unmodified; source via upstream version pin.
+- **LGPL compliance** → licence text shipped; required notices on the Licences screen (ADR-0004); engine unmodified; source via upstream version pin.
 - **Unsigned installer (SmartScreen)** → cosmetic warning at $0; reputation builds with downloads.
 - **BNBC redistribution rights** → BYO-PDF importer path; structured rule data + user-provided copies.
 - **Liability / RAJUK stamping reality** → planning-grade positioning, engineer review pack, deviation register, ToS; engineer partner in P0.
@@ -194,7 +195,7 @@ Automated guards enforced in CI: Bangla rendering regression tests (glyph shapin
 
 **A4. Folded into v1.5 (2026-10-17):**
 1. **One-app integration** — CAD + AI runners live inside the app; one installer, one window; nothing external (§3, §5.3).
-2. **NativeCAD** — branded embedded CAD; engine = FreeCAD (LGPL-2.1, verified); attribution in About only; "ArchCAD" avoided (ArchiCAD proximity); name checked, low risk (§3, §5.3).
+2. **NativeCAD** — branded embedded CAD; engine = bundled open-source CAD (LGPL-2.1, verified); required notices confined to the Licences screen (ADR-0004); "ArchCAD" avoided (ArchiCAD proximity); name checked, low risk (§3, §5.3).
 3. **Left navigation** — Projects → Project Setup → Phase ▾ → Design ▾ → BOQ → Documents ▾ (§5.1).
 4. **Project Setup** — location, plot size (land units), stories, units, optional prices, optional soil (+ Source Registry fetching) (§5.1, §5.10).
 5. **Source Registry** — curated trusted sources; teach the AI where to fetch; provenance; soil assumptions flagged (§5.10).
@@ -206,7 +207,7 @@ Automated guards enforced in CI: Bangla rendering regression tests (glyph shapin
 
 ## Appendix B — Verified building blocks & references
 
-- **FreeCAD** — LGPL-2.1 **verified from its own repository**; supports branded redistributions (name / splash / icons); precedent: branded distributions such as Ondsel ES; our engine stays unmodified; we ship the licence + About attribution.
+- **FreeCAD** — LGPL-2.1 **verified from its own repository**; supports branded redistributions (name / splash / icons); precedent: branded distributions such as Ondsel ES; our engine stays unmodified; we ship the licence text + required notices on the Licences screen (ADR-0004).
 - **NativeCAD name check** — one unrelated commercial use ("3D-NativeCAD Converter" module in 3D-Tool); different category; "native CAD" is a generic industry term; low risk; renameable anytime.
 - **freecad-mcp** (neka-nat, MIT, ~2.9k★) — FreeCAD RPC/MCP pattern; fork basis. **llama-swap** (mostlygeek, MIT, ~6k★) — fleet manager; bundled. **FreeCAD-Reinforcement** (amrit3701) — real rebar; bundled. **PyNite** (JWock82, MIT, ~758★) — Python 3D FEM; v1.5 module.
 - **Qwen3-4B-Instruct-2507** (Apache-2.0) — Chat/Repair base family; **Qwen3-Embedding-0.6B** / **Qwen3-Reranker-0.6B** — stock RAG pair; **Qwen3-30B-A3B-Instruct-2507** — free-tier golden teacher; **Qwen3-8B Q4** — local teacher; **Qwen3-0.6B** — speculative draft.

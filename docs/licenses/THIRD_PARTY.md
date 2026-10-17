@@ -12,4 +12,4 @@ Tracked as part of the $0 / open-source compliance discipline. Bundled component
 | FreeCAD-Reinforcement | Rebar scripting | to verify at integration | planned — spike S5 |
 | Qwen3 family (incl. 30B-A3B teacher) | Fleet bases / embedder / reranker | Apache-2.0 | planned |
 
-**About-screen attribution (final build):** "NativeCAD is powered by FreeCAD (LGPL-2.1, © FreeCAD contributors)."
+**In-app licence notices (final build):** required notices are legal text on the app's **Licences** screen (linked from About) plus licence files in the install folder — never branding copy. No "powered by" line anywhere; no UI surface outside the Licences screen names a bundled component (enforced by `tools/ci/brand_guard.py`, which allows only that legal module — ADR-0004).

@@ -56,7 +56,8 @@ invalid.
 - Register `osifont` via `QFontDatabase.addApplicationFont` before rendering, or sheet text falls
   back to a default font.
 - **Branding:** everything user-facing (drawing title blocks included) carries **NativeCAD** —
-  "FreeCAD" is the engine and stays in About/licences attribution + internal docs only (plan §5.3).
+  the engine name stays off every product surface; required notices live only on the app's
+  Licences screen (ADR-0004), and internal docs keep it for provenance.
   The pipeline enforces it: the template's engine XML plumbing and the DXF's engine banner are
   scrubbed, the script hard-asserts the composed sheet and DXF carry no engine token, and
   `tools/ci/brand_guard.py` guards `app/` in CI.

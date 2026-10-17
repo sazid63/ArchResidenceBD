@@ -1,15 +1,19 @@
-"""Brand guard - user-facing surfaces never name the bundled engine.
+"""Brand guard - product surfaces never name a bundled component.
 
-Plan §5.3: everything user-facing is NativeCAD (or ArchResidenceBD); the engine name is
-confined to About/licences attribution and internal engineering docs. This scans the
-shipped UI source for the engine token and fails CI on any occurrence.
+Plan §5.3 + ADR-0004: the product is NativeCAD; no engine (or other bundled component)
+name in branding, UI copy, or generated documents. Required LGPL notices are legal text
+on the Licences screen only. This scans the shipped product source and fails CI on any
+occurrence.
 
 Scope:
-- `app/` - the shipped UI (this check).
+- `app/` + `installer/` - the shipped product surfaces (this check).
 - Generated documents - guarded in-generator: `tools/spikes/s3/techdraw_headless.py`
   strips the sheet template's engine XML plumbing and asserts the composed sheet is
   token-free; W2.5's drawing generator must carry the same guard.
-- About/licences attribution is intentionally out of scope (it is required).
+- `app/src/legal/**` - the Licences screen module is the one allowed place for required
+  notices (ADR-0004); skipped by design.
+- Internal engineering docs (plan, spike evidence, the registry) keep upstream naming
+  for provenance and are not scanned.
 
 Run from the repo root:  python tools/ci/brand_guard.py
 """
@@ -28,6 +32,7 @@ TEXT_SUFFIXES = {
     ".css", ".md", ".txt", ".svg", ".yml", ".yaml", ".xml", ".iss",
 }
 SKIP_DIRS = {"node_modules", "dist", "build", ".vite", "coverage", ".turbo"}
+LEGAL_PART = "legal"  # ship path allowed to carry required licence notices (ADR-0004)
 
 
 def main() -> int:
@@ -41,6 +46,8 @@ def main() -> int:
                 continue
             if any(part in SKIP_DIRS for part in path.parts):
                 continue
+            if LEGAL_PART in path.parts:
+                continue  # the Licences screen may carry required notices (ADR-0004)
             scanned += 1
             text = path.read_text(encoding="utf-8", errors="replace")
             for n, line in enumerate(text.splitlines(), 1):
