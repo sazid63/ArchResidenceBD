@@ -140,6 +140,15 @@ quality gates.
 - **Branding rule on user-facing output**: sheet furniture and title blocks carry **NativeCAD**
   (+ ArchResidenceBD); "FreeCAD" is confined to About/licences attribution and internal engineering
   docs (plan §3, §5.3). The spike sheet's "Created by" field carries `NativeCAD (ArchResidenceBD)`.
+  Enforcement is in the pipeline, not by convention: the composer strips the template's engine XML
+  plumbing (`xmlns:freecad` + `freecad:*` attributes), then **asserts** the composed sheet carries
+  no engine token; the DXF's engine banner line (`FreeCAD v1.1 …`) is scrubbed and the whole file
+  hard-checked; PDF metadata Title/Creator are set to NativeCAD (this Qt build exposes only those
+  two setters — Producer stays Qt's toolkit default, which is not an engine name);
+  `tools/ci/brand_guard.py` (CI) fails on any engine token in `app/`.
+  Remaining known scope: the *embedded engine GUI* (S6) still shows engine strings in parts of its
+  own dialogs — that residue is S6/W2.13's deliverable to measure and minimize; the plan accepts
+  ~95 % branding coverage there. About/licences attribution is required (LGPL-2.1) and stays.
 - **Views to test in W2.5**: `DrawViewSection` headless (untested here), hidden-line style
   (`HardHidden`), centre marks, multi-sheet/multi-page PDFs, A3 sheets.
 - **Batch behaviour**: N sheets in one `freecadcmd` run vs one process per sheet (startup is

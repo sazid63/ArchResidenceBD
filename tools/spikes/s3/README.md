@@ -57,6 +57,9 @@ invalid.
   back to a default font.
 - **Branding:** everything user-facing (drawing title blocks included) carries **NativeCAD** —
   "FreeCAD" is the engine and stays in About/licences attribution + internal docs only (plan §5.3).
+  The pipeline enforces it: the template's engine XML plumbing and the DXF's engine banner are
+  scrubbed, the script hard-asserts the composed sheet and DXF carry no engine token, and
+  `tools/ci/brand_guard.py` guards `app/` in CI.
 - `freecadcmd` runs a script **exactly once**; duplicated console output under PowerShell `2>&1`
   is a capture artifact (verified with a file-append run counter). Redirect with `*>` and read the
   file when in doubt.

@@ -68,7 +68,7 @@ def mm(q) -> float:
     return float(q.getValueAs("mm")) if hasattr(q, "getValueAs") else float(q)
 
 
-print(f"FreeCAD {App.Version()[0]}.{App.Version()[1]}.{App.Version()[2]} - S3 headless TechDraw spike")
+print(f"engine {'.'.join(App.Version()[:3])} - S3 headless TechDraw spike")
 t = T0
 
 # ---------------------------------------------------------------- model (mm, z up from 0)
@@ -147,9 +147,20 @@ t = mark("fragments", t)
 
 dxf_path = OUT / "page.dxf"
 TechDraw.writeDXFPage(page, str(dxf_path))
+# branding guard (plan §5.3): TechDraw writes a "FreeCAD v..." banner as the DXF's
+# first line - scrub it, then hard-check the whole file carries no engine token
+raw, banner_subs = re.subn(
+    rb"^FreeCAD[^\r\n]*",
+    b"NativeCAD (ArchResidenceBD)",
+    dxf_path.read_bytes(),
+    flags=re.IGNORECASE | re.MULTILINE,
+)
+assert b"freecad" not in raw.lower(), "engine name leaked into the DXF"
+dxf_path.write_bytes(raw)
 t = mark("dxf", t)
-dxf_text = dxf_path.read_text(encoding="utf-8", errors="replace")
+dxf_text = raw.decode("utf-8", errors="replace")
 dxf_lines = len(dxf_text.splitlines())
+print(f"  dxf banner scrubs   {banner_subs}")
 
 # ---------------------------------------------------------------- composer (SVG, mm units)
 
@@ -171,6 +182,11 @@ sheet = sheet_text
 for old, new in FIELDS.items():
     assert sheet.count(old) == 1, f"template field not found exactly once: {old}"
     sheet = sheet.replace(old, new)
+
+# branding guard (plan §5.3): drop the template's engine XML plumbing (namespace
+# declaration + freecad:* editable attributes) - invisible, but the string must go
+sheet = re.sub(r'\s+xmlns:freecad="[^"]*"', "", sheet)
+sheet = re.sub(r'\sfreecad:[A-Za-z_]+="[^"]*"', "", sheet)
 
 
 def to_svg_y(y_mm: float) -> float:
@@ -246,6 +262,7 @@ composed = sheet.replace(
     "</svg>",
     view_group(frag_top, tx, ty) + view_group(frag_front, fx, fy) + ann + "</svg>",
 )
+assert "freecad" not in composed.lower(), "engine name leaked into the composed sheet"
 svg_path = OUT / "page.svg"
 svg_path.write_text(composed, encoding="utf-8", newline="\n")
 t = mark("compose", t)
@@ -291,6 +308,17 @@ layout = QtGui.QPageLayout()
 layout.setPageSize(QtGui.QPageSize(QtGui.QPageSize.A4))
 layout.setOrientation(QtGui.QPageLayout.Orientation.Landscape)
 writer.setPageLayout(layout)
+pdf_meta = []
+for setter, value in (
+    ("setTitle", "ArchResidenceBD - S3 TechDraw spike"),
+    ("setCreator", "NativeCAD (ArchResidenceBD)"),
+    ("setProducer", "NativeCAD (ArchResidenceBD)"),
+):
+    fn = getattr(writer, setter, None)
+    if fn is not None:
+        fn(value)
+        pdf_meta.append(setter)
+print(f"  pdf metadata        {', '.join(pdf_meta) or 'none available'}")
 p = QtGui.QPainter()
 assert p.begin(writer), "QPainter could not start on the PDF writer"
 renderer.render(p, QtCore.QRectF(0, 0, writer.width(), writer.height()))
@@ -304,7 +332,7 @@ assert pdf_bytes[:5] == b"%PDF-" and b"%%EOF" in pdf_bytes[-2048:], "PDF output 
 
 TIMES["total"] = round((time.perf_counter() - T0) * 1000.0, 1)
 run = {
-    "freecad": ".".join(App.Version()[:3]),
+    "engine_version": ".".join(App.Version()[:3]),
     "template": TEMPLATE.name,
     "scale": "1:30",
     "raster_dpi": RASTER_DPI,
