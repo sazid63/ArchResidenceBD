@@ -1,0 +1,39 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.uv/
+dist/
+build/
+
+# --- Node / JS ---
+node_modules/
+.pnpm-store/
+*.tsbuildinfo
+
+# --- Rust / Tauri ---
+target/
+
+# --- App / build outputs ---
+out/
+artifacts/
+*.log
+
+# --- Large local data & model artifacts ---
+data/cache/
+data/downloads/
+models/checkpoints/
+
+# --- Secrets (never commit) ---
+.env
+.env.*
+kaggle.json
+access_token
+
+# --- OS / editors ---
+Thumbs.db
+Desktop.ini
+.DS_Store
+.idea/
+.vscode/

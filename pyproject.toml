@@ -1,0 +1,4 @@
+# ArchResidenceBD — uv workspace root (virtual; not a package itself).
+# Members are added as work packages land. Created in W0.1 (2026-10-17).
+[tool.uv.workspace]
+members = ["core"]

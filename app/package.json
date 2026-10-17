@@ -1,0 +1,7 @@
+{
+  "name": "@archres/app",
+  "private": true,
+  "version": "0.0.0",
+  "description": "ArchResidenceBD desktop shell (Tauri + React). Shell decided by spike S1; clickable prototype + design tokens v0 land in W0.2.",
+  "scripts": {}
+}
