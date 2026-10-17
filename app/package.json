@@ -2,6 +2,23 @@
   "name": "@archres/app",
   "private": true,
   "version": "0.0.0",
-  "description": "ArchResidenceBD desktop shell (Tauri + React). Shell decided by spike S1; clickable prototype + design tokens v0 land in W0.2.",
-  "scripts": {}
+  "description": "ArchResidenceBD desktop shell (Tauri + React). Shell decided by spike S1; this package holds the W0.2 clickable prototype — design tokens v0 + UI kit.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.4"
+  }
 }
