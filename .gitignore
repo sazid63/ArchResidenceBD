@@ -23,6 +23,7 @@ artifacts/
 # --- Large local data & model artifacts ---
 data/cache/
 data/downloads/
+data/spikes/
 models/checkpoints/
 
 # --- Secrets (never commit) ---
