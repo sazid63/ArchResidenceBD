@@ -1,0 +1,84 @@
+{
+  "schemaVersion": "0.1.0",
+  "revision": 1,
+  "locked": false,
+  "createdAt": "2026-10-10T08:00:00+06:00",
+  "updatedAt": "2026-10-16T09:10:00+06:00",
+  "project": {
+    "id": "b1c2d3e4-f5a6-4b7c-8d9e-0f1a2b3c4d5e",
+    "name": "Uttara Family House (internal test)",
+    "language": "en",
+    "displayUnits": {
+      "length": "ft",
+      "area": "sqft",
+      "currency": "BDT"
+    }
+  },
+  "site": {
+    "address": {
+      "division": "Dhaka",
+      "district": "Dhaka",
+      "upazilaOrThana": "Uttara",
+      "areaName": "Sector 7"
+    },
+    "plot": {
+      "areaSqm": 200.67,
+      "roadWidthM": 4.5,
+      "cornerPlot": true,
+      "existingStructure": true
+    },
+    "soil": {
+      "status": "user_report",
+      "sbcKpa": 95.0,
+      "groundwaterDepthM": 4.5,
+      "reportRef": "soil-report-uttara-2026-09.pdf",
+      "note": "Test bore log provided by owner; 3 boreholes to 6 m."
+    },
+    "jurisdiction": {
+      "authority": "rajuk",
+      "rulePack": "rajuk@2026.1",
+      "seismicZone": 2
+    }
+  },
+  "building": {
+    "occupancy": "residential",
+    "structureType": "rcc_frame",
+    "storeys": {
+      "count": 3,
+      "hasBasement": false
+    },
+    "unitsPerFloor": 2,
+    "groundFloorUsage": "residential"
+  },
+  "phases": [
+    { "id": "site-excavation", "kind": "site_excavation", "label": "Site & Excavation", "status": "not_started", "data": {} },
+    { "id": "foundation", "kind": "foundation", "label": "Foundation", "status": "gathering_info", "data": {} },
+    { "id": "floor-0", "kind": "floor", "storeyIndex": 0, "label": "Ground Floor", "status": "not_started", "data": {} },
+    { "id": "floor-1", "kind": "floor", "storeyIndex": 1, "label": "Floor 1", "status": "not_started", "data": {} },
+    { "id": "floor-2", "kind": "floor", "storeyIndex": 2, "label": "Floor 2", "status": "not_started", "data": {} },
+    { "id": "roof-boundary", "kind": "roof_boundary", "label": "Roof & Boundary", "status": "not_started", "data": {} },
+    { "id": "common-services", "kind": "common_services", "label": "Common Services", "status": "not_started", "data": {} }
+  ],
+  "pricing": {
+    "currency": "BDT",
+    "source": "user",
+    "asOf": "2026-10-12",
+    "materials": [
+      { "key": "cement-opc-50kg", "label": "OPC cement, 50 kg bag", "unit": "bag", "rateBdt": 615.0, "source": "user" },
+      { "key": "rebar-b500-60g", "label": "Rebar B500 (60 grade)", "unit": "ton", "rateBdt": 88500.0, "source": "user" }
+    ],
+    "labour": [
+      { "key": "mason", "label": "Mason", "unit": "day", "rateBdt": 850.0, "source": "user" }
+    ],
+    "machinery": [],
+    "subcontract": []
+  },
+  "provenance": {
+    "/site/soil/sbcKpa": {
+      "source": "user",
+      "detail": "Owner-provided soil test report",
+      "at": "2026-10-10T08:05:00+06:00",
+      "confidence": "high"
+    }
+  }
+}

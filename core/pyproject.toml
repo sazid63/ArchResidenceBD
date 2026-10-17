@@ -3,7 +3,16 @@ name = "archres-core"
 version = "0.0.0"
 description = "ArchResidenceBD core engines - spec, rules, geometry, BOQ, drawings, orchestration (populated in P1/P2)."
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+  "pydantic>=2.9",
+  "jsonschema>=4.23",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3",
+  "datamodel-code-generator[black]>=0.26",
+]
 
 [build-system]
 requires = ["hatchling"]
@@ -11,3 +20,6 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/archres_core"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

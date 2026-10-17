@@ -1,0 +1,139 @@
+{
+  "schemaVersion": "0.1.0",
+  "revision": 3,
+  "locked": false,
+  "createdAt": "2026-09-02T11:05:00+06:00",
+  "updatedAt": "2026-10-15T18:40:00+06:00",
+  "project": {
+    "id": "7c9e6f10-2a3b-4c5d-9e8f-1a2b3c4d5e6f",
+    "name": "Mirpur Duplex (internal test)",
+    "language": "en",
+    "displayUnits": {
+      "length": "m",
+      "area": "sqm",
+      "currency": "BDT"
+    },
+    "notes": "Internal test project for the walking skeleton."
+  },
+  "site": {
+    "address": {
+      "division": "Dhaka",
+      "district": "Dhaka",
+      "upazilaOrThana": "Mirpur",
+      "areaName": "Mirpur"
+    },
+    "plot": {
+      "areaSqm": 133.78,
+      "frontageM": 10.0,
+      "roadWidthM": 9.0,
+      "cornerPlot": true,
+      "existingStructure": false
+    },
+    "soil": {
+      "status": "area_default",
+      "sbcKpa": 70,
+      "note": "Conservative area default for Mirpur."
+    },
+    "jurisdiction": {
+      "authority": "rajuk",
+      "rulePack": "rajuk@2026.1",
+      "seismicZone": 2
+    }
+  },
+  "building": {
+    "occupancy": "residential",
+    "structureType": "rcc_frame",
+    "storeys": {
+      "count": 2,
+      "groundFloorHeightM": 3.2,
+      "typicalFloorHeightM": 3.0,
+      "hasBasement": false
+    },
+    "unitsPerFloor": 2,
+    "typicalUnitAreaSqm": 60.0,
+    "groundFloorUsage": "parking"
+  },
+  "phases": [
+    { "id": "site-excavation", "kind": "site_excavation", "label": "Site & Excavation", "status": "designed", "data": { "excavationDepthM": 1.8, "method": "manual", "shoring": "none" } },
+    { "id": "foundation", "kind": "foundation", "label": "Foundation", "status": "designed", "data": { "foundationType": "isolated_footing", "footingDepthM": 1.5, "sbcUsedKpa": 70 } },
+    { "id": "floor-0", "kind": "floor", "storeyIndex": 0, "label": "Ground Floor", "status": "designed", "data": { "slabThicknessMm": 125 } },
+    { "id": "floor-1", "kind": "floor", "storeyIndex": 1, "label": "Floor 1", "status": "designed", "data": { "slabThicknessMm": 125 } },
+    { "id": "roof-boundary", "kind": "roof_boundary", "label": "Roof & Boundary", "status": "gathering_info", "data": {} },
+    { "id": "common-services", "kind": "common_services", "label": "Common Services", "status": "stale", "data": { "hasLift": false, "stairType": "dog_legged" } }
+  ],
+  "pricing": {
+    "currency": "BDT",
+    "source": "mixed",
+    "asOf": "2026-10-01",
+    "materials": [
+      { "key": "cement-opc-50kg", "label": "OPC cement, 50 kg bag", "unit": "bag", "rateBdt": 640.0, "source": "fetched", "supplier": "Source Registry: mill list", "asOf": "2026-10-01" },
+      { "key": "rebar-b500-60g", "label": "Rebar B500 (60 grade)", "unit": "ton", "rateBdt": 92500.0, "source": "fetched", "asOf": "2026-10-01" },
+      { "key": "sand-fm-1-5", "label": "Sylhet sand (FM 1.5)", "unit": "cum", "rateBdt": 2600.0, "source": "user" }
+    ],
+    "labour": [
+      { "key": "mason", "label": "Mason", "unit": "day", "rateBdt": 900.0, "source": "user" }
+    ],
+    "machinery": [
+      { "key": "mixer-1bag", "label": "Concrete mixer, 1 bag", "unit": "day", "rateBdt": 1200.0, "source": "default", "operatorIncluded": false, "fuelIncluded": false }
+    ],
+    "subcontract": [
+      { "key": "piling-per-pile", "label": "Piling (per pile, incl. rig)", "unit": "per_pile", "rateBdt": 28000.0, "source": "user" }
+    ]
+  },
+  "assumptions": [
+    {
+      "id": "asm-soil",
+      "subject": "Soil bearing capacity",
+      "statement": "Conservative area default 70 kPa (no soil report). Assumption - verify on site.",
+      "basis": "area_default",
+      "verifyOnSite": true,
+      "relatedPath": "/site/soil/sbcKpa"
+    }
+  ],
+  "deviations": [
+    {
+      "id": "dev-001",
+      "phaseId": "foundation",
+      "ruleRef": "rajuk@2026.1#setback-front",
+      "ruleTitle": "Front setback",
+      "expected": "3.0 m",
+      "actual": "2.4 m",
+      "riskTier": "approval_risk",
+      "rationale": "Existing front boundary wall retained by owner.",
+      "acknowledged": true,
+      "recordedAt": "2026-10-05T14:20:00+06:00",
+      "nearestCompliantAlternative": "Shift the front wall to 3.0 m from the road edge."
+    }
+  ],
+  "documents": [
+    {
+      "id": "doc-001",
+      "kind": "drawing_pdf",
+      "phaseId": "foundation",
+      "title": "Foundation plan (draft)",
+      "path": "documents/foundation-plan-draft.pdf",
+      "generatedAt": "2026-10-12T10:15:00+06:00",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "provenance": {
+    "/site/plot/areaSqm": {
+      "source": "user",
+      "detail": "Entered as 2 katha (land-unit module)",
+      "at": "2026-09-02T11:20:00+06:00",
+      "confidence": "high"
+    },
+    "/site/soil/sbcKpa": {
+      "source": "assumption",
+      "detail": "Source Registry: area default Dhaka",
+      "at": "2026-09-02T11:20:00+06:00",
+      "confidence": "assumption"
+    },
+    "/building/storeys/count": {
+      "source": "user",
+      "detail": "Project Setup: 2 stories",
+      "at": "2026-09-02T11:21:00+06:00",
+      "confidence": "high"
+    }
+  }
+}

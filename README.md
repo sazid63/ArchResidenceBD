@@ -13,6 +13,7 @@ An offline-first Windows desktop app that acts as an AI civil engineer for Bangl
 | `app/` | Desktop shell — Tauri + React (shell decided by spike S1), design tokens v0 |
 | `core/` | Python engines: Building Spec, rules, geometry, BOQ, drawings, orchestration |
 | `cad/` | FreeCAD addon + worker pool (the NativeCAD engine layer) |
+| `spec/` | Building Spec source of truth (JSON Schema v0.1.0) + examples; generated models are committed |
 | `docs/` | Plan, ADRs, work boards, licences |
 | `data/` | Rule packs, Source Registry data, fixtures (large files ignored) |
 | `models/` | Fleet training notebooks + Kaggle pipeline + eval artifacts |
