@@ -1,0 +1,246 @@
+# Source Registry v0 (W0.10) - curated trusted sources per data type (plan §5.10).
+# The AI fetches through this registry instead of blind searching; every fetched value
+# carries provenance. Validated against spec/schemas/source-registry.schema.json in
+# core/tests/test_source_registry.py. Doc: docs/spec/source-registry-v0.md.
+#
+# Verification state 2026-10-18: ffwc-flood and bwdb-schedule-of-rates were fetched and
+# confirmed live from the build machine; bbs / pwd / hbri / srdi / rajuk domains did not
+# resolve from this network and stay `candidate` with a note - never silently assumed.
+
+schemaVersion: "0.1.0"
+registryId: "sources-v0"
+updated: "2026-10-18"
+
+fetchPolicy:
+  - "Consent: fetching requires the user's explicit approval per source (plan §3, §5.10) - nothing fetches at startup or in the background."
+  - "Cache-first: reuse a fresh cache copy (per-source cacheTtlDays); a fresh copy is never re-fetched."
+  - "Provenance: every fetched value carries sourceId + url + retrievedAt + sha256 of the fetched artifact (plan §2.5); the cache manifest is the evidence."
+  - "Candidate-only: fetched numbers enter rate cards as candidate lines until a human marks the card active (plan §9 quality law)."
+  - "No silent gaps: an unavailable source surfaces as 'not fetched - reason', never as zero or a blank."
+
+sources:
+  - id: rajuk-bidhimala-2008
+    dataTypes: [rule-source]
+    status: active
+    authority: "RAJUK (Rajdhani Unnayan Kartripakkha)"
+    title:
+      bn: "ইমারত নির্মাণ বিধিমালা, ২০০৮ (বাংলাদেশ গেজেট, অতিরিক্ত সংখ্যা, ২৯ মে ২০০৮)"
+      en: "Imarat Nirman Bidhimala 2008 (Bangladesh Gazette, extra issue, 29 May 2008)"
+    kind: pdf-document
+    language: [bn]
+    licence: "Government gazette publication; numbers are used as facts with per-rule citations (ADR-0003); no text bundled."
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: "Hold the gazette PDF (any mirror), hash it first (expect the pinned sha256), page-map per tools/rules/gazette/README.md, extract per ADR-0003. Record the download URL in the fetch manifest - it was not recorded at the 2026-10-17 retrieval (process gap)."
+    cadence: static
+    lastVerified: "2026-10-17"
+    artifact:
+      fileName: "rajuk-bidhimala-2008-gazette.pdf"
+      sizeBytes: 1946482
+      sha256: "3318b3f434a9bf248c798c1982e800360ddf22ae7216966efeacf47d9b860d5e"
+      pages: 199
+    notes: "Backs rule pack rajuk@2008.1 (spec/rules/rajuk-2008.yaml). A second independent download (mirror) was byte-identical."
+
+  - id: hbri-bnbc
+    dataTypes: [rule-source, seismic-zone]
+    status: candidate
+    authority: "HBRI (Housing and Building Research Institute), Ministry of Housing and Public Works"
+    title:
+      bn: "বাংলাদেশ জাতীয় ইমারত নির্মাণ বিধিমালা (বিএনবিসি) ২০২০"
+      en: "Bangladesh National Building Code (BNBC) 2020"
+    kind: pdf-document
+    url: "https://hbri.gov.bd/"
+    language: [en]
+    licence: "Government code publication; numbers used as facts with citations once a pack exists; acquisition path to confirm."
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: "Acquire the official BNBC 2020 volumes, hash and pin as an artifact (like the gazette), then extract rule numbers per ADR-0003 into a 'bnbc@2020.x' pack. The seismic zoning map is read from the relevant BNBC part (zones become a rule-pack table, never a guessed polygon)."
+    cadence: ad-hoc
+    cacheTtlDays: 180
+    notes: "Domain did not resolve from the build machine on 2026-10-18 (transport error) - confirm from a browser before first use. Nothing enters a rule pack until the pinned copy exists."
+
+  - id: city-authority-rules
+    dataTypes: [rule-source]
+    status: candidate
+    authority: "City development authorities (CDA / KDA / RDA / Sylhet City Corporation, per city)"
+    title:
+      bn: "নগর উন্নয়ন কর্তৃপক্ষের ইমারত নির্মাণ বিধিমালা (প্রতি শহরে ভিন্ন)"
+      en: "City development authority building rules (per city)"
+    kind: manual-entry
+    language: [bn]
+    licence: "Per-authority government publications; confirm per city before extraction."
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: "Per city: obtain the authority's rule book / bye-laws, hash the scan, and extract into a new pack (ADR-0003). The RAJUK pack structure (spec/rules/rajuk-2008.yaml) is the template; plan §5.6 budgets 1-2 weeks of data work per new city."
+    cadence: ad-hoc
+    notes: "Placeholder family entry: v1 targets RAJUK/Dhaka + Chattogram, Khulna, Rajshahi, Sylhet (plan §3). Each authority becomes its own source id when its scan is obtained."
+
+  - id: bbs-price-wage
+    dataTypes: [material-price, labour-rate]
+    status: candidate
+    authority: "Bangladesh Bureau of Statistics (BBS)"
+    title:
+      bn: "মাসিক মূল্য ও মজুরি হার প্রতিবেদন (বিবিএস)"
+      en: "Monthly Price and Wage Rate report (BBS)"
+    kind: html-index
+    url: "https://bbs.gov.bd/"
+    language: [bn, en]
+    licence: "Government statistics publication; reuse terms to confirm before redistributing any tables."
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: "Open the latest monthly Price and Wage Rate release; read the district / urban tables for the project's district; record the rows into a candidate rate card (material and labour lines) with the report link + retrieval date."
+    cadence: monthly
+    cacheTtlDays: 30
+    notes: "Domain did not resolve from the build machine on 2026-10-18 (transport error) - confirm from a browser before first use. Official statistics; values still enter as candidate lines only."
+
+  - id: pwd-schedule-of-rates
+    dataTypes: [material-price, labour-rate, machinery-rate]
+    status: candidate
+    authority: "Public Works Department (PWD)"
+    title:
+      bn: "গণপূর্ত অধিদপ্তরের দর তফসিল (সিডিউল অফ রেট)"
+      en: "Public Works Department Schedule of Rates"
+    kind: pdf-document
+    url: "https://pwd.gov.bd/"
+    language: [bn]
+    licence: "Government schedule publication; confirm the current edition's reuse terms."
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: "Download the current SoR PDF; record its exact URL + sha256 in the fetch manifest; transcribe the building-works chapters into candidate rate-card lines (material / labour / machinery)."
+    cadence: yearly
+    cacheTtlDays: 365
+    notes: "The SoR used for government building estimates - the strongest official-list candidate for building works. Domain did not resolve from the build machine on 2026-10-18; host + current edition to confirm."
+
+  - id: bwdb-schedule-of-rates
+    dataTypes: [material-price, labour-rate, machinery-rate]
+    status: active
+    authority: "Bangladesh Water Development Board (BWDB)"
+    title:
+      bn: "বাপাউবো কাজের মূল্য তালিকা (সিডিউল অফ রেট)"
+      en: "BWDB Schedule of Rates"
+    kind: html-index
+    url: "https://bwdb.gov.bd/"
+    language: [bn]
+    licence: "Government schedule publication; reuse terms to confirm before redistributing tables."
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: "From the site menu (বাজেট ও ক্রয় -> দর তফসিল) open the current SoR; record the exact data URL + sha256 in the fetch manifest; transcribe common building items (cement, rod, earthwork, machinery) as cross-check candidate lines."
+    cadence: yearly
+    cacheTtlDays: 365
+    lastVerified: "2026-10-18"
+    notes: "Site fetched and confirmed live on 2026-10-18 (SoR linked under বাজেট ও ক্রয়). Water-sector SoR - used as a published official cross-check, not as the primary building rate list."
+
+  - id: market-survey-manual
+    dataTypes: [material-price, labour-rate, machinery-rate, subcontract-rate]
+    status: candidate
+    authority: "ArchResidenceBD field process"
+    title:
+      bn: "জেলা বাজার জরিপ (অ্যাপ প্রক্রিয়া)"
+      en: "District market survey (app process)"
+    kind: manual-entry
+    language: [bn, en]
+    licence: "n/a - our own survey process."
+    fetch:
+      method: GET
+      parser: none
+      recipe: "Run the district survey sheet (template lands with the price service, W2.7) with at least two local suppliers per key item; enter medians as candidate lines with source.kind market_survey and the survey date."
+    cadence: ad-hoc
+    notes: "Covers what no official list does (local brick/sand variation, day wages); results are candidate lines until a human activates the card."
+
+  - id: vendor-quotes-manual
+    dataTypes: [material-price, machinery-rate, subcontract-rate]
+    status: candidate
+    authority: "ArchResidenceBD supplier process"
+    title:
+      bn: "বিক্রেতা / সাব-কন্ট্রাক্ট উদ্ধৃতি (অ্যাপ প্রক্রিয়া)"
+      en: "Vendor / subcontract quotations (app process)"
+    kind: manual-entry
+    language: [bn, en]
+    licence: "n/a - quotes held as project documents."
+    fetch:
+      method: GET
+      parser: none
+      recipe: "Request written quotes per item / machine / subcontract lot; store the quote copies as documents; enter as candidate lines with source.kind vendor_quote. Piling follows the plan §6 modes (per-pile / per-ft / machine-hour)."
+    cadence: ad-hoc
+    notes: "Approved-vendor list is empty at v0 - filled by the owner/engineer with the first real projects. No invented vendor names."
+
+  - id: ffwc-flood
+    dataTypes: [flood-reference]
+    status: active
+    authority: "FFWC (Flood Forecasting & Warning Centre), BWDB"
+    title:
+      bn: "বন্যা পূর্বাভাস ও সতর্কীকরণ কেন্দ্র"
+      en: "Flood Forecasting & Warning Centre (FFWC)"
+    kind: html-index
+    url: "https://ffwc.gov.bd/"
+    language: [bn, en]
+    licence: "Government publication; advisory use only."
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: "Read the current flood forecast / early-warning bulletin for the project's upazila; attach as an advisory note with the bulletin URL + date. Advisory only - never a rule-pack number."
+    cadence: daily
+    cacheTtlDays: 1
+    lastVerified: "2026-10-18"
+    notes: "Site fetched and confirmed live on 2026-10-18 ('Flood Forecasting & Warning Centre, BWDB, Bangladesh'). Used to flag flood-prone plots in engineer notes; rule numbers stay in packs."
+
+  - id: bwdb-groundwater
+    dataTypes: [water-table]
+    status: candidate
+    authority: "Bangladesh Water Development Board (BWDB)"
+    title:
+      bn: "ভূগর্ভস্থ পানির স্তর তথ্য (বাপাউবো)"
+      en: "Groundwater level data (BWDB)"
+    kind: html-index
+    url: "https://bwdb.gov.bd/"
+    language: [bn, en]
+    licence: "Government data; reuse terms to confirm."
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: "Access the BWDB GIS / groundwater portal (linked from the site); record monitoring-well levels nearest the plot as reference values in the spec soil section with provenance. Confirm the data path first."
+    cadence: monthly
+    cacheTtlDays: 30
+    notes: "Site confirmed live 2026-10-18, but the groundwater data path is not yet confirmed - stays candidate. Groundwater depth feeds foundation notes as a reference, never as a silent default."
+
+  - id: srdi-soil
+    dataTypes: [soil-reference]
+    status: candidate
+    authority: "SRDI (Soil Resource Development Institute)"
+    title:
+      bn: "মৃত্তিকা সম্পদ উন্নয়ন ইনস্টিটিউট (এসআরডিআই)"
+      en: "Soil Resource Development Institute (SRDI)"
+    kind: html-index
+    url: "https://srdi.gov.bd/"
+    language: [bn]
+    licence: "Government data; reuse terms to confirm."
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: "Read the soil-region reports / maps for the project district; use qualitative facts (texture, drainage, flooding class) to choose conservative area defaults. Never a point-level safe bearing capacity."
+    cadence: yearly
+    cacheTtlDays: 365
+    notes: "Domain did not resolve from the build machine on 2026-10-18 (transport error) - confirm from a browser before first use."
+
+  - id: soil-area-defaults
+    dataTypes: [soil-reference]
+    status: candidate
+    authority: "ArchResidenceBD curated defaults"
+    title:
+      bn: "মৃত্তিকা-সম্পর্কিত সংরক্ষণশীল এলাকা-ডিফল্ট (অ্যাপ ডেটাসেট)"
+      en: "Conservative area-based soil defaults (app dataset)"
+    kind: offline-dataset
+    language: [bn, en]
+    licence: "n/a - our own curated dataset."
+    fetch:
+      method: GET
+      parser: none
+      recipe: "Curated conservative defaults maintained with core (lands in W2.x), improved with engineer-partner data and user-provided soil reports. Every use labels 'assumption - verify on site' (plan §5.10)."
+    cadence: static
+    notes: "The honesty row for plan §5.10: Bangladesh has no authoritative public point-level soil API. This entry documents that absence so it is never silently 'solved' with a guessed API."

@@ -1,0 +1,278 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://archresidencebd.local/schemas/source-registry.schema.json",
+  "title": "SourceRegistry",
+  "description": "ArchResidenceBD Source Registry v0.1.0 (plan §5.10) - the curated, versioned list of trusted sources per data type. The AI fetches through this registry instead of blind searching; every fetched value carries provenance. Statuses: candidate (identified, not yet verified), active (verified at lastVerified; fetchable), archived (superseded). Absence = omitted field; no nulls.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "registryId", "updated", "fetchPolicy", "sources"],
+  "properties": {
+    "schemaVersion": {
+      "const": "0.1.0"
+    },
+    "registryId": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "description": "Stable id of this registry document, e.g. sources-v0."
+    },
+    "updated": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "fetchPolicy": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Product laws that govern every fetch (consent, cache-first, provenance, candidate-only)."
+    },
+    "notes": {
+      "type": "string"
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/Source"
+      }
+    }
+  },
+  "$defs": {
+    "Localized": {
+      "title": "Localized",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bn", "en"],
+      "properties": {
+        "bn": {
+          "type": "string",
+          "minLength": 1
+        },
+        "en": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "Artifact": {
+      "title": "Artifact",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fileName", "sizeBytes", "sha256"],
+      "description": "A held, hash-pinned copy of the source document (provenance evidence).",
+      "properties": {
+        "fileName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sizeBytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "pages": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "Fetch": {
+      "title": "Fetch",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "parser", "recipe"],
+      "properties": {
+        "method": {
+          "const": "GET"
+        },
+        "parser": {
+          "type": "string",
+          "enum": ["none", "manual-review", "json-path", "csv-columns"],
+          "description": "How the fetched payload is read. v0 registry: manual-review (auto-parsers land with the price service, W2.7)."
+        },
+        "recipe": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Step-by-step fetch recipe - how a human or the price service obtains values from this source."
+        },
+        "urlTemplate": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Optional URL template for parameterized fetches (e.g. district ids). Omitted while recipes are manual."
+        }
+      }
+    },
+    "Source": {
+      "title": "Source",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "dataTypes", "status", "authority", "title", "kind", "language", "licence", "fetch", "cadence"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "description": "Stable source id; appears in every provenance record."
+        },
+        "dataTypes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["material-price", "labour-rate", "machinery-rate", "subcontract-rate", "rule-source", "seismic-zone", "flood-reference", "water-table", "soil-reference"]
+          },
+          "description": "Data types this source feeds (plan §5.10 list + the plan §6 cost types)."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["candidate", "active", "archived"]
+        },
+        "authority": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "$ref": "#/$defs/Localized"
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["api-json", "http-json", "http-csv", "html-index", "pdf-document", "manual-entry", "offline-dataset"],
+          "description": "How values are obtained. manual-entry / offline-dataset = an in-product process, no URL by design."
+        },
+        "url": {
+          "type": "string",
+          "pattern": "^https?://\\S+$",
+          "description": "Landing page of the source; the exact data URL is recorded in the fetch manifest at fetch time."
+        },
+        "language": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["bn", "en"]
+          }
+        },
+        "licence": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Short statement of the source's licence/reuse terms. Confirm before bundling any text."
+        },
+        "fetch": {
+          "$ref": "#/$defs/Fetch"
+        },
+        "cadence": {
+          "type": "string",
+          "enum": ["hourly", "daily", "weekly", "monthly", "quarterly", "yearly", "ad-hoc", "static"],
+          "description": "How often the underlying data changes; static = a fixed edition (never expires from cache)."
+        },
+        "cacheTtlDays": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Cache freshness window. Required for fetchable sources with a non-static cadence; omitted for static editions and manual/offline rows."
+        },
+        "lastVerified": {
+          "type": "string",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "description": "Date this source was last confirmed usable (for active/archived entries)."
+        },
+        "artifact": {
+          "$ref": "#/$defs/Artifact"
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "Fetchable kinds need a URL (pdf-document may instead be pinned by a held artifact).",
+          "if": {
+            "properties": {
+              "kind": {
+                "enum": ["api-json", "http-json", "http-csv", "html-index"]
+              }
+            },
+            "required": ["kind"]
+          },
+          "then": {
+            "required": ["url"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "pdf-document"
+              }
+            },
+            "required": ["kind"]
+          },
+          "then": {
+            "anyOf": [
+              {
+                "required": ["url"]
+              },
+              {
+                "required": ["artifact"]
+              }
+            ]
+          }
+        },
+        {
+          "$comment": "Manual / offline rows must not pretend to have a URL.",
+          "if": {
+            "properties": {
+              "kind": {
+                "enum": ["manual-entry", "offline-dataset"]
+              }
+            },
+            "required": ["kind"]
+          },
+          "then": {
+            "not": {
+              "required": ["url"]
+            }
+          }
+        },
+        {
+          "$comment": "Active or archived means verified at least once.",
+          "if": {
+            "properties": {
+              "status": {
+                "enum": ["active", "archived"]
+              }
+            },
+            "required": ["status"]
+          },
+          "then": {
+            "required": ["lastVerified"]
+          }
+        },
+        {
+          "$comment": "Fetchable, non-static sources must state their cache window.",
+          "if": {
+            "properties": {
+              "kind": {
+                "enum": ["api-json", "http-json", "http-csv", "html-index", "pdf-document"]
+              },
+              "cadence": {
+                "not": {
+                  "const": "static"
+                }
+              }
+            },
+            "required": ["kind", "cadence"]
+          },
+          "then": {
+            "required": ["cacheTtlDays"]
+          }
+        }
+      ]
+    }
+  }
+}
