@@ -6,7 +6,7 @@ import pathlib
 import py_compile
 import sys
 
-SKIP_DIRS = {".venv", "node_modules", "target", ".git", "out", "artifacts"}
+SKIP_DIRS = {".venv", "node_modules", "target", ".git", "out", "artifacts", "data"}
 
 
 def main() -> int:

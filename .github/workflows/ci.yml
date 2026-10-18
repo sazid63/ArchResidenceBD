@@ -29,6 +29,8 @@ jobs:
         run: uv run --directory core pytest -q
       - name: Spec codegen freshness
         run: python tools/codegen/generate_spec.py --check
+      - name: Interfaces codegen freshness
+        run: python tools/codegen/generate_interfaces.py --check
       - name: Flow book freshness
         run: uv run --directory core python ../tools/flow/render_book.py --check
       - name: Rule pack freshness

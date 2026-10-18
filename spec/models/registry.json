@@ -1,0 +1,123 @@
+{
+  "schemaVersion": "0.1.0",
+  "fleetId": "archie-fleet-v1",
+  "models": [
+    {
+      "id": "archie-chat",
+      "role": "chat",
+      "displayName": {
+        "bn": "আর্চি চ্যাট",
+        "en": "Archie Chat"
+      },
+      "upstream": {
+        "repo": "Qwen/Qwen3-4B-Instruct-2507",
+        "license": "Apache-2.0"
+      },
+      "artifact": {
+        "file": "Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+        "format": "gguf",
+        "quantization": "Q4_K_M",
+        "sizeBytes": 2497281120,
+        "sha256": "3605803b982cb64aead44f6c1b2ae36e3acdb41d8e46c8a94c6533bc4c67e597"
+      },
+      "runtime": {
+        "engine": "llama.cpp",
+        "device": "gpu",
+        "gpuLayers": 99,
+        "context": 8192,
+        "flags": ["--no-webui"]
+      },
+      "swapGroup": "gpu-models",
+      "distribution": "bundled",
+      "notes": "Fleet v1 base; the P1 fine-tune (Archie-Chat archetype) lands as a new entry, never an edit. S2 measured ~58 tok/s at Q4_K_M on the 6 GB floor."
+    },
+    {
+      "id": "archie-repair",
+      "role": "repair",
+      "displayName": {
+        "bn": "আর্চি রিপেয়ার",
+        "en": "Archie Repair"
+      },
+      "upstream": {
+        "repo": "Qwen/Qwen2.5-Coder-3B-Instruct",
+        "license": "Apache-2.0"
+      },
+      "artifact": {
+        "file": "qwen2.5-coder-3b-instruct-q4_k_m.gguf",
+        "format": "gguf",
+        "quantization": "Q4_K_M",
+        "sizeBytes": 2104932800,
+        "sha256": "724fb256bec1ff062b2f65e4569e871ad2e95ab2a3989723d1769c54294730b7"
+      },
+      "runtime": {
+        "engine": "llama.cpp",
+        "device": "gpu",
+        "gpuLayers": 99,
+        "context": 8192,
+        "flags": ["--no-webui"]
+      },
+      "swapGroup": "gpu-models",
+      "distribution": "bundled",
+      "notes": "P1 training-base placeholder for the Archie-Repair archetype (plan §5)."
+    },
+    {
+      "id": "archie-embed",
+      "role": "embed",
+      "displayName": {
+        "bn": "আর্চি এমবেড",
+        "en": "Archie Embed"
+      },
+      "upstream": {
+        "repo": "Qwen/Qwen3-Embedding-0.6B",
+        "license": "Apache-2.0"
+      },
+      "artifact": {
+        "file": "Qwen3-Embedding-0.6B-Q8_0.gguf",
+        "format": "gguf",
+        "quantization": "Q8_0",
+        "sizeBytes": 639150592,
+        "sha256": "06507c7b42688469c4e7298b0a1e16deff06caf291cf0a5b278c308249c3e439"
+      },
+      "runtime": {
+        "engine": "llama.cpp",
+        "device": "cpu",
+        "gpuLayers": 0,
+        "context": 2048,
+        "flags": ["--embeddings", "--pooling", "last", "--no-webui"]
+      },
+      "swapGroup": "cpu-services",
+      "distribution": "bundled",
+      "notes": "CPU-pinned (-ngl 0): llama.cpp auto-fit otherwise pulls it into VRAM and crowds the chat model out (S2 finding)."
+    },
+    {
+      "id": "archie-rerank",
+      "role": "rerank",
+      "displayName": {
+        "bn": "আর্চি রির্যাংক",
+        "en": "Archie Rerank"
+      },
+      "upstream": {
+        "repo": "Qwen/Qwen3-Reranker-0.6B",
+        "license": "Apache-2.0"
+      },
+      "artifact": {
+        "file": "Qwen3-Reranker-0.6B.Q8_0.gguf",
+        "format": "gguf",
+        "quantization": "Q8_0",
+        "sizeBytes": 804166240,
+        "sha256": "48c062151f5a3026f74a2066a37011ff9d7c135ddc8b7c22034b0051257908e9"
+      },
+      "runtime": {
+        "engine": "llama.cpp",
+        "device": "cpu",
+        "gpuLayers": 0,
+        "context": 2048,
+        "flags": ["--reranking", "--no-webui"]
+      },
+      "swapGroup": "cpu-services",
+      "distribution": "bundled",
+      "notes": "CPU-pinned (-ngl 0); needs its own instruct template for meaningful scores (S2)."
+    }
+  ],
+  "notes": "Fleet v1 (S2). Deliberately excluded: Qwen3-0.6B draft - speculative decoding measured ~8% acceptance and 3.5x slower on GPU draft; do not re-add without a new measurement. sha256/sizeBytes are of the artifacts measured on the reference machine in S2."
+}

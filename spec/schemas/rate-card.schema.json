@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.archresidencebd.app/rate-card/0.1.0.json",
+  "title": "RateCard",
+  "description": "ArchResidenceBD rate card v0.1.0 (plan §6 - BOQ cost types; §5.10 - provenance) - one region/date/source set of market rates. Cards are the market side: the price service (W2.7) pushes card values into the Building Spec's inline pricing (Pricing/MaterialRate/LabourRate/MachineryRate/SubcontractRate), where per-project overrides then live in the Deviation Register as usual. status=candidate marks unverified content (plan §9) - candidate cards are never used silently. Real cards are user-imported or registry-fetched; spec/examples/interfaces carries an illustrative one.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "cardId", "region", "currency", "status", "effectiveFrom", "source", "lines"],
+  "properties": {
+    "schemaVersion": { "const": "0.1.0" },
+    "cardId": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "description": "Stable card id, e.g. 'dhaka-2026-10-official'."
+    },
+    "region": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "description": "Base region whose price level the lines represent, e.g. dhaka, chattogram, khulna, rajshahi, sylhet, barishal, rangpur, mymensingh."
+    },
+    "currency": {
+      "type": "string",
+      "const": "BDT"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["candidate", "active", "archived"],
+      "description": "candidate = not yet verified against its source (never used in a BOQ without acknowledgement); active = verified/current; archived = superseded."
+    },
+    "effectiveFrom": { "type": "string", "format": "date" },
+    "effectiveTo": { "type": "string", "format": "date", "description": "Absent = open-ended (absence = no nulls)." },
+    "asOf": { "type": "string", "format": "date", "description": "Observation date of the price list; absent when the source carries its own retrievedAt only." },
+    "source": { "$ref": "#/$defs/RateSource" },
+    "regionalMultipliers": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[a-z0-9][a-z0-9-]*$": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Factor applied to rateBdt for that region; the card's own region = 1.0 by definition and is not listed."
+        }
+      },
+      "description": "Card-level regional multipliers (plan §6). A line may override with its own map."
+    },
+    "lines": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/RateLine" }
+    },
+    "notes": { "type": "string" }
+  },
+  "$defs": {
+    "Localized": {
+      "title": "Localized",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bn", "en"],
+      "properties": {
+        "bn": { "type": "string", "minLength": 1 },
+        "en": { "type": "string", "minLength": 1 }
+      }
+    },
+    "RateSource": {
+      "title": "RateSource",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "name"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["official_list", "market_survey", "vendor_quote", "user_input", "manual"],
+          "description": "Where the numbers come from. official_list = published list (e.g. mill/govt price list); market_survey = our/engineer survey; vendor_quote = a supplier quote; user_input = typed by the user; manual = maintained by hand (illustrative examples use this)."
+        },
+        "name": { "type": "string", "minLength": 1, "description": "Human-readable source name, e.g. 'Cement mill list 2026-10'." },
+        "url": { "type": "string", "format": "uri" },
+        "retrievedAt": { "type": "string", "format": "date" },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$", "description": "Hash of the fetched artifact (list PDF/CSV) when one exists - provenance per plan §5.10." },
+        "note": { "type": "string" }
+      }
+    },
+    "RateLine": {
+      "title": "RateLine",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "label", "costType", "unit", "rateBdt"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "description": "Stable takeoff key, e.g. 'cement-opc-43', 'rod-60g', 'mason', 'mixer-diesel', 'piling-450'."
+        },
+        "label": { "$ref": "#/$defs/Localized" },
+        "costType": {
+          "type": "string",
+          "enum": ["material", "labour", "machinery", "subcontract", "other"],
+          "description": "Plan §6 cost types. Drives BOQ column grouping."
+        },
+        "unit": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Canonical unit vocabulary (free string, documented): material - bag, ton, kg, cum, cft, sqm, sft, m, ft, litre, each, roll; labour - day, point, sqm, cum, per_unit; machinery - hour, day; subcontract - per_pile, per_ft, machine_hour, per_sqm, per_unit, lump_sum."
+        },
+        "rateBdt": { "type": "number", "minimum": 0 },
+        "operatorIncluded": {
+          "type": "boolean",
+          "description": "Machinery lines only: true when the rate includes the operator (plan §6 inclusion flags)."
+        },
+        "fuelIncluded": {
+          "type": "boolean",
+          "description": "Machinery lines only: true when the rate includes fuel."
+        },
+        "minimumChargeHours": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Machinery lines only: minimum billable hours per mobilization, when the source states one."
+        },
+        "source": { "$ref": "#/$defs/RateSource" },
+        "regionalMultipliers": {
+          "type": "object",
+          "additionalProperties": false,
+          "patternProperties": {
+            "^[a-z0-9][a-z0-9-]*$": { "type": "number", "exclusiveMinimum": 0 }
+          },
+          "description": "Per-line override of the card-level multipliers (e.g. piling is priced nationally)."
+        },
+        "note": { "type": "string" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "costType": { "const": "machinery" } }, "required": ["costType"] },
+          "then": {
+            "required": ["operatorIncluded", "fuelIncluded"],
+            "properties": { "unit": { "enum": ["hour", "day"] } }
+          },
+          "else": {
+            "not": {
+              "anyOf": [
+                { "required": ["operatorIncluded"] },
+                { "required": ["fuelIncluded"] },
+                { "required": ["minimumChargeHours"] }
+              ]
+            }
+          }
+        },
+        {
+          "if": { "properties": { "costType": { "const": "subcontract" } }, "required": ["costType"] },
+          "then": {
+            "properties": { "unit": { "enum": ["per_pile", "per_ft", "machine_hour", "per_sqm", "per_unit", "lump_sum"] } }
+          }
+        }
+      ]
+    }
+  }
+}

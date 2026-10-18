@@ -48,8 +48,8 @@ spec/schemas/building-spec.schema.json          (source of truth)
 ## Deliberately NOT in v0 (lands later, additive minor versions)
 
 - Phase payload schemas (element dimensions, rebar, MEP choices) — P1/P2 engines; `data` is the reserved slot.
-- Rule-pack schema (RAJUK numbers) — W0.5; verdict schema — W1.2/W0.9.
-- Rate-card/BOQ line details beyond the v0 fields (regional multipliers, piling modes etc.) — W0.9 freeze.
+- Rule-pack schema (RAJUK numbers) — W0.5; verdict schema — frozen v0.1.0 (`docs/spec/interfaces-v0.md`).
+- Rate-card/BOQ line details beyond the v0 fields (regional multipliers, piling modes etc.) — rate card frozen v0.1.0 (`docs/spec/interfaces-v0.md`); BOQ line format still open (W2.6).
 - UI form layout hints (`x-ui`) — W0.2.
 - Cross-field validations JSON Schema cannot express: phases ⇄ `storeys.count` consistency, `storeyIndex` required for `kind=floor`, id uniqueness, provenance-pointer validity — enforced by the Spec engine (W1.3) with tests + spec fuzzing (plan §9). (Id uniqueness is already covered by tests on examples.)
 
