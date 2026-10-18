@@ -1,88 +1,95 @@
-"""PRE-W1.2 DEMO: evaluate the test vectors embedded in a rule pack.
+"""Rule pack CLI (W1.2): the rule engine replaces the pre-W1.2 demo evaluator.
 
-Proves the pack is machine-consumable end-to-end before the real rules engine (W1.2)
-exists. Frozen semantics (mirrored by core/tests/test_rajuk_pack.py):
-  far      exact roadWidthM row + area band (areaSqmFrom < a <= areaSqmTo; missing = 0 / open);
-           prohibited rows match by area only; 'NR' = no cap
-  setback  area-band row; heightM > heightApplicabilityM or storeys > heightApplicabilityStoreys
-           -> beyondHeight
-  parking  max(minSpaces or 0, ceil(units * numerator / denominator))
+Two modes:
+
+- vector mode (default): every ``testVectors`` entry embedded in a pack is evaluated
+  through ``archres_core.compliance`` and compared with its expectation. This is the
+  pack's self-test and the engine's semantic contract (W1.2 froze the demo semantics).
+- spec mode (``--spec``): evaluate one Building Spec revision against the pack and
+  print (or write) the W0.9 verdict set JSON.
 
 Usage (from the repo root):
-  uv run --directory core python ../tools/rules/eval_spec.py [spec/rules/rajuk-2008.yaml]
+  uv run --directory core python ../tools/rules/eval_spec.py [pack] [--spec SPEC.json] [--out OUT.json]
 
-Exit 0 = every vector passes; 1 = at least one mismatch (details printed).
-Label: pre-W1.2 demo - the W1.2 rule engine replaces this evaluator; the semantics stay.
+Exit codes: 0 = every vector passes / a verdict set was produced; 1 = mismatch or error.
 """
 
-import io
-import math
+from __future__ import annotations
+
+import argparse
+import json
 import pathlib
 import sys
-from fractions import Fraction
 
-import yaml
+from archres_core.compliance import (
+    RulePackError,
+    evaluate_spec,
+    load_pack,
+    pack_sha256,
+    run_vectors,
+)
+from archres_core.spec import SpecEngineError, validate_spec
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
+DEFAULT_PACK = ROOT / "spec" / "rules" / "rajuk-2008.yaml"
 
 
-def band(area, row):
-    lo = row.get("areaSqmFrom", 0)
-    hi = row.get("areaSqmTo")
-    return area > lo if hi is None else lo < area <= hi
+def _path(argument: str) -> pathlib.Path:
+    """Repo-root-relative paths (the way this repo talks about files); absolutes pass through."""
+    path = pathlib.Path(argument)
+    return path if path.is_absolute() else ROOT / path
 
 
-def eval_far(pack, g):
-    rows = next(t for t in pack["farTables"] if t["classId"] == g["classId"])["rows"]
-    for r in rows:
-        if r.get("prohibited") and band(g["areaSqm"], r):
-            return {"prohibited": True}
-    for r in rows:
-        if r.get("anyPlot") and r["roadWidthM"] == g["roadWidthM"]:
-            return {"far": r["far"], "mgcPercent": r["mgcPercent"], "footnotes": r.get("footnotes", [])}
-    for r in rows:
-        if not r.get("prohibited") and not r.get("anyPlot") and r["roadWidthM"] == g["roadWidthM"] and band(g["areaSqm"], r):
-            return {"far": r["far"], "mgcPercent": r["mgcPercent"], "footnotes": r.get("footnotes", [])}
-    raise LookupError("no FAR row")
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Rule pack CLI: test vectors or a spec evaluation.")
+    parser.add_argument(
+        "pack", nargs="?", default=str(DEFAULT_PACK), help="rule pack YAML (default: rajuk-2008.yaml)"
+    )
+    parser.add_argument("--spec", help="evaluate this Building Spec file instead of the test vectors")
+    parser.add_argument("--out", help="write the verdict set here (default: stdout)")
+    parser.add_argument("--at", help="evaluatedAt timestamp (default: now)")
+    args = parser.parse_args()
+    pack_file = _path(args.pack)
 
+    try:
+        pack = load_pack(pack_file)
+    except RulePackError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
 
-def eval_setback(pack, g):
-    st = pack["setbackTable"]
-    if (g.get("heightM") or 0) > st["heightApplicabilityM"] or (g.get("storeys") or 0) > st["heightApplicabilityStoreys"]:
-        b = st["beyondHeight"]
-        return {"frontM": b["frontM"], "rearM": b["rearM"], "sideM": b["sideM"]}
-    for r in st["rows"]:
-        if band(g["areaSqm"], r):
-            return {"frontM": r["frontM"], "rearM": r["rearM"], "sideM": r["sideM"]}
-    raise LookupError("no setback row")
+    if args.spec:
+        try:
+            spec = json.loads(_path(args.spec).read_text(encoding="utf-8"))
+            validate_spec(spec)
+            verdict_set = evaluate_spec(spec, pack, pack_path=pack_file, evaluated_at=args.at)
+        except (OSError, json.JSONDecodeError, SpecEngineError) as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 1
+        text = json.dumps(verdict_set, ensure_ascii=False, indent=2) + "\n"
+        if args.out:
+            out = _path(args.out)
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_text(text, encoding="utf-8", newline="\n")
+            print(f"wrote {out}")
+        else:
+            print(text, end="")
+        summary = verdict_set["summary"]
+        print(
+            f"{pack['id']} [{pack['status']}]@{pack_sha256(pack_file)[:12]}: "
+            f"compliant {summary['compliant']}, deviation {summary['deviation']}, "
+            f"impossible {summary['impossible']}, unevaluated {len(verdict_set['unevaluated'])}",
+            file=sys.stderr,
+        )
+        return 0
 
-
-def eval_parking(pack, g):
-    row = next(r for r in pack["parkingSchedule"]["rows"] if r["id"] == g["rowId"])
-    n = g.get("units", 1)
-    q = Fraction(n * row["spaces"]["numerator"], row["spaces"]["denominator"])
-    return {"spaces": max(row.get("minSpaces", 0), math.ceil(q))}
-
-
-EVAL = {"far": eval_far, "setback": eval_setback, "parking": eval_parking}
-
-
-def main():
-    path = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "spec" / "rules" / "rajuk-2008.yaml"
-    pack = yaml.safe_load(io.open(path, encoding="utf-8"))
-    fails = 0
-    for v in pack["testVectors"]:
-        got = EVAL[v["kind"]](pack, v["given"])
-        for key, want in v["expect"].items():
-            have = got.get(key)
-            ok = sorted(have or []) == sorted(want) if key == "footnotes" else have == want
-            if not ok:
-                fails += 1
-                print(f"FAIL {v['id']}: {key} got {have!r}, want {want!r}")
-    total = len(pack["testVectors"])
-    print(f"{pack['id']} [{pack['status']}]: {total - fails}/{total} vectors pass")
-    return 1 if fails else 0
+    results = run_vectors(pack)
+    for row in results:
+        if not row["ok"]:
+            print(f"FAIL {row['id']}: got {row['got']!r}, want {row['expect']!r}")
+    failed = sum(1 for row in results if not row["ok"])
+    print(f"{pack['id']} [{pack['status']}]: {len(results) - failed}/{len(results)} vectors pass")
+    return 1 if failed else 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit(main())

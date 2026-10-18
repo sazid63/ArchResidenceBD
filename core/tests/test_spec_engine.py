@@ -84,6 +84,41 @@ def test_resolve_errors(spec: dict) -> None:
         resolve(spec, "/site/plot/areaSqm/x")
 
 
+def test_resolve_by_element_id(spec: dict) -> None:
+    # ADR-0008: the Building Spec addresses phases by slug id (flow book + verdict sets).
+    assert resolve(spec, "/phases/site-excavation/id") == "site-excavation"
+    assert resolve(spec, "/phases/floor-4/storeyIndex") == 4
+    assert resolve(spec, "/phases/common-services/kind") == "common_services"
+
+
+def test_resolve_by_element_id_errors(spec: dict) -> None:
+    with pytest.raises(PointerError):
+        resolve(spec, "/phases/floor-9/kind")
+    with pytest.raises(PointerError):
+        resolve(spec, "/phases/site-excavation/nope")
+
+
+def test_keyed_addressing_never_silently_picks() -> None:
+    doc = {"items": [{"id": "a", "v": 1}, {"id": "a", "v": 2}]}
+    with pytest.raises(PointerError, match="ambiguous"):
+        resolve(doc, "/items/a/v")
+
+
+def test_write_ops_by_element_id(spec: dict) -> None:
+    work = json.loads(json.dumps(spec))
+    work = ptr.add(work, "/phases/site-excavation/data/setbackFrontM", 1.5)
+    assert work["phases"][0]["data"]["setbackFrontM"] == 1.5
+    work = ptr.replace(work, "/phases/site-excavation/data/setbackFrontM", 1.2)
+    assert resolve(work, "/phases/site-excavation/data/setbackFrontM") == 1.2
+    assert ptr.remove(work, "/phases/site-excavation/data/setbackFrontM") == 1.2
+
+
+def test_add_to_array_by_id_is_rejected() -> None:
+    doc = {"items": [{"id": "a", "v": 1}]}
+    with pytest.raises(PointerError, match="use 'replace'"):
+        ptr.add(doc, "/items/a", {"id": "a", "v": 2})
+
+
 def test_add_replace_remove_semantics() -> None:
     doc = {"a": {"b": [1, 2]}, "x": 0}
     assert ptr.add(doc, "/a/c", 5)["a"]["c"] == 5

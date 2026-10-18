@@ -4,6 +4,12 @@ Only what the spec engine needs: read (resolve), and the JSON-Patch-style writes
 add/replace/remove with full `~0` / `~1` escaping and array semantics (`-` = append).
 Every helper that is not a root operation mutates the given document in place - the
 engine always calls them on a deep copy.
+
+One documented extension over strict RFC 6901 (ADR-0008): an array element may also be
+addressed by its ``id`` when the array is a list of objects carrying unique ids. The
+Building Spec addresses phase data this way (``/phases/site-excavation/data/...`` - the
+form the flow book and verdict sets use), so id tokens resolve for reads and writes;
+a token that is neither digits nor a unique id raises instead of guessing.
 """
 
 from __future__ import annotations
@@ -63,15 +69,37 @@ def _array_index(token: str, length: int, *, allow_append: bool = False) -> int:
     return index
 
 
+def _list_index(current: list, token: str, *, allow_append: bool = False) -> int:
+    """Resolve a token against an array: index, '-' (add only) or a unique element id.
+
+    Keyed addressing (ADR-0008): a non-numeric token matches the unique element whose
+    ``id`` equals it. No match or more than one match raises - never a silent pick.
+    """
+    if token == "-":
+        if allow_append:
+            return len(current)
+        raise PointerError("'-' is only valid as the final token of an 'add' path")
+    if token.isdigit():
+        return _array_index(token, len(current))
+    matches = [
+        index
+        for index, item in enumerate(current)
+        if isinstance(item, dict) and item.get("id") == token
+    ]
+    if len(matches) == 1:
+        return matches[0]
+    if not matches:
+        raise PointerError(f"no array element with id {token!r}")
+    raise PointerError(f"ambiguous array element id {token!r} ({len(matches)} matches)")
+
+
 def _descend(current: Any, token: str, pointer: str) -> Any:
     if isinstance(current, dict):
         if token not in current:
             raise PointerError(f"{pointer!r}: token {token!r} not found")
         return current[token]
     if isinstance(current, list):
-        if token == "-":
-            raise PointerError(f"{pointer!r}: '-' has no value to read")
-        return current[_array_index(token, len(current))]
+        return current[_list_index(current, token)]
     raise PointerError(f"{pointer!r}: cannot descend into a scalar at token {token!r}")
 
 
@@ -101,6 +129,10 @@ def add(document: Any, pointer: str, value: Any) -> Any:
     if isinstance(parent, dict):
         parent[token] = value
     elif isinstance(parent, list):
+        if token != "-" and not token.isdigit():
+            raise PointerError(
+                f"{pointer!r}: 'add' to an array needs '-' or an index; use 'replace' for id {token!r}"
+            )
         parent.insert(_array_index(token, len(parent), allow_append=True), value)
     else:
         raise PointerError(f"{pointer!r}: parent is a scalar")
@@ -117,7 +149,7 @@ def replace(document: Any, pointer: str, value: Any) -> Any:
             raise PointerError(f"{pointer!r}: token {token!r} not found")
         parent[token] = value
     elif isinstance(parent, list):
-        parent[_array_index(token, len(parent))] = value
+        parent[_list_index(parent, token)] = value
     else:
         raise PointerError(f"{pointer!r}: parent is a scalar")
     return document
@@ -131,5 +163,5 @@ def remove(document: Any, pointer: str) -> Any:
             raise PointerError(f"{pointer!r}: token {token!r} not found")
         return parent.pop(token)
     if isinstance(parent, list):
-        return parent.pop(_array_index(token, len(parent)))
+        return parent.pop(_list_index(parent, token))
     raise PointerError(f"{pointer!r}: parent is a scalar")

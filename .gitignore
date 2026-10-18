@@ -24,6 +24,7 @@ artifacts/
 data/cache/
 data/downloads/
 data/spikes/
+data/tmp/
 models/checkpoints/
 
 # --- Secrets (never commit) ---

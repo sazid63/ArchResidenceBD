@@ -41,6 +41,17 @@ Rules:
 - **Reserved paths**: `/revision`, `/locked`, `/updatedAt` cannot be patched — the revision store owns them.
 - The patch call takes the same op shape as the W0.9 verdict `alternative.specPatch`, so **restore-to-compliant applies 1:1**. Convention (W1.2): restores use `source: "engine"`, `detail: "restore to compliant: <ruleRef>"`.
 
+### Keyed array addressing (ADR-0008)
+
+Strict RFC 6901 indexes arrays numerically; the Building Spec **also** addresses array elements whose objects carry unique `id`s by that id — the flow book, the W0.9 verdict example and the rule engine all use `/phases/site-excavation/data/...`, never `/phases/0/data/...`:
+
+- a digits-only token is an array index (`/phases/0` resolves as before);
+- `-` stays append-only (final token of an `add`);
+- any other token matches the **unique** element whose `id` equals it; no match or several matches raise `PointerError` (never a silent pick);
+- `add` to an array still needs `-` or an index — use `replace`/`add` on the element's members to write a keyed element.
+
+Reads and writes (`resolve`, `replace`, `remove`, parent navigation of `add`) all support keyed tokens; the addition is documented in the module docstring and pinned by tests.
+
 ## Revision store
 
 ```

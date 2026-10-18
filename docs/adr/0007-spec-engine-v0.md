@@ -1,6 +1,6 @@
 # ADR-0007 — Spec engine v0: canonical hash, patch law, revision store
 
-- **Status:** Accepted
+- **Status:** Accepted — amended by ADR-0008 (the pointer layer adds keyed array addressing: id tokens for arrays of id-bearing objects; everything else stands)
 - **Date:** 2026-10-18
 - **Deciders:** Owner (standing order for the autonomous build-out run; package W1.3 defined by plan Appendix C)
 
