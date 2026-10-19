@@ -53,8 +53,11 @@ Constraints that shaped the design:
    non-degenerate scores and citation recall against `LexicalReranker`.
 5. **Degradation is data.** A reranker failure or a partial response does not abort the
    answer: the hits come back in fused order and `SearchResult.degraded` records
-   `rerank:<reason>`. `SearchResult.embedder` / `.reranker` name what actually ran. Silent
-   substitution with a different component is forbidden.
+   `rerank:<reason>`. `SearchResult.embedder` / `.reranker` name what was actually
+   **invoked** — including a reranker that was asked and produced no usable signal, so a
+   live probe reports `reranker="archie-rerank"` *and* a `degraded` reason rather than
+   reading as "no reranker configured". Silent substitution with a different component is
+   forbidden.
 6. **Citations are pack-pinned and cached by pin.** Every hit carries the gazette page, PDF
    page, tier, cite key and the pack sha256. `ClauseCache` is keyed by
    `(packId, packVersion, packSha256)`; a document from another pin is refused. A cached

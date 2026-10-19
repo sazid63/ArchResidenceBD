@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import dataclasses
+import json
 import os
 import pathlib
 import subprocess
@@ -151,7 +152,9 @@ def test_a_failed_rerank_is_visible_but_not_fatal(corpus) -> None:
     service = RagService(corpus, embedder=HashingEmbedder(dim=128), reranker=BrokenReranker())
     result = service.search("side setback", k=3)
     assert result.hits
-    assert result.reranker is None
+    # the seam is named even when it fails: `degraded` says it changed nothing, the name
+    # says which reranker was asked (lexical vs archie-rerank) - needed to read a live probe
+    assert result.reranker == "broken"
     assert result.degraded == ("rerank:router down",)
 
 
@@ -166,7 +169,7 @@ def test_a_signal_free_rerank_is_rejected_as_degraded(corpus) -> None:
     float_service = RagService(corpus, embedder=HashingEmbedder(dim=128), reranker=FlatReranker())
     result = float_service.search("side setback", k=3)
     assert result.hits
-    assert result.reranker is None
+    assert result.reranker == "flat"
     assert result.degraded and "no usable signal" in result.degraded[0]
     # the fused order is preserved instead of an arbitrary flat-score order
     without_rerank = RagService(corpus, embedder=HashingEmbedder(dim=128)).search(
@@ -316,3 +319,30 @@ def test_the_search_cli_survives_a_cp1252_console() -> None:
     assert result.returncode == 0, result.stderr
     assert "UnicodeEncodeError" not in result.stderr
     assert "hits" in result.stdout
+
+
+def test_the_search_cli_reports_coverage_without_a_query() -> None:
+    """`--coverage` is a corpus statement, not a search; it must not demand a question."""
+    result = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "rag" / "search.py"), "--coverage"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        timeout=180,
+    )
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    assert payload["documents"] >= 1
+    assert payload["referenceSet"] == "declared"
+
+    missing = subprocess.run(
+        [sys.executable, str(ROOT / "tools" / "rag" / "search.py")],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        timeout=180,
+    )
+    assert missing.returncode == 2
+    assert "--coverage" in missing.stderr

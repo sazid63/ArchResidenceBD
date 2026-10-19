@@ -108,7 +108,8 @@ gazette bytes. `stats()` reports `entries`, `hits`, `misses` and the pin.
 - **No silent gap**: every pack gap is a `declared_gap` document; every un-ingested reference
   is in `sources.yaml`, the manifest and `coverage()`.
 - **No invented numbers**: table documents restate pack rows; row selection stays in W1.2.
-- **No silent degradation**: `degraded`, `embedder` and `reranker` are always reported.
+- **No silent degradation**: `degraded`, `embedder` and `reranker` are always reported;
+  `reranker` names the seam that was invoked even when it produced no usable signal.
 
 ## Known limitations (v0)
 

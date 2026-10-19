@@ -35,7 +35,7 @@ CACHE = ROOT / "data" / "cache" / "rag"
 def main(argv: list[str] | None = None) -> int:
     utf8_stdio()
     parser = argparse.ArgumentParser(description="Search the cited clause corpus.")
-    parser.add_argument("query", nargs="+", help="the question, BN or EN")
+    parser.add_argument("query", nargs="*", help="the question, BN or EN (omit with --coverage)")
     parser.add_argument("--k", type=int, default=5, help="hits to show (default 5)")
     parser.add_argument("--lang", choices=["bn", "en"], help="restrict to one language")
     parser.add_argument("--kind", action="append", help="restrict to a document kind")
@@ -44,6 +44,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--json", action="store_true", help="print the full result as JSON")
     parser.add_argument("--coverage", action="store_true", help="print what the corpus covers")
     args = parser.parse_args(argv)
+    if not args.query and not args.coverage:
+        parser.error("a query is required unless --coverage is given")
 
     embedder = None
     reranker = None

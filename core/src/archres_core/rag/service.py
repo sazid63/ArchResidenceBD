@@ -286,6 +286,11 @@ class RagService:
         rerank_scores: dict[str, float] = {}
         reranker_name: str | None = None
         if rerank and self.reranker is not None and candidates:
+            # Name the seam as soon as it is invoked, not only when it changes the order.
+            # `degraded` says *that* no signal arrived; the name says *which* reranker
+            # produced none (lexical offline vs `archie-rerank` live), which a reader needs
+            # before trusting any live number.
+            reranker_name = self.reranker.name
             try:
                 values = self.reranker.rerank(query, candidates)
                 if len(values) != len(candidates):
@@ -300,8 +305,6 @@ class RagService:
                         f"rerank:no usable signal (max={highest:.3g}, spread={spread:.3g})"
                     )
                     rerank_scores = {}
-                else:
-                    reranker_name = self.reranker.name
             except RagError as exc:
                 degraded.append(f"rerank:{exc}")
         if rerank_scores:
