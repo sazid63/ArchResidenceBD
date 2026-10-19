@@ -485,6 +485,10 @@ def build_parse_records(
                     value = detail.get("asGiven") or detail.get("trimmed")
                 elif operator in ("partial", "typo_label"):
                     value, confidence = answer["option"]["value"], "medium"
+                elif result.get("value") is not None:
+                    # The operator changed the value, not only the wording: an affirmation
+                    # answers "yes" even when the base answer was "no".
+                    value, unit = result["value"], answer["unit"]
                 else:
                     value, unit = answer["value"], answer["unit"]
                 labels["value"] = value

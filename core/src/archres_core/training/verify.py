@@ -198,7 +198,9 @@ def verify_record(
             assert data["answerText"] in record["messages"][1]["content"], "answer not in the user turn"
             assert labels["decision"] == result["decision"], "decision differs from the operator contract"
             if result["decision"] == "accept":
-                expected_value = result["detail"].get("canonical")
+                expected_value = result["value"]
+                if expected_value is None:
+                    expected_value = result["detail"].get("canonical")
                 if expected_value is None:
                     expected_value = result["detail"].get(
                         "asGiven",

@@ -15,7 +15,7 @@ unit_alt         area -> katha/shotok/bigha, length m -> ft        accept
 typo             seeded adjacent-letter swap in a word             accept
 omit_unit        drops the unit word                                ask_again
 absurd           negative / zero value                              ask_again
-affirm_sloppy    "yep" / "হুম" style yes-no answers                  accept
+affirm_sloppy    "yep" / "হুম" style yes-no answers                  accept (value: true)
 maybe            "maybe" / "sometimes"                              ask_again
 label_native     choice answered with the Bangla label              accept
 partial          truncated choice label                             accept (medium)
@@ -29,9 +29,10 @@ dont_know        "don't know" / "জানি না" / "janina"               f
 off_topic        unrelated question                                 escalate
 ===============  =================================================  =================
 
-Every operator returns ``{"operator", "text", "decision", "detail"}`` where ``detail``
-carries everything a verifier needs to recompute the answer's canonical value - so a
-scripted sloppy record is checked by re-derivation, not by trust.
+Every operator returns ``{"operator", "text", "decision", "detail", "value"}`` where ``value``
+is set only when the operator changes the answer's value (an affirmation always answers
+``True``), and ``detail`` carries everything a verifier needs to recompute the answer's
+canonical value - so a scripted sloppy record is checked by re-derivation, not by trust.
 """
 
 from __future__ import annotations
@@ -190,6 +191,9 @@ def apply_operator(
     detail: dict[str, Any] = {}
     decision = "accept"
     text = base["text"]
+    #: Set when the operator changes the *value* as well as the wording (an affirmation
+    #: answers "yes", whatever the base answer was).
+    value: Any = None
 
     if operator == "bangla_digits":
         text = bn_digits(text)
@@ -257,6 +261,10 @@ def apply_operator(
 
     elif operator == "affirm_sloppy":
         text = _pick(lang, _AFFIRM_SLOPPY, seed)
+        # "yep" affirms the proposition, so the answer is *true* even when the base answer
+        # was false. Keeping the base value here (the v0 bug) trained "yes" to mean "no".
+        value = True
+        detail = {"affirms": True}
 
     elif operator == "maybe":
         text = _pick(lang, _MAYBE, seed)
@@ -308,4 +316,4 @@ def apply_operator(
     else:  # pragma: no cover - guarded by the applicability table
         raise OperatorNotApplicable(f"unknown operator {operator!r}")
 
-    return {"operator": operator, "text": text, "decision": decision, "detail": detail}
+    return {"operator": operator, "text": text, "decision": decision, "detail": detail, "value": value}

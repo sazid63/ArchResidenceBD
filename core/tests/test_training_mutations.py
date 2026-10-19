@@ -166,6 +166,29 @@ def test_omit_unit_and_absurd_ask_again() -> None:
     assert absurd["decision"] == "ask_again"
 
 
+def test_an_affirmation_answers_true_whatever_the_base_was() -> None:
+    """`affirm_sloppy` used to keep the base value, so "yup" labelled a false answer false."""
+    question = _question(id="corner-plot", type="yes_no", display=[], unit=None)
+    for base_value in (False, True):
+        result = mutations.apply_operator(
+            "affirm_sloppy",
+            question=question,
+            base={"kind": "yes_no", "value": base_value, "unit": None, "text": "no"},
+            lang="en",
+            seed="s",
+        )
+        assert result["decision"] == "accept"
+        assert result["value"] is True
+        assert result["detail"] == {"affirms": True}
+
+
+def test_operators_that_keep_the_value_leave_it_unset() -> None:
+    result = mutations.apply_operator(
+        "bangla_digits", question=_question(), base=_base(), lang="bn", seed="s"
+    )
+    assert result["value"] is None
+
+
 def test_operators_do_not_apply_to_the_wrong_answer_kind() -> None:
     with pytest.raises(mutations.OperatorNotApplicable):
         mutations.apply_operator(

@@ -109,6 +109,20 @@ def test_parse_coverage_is_declared(dataset: Dataset) -> None:
     assert "plinth-height" in dataset.coverage["questionsWithoutParse"]
 
 
+def test_an_affirmative_answer_is_labelled_true(dataset: Dataset) -> None:
+    """`affirm_sloppy` answers "yes"; keeping the base value trained "yes" to mean "no"."""
+    affirmative = [
+        record
+        for record in dataset.records
+        if (record.get("input") or {}).get("operator") == "affirm_sloppy"
+    ]
+    assert affirmative
+    for record in affirmative:
+        assert record["labels"]["decision"] == "accept", record["id"]
+        assert record["labels"]["value"] is True, record["id"]
+        assert json.loads(record["messages"][2]["content"])["value"] is True, record["id"]
+
+
 def test_pins_match_the_frozen_artifacts(dataset: Dataset) -> None:
     assert dataset.pins["generatorVersion"] == "build_chat_dataset-0.1.0"
     assert dataset.pins["flowBookSha256"] == sha256_file(FLOW_BOOK)
