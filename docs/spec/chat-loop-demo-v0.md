@@ -79,7 +79,9 @@ The runner never touches the spec directly; every write is the session's provena
 | BN run with the real fleet | fleet ready + interview warm 5.9 s; demo 2.6 s; same spec shape |
 | 2-storey spec shape | phases exactly `site-excavation, foundation, floor-0, floor-1, roof-boundary, common-services` |
 | Live escalation probe (stock 4B) | valid JSON returned and written at `confidence: low`, but a Bengali fractional area was misread — model-quality finding for W1.6/W1.9 |
-| Automated tests | 21 new (scenario validation, runner honesty, CLI smoke) — 497 total |
+| Automated tests | 19 new (scenario validation, runner honesty, CLI smoke) — 475 → 494 at W1.12; the suite total is asserted by CI, not by this table |
+| cp1252 console | narration survives a captured cp1252 pipe (`PYTHONIOENCODING=cp1252` regression test); Bangla text is UTF-8 on stdout and stderr |
+| relative `--root` | `--root data/downloads/s2` resolves against the repo, not against `core/` (regression test) |
 
 ## Deliberately NOT in v0
 

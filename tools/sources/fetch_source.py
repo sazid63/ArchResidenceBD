@@ -18,6 +18,7 @@ import pathlib
 import sys
 
 from archres_core.sources import SourceFetchError, fetch_source, load_registry, validate_registry
+from archres_core.stdio import utf8_stdio
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 DEFAULT_REGISTRY = ROOT / "spec" / "sources" / "registry.yaml"
@@ -26,6 +27,7 @@ DEFAULT_CACHE = ROOT / "data" / "cache" / "sources"
 
 
 def main(argv: list[str] | None = None) -> int:
+    utf8_stdio()
     parser = argparse.ArgumentParser(description="Fetch one Source Registry entry into the cache.")
     parser.add_argument("source_id", nargs="?", help="registry source id to fetch")
     parser.add_argument("--list", action="store_true", help="list registry entries instead of fetching")

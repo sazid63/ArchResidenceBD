@@ -22,6 +22,7 @@ import pathlib
 import sys
 from datetime import datetime, timezone
 
+from archres_core.stdio import utf8_stdio
 from archres_core.training import (
     ChatCompletionClient,
     TeacherError,
@@ -44,6 +45,7 @@ DEFAULT_OUT = ROOT / "data" / "training" / "teacher-candidates"
 
 
 def main() -> int:
+    utf8_stdio()
     parser = argparse.ArgumentParser(description="Rephrase flow-book questions through a teacher model.")
     parser.add_argument("--endpoint", default="http://127.0.0.1:8787/v1/chat/completions")
     parser.add_argument("--model", default="chat")

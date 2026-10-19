@@ -1,0 +1,94 @@
+{
+  "byKind": {
+    "declared_gap": 16,
+    "far_table": 20,
+    "footnote": 20,
+    "geometry_rule": 6,
+    "parking_note": 12,
+    "parking_row": 54,
+    "parking_schedule": 2,
+    "provision": 46,
+    "setback_table": 2
+  },
+  "byLang": {
+    "bn": 89,
+    "en": 89
+  },
+  "byTextKind": {
+    "declared_gap": 16,
+    "gazette_quote": 20,
+    "pack_note": 12,
+    "pack_summary": 130
+  },
+  "corpusBytes": 214664,
+  "corpusSha256": "9646f07e7387826e0679e2cebb58cde6bd66a57fd57da9ba7fa78735aca71beb",
+  "coverage": {
+    "citationsDeclared": 39,
+    "citationsUnused": [
+      "s56-1-3",
+      "schedule4-notes"
+    ],
+    "citationsUsed": 37,
+    "declaredGapsInCorpus": 8,
+    "declaredGapsInPack": 8,
+    "provisions": 23,
+    "provisionsWithDocs": 23,
+    "sourcesIngested": 1,
+    "sourcesMissing": 3
+  },
+  "documents": 178,
+  "generator": "build_rag_corpus-0.1.0",
+  "missing": [
+    {
+      "id": "bnbc-2020-core",
+      "reason": "No redistributable copy of the BNBC 2020 text is held in the repo; the seismic-zone values used by the engine come from the rule pack's source registry entry, not from a clause corpus. Ingest after the BYO-PDF path (plan section 5.6) provides a lawful copy.",
+      "status": "not_ingested"
+    },
+    {
+      "id": "rajuk-appendix5-definitions",
+      "reason": "Appendix 5 (definitions) is not transcribed yet - pack candidates item C4. Terms such as open space and covered area therefore have no clause-level citation in v0.",
+      "status": "not_ingested"
+    },
+    {
+      "id": "city-authority-rules-chattogram-khulna-rajshahi-sylhet",
+      "reason": "City rule packs beyond RAJUK are P4 work; the pack registry lists them as pending, so the corpus covers Dhaka only and says so.",
+      "status": "not_ingested"
+    }
+  ],
+  "packId": "rajuk@2008.1",
+  "packSha256": "d50cce8c4f08246f8ed7ab6576f7ecbfc672e29d340510b799bf679a924551d1",
+  "packVersion": "0.1.0",
+  "schemaVersion": "0.1.0",
+  "sources": [
+    {
+      "authority": "rajuk",
+      "citationBasis": "gazette pages 2998-3196, sha256-pinned PDF (pack.source)",
+      "id": "rajuk-bidhimala-2008",
+      "notes": "Clause documents are derived from the pack's provisions, tables, footnotes and declared gaps. Provision text is our summary of the provision (textKind pack_summary); only the footnotes are transcribed gazette wording (textKind gazette_quote).",
+      "pack": "rajuk-2008.yaml",
+      "status": "ingested",
+      "title": {
+        "bn": "ইমারত নির্মাণ বিধিমালা, ২০০৮ (রাজউক)",
+        "en": "Imarat Nirman Bidhimala 2008 (RAJUK)"
+      }
+    },
+    {
+      "authority": "hbri",
+      "id": "bnbc-2020-core",
+      "reason": "No redistributable copy of the BNBC 2020 text is held in the repo; the seismic-zone values used by the engine come from the rule pack's source registry entry, not from a clause corpus. Ingest after the BYO-PDF path (plan section 5.6) provides a lawful copy.",
+      "status": "not_ingested"
+    },
+    {
+      "authority": "rajuk",
+      "id": "rajuk-appendix5-definitions",
+      "reason": "Appendix 5 (definitions) is not transcribed yet - pack candidates item C4. Terms such as open space and covered area therefore have no clause-level citation in v0.",
+      "status": "not_ingested"
+    },
+    {
+      "authority": "city-authorities",
+      "id": "city-authority-rules-chattogram-khulna-rajshahi-sylhet",
+      "reason": "City rule packs beyond RAJUK are P4 work; the pack registry lists them as pending, so the corpus covers Dhaka only and says so.",
+      "status": "not_ingested"
+    }
+  ]
+}

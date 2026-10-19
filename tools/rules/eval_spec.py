@@ -28,6 +28,7 @@ from archres_core.compliance import (
     pack_sha256,
     run_vectors,
 )
+from archres_core.stdio import utf8_stdio
 from archres_core.spec import SpecEngineError, validate_spec
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -41,6 +42,7 @@ def _path(argument: str) -> pathlib.Path:
 
 
 def main() -> int:
+    utf8_stdio()
     parser = argparse.ArgumentParser(description="Rule pack CLI: test vectors or a spec evaluation.")
     parser.add_argument(
         "pack", nargs="?", default=str(DEFAULT_PACK), help="rule pack YAML (default: rajuk-2008.yaml)"

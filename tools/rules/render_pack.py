@@ -23,6 +23,8 @@ from pathlib import Path
 
 import yaml
 
+from archres_core.stdio import utf8_stdio
+
 ROOT = Path(__file__).resolve().parents[2]
 PACK_REL = "spec/rules/rajuk-2008.yaml"
 PACK = ROOT / "spec" / "rules" / "rajuk-2008.yaml"
@@ -589,6 +591,7 @@ def _first_difference(on_disk: str, rendered: str) -> str:
 
 
 def main() -> int:
+    utf8_stdio()
     parser = argparse.ArgumentParser(description="Render the RAJUK rule pack (or verify freshness).")
     parser.add_argument("--check", action="store_true", help="verify the committed render is fresh; write nothing")
     args = parser.parse_args()

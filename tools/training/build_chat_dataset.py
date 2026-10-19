@@ -24,6 +24,7 @@ import pathlib
 import sys
 import tempfile
 
+from archres_core.stdio import utf8_stdio
 from archres_core.training import build_chat_dataset, sample_records, write_jsonl
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -81,6 +82,7 @@ def _compare(expected: pathlib.Path, actual: pathlib.Path) -> bool:
 
 
 def main() -> int:
+    utf8_stdio()
     parser = argparse.ArgumentParser(description="Build the scripted chat dataset (or verify freshness).")
     parser.add_argument("--out", default=str(DEFAULT_OUT), help="output directory")
     parser.add_argument("--check", action="store_true", help="verify committed outputs are fresh; write nothing")

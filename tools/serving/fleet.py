@@ -17,12 +17,14 @@ import sys
 from pathlib import Path
 
 from archres_core.serving import FleetError, is_fresh, load_fleet, write_fleet
+from archres_core.stdio import utf8_stdio
 
 ROOT = Path(__file__).resolve().parents[2]
 FLEET = ROOT / "spec" / "models" / "fleet.json"
 
 
 def main() -> int:
+    utf8_stdio()
     parser = argparse.ArgumentParser(description="Render or verify the model fleet config.")
     parser.add_argument("--fleet", default=str(FLEET), help="fleet JSON (default: spec/models/fleet.json)")
     parser.add_argument("--check", action="store_true", help="verify the committed config is fresh; write nothing")

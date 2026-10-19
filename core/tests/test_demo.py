@@ -8,6 +8,7 @@ will type (with `--no-model`, so it is deterministic and offline).
 from __future__ import annotations
 
 import json
+import os
 import pathlib
 import subprocess
 import sys
@@ -208,24 +209,33 @@ def test_scenario_needs_a_real_spec(tmp_path, base_spec) -> None:
         scenario.spec()
 
 
-def test_cli_runs_the_bengali_demo_offline(tmp_path) -> None:
-    out = tmp_path / "demo"
-    result = subprocess.run(
-        [
-            sys.executable,
-            str(CLI),
-            "--scenario",
-            str(SCENARIOS / "dhaka-house-bn.json"),
-            "--no-model",
-            "--quiet",
-            "--out",
-            str(out),
-        ],
+def _run_cli(
+    *args: str, out: pathlib.Path, extra_env: dict[str, str] | None = None
+) -> subprocess.CompletedProcess[str]:
+    """Run the demo CLI the way a shell, a CI runner or the desktop sidecar would capture it."""
+    env = dict(os.environ)
+    env.pop("ARCHRES_ROOT", None)  # the tests own every path
+    if extra_env:
+        env.update(extra_env)
+    return subprocess.run(
+        [sys.executable, str(CLI), *args, "--out", str(out)],
         cwd=ROOT,
         capture_output=True,
         text=True,
         encoding="utf-8",
+        env=env,
         timeout=120,
+    )
+
+
+def test_cli_runs_the_bengali_demo_offline(tmp_path) -> None:
+    out = tmp_path / "demo"
+    result = _run_cli(
+        "--scenario",
+        str(SCENARIOS / "dhaka-house-bn.json"),
+        "--no-model",
+        "--quiet",
+        out=out,
     )
     assert result.returncode == 0, result.stderr
     summary = json.loads((out / "summary.json").read_text(encoding="utf-8"))
@@ -233,3 +243,37 @@ def test_cli_runs_the_bengali_demo_offline(tmp_path) -> None:
     assert summary["openEssential"] == []
     assert summary["steps"] == 63
     assert len(list((out / "store" / "revisions").glob("*.json"))) == 64
+
+
+def test_the_cli_survives_a_cp1252_console(tmp_path) -> None:
+    """Windows pipes are cp1252, and the narration is Bangla - this used to crash.
+
+    `--quiet` is deliberately off: the per-question Bangla text is what raised
+    ``UnicodeEncodeError`` the moment the shell captured stdout.
+    """
+    result = _run_cli(
+        "--scenario",
+        str(SCENARIOS / "dhaka-house-bn.json"),
+        "--no-model",
+        out=tmp_path / "demo",
+        extra_env={"PYTHONIOENCODING": "cp1252", "PYTHONUTF8": "0"},
+    )
+    assert result.returncode == 0, result.stderr
+    assert "UnicodeEncodeError" not in result.stderr
+    assert "মন্ডি" in result.stdout  # the Bangla title really did come out as UTF-8
+
+
+def test_the_cli_resolves_a_relative_install_root_against_the_repo(tmp_path) -> None:
+    """`uv run --directory core` runs from core/, so a bare relative root must not follow it."""
+    missing = "data/downloads/no-such-install-root"
+    result = _run_cli(
+        "--scenario",
+        str(SCENARIOS / "dhaka-house-en.json"),
+        "--root",
+        missing,
+        out=tmp_path / "demo",
+    )
+    assert result.returncode == 1
+    found = result.stderr.replace("\\", "/")
+    assert (ROOT / missing).as_posix() in found
+    assert (ROOT / "core" / missing).as_posix() not in found

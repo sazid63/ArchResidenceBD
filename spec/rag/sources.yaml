@@ -1,0 +1,46 @@
+# RAG reference set v0 (W1.1) - what the clause corpus is built from and what it is not.
+# The plan's RAG loads the full reference set (BNBC core + active city + project-referenced
+# packs). v0 has exactly one ingested pack; every other reference is declared here with a
+# reason, and the built corpus manifest repeats that list so a missing reference can never be
+# mistaken for coverage. Quality law (plan section 9): unverified content is a candidate, and
+# uncovered references are stated, never implied.
+#
+# status: ingested (a pack in spec/rules is the source of truth) | not_ingested (declared gap)
+
+version: "0.1.0"
+
+sources:
+  - id: rajuk-bidhimala-2008
+    status: ingested
+    pack: rajuk-2008.yaml
+    authority: rajuk
+    title:
+      bn: "ইমারত নির্মাণ বিধিমালা, ২০০৮ (রাজউক)"
+      en: "Imarat Nirman Bidhimala 2008 (RAJUK)"
+    citationBasis: "gazette pages 2998-3196, sha256-pinned PDF (pack.source)"
+    notes: >-
+      Clause documents are derived from the pack's provisions, tables, footnotes and declared
+      gaps. Provision text is our summary of the provision (textKind pack_summary); only the
+      footnotes are transcribed gazette wording (textKind gazette_quote).
+
+  - id: bnbc-2020-core
+    status: not_ingested
+    authority: hbri
+    reason: >-
+      No redistributable copy of the BNBC 2020 text is held in the repo; the seismic-zone
+      values used by the engine come from the rule pack's source registry entry, not from a
+      clause corpus. Ingest after the BYO-PDF path (plan section 5.6) provides a lawful copy.
+
+  - id: rajuk-appendix5-definitions
+    status: not_ingested
+    authority: rajuk
+    reason: >-
+      Appendix 5 (definitions) is not transcribed yet - pack candidates item C4. Terms such
+      as open space and covered area therefore have no clause-level citation in v0.
+
+  - id: city-authority-rules-chattogram-khulna-rajshahi-sylhet
+    status: not_ingested
+    authority: city-authorities
+    reason: >-
+      City rule packs beyond RAJUK are P4 work; the pack registry lists them as pending, so
+      the corpus covers Dhaka only and says so.

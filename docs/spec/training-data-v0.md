@@ -110,7 +110,8 @@ Output goes to `data/training/teacher-candidates/` (gitignored) as `candidates.j
 ## Checks
 
 ```powershell
-uv run --directory core pytest -q                         # 253 tests (56 training-specific)
+uv run --directory core pytest -q                         # suite total is asserted by CI, not hard-coded here
+uv run --directory core pytest -q tests/test_training_pipeline.py   # 56 training-specific
 uv run --directory core python ../tools/training/build_chat_dataset.py --check
 python tools/ci/brand_guard.py
 ```

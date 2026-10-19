@@ -18,6 +18,27 @@ jobs:
       - name: Brand guard
         run: python tools/ci/brand_guard.py
 
+  # The dev machine and every install are Windows (plan §1): a redirected console is cp1252,
+  # not UTF-8, and `uv run --directory core` runs every tool from core/. Those two facts are
+  # why the Bangla CLI crash and the relative-`--root` bug shipped unnoticed under
+  # Ubuntu-only CI. This job is deliberately narrow — the console-encoding, RAG, demo and
+  # freshness checks that are Windows-specific — so it stays fast.
+  windows-smoke:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.3.0
+      - name: Sync workspace
+        run: uv sync --all-packages
+      - name: Console encoding, RAG and demo tests
+        run: uv run --directory core pytest -q tests/test_stdio.py tests/test_rag_corpus.py tests/test_rag_retrieval.py tests/test_rag_service.py tests/test_demo.py
+      - name: Rule pack vectors (candidate honesty)
+        run: uv run --directory core python ../tools/rules/eval_spec.py
+      - name: RAG corpus freshness
+        run: uv run --directory core python ../tools/rag/build_corpus.py --check
+      - name: Rule pack render freshness
+        run: uv run --directory core python ../tools/rules/render_pack.py --check
+
   core-tests:
     runs-on: ubuntu-latest
     steps:
@@ -37,6 +58,8 @@ jobs:
         run: uv run --directory core python ../tools/flow/render_book.py --check
       - name: Rule pack freshness
         run: uv run --directory core python ../tools/rules/render_pack.py --check
+      - name: RAG corpus freshness
+        run: uv run --directory core python ../tools/rag/build_corpus.py --check
       - name: Fleet config freshness
         run: uv run --directory core python ../tools/serving/fleet.py --check
 

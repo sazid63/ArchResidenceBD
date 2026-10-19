@@ -26,6 +26,7 @@ from archres_core.agent import LlamaSwapClient, OrchestratorError, Session
 from archres_core.demo import DemoError, DemoRunner, load_scenario, write_report
 from archres_core.interview import InterviewError, load_book
 from archres_core.serving import FleetError, FleetLauncher, LauncherError, load_fleet
+from archres_core.stdio import utf8_stdio
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 BOOK = ROOT / "spec" / "flows" / "phase-flow-book.yaml"
@@ -41,6 +42,7 @@ def _path(value: str | None) -> pathlib.Path | None:
 
 
 def main() -> int:
+    utf8_stdio()
     parser = argparse.ArgumentParser(description="Interview a dummy project with the real brain.")
     parser.add_argument("--scenario", default=str(DEFAULT_SCENARIO), help="scenario JSON (default: Bengali demo)")
     parser.add_argument("--out", help="artifact directory (default: data/demo/<scenario>-<timestamp>)")
@@ -83,8 +85,11 @@ def main() -> int:
                     file=sys.stderr,
                 )
             else:
-                root = pathlib.Path(root_value).resolve()
-                binary = pathlib.Path(args.binary) if args.binary else root / "bin" / "llama-swap" / "llama-swap.exe"
+                # resolved against the repo root, not the shell's cwd: `uv run --directory
+                # core` runs every tool from core/, so a bare `--root data/downloads/s2`
+                # used to resolve to core/data/downloads/s2 and fail with "binary not found".
+                root = (_path(root_value) or pathlib.Path(root_value)).resolve()
+                binary = _path(args.binary) or root / "bin" / "llama-swap" / "llama-swap.exe"
                 launcher = FleetLauncher(
                     load_fleet(FLEET),
                     binary,

@@ -21,6 +21,8 @@ from pathlib import Path
 import yaml
 from jsonschema import Draft202012Validator
 
+from archres_core.stdio import utf8_stdio
+
 ROOT = Path(__file__).resolve().parents[2]
 BOOK = ROOT / "spec" / "flows" / "phase-flow-book.yaml"
 SCHEMA = ROOT / "spec" / "schemas" / "flow-book.schema.json"
@@ -200,6 +202,7 @@ def render(data: dict) -> str:
 
 
 def main() -> int:
+    utf8_stdio()
     parser = argparse.ArgumentParser(description="Render the Phase Flow Book (or verify freshness).")
     parser.add_argument("--check", action="store_true", help="verify the committed render is fresh; write nothing")
     args = parser.parse_args()

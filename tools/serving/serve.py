@@ -24,6 +24,7 @@ import sys
 import time
 
 from archres_core.serving import FleetError, FleetLauncher, LauncherError, load_fleet
+from archres_core.stdio import utf8_stdio
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 FLEET = ROOT / "spec" / "models" / "fleet.json"
@@ -37,6 +38,7 @@ def _path(value: str | None, *, base: pathlib.Path) -> pathlib.Path | None:
 
 
 def main() -> int:
+    utf8_stdio()
     parser = argparse.ArgumentParser(description="Start the model fleet on loopback and warm a mode.")
     parser.add_argument("--fleet", default=str(FLEET), help="fleet JSON (default: spec/models/fleet.json)")
     parser.add_argument("--root", help="install root (default: $ARCHRES_ROOT)")
@@ -50,7 +52,7 @@ def main() -> int:
     args = parser.parse_args()
 
     try:
-        fleet = load_fleet(args.fleet)
+        fleet = load_fleet(_path(args.fleet, base=ROOT) or args.fleet)
     except FleetError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
@@ -59,7 +61,9 @@ def main() -> int:
     if not root_arg:
         print(f"error: pass --root or set {fleet.install_root_env}", file=sys.stderr)
         return 1
-    root = pathlib.Path(root_arg).resolve()
+    # resolved against the repo root, not the shell's cwd: `uv run --directory core` runs
+    # every tool from core/, so a bare `--root data/downloads/s2` used to resolve under core/.
+    root = (_path(root_arg, base=ROOT) or pathlib.Path(root_arg)).resolve()
     binary = _path(args.binary, base=root) if args.binary else root / "bin" / "llama-swap" / "llama-swap.exe"
     log_path = _path(args.log, base=ROOT)
 
