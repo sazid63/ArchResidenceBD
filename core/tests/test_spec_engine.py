@@ -314,6 +314,60 @@ def test_store_lock_and_reopen_require_tip(tmp_path: pathlib.Path, spec: dict) -
         store.reopen(store.tip().sha256, at=AT)  # tip is not locked
 
 
+# --- snapshot commits (W1.10 orchestrator) ------------------------------------
+
+
+def test_store_commit_snapshot_records_a_patched_draft(tmp_path: pathlib.Path, spec: dict) -> None:
+    store = SpecStore.create(tmp_path / "p1", spec, at=AT)
+    first = store.tip()
+    draft = apply_patch(store.load(first.sha256), SOIL_PATCH, provenance=SOIL_PROVENANCE, at=AT)
+    rev = store.commit_snapshot(
+        first.sha256, draft, at="2026-10-20T09:00:00+06:00", note="interview: soil-sbc"
+    )
+    assert rev.number == 1 and rev.parentSha256 == first.sha256
+    assert rev.note == "interview: soil-sbc"
+    assert set(rev.ops) >= {"replace /site/soil/status", "replace /site/soil/sbcKpa"}
+    snapshot = store.load(rev.sha256)
+    assert snapshot["revision"] == 1
+    assert snapshot["updatedAt"] == "2026-10-20T09:00:00+06:00"
+    # the draft's own provenance entries survive verbatim (no second, coarser entry)
+    assert snapshot["provenance"]["/site/soil/sbcKpa"] == draft["provenance"]["/site/soil/sbcKpa"]
+    assert snapshot["site"]["soil"]["sbcKpa"] == 120
+    assert store.diff(rev.sha256, rev.sha256) == []
+
+
+def test_store_commit_snapshot_requires_a_change(tmp_path: pathlib.Path, spec: dict) -> None:
+    store = SpecStore.create(tmp_path / "p1", spec, at=AT)
+    first = store.tip()
+    with pytest.raises(SpecStoreError, match="nothing changed"):
+        store.commit_snapshot(first.sha256, store.load(first.sha256), at=AT)
+    metadata_only = store.load(first.sha256)
+    metadata_only["revision"] = 99
+    metadata_only["updatedAt"] = AT
+    with pytest.raises(SpecStoreError, match="nothing changed"):
+        store.commit_snapshot(first.sha256, metadata_only, at=AT)
+
+
+def test_store_commit_snapshot_respects_the_store_law(tmp_path: pathlib.Path, spec: dict) -> None:
+    store = SpecStore.create(tmp_path / "p1", spec, at=AT)
+    first = store.tip()
+    draft = apply_patch(store.load(first.sha256), SOIL_PATCH, provenance=SOIL_PROVENANCE, at=AT)
+    with pytest.raises(SpecStoreError, match="current tip"):
+        store.commit_snapshot("0" * 64, draft, at=AT)
+    locked = store.lock(first.sha256, at=AT)
+    with pytest.raises(SpecStoreError, match="locked"):
+        store.commit_snapshot(locked.sha256, draft, at=AT)
+
+
+def test_store_commit_snapshot_rejects_an_invalid_draft(tmp_path: pathlib.Path, spec: dict) -> None:
+    store = SpecStore.create(tmp_path / "p1", spec, at=AT)
+    first = store.tip()
+    broken = store.load(first.sha256)
+    broken["building"]["storeys"]["count"] = 0
+    with pytest.raises(SpecValidationError):
+        store.commit_snapshot(first.sha256, broken, at=AT)
+
+
 def test_store_diff_between_revisions(tmp_path: pathlib.Path, spec: dict) -> None:
     store = SpecStore.create(tmp_path / "p1", spec, at=AT)
     first = store.tip()

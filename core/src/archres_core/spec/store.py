@@ -32,6 +32,18 @@ from .engine import (
 )
 
 
+#: Revision metadata is rewritten by the store, not authored by a patch (see engine.py).
+_METADATA_PATHS = frozenset({"/revision", "/locked", "/updatedAt"})
+
+
+def _diff_op(row: dict) -> str:
+    if "before" not in row:
+        return "add"
+    if "after" not in row:
+        return "remove"
+    return "replace"
+
+
 class SpecStoreError(SpecEngineError):
     """A revision-store operation that violates the store law."""
 
@@ -146,6 +158,55 @@ class SpecStore:
             locked=False,
             parentSha256=parent_sha256,
             ops=ops_summary(ops),
+        )
+        return self._record(patched, revision)
+
+    def commit_snapshot(
+        self,
+        parent_sha256: str,
+        spec: dict,
+        *,
+        at: str | None = None,
+        note: str = "",
+    ) -> Revision:
+        """Record an already-patched working draft as the next revision.
+
+        The interview/orchestrator applies patches to its own copy of the spec (so every
+        path carries its own provenance entry); this records that exact draft instead of
+        re-applying ops with a second, coarser provenance entry. The revision's op summary
+        is derived from the pointer-level diff against the parent, so the log stays honest.
+        """
+        from .engine import diff_specs
+
+        tip = self.tip()
+        if parent_sha256 != tip.sha256:
+            raise SpecStoreError("can only commit from the current tip")
+        if tip.locked:
+            raise SpecStoreError("the tip revision is locked - reopen() it first")
+        parent = self.load(parent_sha256)
+        if not isinstance(spec, dict):
+            raise SpecStoreError("a spec snapshot must be an object")
+        patched = copy.deepcopy(spec)
+        patched["revision"] = parent["revision"] + 1
+        patched["locked"] = False
+        patched["updatedAt"] = at or utc_now_iso()
+        validate_spec(patched)
+        diff = diff_specs(parent, patched)
+        content = [row for row in diff if row["path"] not in _METADATA_PATHS]
+        if not content:
+            raise SpecStoreError("nothing changed - the snapshot equals the parent content")
+        ops = tuple(
+            f"{_diff_op(row)} {row['path']}"
+            for row in content
+        )
+        revision = Revision(
+            number=patched["revision"],
+            sha256=spec_sha256(patched),
+            createdAt=patched["updatedAt"],
+            note=note,
+            locked=False,
+            parentSha256=parent_sha256,
+            ops=ops,
         )
         return self._record(patched, revision)
 
