@@ -8,6 +8,13 @@
 - **Fleet v1** is frozen at four roles: chat / repair / embed / rerank. The S2 draft model (Qwen3-0.6B) is excluded on purpose — see the registry `notes`.
 - **Updates:** a new base model or a fine-tune is a **new entry** (e.g. id `archie-chat-ft1`), never an edit of a shipped one; removing an entry is an ADR-level change.
 
+## Serving fleet (W1.11)
+
+- `fleet.json` — the product fleet configuration: install-root macros, router policy, swap groups and the `interview` / `design` modes. It never repeats a model's artifact, hash or flags — those stay in `registry.json` (ADR-0012).
+- `llama-swap.yaml` — **generated, committed**: the llama-swap router config rendered from the two files above. Never edit it; CI checks freshness.
+- Regenerate / check: `uv run --directory core python ../tools/serving/fleet.py [--check]`.
+- Run locally: `uv run --directory core python ../tools/serving/serve.py --mode interview` with `ARCHRES_ROOT` pointing at the install (or the S2 download layout). See `docs/spec/model-serving-v0.md`.
+
 Related (W0.8):
 
 - `cards/` — one model card per registry entry (skeleton → draft → published lifecycle; front matter pinned to this registry; policy in `cards/README.md`).

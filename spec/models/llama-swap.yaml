@@ -1,0 +1,66 @@
+# Generated from spec/models/fleet.json + registry.json by tools/serving/fleet.py.
+# Do not edit - regenerate: python tools/serving/fleet.py
+#
+# Fleet v1: one GPU model resident at a time (chat/repair swap); embed/rerank are
+# pinned to CPU and persistent. Evidence: docs/spikes/S2-serve.md.
+
+healthCheckTimeout: 500
+logLevel: info
+logTimeFormat: "rfc3339"
+sendLoadingState: true
+
+macros:
+  "llama-server": "${env.ARCHRES_ROOT}/bin/llama/llama-server.exe"
+  "models": "${env.ARCHRES_ROOT}/models"
+
+models:
+  "chat":
+    name: "Archie Chat"
+    cmd: |
+      ${llama-server} --host 127.0.0.1 --port ${PORT}
+      -m ${models}/Qwen3-4B-Instruct-2507-Q4_K_M.gguf
+      -ngl 99 -c 8192 -np 1 --no-webui
+    ttl: 0
+    # archie-chat | sha256 3605803b982cb64aead44f6c1b2ae36e3acdb41d8e46c8a94c6533bc4c67e597
+  "repair":
+    name: "Archie Repair"
+    cmd: |
+      ${llama-server} --host 127.0.0.1 --port ${PORT}
+      -m ${models}/qwen2.5-coder-3b-instruct-q4_k_m.gguf
+      -ngl 99 -c 8192 -np 1 --no-webui
+    ttl: 0
+    # archie-repair | sha256 724fb256bec1ff062b2f65e4569e871ad2e95ab2a3989723d1769c54294730b7
+  "embed":
+    name: "Archie Embed"
+    cmd: |
+      ${llama-server} --host 127.0.0.1 --port ${PORT}
+      -m ${models}/Qwen3-Embedding-0.6B-Q8_0.gguf
+      -ngl 0 -c 2048 -np 1 --embeddings --pooling last --no-webui
+    ttl: 0
+    # archie-embed | sha256 06507c7b42688469c4e7298b0a1e16deff06caf291cf0a5b278c308249c3e439
+  "rerank":
+    name: "Archie Rerank"
+    cmd: |
+      ${llama-server} --host 127.0.0.1 --port ${PORT}
+      -m ${models}/Qwen3-Reranker-0.6B.Q8_0.gguf
+      -ngl 0 -c 2048 -np 1 --reranking --no-webui
+    ttl: 0
+    # archie-rerank | sha256 48c062151f5a3026f74a2066a37011ff9d7c135ddc8b7c22034b0051257908e9
+    capabilities:
+      reranker: true
+
+routing:
+  router:
+    use: group
+    settings:
+      groups:
+        "gpu-models":
+          swap: true
+          exclusive: true
+          persistent: false
+          members: ["chat", "repair"]
+        "cpu-services":
+          swap: false
+          exclusive: false
+          persistent: true
+          members: ["embed", "rerank"]

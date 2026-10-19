@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "0.1.0",
+  "generated": "llama-swap.yaml",
+  "installRootEnv": "ARCHRES_ROOT",
+  "router": {
+    "listen": "127.0.0.1:8787",
+    "healthCheckTimeout": 500,
+    "logLevel": "info",
+    "logTimeFormat": "rfc3339",
+    "sendLoadingState": true
+  },
+  "macros": {
+    "llama-server": "bin/llama/llama-server.exe",
+    "models": "models"
+  },
+  "defaults": {
+    "host": "127.0.0.1",
+    "parallel": 1,
+    "ttl": 0
+  },
+  "groups": {
+    "gpu-models": {
+      "swap": true,
+      "exclusive": true,
+      "persistent": false,
+      "purpose": "interview/design models share one 6 GB card - exactly one resident (S2)"
+    },
+    "cpu-services": {
+      "swap": false,
+      "exclusive": false,
+      "persistent": true,
+      "purpose": "embedder/reranker stay loaded on CPU while GPU models swap (S2)"
+    }
+  },
+  "modes": {
+    "interview": {
+      "description": {
+        "en": "Interview: ask, parse and explain - the chat model stays resident.",
+        "bn": "ইন্টারভিউ: প্রশ্ন, উত্তর বোঝা ও ব্যাখ্যা — চ্যাট মডেল সক্রিয় থাকে।"
+      },
+      "primary": "chat",
+      "warmup": ["chat", "embed", "rerank"]
+    },
+    "design": {
+      "description": {
+        "en": "Design: build and repair CAD scripts - the repair model takes the GPU.",
+        "bn": "ডিজাইন: ক্যাড স্ক্রিপ্ট তৈরি ও মেরামত — রিপেয়ার মডেল জিপিইউ নেয়।"
+      },
+      "primary": "repair",
+      "warmup": ["repair", "embed", "rerank"]
+    }
+  },
+  "notes": "Model fleet config v0 (W1.11). Source of truth for router policy and modes; the llama-swap YAML is generated from this file plus registry.json (never hand-edited). Paths are relative to the install root (ARCHRES_ROOT) - the installer's layout, not this repo's. Fleet v1 is the fixed roster of plan section 4; modes only re-order which member is warmed, they cannot add one."
+}

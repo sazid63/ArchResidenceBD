@@ -37,6 +37,8 @@ jobs:
         run: uv run --directory core python ../tools/flow/render_book.py --check
       - name: Rule pack freshness
         run: uv run --directory core python ../tools/rules/render_pack.py --check
+      - name: Fleet config freshness
+        run: uv run --directory core python ../tools/serving/fleet.py --check
 
   app:
     runs-on: ubuntu-latest
