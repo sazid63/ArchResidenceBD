@@ -95,12 +95,33 @@ class PermissionError(RuntimeError):
     """The policy itself is misconfigured (not a denial)."""
 
 
+def _path_flavour(raw: str) -> str | None:
+    """Which path syntax made this string absolute: ``"windows"``, ``"posix"`` or ``None``.
+
+    Checking only ``pathlib.Path(raw).is_absolute()`` asks the *host* flavour, so on Linux
+    ``C:/Windows/win.ini`` looked relative and was silently joined onto the sandbox — a
+    Windows absolute path was readable from a POSIX install. Both flavours are checked here
+    and a foreign absolute path is refused instead of reinterpreted.
+    """
+    if pathlib.PureWindowsPath(raw).is_absolute():  # C:\x, C:/x, \\server\share
+        return "windows"
+    if pathlib.PurePosixPath(raw).is_absolute():
+        return "posix"
+    return None
+
+
 def _resolve_inside(sandbox: pathlib.Path, raw: Any) -> pathlib.Path:
     """Resolve a tool path inside the sandbox or raise ``ValueError`` with the reason."""
     if not isinstance(raw, str) or not raw.strip():
         raise ValueError("a non-empty path is required")
+    if "\x00" in raw:
+        raise ValueError(f"{raw!r} is not a usable path")
+    flavour = _path_flavour(raw)
+    host = "windows" if pathlib.PureWindowsPath(sandbox).is_absolute() else "posix"
+    if flavour is not None and flavour != host:
+        raise ValueError(f"{raw!r} is a {flavour} absolute path, not inside this project sandbox")
     candidate = pathlib.Path(raw)
-    if candidate.is_absolute():
+    if flavour is not None:
         resolved = candidate.resolve()
     else:
         resolved = (sandbox / candidate).resolve()

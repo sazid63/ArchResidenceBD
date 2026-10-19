@@ -6,6 +6,8 @@ shows the log — a decision that is not recorded did not happen.
 
 from __future__ import annotations
 
+import os
+
 import pytest
 
 from archres_core.agent.injection import Finding
@@ -46,11 +48,72 @@ def test_ungranted_read_asks(policy: PermissionPolicy) -> None:
     assert "not granted" in decision.reason
 
 
-@pytest.mark.parametrize("path", ["../secret.txt", "C:/Windows/win.ini", "/etc/passwd"])
+@pytest.mark.parametrize(
+    "path",
+    [
+        "../secret.txt",
+        "C:/Windows/win.ini",
+        "C:\\Windows\\win.ini",
+        "/etc/passwd",
+        "\\\\server\\share\\x",
+        "//server/share/x",
+    ],
+)
 def test_paths_outside_the_sandbox_are_denied(policy: PermissionPolicy, path: str) -> None:
+    """Both path flavours are recognised on either host.
+
+    CI runs on Linux, where ``C:/Windows/win.ini`` is *not* absolute to
+    ``pathlib.Path``; it used to be joined onto the sandbox and allowed. Windows syntax is
+    the product's real target, so it must be denied on a POSIX host too.
+    """
     decision = policy.authorize(Call("fs.read", {"path": path}))
     assert decision.status == "deny"
-    assert "outside the project sandbox" in decision.reason
+    assert "sandbox" in decision.reason
+
+
+def test_a_foreign_absolute_path_is_refused_not_reinterpreted(tmp_path) -> None:
+    """Deny the *reason* clearly: a path in the other flavour cannot be inside the sandbox."""
+    foreign = "C:/Windows/win.ini" if os.name != "nt" else "/etc/passwd"
+    policy = PermissionPolicy(sandbox=tmp_path, granted={"fs.read"})
+    decision = policy.authorize(Call("fs.read", {"path": foreign}))
+    assert decision.status == "deny"
+    assert "absolute path" in decision.reason and "sandbox" in decision.reason
+
+
+def test_path_syntax_is_classified_independently_of_the_host() -> None:
+    """The bug's core: which flavour made this absolute, decided on the string alone."""
+    from archres_core.agent.tools import _path_flavour
+
+    assert _path_flavour("C:/Windows/win.ini") == "windows"
+    assert _path_flavour("C:\\Windows\\win.ini") == "windows"
+    assert _path_flavour("\\\\server\\share\\x") == "windows"
+    assert _path_flavour("/etc/passwd") == "posix"
+    # `//server/share` reads as UNC first; either reading is absolute and outside the sandbox
+    assert _path_flavour("//server/share/x") == "windows"
+    assert _path_flavour("notes.txt") is None
+    assert _path_flavour("../secret.txt") is None
+    assert _path_flavour("D:plans\\relative-to-drive.pdf") is None
+
+
+def test_a_nul_byte_is_not_a_usable_path(policy: PermissionPolicy) -> None:
+    decision = policy.authorize(Call("fs.read", {"path": "notes.txt\x00.png"}))
+    assert decision.status == "deny"
+    assert "not a usable path" in decision.reason
+
+
+def test_a_backslash_relative_name_is_a_traversal_only_on_windows(
+    policy: PermissionPolicy, tmp_path
+) -> None:
+    """A POSIX filename may legally contain a backslash, so it is read as a plain name there.
+
+    On the product's Windows host ``..\\secret.txt`` is a real traversal and is denied;
+    pretending otherwise would make the POSIX test lie about the shipping platform.
+    """
+    decision = policy.authorize(Call("fs.read", {"path": "..\\secret.txt"}))
+    if os.name == "nt":
+        assert decision.status == "deny"
+    else:
+        assert decision.status == "allow"
 
 
 def test_missing_path_is_denied(policy: PermissionPolicy) -> None:
