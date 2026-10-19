@@ -122,7 +122,7 @@ def test_escalation_context_is_deterministic_and_complete(base_spec) -> None:
     assert "| maybe like the usual" in user
     system = first.messages[0]["content"]
     assert "Parse the user's answer. Reply with JSON only." in system
-    assert '"value": <typed value>' in system
+    assert '"value": <number or typed value>' in system
     assert first.estimatedTokens > 0
 
 

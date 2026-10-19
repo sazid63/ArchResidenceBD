@@ -99,7 +99,7 @@ Unreadable input returns:
 }
 ```
 
-W1.10 (orchestrator) builds the prompt from it. The model's answer comes back through `accept_external(value, unit=...)`, which re-validates by question type, applies the same schema gate, and records `source: user`, `confidence: low`, `detail: model-parsed (escalation)`. An invalid value is a visible `model_invalid` re-ask; it cannot write.
+W1.10 (orchestrator) builds the prompt from it. The model reports the value **in the unit the user used** — it is explicitly not asked to do the conversion; `accept_external(value, unit=...)` converts through the land-unit module, re-validates by question type, applies the same schema gate, and records `source: user`, `confidence: low`, `detail: model-parsed (escalation)`. An invalid value is a visible `model_invalid` re-ask; it cannot write. On stock base models a valid-but-wrong reading is still possible (low confidence is the honest signal); W1.6/W1.9 own the quality gate.
 
 ## Coverage & provenance
 

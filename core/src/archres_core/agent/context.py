@@ -197,7 +197,8 @@ def build_escalation_context(
     sections.append(Section("User answer", str(payload.get("answer", "")), "user"))
     rules = [str(payload.get("instruction", "")).strip()]
     rules.append(
-        'Reply with exactly one JSON object: {"value": <typed value>, "unit": <entered unit or null>}. '
+        'Reply with exactly one JSON object: {"value": <number or typed value>, '
+        '"unit": <the unit the user said, or null>}. Do not convert units; the app converts. '
         "No other text. If the answer cannot be read, use null."
     )
     builder = ContextBuilder(language=language, rules=rules, budget_tokens=budget_tokens)

@@ -166,15 +166,15 @@ ASK_AGAIN = {
 ESCALATION_INSTRUCTION = {
     "en": (
         "Parse the user's answer for one interview question. Reply with JSON only: "
-        '{{"value": <typed value>, "unit": <entered unit or null>}}. '
-        "Use the canonical unit {unit}. Never invent a value; if the answer cannot be read, "
-        'reply {{"value": null}}.'
+        '{{"value": <number or typed value>, "unit": <the unit the user said, or null>}}. '
+        "Do not convert units - the app converts to {unit}. Never invent a value; if the "
+        'answer cannot be read, reply {{"value": null}}.'
     ),
     "bn": (
         "একটি ইন্টারভিউ প্রশ্নের উত্তরটি বুঝে শুধু JSON ফেরত দিন: "
-        '{{"value": <মান>, "unit": <একক বা null>}}। '
-        "ক্যানোনিকাল একক {unit}। কোনো মান অনুমান করবেন না; না বুঝলে "
-        '{{"value": null}} দিন।'
+        '{{"value": <সংখ্যা বা মান>, "unit": <ব্যবহারকারীর বলা একক, অথবা null>}}। '
+        "একক নিজে বদলাবেন না — অ্যাপটি {unit}-এ রূপান্তর করবে। কোনো মান অনুমান করবেন না; "
+        'না বুঝলে {{"value": null}} দিন।'
     ),
 }
 

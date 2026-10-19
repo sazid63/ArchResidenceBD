@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "0.1.0",
+  "revision": 0,
+  "locked": false,
+  "createdAt": "2026-10-20T09:00:00+06:00",
+  "updatedAt": "2026-10-20T09:00:00+06:00",
+  "project": {
+    "id": "7b1e4c2a-9d3f-4a6b-8c5e-1f2a3b4c5d6e",
+    "name": "Demo Project",
+    "language": "en",
+    "displayUnits": {
+      "length": "m",
+      "area": "sqm",
+      "currency": "BDT"
+    }
+  },
+  "site": {
+    "address": {
+      "division": "Dhaka",
+      "district": "Dhaka"
+    },
+    "plot": {
+      "areaSqm": 100.0
+    }
+  },
+  "building": {
+    "occupancy": "residential",
+    "structureType": "rcc_frame",
+    "storeys": {
+      "count": 2
+    }
+  },
+  "phases": [
+    { "id": "site-excavation", "kind": "site_excavation", "status": "not_started", "data": {} },
+    { "id": "foundation", "kind": "foundation", "status": "not_started", "data": {} },
+    { "id": "floor-0", "kind": "floor", "storeyIndex": 0, "status": "not_started", "data": {} },
+    { "id": "floor-1", "kind": "floor", "storeyIndex": 1, "status": "not_started", "data": {} },
+    { "id": "roof-boundary", "kind": "roof_boundary", "status": "not_started", "data": {} },
+    { "id": "common-services", "kind": "common_services", "status": "not_started", "data": {} }
+  ]
+}

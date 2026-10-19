@@ -22,6 +22,7 @@ artifacts/
 
 # --- Large local data & model artifacts ---
 data/cache/
+data/demo/
 data/downloads/
 data/spikes/
 data/tmp/

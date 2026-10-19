@@ -361,6 +361,7 @@ def test_parse_failure_escalates_and_model_value_is_low_confidence(book, base_sp
     assert turn.escalation["answer"] == "something odd"
     assert [option["value"] for option in turn.escalation["options"]] == ["metric", "feet-inch", "bangla-land"]
     assert "JSON" in turn.escalation["instruction"]
+    assert "Do not convert units" in turn.escalation["instruction"]
 
     accepted = interview.accept_external("metric")
     assert accepted.decision == "accept"
