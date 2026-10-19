@@ -26,6 +26,11 @@ data/downloads/
 data/spikes/
 data/tmp/
 models/checkpoints/
+# Teacher output is unverified (candidates); the scripted dataset is committed.
+data/training/teacher-candidates/
+
+# --- Tool workspace metadata ---
+.freebuff/
 
 # --- Secrets (never commit) ---
 .env

@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.archresidencebd.app/sft-record/0.1.0.json",
+  "title": "SftRecord",
+  "description": "ArchResidenceBD SFT record schema v0.1.0 (W1.5, plan §7) - one training example for a fleet member. Scripts generate the substrate (structure, numbers, templates); teacher models add natural-language variety. Every record carries machine-checkable labels, the generator/teacher provenance, and a status: verified records are training-eligible, candidate records await deterministic verification (quality law: unverified content is a candidate). Labels are task-extensible (additional properties allowed); the core fields per task are required. Repair records (Archie-Repair) are added additively with W1.7.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "kind",
+    "task",
+    "lang",
+    "messages",
+    "labels",
+    "input",
+    "source",
+    "difficulty",
+    "status"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "0.1.0" },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "description": "Stable record id, e.g. chat-parse-plot-area-slp-katha-bn-01."
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["chat", "repair"],
+      "description": "Dataset family; chat = Archie-Chat-4B (W1.6), repair = Archie-Repair-4B (W1.7)."
+    },
+    "task": {
+      "type": "string",
+      "enum": ["interview.ask", "interview.parse", "rule.explain", "deviation.override"],
+      "description": "Narrow task contract of the record. repair.fix arrives with W1.7."
+    },
+    "lang": {
+      "type": "string",
+      "enum": ["bn", "en", "mixed"],
+      "description": "Language of the user-side content (assistant follows the user)."
+    },
+    "messages": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 9,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["role", "content"],
+        "properties": {
+          "role": { "type": "string", "enum": ["system", "user", "assistant"] },
+          "content": { "type": "string", "minLength": 1 }
+        }
+      },
+      "description": "Rendered prompt/completion payload (system first, then alternating user/assistant)."
+    },
+    "labels": {
+      "type": "object",
+      "description": "Machine-checkable ground truth; verification reads only here (and the pack/spec), never the prose.",
+      "properties": {
+        "questionId": { "type": "string" },
+        "phaseId": { "type": "string" },
+        "mapsTo": { "type": "string", "pattern": "^/" },
+        "essential": { "type": "boolean" },
+        "pointer": { "type": "string", "pattern": "^/" },
+        "decision": { "type": "string", "enum": ["accept", "ask_again", "fallback", "escalate"] },
+        "value": { "type": ["number", "string", "boolean"] },
+        "unit": { "type": "string" },
+        "fallbackKind": { "type": "string", "enum": ["default", "registry", "area_default", "derive", "omit"] },
+        "ruleRef": { "type": "string", "pattern": "^[a-z]+@\\d{4}\\.\\d+#[a-z0-9][a-z0-9-]*$" },
+        "status": { "type": "string", "enum": ["compliant", "deviation", "impossible"] },
+        "citations": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "allowedNumbers": { "type": "array", "items": { "type": "string" } },
+        "registerEntry": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "ruleRef", "ruleTitle", "expected", "actual", "riskTier"],
+          "properties": {
+            "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+            "ruleRef": { "type": "string" },
+            "ruleTitle": { "type": "string" },
+            "expected": { "type": "string" },
+            "actual": { "type": "string" },
+            "riskTier": { "type": "string", "enum": ["cosmetic", "approval_risk", "structural_attention"] }
+          }
+        },
+        "specPatch": { "type": "array", "items": { "type": "object" } }
+      },
+      "additionalProperties": true
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["generator"],
+      "description": "What the record was generated from (artifact refs, question/rule/spec ids, the seed inputs).",
+      "properties": {
+        "generator": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": { "type": "string", "enum": ["scripted", "teacher", "hand"] },
+        "seed": { "type": "integer" },
+        "model": { "type": "string", "description": "Teacher model id (registry-pinned) for kind=teacher." },
+        "modelSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "promptVersion": { "type": "string" },
+        "batch": { "type": "string" }
+      }
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": ["clean", "sloppy"],
+      "description": "sloppy = the sloppy-input class (Banglish, typos, unit confusion, 'don't know', off-topic); it must trigger defaults/clarification, never stall."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["verified", "candidate"],
+      "description": "verified = passed its deterministic checks and may enter training; candidate = unverified (quality law)."
+    },
+    "verifyChecks": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "task": { "const": "interview.ask" } } },
+      "then": { "properties": { "labels": { "required": ["questionId", "phaseId", "mapsTo"] } } }
+    },
+    {
+      "if": { "properties": { "task": { "const": "interview.parse" } } },
+      "then": { "properties": { "labels": { "required": ["questionId", "pointer", "decision"] } } }
+    },
+    {
+      "if": { "properties": { "task": { "const": "rule.explain" } } },
+      "then": { "properties": { "labels": { "required": ["ruleRef", "status", "citations", "allowedNumbers"] } } }
+    },
+    {
+      "if": { "properties": { "task": { "const": "deviation.override" } } },
+      "then": { "properties": { "labels": { "required": ["ruleRef", "citations", "allowedNumbers", "registerEntry"] } } }
+    }
+  ]
+}

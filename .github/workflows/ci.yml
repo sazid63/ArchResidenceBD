@@ -27,6 +27,8 @@ jobs:
         run: uv sync --all-packages
       - name: Core tests
         run: uv run --directory core pytest -q
+      - name: Training dataset freshness
+        run: uv run --directory core python ../tools/training/build_chat_dataset.py --check
       - name: Spec codegen freshness
         run: python tools/codegen/generate_spec.py --check
       - name: Interfaces codegen freshness
@@ -35,3 +37,19 @@ jobs:
         run: uv run --directory core python ../tools/flow/render_book.py --check
       - name: Rule pack freshness
         run: uv run --directory core python ../tools/rules/render_pack.py --check
+
+  app:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.14.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Typecheck
+        run: pnpm --dir app typecheck

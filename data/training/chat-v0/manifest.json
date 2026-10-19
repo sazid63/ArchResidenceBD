@@ -1,0 +1,107 @@
+{
+  "counts": {
+    "byDecision": {
+      "accept": 317,
+      "ask_again": 58,
+      "escalate": 80,
+      "fallback": 68
+    },
+    "byDifficulty": {
+      "clean": 280,
+      "sloppy": 381
+    },
+    "byLang": {
+      "bn": 325,
+      "en": 336
+    },
+    "byOperator": {
+      "absurd": 22,
+      "affirm_sloppy": 6,
+      "as_given": 6,
+      "bangla_digits": 11,
+      "banglish": 16,
+      "dont_know": 80,
+      "maybe": 6,
+      "off_topic": 34,
+      "omit_unit": 18,
+      "partial": 46,
+      "typo": 18,
+      "typo_label": 46,
+      "unit_alt": 20,
+      "unknown_choice": 46,
+      "whitespace": 6
+    },
+    "byPhase": {
+      "common-services": 100,
+      "floor": 84,
+      "foundation": 50,
+      "roof-boundary": 50,
+      "setup": 294,
+      "site-excavation": 65
+    },
+    "byStatus": {
+      "verified": 661
+    },
+    "byTask": {
+      "deviation.override": 6,
+      "interview.ask": 120,
+      "interview.parse": 523,
+      "rule.explain": 12
+    },
+    "total": 661
+  },
+  "coverage": {
+    "askQuestions": 60,
+    "parseQuestions": 40,
+    "questionsWithoutParse": [
+      "plot-depth",
+      "material-prices",
+      "soil-has-report",
+      "soil-report-file",
+      "keep-boundary-wall",
+      "adjacent-close",
+      "boundary-markers",
+      "water-hit-digging",
+      "anti-termite",
+      "depth-constraint",
+      "plinth-height",
+      "units-override",
+      "bedrooms-per-unit",
+      "attached-bath",
+      "mep-points-note",
+      "overhead-tank",
+      "solar-provision",
+      "parapet-height",
+      "boundary-wall-height",
+      "underground-tank"
+    ]
+  },
+  "files": {
+    "dataset.jsonl": {
+      "bytes": 1428206,
+      "records": 661,
+      "sha256": "b556664e52ffca0371738cf858e2b33152cb7c3e1b25b5fe95c1190be34dd98a"
+    },
+    "sample.jsonl": {
+      "bytes": 39484,
+      "records": 17,
+      "sha256": "799c43ca54894050642750f789c19bfa3e0e217852081d151bb9c6c65f7003ea"
+    }
+  },
+  "generatorVersion": "build_chat_dataset-0.1.0",
+  "manifestVersion": "1",
+  "pins": {
+    "buildingSpecSchemaSha256": "45a5f296a4f3208509074fc4cc205348d1a94e13cdf2fcc5b96cab2deb8cda9a",
+    "examplesSha256": {
+      "new-project": "da8f11c46179ba517d3b6c1b25423886399b76fe95f91f65bc32ccf82014d035",
+      "three-storey-with-soil-report": "57c0906734c5bcc6036f13cf90d87f2a6cd1dd2b89fb921e682573d7bce33751",
+      "two-storey-residential": "14e9c5184c8ae5fe15707470cd21a95d4d2cc0a81b94fd21f2d8b20695255799"
+    },
+    "flowBookSha256": "782a2897d420f342b2bb47e7cd74f1c6c5622348dff9f06eb238549285a7855a",
+    "generatorVersion": "build_chat_dataset-0.1.0",
+    "promptVersion": "chat-system-v0",
+    "rulePackSha256": "d50cce8c4f08246f8ed7ab6576f7ecbfc672e29d340510b799bf679a924551d1",
+    "sftSchemaSha256": "82a11cd46d31e278f8f25cfdd91a70a0148ede4ae410e31b825c7bdb7480195a"
+  },
+  "promptVersion": "chat-system-v0"
+}
