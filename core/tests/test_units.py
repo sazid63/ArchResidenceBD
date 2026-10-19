@@ -31,7 +31,9 @@ def test_area_round_trip_is_exact_enough_for_display() -> None:
 def test_length_conversions() -> None:
     assert units.length_to_m(1, "ft") == Decimal("0.3048")
     assert units.length_to_m(12, "inch") == Decimal("0.3048")
+    assert units.length_to_m(12, "mm") == Decimal("0.012")
     assert units.length_from_m(Decimal("3.048"), "ft") == Decimal("10.0")
+    assert units.unit_words("mm") == ("mm", "মিলিমিটার")
 
 
 def test_quantize_rounds_half_up_and_format_trims_zeros() -> None:

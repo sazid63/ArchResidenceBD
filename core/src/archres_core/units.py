@@ -56,6 +56,7 @@ LENGTH_TO_M: dict[str, Decimal] = {
     "feet": FT_M,
     "foot": FT_M,
     "inch": INCH_M,
+    "mm": Decimal("0.001"),
 }
 
 #: Display words per unit code: (English, Bangla). Hand-authored, never machine-translated.
@@ -77,6 +78,7 @@ UNIT_WORDS: dict[str, tuple[str, str]] = {
     "feet": ("ft", "ফুট"),
     "foot": ("ft", "ফুট"),
     "inch": ("inch", "ইঞ্চি"),
+    "mm": ("mm", "মিলিমিটার"),
     "kPa": ("kPa", "কিলোপ্যাসকেল"),
 }
 
