@@ -280,6 +280,14 @@ def test_a_wrong_value_fails_and_moves_value_accuracy(cases) -> None:
     assert result.metrics["valueAccuracy"] == 0.0
 
 
+def test_value_accuracy_is_absent_without_accepted_values(cases) -> None:
+    case = next(case for case in cases["model.parse"] if case.expect["decision"] != "accept")
+    reply = json.dumps({"decision": case.expect["decision"], "value": case.expect.get("value")})
+    result = run_model_suite([case], {case.id: reply})
+    assert result.passed == 1
+    assert "valueAccuracy" not in result.metrics
+
+
 def test_load_replies_rejects_a_missing_file_and_bad_rows(tmp_path) -> None:
     with pytest.raises(EvalError, match="record_ baseline|record_baseline"):
         load_replies(tmp_path / "missing.jsonl")
@@ -312,6 +320,12 @@ def test_a_wrong_doc_id_fails_with_the_miss_reason(cases, desk) -> None:
     result = run_rag_suite([broken], desk)
     assert result.failed == 1
     assert "not in top-5" in result.failures[0].reason
+
+
+def test_abstention_metric_is_absent_without_gap_cases(cases, desk) -> None:
+    case = next(case for case in cases["rag"] if case.expect["mode"] == "answer")
+    result = run_rag_suite([case], desk)
+    assert "abstentionAccuracy" not in result.metrics
 
 
 def test_answering_a_declared_gap_is_a_failure(cases, desk) -> None:

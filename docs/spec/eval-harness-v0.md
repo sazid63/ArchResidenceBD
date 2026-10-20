@@ -90,6 +90,12 @@ fine-tune that scores below the base model fails CI instead of being celebrated.
 | `scenario/accuracy` | 1.0 (2/2) | 1.0 | demo end state unchanged |
 | `register/accuracy` | 1.0 (3/3) | 1.0 | register round-trip unchanged |
 
+**Audit hardening (2026-10-20):** a metric is now **omitted** when its denominator is zero
+(`valueAccuracy` with no accepted-value cases, `abstentionAccuracy` with no declared-gap cases).
+A gate on an omitted metric fails with "the suite reports no such metric"; it is never reported
+as `1.0` from an empty denominator. This is the same no-vacuous-pass rule as the CAD expected-error
+case: a hard 1.0 has to be earned by measured cases.
+
 **Baseline model:** Qwen3-4B-Instruct-2507 Q4_K_M, served by the S2 llama-swap fleet, recorded
 2026-10-20 at temperature 0, 60 calls, `data/eval/chat-v0/replies/stock.jsonl`. A model case
 passes only when the decision **and** the accepted value are right — accepting the wrong value

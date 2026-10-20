@@ -394,8 +394,12 @@ def run_model_suite(cases: Sequence[EvalCase], replies: dict[str, str]) -> Suite
             outcomes.append(_score(case, True, {"decision": got_decision, "value": got_value}, case.expect))
     metrics = {
         "decisionAccuracy": round(decision_ok / len(cases), 4),
-        "valueAccuracy": round(value_ok / value_total, 4) if value_total else 1.0,
     }
+    # No accepted-value cases means no value measurement. Omitting the metric makes a gate
+    # on it fail loudly ("the suite reports no such metric"); defaulting to 1.0 would let a
+    # case-set edit pass a hard floor without measuring anything.
+    if value_total:
+        metrics["valueAccuracy"] = round(value_ok / value_total, 4)
     return _summarize("model.parse", cases, outcomes, model=True, metrics=metrics)
 
 
@@ -435,7 +439,10 @@ def run_rag_suite(cases: Sequence[EvalCase], desk: Any) -> SuiteResult:
     metrics = {
         "citationRecall": round(cited / len(cases), 4),
         "statusAccuracy": round(status_ok / len(cases), 4),
-        "abstentionAccuracy": round(
+    }
+    # Same rule as valueAccuracy: no declared-gap cases means no abstention measurement.
+    if gap_cases:
+        metrics["abstentionAccuracy"] = round(
             sum(
                 1
                 for outcome, case in zip(outcomes, cases)
@@ -444,9 +451,6 @@ def run_rag_suite(cases: Sequence[EvalCase], desk: Any) -> SuiteResult:
             / gap_cases,
             4,
         )
-        if gap_cases
-        else 1.0,
-    }
     return _summarize("rag", cases, outcomes, model=False, metrics=metrics)
 
 
