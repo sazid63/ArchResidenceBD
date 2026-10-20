@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "1",
+  "notes": [
+    "The repair suite is judged by the engine, not by a text diff: tools/training/eval_repair.py",
+    "writes each returned macro to disk, runs it through the W1.8 harness (FreeCAD) and asks the",
+    "case verdict. A floor is the stock base model's measured rate on the same held-out prompts -",
+    "the same law as the chat suite (ADR-0015): a floor moves only as a reviewed event that quotes",
+    "the measured number, the model and the commit.",
+    "The values below are PROVISIONAL until the round lands: the kernel answers the four frozen",
+    "holdout prompts with the untouched base model (stock) and with the adapter, and the measured",
+    "stock rate replaces each provisional floor before any candidate is judged against it."
+  ],
+  "floors": {
+    "passesOwnCase": {
+      "floor": 0.0,
+      "model": "qwen2.5-coder-3b-instruct (stock, 4-bit, greedy)",
+      "date": "2026-10-20",
+      "count": 4,
+      "status": "provisional - replaced by the measured stock baseline"
+    },
+    "noCollateral": {
+      "floor": 0.0,
+      "model": "qwen2.5-coder-3b-instruct (stock, 4-bit, greedy)",
+      "date": "2026-10-20",
+      "count": 4,
+      "status": "provisional - replaced by the measured stock baseline"
+    }
+  }
+}
