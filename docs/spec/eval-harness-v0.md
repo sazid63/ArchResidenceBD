@@ -103,6 +103,21 @@ case: a hard 1.0 has to be earned by measured cases.
 passes only when the decision **and** the accepted value are right — accepting the wrong value
 is the worst outcome this suite exists to catch, so it never counts as a pass.
 
+### The advisor/override dialogue — what is gated, and what is not
+
+The plan's behavioural curriculum ("identify the rule → explain the consequence → confirm →
+proceed → register") has two halves, and only one of them is a model job:
+
+| Half | Where it lives | Gated by |
+|---|---|---|
+| the rule, the consequence, the restore-to-compliant alternative, the register entry | the **deterministic** rule engine (`archres_core.compliance`) | `rule.vector` 49/49 and `register` 3/3, both at 1.0 |
+| reading an answer the parser could not read | the **chat model**, through the escalation seam | `model.parse` (is it right?) and `model.safety` (can a wrong reading become a written value?) |
+
+What is **not** gated is the advisor's *dialogue* - the sentence the app shows the user - because
+there is no product path that produces it yet: the engine computes the deviation, and the UI
+that would phrase it is P2/P3 work. There is nothing to measure until that path exists, and the
+gap is declared here rather than implied by a missing suite.
+
 ### `model.safety` — the product's question, not the model's
 
 `model.parse` asks whether the **model** read the answer right. `model.safety` asks the
