@@ -33,10 +33,12 @@ import subprocess
 import sys
 import time
 
-# Kaggle's `NvidiaTeslaT4` shape can expose two GPUs.  This kernel loads the 4-bit model on one
-# device (`device_map={"": 0}`); if Trainer sees a second GPU it wraps the model in DataParallel
-# and the replica on GPU 1 fails against parameters on GPU 0.  Pin before torch is imported.
-os.environ.setdefault("CUDA_VISIBLE_DEVICES", "0")
+# Kaggle's `NvidiaTeslaT4` shape can expose two GPUs and may already set
+# CUDA_VISIBLE_DEVICES=0,1.  This kernel loads the 4-bit model on one device
+# (`device_map={"": 0}`); if Trainer sees a second GPU it wraps the model in DataParallel and the
+# replica on GPU 1 fails against parameters on GPU 0.  Force one device before torch is imported:
+# `setdefault` would preserve the host's two-GPU value.  ARCHRES_SFT_CUDA may name one GPU id.
+os.environ["CUDA_VISIBLE_DEVICES"] = os.environ.get("ARCHRES_SFT_CUDA", "0").strip() or "0"
 
 SMOKE = os.environ.get("ARCHRES_SFT_SMOKE") == "1"
 SKIP_GGUF = os.environ.get("ARCHRES_SFT_SKIP_GGUF") == "1"
@@ -63,6 +65,15 @@ PIP = [
 
 def log(message: str) -> None:
     print(f"[{time.strftime('%H:%M:%S')}] {message}", flush=True)
+
+
+def assert_single_gpu(visible: int) -> None:
+    """Refuse to build a Trainer that would wrap the 4-bit model in DataParallel."""
+    if visible != 1:
+        raise SystemExit(
+            f"expected exactly one visible GPU, found {visible}; "
+            "set ARCHRES_SFT_CUDA to one device id"
+        )
 
 
 def install() -> None:
@@ -285,7 +296,9 @@ def train(records: list[dict], tokenizer) -> tuple[object, dict]:
 
     if not torch.cuda.is_available():
         raise SystemExit("no GPU: Kaggle kernel must run with a GPU accelerator")
-    log(f"gpu: {torch.cuda.get_device_name(0)}")
+    visible_gpus = torch.cuda.device_count()
+    assert_single_gpu(visible_gpus)
+    log(f"gpu: {torch.cuda.get_device_name(0)} (visible={visible_gpus})")
     torch.manual_seed(SEED)
 
     quantization = BitsAndBytesConfig(

@@ -177,8 +177,9 @@ CPU kernel `tools/training/kaggle/chat-preflight/` verifies the mount without sp
   `CausalLMCollator` now pads ids/labels/attention together and asserts per-record id/label
   alignment (`3a9cb2f`, five kernel tests). v2 then exposed Kaggle's two T4 GPUs: Trainer wrapped
   the single-device `device_map={"": 0}` model in `DataParallel` and the second replica failed;
-  the kernel pins `CUDA_VISIBLE_DEVICES=0` before importing torch (`9e6a209`). v3 is running; no
-  result is claimed until it completes.
+  the kernel pins `CUDA_VISIBLE_DEVICES=0` before importing torch (`9e6a209`). A follow-up forces
+  the value even when Kaggle pre-sets `0,1` and refuses a multi-GPU Trainer (three new kernel
+  tests). v3 is running; no result is claimed until it completes.
 
 ## Units
 
