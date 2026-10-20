@@ -32,7 +32,6 @@ import tempfile
 from archres_core.stdio import utf8_stdio
 from archres_core.training import (
     VerifyContext,
-    build_chat_dataset,
     load_flow_book,
     load_jsonl,
     sha256_file,
@@ -43,10 +42,7 @@ from archres_core.training.generators import question_dict
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 FLOW_BOOK = ROOT / "spec" / "flows" / "phase-flow-book.yaml"
-PACK = ROOT / "spec" / "rules" / "rajuk-2008.yaml"
-EXAMPLES = ROOT / "spec" / "examples"
 SFT_SCHEMA = ROOT / "spec" / "schemas" / "sft-record.schema.json"
-SPEC_SCHEMA = ROOT / "spec" / "schemas" / "building-spec.schema.json"
 SFT_TRAIN = ROOT / "data" / "training" / "sft-v0" / "train.jsonl"
 CANDIDATES = ROOT / "data" / "training" / "teacher-candidates" / "candidates.jsonl"
 CANDIDATE_MANIFEST = ROOT / "data" / "training" / "teacher-candidates" / "manifest.json"
@@ -167,13 +163,6 @@ def _build(
     out: pathlib.Path,
 ) -> dict:
     schema = json.loads(SFT_SCHEMA.read_text(encoding="utf-8"))
-    dataset = build_chat_dataset(
-        flow_book_path=FLOW_BOOK,
-        pack_path=PACK,
-        examples_dir=EXAMPLES,
-        sft_schema_path=SFT_SCHEMA,
-        building_spec_schema_path=SPEC_SCHEMA,
-    )
     questions = {question.id: question_dict(question) for question in load_flow_book(FLOW_BOOK)}
     context = VerifyContext(questions=questions)
     train_ids = {record["id"] for record in load_jsonl(SFT_TRAIN)}
