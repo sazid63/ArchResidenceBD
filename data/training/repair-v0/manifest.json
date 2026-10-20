@@ -38,7 +38,7 @@
   "pins": {
     "caseFile": {
       "path": "tools/cad/cases/foundation.json",
-      "sha256": "9fb9f6b620d1d25e39d3efc44409252535da16206dd9852c697eeb7ca9ca0ea6"
+      "sha256": "4079b187ff6d05ce8f933f3324b666c01e523a919a5ce318c14feb39ff15c180"
     },
     "schema": {
       "path": "spec/schemas/sft-record.schema.json",

@@ -19,15 +19,19 @@ A case is a claim that survives being executed:
 ```
 
 Every field is exact: an unknown key is a load error, never a silently ignored typo. A case
-that cannot say what it expects is a case that cannot verify anything, so ``expect`` must
-demand at least one of ``status``, ``documentObjects``, ``totals``, ``objects`` or
-``artifacts``.
+that cannot say what it expects is a case that cannot verify anything, so an ``ok`` case must
+demand at least one of ``documentObjects``, ``totals``, ``objects`` or ``artifacts``, and an
+``error`` case must name the exception type it expects in ``errorType`` (optionally with an
+``errorContains`` message fragment). A broken-candidate case that only says ``status: error``
+would pass on the wrong exception, so it is refused.
 """
 
 from __future__ import annotations
 
 import json
+import math
 import pathlib
+import re
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -44,7 +48,16 @@ __all__ = [
 DEFAULT_TIMEOUT_MS = 120_000
 
 CASE_KEYS = {"id", "kind", "script", "params", "expect", "determinism", "timeoutMs", "notes"}
-EXPECT_KEYS = {"status", "documentObjects", "totals", "objects", "artifacts"}
+EXPECT_KEYS = {
+    "status",
+    "documentObjects",
+    "totals",
+    "objects",
+    "artifacts",
+    "errorType",
+    "errorContains",
+}
+CASE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 
 
 class CadError(ValueError):
@@ -71,9 +84,20 @@ class Bounds:
         return f"{self.min:g}..{self.max:g}"
 
 
+def _number(raw: Any, where: str) -> float:
+    """One real number. Booleans are not numbers here, and NaN can never be an expectation."""
+    if isinstance(raw, bool) or not isinstance(raw, (int, float)):
+        raise CadError(f"{where}: expected a number, got {type(raw).__name__}")
+    value = float(raw)
+    if math.isnan(value):
+        raise CadError(f"{where}: expected a real number, got NaN")
+    return value
+
+
 def _bounds(raw: Any, where: str) -> Bounds:
-    if isinstance(raw, bool) or isinstance(raw, (int, float)):
-        return Bounds(float(raw), float(raw))
+    if isinstance(raw, (int, float)) and not isinstance(raw, bool):
+        value = _number(raw, where)
+        return Bounds(value, value)
     if isinstance(raw, dict):
         extra = set(raw) - {"min", "max", "value"}
         if extra:
@@ -86,9 +110,11 @@ def _bounds(raw: Any, where: str) -> Bounds:
             raise CadError(f"{where}: bounds need min/max or value")
         if low is None or high is None:
             raise CadError(f"{where}: bounds need both min and max")
-        if float(low) > float(high):
+        low_value = _number(low, f"{where}.min")
+        high_value = _number(high, f"{where}.max")
+        if low_value > high_value:
             raise CadError(f"{where}: min {low} is above max {high}")
-        return Bounds(float(low), float(high))
+        return Bounds(low_value, high_value)
     raise CadError(f"{where}: expected a number or {{min, max}}, got {type(raw).__name__}")
 
 
@@ -146,6 +172,19 @@ def _objects(raw: Any, where: str) -> tuple[ObjectExpectation, ...]:
             if not isinstance(bbox, list) or len(bbox) != 3:
                 raise CadError(f"{spot}.bboxMm: expected three bounds")
             bbox_bounds = tuple(_bounds(item, f"{spot}.bboxMm") for item in bbox)  # type: ignore[assignment]
+        solids = None
+        if "solids" in entry:
+            raw_solids = entry["solids"]
+            if isinstance(raw_solids, bool) or not isinstance(raw_solids, int):
+                raise CadError(f"{spot}.solids: expected a whole number, got {type(raw_solids).__name__}")
+            if raw_solids < 0:
+                raise CadError(f"{spot}.solids: expected a count >= 0, got {raw_solids}")
+            solids = raw_solids
+        valid = None
+        if "valid" in entry:
+            if not isinstance(entry["valid"], bool):
+                raise CadError(f"{spot}.valid: expected true or false, got {type(entry['valid']).__name__}")
+            valid = entry["valid"]
         out.append(
             ObjectExpectation(
                 name=name,
@@ -153,8 +192,8 @@ def _objects(raw: Any, where: str) -> tuple[ObjectExpectation, ...]:
                 if "volumeM3" in entry
                 else None,
                 bbox_mm=bbox_bounds,
-                solids=int(entry["solids"]) if "solids" in entry else None,
-                valid=bool(entry["valid"]) if "valid" in entry else None,
+                solids=solids,
+                valid=valid,
             )
         )
     return tuple(out)
@@ -177,12 +216,30 @@ def _artifacts(raw: Any, where: str) -> tuple[ArtifactExpectation, ...]:
         name = entry.get("name")
         if not isinstance(name, str) or not name:
             raise CadError(f"{spot}: 'name' is required")
+        kind = entry.get("kind")
+        if kind is not None and (not isinstance(kind, str) or not kind):
+            raise CadError(f"{spot}.kind: expected a non-empty string")
+        min_bytes = None
+        if "minBytes" in entry:
+            raw_bytes = entry["minBytes"]
+            if isinstance(raw_bytes, bool) or not isinstance(raw_bytes, int) or raw_bytes < 0:
+                raise CadError(f"{spot}.minBytes: expected a whole number >= 0")
+            min_bytes = raw_bytes
+        sha256 = entry.get("sha256")
+        if sha256 is not None:
+            if (
+                not isinstance(sha256, str)
+                or len(sha256) != 64
+                or any(char not in "0123456789abcdef" for char in sha256.lower())
+            ):
+                raise CadError(f"{spot}.sha256: expected 64 hex characters")
+            sha256 = sha256.lower()  # artifact hashes are lowercase; compare like with like
         out.append(
             ArtifactExpectation(
                 name=name,
-                kind=entry.get("kind"),
-                min_bytes=int(entry["minBytes"]) if "minBytes" in entry else None,
-                sha256=entry.get("sha256"),
+                kind=kind,
+                min_bytes=min_bytes,
+                sha256=sha256,
             )
         )
     return tuple(out)
@@ -190,10 +247,9 @@ def _artifacts(raw: Any, where: str) -> tuple[ArtifactExpectation, ...]:
 
 def _count_bounds(raw: Any, where: str) -> Bounds:
     """A count may be exact, or at-least / at-most: `{min: 1}` is a real expectation."""
-    if isinstance(raw, bool):
-        raise CadError(f"{where}: expected a count or bounds, got a boolean")
-    if isinstance(raw, (int, float)):
-        return Bounds(float(raw), float(raw))
+    if isinstance(raw, (int, float)) and not isinstance(raw, bool):
+        value = _number(raw, where)
+        return Bounds(value, value)
     if isinstance(raw, dict):
         extra = set(raw) - {"min", "max"}
         if extra:
@@ -202,8 +258,8 @@ def _count_bounds(raw: Any, where: str) -> Bounds:
         high = raw.get("max")
         if low is None and high is None:
             raise CadError(f"{where}: bounds need min and/or max")
-        low_value = 0.0 if low is None else float(low)
-        high_value = float("inf") if high is None else float(high)
+        low_value = 0.0 if low is None else _number(low, f"{where}.min")
+        high_value = float("inf") if high is None else _number(high, f"{where}.max")
         if low_value > high_value:
             raise CadError(f"{where}: min {low_value} is above max {high_value}")
         return Bounds(low_value, high_value)
@@ -218,9 +274,17 @@ def _case(raw: dict[str, Any], root: pathlib.Path, where: str) -> CadCase:
         if required not in raw:
             raise CadError(f"{where}: missing '{required}'")
     case_id = raw["id"]
-    if not isinstance(case_id, str) or not case_id:
-        raise CadError(f"{where}: 'id' must be a non-empty string")
-    script = pathlib.Path(raw["script"])
+    if not isinstance(case_id, str) or not CASE_ID.match(case_id):
+        raise CadError(
+            f"{where}: 'id' must be a safe path segment (letters, digits, '.', '_' or '-')"
+        )
+    kind = raw["kind"]
+    if not isinstance(kind, str) or not kind:
+        raise CadError(f"{where}: 'kind' must be a non-empty string")
+    script_raw = raw["script"]
+    if not isinstance(script_raw, str) or not script_raw:
+        raise CadError(f"{where}: 'script' must be a non-empty string")
+    script = pathlib.Path(script_raw)
     if not script.is_absolute():
         script = root / script
     if not isinstance(raw["params"], dict):
@@ -236,24 +300,53 @@ def _case(raw: dict[str, Any], root: pathlib.Path, where: str) -> CadCase:
             f"{where}: 'expect' must demand something "
             f"(one of {sorted(EXPECT_KEYS)})"
         )
-    totals = expect.get("totals") or {}
-    if not isinstance(totals, dict):
-        raise CadError(f"{where}: expect.totals must be a mapping")
-    unknown_totals = set(totals) - {"volumeM3", "objects", "solids"}
-    if unknown_totals:
-        raise CadError(f"{where}: unknown expect.totals key(s) {sorted(unknown_totals)}")
     status = expect.get("status", "ok")
     if status not in ("ok", "error"):
         raise CadError(f"{where}: expect.status must be 'ok' or 'error'")
+    measurements = {"documentObjects", "totals", "objects", "artifacts"}
+    error_type = expect.get("errorType")
+    error_contains = expect.get("errorContains")
+    if status == "ok":
+        if error_type is not None or error_contains is not None:
+            raise CadError(f"{where}: errorType/errorContains are only valid with status 'error'")
+        if not (set(expect) & measurements):
+            raise CadError(
+                f"{where}: an 'ok' case must demand at least one of "
+                f"{sorted(measurements)}, not just a status"
+            )
+    else:
+        if set(expect) & measurements:
+            raise CadError(
+                f"{where}: an 'error' case cannot demand {sorted(set(expect) & measurements)}; "
+                "a failed run has no trustworthy geometry"
+            )
+        if not isinstance(error_type, str) or not error_type:
+            raise CadError(f"{where}: an 'error' case must name the expected 'errorType'")
+        if error_contains is not None and (not isinstance(error_contains, str) or not error_contains):
+            raise CadError(f"{where}: expect.errorContains must be a non-empty string")
+    raw_totals = expect.get("totals", {})
+    if not isinstance(raw_totals, dict):
+        raise CadError(f"{where}: expect.totals must be a mapping")
+    totals = raw_totals
+    unknown_totals = set(totals) - {"volumeM3", "objects", "solids"}
+    if unknown_totals:
+        raise CadError(f"{where}: unknown expect.totals key(s) {sorted(unknown_totals)}")
     document_objects = expect.get("documentObjects")
-    if document_objects is not None and not isinstance(document_objects, (dict, int)):
-        raise CadError(f"{where}: expect.documentObjects must be a count or bounds")
-    timeout = int(raw.get("timeoutMs", DEFAULT_TIMEOUT_MS))
+    timeout_raw = raw.get("timeoutMs", DEFAULT_TIMEOUT_MS)
+    if isinstance(timeout_raw, bool) or not isinstance(timeout_raw, int):
+        raise CadError(f"{where}: timeoutMs must be a whole number of milliseconds")
+    timeout = timeout_raw
     if timeout < 1000:
         raise CadError(f"{where}: timeoutMs must be at least 1000")
+    determinism = raw.get("determinism", True)
+    if not isinstance(determinism, bool):
+        raise CadError(f"{where}: 'determinism' must be true or false")
+    notes = raw.get("notes", "")
+    if not isinstance(notes, str):
+        raise CadError(f"{where}: 'notes' must be a string")
     return CadCase(
         id=case_id,
-        kind=str(raw["kind"]),
+        kind=kind,
         script=script,
         params=dict(raw["params"]),
         expect={
@@ -267,10 +360,12 @@ def _case(raw: dict[str, Any], root: pathlib.Path, where: str) -> CadCase:
             "artifacts": _artifacts(expect["artifacts"], f"{where}.artifacts")
             if "artifacts" in expect
             else (),
+            "errorType": error_type,
+            "errorContains": error_contains,
         },
-        determinism=bool(raw.get("determinism", True)),
+        determinism=determinism,
         timeout_ms=timeout,
-        notes=str(raw.get("notes", "")),
+        notes=notes,
         objects=_objects(expect["objects"], f"{where}.objects") if "objects" in expect else (),
     )
 

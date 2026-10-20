@@ -87,8 +87,13 @@ A case file is JSON or YAML: a list of objects. Committed example:
 
 `expect` accepts:
 
-- `status` — `"ok"` (default) or `"error"`. An `"error"` case is scored as passed when the
-  candidate failed in the engine; it is how the harness proves it captures failures.
+- `status` — `"ok"` (default) or `"error"`. An `"error"` case is how the harness proves it
+  captures failures; it must also name `errorType`, and may name `errorContains`. An error case
+  cannot also demand geometry (a failed run has no trustworthy geometry), and a case that only
+  says `status: "error"` is a load error: it would pass on the wrong exception.
+- `errorType` — the exception class the candidate must raise, e.g. `"RuntimeError"` (required
+  when `status` is `"error"`).
+- `errorContains` — a message fragment the raised exception must contain (optional).
 - `documentObjects` — an exact count, or `{min}` / `{max}` / `{min, max}`. Counts are exact:
   an interval is the author saying "at least this many".
 - `totals` — `objects`, `solids`, `volumeM3` as bounds. `volumeM3` compares with a relative
@@ -99,12 +104,34 @@ A case file is JSON or YAML: a list of objects. Committed example:
 - `artifacts[]` — a bare name or `{name, kind, minBytes, sha256}`. A declared artifact that is
   not produced is a failure; a produced artifact is hashed from bytes.
 
-If `expect.documentObjects` is present and the document exposes **no measurable shape**, that is
-an explicit failure (`objects.measured`) even if the count looks acceptable: an object with no
-`Shape` is not evidence.
+If `expect.documentObjects` is present, expects at least one object, and the document exposes
+**no measurable shape**, that is an explicit failure (`objects.measured`) even if the count
+looks acceptable: an object with no `Shape` is not evidence. A case that explicitly expects an
+empty document (`{max: 0}`) is not forced to invent a shape.
 
-Bounds are validated at load time: `min > max`, an unknown key, a boolean where a number
-belongs, or an empty `expect` are all load errors, not runtime surprises.
+Bounds and flags are validated at load time: `min > max`, an unknown key, a boolean where a
+number belongs, `NaN`, a non-boolean `valid`/`determinism`, a boolean `solids` count, a
+non-hex `sha256`, an unsafe case id (it becomes a workdir path segment), or an empty `expect`
+are all load errors, not runtime surprises.
+
+### Audit hardening (2026-10-20)
+
+A post-closure audit of the harness found and fixed three real defects:
+
+1. **The expected-error case was a false pass.** `foundation.broken.missing-column` only said
+   `status: "error"`, so any exception passed it. Worse, the fixture called an undefined
+   `_params()` and was failing with `NameError` at line 24, not the documented missing column.
+   Error cases now require `errorType` (and may require `errorContains`), and the fixture fails
+   for the documented reason. The new live probe below is the first run that actually proves it.
+2. **A timeout discarded the engine's last words.** `_kill_tree()` consumed `communicate()` and
+   the caller's second `communicate()` returned empty streams. The kill now returns the captured
+   stdout/stderr, so a `timeout` verdict carries the engine's tail instead of nothing.
+3. **A reused workdir could pass stale artifacts off as this run's output.** `result.json` was
+   deleted before a run, but `out/` was not; it is now cleared too. A reused directory is still
+   the caller's evidence for the run that just happened.
+
+The case contract also no longer silently coerces booleans into numbers or accepts a status-only
+case. The offline tests and the live probe were re-run after these fixes.
 
 ## Measurement contract
 
@@ -144,15 +171,20 @@ when `ARCHRES_CANDIDATE` is set, and runs the candidate with
 - `code` — `None` for a clean run, else `timeout`, `no_result` or the candidate's `errorCode`
   (today always `engine_error` from the launcher);
 - `failures[]` — each row names the check (`totals.volumeM3`, `objects[Pad_1].volumeM3`,
-  `artifacts[summary.json]`, …), a human message with the actual and expected numbers, and the
-  values themselves;
+  `artifacts[summary.json]`, `errorType`, …), a human message with the actual and expected
+  values, and the values themselves;
 - `trace` — the engine's traceback when there is one, else its stderr tail (exported in the JSON
-  report, not part of the determinism signature);
+  report, not part of the determinism signature); a timeout keeps the tail captured at the kill;
 - `totals`, `artifactHashes`, `engineVersion`, `durationMs`.
 
 A failed run cannot satisfy geometry expectations: when `status` is unexpected the verdict
 returns the status row (with the trace) and stops, rather than emitting four secondary failures
 about numbers that were never measured.
+
+An expected failure is scored separately: the run must carry the case's `errorType`, and its
+`message` must contain `errorContains` when the case gives one. A `RuntimeError` with the wrong
+message is still a failure, and a `NameError` produced by a broken fixture is not a pass. This
+check runs before any geometry row.
 
 ## Determinism
 
@@ -204,7 +236,8 @@ about.
 
 `--workdir` keeps the tree for inspection. Without it, a scratch tree is created under the OS
 temp directory; a failing run's tree is the evidence a repair step trains on, so it is not
-deleted either.
+deleted either. Before each run in a reused directory, `result.json` and the whole `out/` tree
+are removed: a previous run's result or artifact is never evidence for this run.
 
 ## Live probe (recorded, not stubbed)
 
@@ -221,21 +254,26 @@ uv run --directory core python ../tools/cad/verify.py --run \
 
 | Case | Verdict | Measured | Runs (ms) |
 | --- | --- | --- | --- |
-| `foundation.pads.1x1` | PASS | 1 object, 1 solid, 0.675 m³ | 437, 344 |
-| `foundation.pads.6x3` | PASS | 6 objects, 6 solids, 6.966 m³ | 438, 437 |
-| `foundation.broken.missing-column` | PASS (expected error) | `engine_error`, 0 objects | 172 |
+| `foundation.pads.1x1` | PASS | 1 object, 1 solid, 0.675 m³ | 391, 609 |
+| `foundation.pads.6x3` | PASS | 6 objects, 6 solids, 6.966 m³ | 469, 625 |
+| `foundation.broken.missing-column` | PASS (expected error) | `RuntimeError`, 0 objects | 422 |
 
 Overall: **3/3, accuracy 1.0**, engine version `1.1.4`, both determinism pairs identical
 (verdicts and artifact trees). Artifact hashes:
 `foundation-summary.json` = `6d03cdaeb5a8f6f69e4f7f869a92b47ca52a61013de0a2c5e126d103168c7357`
 (1 pad) and `4c9255e7effe89b7a46a68fdad787a7a9b876306e302d17ea2f46ba64a16b0f0` (6 pads).
 
-The broken candidate's recorded trace (excerpt, as exported in the JSON report):
+This is the **corrected** probe. The earlier 3/3 was a false pass: the broken case accepted any
+exception, and the fixture was raising `NameError: name '_params' is not defined` at line 24.
+The error-expectation hardening above turned that into a red run, the fixture was repaired, and
+the case now passes only on the documented failure. The recorded trace (excerpt):
 
 ```
-File "...\tools\cad\candidates\broken_generator.py", line 24, in main
-    params = _params()
-NameError: name '_params' is not defined
+File "...\tools\cad\candidates\broken_generator.py", line 38, in <module>
+    main()
+File "...\tools\cad\candidates\broken_generator.py", line 31, in main
+    raise RuntimeError(
+RuntimeError: Column_1 is missing: the foundation needs a column on every pad
 ```
 
 That trace is the W1.7 input: type, message, source file and line, and the case that caught it.
@@ -257,9 +295,11 @@ That trace is the W1.7 input: type, message, source file and line, and the case 
 ## Gates and CI
 
 - `pytest core/tests/test_cad_{cases,runner,verify}.py` — the engine-free contract: case
-  validation, discovery, deadline/kill, stale-result protection, verdict evidence, determinism
-  pairs (fake launcher, real process plumbing), the offline layer on the committed cases, and a
-  cp1252 console run of `--check`.
+  validation (including the error-type requirement and boolean/NaN rejection), discovery,
+  deadline/kill with the timeout's stderr retained, stale-result **and stale-artifact**
+  protection, expected-error type/message matching, verdict evidence, determinism pairs (fake
+  launcher, real process plumbing), the offline layer on the committed cases, and a cp1252
+  console run of `--check`.
 - Every push: `core-tests` runs `tools/cad/verify.py --check` — case freshness without an engine.
 - Weekly + manual (`cad-execution` job): install FreeCAD 1.1.3 from conda-forge, run `--run`
   against the committed cases, then replay the repair corpus (`--check --engine`). It is not on

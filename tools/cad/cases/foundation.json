@@ -76,10 +76,12 @@
       "columnsPerPad": 3
     },
     "expect": {
-      "status": "error"
+      "status": "error",
+      "errorType": "RuntimeError",
+      "errorContains": "Column_1 is missing"
     },
     "determinism": false,
     "timeoutMs": 120000,
-    "notes": "Candidate raises mid-build; harness must capture the traceback and report engine_error."
+    "notes": "Candidate raises RuntimeError mid-build; the verdict must name that type and message, not merely any failure."
   }
 ]

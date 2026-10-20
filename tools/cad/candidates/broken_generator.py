@@ -21,7 +21,6 @@ def main() -> None:
     document = App.ActiveDocument
     if document is None:
         raise RuntimeError("no active document: the launcher always creates one")
-    params = _params()
     pad = Part.makeBox(1200.0, 1200.0, 300.0, App.Vector(0.0, 0.0, -300.0))
     obj = document.addObject("Part::Feature", "Pad_Root")
     obj.Shape = pad
@@ -30,8 +29,7 @@ def main() -> None:
     column = document.getObject("Column_1")
     if column is None:
         raise RuntimeError(
-            "Column_1 is missing: the foundation needs a column on every pad "
-            f"(params: {params})"
+            "Column_1 is missing: the foundation needs a column on every pad"
         )
     obj.Shape = obj.Shape.fuse(column.Shape)
 

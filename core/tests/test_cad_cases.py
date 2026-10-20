@@ -51,6 +51,8 @@ def test_the_committed_case_file_loads() -> None:
     assert first.objects[0].volume_m3 is not None
     assert first.objects[0].volume_m3.holds(0.675)
     assert cases[2].expect["status"] == "error"
+    assert cases[2].expect["errorType"] == "RuntimeError"
+    assert cases[2].expect["errorContains"] == "Column_1 is missing"
     assert cases[2].determinism is False
 
 
@@ -69,6 +71,90 @@ def test_a_bare_number_is_exact(tmp_path: pathlib.Path) -> None:
 def test_an_empty_expectation_is_a_load_error(tmp_path: pathlib.Path) -> None:
     with pytest.raises(CadError, match="must demand something"):
         load_cases(_write(tmp_path, [_case(expect={})]), root=ROOT)
+
+
+def test_a_status_only_ok_case_is_refused(tmp_path: pathlib.Path) -> None:
+    with pytest.raises(CadError, match="not just a status"):
+        load_cases(_write(tmp_path, [_case(expect={"status": "ok"})]), root=ROOT)
+
+
+def test_an_expected_error_must_name_its_type(tmp_path: pathlib.Path) -> None:
+    with pytest.raises(CadError, match="errorType"):
+        load_cases(_write(tmp_path, [_case(expect={"status": "error"})]), root=ROOT)
+
+
+def test_an_expected_error_cannot_demand_geometry(tmp_path: pathlib.Path) -> None:
+    with pytest.raises(CadError, match="cannot demand"):
+        load_cases(
+            _write(
+                tmp_path,
+                [
+                    _case(
+                        expect={
+                            "status": "error",
+                            "errorType": "RuntimeError",
+                            "totals": {"volumeM3": 1},
+                        }
+                    )
+                ],
+            ),
+            root=ROOT,
+        )
+
+
+def test_a_boolean_is_not_a_number(tmp_path: pathlib.Path) -> None:
+    with pytest.raises(CadError, match="expected a number"):
+        load_cases(
+            _write(
+                tmp_path,
+                [_case(expect={"status": "ok", "totals": {"volumeM3": True}})],
+            ),
+            root=ROOT,
+        )
+
+
+def test_a_boolean_solids_count_is_refused(tmp_path: pathlib.Path) -> None:
+    with pytest.raises(CadError, match="whole number"):
+        load_cases(
+            _write(
+                tmp_path,
+                [
+                    _case(
+                        expect={
+                            "status": "ok",
+                            "objects": [{"name": "Pad_1", "solids": True}],
+                        }
+                    )
+                ],
+            ),
+            root=ROOT,
+        )
+
+
+def test_an_unsafe_case_id_is_refused(tmp_path: pathlib.Path) -> None:
+    with pytest.raises(CadError, match="safe path segment"):
+        load_cases(_write(tmp_path, [_case(id="../escape")]), root=ROOT)
+
+
+def test_an_artifact_hash_is_normalized(tmp_path: pathlib.Path) -> None:
+    path = _write(
+        tmp_path,
+        [
+            _case(
+                expect={
+                    "status": "ok",
+                    "artifacts": [{"name": "summary.json", "sha256": "A" * 64}],
+                }
+            )
+        ],
+    )
+    (case,) = load_cases(path, root=ROOT)
+    assert case.expect["artifacts"][0].sha256 == "a" * 64
+
+
+def test_determinism_must_be_boolean(tmp_path: pathlib.Path) -> None:
+    with pytest.raises(CadError, match="true or false"):
+        load_cases(_write(tmp_path, [_case(determinism="false")]), root=ROOT)
 
 
 def test_an_unknown_key_is_a_load_error(tmp_path: pathlib.Path) -> None:

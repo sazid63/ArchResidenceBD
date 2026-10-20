@@ -15,6 +15,7 @@ from __future__ import annotations
 import json
 import os
 import pathlib
+import shutil
 import subprocess
 import sys
 import time
@@ -58,23 +59,27 @@ class RunOutcome:
         return self.stderr
 
 
-def _kill_tree(process: subprocess.Popen) -> None:
-    """Kill the engine and any child it spawned; a hung engine must not outlive the run."""
-    if process.poll() is not None:
-        return
-    if sys.platform == "win32":
-        # freecadcmd spawns no children for our jobs, but /T makes that a guarantee.
-        subprocess.run(
-            ["taskkill", "/F", "/T", "/PID", str(process.pid)],
-            capture_output=True,
-            check=False,
-        )
-    else:
-        process.kill()
+def _kill_tree(process: subprocess.Popen) -> tuple[str, str]:
+    """Kill the engine and any child it spawned; return whatever it wrote before dying.
+
+    The output must be captured here: ``communicate`` can only be consumed once, and a
+    timeout is exactly the case where the engine's last words are the only diagnosis.
+    """
+    if process.poll() is None:
+        if sys.platform == "win32":
+            # freecadcmd spawns no children for our jobs, but /T makes that a guarantee.
+            subprocess.run(
+                ["taskkill", "/F", "/T", "/PID", str(process.pid)],
+                capture_output=True,
+                check=False,
+            )
+        else:
+            process.kill()
     try:
-        process.communicate(timeout=KILL_SLACK_S)
+        return process.communicate(timeout=KILL_SLACK_S)
     except subprocess.TimeoutExpired:  # pragma: no cover - a truly wedged process
         process.kill()
+        return process.communicate()
 
 
 def run_candidate(
@@ -96,6 +101,8 @@ def run_candidate(
     directory = pathlib.Path(workdir)
     directory.mkdir(parents=True, exist_ok=True)
     out_dir = directory / "out"
+    if out_dir.exists():  # a reused directory must not hand us stale artifacts
+        shutil.rmtree(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     result_path = directory / "result.json"
     if result_path.exists():  # a reused directory must not hand us a stale result
@@ -135,8 +142,7 @@ def run_candidate(
         stdout, stderr = process.communicate(timeout=max(timeout_ms, 1) / 1000.0)
     except subprocess.TimeoutExpired:
         timed_out = True
-        _kill_tree(process)
-        stdout, stderr = process.communicate()
+        stdout, stderr = _kill_tree(process)
     duration_ms = round((time.monotonic() - started) * 1000.0, 3)
 
     result: dict[str, Any] | None = None

@@ -137,7 +137,9 @@ def _check_document_objects(
             )
         )
     measured = [item for item in (result.get("objects") or []) if isinstance(item, dict)]
-    if not measured:
+    # A case may legitimately expect an empty document (`{max: 0}`); only a case that
+    # expects at least one object needs a measured Shape to exist.
+    if not measured and expected.max > 0:
         failures.append(
             Failure(
                 check="objects.measured",
@@ -339,6 +341,35 @@ def verify_result(case: CadCase, outcome: RunOutcome) -> CaseVerdict:
         )
         # A failed run cannot satisfy geometry expectations; the status row is the evidence.
         verdict.code = str(result.get("errorCode") or outcome.code or "engine_error")
+        return verdict
+
+    if expected_status == "error":
+        # An expected failure is only a pass when it is *the* failure the case names: a
+        # RuntimeError with the right explanation, not just any exception.
+        expected_type = case.expect.get("errorType")
+        actual_type = result.get("errorType")
+        if actual_type != expected_type:
+            verdict.failures.append(
+                Failure(
+                    check="errorType",
+                    message=f"the run raised {actual_type!r}, expected {expected_type!r}",
+                    expected=expected_type,
+                    actual=actual_type,
+                )
+            )
+        needle = case.expect.get("errorContains")
+        actual_message = str(result.get("message") or "")
+        if needle and needle not in actual_message:
+            verdict.failures.append(
+                Failure(
+                    check="errorContains",
+                    message=f"the error message does not contain {needle!r}",
+                    expected=needle,
+                    actual=actual_message,
+                )
+            )
+        verdict.code = str(result.get("errorCode") or outcome.code or "engine_error")
+        verdict.ok = not verdict.failures
         return verdict
 
     verdict.totals = _check_totals(case, result, verdict.failures)

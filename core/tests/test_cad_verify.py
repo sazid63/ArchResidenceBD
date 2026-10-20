@@ -188,7 +188,7 @@ def test_an_expected_failure_must_actually_fail(tmp_path: pathlib.Path) -> None:
     (case,) = load_cases(
         _case_dir(
             tmp_path,
-            expect={"status": "error"},
+            expect={"status": "error", "errorType": "RuntimeError"},
             determinism=False,
         ),
         root=ROOT,
@@ -197,6 +197,82 @@ def test_an_expected_failure_must_actually_fail(tmp_path: pathlib.Path) -> None:
     assert verdict.ok is False
     assert verdict.failures[0].check == "status"
     assert "expected 'error'" in verdict.failures[0].message
+
+
+def _error_result(**overrides) -> dict:
+    result = _result(
+        status="error",
+        errorCode="engine_error",
+        errorType="RuntimeError",
+        message="Column_1 is missing: the foundation needs a column",
+    )
+    result.update(overrides)
+    return result
+
+
+def test_an_expected_error_must_be_the_named_error(tmp_path: pathlib.Path) -> None:
+    (case,) = load_cases(
+        _case_dir(
+            tmp_path,
+            expect={
+                "status": "error",
+                "errorType": "RuntimeError",
+                "errorContains": "Column_1 is missing",
+            },
+            determinism=False,
+        ),
+        root=ROOT,
+    )
+    verdict = verify_result(case, _outcome(tmp_path, _error_result()))
+    assert verdict.ok is True
+    assert verdict.code == "engine_error"
+
+
+def test_the_wrong_exception_type_does_not_pass_an_expected_error(tmp_path: pathlib.Path) -> None:
+    (case,) = load_cases(
+        _case_dir(
+            tmp_path,
+            expect={"status": "error", "errorType": "RuntimeError"},
+            determinism=False,
+        ),
+        root=ROOT,
+    )
+    verdict = verify_result(case, _outcome(tmp_path, _error_result(errorType="NameError")))
+    assert verdict.ok is False
+    assert [failure.check for failure in verdict.failures] == ["errorType"]
+
+
+def test_the_wrong_error_message_does_not_pass_an_expected_error(tmp_path: pathlib.Path) -> None:
+    (case,) = load_cases(
+        _case_dir(
+            tmp_path,
+            expect={
+                "status": "error",
+                "errorType": "RuntimeError",
+                "errorContains": "Column_1 is missing",
+            },
+            determinism=False,
+        ),
+        root=ROOT,
+    )
+    verdict = verify_result(
+        case, _outcome(tmp_path, _error_result(message="something else broke"))
+    )
+    assert verdict.ok is False
+    assert [failure.check for failure in verdict.failures] == ["errorContains"]
+
+
+def test_an_empty_document_can_be_expected(tmp_path: pathlib.Path) -> None:
+    (case,) = load_cases(
+        _case_dir(
+            tmp_path,
+            expect={"status": "ok", "documentObjects": {"max": 0}},
+        ),
+        root=ROOT,
+    )
+    verdict = verify_result(case, _outcome(tmp_path, _result(objects=[], documentObjects=[])))
+    assert verdict.ok is True
+    assert verdict.totals["objects"] == 0
 
 
 def test_a_failed_run_cannot_pass_geometry_expectations(tmp_path: pathlib.Path) -> None:

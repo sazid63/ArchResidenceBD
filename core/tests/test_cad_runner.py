@@ -23,10 +23,10 @@ import json, os, pathlib, time
 
 state = json.loads(pathlib.Path(os.environ["FAKE_STATE"]).read_text(encoding="utf-8"))
 mode = state.get("mode", "ok")
+if state.get("stderr"):
+    print(state["stderr"], file=__import__("sys").stderr, flush=True)
 if state.get("sleep"):
     time.sleep(state["sleep"])
-if state.get("stderr"):
-    print(state["stderr"], file=__import__("sys").stderr)
 if mode == "no-result":
     raise SystemExit(state.get("exit", 9))
 out = pathlib.Path(os.environ["ARCHRES_JOB_OUT"])
@@ -174,12 +174,16 @@ def test_a_missing_result_is_reported_with_its_stderr(
 def test_a_hung_engine_is_killed_and_reported(
     tmp_path: pathlib.Path, fake_launcher: pathlib.Path, monkeypatch
 ) -> None:
-    monkeypatch.setenv("FAKE_STATE", str(_state(tmp_path, {"result": _ok_result(), "sleep": 30})))
+    monkeypatch.setenv(
+        "FAKE_STATE",
+        str(_state(tmp_path, {"result": _ok_result(), "sleep": 30, "stderr": "still working"})),
+    )
     started = time.monotonic()
     outcome = _run(tmp_path, fake_launcher, timeout_ms=1_500)
     elapsed = time.monotonic() - started
     assert outcome.timed_out is True
     assert outcome.code == "timeout"
+    assert "still working" in outcome.stderr  # the last words survive the kill
     assert elapsed < 20  # killed, not waited out
 
 
@@ -195,3 +199,17 @@ def test_a_stale_result_in_a_reused_workdir_is_not_mistaken_for_this_run(
     outcome = _run(tmp_path, fake_launcher)
     assert outcome.code == "no_result"
     assert not stale.exists()
+
+
+def test_stale_artifacts_in_a_reused_workdir_are_cleared(
+    tmp_path: pathlib.Path, fake_launcher: pathlib.Path, monkeypatch
+) -> None:
+    out = tmp_path / "run" / "out"
+    out.mkdir(parents=True)
+    (out / "old.json").write_text("{}", encoding="utf-8")
+    monkeypatch.setenv(
+        "FAKE_STATE", str(_state(tmp_path, {"result": _ok_result()})),
+    )
+    outcome = _run(tmp_path, fake_launcher)
+    assert outcome.code is None
+    assert not (out / "old.json").exists()
