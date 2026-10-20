@@ -1,5 +1,12 @@
 """Teacher augmentation (W1.5) - natural-language variety as candidates, not facts.
 
+**Parked (2026-10-21, ADR-0024).** The plan's ~0.5M-token teacher target was retired: the
+teacher can only rephrase the questions it is given (111 unique paraphrases from 88 seed
+questions) and its one trained round tied the scripted model on the W1.9 gate. This harness
+stays as the record of that measurement; nothing runs it, and no fleet member uses its output.
+Re-entry needs a gate that can see the data, a corpus that is not one seed set, and an owner
+decision.
+
 The deterministic generators own every number, citation and label. The teacher is used
 only to rephrase the **interview question** in natural BN/EN; its output can never change
 a label or a fact. This is the plan's "scripts first, AI last-mile" rule applied to

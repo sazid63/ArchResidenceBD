@@ -68,6 +68,14 @@ Consequences of that measurement:
 - The shortfall decision stands on its own: 207,558 tokens against the 500,000 target, with the
   292,442-token gap declared in `sft-v1/manifest.json`.
 
+## Closed by ADR-0024 (2026-10-21)
+
+The owner chose to **retire** the plan's ~0.5M-token teacher target rather than keep working
+toward it: the teacher only rephrases the 88 seed questions, and its one trained round tied the
+scripted model on the W1.9 gate, so no amount of extra passes would have closed the gap or shown
+a benefit. The findings in this ADR stand as the record; the *target* is dropped, the tooling is
+parked, and the shortfall is no longer an open gap on the board.
+
 ## Consequences
 
 - The 8B pool is now an auditable reviewed subset rather than an unexamined candidate pile.

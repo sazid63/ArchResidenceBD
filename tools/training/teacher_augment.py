@@ -1,5 +1,10 @@
 """Teacher augmentation CLI (W1.5) - candidates only, never part of the scripted dataset.
 
+**Parked (2026-10-21, ADR-0024).** The plan's ~0.5M-token teacher target was retired after the
+measurement below: the teacher only rephrases the questions it is given, and its one trained
+round tied the scripted model. This CLI stays as the record of that run; it is not part of any
+build, release or fleet member.
+
 The teacher rephrases flow-book questions through an OpenAI-compatible endpoint
 (llama-server exposes one at /v1/chat/completions). Only ask records on the frozen
 **train** side are eligible; holdout questions are never paraphrased (ADR-0015). Every

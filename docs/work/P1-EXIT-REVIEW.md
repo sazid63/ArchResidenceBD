@@ -35,7 +35,7 @@ engine, advisor/override behavior; first evals."*
 | Deterministic suites | rule.vector 49/49, rag 18/18, scenario 2/2, register 3/3 — all 1.000 | `run_eval.py` |
 | Chat training data | 661 scripted + 61 reviewed teacher = 722 records in `sft-v1`; **207,558** tokens | `data/training/sft-v1/manifest.json` |
 | Teacher review | 111 decisions — **61 accepted / 50 rejected**, every rejection with a reason | `data/training/teacher-review/review.jsonl` |
-| Teacher target | **292,442 tokens short** of the 0.5M goal — declared, not hidden | `sft-v1/manifest.json` → `tokens.shortfall` |
+| Teacher target | **retired** on 2026-10-21 (was 292,442 tokens short of the 0.5M goal) | ADR-0024 · plan v1.6 §7 |
 | Repair corpus | 16 executed records (9 engine errors across 9 error types + 7 measured rejections across 8 checks); live replay byte-identical | `data/training/repair-v0/manifest.json` |
 | Repair round | 48 steps, loss 0.0024; **stock 3/4 & 3/4, fine-tune 3/4 & 3/4** — a tie → the member stayed stock | `data/eval/repair-v0/reports/` |
 | CAD harness | 3/3 cases, identical verdict signatures and artifact trees on re-run | `tools/cad/verify.py --run` |
@@ -55,13 +55,16 @@ not bit-reproducible across hardware, so the *recorded* set is the artefact CI s
 
 | Declared gap | Size | Where it is declared |
 |---|---|---|
-| Teacher training tokens | 292,442 of 500,000 | `sft-v1/manifest.json` → `tokens.shortfall` |
 | Questions the eval does not measure (no parse records) | 20 of 60 | `sft-v0/manifest.json` → `unmeasured` |
 | Rule-pack provisions the engine does not evaluate | 8 | pack manifest → `gaps` |
+| (Retired, not open: the ~0.5M-token teacher target — ADR-0024, 2026-10-21) | — | `docs/adr/0024-retire-the-teacher-target.md` |
 | References not ingested (BNBC core, RAJUK Appendix 5, other cities) | 3 | `spec/rag/rajuk-2008.manifest.json` → `missing` |
 | RAG coverage probes that return a neighbour instead of abstaining | 4 | every `run_eval.py` report |
 | Repair corpus breadth | 1 macro, 16 single-line mutations | ADR-0017 amendment |
 | `LawDesk` not wired into `Session` | 1 seam | `docs/spec/eval-harness-v0.md` |
+
+(Six open gaps plus one retired target; the teacher row is kept visible so the decision
+stays on the record.)
 
 **3. Content human-reviewed?** The rule pack, phase flow book, spec schema, CAD candidate and
 every source document are hand-authored and reviewed. Everything derived from execution is
@@ -76,8 +79,9 @@ fleet's chat model was trained on the scripted corpus only.
 tokens, +5.2 % of the corpus) moved `model.parse` from 43/60 to **42/60**: it fixed no case and
 broke one. The reason is structural, not accidental — the W1.9 suite measures *parse* answers,
 and ask-paraphrase variety is invisible to it. **There is no ask-phrasing gate**, so the
-teacher's value is unmeasurable today. That is the finding, and it is the reason a future
-teacher round must either add a gated ask suite or target parse/explain records.
+teacher's value is unmeasurable today. That is the finding, and it is why the owner **retired
+the target** (ADR-0024, 2026-10-21) instead of funding another round: the teacher is now a
+parked offline tool, and re-entry would need a gate that can see the data.
 
 **b. The repair round did not beat the stock base model.** The 12-record fine-tune repairs 3 of
 4 held-out mutations — exactly what the untouched Qwen2.5-Coder-3B-Instruct already does. Both
@@ -88,10 +92,11 @@ floor moved. The seam works; the corpus is the limiting factor.
 
 ## 5. Trades and decisions that belong to the owner (plan §9)
 
-1. **Teacher token shortfall — signed (path A, 2026-10-20).** 207,558 of 500,000 tokens. The
-   trade: less natural-language variety in exchange for a reviewed, honest dataset. Recorded in
-   ADR-0020. **Still open:** *how* to reach a larger corpus — prompt-style variants, longer
-   explain/parse records, or a new source. This is a P2/P4 decision, not a W1 decision.
+1. **Teacher token shortfall — closed (retired, 2026-10-21).** The owner chose to retire the
+   plan's ~0.5M-token target rather than keep working toward it: the teacher only rephrases the
+   88 seed questions, and its one trained round tied the scripted model, so no extra passes
+   would have closed the gap or shown a benefit. The teacher is a **parked offline tool**; the
+   scripted corpus is the training data; the shortfall is no longer an open gap (ADR-0024).
 2. **No trained repair model ships.** Nothing degrades (the stock member stays), but the plan's
    "Repair training pipeline end-to-end" is met as a *pipeline*, not as a shipped model. The
    next step is a corpus of several macros with a holdout of whole scripts — a new reviewed

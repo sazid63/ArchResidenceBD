@@ -10,6 +10,7 @@
 - v1.4 — owner-approved improvements folded in (Appendix A1); fleet roster fixed — no new model members; v1.5 bench approved
 - v1.5 — one-app **NativeCAD** integration (branded, embedded, invisible engine); left navigation + Project Setup + Source Registry; BOQ cost types (labour / machinery / subcontract) + machinery rate cards; Claude-style soft theme with the **no-sharp-edges** corner policy; Work Breakdown added (Appendix C) *(this document)*
 - v1.5.1 — branding/attribution policy: required licensing notices confined to the app's **Licences** screen; engine name kept out of branding, UI copy and generated documents (ADR-0004). No functional change.
+- v1.6 — owner-approved: the **~0.5M-token teacher target is retired** (§7). The teacher produced 111 unique paraphrases from 88 seed questions and its one trained round tied the scripted model on the W1.9 gate; it stays a parked offline tool, never a fleet member. Scripted generation remains the training data (ADR-0024). No other section changes.
 
 ---
 
@@ -124,7 +125,7 @@ Fleet of specialists — separate models, each with the right base and its own n
 
 ## 7. Training Plan ($0)
 
-- **Data:** scripted generation for structure (all BNBC/RAJUK numbers, geometry, templates) + teacher model for natural-language variety (~0.5M tokens target). Local teacher: Qwen3-8B Q4 on owner's PC (~5 GB, fits 6 GB, overnight). Golden batches: Qwen3-30B-A3B-Instruct-2507 on **Kaggle free tier** (30 GPU-hrs/week, 2×T4) + Colab backup.
+- **Data:** scripted generation for structure (all BNBC/RAJUK numbers, geometry, templates) + teacher model for natural-language variety. *(The ~0.5M-token teacher target is **retired** (2026-10-21, ADR-0024): the teacher only rephrases the questions it is given - 111 unique paraphrases from 88 seed questions - and its one trained round tied the scripted model on the W1.9 gate. The teacher stays a parked offline tool, never a fleet member; scripted generation is the training data. Re-entry needs a gate that can see the data, a corpus that is not one seed set, and an owner decision.)* Local teacher (parked): Qwen3-8B Q4 on owner's PC (~5 GB, fits 6 GB, overnight). Golden batches: Qwen3-30B-A3B-Instruct-2507 on **Kaggle free tier** (30 GPU-hrs/week, 2×T4) + Colab backup.
 - **Method:** Unsloth QLoRA per fleet member (narrow data). RFT loop: SFT → local sampling → CPU execution-verification (local + free GitHub Actions) → retrain → eval gates → GGUF quantize locally → HF publish.
 - **Behavioral curriculum:** advisory-and-override dialogues (identify rule → explain consequence → confirm → proceed → register entry) and impossibility-explanation dialogues, in BN/EN. Refusal drills deliberately excluded — behavior is "advise, record, proceed".
 - **Eval gates:** golden projects — BOQ within ±8%, CAD execution success >90%, drawings engineer-checked; plus rule-identification / override-handling / register-correctness checks; sloppy-input class (Banglish, typos, "don't know") must trigger defaults, never stall.

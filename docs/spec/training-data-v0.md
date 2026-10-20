@@ -1,6 +1,6 @@
 # Training data pipeline — v0 (W1.5)
 
-**Status:** v0.2.0 — deterministic scripted dataset committed; the plan's Qwen3-8B Q4 and a 4B fallback both ran on 2026-10-20 (1,496 raw calls each; 111 vs 114 unique candidates; 106/105 deterministic-pass; ~18.8k/~18.4k passing tokens); the 8B pool was reviewed record by record (61 accepted / 50 rejected) and the accepted subset is the committed `sft-v1` split (722 records, 207,558 tokens); the ~0.5M-token target is **292,442 tokens short — a declared gap**, not a silent omission. The teacher-augmented v1 round was then trained and measured (42/60 model.parse, all floors pass) and **not selected**: it broke one case the scripted round passed, so `archie-chat-v0` (43/60) stays in the fleet. No teacher record is auto-promoted.
+**Status:** v0.3.0 — deterministic scripted dataset committed; the plan's Qwen3-8B Q4 and a 4B fallback both ran on 2026-10-20 (1,496 raw calls each; 111 vs 114 unique candidates; 106/105 deterministic-pass; ~18.8k/~18.4k passing tokens); the 8B pool was reviewed record by record (61 accepted / 50 rejected) and the accepted subset is the committed `sft-v1` split (722 records, 207,558 tokens). **The ~0.5M-token teacher target was retired on 2026-10-21 (ADR-0024):** the teacher could only rephrase the 88 seed questions (111 unique), and its one trained round tied the scripted model on the W1.9 gate, so the teacher is a **parked offline tool** and the scripted corpus is the training data. The teacher-augmented v1 round measured 42/60 (all floors pass) and was **not selected**: it broke one case the scripted round passed, so `archie-chat-v0` (43/60) stays in the fleet.
 **Code:** `core/src/archres_core/training/{records,prompts,mutations,generators,verify,teacher}.py` · CLI `tools/training/build_chat_dataset.py`, `tools/training/teacher_augment.py`.
 **Schema:** `spec/schemas/sft-record.schema.json` (v0.1.0).
 **Decision record:** **ADR-0009**.
@@ -78,7 +78,14 @@ The plan requires Banglish, typos, unit confusion, "don't know" and off-topic an
 
 Each operator is seeded and reproducible; `parse.mutation` re-runs it and compares the text and expected decision/value. The dataset contains 381 sloppy records (175 accept, 58 `ask_again`, 68 `fallback`, 80 `escalate`).
 
-## Teacher augmentation
+## Teacher augmentation — parked (2026-10-21, ADR-0024)
+
+**Status: parked.** The harness, the prompt, the review ledger and the measurements stay in the
+repository as the *record of a closed decision*; nothing runs them, no build depends on them,
+and no fleet member uses their output. The plan's ~0.5M-token target is retired: the teacher
+rephrases the questions it is given (88 seeds → 111 unique paraphrases), and its one trained
+round tied the scripted model on the W1.9 gate. Re-entry needs a gate that can see the data, a
+corpus that is not one seed set, and an owner decision.
 
 `teacher.py` speaks the OpenAI-compatible `/v1/chat/completions` endpoint exposed by llama-server (stdlib only). v0 rephrases **questions only**; it can never change a label or a fact. The CLI:
 
@@ -397,8 +404,10 @@ GPU quota:
   floor is a smoke venue, not a viable full-run venue for this configuration; Kaggle is the
   selected candidate. No local result is claimed.
 - **Scope:** this is the **414-record scripted round** (~197k tokens). The plan's ~0.5M-token
-  teacher-augmented batch remains a W1.6 job and is not silently dropped; the fractional-area
-  miss above is a measured example of what it must fix. **W1.6 is not ticked** by this candidate.
+  teacher-augmented batch was **retired** on 2026-10-21 (ADR-0024) — it is dropped, not
+  silently dropped, and the teacher is a parked offline tool. The fractional-area miss above
+  was fixed in the deterministic parser (W1.4), not by a paraphrase. **W1.6 is not ticked** by
+  this candidate.
 
 ## Teacher-augmented v1 round (2026-10-20)
 
@@ -448,8 +457,8 @@ measures better.
 
 ## Deliberately NOT in v0
 
-- **A full ~0.5M-token teacher batch** — the reviewed 8B subset is accepted (61 records), but the total is 207,558 tokens; the 292,442 shortfall is declared. The 4B fallback remains archived and rejected.
-- **Teacher augmentation of parse/explain records** — round 1 rephrases interview questions only; longer record types are the next corpus decision (ADR-0020).
+- **A full ~0.5M-token teacher batch** — the target is **retired** (ADR-0024), not merely unmet: the reviewed 8B subset (61 records) is a candidate dataset with no role in the fleet, the 4B fallback stays archived and rejected, and the scripted corpus (~197k tokens) is the training data.
+- **Teacher augmentation of parse/explain records** — not attempted; re-entry conditions are written down in ADR-0024.
 - **Masked-token / loss-mask metadata** — the SFT trainer derives it from `messages` roles; no separate format yet.
 - **Conversation-level multi-turn samples beyond the override confirmation pair** — v0 records are single-task; longer dialogues come from the orchestrator (W1.10) and its transcript capture.
 
