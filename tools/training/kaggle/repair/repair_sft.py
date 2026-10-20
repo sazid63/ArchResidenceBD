@@ -51,12 +51,24 @@ OUT = pathlib.Path(os.environ.get("ARCHRES_SFT_OUT", "/kaggle/working"))
 BASE = os.environ.get("ARCHRES_SFT_BASE", "Qwen/Qwen2.5-Coder-3B-Instruct")
 MAX_LEN = int(os.environ.get("ARCHRES_SFT_MAX_LEN", "5120"))
 MAX_NEW_TOKENS = int(os.environ.get("ARCHRES_SFT_MAX_NEW_TOKENS", "3000"))
-TRAIN_EPOCHS = float(os.environ.get("ARCHRES_SFT_EPOCHS", "3"))
+TRAIN_EPOCHS = float(os.environ.get("ARCHRES_SFT_EPOCHS", "4"))
+TRAIN_ACCUM = int(os.environ.get("ARCHRES_SFT_ACCUM", "1"))
 SEED = 20261020
 SMOKE = os.environ.get("ARCHRES_SFT_SMOKE") == "1"
 NO_INSTALL = os.environ.get("ARCHRES_SFT_NO_INSTALL") == "1"
 
-PIP = ("torch", "transformers>=4.45", "peft>=0.13", "bitsandbytes", "accelerate", "datasets")
+#: Pinned to the 4.x line on purpose: transformers 5.x changed the TrainingArguments API
+#: (`warmup_ratio` is gone), and a training kernel that breaks on a PyPI release is a kernel
+#: that breaks in the queue. The chat round uses the same bounds.
+PIP = [
+    "transformers>=4.51,<5",
+    "peft>=0.13",
+    "bitsandbytes>=0.44",
+    "accelerate>=1.0",
+    "datasets>=3.0",
+    "sentencepiece",
+    "protobuf",
+]
 
 
 def log(message: str) -> None:
@@ -310,7 +322,10 @@ def train(records: list[dict], tokenizer, model) -> dict:
     arguments = TrainingArguments(
         output_dir=str(OUT / "checkpoints"),
         per_device_train_batch_size=1,
-        gradient_accumulation_steps=8,
+        # A 12-record corpus with an effective batch of 8 would be four optimizer steps in
+        # total - too few to move anything. One sample per step gives 48 steps for four
+        # epochs, which is what a corpus this small needs.
+        gradient_accumulation_steps=TRAIN_ACCUM,
         num_train_epochs=TRAIN_EPOCHS,
         max_steps=2 if SMOKE else -1,
         learning_rate=1e-4,
@@ -388,8 +403,6 @@ def main() -> int:
         write_jsonl(stock_replies, OUT / "replies" / "stock.jsonl")
 
     train_summary = train(encoded, tokenizer, model)
-    finetune_replies, finetune_seconds = generate_repairs(model, tokenizer, holdout, "finetune")
-    write_jsonl(finetune_replies, OUT / "replies" / "finetune.jsonl")
 
     summary = {
         "base": BASE,
@@ -403,7 +416,7 @@ def main() -> int:
         "repairs": {
             "holdout": len(holdout),
             "stockSeconds": stock_seconds,
-            "finetuneSeconds": finetune_seconds,
+            "finetuneSeconds": 0.0,
             "frozenHoldout": (manifest.get("frozenHoldout") or {}).get("mutations"),
         },
         "manifestPin": manifest.get("pins"),
@@ -413,6 +426,16 @@ def main() -> int:
         },
         "elapsedSeconds": round(time.time() - started, 1),
     }
+    # The summary is written *before* the fine-tuned generation: if generation fails, the
+    # training evidence (steps, loss, versions) and the stock replies are still on disk.
+    (OUT / "train-summary.json").write_text(
+        json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    finetune_replies, finetune_seconds = generate_repairs(model, tokenizer, holdout, "finetune")
+    write_jsonl(finetune_replies, OUT / "replies" / "finetune.jsonl")
+    summary["repairs"]["finetuneSeconds"] = finetune_seconds
+    summary["elapsedSeconds"] = round(time.time() - started, 1)
     (OUT / "train-summary.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",

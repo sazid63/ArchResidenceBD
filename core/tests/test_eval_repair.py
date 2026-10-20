@@ -7,7 +7,8 @@ import pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 TOOL = ROOT / "tools" / "training" / "eval_repair.py"
-GATES = ROOT / "data" / "eval" / "repair-v0" / "gates.json"
+EVAL = ROOT / "data" / "eval" / "repair-v0"
+GATES = EVAL / "gates.json"
 
 
 def _tool():
@@ -40,3 +41,32 @@ def test_the_gates_are_the_recorded_stock_baseline() -> None:
     assert gates["floors"]["passesOwnCase"]["model"]
     assert gates["floors"]["passesOwnCase"]["count"] == 4
     assert "stock" in gates["floors"]["passesOwnCase"]["model"].lower()
+
+
+def test_the_committed_report_scores_the_committed_replies() -> None:
+    import hashlib
+    import json
+
+    reports = EVAL / "reports"
+    for model in ("stock", "finetune"):
+        report_path = reports / f"{model}.json"
+        if not report_path.is_file():
+            continue
+        report = json.loads(report_path.read_text(encoding="utf-8"))
+        reply = EVAL / "replies" / f"{model}.jsonl"
+        digest = hashlib.sha256(reply.read_bytes()).hexdigest()
+        assert report["replySha256"] == digest, model
+        assert report["summary"]["replies"] == 4, model
+        assert report["missingReplies"] == [], model
+
+
+def test_the_floor_is_the_measured_stock_rate() -> None:
+    import json
+
+    stock_path = EVAL / "reports" / "stock.json"
+    if not stock_path.is_file():
+        return
+    gates = json.loads(GATES.read_text(encoding="utf-8"))
+    stock = json.loads(stock_path.read_text(encoding="utf-8"))
+    for name in ("passesOwnCase", "noCollateral"):
+        assert gates["floors"][name]["floor"] == stock["rates"][name]

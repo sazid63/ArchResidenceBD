@@ -6,24 +6,27 @@
     "case verdict. A floor is the stock base model's measured rate on the same held-out prompts -",
     "the same law as the chat suite (ADR-0015): a floor moves only as a reviewed event that quotes",
     "the measured number, the model and the commit.",
-    "The values below are PROVISIONAL until the round lands: the kernel answers the four frozen",
-    "holdout prompts with the untouched base model (stock) and with the adapter, and the measured",
-    "stock rate replaces each provisional floor before any candidate is judged against it."
+    "Measured 2026-10-20 on the frozen holdout (4 mutations) with the untouched base model,",
+    "4-bit, greedy, on a Kaggle T4: 3/4 repaired macros pass their own case and 3/4 cause no",
+    "collateral damage (0/4 are byte-identical to the known-good macro, so the stock model does",
+    "genuinely edit the code rather than replay it)."
   ],
   "floors": {
     "passesOwnCase": {
-      "floor": 0.0,
+      "floor": 0.75,
       "model": "qwen2.5-coder-3b-instruct (stock, 4-bit, greedy)",
       "date": "2026-10-20",
       "count": 4,
-      "status": "provisional - replaced by the measured stock baseline"
+      "measured": "3/4",
+      "source": "data/eval/repair-v0/replies/stock.jsonl"
     },
     "noCollateral": {
-      "floor": 0.0,
+      "floor": 0.75,
       "model": "qwen2.5-coder-3b-instruct (stock, 4-bit, greedy)",
       "date": "2026-10-20",
       "count": 4,
-      "status": "provisional - replaced by the measured stock baseline"
+      "measured": "3/4",
+      "source": "data/eval/repair-v0/replies/stock.jsonl"
     }
   }
 }

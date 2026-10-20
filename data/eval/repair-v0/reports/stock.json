@@ -1,0 +1,83 @@
+{
+  "failures": [],
+  "frozenHoldout": [
+    "column-unit-slip",
+    "float-arity",
+    "pads-hard-coded",
+    "volume-divide-zero"
+  ],
+  "gates": {
+    "noCollateral": {
+      "count": 4,
+      "date": "2026-10-20",
+      "floor": 0.75,
+      "measured": "3/4",
+      "model": "qwen2.5-coder-3b-instruct (stock, 4-bit, greedy)",
+      "source": "data/eval/repair-v0/replies/stock.jsonl"
+    },
+    "passesOwnCase": {
+      "count": 4,
+      "date": "2026-10-20",
+      "floor": 0.75,
+      "measured": "3/4",
+      "model": "qwen2.5-coder-3b-instruct (stock, 4-bit, greedy)",
+      "source": "data/eval/repair-v0/replies/stock.jsonl"
+    }
+  },
+  "missingReplies": [],
+  "model": "stock",
+  "ok": true,
+  "rates": {
+    "identicalToTarget": 0.0,
+    "noCollateral": 0.75,
+    "passesOwnCase": 0.75
+  },
+  "replyFile": "stock.jsonl",
+  "replySha256": "b3ee585709e529bbcb35198fad15a8f3967c9d3c80ccec0f1cfab40dfaefd706",
+  "rows": [
+    {
+      "caseId": "foundation.pads.1x1",
+      "detail": "None: total volumeM3 is 0.432, expected 0.674..0.676; Pad_1 volume is 0.432 m3, expected 0.674..0.676; Pad_1 extent 2 is 302.7 mm, expected 2999.9..3000.1",
+      "executed": true,
+      "identicalToTarget": false,
+      "mutationId": "column-unit-slip",
+      "noCollateral": false,
+      "passesOwnCase": false
+    },
+    {
+      "caseId": "foundation.pads.1x1",
+      "detail": "the case passed",
+      "executed": true,
+      "identicalToTarget": false,
+      "mutationId": "float-arity",
+      "noCollateral": true,
+      "passesOwnCase": true
+    },
+    {
+      "caseId": "foundation.pads.6x3",
+      "detail": "the case passed",
+      "executed": true,
+      "identicalToTarget": false,
+      "mutationId": "pads-hard-coded",
+      "noCollateral": true,
+      "passesOwnCase": true
+    },
+    {
+      "caseId": "foundation.pads.1x1",
+      "detail": "the case passed",
+      "executed": true,
+      "identicalToTarget": false,
+      "mutationId": "volume-divide-zero",
+      "noCollateral": true,
+      "passesOwnCase": true
+    }
+  ],
+  "schemaVersion": "1",
+  "summary": {
+    "executed": 4,
+    "identicalToTarget": 0,
+    "noCollateral": 3,
+    "passesOwnCase": 3,
+    "replies": 4
+  }
+}
