@@ -110,3 +110,33 @@ agreement:
 4. **The growth is a recorded build, not a silent edit.** The corpus is rebuilt against the real
    engine, the manifest pins the case file / candidate / schema by sha256, and the weekly CAD job
    re-executes the whole corpus and demands a byte-identical dataset.
+
+## Amendment (2026-10-20) — round 1 measured: a tie, so nothing was swapped
+
+The repair SFT round ran on Kaggle (`archresidencebd-repair-sft-v1`, T4, Qwen2.5-Coder-3B-Instruct,
+4-bit QLoRA, 12 training records, 48 steps, loss 0.0024) and was judged by the engine on the
+frozen holdout of four mutations:
+
+| Model | passes own case | no collateral | identical to target |
+|---|---:|---:|---:|
+| stock base model (4-bit, greedy) | 3/4 | 3/4 | 0/4 |
+| repair SFT round 1 | 3/4 | 3/4 | 1/4 |
+
+Decisions that follow from that measurement:
+
+5. **A tie is not a selection.** The fine-tune neither beats nor loses to the stock placeholder,
+   so the `archie-repair` member stays the stock artifact: the adapter is not registered, not
+   converted to GGUF and not shipped. A trained member that measures the same as the placeholder
+   would cost 2.1 GB of fleet artifact for no measurable gain, and shipping it would be a claim
+   the suite cannot support.
+6. **The floor is the stock model, measured on the same prompts** (`data/eval/repair-v0/gates.json`),
+   and it did not move. The suite that judges a repair is the engine: a repair is right only if
+   the macro passes the same case (`tools/training/eval_repair.py`), and the judge has a
+   self-test that proves it separates the known-good macro from a broken one.
+7. **The corpus, not the model, is the limiting factor.** Both models miss the unit-scale slip
+   and both "repair" the hard-coded pad count by editing the parameter *default* to the case's
+   value. Twelve records of one macro cannot teach a repair skill; the next corpus decision is
+   more macros with a holdout of whole scripts, and that is a new reviewed corpus, not a re-run.
+8. **The round's real result is the seam.** A failed macro plus its normalised trace goes into a
+   model, and the model's macro is judged by FreeCAD rather than by a text diff. That pipeline
+   is now measured and repeatable; a trained repair member is the next corpus's job.

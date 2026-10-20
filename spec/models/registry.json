@@ -62,7 +62,7 @@
       },
       "swapGroup": "gpu-models",
       "distribution": "bundled",
-      "notes": "P1 training-base placeholder for the Archie-Repair archetype (plan §5)."
+      "notes": "P1 training-base placeholder for the Archie-Repair archetype (plan §5). Kept as the stock artifact on purpose: the W1.7 repair SFT round 1 (12 records, 48 steps) measured 3/4 on the frozen holdout - a tie with this base model - so nothing was swapped (ADR-0017)."
     },
     {
       "id": "archie-embed",

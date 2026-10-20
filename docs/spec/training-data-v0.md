@@ -300,6 +300,36 @@ uv run --directory core python ../tools/training/build_repair_dataset.py --check
   arbitrary CAD scripts. A broader claim needs a corpus of several macros with a holdout of whole
   scripts, which is the next corpus decision, not this round.
 
+### Measured result (2026-10-20)
+
+| Model | passes own case | no collateral | identical to target | Outcome |
+|---|---:|---:|---:|---|
+| stock Qwen2.5-Coder-3B-Instruct (4-bit, greedy) | **3/4 = 0.75** | 3/4 = 0.75 | 0/4 | the floor |
+| repair SFT round 1 (12 records, 48 steps, loss 0.0024) | **3/4 = 0.75** | 3/4 = 0.75 | 1/4 | **tie — not selected** |
+
+- **Run:** Kaggle kernel `archresidencebd-repair-sft-v1` v3 (Tesla T4, Qwen2.5-Coder-3B-Instruct,
+  4-bit QLoRA, r16, 4 epochs / 48 steps, max length 5120, seed 20261020, bf16): 12 train
+  records, 0 skipped, mean 3,057 tokens, loss **0.00242**; stock repairs 289.1 s, fine-tuned
+  repairs 741.2 s, 2,933 s in total. The first run (v2) died before training because pip had
+  installed **transformers 5.20.2**, whose `TrainingArguments` dropped `warmup_ratio`; the kernel
+  now pins the 4.x line (`transformers>=4.51,<5`) like the chat round, and an effective batch of 8
+  would have given four optimizer steps on a 12-record corpus, so the batch is 1 (48 steps).
+- **Judged by the engine:** `data/eval/repair-v0/reports/{stock,finetune}.json`; the reply sets
+  are committed and pinned, and the judge's `--self-test` proves it separates the known-good macro
+  from a broken one.
+- **The fine-tune ties the stock model, so nothing was swapped.** Both models repair the three
+  easy mutations and **both miss the unit-scale slip** (a millimetre column scaled to metres:
+  `col_x, col_y, col_z = [value * 0.001 ...]`). Both also "repair" the hard-coded pad count by
+  editing the parameter *default* to the case's value rather than restoring the parameter read —
+  the case passes because the case sets the parameter explicitly, but the macro is not the
+  known-good one. A trained member that only ties the placeholder is not an improvement, so
+  `archie-repair` stays the stock artifact and the adapter is not registered, converted or
+  shipped. The floor did not move.
+- **What the round proves:** the seam works end to end — a failed macro plus its normalised trace
+  goes into a model, and the model's macro is judged by FreeCAD, not by a text diff. **What it
+  does not prove:** that a 12-record corpus teaches repair. The next corpus decision is more
+  macros with a holdout of whole scripts; until then the trained member stays a candidate.
+
 
 ## Kaggle preflight (2026-10-20)
 

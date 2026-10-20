@@ -9,8 +9,31 @@
     "Measured 2026-10-20 on the frozen holdout (4 mutations) with the untouched base model,",
     "4-bit, greedy, on a Kaggle T4: 3/4 repaired macros pass their own case and 3/4 cause no",
     "collateral damage (0/4 are byte-identical to the known-good macro, so the stock model does",
-    "genuinely edit the code rather than replay it)."
+    "genuinely edit the code rather than replay it).",
+    "The teacher-augmented candidate (12 training records, 48 steps, loss 0.0024) measured the",
+    "same 3/4 and the same 3/4 - a tie, not an improvement - so the floors did not move and the",
+    "fleet member stayed the stock artifact. Both models miss the unit-scale slip and both",
+    "'repair' the pad-count bug by editing the parameter default to the case's value."
   ],
+  "candidates": {
+    "stock": {
+      "model": "qwen2.5-coder-3b-instruct (stock, 4-bit, greedy)",
+      "passesOwnCase": 0.75,
+      "noCollateral": 0.75,
+      "identicalToTarget": 0.0,
+      "replies": "data/eval/repair-v0/replies/stock.jsonl",
+      "report": "data/eval/repair-v0/reports/stock.json"
+    },
+    "finetune": {
+      "model": "qwen2.5-coder-3b-instruct + repair SFT round 1 (12 records, 48 steps)",
+      "passesOwnCase": 0.75,
+      "noCollateral": 0.75,
+      "identicalToTarget": 0.25,
+      "replies": "data/eval/repair-v0/replies/finetune.jsonl",
+      "report": "data/eval/repair-v0/reports/finetune.json",
+      "outcome": "tie with the stock baseline - not selected"
+    }
+  },
   "floors": {
     "passesOwnCase": {
       "floor": 0.75,
