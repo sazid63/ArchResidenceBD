@@ -82,3 +82,31 @@ Constraints:
   the version and the weekly replay makes a drift a red check, not a surprise.
 - Six records are substrate, not a trained model. No claim about repair accuracy exists until the
   W1.7 run is evaluated against the holdout CAD cases (W1.8's suite plus new cases).
+
+## Amendment (2026-10-20) — the reviewed growth of the corpus
+
+Round 1 was six mutations on purpose: it proved the pipeline, not the failure space. W1.7's
+training run needs more than "four crashes and two wrong volumes", so the corpus was grown
+**under this ADR's rules** (executed, declared failures, pinned manifest) rather than by a new
+agreement:
+
+1. **Sixteen records, ten new mutations.** Nine exception records across nine error types
+   (`NameError`, `ValueError`, `KeyError`, `AttributeError`, `TypeError`, `IndexError`,
+   `ZeroDivisionError`, `RuntimeError`, `FileExistsError`) and seven measured rejections across
+   eight distinct checks (`objects[Pad_1].volumeM3`, `totals.volumeM3`, `totals.objects`,
+   `documentObjects`, `objects[Pad_1].bboxMm[2]`, `artifacts[foundation-summary.json]`, …). The
+   generator is bumped to `build_repair_dataset-0.2.0`; the prompt contract (`repair-prompt-v0`)
+   and the schema are unchanged.
+2. **A mutation that the harness cannot see is not a record.** One candidate mutation (dropping
+   `removeSplitter()`) turned out to leave the measurement unchanged - FreeCAD's `fuse` already
+   returns one solid there - so it was **dropped, not declared**. The corpus only contains bugs
+   the harness can actually catch.
+3. **Machine paths are redacted, not refused.** The `outdir-mkdir-exists` mutation raises
+   `FileExistsError` whose message carries the absolute work directory. Before this amendment the
+   only honest outcome was to refuse the record, which threw that failure class away. The trace
+   normaliser now redacts machine paths to `<path>` at capture time (message and frame source);
+   the raw message stays in the workdir as evidence. The law "machine paths never in the record"
+   is now enforced by construction *and* by the offline check.
+4. **The growth is a recorded build, not a silent edit.** The corpus is rebuilt against the real
+   engine, the manifest pins the case file / candidate / schema by sha256, and the weekly CAD job
+   re-executes the whole corpus and demands a byte-identical dataset.

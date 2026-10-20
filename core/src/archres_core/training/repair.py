@@ -27,7 +27,7 @@ from typing import Any, Iterable
 
 from .records import RecordError, validate_record
 
-GENERATOR = "build_repair_dataset-0.1.0"
+GENERATOR = "build_repair_dataset-0.2.0"
 REPAIR_PROMPT_VERSION = "repair-prompt-v0"
 REPAIR_SCHEMA_VERSION = "0.2.0"
 REPAIR_SEED = 20261020
@@ -120,6 +120,97 @@ MUTATIONS: tuple[Mutation, ...] = (
         expected="verification",
         expected_check="totals.volumeM3",
     ),
+    # --- the reviewed growth of 2026-10-20 (ADR-0017 amendment): five more exception
+    # classes and five more measured checks, so the corpus is not only "four crashes and
+    # two wrong volumes" any more.
+    Mutation(
+        id="float-arity",
+        description="the dimension list is converted with a two-argument float() call",
+        old="    values = [float(item) for item in raw]",
+        new="    values = [float(item, 10) for item in raw]",
+        case_id="foundation.pads.1x1",
+        expected="TypeError",
+    ),
+    Mutation(
+        id="param-index",
+        description="the positivity check reads a dimension the list does not have",
+        old="    if any(value <= 0 for value in values):",
+        new="    if any(values[3] <= 0 for value in values):",
+        case_id="foundation.pads.1x1",
+        expected="IndexError",
+    ),
+    Mutation(
+        id="volume-divide-zero",
+        description="the volume summary divides by zero instead of by a cubic conversion",
+        old='            "volumeM3": round(sum(shape.Volume for shape in shapes) / 1e9, 6),',
+        new='            "volumeM3": round(sum(shape.Volume for shape in shapes) / 0, 6),',
+        case_id="foundation.pads.1x1",
+        expected="ZeroDivisionError",
+    ),
+    Mutation(
+        id="document-guard-inverted",
+        description="the active-document guard is inverted, so a real document is refused",
+        old="    if document is None:",
+        new="    if document is not None:",
+        case_id="foundation.pads.1x1",
+        expected="RuntimeError",
+    ),
+    Mutation(
+        id="outdir-mkdir-exists",
+        description="the output directory is created without exist_ok, so an existing one fails",
+        old="        target.parent.mkdir(parents=True, exist_ok=True)",
+        new="        target.parent.mkdir(parents=True, exist_ok=False)",
+        case_id="foundation.pads.1x1",
+        expected="FileExistsError",
+    ),
+    Mutation(
+        id="no-pads",
+        description="the pad loop never runs, so the document stays empty",
+        old="    for index in range(pads):",
+        new="    for index in range(pads - pads):",
+        case_id="foundation.pads.1x1",
+        expected="verification",
+        expected_check="documentObjects",
+    ),
+    Mutation(
+        id="column-unit-slip",
+        description="the column dimensions are scaled from millimetres to metres",
+        old='    col_x, col_y, col_z = _mm(params, "columnMm", [300.0, 300.0, 2700.0], 3)',
+        new=(
+            "    col_x, col_y, col_z = [value * 0.001 for value in _mm("
+            'params, "columnMm", [300.0, 300.0, 2700.0], 3)]'
+        ),
+        case_id="foundation.pads.1x1",
+        expected="verification",
+        expected_check="objects[Pad_1].volumeM3",
+    ),
+    Mutation(
+        id="outdir-env-typo",
+        description="the summary is written to an output directory the harness never created",
+        old='    out_dir = os.environ.get("ARCHRES_JOB_OUTDIR")',
+        new='    out_dir = os.environ.get("ARCHRES_JOB_OUTDIR_MISSING")',
+        case_id="foundation.pads.1x1",
+        expected="verification",
+        expected_check="artifacts[foundation-summary.json]",
+    ),
+    Mutation(
+        id="pad-base-offset",
+        description="the pad is placed on the ground plane instead of below it",
+        old="        pad = Part.makeBox(pad_x, pad_y, pad_z, App.Vector(origin_x, 0.0, -pad_z))",
+        new="        pad = Part.makeBox(pad_x, pad_y, pad_z, App.Vector(origin_x, 0.0, 0.0))",
+        case_id="foundation.pads.1x1",
+        expected="verification",
+        expected_check="objects[Pad_1].bboxMm[2]",
+    ),
+    Mutation(
+        id="pads-hard-coded",
+        description="the pad count is hard-coded to one, whatever the case asks for",
+        old='    pads = _count(params, "pads", 2)',
+        new="    pads = 1",
+        case_id="foundation.pads.6x3",
+        expected="verification",
+        expected_check="totals.objects",
+    ),
 )
 
 
@@ -144,6 +235,27 @@ def apply_mutation(source: str, mutation: Mutation) -> str:
 def _limit(text: Any, size: int) -> str:
     value = str(text or "").strip("\r\n")
     return value if len(value) <= size else value[:size] + "…"
+
+
+#: A machine path in an exception message ("... exists: 'C:\\Users\\someone\\out'") is a
+#: portability leak, not repair signal: the record must mean the same thing on Kaggle. The
+#: full message stays in the workdir as evidence; the record keeps the type and the sentence.
+_PATH_RE = re.compile(
+    r"(?P<quoted>'(?:[A-Za-z]:[\\/][^']*)'|\"(?:[A-Za-z]:[\\/][^\"]*)\")"
+    r"|(?P<bare>(?:[A-Za-z]:[\\/]|/(?:home|Users|tmp|var|opt|root|mnt)/)[^\s'\",;()<>]*)"
+)
+
+
+def _redact_paths(text: str) -> str:
+    """Replace machine paths with ``<path>`` so a record stays portable."""
+
+    def replace(match: re.Match[str]) -> str:
+        quoted = match.group("quoted")
+        if quoted:
+            return "'<path>'" if quoted.startswith("'") else '"<path>"'
+        return "<path>"
+
+    return _PATH_RE.sub(replace, text)
 
 
 def _candidate_frames(result: dict[str, Any]) -> list[dict[str, Any]]:
@@ -176,14 +288,14 @@ def normalize_failure(result: dict[str, Any], code: str | None) -> dict[str, Any
             {
                 "file": str(frame.get("file")),
                 "line": int(frame.get("line") or 0),
-                "source": _limit(frame.get("source"), 200),
+                "source": _limit(_redact_paths(str(frame.get("source") or "")), 200),
             }
         )
     deepest = views[-1] if views else {"line": 0, "source": ""}
     failure = {
         "code": str(code),
         "errorType": _limit(result.get("errorType") or "Exception", 80),
-        "message": _limit(result.get("message"), 500),
+        "message": _limit(_redact_paths(str(result.get("message") or "")), 500),
         "line": deepest["line"],
         "sourceLine": deepest["source"],
         "frames": views,
@@ -197,7 +309,7 @@ def verification_failure(check: str, message: str) -> dict[str, Any]:
     failure = {
         "code": "verification",
         "errorType": "verification",
-        "message": _limit(message, 500),
+        "message": _limit(_redact_paths(str(message or "")), 500),
         "check": check,
         "line": 0,
         "sourceLine": "",

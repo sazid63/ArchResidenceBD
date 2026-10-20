@@ -242,13 +242,23 @@ uv run --directory core python ../tools/training/build_repair_dataset.py --check
 ```
 
 - Each record is one deterministic mutation of `tools/cad/candidates/geometry_build.py`
-  (ADR-0017). The broken macro must fail exactly as declared — an exception type
-  (`NameError`, `ValueError`, `KeyError`, `AttributeError`) or a named measured check
-  (`objects[Pad_1].volumeM3`, `totals.volumeM3`). The target is the known-good macro, which must
-  pass the same case **twice** with identical verdicts and artifact trees.
+  (ADR-0017). The broken macro must fail exactly as declared — an exception type or a named
+  measured check. The target is the known-good macro, which must pass the same case **twice**
+  with identical verdicts and artifact trees.
+- **The corpus grew on 2026-10-20 from six records to sixteen** (ADR-0017 amendment): nine
+  exception records across nine error types (`NameError`, `ValueError`, `KeyError`,
+  `AttributeError`, `TypeError`, `IndexError`, `ZeroDivisionError`, `RuntimeError`,
+  `FileExistsError`) and seven measured rejections across eight distinct checks
+  (`objects[Pad_1].volumeM3`, `totals.volumeM3`, `totals.objects`, `documentObjects`,
+  `objects[Pad_1].bboxMm[2]`, `artifacts[foundation-summary.json]`, …). The generator is
+  `build_repair_dataset-0.2.0`; the prompt contract and the schema are unchanged. One candidate
+  mutation (dropping `removeSplitter()`) left the measurement unchanged and was **dropped, not
+  declared** — a bug the harness cannot see is not a training record.
 - The trace is normalised at capture: candidate frames only (basename `candidate.py`, line,
   source), the exception type/message, and a short rendered trace. No temp paths, timings or
-  engine strings; a record that leaks a machine path is rejected.
+  engine strings. A machine path inside an exception message is now **redacted to `<path>`** at
+  capture time (the `FileExistsError` case exposed that gap); the raw message stays in the
+  workdir as evidence, and the offline check still refuses any record that leaks a path.
 - Shape: `kind: repair`, `task: repair.fix`, `lang: code`, `difficulty: broken`, labels
   `{caseId, errorType, failureCode[, check]}`, exactly system/user/assistant. The user message
   carries the case, params, harness expectations and trace; the assistant message is the full
@@ -256,11 +266,10 @@ uv run --directory core python ../tools/training/build_repair_dataset.py --check
   rebuilt.
 - `manifest.json` pins the case file, the target candidate and the schema by sha256, records the
   FreeCAD version and the counts. A change to any pinned input makes the corpus visibly stale.
-- Round 1 is **six mutations** (four exception classes, two measured bugs). It proves the
-  pipeline, not the breadth of the CAD failure space; more mutations are a new reviewed corpus.
 - The corpus is portable: recorded on FreeCAD 1.1.4 (Windows) and replayed byte-identically on
   FreeCAD 1.1.3 (Ubuntu, conda-forge) on 2026-10-20. The trace normalisation is what makes that
-  true; the manifest still records the recording engine.
+  true; the manifest still records the recording engine. The 16-record corpus was re-executed
+  byte-identically on FreeCAD 1.1.4 (Windows) on 2026-10-20 (`--check --engine`).
 - Repair records are a separate corpus: they do not join `sft-v0` and never train the chat
   adapter.
 

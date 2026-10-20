@@ -2,14 +2,19 @@
   "counts": {
     "byErrorType": {
       "AttributeError": 1,
+      "FileExistsError": 1,
+      "IndexError": 1,
       "KeyError": 1,
       "NameError": 1,
+      "RuntimeError": 1,
+      "TypeError": 1,
       "ValueError": 1,
-      "verification": 2
+      "ZeroDivisionError": 1,
+      "verification": 7
     },
     "byFailureCode": {
-      "engine_error": 4,
-      "verification": 2
+      "engine_error": 9,
+      "verification": 7
     },
     "mutations": [
       "call-typo",
@@ -17,9 +22,19 @@
       "gap-key",
       "api-typo",
       "fuse-to-cut",
-      "column-off-by-one"
+      "column-off-by-one",
+      "float-arity",
+      "param-index",
+      "volume-divide-zero",
+      "document-guard-inverted",
+      "outdir-mkdir-exists",
+      "no-pads",
+      "column-unit-slip",
+      "outdir-env-typo",
+      "pad-base-offset",
+      "pads-hard-coded"
     ],
-    "records": 6
+    "records": 16
   },
   "engine": {
     "name": "freecad",
@@ -27,12 +42,12 @@
   },
   "files": {
     "dataset.jsonl": {
-      "bytes": 107657,
-      "records": 6,
-      "sha256": "8beaf96eb17d4e84f691faa5b1f3f62d11028209e7be5530694a4ee0c1b25df5"
+      "bytes": 287945,
+      "records": 16,
+      "sha256": "dfc1ace1ba8221bc6ca6240b513255d715429a8f9e592f865e8367150fa38f18"
     }
   },
-  "generator": "build_repair_dataset-0.1.0",
+  "generator": "build_repair_dataset-0.2.0",
   "manifestVersion": "1",
   "notes": "Each record pairs a deterministically mutated macro + the case it failed + a normalised trace with the known-good macro that passes the same case. Regenerate with tools/training/build_repair_dataset.py against a CAD engine; CI checks the offline contract and the weekly cad job re-executes it.",
   "pins": {
