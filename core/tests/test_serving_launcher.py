@@ -208,15 +208,16 @@ def test_preload_interview_warms_chat_then_cpu_services(fleet, tmp_path) -> None
         before = len(seen)
         result = launcher.preload("interview")
     posts = [row for row in seen[before:] if row["method"] == "POST"]
+    # The rerank seat is parked (ADR-0026): the interview mode warms the chat model and the
+    # embedder, and does not load a model whose scores are discarded.
     assert [row["path"] for row in posts] == [
         "/v1/chat/completions",
         "/v1/embeddings",
-        "/v1/rerank",
     ]
-    assert [row["body"]["model"] for row in posts] == ["chat", "embed", "rerank"]
+    assert [row["body"]["model"] for row in posts] == ["chat", "embed"]
     assert result["mode"] == "interview"
     assert result["primary"] == "chat"
-    assert [row["route"] for row in result["warmed"]] == ["chat", "embed", "rerank"]
+    assert [row["route"] for row in result["warmed"]] == ["chat", "embed"]
     assert result["seconds"] >= 0
 
 

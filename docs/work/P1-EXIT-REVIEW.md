@@ -39,7 +39,7 @@ engine, advisor/override behavior; first evals."*
 | Repair corpus | 16 executed records (9 engine errors across 9 error types + 7 measured rejections across 8 checks); live replay byte-identical | `data/training/repair-v0/manifest.json` |
 | Repair round | 48 steps, loss 0.0024; **stock 3/4 & 3/4, fine-tune 3/4 & 3/4** — a tie → the member stayed stock | `data/eval/repair-v0/reports/` |
 | CAD harness | 3/3 cases, identical verdict signatures and artifact trees on re-run | `tools/cad/verify.py --run` |
-| Fleet | 4 routes / 2 modes (interview, design) | `tools/serving/fleet.py --check` |
+| Fleet | 4 routes / 2 modes (interview, design) — the **rerank seat is parked** (ADR-0026: the model route returns all-zero scores, so production uses the lexical reranker and the fleet does not warm the seat) | `tools/serving/fleet.py --check` |
 | Fractional areas | `সাড়ে ৫ কাঠা` → 367.9 m² (5.5 katha), **0 model calls** | `docs/spec/question-engine-v0.md` |
 | Suite | 812 tests, 149 Python files compile clean, brand guard clean, CI green on `c898354` | CI |
 

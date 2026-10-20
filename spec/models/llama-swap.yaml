@@ -54,13 +54,13 @@ routing:
     use: group
     settings:
       groups:
-        "gpu-models":
-          swap: true
-          exclusive: true
-          persistent: false
-          members: ["chat", "repair"]
         "cpu-services":
           swap: false
           exclusive: false
           persistent: true
           members: ["embed", "rerank"]
+        "gpu-models":
+          swap: true
+          exclusive: true
+          persistent: false
+          members: ["chat", "repair"]

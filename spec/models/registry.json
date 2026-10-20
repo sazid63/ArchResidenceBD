@@ -128,7 +128,7 @@
       },
       "swapGroup": "cpu-services",
       "distribution": "bundled",
-      "notes": "CPU-pinned (-ngl 0); needs its own instruct template for meaningful scores (S2)."
+      "notes": "Parked (ADR-0026): the model route returns all-zero scores for every candidate, so the production reranker is the lexical one and the fleet does not warm this seat. The seat stays in the roster (ADR-0012 fixes one seat per role); the model needs its own instruct template before it can be un-parked."
     }
   ],
   "notes": "Fleet v1 (S2). Deliberately excluded: Qwen3-0.6B draft - speculative decoding measured ~8% acceptance and 3.5x slower on GPU draft; do not re-add without a new measurement. sha256/sizeBytes are of the artifacts measured on the reference machine in S2. W1.6 adds the scripted-round chat fine-tune as a new entry; the stock chat entry is removed; the teacher batch remains open."
