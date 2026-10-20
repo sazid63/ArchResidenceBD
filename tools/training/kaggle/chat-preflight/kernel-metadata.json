@@ -1,0 +1,13 @@
+{
+  "id": "sajidhossain004/archresidencebd-sft-preflight",
+  "title": "ArchResidenceBD SFT preflight",
+  "code_file": "preflight.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_internet": true,
+  "dataset_sources": ["sajidhossain004/archresbd-sft-v0"],
+  "competition_sources": [],
+  "kernel_sources": []
+}

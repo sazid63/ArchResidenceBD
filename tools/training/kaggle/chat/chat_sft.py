@@ -64,6 +64,22 @@ def read_jsonl(path: pathlib.Path) -> list[dict]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
+def locate_data() -> pathlib.Path:
+    """Find the mounted dataset even if Kaggle slugged the folder differently."""
+    if (DATA / "train.jsonl").is_file():
+        return DATA
+    parent = pathlib.Path("/kaggle/input")
+    if parent.is_dir():
+        for candidate in sorted(parent.rglob("train.jsonl")):
+            folder = candidate.parent
+            if (folder / "manifest.json").is_file():
+                return folder
+        names = sorted(str(path.relative_to(parent)) for path in parent.rglob("*") if path.is_file())[:20]
+    else:
+        names = ["<no /kaggle/input>"]
+    raise SystemExit(f"SFT dataset is not mounted; /kaggle/input files: {names}")
+
+
 def write_jsonl(rows: list[dict], path: pathlib.Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="\n") as handle:
@@ -71,14 +87,14 @@ def write_jsonl(rows: list[dict], path: pathlib.Path) -> None:
             handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
 
 
-def check_inputs() -> tuple[list[dict], list[dict], list[dict], dict]:
+def check_inputs(data: pathlib.Path) -> tuple[list[dict], list[dict], list[dict], dict]:
     for name in ("train.jsonl", "holdout.jsonl", "dataset.jsonl", "cases.jsonl", "manifest.json"):
-        if not (DATA / name).is_file():
-            raise SystemExit(f"missing dataset file: {DATA / name}")
-    manifest = json.loads((DATA / "manifest.json").read_text(encoding="utf-8"))
-    train = read_jsonl(DATA / "train.jsonl")
-    dataset = read_jsonl(DATA / "dataset.jsonl")
-    cases = read_jsonl(DATA / "cases.jsonl")
+        if not (data / name).is_file():
+            raise SystemExit(f"missing dataset file: {data / name}")
+    manifest = json.loads((data / "manifest.json").read_text(encoding="utf-8"))
+    train = read_jsonl(data / "train.jsonl")
+    dataset = read_jsonl(data / "dataset.jsonl")
+    cases = read_jsonl(data / "cases.jsonl")
     if manifest["counts"]["train"] != len(train):
         raise SystemExit(
             f"train count {len(train)} != manifest {manifest['counts']['train']}"
@@ -87,7 +103,7 @@ def check_inputs() -> tuple[list[dict], list[dict], list[dict], dict]:
         raise SystemExit("the train split contains an unverified record")
     if any(record.get("kind") != "chat" for record in train):
         raise SystemExit("the train split contains a non-chat record")
-    holdout_ids = {record["id"] for record in read_jsonl(DATA / "holdout.jsonl")}
+    holdout_ids = {record["id"] for record in read_jsonl(data / "holdout.jsonl")}
     overlap = holdout_ids & {record["id"] for record in train}
     if overlap:
         raise SystemExit(f"train/holdout leakage: {sorted(overlap)[:3]}")
@@ -368,7 +384,8 @@ def main() -> int:
     started = time.time()
     os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
     install()
-    train_records, dataset, cases, manifest = check_inputs()
+    data = locate_data()
+    train_records, dataset, cases, manifest = check_inputs(data)
 
     import torch
     from transformers import AutoTokenizer

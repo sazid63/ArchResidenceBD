@@ -155,6 +155,23 @@ uv run --directory core python ../tools/training/build_repair_dataset.py --check
 - Repair records are a separate corpus: they do not join `sft-v0` and never train the chat
   adapter.
 
+## Kaggle preflight (2026-10-20)
+
+The training inputs travel as the private Kaggle dataset `sajidhossain004/archresbd-sft-v0`
+(`train.jsonl`, `holdout.jsonl`, `dataset.jsonl`, `cases.jsonl`, `manifest.json`). The committed
+CPU kernel `tools/training/kaggle/chat-preflight/` verifies the mount without spending GPU quota:
+
+- **Result:** COMPLETE in 49 s; mount discovered at
+  `/kaggle/input/datasets/sajidhossain004/archresbd-sft-v0` (Kaggle now nests dataset mounts;
+  both kernels find the folder recursively rather than assuming `/kaggle/input/<slug>`).
+- Counts match the manifest: 414 train / 247 holdout / 661 records / 655 eval cases; every one of
+  the 60 `model.parse` holdout cases resolves to a prompt record (no missing prompt, no silent
+  fallback).
+- The chat template is prefix-stable and the assistant span survives masking (2 sample records,
+  385 prefix tokens masked); `transformers` 4.57.6 on the Kaggle image.
+- The GPU training kernel (`tools/training/kaggle/chat/`, ADR-0018) is queued behind the account's
+  running 27B session; the block is recorded in `docs/work/OWNER-ATTENTION.md` #4.
+
 ## Units
 
 `archres_core.units` is the only conversion home: Decimal-based katha/shotok/bigha/gonda/sqft ⇄ m² and m/ft/inch, with hand-authored English/Bangla unit words. `kani` is deliberately absent until an authoritative factor is pinned — adding a regional guess would violate the provenance rule. The module has its own tests (`core/tests/test_units.py`).
