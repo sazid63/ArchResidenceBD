@@ -1,19 +1,23 @@
-"""Archie-Chat SFT v0 - Kaggle script kernel (W1.6).
+"""Archie-Chat SFT v0 - venue-neutral training kernel (W1.6).
 
 QLoRA on Qwen3-4B-Instruct-2507 with the frozen train split, then greedy replies for the 60
 `model.parse` holdout cases (the W1.9 gate set) and a merged Q4_K_M GGUF artifact for the fleet.
 
-Run as a Kaggle *script* kernel with:
-  - dataset:  sajidhossain004/archresbd-sft-v0  (train.jsonl, dataset.jsonl, cases.jsonl, manifest.json)
+Primary venue: Kaggle *script* kernel (ADR-0018) with
+  - dataset:  sajidhossain004/archresbd-sft-v0 (train/holdout/dataset/cases/manifest)
   - GPU:      T4 x1 (16 GB)  - 4-bit QLoRA fits
   - internet: on (base model + llama.cpp)
-  - output:   /kaggle/working  (adapter/, replies/finetune.jsonl, archres-chat-v0-Q4_K_M.gguf)
+  - output:   /kaggle/working (adapter/, replies/finetune.jsonl, archres-chat-v0-Q4_K_M.gguf)
+
+Fallback venue: the dev RTX 4050 6 GB in an isolated venv (ADR-0019), same code, with
+ARCHRES_SFT_DATA/OUT/MAX_LEN/NO_INSTALL/SKIP_GGUF set; the run summary records the venue.
 
 Nothing here trains unless W1.9 can measure it: the eval prompts are the *same dataset records*
 the stock baseline answered, and the reply set is scored by `tools/eval/run_eval.py` locally.
 
-SMOKE = True runs 8 records for 2 steps and skips merge/GGUF; it exists to prove the environment
-before spending an hour of GPU quota.
+ARCHRES_SFT_SMOKE=1 runs 8 records for 2 steps and skips merge/GGUF; it proves the environment
+before spending GPU quota. ARCHRES_SFT_SKIP_GGUF=1 keeps the adapter/replies and defers GGUF
+conversion to a CPU host.
 """
 
 from __future__ import annotations
@@ -28,13 +32,15 @@ import subprocess
 import sys
 import time
 
-SMOKE = False
-BASE = "Qwen/Qwen3-4B-Instruct-2507"
-DATA = pathlib.Path("/kaggle/input/archresbd-sft-v0")
-OUT = pathlib.Path("/kaggle/working")
+SMOKE = os.environ.get("ARCHRES_SFT_SMOKE") == "1"
+SKIP_GGUF = os.environ.get("ARCHRES_SFT_SKIP_GGUF") == "1"
+NO_INSTALL = os.environ.get("ARCHRES_SFT_NO_INSTALL") == "1"
+BASE = os.environ.get("ARCHRES_SFT_BASE", "Qwen/Qwen3-4B-Instruct-2507")
+DATA = pathlib.Path(os.environ.get("ARCHRES_SFT_DATA", "/kaggle/input/archresbd-sft-v0"))
+OUT = pathlib.Path(os.environ.get("ARCHRES_SFT_OUT", "/kaggle/working"))
 LLAMA = OUT / "llama.cpp"
-MAX_LEN = 2048
-MAX_NEW_TOKENS = 320
+MAX_LEN = int(os.environ.get("ARCHRES_SFT_MAX_LEN", "2048"))
+MAX_NEW_TOKENS = int(os.environ.get("ARCHRES_SFT_MAX_NEW_TOKENS", "320"))
 TRAIN_EPOCHS = 1 if SMOKE else 2
 SEED = 20261020
 
@@ -54,6 +60,9 @@ def log(message: str) -> None:
 
 
 def install() -> None:
+    if NO_INSTALL:
+        log("dependencies assumed (ARCHRES_SFT_NO_INSTALL=1)")
+        return
     subprocess.check_call(
         [sys.executable, "-m", "pip", "install", "-q", "--no-input", *PIP]
     )
@@ -206,6 +215,7 @@ def train(records: list[dict], tokenizer) -> tuple[object, dict]:
     model.print_trainable_parameters()
 
     subset = records[:8] if SMOKE else records
+    bf16 = torch.cuda.is_bf16_supported()
     arguments = TrainingArguments(
         output_dir=str(OUT / "checkpoints"),
         per_device_train_batch_size=1,
@@ -217,7 +227,8 @@ def train(records: list[dict], tokenizer) -> tuple[object, dict]:
         warmup_ratio=0.03,
         logging_steps=1,
         save_strategy="no",
-        fp16=True,
+        fp16=not bf16,
+        bf16=bf16,
         optim="paged_adamw_8bit",
         gradient_checkpointing=True,
         gradient_checkpointing_kwargs={"use_reentrant": False},
@@ -249,6 +260,8 @@ def train(records: list[dict], tokenizer) -> tuple[object, dict]:
         "gpu": torch.cuda.get_device_name(0),
         "smoke": SMOKE,
         "seed": SEED,
+        "precision": "bf16" if bf16 else "fp16",
+        "maxLen": MAX_LEN,
     }
     return model, summary
 
@@ -315,6 +328,8 @@ def build_gguf() -> dict:
 
     if SMOKE:
         return {"skipped": "smoke run"}
+    if SKIP_GGUF:
+        return {"skipped": "ARCHRES_SFT_SKIP_GGUF=1 (convert on a CPU host)"}
     result: dict = {}
     merged_dir = OUT / "merged"
     log("merging the adapter into fp16 weights (CPU)")
@@ -383,6 +398,7 @@ def build_gguf() -> dict:
 def main() -> int:
     started = time.time()
     os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
+    OUT.mkdir(parents=True, exist_ok=True)
     install()
     data = locate_data()
     train_records, dataset, cases, manifest = check_inputs(data)
