@@ -38,7 +38,7 @@ PAGE_OFFSET = 2997
 
 # Anti-silent-drop sentinels (W0.5a gate): exact where the count is exact, a floor
 # where the pack may legitimately grow.
-OPEN_ITEMS_SENTINEL = 8
+OPEN_ITEMS_SENTINEL = 12
 PROVISIONS_SENTINEL = 23
 TEST_VECTORS_FLOOR = 45
 

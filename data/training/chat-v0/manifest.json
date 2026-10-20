@@ -100,7 +100,7 @@
     "flowBookSha256": "782a2897d420f342b2bb47e7cd74f1c6c5622348dff9f06eb238549285a7855a",
     "generatorVersion": "build_chat_dataset-0.1.0",
     "promptVersion": "chat-system-v0",
-    "rulePackSha256": "d50cce8c4f08246f8ed7ab6576f7ecbfc672e29d340510b799bf679a924551d1",
+    "rulePackSha256": "ae9738b458113c083cb8f662f6757f45b0741df6afeec55c2dc7b910bf7754eb",
     "sftSchemaSha256": "4b206516988e9aa75837b053bbdfc004e7411af118a679e86a5d17350010832a"
   },
   "promptVersion": "chat-system-v0"

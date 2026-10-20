@@ -15,7 +15,7 @@ page it came from, and whether the words are the gazette's or our summary. Nothi
 answered from model memory: no match means an empty result with a reason.
 
 ```text
-rule pack ──build_corpus──▶ 178 cited docs (BN+EN) ──BM25 + dense──▶ RRF ──rerank──▶ hits
+rule pack ──build_corpus──▶ 186 cited docs (BN+EN) ──BM25 + dense──▶ RRF ──rerank──▶ hits
                                    │                                            │
                         manifest: pins, counts, gaps               ClauseCache (pack-pinned)
 ```
@@ -35,7 +35,7 @@ of dropping an entity whose citation is missing.
 | `parking_note` | 12 | note text | pack `parkingSchedule.notes[]` |
 | `geometry_rule` | 6 | clause + title + summary | pack `parkingGeometry.rules[]` |
 | `footnote` | 20 | transcribed gazette wording (`gazette_quote`) | pack `footnotes[]` |
-| `declared_gap` | 16 | what the pack cannot assert, and why; **no** citation | pack `gaps[]` |
+| `declared_gap` | 24 | what the pack cannot assert, and why; **no** citation | pack `gaps[]` |
 
 Document fields: `id` (`<packId>:<kind>:<entityId>:<lang>`), `kind`, `lang`, `entityId`,
 `clause`, `title`, `text`, `textKind`, `citation` (`citeKey`, `gazettePage`, `pdfPage`,
@@ -105,6 +105,13 @@ gazette bytes. `stats()` reports `entries`, `hits`, `misses` and the pin.
 ## Coverage law
 
 - **No uncited document**: build fails if an entity's `cite` key is missing or lacks a page.
+- **A subject the pack does not cover is a gap, not a neighbour.** The four coverage probes
+  (a staircase width, a parapet height, a concrete grade, a lift count) are declared in the pack
+  (ADR-0003, 2026-10-21), so the corpus carries a gap document for each and the service cites
+  the gap instead of a neighbouring clause. Two rules make that true: a `declared_gap` document
+  that the lexical search ranks first **stays** first (a reranker may reorder law documents; it
+  may not demote the pack's own "we do not assert this"), and a gap document's text carries the
+  question's own words so the lexical search can find it.
 - **No silent gap**: every pack gap is a `declared_gap` document; every un-ingested reference
   is in `sources.yaml`, the manifest and `coverage()`.
 - **No invented numbers**: table documents restate pack rows; row selection stays in W1.2.
@@ -129,7 +136,7 @@ gazette bytes. `stats()` reports `entries`, `hits`, `misses` and the pin.
   v0 production reranker and live ranking should be described as fused+lexical.
 - **No PDF ingestion yet.** The BYO-PDF importer (§5.6) is what will add BNBC/clause text as
   candidates; nothing here pretends to read the gazette PDF directly.
-- **CPU cost is untested at scale.** 178 documents are indexed in memory; a real reference
+- **CPU cost is untested at scale.** 186 documents are indexed in memory; a real reference
   set (thousands of clauses) will need a sharded cache and likely numpy — an owner-signoff
   dependency decision, deliberately deferred.
 

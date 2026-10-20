@@ -125,7 +125,7 @@ def test_search_returns_an_explanatory_empty_result(service) -> None:
     result = service.search("!!! ???", k=3)
     assert result.hits == ()
     assert result.note == "no clause matched the query"
-    assert result.corpus_documents == 178
+    assert result.corpus_documents == 186
 
 
 def test_search_flags_a_declared_gap_hit(service) -> None:

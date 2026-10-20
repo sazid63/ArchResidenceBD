@@ -92,6 +92,31 @@ pack's `gaps` array (open items only). Items marked **RESOLVED** are kept for th
   room-dimension standards belong with the rule engine (W1.2), where they can actually be enforced.
 - Not silent: listed in the pack's `gaps` and here.
 
+## C12: minimum staircase width — OPEN (scope decision recorded)
+
+- The pack has no rule for a minimum staircase width; the staircase appears only in passing
+  (the ramp/landing provisions). A staircase width is a BNBC matter.
+- Scope decision (pack v0 = FAR/BCR/setback/height + key rules): not transcribed, not asserted.
+- Not silent: listed in the pack's `gaps` (gap-topic-staircase-width) and here, so the RAG answers
+  "not in this pack" instead of citing a neighbouring clause.
+
+## C13: minimum parapet wall height — OPEN (scope decision recorded)
+
+- The pack mentions parapets only inside portico footnotes; it has no parapet height rule.
+- Scope decision: not transcribed, not asserted (see gap-topic-parapet-height).
+
+## C14: structural material / concrete grade — OPEN (scope decision recorded)
+
+- Concrete grades and structural materials are BNBC provisions; BNBC is not ingested (see the
+  source registry and gap-c4).
+- Scope decision: not asserted (see gap-topic-concrete-grade).
+
+## C15: number of lifts in a building — OPEN (scope decision recorded)
+
+- A lift count comes from the building code and a lift study, not from the gazette rules this
+  pack transcribes.
+- Scope decision: not asserted (see gap-topic-lift-count).
+
 ## Resolved during verification (non-C notes)
 
 - Footnote [১] (Type A unplanned-area uses): the words for restaurant, home for the elderly and hostel

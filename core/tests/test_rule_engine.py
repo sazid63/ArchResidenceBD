@@ -20,7 +20,7 @@ PACK_PATH = ROOT / "spec" / "rules" / "rajuk-2008.yaml"
 VERDICT_EXAMPLE = EXAMPLES / "interfaces" / "verdict-set-example.json"
 
 # Pinned pack file hash (W0.9 froze the same value in verdict-set-example.json).
-PACK_SHA256 = "d50cce8c4f08246f8ed7ab6576f7ecbfc672e29d340510b799bf679a924551d1"
+PACK_SHA256 = "ae9738b458113c083cb8f662f6757f45b0741df6afeec55c2dc7b910bf7754eb"
 AT = "2026-10-18T10:02:00+06:00"
 
 PACK = compliance.load_pack(PACK_PATH)

@@ -307,6 +307,7 @@ class RagService:
                     rerank_scores = {}
             except RagError as exc:
                 degraded.append(f"rerank:{exc}")
+        lexical_head = lexical[0].doc_id if lexical else None
         if rerank_scores:
             ordered = sorted(
                 ordered,
@@ -316,6 +317,13 @@ class RagService:
                     item[0],
                 ),
             )
+        if lexical_head is not None and self.docs[lexical_head].kind == "declared_gap":
+            # The pack declared this subject a gap and the lexical search put that declaration
+            # first. A reranker may reorder law documents; it may not demote the pack's own
+            # "we do not assert this" below a neighbouring clause.
+            ordered = [(lexical_head, next(score for doc_id, score in ordered if doc_id == lexical_head))] + [
+                item for item in ordered if item[0] != lexical_head
+            ]
 
         hits = []
         for doc_id, fused_score in ordered[:k]:

@@ -7,9 +7,9 @@
   },
   "harnessVersion": "eval-harness-0.1.0",
   "pins": {
-    "corpusSha256": "9646f07e7387826e0679e2cebb58cde6bd66a57fd57da9ba7fa78735aca71beb",
+    "corpusSha256": "ec43c30ad4c64e2e89a9345ffbd25a3e698cf593b33141c71a7b4421bf599dc0",
     "datasetSha256": "d6d1e8804e893605c7169fd9c6dab9b8d7d2607dd59b9976e1542779097c7acb",
-    "packSha256": "d50cce8c4f08246f8ed7ab6576f7ecbfc672e29d340510b799bf679a924551d1"
+    "packSha256": "ae9738b458113c083cb8f662f6757f45b0741df6afeec55c2dc7b910bf7754eb"
   },
   "replies": {
     "finetune": {

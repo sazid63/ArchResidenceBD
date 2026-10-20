@@ -78,7 +78,7 @@ Generated from spec/rules/rajuk-2008.yaml - do not edit by hand; regenerate with
 ## Review
 
 - **Label:** engineer validation pending — Launch Plan
-- **Open items:** 8
+- **Open items:** 12
 - **Open items file:** `spec/rules/rajuk-2008-candidates.md`
 
 ## Use classes
@@ -724,6 +724,10 @@ Packed bay width: 2.3 m
 | `gap-c8` | C8 | Amendments to the 2008 Bidhimala published after 2008 are not researched. | The pack encodes the 2008 text as printed; amendments must be obtained and diffed before the pack can leave candidate status. See candidates C8. |
 | `gap-c9` | C9 | The 2025-12-14 DAP FAR reform is recorded as metadata only; its primary document is not obtained and nothing from it is encoded. | Quality law: no unsourced values. The app must keep surfacing that a newer regime may apply. See candidates C9. |
 | `gap-c10` | C10 | Two legacy-font glitch words are not page-image verifiable in this edition: §52(2) (text-layer decodes to স্ব-স্ব, high confidence) and §53(2)(ঙ) (probable স্বার্থ). | The font subset is broken (glyphs render as Λ-shaped marks); the mirror PDF is byte-identical; both words are withheld from provision text until confirmed against another edition. See candidates C10. |
+| `gap-topic-staircase-width` | C12 | This pack contains no rule for a minimum staircase width (the staircase is mentioned only in passing, in the ramp/landing provisions). এই প্যাকে সিঁড়ির ন্যূনতম প্রস্থের কোনো বিধান নেই। | Scope decision: the pack covers FAR/BCR/setback/height and the key rules; a staircase width belongs to BNBC, which is not ingested (see gap-c4 and the source registry). The answer is therefore "not in this pack", never a neighbouring clause. |
+| `gap-topic-parapet-height` | C13 | This pack contains no minimum height for a parapet wall; parapets appear only inside portico footnotes. এই প্যাকে পারাপেট/প্যারাপিট দেওয়ালের ন্যূনতম উচ্চতার কোনো বিধান নেই। | Scope decision: the pack covers FAR/BCR/setback/height and the key rules; a parapet height is not among them. The answer is therefore "not in this pack", never a neighbouring clause. |
+| `gap-topic-concrete-grade` | C14 | This pack contains no concrete grade rule and no structural material rule (those are BNBC provisions). এই প্যাকে কংক্রিট গ্রেড বা কাঠামো বস্তুর কোনো বিধান নেই। | Scope decision: the pack is the RAJUK FAR/BCR edition; structural materials belong to BNBC, which is not ingested (see gap-c4 and the source registry). The answer is therefore "not in this pack", never a neighbouring clause. |
+| `gap-topic-lift-count` | C15 | This pack contains no rule for the lift count in a building (a lift study, not a gazette rule). এই প্যাকে টাওয়ারে বা অন্য কোনো ভবনে লিফট সংখ্যা নির্ধারণের কোনো বিধান নেই। | Scope decision: the pack covers FAR/BCR/setback/height and the key rules; a lift count comes from the building code and a lift study, neither of which is ingested. The answer is therefore "not in this pack", never a neighbouring clause. |
 | `gap-c11` | C11 | §58 (ইমারতের পরিসরের ন্যূনতম চাহিদা, minimum space requirements for habitable rooms etc.) is not transcribed into the pack. | Recorded scope decision: pack v0 covers FAR/BCR/setback/height and the key rules; §58 belongs with the rule engine in W1.2. Listed so coverage is never silently dropped. See candidates C11. |
 
 Full working notes: `spec/rules/rajuk-2008-candidates.md` — open items are tracked there and never dropped silently (plan §9).

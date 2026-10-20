@@ -23,3 +23,22 @@ Plan §5.6 makes structured rule packs the home of every compliance number (FAR,
 - The YAML is the only legal review surface for the engineer; the rendered doc is for reading and links the ledger.
 - W1.2 (rules engine) consumes packs through this schema; W0.9 may treat `rule-pack.schema.json` as an upstream contract.
 - Any future authority pack reuses the same schema, tests and renderer.
+
+## Amendment 2026-10-21 — the pack declares the subjects it does not cover
+
+Four **subject gaps** were added to the RAJUK pack (`gap-topic-staircase-width`,
+`gap-topic-parapet-height`, `gap-topic-concrete-grade`, `gap-topic-lift-count`, with the open
+items C12-C15 in `spec/rules/rajuk-2008-candidates.md`). The RAG's coverage probes asked the
+pack about exactly these subjects and retrieval answered with a *neighbouring* clause - a wrong
+answer with a real citation.
+
+A score floor cannot fix that: the probes' scores overlap the real questions' scores, so any
+threshold that abstains the probes would also drop real questions. The honest fix is the pack's
+own mechanism for "we do not assert this": a declared gap, so the corpus carries a gap document,
+the service cites the gap instead of a neighbour, and the answer says the pack does not cover
+the subject.
+
+The pack's `review.openItems` moves 8 -> 12 (the ledger is exact, not approximate) and the pack
+hash changes with it, so the corpus, the chat dataset, the SFT split and the eval case set were
+rebuilt. Nothing else about the pack's content changed: no provision, table, footnote or test
+vector was touched - the amendment only says what was never there.

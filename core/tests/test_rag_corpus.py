@@ -51,7 +51,7 @@ def test_corpus_covers_every_pack_entity_kind(corpus, pack) -> None:
         "declared_gap",
     }
     assert {doc.lang for doc in corpus.docs} == {"bn", "en"}
-    assert len(corpus.docs) == 178
+    assert len(corpus.docs) == 186
     assert corpus.counts()["byKind"]["provision"] == 2 * len(pack["provisions"])
 
 

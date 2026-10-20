@@ -1,6 +1,6 @@
 {
   "byKind": {
-    "declared_gap": 16,
+    "declared_gap": 24,
     "far_table": 20,
     "footnote": 20,
     "geometry_rule": 6,
@@ -11,17 +11,17 @@
     "setback_table": 2
   },
   "byLang": {
-    "bn": 89,
-    "en": 89
+    "bn": 93,
+    "en": 93
   },
   "byTextKind": {
-    "declared_gap": 16,
+    "declared_gap": 24,
     "gazette_quote": 20,
     "pack_note": 12,
     "pack_summary": 130
   },
-  "corpusBytes": 214664,
-  "corpusSha256": "9646f07e7387826e0679e2cebb58cde6bd66a57fd57da9ba7fa78735aca71beb",
+  "corpusBytes": 221838,
+  "corpusSha256": "ec43c30ad4c64e2e89a9345ffbd25a3e698cf593b33141c71a7b4421bf599dc0",
   "coverage": {
     "citationsDeclared": 39,
     "citationsUnused": [
@@ -29,14 +29,14 @@
       "schedule4-notes"
     ],
     "citationsUsed": 37,
-    "declaredGapsInCorpus": 8,
-    "declaredGapsInPack": 8,
+    "declaredGapsInCorpus": 12,
+    "declaredGapsInPack": 12,
     "provisions": 23,
     "provisionsWithDocs": 23,
     "sourcesIngested": 1,
     "sourcesMissing": 3
   },
-  "documents": 178,
+  "documents": 186,
   "generator": "build_rag_corpus-0.1.0",
   "missing": [
     {
@@ -56,7 +56,7 @@
     }
   ],
   "packId": "rajuk@2008.1",
-  "packSha256": "d50cce8c4f08246f8ed7ab6576f7ecbfc672e29d340510b799bf679a924551d1",
+  "packSha256": "ae9738b458113c083cb8f662f6757f45b0741df6afeec55c2dc7b910bf7754eb",
   "packVersion": "0.1.0",
   "schemaVersion": "0.1.0",
   "sources": [

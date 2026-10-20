@@ -17,7 +17,7 @@ engine, advisor/override behavior; first evals."*
 |---|---|---|
 | Chat training pipeline end-to-end | **Yes.** Scripted corpus 661 verified records → QLoRA on Kaggle (T4) → GGUF → fleet → live BN+EN demo. | `data/training/chat-v0/`, `sft-v0/`, `sft-v1/`; `archie-chat-v0-Q4_K_M.gguf` (2,497,278,880 B, sha256 `bea406a8…a54f73`); `data/eval/chat-v0/replies/finetune.jsonl` (43/60) |
 | Repair training pipeline end-to-end | **Pipeline yes, trained member no.** Corpus executed in FreeCAD → split frozen → QLoRA on Kaggle → replies judged *by the engine*. The fine-tune **ties** the stock base model, so no trained model ships. | `data/training/repair-v0/` (16 records), `repair-v1/` (12/4), `data/eval/repair-v0/reports/*.json`, ADR-0017 amendments |
-| RAG service | **Yes**, with one declared degradation: 178 cited documents, hybrid retrieval, citations, clause cache; the *model* reranker is degenerate, so lexical reranking is the production reranker. | `spec/rag/rajuk-2008.corpus.jsonl` + manifest (8 pack gaps, 3 sources not ingested, 16 declared-gap docs), `docs/spec/rag-service-v0.md` |
+| RAG service | **Yes**, with one declared degradation: 186 cited documents, hybrid retrieval, citations, clause cache; the *model* reranker is degenerate, so lexical reranking is the production reranker. | `spec/rag/rajuk-2008.corpus.jsonl` + manifest (8 pack gaps, 3 sources not ingested, 16 declared-gap docs), `docs/spec/rag-service-v0.md` |
 | Rule engine | **Yes.** 49/49 pack vectors, verdicts, deviation register, restore-to-compliant. | `archres_core.compliance`, ADR-0008 |
 | Spec engine | **Yes.** Patch/validate/version, revision log, provenance, spec sha256. | `archres_core.spec`, ADR-0007 |
 | Advisor / override behaviour | **Yes, in the brain; not yet in the app.** The behavioural curriculum exists as data (12 `rule.explain` + 6 `deviation.override` records), the register is live, and the model is only asked for the *value* it cannot parse. | `data/training/chat-v0/` (byTask), `archres_core.compliance`, ADR-0008/0010 |
@@ -59,7 +59,7 @@ not bit-reproducible across hardware, so the *recorded* set is the artefact CI s
 | Rule-pack provisions the engine does not evaluate | 8 | pack manifest → `gaps` |
 | (Retired, not open: the ~0.5M-token teacher target — ADR-0024, 2026-10-21) | — | `docs/adr/0024-retire-the-teacher-target.md` |
 | References not ingested (BNBC core, RAJUK Appendix 5, other cities) | 3 | `spec/rag/rajuk-2008.manifest.json` → `missing` |
-| RAG coverage probes that return a neighbour instead of abstaining | 4 | every `run_eval.py` report |
+| RAG coverage probes (a staircase width, a parapet height, a concrete grade, a lift count) | 4 - **now answered with the pack's declared gap** (ADR-0003, 2026-10-21) | `spec/rules/rajuk-2008.yaml` `gaps[]` |
 | Repair corpus breadth | 1 macro, 16 single-line mutations | ADR-0017 amendment |
 | `LawDesk` not wired into `Session` | 1 seam | `docs/spec/eval-harness-v0.md` |
 

@@ -36,7 +36,7 @@ verification:
 
 review:
   label: "engineer validation pending — Launch Plan"
-  openItems: 8
+  openItems: 12
   openItemsFile: "spec/rules/rajuk-2008-candidates.md"
 
 useClasses:
@@ -834,6 +834,42 @@ gaps:
     what: "Two legacy-font glitch words are not page-image verifiable in this edition: §52(2) (text-layer decodes to স্ব-স্ব, high confidence) and §53(2)(ঙ) (probable স্বার্থ)."
     why: "The font subset is broken (glyphs render as Λ-shaped marks); the mirror PDF is byte-identical; both words are withheld from provision text until confirmed against another edition. See candidates C10."
     candidateRef: C10
+  - id: gap-topic-staircase-width
+    what: >-
+      This pack contains no rule for a minimum staircase width (the staircase is mentioned only
+      in passing, in the ramp/landing provisions). এই প্যাকে সিঁড়ির ন্যূনতম প্রস্থের কোনো বিধান নেই।
+    why: >-
+      Scope decision: the pack covers FAR/BCR/setback/height and the key rules; a staircase
+      width belongs to BNBC, which is not ingested (see gap-c4 and the source registry). The
+      answer is therefore "not in this pack", never a neighbouring clause.
+    candidateRef: C12
+  - id: gap-topic-parapet-height
+    what: >-
+      This pack contains no minimum height for a parapet wall; parapets appear only inside
+      portico footnotes. এই প্যাকে পারাপেট/প্যারাপিট দেওয়ালের ন্যূনতম উচ্চতার কোনো বিধান নেই।
+    why: >-
+      Scope decision: the pack covers FAR/BCR/setback/height and the key rules; a parapet height
+      is not among them. The answer is therefore "not in this pack", never a neighbouring
+      clause.
+    candidateRef: C13
+  - id: gap-topic-concrete-grade
+    what: >-
+      This pack contains no concrete grade rule and no structural material rule (those are
+      BNBC provisions). এই প্যাকে কংক্রিট গ্রেড বা কাঠামো বস্তুর কোনো বিধান নেই।
+    why: >-
+      Scope decision: the pack is the RAJUK FAR/BCR edition; structural materials belong to
+      BNBC, which is not ingested (see gap-c4 and the source registry). The answer is therefore
+      "not in this pack", never a neighbouring clause.
+    candidateRef: C14
+  - id: gap-topic-lift-count
+    what: >-
+      This pack contains no rule for the lift count in a building (a lift study, not a
+      gazette rule). এই প্যাকে টাওয়ারে বা অন্য কোনো ভবনে লিফট সংখ্যা নির্ধারণের কোনো বিধান নেই।
+    why: >-
+      Scope decision: the pack covers FAR/BCR/setback/height and the key rules; a lift count
+      comes from the building code and a lift study, neither of which is ingested. The answer is
+      therefore "not in this pack", never a neighbouring clause.
+    candidateRef: C15
   - id: gap-c11
     what: "§58 (ইমারতের পরিসরের ন্যূনতম চাহিদা, minimum space requirements for habitable rooms etc.) is not transcribed into the pack."
     why: "Recorded scope decision: pack v0 covers FAR/BCR/setback/height and the key rules; §58 belongs with the rule engine in W1.2. Listed so coverage is never silently dropped. See candidates C11."
