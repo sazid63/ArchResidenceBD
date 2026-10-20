@@ -273,6 +273,27 @@ uv run --directory core python ../tools/training/build_repair_dataset.py --check
 - Repair records are a separate corpus: they do not join `sft-v0` and never train the chat
   adapter.
 
+## Repair SFT round 1 (W1.7)
+
+- **Split:** `data/training/repair-v1/` — the 16-record corpus cut by a **frozen** holdout of
+  four mutation ids (`float-arity`, `volume-divide-zero`, `column-unit-slip`, `pads-hard-coded`):
+  12 train, 4 judged. The holdout is a constant in `tools/training/build_repair_split.py`, pinned
+  by sha256 in the manifest; moving a mutation across that line is a reviewed edit, never a
+  re-run (ADR-0015 law).
+- **Kernel:** `tools/training/kaggle/repair/` — QLoRA on **Qwen2.5-Coder-3B-Instruct** (the family
+  the `archie-repair` placeholder already points at), max length 5120 (a repair record is ~3.4k
+  tokens), 3 epochs, seed 20261020, one visible GPU. The run answers the four held-out prompts
+  twice: once with the untouched base model — the **stock baseline floor**, same quantisation,
+  greedy — and once with the adapter. Both reply sets are recorded.
+- **Judge:** `tools/training/eval_repair.py` — a repair is right only if the repaired macro
+  **passes the same case**. The tool writes each returned macro to disk, runs it through the W1.8
+  harness (FreeCAD) and reports three measures: `passesOwnCase` (the gate), `noCollateral` (the
+  same macro must still pass the *other* foundation cases) and `identicalToTarget` (byte-identical
+  to the known-good macro). The floor is the stock model's measured rate on the same prompts
+  (`data/eval/repair-v0/gates.json`); a fine-tune below the floor fails, exactly like the chat
+  round.
+
+
 ## Kaggle preflight (2026-10-20)
 
 The training inputs travel as the private Kaggle dataset `sajidhossain004/archresbd-sft-v1`

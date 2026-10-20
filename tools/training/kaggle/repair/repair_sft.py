@@ -39,9 +39,12 @@ import sys
 import time
 
 os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
-# Kaggle exposes two T4s; a single-device Trainer wrapped in DataParallel failed on the second
-# replica in the chat round, so the visible device is pinned before torch is imported.
-os.environ.setdefault("CUDA_VISIBLE_DEVICES", "0")
+# Kaggle's T4 shape can expose two GPUs and may already set CUDA_VISIBLE_DEVICES=0,1. This
+# kernel loads the 4-bit model on one device; if Trainer sees a second GPU it wraps the model in
+# DataParallel and the replica on GPU 1 fails against parameters on GPU 0. The visible device is
+# therefore *forced* before torch is imported - `setdefault` would preserve the host's two-GPU
+# value. ARCHRES_SFT_CUDA may name one GPU id.
+os.environ["CUDA_VISIBLE_DEVICES"] = os.environ.get("ARCHRES_SFT_CUDA", "0").strip() or "0"
 
 DATA = pathlib.Path(os.environ.get("ARCHRES_SFT_DATA", "/kaggle/input/archresbd-repair-v1"))
 OUT = pathlib.Path(os.environ.get("ARCHRES_SFT_OUT", "/kaggle/working"))
@@ -229,8 +232,12 @@ class CausalLMCollator:
 
 
 def assert_single_gpu(visible: int) -> None:
+    """Refuse to build a Trainer that would wrap the 4-bit model in DataParallel."""
     if visible != 1:
-        raise SystemExit(f"expected exactly one visible GPU, found {visible}")
+        raise SystemExit(
+            f"expected exactly one visible GPU, found {visible}; "
+            "set ARCHRES_SFT_CUDA to one device id"
+        )
 
 
 def generate_repairs(model, tokenizer, holdout: list[dict], label: str) -> tuple[list[dict], float]:

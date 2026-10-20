@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import pathlib
 import shutil
 
@@ -91,6 +92,19 @@ def test_the_kernel_refuses_a_moved_holdout(tmp_path: pathlib.Path) -> None:
     )
     with pytest.raises(SystemExit, match="not the frozen one"):
         _kernel().check_inputs(data)
+
+
+def test_the_kernel_forces_one_visible_gpu(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "0,1")
+    _kernel()
+    assert os.environ["CUDA_VISIBLE_DEVICES"] == "0"
+
+
+def test_the_kernel_honours_an_explicit_single_gpu(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "0,1")
+    monkeypatch.setenv("ARCHRES_SFT_CUDA", "1")
+    _kernel()
+    assert os.environ["CUDA_VISIBLE_DEVICES"] == "1"
 
 
 def test_the_kernel_refuses_a_leaked_mutation(tmp_path: pathlib.Path) -> None:
