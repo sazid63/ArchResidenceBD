@@ -33,6 +33,11 @@ import subprocess
 import sys
 import time
 
+# Kaggle's `NvidiaTeslaT4` shape can expose two GPUs.  This kernel loads the 4-bit model on one
+# device (`device_map={"": 0}`); if Trainer sees a second GPU it wraps the model in DataParallel
+# and the replica on GPU 1 fails against parameters on GPU 0.  Pin before torch is imported.
+os.environ.setdefault("CUDA_VISIBLE_DEVICES", "0")
+
 SMOKE = os.environ.get("ARCHRES_SFT_SMOKE") == "1"
 SKIP_GGUF = os.environ.get("ARCHRES_SFT_SKIP_GGUF") == "1"
 NO_INSTALL = os.environ.get("ARCHRES_SFT_NO_INSTALL") == "1"
@@ -341,7 +346,8 @@ def train(records: list[dict], tokenizer) -> tuple[object, dict]:
     )
     log(
         f"batch: per_device={arguments.per_device_train_batch_size}, "
-        f"accum={arguments.gradient_accumulation_steps}, effective={arguments.train_batch_size}"
+        f"accum={arguments.gradient_accumulation_steps}, effective={arguments.train_batch_size}, "
+        f"visibleGpus={torch.cuda.device_count()}"
     )
     trainer = Trainer(
         model=model,
