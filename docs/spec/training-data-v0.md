@@ -169,8 +169,16 @@ CPU kernel `tools/training/kaggle/chat-preflight/` verifies the mount without sp
   fallback).
 - The chat template is prefix-stable and the assistant span survives masking (2 sample records,
   385 prefix tokens masked); `transformers` 4.57.6 on the Kaggle image.
-- The GPU training kernel (`tools/training/kaggle/chat/`, ADR-0018) is queued behind the account's
-  running 27B session; the block is recorded in `docs/work/OWNER-ATTENTION.md` #4.
+- The GPU training kernel (`tools/training/kaggle/chat/`, ADR-0018) is no longer queued: after the
+  owner's stop authorization the 27B server moved to `CANCEL_ACKNOWLEDGED` at 09:44, leaving
+  21.95 h of GPU quota. The block is closed in `docs/work/OWNER-ATTENTION.md` #4.
+- **First two GPU attempts (2026-10-20):** v1 failed in the stock
+  `DataCollatorForLanguageModeling` because it pads `input_ids` but not `labels`; the explicit
+  `CausalLMCollator` now pads ids/labels/attention together and asserts per-record id/label
+  alignment (`3a9cb2f`, five kernel tests). v2 then exposed Kaggle's two T4 GPUs: Trainer wrapped
+  the single-device `device_map={"": 0}` model in `DataParallel` and the second replica failed;
+  the kernel pins `CUDA_VISIBLE_DEVICES=0` before importing torch (`9e6a209`). v3 is running; no
+  result is claimed until it completes.
 
 ## Units
 
