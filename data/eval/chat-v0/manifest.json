@@ -12,6 +12,10 @@
     "packSha256": "d50cce8c4f08246f8ed7ab6576f7ecbfc672e29d340510b799bf679a924551d1"
   },
   "replies": {
+    "finetune": {
+      "count": 60,
+      "sha256": "b970f0904cca89d8f6315c362a2515713e79e42272b91032cb3e4209d240dbb0"
+    },
     "stock": {
       "count": 60,
       "sha256": "6f0135e36e5435f535d231f62ac28a99597b49e1327ed8e931e1e5b1bf3f7f9e"

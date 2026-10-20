@@ -283,6 +283,10 @@ uv run --directory core python ../tools/eval/run_eval.py --json data/tmp/eval.js
 uv run --directory core python ../tools/eval/record_baseline.py --root data/downloads/s2 --name stock
 # then rebuild the manifest pin; run_eval refuses bytes that do not match it
 uv run --directory core python ../tools/eval/build_cases.py
+# a pinned training candidate: copy replies/<name>.jsonl into data/eval/chat-v0/replies/,
+# rebuild the pin, then score with that model name (use absolute report paths)
+$repo = (Get-Location).Path
+uv run --directory core python ../tools/eval/run_eval.py --model finetune --json "$repo\data\tmp\eval-finetune.json" --markdown "$repo\data\tmp\eval-finetune.md"
 ```
 
 Exit code is 0 only when every gate holds. `--no-gates` prints the numbers without failing
@@ -296,7 +300,7 @@ Exit code is 0 only when every gate holds. `--no-gates` prints the numbers witho
 | `split.json` | `--init-split` once | frozen by hashed id; a plain build fails without it |
 | `cases.jsonl` | `build_cases.py` | 655 cases, byte-stable, `--check`ed in CI |
 | `manifest.json` | `build_cases.py` | pins dataset / pack / corpus / split sha256 and the reply files |
-| `replies/<model>.jsonl` | `record_baseline.py` | one `{caseId, reply}` per line; sha pinned in the manifest |
+| `replies/<model>.jsonl` | `record_baseline.py` for stock; a scored training candidate for `finetune` | one `{caseId, reply}` per line; sha pinned in the manifest |
 | `gates.json` | human | a floor is a reviewed number, not a target |
 
 `run_eval.py` hashes the reply file it actually scores. When a `--model` name is pinned in
@@ -307,6 +311,8 @@ new `--model` name, never a masquerade under `stock`. The JSON report records bo
 ## Next
 
 W1.6 (chat SFT round 1) trains on the `train` split and is judged on the `holdout` floors
-recorded here; W1.7 (repair SFT) adds its own suites; W1.12 re-runs the demo on the fine-tune.
+recorded here; the 2026-10-20 scripted-round `finetune` set is pinned and passes all four floors
+(43/60 model.parse), while the teacher batch remains open. W1.7 (repair SFT) adds its own
+suites; W1.12 re-runs the demo on the fine-tune.
 A floor may only move with a recorded reason — quote the measured number, the model and the
 commit, and update `gates.json` and this table together.

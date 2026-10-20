@@ -179,7 +179,33 @@ CPU kernel `tools/training/kaggle/chat-preflight/` verifies the mount without sp
   the single-device `device_map={"": 0}` model in `DataParallel` and the second replica failed;
   the kernel pins `CUDA_VISIBLE_DEVICES=0` before importing torch (`9e6a209`). A follow-up forces
   the value even when Kaggle pre-sets `0,1` and refuses a multi-GPU Trainer (`9ff1b57`, three new
-  kernel tests). v3 is running; no result is claimed until it completes.
+  kernel tests). **v3 COMPLETE**; the measured candidate is recorded below.
+
+## Chat SFT round 1 candidate (2026-10-20)
+
+- **v3 run:** Kaggle T4, Qwen3-4B-Instruct-2507, 2 epochs / 104 steps / 414 train records,
+  max length 2048, seed 20261020, bf16. `train-summary.json` records loss **0.21749**, 60 replies
+  in 303.9 s, total 4,493.5 s; the adapter is 132,187,888 bytes. The run used the `9e6a209`
+  kernel; the forced-pin hardening (`9ff1b57`) is for any future run.
+- **Reply set:** `data/eval/chat-v0/replies/finetune.jsonl`, 60 lines / 60 unique `model.parse`
+  case ids / no missing or extra ids; sha256
+  `b970f0904cca89d8f6315c362a2515713e79e42272b91032cb3e4209d240dbb0`, pinned in the eval
+  manifest. The gated command is the one in `docs/spec/eval-harness-v0.md`; it exits 0.
+- **Measured:** `model.parse` **43/60 = 0.7167** vs stock 32/60 = 0.5333. Gates: decision
+  **0.867** (floor 0.650), value **0.706** (0.500), `accuracy:bn` **0.600** (0.5667),
+  `accuracy:en` **0.833** (0.500). All four floors pass; **none was moved**. Seventeen
+  `model.parse` misses remain and are enumerated by the reproducible gated report; no 1.0 claim.
+- **GGUF:** the Kaggle build step failed with `ImportError: incompatible torchao 0.10.0`
+  (requires >0.16.0); this is a packaging error, not a training result. The CPU converter
+  (`tools/training/convert_gguf.py`, no torchao) is the build path; the artifact/sha used by the
+  fleet is recorded in `docs/spec/model-serving-v0.md` after it lands.
+- **Local fallback:** the RTX 4050 run was stopped after **28/104 steps in 2h51m**
+  (~360-420 s/step, projected >7h remaining) and produced no adapter/replies. The 6 GB local
+  floor is a smoke venue, not a viable full-run venue for this configuration; Kaggle is the
+  selected candidate. No local result is claimed.
+- **Scope:** this is the **414-record scripted round** (~197k tokens). The plan's ~0.5M-token
+  teacher-augmented batch remains a W1.6 job and is not silently dropped; **W1.6 is not ticked**
+  by this candidate.
 
 ## Units
 
@@ -193,7 +219,7 @@ CPU kernel `tools/training/kaggle/chat-preflight/` verifies the mount without sp
 
 ## Deliberately NOT in v0
 
-- **The Kaggle training run itself** — the split and the repair corpus are prepared here; the QLoRA notebook, adapter, GGUF conversion, fleet registration and the W1.9/W1.12 re-runs on the fine-tune are the training runs.
+- **The teacher batch** — the 414-record scripted round is measured; the plan's ~0.5M-token teacher-augmented batch remains a W1.6 job.
 - **Masked-token / loss-mask metadata** — the SFT trainer derives it from `messages` roles; no separate format yet.
 - **Conversation-level multi-turn samples beyond the override confirmation pair** — v0 records are single-task; longer dialogues come from the orchestrator (W1.10) and its transcript capture.
 
