@@ -99,7 +99,8 @@ dropped). **105 passed** the deterministic verifier; **9 failed** (7 are cut mid
 with no question mark at the 96-token completion cap, 2 echo the editor prompt). The
 passing pool is 58 BN + 47 EN, covers all 88 source questions, but only 26 questions have
 a second distinct paraphrase. Estimated size: **~18.4k passing tokens** (chars ÷ 4), far
-below the ~0.5M target.
+below the ~0.5M target. The audit file retains all 114 records; only the 105 passing
+records are promotion-eligible, and a promotion step must re-run the verifier.
 
 The review sample is **not promotion-ready**. EN paraphrases are mostly faithful; the BN
 sample contains meaning drift and typo-level errors — `খুব কাছে` → `খুব স্বাপ্ত`,
