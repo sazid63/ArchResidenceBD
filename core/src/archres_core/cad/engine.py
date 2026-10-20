@@ -19,11 +19,9 @@ import os
 import pathlib
 import shutil
 
+from .cases import CadError
+
 __all__ = ["CadError", "EngineMissing", "EngineInfo", "find_engine"]
-
-
-class CadError(RuntimeError):
-    """A CAD execution problem the caller must see (never a silent pass)."""
 
 
 class EngineMissing(CadError):

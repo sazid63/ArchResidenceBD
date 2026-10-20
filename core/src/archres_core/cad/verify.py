@@ -17,7 +17,7 @@ import pathlib
 from dataclasses import dataclass, field
 from typing import Any
 
-from .cases import ArtifactExpectation, Bounds, CadCase, ObjectExpectation, _bounds
+from .cases import Bounds, CadCase, ObjectExpectation
 from .runner import RunOutcome, tail
 
 __all__ = ["CaseVerdict", "Failure", "verify_result"]
@@ -60,7 +60,7 @@ class CaseVerdict:
     totals: dict[str, Any] = field(default_factory=dict)
 
     def as_dict(self) -> dict[str, Any]:
-        return {
+        payload: dict[str, Any] = {
             "caseId": self.case_id,
             "ok": self.ok,
             "code": self.code,
@@ -71,6 +71,9 @@ class CaseVerdict:
             "artifactHashes": dict(sorted(self.artifact_hashes.items())),
             "totals": self.totals,
         }
+        if self.trace:
+            payload["trace"] = self.trace
+        return payload
 
     def signature(self) -> dict[str, Any]:
         """The part of a verdict that determinism must reproduce exactly."""
@@ -87,10 +90,6 @@ def _relative(value: float, expected: float) -> float:
     if expected == 0.0:
         return abs(value - expected)
     return abs(value - expected) / abs(expected)
-
-
-def _bounds_equal(first: Bounds | None, second: Bounds | None) -> bool:
-    return first == second
 
 
 def _check_totals(
@@ -123,19 +122,9 @@ def _check_totals(
 def _check_document_objects(
     case: CadCase, result: dict[str, Any], totals: dict[str, Any], failures: list[Failure]
 ) -> None:
-    raw = case.expect.get("documentObjects")
-    if raw is None:
+    expected: Bounds | None = case.expect.get("documentObjects")
+    if expected is None:
         return
-    if isinstance(raw, int):
-        expected = Bounds(float(raw), float(raw))
-    elif isinstance(raw, dict) and {"min", "max"} <= set(raw):
-        expected = _bounds(raw, "documentObjects")
-    elif isinstance(raw, dict) and "min" in raw and "max" not in raw:
-        expected = Bounds(float(raw["min"]), float(raw["min"]))
-    elif isinstance(raw, dict) and "max" in raw and "min" not in raw:
-        expected = Bounds(float(raw["max"]), float(raw["max"]))
-    else:
-        raise CadError("expect.documentObjects must be a count or bounds")
     names = result.get("documentObjects")
     count = len(names) if isinstance(names, list) else totals["objects"]
     if not expected.holds(float(count)):
@@ -147,9 +136,8 @@ def _check_document_objects(
                 actual=count,
             )
         )
-    objects_list = result.get("objects") or []
-    shape_objects = [item for item in objects_list if isinstance(item, dict)]
-    if not shape_objects and not _bounds_equal(expected, None):
+    measured = [item for item in (result.get("objects") or []) if isinstance(item, dict)]
+    if not measured:
         failures.append(
             Failure(
                 check="objects.measured",
@@ -196,8 +184,6 @@ def _check_object(
     if expectation.bbox_mm is not None:
         actual_box = [float(value) for value in (source.get("bboxMm") or [0.0, 0.0, 0.0])]
         for axis, (expected, actual) in enumerate(zip(expectation.bbox_mm, actual_box)):
-            if _bounds_equal(expected, None):
-                continue
             if expected.min == expected.max:
                 if abs(actual - expected.min) <= LENGTH_TOLERANCE_MM:
                     continue

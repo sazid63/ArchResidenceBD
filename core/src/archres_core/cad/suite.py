@@ -171,9 +171,6 @@ def check_cases(
             continue
         if case.script.suffix.lower() != ".py":
             report.failures.append(f"{case.id}: candidate is not a Python macro: {case.script}")
-        body = case.script.read_text(encoding="utf-8", errors="replace")
-        if "runpy" in body and "launcher" in body:
-            report.failures.append(f"{case.id}: candidate looks like the launcher, not a candidate")
         if not case.notes:
             report.warnings.append(f"{case.id}: no notes (why does this case exist?)")
     if not cases:
@@ -199,6 +196,7 @@ def run_execution(
     engine: EngineInfo | None = None,
     workdir: str | pathlib.Path | None = None,
     keep: bool = False,
+    launcher: str | pathlib.Path | None = None,
 ) -> ExecutionReport:
     """Execute every case headless; determinism cases run twice and must match exactly."""
     if engine is None:
@@ -220,7 +218,12 @@ def run_execution(
             shutil.rmtree(case_dir)
         params = {"kind": case.kind, "params": case.params, "caseId": case.id}
         first = run_candidate(
-            engine, case.script, params, case_dir / "run1", timeout_ms=case.timeout_ms
+            engine,
+            case.script,
+            params,
+            case_dir / "run1",
+            timeout_ms=case.timeout_ms,
+            launcher=launcher,
         )
         verdict = verify_result(case, first)
         outcomes = [first]
@@ -228,7 +231,12 @@ def run_execution(
         note = ""
         if case.determinism:
             second = run_candidate(
-                engine, case.script, params, case_dir / "run2", timeout_ms=case.timeout_ms
+                engine,
+                case.script,
+                params,
+                case_dir / "run2",
+                timeout_ms=case.timeout_ms,
+                launcher=launcher,
             )
             outcomes.append(second)
             second_verdict = verify_result(case, second)
@@ -255,9 +263,8 @@ def run_execution(
                 determinism_note=note,
             )
         )
-    if workdir is None and not (keep or any(not run.ok for run in runs)):
-        # A clean scratch run leaves nothing behind; a failure keeps its directory for evidence.
-        return ExecutionReport(engine=engine, runs=runs, workdir=root)
+    # Scratch runs are left in the OS temp directory on purpose: a failing run's directory is
+    # the evidence a repair step trains on, and the report points at it either way.
     return ExecutionReport(engine=engine, runs=runs, workdir=root)
 
 

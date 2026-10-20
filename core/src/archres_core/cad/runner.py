@@ -84,12 +84,14 @@ def run_candidate(
     workdir: str | pathlib.Path,
     *,
     timeout_ms: int = 60_000,
+    launcher: str | pathlib.Path | None = None,
 ) -> RunOutcome:
     """Execute ``candidate`` in a fresh engine process and return its measured result.
 
     ``workdir`` is created (or reused) and receives ``params.json``, ``result.json`` and the
     candidate's artifacts under ``out/``. The caller owns ``workdir`` so a failed run can be
-    inspected afterwards.
+    inspected afterwards. ``launcher`` is the in-engine script (``launcher.py``); tests pass a
+    fake one so the process plumbing can be exercised without a CAD install.
     """
     directory = pathlib.Path(workdir)
     directory.mkdir(parents=True, exist_ok=True)
@@ -116,8 +118,9 @@ def run_candidate(
     )
 
     started = time.monotonic()
+    in_engine = pathlib.Path(launcher) if launcher is not None else LAUNCHER
     process = subprocess.Popen(
-        [str(engine.path), str(LAUNCHER.resolve())],
+        [str(engine.path), str(in_engine.resolve())],
         cwd=str(directory),
         env=env,
         stdin=subprocess.DEVNULL,

@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
   pull_request:
+  schedule:
+    # The CAD execution job installs FreeCAD (~minutes) and runs weekly as a bit-rot probe;
+    # the offline case check runs on every push in core-tests.
+    - cron: "23 4 * * 1"
+  workflow_dispatch:
 
 jobs:
   sanity:
@@ -66,6 +71,44 @@ jobs:
         run: uv run --directory core python ../tools/eval/build_cases.py --check
       - name: Eval gates
         run: uv run --directory core python ../tools/eval/run_eval.py
+      - name: CAD case set (offline, no engine)
+        run: uv run --directory core python ../tools/cad/verify.py --check
+
+  # Real FreeCAD, weekly and on demand. Not on every push: this is a private repository and a
+  # full engine install per push would spend the monthly Actions minutes for no extra signal.
+  # The Windows dev machine runs the same probe at every CAD change and records the numbers in
+  # docs/spec/cad-verify-v0.md.
+  cad-execution:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install FreeCAD (headless)
+        run: |
+          sudo apt-get update -o Acquire::Retries=3
+          sudo apt-get install -y --no-install-recommends -o Acquire::Retries=3 freecad
+          freecadcmd --version
+      - uses: astral-sh/setup-uv@v10.3.0
+      - name: Sync workspace
+        run: uv sync --all-packages
+      - name: Execute the committed CAD cases
+        env:
+          ARCHRES_FREECADCMD: /usr/bin/freecadcmd
+        run: |
+          uv run --directory core python ../tools/cad/verify.py --run \
+            --workdir "$GITHUB_WORKSPACE/data/tmp/cad-ci" \
+            --json "$GITHUB_WORKSPACE/data/tmp/cad-ci/report.json" \
+            --markdown "$GITHUB_WORKSPACE/data/tmp/cad-ci/report.md"
+      - name: Upload the execution report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cad-execution-report
+          path: data/tmp/cad-ci
+          if-no-files-found: warn
 
   app:
     runs-on: ubuntu-latest

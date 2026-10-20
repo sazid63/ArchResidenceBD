@@ -56,6 +56,10 @@ class Bounds:
     def describe(self) -> str:
         if self.min == self.max:
             return f"{self.min:g}"
+        if self.max == float("inf"):
+            return f">= {self.min:g}"
+        if self.min == float("-inf"):
+            return f"<= {self.max:g}"
         return f"{self.min:g}..{self.max:g}"
 
 
@@ -176,6 +180,28 @@ def _artifacts(raw: Any, where: str) -> tuple[ArtifactExpectation, ...]:
     return tuple(out)
 
 
+def _count_bounds(raw: Any, where: str) -> Bounds:
+    """A count may be exact, or at-least / at-most: `{min: 1}` is a real expectation."""
+    if isinstance(raw, bool):
+        raise CadError(f"{where}: expected a count or bounds, got a boolean")
+    if isinstance(raw, (int, float)):
+        return Bounds(float(raw), float(raw))
+    if isinstance(raw, dict):
+        extra = set(raw) - {"min", "max"}
+        if extra:
+            raise CadError(f"{where}: unknown bounds key(s) {sorted(extra)}")
+        low = raw.get("min")
+        high = raw.get("max")
+        if low is None and high is None:
+            raise CadError(f"{where}: bounds need min and/or max")
+        low_value = 0.0 if low is None else float(low)
+        high_value = float("inf") if high is None else float(high)
+        if low_value > high_value:
+            raise CadError(f"{where}: min {low_value} is above max {high_value}")
+        return Bounds(low_value, high_value)
+    raise CadError(f"{where}: expected a count or {{min, max}}, got {type(raw).__name__}")
+
+
 def _case(raw: dict[str, Any], root: pathlib.Path, where: str) -> CadCase:
     extra = set(raw) - CASE_KEYS
     if extra:
@@ -224,7 +250,9 @@ def _case(raw: dict[str, Any], root: pathlib.Path, where: str) -> CadCase:
         params=dict(raw["params"]),
         expect={
             "status": status,
-            "documentObjects": document_objects,
+            "documentObjects": _count_bounds(document_objects, f"{where}.documentObjects")
+            if document_objects is not None
+            else None,
             "totals": {
                 key: _bounds(value, f"{where}.totals.{key}") for key, value in totals.items()
             },

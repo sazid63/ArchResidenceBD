@@ -13,7 +13,7 @@ See docs/spec/cad-verify-v0.md and ADR-0016.
 
 from __future__ import annotations
 
-from .cases import CadCase, CadError, load_cases
+from .cases import Bounds, CadCase, CadError, ObjectExpectation, load_cases
 from .engine import ENV_VAR, EngineInfo, EngineMissing, find_engine
 from .runner import RunOutcome, run_candidate
 from .suite import (
@@ -30,6 +30,7 @@ from .suite import (
 from .verify import CaseVerdict, Failure, verify_result
 
 __all__ = [
+    "Bounds",
     "CadCase",
     "CadError",
     "CaseRun",
@@ -39,6 +40,7 @@ __all__ = [
     "EngineMissing",
     "ExecutionReport",
     "Failure",
+    "ObjectExpectation",
     "REPORT_VERSION",
     "RunOutcome",
     "SuiteReport",
