@@ -47,7 +47,7 @@ Validation refuses (with a named error): unknown keys/versions; duplicate or mis
 
 | Mode | Primary | Warmup | Meaning |
 |---|---|---|---|
-| `interview` | `chat` | chat, embed, rerank | The conversation is active; chat stays resident. |
+| `interview` | `chat` | chat, embed | The conversation is active; chat stays resident. The rerank seat is **parked** (ADR-0026): the model route returns all-zero scores, so the production reranker is the lexical one and the fleet does not load it. |
 | `design` | `repair` | repair, embed, rerank | CAD script build/repair; repair takes the GPU. |
 
 `preload()` sends one minimal request per route **in order**, so the router performs the real load:
@@ -106,7 +106,7 @@ data/downloads/s2/bin/llama-swap/llama-swap.exe -config spec/models/llama-swap.y
 | `preload("interview")` — W1.6 fine-tune | 4.9 s warm (chat 2.3 s, embed 1.3 s, rerank 1.3 s); 8.0 s cold |
 | Chat completion through `LlamaSwapClient` — stock | 0.06 s warm, correct reply |
 | Chat escalation through the fine-tune | valid JSON returned; fractional 5.5 read as 5.0 at low confidence (see W1.6 note) |
-| `preload("design")` | 3.6 s (repair loads; embed/rerank stayed warm) |
+| `preload("design")` | 3.6 s (repair loads; embed stayed warm; the rerank seat is parked since ADR-0026) |
 | Shutdown | clean, no orphan processes |
 
 ## Deliberately NOT in v0

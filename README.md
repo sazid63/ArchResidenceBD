@@ -2,7 +2,7 @@
 
 An offline-first Windows desktop app that acts as an AI civil engineer for Bangladeshi residential buildings: chat-driven phase planning → compliant-by-default design → per-phase 3D models that federate into one building → drawings + BBS + BOQ (live prices; materials + labour + machinery) + deviation register.
 
-**Status:** P1 — Brain v0, all twelve packages closed (started 2026-10-18; spec, rule, training-data, question, orchestrator, model-serving, chat-loop demo, cited RAG and the execution-verify harness are done; the exit review is written and three of its decisions are parked for the owner).
+**Status:** P2 — 3D v0, in progress (P1 Brain v0 closed with its exit review; P2 has the CAD worker pool, the spec-driven foundation, floor, rebar, sheet and BOQ generators, and the walking skeleton that runs them end to end).
 **Plan of record:** [`docs/plan/ArchResidenceBD-Plan-v1.5.md`](docs/plan/ArchResidenceBD-Plan-v1.5.md)
 **Current board:** [`docs/work/P1.md`](docs/work/P1.md) · **P1 exit review:** [`docs/work/P1-EXIT-REVIEW.md`](docs/work/P1-EXIT-REVIEW.md)
 

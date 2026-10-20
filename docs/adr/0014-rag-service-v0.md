@@ -91,7 +91,7 @@ Constraints that shaped the design:
 ## Alternatives rejected
 
 - **A vector database** (sqlite-vss, LanceDB, Chroma): new dependency and platform weight
-  for 178 documents; a pure-Python cosine over a cached matrix is enough until evals say
+  for 186 documents (the pack declares 12 gaps, 4 of them subject-level since 2026-10-21); a pure-Python cosine over a cached matrix is enough until evals say
   otherwise.
 - **Downloading BNBC/RAJUK text into the repo**: redistribution and fidelity problems; the
   BYO-PDF path in §5.6 is the lawful route.

@@ -150,4 +150,4 @@ uv run --directory core pytest -q -k rag                                  # corp
 uv run --directory core python ../tools/rag/search.py "পার্কিং" --base-url http://127.0.0.1:8787
 ```
 
-The last command uses the running fleet (`interview`/`design` modes warm `embed`/`rerank`).
+The last command uses the running fleet (`interview`/`design` modes warm `embed`; the rerank seat is parked since ADR-0026, so the live path there is the experimental `LlamaReranker` seam).

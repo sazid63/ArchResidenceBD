@@ -41,7 +41,7 @@ engine, advisor/override behavior; first evals."*
 | CAD harness | 3/3 cases, identical verdict signatures and artifact trees on re-run | `tools/cad/verify.py --run` |
 | Fleet | 4 routes / 2 modes (interview, design) — the **rerank seat is parked** (ADR-0026: the model route returns all-zero scores, so production uses the lexical reranker and the fleet does not warm the seat) | `tools/serving/fleet.py --check` |
 | Fractional areas | `সাড়ে ৫ কাঠা` → 367.9 m² (5.5 katha), **0 model calls** | `docs/spec/question-engine-v0.md` |
-| Suite | 812 tests, 149 Python files compile clean, brand guard clean, CI green on `c898354` | CI |
+| Suite | 812 tests, 149 Python files compile clean, brand guard clean, CI green on `c898354` (at the P1 exit; the repo now carries 880+ tests after W2.1–W2.10) | CI |
 
 ## 3. The plan's §9 filter, applied honestly
 

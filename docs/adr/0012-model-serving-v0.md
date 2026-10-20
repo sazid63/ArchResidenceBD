@@ -28,3 +28,11 @@ W1.11 had to turn spike S2's throwaway `llama-swap.yaml` into the product's mode
 - Dev verification used the real v265 binary and the S2 GGUFs: config validates (4 models), router ready in 0.57 s, interview mode warm in 9.8 s (chat 5.2 s load, embed 2.3 s, rerank 2.3 s), a chat completion answered in 0.06 s, design mode loaded repair in 3.6 s with the CPU services still warm, clean shutdown and no orphan processes.
 - The generated file intentionally carries internal configuration (runtime names, artifact file names) — it is not a user-facing surface.
 - Costs accepted: no streaming, no VRAM telemetry in-product, no automatic restart/watchdog (the app shell owns that), and mode warmup is serial by design (one GPU resident).
+
+## Amendment 2026-10-21 — the rerank seat is parked, so the modes no longer warm it
+
+The decision below (a mode is a warmup order) stands, but the *order* changed: the rerank seat
+is parked (ADR-0026) because the model route returns all-zero scores, so the production
+reranker is the lexical one and the fleet does not load a model whose answer it discards.
+`interview` now warms `chat, embed` and `design` warms `repair, embed`. The roster is unchanged
+(one seat per role); only the warmup moved.

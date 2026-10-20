@@ -89,6 +89,23 @@ The schedule as **data**: one mark per bar shape, repeated. Added by W2.4 (plan 
 - **Consumers:** the rebar generator (W2.4) → the BBS (W3.4) → the BOQ (W2.6) and the engineer
   review pack.
 
+## 6 — Bill of Quantities (`boq.schema.json`)
+
+The priced document the xlsx/PDF renderers (P3) read. Added by W2.6.
+
+- **One line per measured quantity**, with the phase it belongs to, the plan's cost type
+  (material / labour / machinery / subcontract / other), the unit, the quantity, the rate key it
+  priced itself from, and the quantity's provenance (`spec` / `derived` / `assumed` / `rule`).
+- **A line the card cannot price stays in the document** with a null amount and is listed in
+  `totals.unpricedLines`. A missing price is a visible gap, never a zero and never a dropped
+  line. A rate in another unit never prices a line either.
+- **The rate card's identity travels with the document** (id, region, status, date, source), so
+  a *candidate* card is never laundered into a quotation.
+- **The arithmetic is re-derivable from the document itself**: every amount is quantity × rate
+  and the subtotals and the grand total are the sums of the lines.
+- **Consumers:** the BOQ builder (W2.6) → the xlsx/PDF renderers (P3) → the engineer review
+  pack (W3.7).
+
 ## Conventions (shared)
 
 - **Absence = omitted field.** No nulls anywhere.
@@ -97,6 +114,11 @@ The schedule as **data**: one mark per bar shape, repeated. Added by W2.4 (plan 
 - **Time:** ISO 8601 with offset (`+06:00` local). **Ids:** lowercase slugs `^[a-z0-9][a-z0-9-]*$`, stable forever. **Hashes:** lowercase hex sha256. **Money:** BDT, `rateBdt ≥ 0`.
 
 ## Evolution rules
+
+**Additive change (2026-10-21):** W2.4 added `bbs.schema.json` (§5) and W2.6 added
+`boq.schema.json` (§6). Neither changed an existing shape, so no version moved and no consumer
+had to change; the generated Python/TS modules were regenerated in the same commit.
+
 
 - Version consts per schema (`protocolVersion` / `schemaVersion`); consumers validate against the version they know.
 - Additive change → minor bump + example updates + regeneration commit. Breaking change → major bump + migration script + ADR (ADR-0006 rule).
