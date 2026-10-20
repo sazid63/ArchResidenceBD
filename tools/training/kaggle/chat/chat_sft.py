@@ -180,14 +180,20 @@ def encode_records(train: list[dict], tokenizer) -> tuple[list[dict], dict]:
         )
         if not full_text.startswith(prefix_text):
             raise SystemExit(f"{record.get('id')}: chat template is not prefix-stable")
-        answer_text = full_text[len(prefix_text) :]
         prefix_ids = tokenizer(prefix_text, add_special_tokens=False)["input_ids"]
-        answer_ids = tokenizer(answer_text, add_special_tokens=False)["input_ids"]
-        if not answer_ids or len(prefix_ids) >= MAX_LEN:
+        full_ids = tokenizer(full_text, add_special_tokens=False)["input_ids"]
+        # Tokenising the answer separately can merge across the prompt/answer boundary, so the
+        # label span must come from the tokenisation of the whole template. The prefix has to be
+        # a literal token prefix, not just a string prefix; otherwise the loss is trained on a
+        # different sequence from the one the model sees. This was a silent hazard in the first
+        # version of this kernel (string-prefix check only).
+        if full_ids[: len(prefix_ids)] != prefix_ids:
+            raise SystemExit(f"{record.get('id')}: prefix tokenisation is not prefix-stable")
+        if len(prefix_ids) >= MAX_LEN or len(full_ids) <= len(prefix_ids):
             skipped.append(str(record.get("id")))
             continue
-        ids = (prefix_ids + answer_ids)[:MAX_LEN]
-        labels = ([-100] * len(prefix_ids) + answer_ids)[:MAX_LEN]
+        ids = full_ids[:MAX_LEN]
+        labels = ([-100] * len(prefix_ids) + full_ids[len(prefix_ids) :])[:MAX_LEN]
         if all(label == -100 for label in labels):
             skipped.append(str(record.get("id")))
             continue
