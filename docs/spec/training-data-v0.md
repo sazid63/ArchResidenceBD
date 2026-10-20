@@ -291,7 +291,14 @@ uv run --directory core python ../tools/training/build_repair_dataset.py --check
   same macro must still pass the *other* foundation cases) and `identicalToTarget` (byte-identical
   to the known-good macro). The floor is the stock model's measured rate on the same prompts
   (`data/eval/repair-v0/gates.json`); a fine-tune below the floor fails, exactly like the chat
-  round.
+  round. The judge has a self-test (`--self-test`): the known-good macro must pass every holdout
+  case and the broken macro must fail its own, or the judge measures nothing.
+- **What this round can and cannot show.** The corpus is **one** candidate macro with sixteen
+  single-line mutations, so a model that learned the corpus can restore that macro for an unseen
+  mutation of it. That is the seam the round measures — *can the model turn a failed macro plus
+  its trace into a macro the engine accepts?* — and it is **not** a claim that the model repairs
+  arbitrary CAD scripts. A broader claim needs a corpus of several macros with a holdout of whole
+  scripts, which is the next corpus decision, not this round.
 
 
 ## Kaggle preflight (2026-10-20)
