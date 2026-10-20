@@ -1,6 +1,6 @@
 # Training data pipeline — v0 (W1.5)
 
-**Status:** v0.1.0 — deterministic scripted dataset committed; teacher harness run against the local 4B fallback on 2026-10-20 (1,496 raw calls → 114 unique candidates, 105 deterministic-pass, 9 failures, ~18.4k passing tokens); no candidate promoted; the accepted ~0.5M-token teacher batch remains a W1.6 job.
+**Status:** v0.1.0 — deterministic scripted dataset committed; the plan's Qwen3-8B Q4 and a 4B fallback both ran on 2026-10-20 (1,496 raw calls each; 111 vs 114 unique candidates; 106/105 deterministic-pass; ~18.8k/~18.4k passing tokens); no candidate promoted; the ~0.5M-token target is unmet and remains a W1.6 decision.
 **Code:** `core/src/archres_core/training/{records,prompts,mutations,generators,verify,teacher}.py` · CLI `tools/training/build_chat_dataset.py`, `tools/training/teacher_augment.py`.
 **Schema:** `spec/schemas/sft-record.schema.json` (v0.1.0).
 **Decision record:** **ADR-0009**.
@@ -116,8 +116,35 @@ sample contains meaning drift and typo-level errors — `খুব কাছে`
 `জলের বাটি`, and `সামনের দিক` → `আগের দিক`. These are exactly the human-gate failures the
 candidate status exists for. The 96-token cap is also too low for long Bangla questions;
 a 4B rerun must raise it and retry shape failures before its yield is comparable. No
-candidate was promoted. W1.6 stays open for the plan's **Qwen3-8B Q4** teacher (the
-on-disk hybrid, run with `--no-think`) or an explicit owner decision on a reviewed subset.
+candidate was promoted. W1.6 stayed open for the plan's **Qwen3-8B Q4** teacher (the
+on-disk hybrid, run with `--no-think`); that run is recorded below.
+
+### 8B batch result (2026-10-20)
+
+The plan's Qwen3-8B Q4 teacher ran the same full batch with `/no_think`, prompt v0.3
+and a 160-token cap: **1,496 raw calls** (88 × 17) → **111 unique candidates** (1,385
+duplicates dropped), **106 deterministic-pass / 5 failures**, 59 BN + 52 EN, all 88
+source questions covered. Only 23 questions have a second distinct paraphrase; the
+other 65 have one. Estimated size: **~18.8k passing tokens** (chars ÷ 4). No variant was
+skipped; the `ground-floor-height-bn` question that aborted the earlier run now
+paraphrases faithfully.
+
+The five failures are mostly gate artefacts, not bad paraphrases: two (`adjacent-close-bn`,
+`material-prices-bn`) echo the `প্রশ্ন:` label before a paraphrase; the label itself is the
+shape failure. Two
+(`soil-report-file` BN/EN) are correct imperative paraphrases of a source that is an
+attach-file instruction, not a question, so the one-question-mark gate rejects them; one
+(`typical-floor-height-bn`) emitted the original plus a second question. The human gate
+must review the accepted subset; none was promoted.
+
+The 8B did **not** solve the yield problem: 111 unique candidates versus 114 for the 4B,
+and ~18.8k versus ~18.4k passing tokens. Seed-only variants collapse to at most two
+distinct paraphrases per question, so the ~0.5M-token target cannot be reached by adding
+seeds alone. Quality is better than the 4B overall but still mixed — for example
+`ছাদে পানির ট্যাংক থাকবে?` → `কীভাবে ছাদ থেকে পানি সঞ্চয় করা হয়?` changes a yes/no
+question into a method question, and `পাইলের ধরন` → `পাইলের বিধ` is a typo. Reaching the
+target needs prompt-style variants and/or teacher augmentation of longer explain/parse
+records, or a formally recorded shortfall. W1.6 stays open.
 
 ## SFT split (W1.6 preparation)
 
@@ -257,11 +284,12 @@ CPU kernel `tools/training/kaggle/chat-preflight/` verifies the mount without sp
 - Scripted build: **661 records, all `verified`**; `--check` fresh; 56 training tests green.
 - Real teacher smoke: local Qwen3-4B-Instruct-2507 Q4_K_M via llama-server on `127.0.0.1:8790`, `--limit 2 --variants 1` → 2 candidates (bn/en), 0 deterministic failures, both left `candidate`. The server was stopped after the run; candidates are gitignored.
 - Full 4B fallback batch (2026-10-20): 1,496 raw calls → 114 unique candidates (1,382 duplicates), 105 deterministic-pass / 9 failures, 58 BN + 47 EN, ~18.4k passing tokens (chars ÷ 4); no candidate promoted. Seven failures are cut mid-sentence at the 96-token cap and two echo the editor prompt. The BN review sample shows meaning drift, so the 4B fallback is not accepted as the plan's 8B teacher.
+- Full Qwen3-8B Q4 batch (2026-10-20): 1,496 raw calls → 111 unique candidates (1,385 duplicates), 106 deterministic-pass / 5 failures, 59 BN + 52 EN, ~18.8k passing tokens (chars ÷ 4); no variant skipped and no candidate promoted. Two failures echo the editor label, two are `soil-report-file` imperatives rejected by the question-mark gate, and one emitted two questions. Quality is better than the 4B but still mixed; the ~0.5M-token target is unmet.
 - The teacher prompt is an editor prompt, not the product's JSON-oriented system prompt. A shape gate rejects non-questions (no question mark, more than one question, echoed editor instructions, or JSON/quoted output).
 
 ## Deliberately NOT in v0
 
-- **An accepted teacher batch** — the 4B fallback candidate pool is measured but not accepted; the plan's ~0.5M-token teacher-augmented batch remains a W1.6 job.
+- **An accepted teacher batch** — both the 4B fallback and the plan's 8B pool are measured but not accepted; the ~0.5M-token target is unmet and remains a W1.6 decision.
 - **Masked-token / loss-mask metadata** — the SFT trainer derives it from `messages` roles; no separate format yet.
 - **Conversation-level multi-turn samples beyond the override confirmation pair** — v0 records are single-task; longer dialogues come from the orchestrator (W1.10) and its transcript capture.
 
