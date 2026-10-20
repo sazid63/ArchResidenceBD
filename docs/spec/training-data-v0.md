@@ -1,6 +1,6 @@
 # Training data pipeline — v0 (W1.5)
 
-**Status:** v0.1.0 — deterministic scripted dataset committed; teacher harness proven against the local 4B through llama-server (2 candidates, 0 deterministic failures); the full teacher batch belongs to W1.6.
+**Status:** v0.1.0 — deterministic scripted dataset committed; teacher harness run against the local 4B fallback on 2026-10-20 (1,496 raw calls → 114 unique candidates, 105 deterministic-pass, 9 failures, ~18.4k passing tokens); no candidate promoted; the accepted ~0.5M-token teacher batch remains a W1.6 job.
 **Code:** `core/src/archres_core/training/{records,prompts,mutations,generators,verify,teacher}.py` · CLI `tools/training/build_chat_dataset.py`, `tools/training/teacher_augment.py`.
 **Schema:** `spec/schemas/sft-record.schema.json` (v0.1.0).
 **Decision record:** **ADR-0009**.
@@ -90,6 +90,25 @@ uv run --directory core python ../tools/training/teacher_augment.py \
 Output goes to `data/training/teacher-candidates/` (gitignored) as `candidates.jsonl`. Every teacher record is `status: candidate`; the deterministic verifier checks schema/labels/language, but meaning preservation is not machine-provable. Promotion belongs to the W1.6 eval/human gate — there is no auto-promotion path in this pipeline. The full teacher batch (plan §7's ~0.5M-token target) is a W1.6 job; the committed scripted dataset is ~197k tokens.
 
 The batch is **train-side only**. The CLI loads the frozen `data/training/sft-v0/train.jsonl`, filters ask records by source id before calling the teacher, and never paraphrases a holdout question (ADR-0015). The candidate manifest records the source split, train-file sha256, raw/used counts, duplicate paraphrases dropped and verifier failures. The plan §7 local 8B teacher is not available anonymously: `Qwen/Qwen3-8B-Instruct-2507-GGUF` and the unsloth mirror return HTTP 401 (gated), while the public hybrid `Qwen3-8B-GGUF` spends its completion on a thinking block and fails the one-question gate. The batch therefore uses the on-disk `Qwen3-4B-Instruct-2507` Q4_K_M (the same 2507 non-thinking family) as a documented fallback; candidates remain candidate-only and W1.6 stays open for an authenticated 8B rerun. The client caps completions at 96 tokens; a first-line stop was removed because this template can return empty content after a leading newline. `/no_think` is opt-in for hybrid teachers only (`--no-think`), not used for the 2507 teacher. The full batch uses 17 variants of the 88 train ask records, aimed at the ~0.5M-token target. The first uncapped hybrid smoke generated 213+ tokens for one one-line question, so the cap is a measured correction, not a cosmetic one.
+
+### 4B fallback batch result (2026-10-20)
+
+The train-only fallback batch completed: **1,496 raw calls** (88 train ask records × 17
+variants) → **114 unique candidates** after deterministic dedupe (1,382 duplicates
+dropped). **105 passed** the deterministic verifier; **9 failed** (7 are cut mid-sentence
+with no question mark at the 96-token completion cap, 2 echo the editor prompt). The
+passing pool is 58 BN + 47 EN, covers all 88 source questions, but only 26 questions have
+a second distinct paraphrase. Estimated size: **~18.4k passing tokens** (chars ÷ 4), far
+below the ~0.5M target.
+
+The review sample is **not promotion-ready**. EN paraphrases are mostly faithful; the BN
+sample contains meaning drift and typo-level errors — `খুব কাছে` → `খুব স্বাপ্ত`,
+`প্রতিটি বেডরুমে` → `প্রতিটি ঘরে`, `কোন বিভাগে` → `কোন অঞ্চলে`, `পানির ট্যাংক` →
+`জলের বাটি`, and `সামনের দিক` → `আগের দিক`. These are exactly the human-gate failures the
+candidate status exists for. The 96-token cap is also too low for long Bangla questions;
+a 4B rerun must raise it and retry shape failures before its yield is comparable. No
+candidate was promoted. W1.6 stays open for the plan's authenticated
+**Qwen3-8B-Instruct-2507** teacher or an explicit owner decision on a reviewed subset.
 
 ## SFT split (W1.6 preparation)
 
@@ -224,15 +243,16 @@ CPU kernel `tools/training/kaggle/chat-preflight/` verifies the mount without sp
 
 `archres_core.units` is the only conversion home: Decimal-based katha/shotok/bigha/gonda/sqft ⇄ m² and m/ft/inch, with hand-authored English/Bangla unit words. `kani` is deliberately absent until an authoritative factor is pinned — adding a regional guess would violate the provenance rule. The module has its own tests (`core/tests/test_units.py`).
 
-## Verification state (2026-10-19)
+## Verification state (2026-10-19, updated 2026-10-20)
 
 - Scripted build: **661 records, all `verified`**; `--check` fresh; 56 training tests green.
 - Real teacher smoke: local Qwen3-4B-Instruct-2507 Q4_K_M via llama-server on `127.0.0.1:8790`, `--limit 2 --variants 1` → 2 candidates (bn/en), 0 deterministic failures, both left `candidate`. The server was stopped after the run; candidates are gitignored.
+- Full 4B fallback batch (2026-10-20): 1,496 raw calls → 114 unique candidates (1,382 duplicates), 105 deterministic-pass / 9 failures, 58 BN + 47 EN, ~18.4k passing tokens (chars ÷ 4); no candidate promoted. Seven failures are cut mid-sentence at the 96-token cap and two echo the editor prompt. The BN review sample shows meaning drift, so the 4B fallback is not accepted as the plan's 8B teacher.
 - The teacher prompt is an editor prompt, not the product's JSON-oriented system prompt. A shape gate rejects non-questions (no question mark, more than one question, echoed editor instructions, or JSON/quoted output).
 
 ## Deliberately NOT in v0
 
-- **The teacher batch** — the 414-record scripted round is measured; the plan's ~0.5M-token teacher-augmented batch remains a W1.6 job.
+- **An accepted teacher batch** — the 4B fallback candidate pool is measured but not accepted; the plan's ~0.5M-token teacher-augmented batch remains a W1.6 job.
 - **Masked-token / loss-mask metadata** — the SFT trainer derives it from `messages` roles; no separate format yet.
 - **Conversation-level multi-turn samples beyond the override confirmation pair** — v0 records are single-task; longer dialogues come from the orchestrator (W1.10) and its transcript capture.
 
