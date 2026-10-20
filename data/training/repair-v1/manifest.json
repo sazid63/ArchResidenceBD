@@ -1,0 +1,55 @@
+{
+  "counts": {
+    "holdout": 4,
+    "total": 16,
+    "train": 12
+  },
+  "files": {
+    "holdout.jsonl": {
+      "bytes": 72074,
+      "records": 4,
+      "sha256": "934532beeccea460f81b7206978b751bf70648f974936a41ee1448a9b06fbbc5"
+    },
+    "train.jsonl": {
+      "bytes": 215871,
+      "records": 12,
+      "sha256": "080434e3e49141ce785a037beefa07c628cd897813c74f9c45cf5dcf7f2a95d3"
+    }
+  },
+  "frozenHoldout": {
+    "mutations": [
+      "float-arity",
+      "volume-divide-zero",
+      "column-unit-slip",
+      "pads-hard-coded"
+    ],
+    "note": "Frozen before any training run (ADR-0015 law). Moving a mutation across this line is a reviewed edit of tools/training/build_repair_split.py, never a re-run."
+  },
+  "manifestVersion": "1",
+  "notes": "Regenerate with tools/training/build_repair_split.py; CI checks freshness. The Kaggle repair kernel consumes train.jsonl, holdout.jsonl and this manifest; the holdout is judged by tools/training/eval_repair.py against the real engine.",
+  "pins": {
+    "corpus": {
+      "path": "data/training/repair-v0/dataset.jsonl",
+      "sha256": "dfc1ace1ba8221bc6ca6240b513255d715429a8f9e592f865e8367150fa38f18"
+    },
+    "corpusManifest": {
+      "path": "data/training/repair-v0/manifest.json",
+      "sha256": "1c63d9ebca1d21af98b1e01d28c738f5884922101fbb062ecbd16c23cc2153db"
+    }
+  },
+  "purpose": "W1.7 repair SFT split: the executed repair corpus cut by a frozen holdout of mutation ids; the holdout is judged by re-executing the repaired macro in FreeCAD",
+  "trainMutations": [
+    "api-typo",
+    "call-typo",
+    "column-off-by-one",
+    "document-guard-inverted",
+    "fuse-to-cut",
+    "gap-key",
+    "mm-arity",
+    "no-pads",
+    "outdir-env-typo",
+    "outdir-mkdir-exists",
+    "pad-base-offset",
+    "param-index"
+  ]
+}

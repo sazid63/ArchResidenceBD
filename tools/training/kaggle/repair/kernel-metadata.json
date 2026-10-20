@@ -1,0 +1,13 @@
+{
+  "id": "sajidhossain004/archresidencebd-repair-sft-v1",
+  "title": "ArchResidenceBD repair SFT v1",
+  "code_file": "repair_sft.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "dataset_sources": ["sajidhossain004/archresbd-repair-v1"],
+  "competition_sources": [],
+  "kernel_sources": []
+}
