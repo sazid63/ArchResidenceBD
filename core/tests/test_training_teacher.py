@@ -148,10 +148,11 @@ class _Handler(http.server.BaseHTTPRequestHandler):
     reply = json.dumps(
         {"choices": [{"message": {"role": "assistant", "content": "  Rewritten question?  "}}]}
     ).encode("utf-8")
+    last_body = b""
 
     def do_POST(self) -> None:  # noqa: N802 - http.server API
         length = int(self.headers.get("Content-Length", "0"))
-        self.rfile.read(length)
+        type(self).last_body = self.rfile.read(length)
         if self.path != "/v1/chat/completions":
             self.send_error(404)
             return
@@ -180,6 +181,15 @@ def test_chat_client_parses_a_completion_and_strips(endpoint: str) -> None:
     assert client.complete([{"role": "user", "content": "hi"}], temperature=0.7, seed=1) == (
         "Rewritten question?"
     )
+
+
+def test_chat_client_caps_the_teacher_and_disables_thinking(endpoint: str) -> None:
+    client = ChatCompletionClient(endpoint=endpoint, model="chat", timeout=5)
+    client.complete([{"role": "user", "content": "hi"}], temperature=0.7, seed=1)
+    body = json.loads(_Handler.last_body)
+    assert body["max_tokens"] == 96
+    assert body["stop"] == ["\n"]
+    assert body["messages"][-1]["content"].endswith("/no_think")
 
 
 def test_chat_client_reports_a_bad_payload() -> None:

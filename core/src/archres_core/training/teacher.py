@@ -58,17 +58,32 @@ class ChatCompletionClient:
         endpoint: str = "http://127.0.0.1:8787/v1/chat/completions",
         model: str = "chat",
         timeout: float = 180.0,
+        max_tokens: int = 96,
+        no_think: bool = True,
     ) -> None:
         self.endpoint = endpoint
         self.model = model
         self.timeout = timeout
+        self.max_tokens = max_tokens
+        self.no_think = no_think
 
     def complete(self, messages: list[dict[str, str]], *, temperature: float, seed: int) -> str:
+        # The plan's local teacher is a hybrid Qwen3-8B. Without an explicit switch it
+        # spends the completion budget on a thinking block and can exceed the one-line
+        # question contract. The Qwen3 chat template understands the /no_think soft
+        # switch; the cap is a second guard for teachers that ignore it.
+        request_messages = [dict(message) for message in messages]
+        if self.no_think and request_messages and request_messages[-1].get("role") == "user":
+            request_messages[-1]["content"] = (
+                f"{request_messages[-1].get('content', '')}\n/no_think"
+            )
         payload = {
             "model": self.model,
-            "messages": messages,
+            "messages": request_messages,
             "temperature": temperature,
             "seed": seed,
+            "max_tokens": self.max_tokens,
+            "stop": ["\n"],
             "stream": False,
         }
         request = urllib.request.Request(
