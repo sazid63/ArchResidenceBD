@@ -10,7 +10,7 @@ Training produces an adapter; the fleet needs a GGUF. Neither step needs a GPU:
 The merged directory is removed as soon as the f16 GGUF exists, so the 4B merge, the f16 file
 and the quantized output do not all have to fit on a 16 GB dev disk at once. A failed quantize
 can be retried with `--skip-convert`; a pre-existing merged dir is left alone with
-`--skip-convert`.
+`--skip-merge`.
 
 Run it with the training venv (torch/transformers/peft/accelerate installed), not the app env:
 
@@ -51,6 +51,8 @@ def sha256(path: pathlib.Path) -> str:
 
 
 def merge(base: str, adapter: pathlib.Path, merged: pathlib.Path) -> None:
+    adapter = adapter.resolve()
+    merged = merged.resolve()
     try:
         import torch
         from peft import PeftModel
@@ -78,7 +80,10 @@ def merge(base: str, adapter: pathlib.Path, merged: pathlib.Path) -> None:
 
 
 def convert(llama_src: pathlib.Path, merged: pathlib.Path, f16: pathlib.Path) -> None:
-    script = llama_src / "convert_hf_to_gguf.py"
+    llama_src = llama_src.resolve()
+    merged = merged.resolve()
+    f16 = f16.resolve()
+    script = (llama_src / "convert_hf_to_gguf.py").resolve()
     if not script.is_file():
         raise SystemExit(f"llama.cpp checkout has no convert_hf_to_gguf.py: {llama_src}")
     log(f"converting {merged} -> {f16.name} (f16)")
@@ -97,6 +102,9 @@ def convert(llama_src: pathlib.Path, merged: pathlib.Path, f16: pathlib.Path) ->
 
 
 def quantize(quantize_exe: pathlib.Path, f16: pathlib.Path, out: pathlib.Path, quant: str) -> None:
+    quantize_exe = quantize_exe.resolve()
+    f16 = f16.resolve()
+    out = out.resolve()
     if not quantize_exe.is_file():
         raise SystemExit(f"quantizer not found: {quantize_exe}")
     log(f"quantizing {f16.name} -> {out.name} ({quant})")
@@ -120,36 +128,40 @@ def main() -> int:
     parser.add_argument("--keep-f16", action="store_true", help="keep the intermediate f16 GGUF")
     args = parser.parse_args()
 
-    merged = args.merged
-    if merged is None:
+    if args.merged is None:
         raise SystemExit("--merged is required (the merged directory, or an existing one with --skip-merge)")
+    merged = args.merged.resolve()
+    adapter = args.adapter.resolve() if args.adapter else None
+    llama_src = args.llama_src.resolve()
+    quantize_exe = args.quantize.resolve()
+    out = args.out.resolve()
     f16 = merged.with_suffix(".f16.gguf")
 
     if not args.skip_merge:
-        if not args.base or not args.adapter:
+        if not args.base or adapter is None:
             raise SystemExit("--base and --adapter are required unless --skip-merge")
-        merge(args.base, args.adapter, merged)
+        merge(args.base, adapter, merged)
     if not args.skip_convert:
-        convert(args.llama_src, merged, f16)
+        convert(llama_src, merged, f16)
         # The f16 GGUF is now the source of truth; drop the merged weights *before*
         # quantization so the 4B merge + f16 + Q4 do not all have to fit on a 16 GB dev
         # disk at once. A failed quantize can be retried with --skip-convert.
         shutil.rmtree(merged, ignore_errors=True)
     if not f16.is_file():
         raise SystemExit(f"f16 GGUF missing: {f16}")
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    quantize(args.quantize, f16, args.out, args.quant)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    quantize(quantize_exe, f16, out, args.quant)
     if not args.keep_f16:
         f16.unlink(missing_ok=True)
 
     report = {
         "base": args.base,
-        "adapter": str(args.adapter) if args.adapter else None,
+        "adapter": str(adapter) if adapter else None,
         "merged": str(merged),
         "quant": args.quant,
-        "output": str(args.out),
-        "bytes": args.out.stat().st_size,
-        "sha256": sha256(args.out),
+        "output": str(out),
+        "bytes": out.stat().st_size,
+        "sha256": sha256(out),
     }
     print(json.dumps(report, indent=2, sort_keys=True))
     return 0
