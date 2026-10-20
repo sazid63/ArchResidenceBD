@@ -188,8 +188,48 @@ def test_chat_client_caps_the_teacher_and_disables_thinking(endpoint: str) -> No
     client.complete([{"role": "user", "content": "hi"}], temperature=0.7, seed=1)
     body = json.loads(_Handler.last_body)
     assert body["max_tokens"] == 96
-    assert body["stop"] == ["\n"]
+    assert "stop" not in body
     assert body["messages"][-1]["content"].endswith("/no_think")
+
+
+def test_chat_client_retries_a_transient_connection_reset() -> None:
+    class FlakyHandler(http.server.BaseHTTPRequestHandler):
+        calls = 0
+        reply = json.dumps(
+            {"choices": [{"message": {"role": "assistant", "content": "Recovered?"}}]}
+        ).encode("utf-8")
+
+        def do_POST(self) -> None:  # noqa: N802
+            self.rfile.read(int(self.headers.get("Content-Length", "0")))
+            type(self).calls += 1
+            if type(self).calls == 1:
+                self.close_connection = True
+                return
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(self.reply)))
+            self.end_headers()
+            self.wfile.write(self.reply)
+
+        def log_message(self, *args: object) -> None:
+            pass
+
+    server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), FlakyHandler)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    try:
+        client = ChatCompletionClient(
+            endpoint=f"http://127.0.0.1:{server.server_address[1]}/v1/chat/completions",
+            timeout=5,
+            retry_delay=0,
+        )
+        assert client.complete([{"role": "user", "content": "hi"}], temperature=0.7, seed=1) == (
+            "Recovered?"
+        )
+        assert FlakyHandler.calls == 2
+    finally:
+        server.shutdown()
+        thread.join(timeout=5)
 
 
 def test_chat_client_reports_a_bad_payload() -> None:

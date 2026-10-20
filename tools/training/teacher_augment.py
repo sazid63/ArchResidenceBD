@@ -60,6 +60,11 @@ def main() -> int:
     parser.add_argument(
         "--limit", type=int, help="use only the first N train-split ask records (smoke run)"
     )
+    parser.add_argument(
+        "--no-think",
+        action="store_true",
+        help="append Qwen3 /no_think (hybrid teacher only; omit for the 2507 non-thinking teacher)",
+    )
     parser.add_argument("--out", default=str(DEFAULT_OUT))
     args = parser.parse_args()
     out = pathlib.Path(args.out)
@@ -80,7 +85,9 @@ def main() -> int:
         }
         all_sources = train_ask_records(dataset.by_task("interview.ask"), train_ids)
         sources = all_sources[: args.limit] if args.limit else all_sources
-        client = ChatCompletionClient(endpoint=args.endpoint, model=args.model)
+        client = ChatCompletionClient(
+            endpoint=args.endpoint, model=args.model, no_think=args.no_think
+        )
         raw_candidates = build_teacher_records(
             sources,
             client,

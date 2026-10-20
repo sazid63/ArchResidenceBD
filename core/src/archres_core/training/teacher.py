@@ -18,6 +18,7 @@ The client speaks the OpenAI-compatible chat-completions API that llama-server e
 from __future__ import annotations
 
 import json
+import time
 import urllib.request
 from typing import Any, Iterable, Protocol
 
@@ -60,12 +61,18 @@ class ChatCompletionClient:
         timeout: float = 180.0,
         max_tokens: int = 96,
         no_think: bool = True,
+        attempts: int = 3,
+        retry_delay: float = 1.0,
     ) -> None:
+        if attempts < 1:
+            raise ValueError("attempts must be positive")
         self.endpoint = endpoint
         self.model = model
         self.timeout = timeout
         self.max_tokens = max_tokens
         self.no_think = no_think
+        self.attempts = attempts
+        self.retry_delay = retry_delay
 
     def complete(self, messages: list[dict[str, str]], *, temperature: float, seed: int) -> str:
         # The plan's local teacher is a hybrid Qwen3-8B. Without an explicit switch it
@@ -83,7 +90,6 @@ class ChatCompletionClient:
             "temperature": temperature,
             "seed": seed,
             "max_tokens": self.max_tokens,
-            "stop": ["\n"],
             "stream": False,
         }
         request = urllib.request.Request(
@@ -92,11 +98,23 @@ class ChatCompletionClient:
             headers={"Content-Type": "application/json"},
             method="POST",
         )
-        try:
-            with urllib.request.urlopen(request, timeout=self.timeout) as response:
-                raw = response.read()
-        except OSError as exc:  # URLError, timeouts, refused connections
-            raise TeacherError(f"teacher request failed: {exc}") from exc
+        last_error: OSError | None = None
+        raw = b""
+        for attempt in range(self.attempts):
+            try:
+                with urllib.request.urlopen(request, timeout=self.timeout) as response:
+                    raw = response.read()
+                last_error = None
+                break
+            except OSError as exc:  # URLError, timeouts, refused/reset connections
+                last_error = exc
+                if attempt + 1 >= self.attempts:
+                    break
+                time.sleep(self.retry_delay * (attempt + 1))
+        if last_error is not None:
+            raise TeacherError(
+                f"teacher request failed after {self.attempts} attempts: {last_error}"
+            ) from last_error
         try:
             body = raw.decode("utf-8")
             data = json.loads(body)
