@@ -91,6 +91,14 @@ Output goes to `data/training/teacher-candidates/` (gitignored) as `candidates.j
 
 The batch is **train-side only**. The CLI loads the frozen `data/training/sft-v0/train.jsonl`, filters ask records by source id before calling the teacher, and never paraphrases a holdout question (ADR-0015). The candidate manifest records the source split, train-file sha256, raw/used counts, duplicate paraphrases dropped and verifier failures. The plan §7 local teacher is **Qwen3-8B Q4** (~5 GB), not an 8B-2507 variant; the Qwen3-2507 family has no 8B release. The on-disk public hybrid `Qwen3-8B-GGUF` is that model. Its default thinking block spends the completion budget and fails the one-question gate; the client's `--no-think` switch appends `/no_think`, and a 2-record smoke with `--max-tokens 160` passed. The 4B batch remains the fallback evidence from before that switch was exercised; candidates stay candidate-only and W1.6 stays open for the human/eval promotion gate. The client default cap is 96 tokens; `--max-tokens` raises it for long Bangla questions (the 4B batch measured seven truncations at 96). A first-line stop was removed because this template can return empty content after a leading newline. `/no_think` is opt-in for hybrid teachers only (`--no-think`), not used for the 2507 teacher. The full batch uses 17 variants of the 88 train ask records, aimed at the ~0.5M-token target. The first uncapped hybrid smoke generated 213+ tokens for one one-line question, so the cap is a measured correction, not a cosmetic one.
 
+The 8B batch uses prompt **v0.3**. The earlier prompt let the 8B copy
+`chat-ask-floor-ground-floor-height-bn` verbatim, which aborted the whole run after two
+attempts. The instruction now demands a completely different sentence structure and at
+least three changed words; each copied question is retried four times with temperature
+escalation (0.7 → 1.0). If it still repeats, the CLI records `source_id#vN` in
+`manifest.skipped` and continues. A skipped variant is a declared coverage gap, never a
+silent omission, and the exit code is non-zero.
+
 ### 4B fallback batch result (2026-10-20)
 
 The train-only fallback batch completed: **1,496 raw calls** (88 train ask records × 17

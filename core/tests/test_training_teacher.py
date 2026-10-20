@@ -136,6 +136,15 @@ def test_teacher_must_actually_change_the_text() -> None:
         build_teacher_records(_sources(), FakeClient(echo=True))
 
 
+def test_teacher_can_declare_an_unparaphrased_variant() -> None:
+    sources = _sources()
+    client = FakeClient(echo=True)
+    skipped: list[str] = []
+    assert build_teacher_records(sources, client, skipped=skipped) == []
+    assert skipped == [f"{source['id']}#v1" for source in sources]
+    assert len(client.calls) == 4 * len(sources)  # four attempts per source before skipping
+
+
 def test_variants_must_be_positive() -> None:
     with pytest.raises(ValueError):
         build_teacher_records(_sources(), FakeClient(), variants=0)

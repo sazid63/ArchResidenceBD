@@ -97,12 +97,14 @@ def main() -> int:
             max_tokens=args.max_tokens,
             no_think=args.no_think,
         )
+        skipped: list[str] = []
         raw_candidates = build_teacher_records(
             sources,
             client,
             variants=args.variants,
             temperature=args.temperature,
             batch=f"teacher-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}",
+            skipped=skipped,
         )
         candidates = dedupe_teacher_records(raw_candidates)
     except (TeacherError, OSError, ValueError) as exc:
@@ -137,9 +139,12 @@ def main() -> int:
         },
         "records": stats["records"],
         "rawRecords": len(raw_candidates),
+        "requestedRecords": len(sources) * args.variants,
         "duplicatesDropped": len(raw_candidates) - len(candidates),
         "sha256": stats["sha256"],
         "failures": len(failures),
+        "skipped": skipped,
+        "skippedCount": len(skipped),
     }
     (out / "manifest.json").write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
@@ -147,9 +152,11 @@ def main() -> int:
         newline="\n",
     )
     print(f"wrote {out.relative_to(ROOT).as_posix()}: {stats['records']} candidates")
+    for source_key in skipped:
+        print(f"SKIP {source_key}: teacher repeated the source question", file=sys.stderr)
     for failure in failures:
         print(f"FAIL {failure}", file=sys.stderr)
-    return 1 if failures else 0
+    return 1 if failures or skipped else 0
 
 
 if __name__ == "__main__":

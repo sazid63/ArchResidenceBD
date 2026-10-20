@@ -24,18 +24,19 @@ from typing import Any, Iterable, Protocol
 
 from .records import make_id
 
-TEACHER_PROMPT_VERSION = "teacher-paraphrase-v0"
+TEACHER_PROMPT_VERSION = "teacher-paraphrase-v0.3"
 TEACHER_INSTRUCTION = {
     "en": (
-        "Rephrase the question below in natural English. The meaning must stay the same, "
-        "but the wording must be new. Keep every number and unit exactly. Ask exactly one "
-        "question. Output only the rephrased question, with no quotes, JSON, labels or "
-        "preamble."
+        "Rewrite the question below with the same meaning but a completely different "
+        "sentence structure. Do not copy any full phrase from the original; change at "
+        "least three words. Ask exactly one question. Output only the new question. Keep "
+        "every number and unit exactly. No preamble, quotes, JSON or labels."
     ),
     "bn": (
-        "নিচের প্রশ্নটি স্বাভাবিক বাংলায় নতুন শব্দে লিখুন। অর্থ একই রাখুন, শব্দ বদলান। "
-        "প্রতিটি সংখ্যা ও একক অপরিবর্তিত রাখুন। ঠিক একটি প্রশ্ন করুন। শুধু নতুন প্রশ্নটি "
-        "লিখুন — উদ্ধৃতি, JSON, লেবেল বা ভূমিকা নয়।"
+        "নিচের প্রশ্নটির অর্থ ঠিক রেখে সম্পূর্ণ ভিন্ন বাক্যগঠনে লিখুন। মূল বাক্যের কোনো পূর্ণ "
+        "বাক্যাংশ কপি করবেন না। অন্তত তিনটি শব্দ বদলান। একটির বেশি প্রশ্ন নয়। শুধু নতুন "
+        "প্রশ্নটি লিখুন। প্রতিটি সংখ্যা ও একক অপরিবর্তিত রাখুন। কোনো ভূমিকা, উদ্ধৃতি, JSON "
+        "বা লেবেল নয়।"
     ),
 }
 
@@ -129,14 +130,11 @@ class ChatCompletionClient:
 def _teacher_system(lang: str) -> str:
     """A dedicated editor prompt - never the product's JSON-oriented system prompt.
 
-    Reusing ``prompts.SYSTEM`` made the 4B model answer with a JSON object (the product
-    prompt says "when a task asks for JSON..."); an editor prompt keeps the task plain.
+    The instruction alone is the editor prompt. An extra "careful editor" persona prefix
+    made the 8B model copy short questions verbatim (measured on ground-floor-height-bn),
+    so it is deliberately omitted.
     """
-    return (
-        "You are a careful bilingual editor for ArchResidenceBD, a Bangladeshi civil-engineering "
-        "app.\n\n"
-        f"{TEACHER_INSTRUCTION[lang]}"
-    )
+    return TEACHER_INSTRUCTION[lang]
 
 
 def _teacher_user(lang: str, question: str) -> str:
@@ -191,12 +189,19 @@ def build_teacher_records(
     variants: int = 1,
     temperature: float = 0.7,
     batch: str = "teacher-paraphrase-v0",
+    skipped: list[str] | None = None,
 ) -> list[dict[str, Any]]:
     """Rephrase scripted ``interview.ask`` records; returns candidate records.
 
     One teacher record is produced per source record per variant. The source's labels,
     task contract, phase and question id are preserved exactly. A client failure raises
     ``TeacherError`` - a partial file is never written by this function.
+
+    A source that still repeats its question after four temperature-escalated attempts
+    is appended to ``skipped`` as ``source_id#vN`` and that variant is omitted when the
+    caller supplies the list; without it the function raises ``TeacherError``. The caller
+    records ``skipped`` in the manifest, so a missing variant is a declared coverage gap,
+    not a silent one.
     """
     if variants < 1:
         raise ValueError("variants must be >= 1")
@@ -211,19 +216,22 @@ def build_teacher_records(
                 (source["id"] + f"::teacher::{variant}").encode("utf-8")[:8], "big"
             ) % (2**31 - 1)
             text = ""
-            for attempt in range(2):
+            for attempt in range(4):
                 text = client.complete(
                     [
                         {"role": "system", "content": _teacher_system(lang)},
                         {"role": "user", "content": _teacher_user(lang, question)},
                     ],
-                    temperature=temperature,
+                    temperature=min(1.2, temperature + 0.1 * attempt),
                     seed=seed + attempt,
                 )
                 if text != question:
                     break
             if text == question:
-                raise TeacherError(f"teacher did not paraphrase {source['id']!r}")
+                if skipped is None:
+                    raise TeacherError(f"teacher did not paraphrase {source['id']!r}")
+                skipped.append(f"{source['id']}#v{variant}")
+                continue
             records.append(
                 {
                     "schemaVersion": "0.1.0",
