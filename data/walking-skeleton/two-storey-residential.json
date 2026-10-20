@@ -1,0 +1,97 @@
+{
+  "boq": {
+    "byCostType": {
+      "labour": 2071.67,
+      "machinery": 69803.3,
+      "material": 47724.73
+    },
+    "byPhase": {
+      "floor": 36937.61,
+      "foundation": 14087.29,
+      "site-excavation": 68574.8
+    },
+    "cardId": "dhaka-example-2026-10",
+    "cardStatus": "candidate",
+    "lines": 11,
+    "priced": 9,
+    "sumOfLinesBdt": 119599.7,
+    "totalBdt": 119599.7,
+    "unpriced": [
+      "formwork-foundation",
+      "formwork-floor"
+    ]
+  },
+  "boqMarkdown": "# Bill of Quantities\n\n- Project: `7c9e6f10-2a3b-4c5d-9e8f-1a2b3c4d5e6f`\n- Rate card: `dhaka-example-2026-10` (dhaka, from 2026-10-01, status **candidate**)\n- Source: Illustrative example card (structure demo) (manual)\n\n| Phase | Description | Type | Qty | Unit | Rate BDT | Amount BDT |\n|---|---|---|---:|---|---:|---:|\n| site-excavation | Excavation (machinery) | machinery | 24.491 | hour | 2,800.00 | 68,574.80 |\n| foundation | Cement (foundation) | material | 21.060 | bag | 550.00 | 11,583.00 |\n| floor | Cement (floor) | material | 19.828 | bag | 550.00 | 10,905.45 |\n| foundation | Sand (foundation) | material | 4.970 | cft | 42.00 | 208.75 |\n| floor | Sand (floor) | material | 4.679 | cft | 42.00 | 196.53 |\n| floor | Steel reinforcement | material | 0.279 | ton | 89,000.00 | 24,831.00 |\n| foundation | Mason (labour) | labour | 1.123 | day | 950.00 | 1,067.04 |\n| floor | Mason (floor, labour) | labour | 1.058 | day | 950.00 | 1,004.63 |\n| foundation | Concrete mixer | machinery | 0.351 | day | 3,500.00 | 1,228.50 |\n| foundation | Formwork (foundation) | other | 5.760 | sqm | - | - |\n| floor | Formwork (floor) | other | 17.190 | sqm | - | - |\n\n## Subtotals\n\n- floor: 36,937.61 BDT\n- foundation: 14,087.29 BDT\n- site-excavation: 68,574.80 BDT\n\n## By cost type\n\n- labour: 2,071.67 BDT\n- machinery: 69,803.30 BDT\n- material: 47,724.73 BDT\n\n**Total: 119,599.70 BDT** (9 priced lines, 2 unpriced: formwork-foundation, formwork-floor)\n\n_the quantities are measured from the design; the rates come from the rate card (dhaka-example-2026-10, status candidate)_\n\n> **The rate card is a candidate**: it has not been verified against its source, so these prices are not a quotation. Acknowledge it before this BOQ is used.\n",
+  "checks": {},
+  "failures": [],
+  "model": {
+    "designVolumeM3": 5.45175,
+    "objects": 15,
+    "volumeM3": 5.45175
+  },
+  "ok": true,
+  "projectId": "7c9e6f10-2a3b-4c5d-9e8f-1a2b3c4d5e6f",
+  "projectName": "Mirpur Duplex (internal test)",
+  "sheet": {
+    "artifacts": {
+      "page.dxf": {
+        "bytes": 19843,
+        "sha256": "76932ff932b2231bc1ed3fae4e94bef13220a0a3d99180415d857222502d6931"
+      },
+      "page.pdf": {
+        "bytes": 455726,
+        "sha256": "787a1380e0a96c7e8eb592e94a3b8e1671170d503ff9ff472ce4b389d059886a"
+      },
+      "page.svg": {
+        "bytes": 14466,
+        "sha256": "9e41dff769d4a93116e4cea8c6de419edd69a91e17945f840d17dc1cc750c30e"
+      }
+    },
+    "carriesStatus": true,
+    "engineNameInSheet": false,
+    "views": 15
+  },
+  "stages": [
+    {
+      "phase": "site-excavation",
+      "stage": "excavation"
+    },
+    {
+      "phase": "foundation",
+      "stage": "foundation"
+    },
+    {
+      "phase": "floor",
+      "stage": "floor"
+    },
+    {
+      "phase": "roof-boundary",
+      "stage": "not covered in v0"
+    },
+    {
+      "phase": "common-services",
+      "stage": "not covered in v0"
+    },
+    {
+      "phase": "drawings",
+      "stage": "sheet"
+    },
+    {
+      "phase": "bbs",
+      "stage": "rebar schedule"
+    },
+    {
+      "phase": "takeoff",
+      "stage": "boq"
+    }
+  ],
+  "steel": {
+    "differencePct": 0.077,
+    "measuredKg": 278.785,
+    "scheduledKg": 278.9998
+  },
+  "uncoveredPhases": [
+    "roof-boundary",
+    "common-services"
+  ]
+}

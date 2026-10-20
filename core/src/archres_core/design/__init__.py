@@ -41,6 +41,12 @@ from .floor import (
     design_typical_floor,
     render_floor_macro,
 )
+from .project import (
+    PIPELINE,
+    UNCOVERED_PHASES,
+    ProjectDesign,
+    design_project,
+)
 from .rebar import (
     BBS_SCHEMA_VERSION,
     SHAPES,
@@ -71,6 +77,9 @@ from .foundation import (
 
 __all__ = [
     "BBS_SCHEMA_VERSION",
+    "PIPELINE",
+    "UNCOVERED_PHASES",
+    "ProjectDesign",
     "COST_TYPES",
     "PHASES",
     "Takeoff",
@@ -114,6 +123,7 @@ __all__ = [
     "Value",
     "build_bbs",
     "design_foundation",
+    "design_project",
     "design_rebar",
     "design_sheet",
     "design_typical_floor",

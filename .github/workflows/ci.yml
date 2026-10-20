@@ -87,6 +87,8 @@ jobs:
         run: uv run --directory core python ../tools/cad/floor_probe.py --check
       - name: The committed BOQ is fresh and its arithmetic adds up
         run: uv run --directory core python ../tools/boq/build_boq.py --check
+      - name: The committed walking-skeleton report is present and passed
+        run: uv run --directory core python ../tools/walking_skeleton/run.py --check
       - name: Generated rebar fixtures are fresh (offline, no engine)
         run: uv run --directory core python ../tools/cad/rebar_probe.py --check
 
@@ -147,6 +149,11 @@ jobs:
           uv run --directory core python ../tools/cad/sheet_probe.py \
             --engine "$ARCHRES_FREECADCMD" \
             --json "$GITHUB_WORKSPACE/data/tmp/cad-ci/sheet-probe.json"
+      - name: Run the walking skeleton (one house, end to end, every stage checked)
+        run: |
+          uv run --directory core python ../tools/walking_skeleton/run.py \
+            --engine "$ARCHRES_FREECADCMD" \
+            --json "$GITHUB_WORKSPACE/data/tmp/cad-ci/walking-skeleton.json"
       - name: Upload the execution report
         if: always()
         uses: actions/upload-artifact@v4
