@@ -251,9 +251,8 @@ That trace is the W1.7 input: type, message, source file and line, and the case 
   kills the tree and captures streams, but does not claim to contain hostile code.
 - **The suite is three cases.** It proves the harness (measurement, tolerances, determinism,
   failure capture), not the breadth of the CAD generator.
-- **FreeCAD 0.21 is untested live.** CI installs the Ubuntu package (0.21.x) as a bit-rot probe;
-  the recorded probe is 1.1.4 on Windows. A version difference is visible in the report, never
-  hidden.
+- **FreeCAD 0.21 is untested live.** The recorded probe is 1.1.4 on Windows; the weekly job runs
+  conda-forge 1.1.3 on Ubuntu. A version difference is visible in the report, never hidden.
 
 ## Gates and CI
 
@@ -262,7 +261,9 @@ That trace is the W1.7 input: type, message, source file and line, and the case 
   pairs (fake launcher, real process plumbing), the offline layer on the committed cases, and a
   cp1252 console run of `--check`.
 - Every push: `core-tests` runs `tools/cad/verify.py --check` — case freshness without an engine.
-- Weekly + manual (`cad-execution` job): install FreeCAD from Ubuntu, run `--run` against the
-  committed cases. It is not on every push because this is a private repository and a full
-  FreeCAD install per push would burn the monthly Actions minutes for no extra signal; the
-  Windows dev machine runs the real probe at every CAD change and the numbers are recorded here.
+- Weekly + manual (`cad-execution` job): install FreeCAD 1.1.3 from conda-forge, run `--run`
+  against the committed cases, then replay the repair corpus (`--check --engine`). It is not on
+  every push because this is a private repository and a full engine install per push would burn
+  the monthly Actions minutes for no extra signal; the Windows dev machine runs the real probe at
+  every CAD change and the numbers are recorded here. First green run: 2026-10-20 (FreeCAD 1.1.3,
+  3/3).

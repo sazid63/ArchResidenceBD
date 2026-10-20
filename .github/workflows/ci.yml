@@ -108,7 +108,7 @@ jobs:
             --json "$GITHUB_WORKSPACE/data/tmp/cad-ci/report.json" \
             --markdown "$GITHUB_WORKSPACE/data/tmp/cad-ci/report.md"
       - name: Replay the repair corpus against the engine
-        run: uv run --directory core python ../tools/training/build_repair_dataset.py --check
+        run: uv run --directory core python ../tools/training/build_repair_dataset.py --check --engine "$ARCHRES_FREECADCMD"
       - name: Upload the execution report
         if: always()
         uses: actions/upload-artifact@v4

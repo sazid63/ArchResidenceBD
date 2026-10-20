@@ -70,8 +70,8 @@ Constraints:
 - A CAD regression is a red run with the violating expectation named, not a diff of screenshots.
 - FreeCAD version differences are visible (`engineVersion` in every verdict); the harness does
   not claim a version-independent geometry contract.
-- The weekly Actions job installs FreeCAD 0.21.x while the recorded probe is 1.1.4. That is a
-  bit-rot probe, not a second baseline; if it diverges, the report says which engine produced
-  which numbers.
+- The weekly Actions job installs FreeCAD 1.1.3 (conda-forge) while the recorded probe is 1.1.4
+  on Windows. That is a bit-rot probe, not a second baseline; if it diverges, the report says
+  which engine produced which numbers.
 - The harness is CPU-only and headless; it measures geometry, not drawings, and it does not
   replace a human review of constructability.
