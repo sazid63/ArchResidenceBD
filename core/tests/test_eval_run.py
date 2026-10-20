@@ -491,15 +491,12 @@ def test_the_eval_cli_refuses_a_reply_file_that_does_not_match_its_pin(
     tmp_path: pathlib.Path,
 ) -> None:
     source = ROOT / "data" / "eval" / "chat-v0" / "replies" / "stock.jsonl"
-    lines = source.read_text(encoding="utf-8").splitlines()
     tampered = tmp_path / "stock.jsonl"
-    tampered.write_text(
-        lines[0].replace('"decision": "fallback"', '"decision": "escalate"')
-        + "\n"
-        + "\n".join(lines[1:])
-        + "\n",
-        encoding="utf-8",
-    )
+    # Append one byte: still valid JSONL (a blank line is ignored), definitely not the pinned
+    # bytes. A content-string replace is fragile: it can silently not match, and a CRLF checkout
+    # can then make the copy differ by line endings alone (a false pass on Windows, a failure on
+    # Linux). The pin is over bytes, so the test must change bytes.
+    tampered.write_bytes(source.read_bytes() + b"\n")
     result = _cli(
         str(ROOT / "tools" / "eval" / "run_eval.py"),
         "--model",
