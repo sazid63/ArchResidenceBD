@@ -1,0 +1,141 @@
+{
+  "assumptions": [
+    {
+      "pointer": "/phases/floor/data/columnSizeMm",
+      "reason": "the rule pack (v0) has no column-sizing rule; v0 assumes a 300 mm square column",
+      "unit": "mm",
+      "value": 300.0
+    },
+    {
+      "pointer": "/phases/floor/data/beamMm",
+      "reason": "the rule pack (v0) has no beam-sizing rule; v0 assumes 300 x 450 mm",
+      "unit": "mm",
+      "value": 300.0
+    }
+  ],
+  "beams": [
+    {
+      "depthMm": 450.0,
+      "id": "B1",
+      "lengthMm": 3000.0,
+      "widthMm": 300.0,
+      "xMm": 2000.0,
+      "yMm": 6689.0
+    },
+    {
+      "depthMm": 450.0,
+      "id": "B2",
+      "lengthMm": 3000.0,
+      "widthMm": 300.0,
+      "xMm": 5000.0,
+      "yMm": 6689.0
+    },
+    {
+      "depthMm": 450.0,
+      "id": "B3",
+      "lengthMm": 3000.0,
+      "widthMm": 300.0,
+      "xMm": 8000.0,
+      "yMm": 6689.0
+    }
+  ],
+  "columns": [
+    {
+      "footingId": "F1",
+      "heightMm": 3000.0,
+      "id": "C1",
+      "sizeMm": 300.0,
+      "xMm": 500.0,
+      "yMm": 6689.0
+    },
+    {
+      "footingId": "F2",
+      "heightMm": 3000.0,
+      "id": "C2",
+      "sizeMm": 300.0,
+      "xMm": 3500.0,
+      "yMm": 6689.0
+    },
+    {
+      "footingId": "F3",
+      "heightMm": 3000.0,
+      "id": "C3",
+      "sizeMm": 300.0,
+      "xMm": 6500.0,
+      "yMm": 6689.0
+    },
+    {
+      "footingId": "F4",
+      "heightMm": 3000.0,
+      "id": "C4",
+      "sizeMm": 300.0,
+      "xMm": 9500.0,
+      "yMm": 6689.0
+    }
+  ],
+  "declaredAbsent": [
+    "walls: the v0 spec carries no wall data, so no wall is built (an invented wall would be a fabricated fact)",
+    "openings: the v0 spec carries no opening data, so no opening is cut"
+  ],
+  "projectId": "7c9e6f10-2a3b-4c5d-9e8f-1a2b3c4d5e6f",
+  "slab": {
+    "originXMm": 350.0,
+    "originYMm": 6539.0,
+    "sizeXMm": 9300.0,
+    "sizeYMm": 300.0,
+    "thicknessMm": 125.0
+  },
+  "storeyIndex": 1,
+  "storeyLabel": "floor-1",
+  "values": {
+    "beam.depthMm": {
+      "provenance": "assumed",
+      "reason": "no beam rule in the pack",
+      "source": "v0 default",
+      "unit": "mm",
+      "value": 450.0
+    },
+    "beam.widthMm": {
+      "provenance": "assumed",
+      "reason": "no beam rule in the pack",
+      "source": "v0 default",
+      "unit": "mm",
+      "value": 300.0
+    },
+    "column.count": {
+      "provenance": "derived",
+      "reason": "one column per footing, on the foundation grid",
+      "source": "foundation design",
+      "unit": "1",
+      "value": 4
+    },
+    "column.sizeMm": {
+      "provenance": "assumed",
+      "reason": "no column rule in the pack",
+      "source": "v0 default",
+      "unit": "mm",
+      "value": 300.0
+    },
+    "slab.overhangMm": {
+      "provenance": "assumed",
+      "reason": "a 150 mm slab overhang past the grid",
+      "source": "v0 default",
+      "unit": "mm",
+      "value": 150.0
+    },
+    "slab.thicknessMm": {
+      "provenance": "spec",
+      "reason": "",
+      "source": "/phases/floor-1/data/slabThicknessMm",
+      "unit": "mm",
+      "value": 125.0
+    },
+    "storey.heightM": {
+      "provenance": "spec",
+      "reason": "",
+      "source": "/building/storeys/typicalFloorHeightM",
+      "unit": "m",
+      "value": 3.0
+    }
+  }
+}

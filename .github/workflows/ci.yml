@@ -83,6 +83,8 @@ jobs:
         run: uv run --directory core python ../tools/cad/verify.py --check
       - name: Generated foundation fixtures are fresh (offline, no engine)
         run: uv run --directory core python ../tools/cad/foundation_probe.py --check
+      - name: Generated floor fixtures are fresh (offline, no engine)
+        run: uv run --directory core python ../tools/cad/floor_probe.py --check
 
   # Real FreeCAD, weekly and on demand. Not on every push: this is a private repository and a
   # full engine install per push would spend the monthly Actions minutes for no extra signal.
@@ -126,6 +128,11 @@ jobs:
           uv run --directory core python ../tools/cad/foundation_probe.py \
             --engine "$ARCHRES_FREECADCMD" \
             --json "$GITHUB_WORKSPACE/data/tmp/cad-ci/foundation-probe.json"
+      - name: Probe the floor generator (spec -> design -> macro -> measured geometry)
+        run: |
+          uv run --directory core python ../tools/cad/floor_probe.py \
+            --engine "$ARCHRES_FREECADCMD" \
+            --json "$GITHUB_WORKSPACE/data/tmp/cad-ci/floor-probe.json"
       - name: Upload the execution report
         if: always()
         uses: actions/upload-artifact@v4
