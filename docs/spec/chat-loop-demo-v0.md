@@ -77,7 +77,10 @@ The runner never touches the spec directly; every write is the session's provena
 | BN run, `--no-model` | 69 coverage / 63 writing turns, 61 accept + 2 fallback, 0 open essentials, 63 revisions, ~2.3 s |
 | EN run, `--no-model` | identical counts and shape (English text answers) |
 | BN run with the real fleet | fleet ready + interview warm 5.9 s; demo 2.6 s; same spec shape |
-| 2-storey spec shape | phases exactly `site-excavation, foundation, floor-0, floor-1, roof-boundary, common-services` |
+| BN run with the W1.6 fine-tune | fleet ready + interview warm 4.9 s (chat 2.3 s, embed 1.3 s, rerank 1.3 s); demo 2.389 s; 69 coverage / 63 writing turns, 61 accept + 2 fallback, 0 open essentials, 0 model calls |
+| EN run with the W1.6 fine-tune | same warm-up; demo 1.991 s; identical 69/63 shape, 0 open essentials, 0 model calls |
+| Fine-tune escalation probe | temporary copy of `dhaka-house-bn` with `plot-area: সাড়ে ৫ কাঠা`; 2.378 s; 69/63, 61 accept + 2 fallback, 0 open; 1 model call; `llama-swap:chat` returned valid JSON `{"value":5.0,"unit":"katha"}`, written at `confidence: low` — **5.0, not 5.5**; the stock fractional-area finding persists and belongs to the W1.6 teacher batch |
+| Fractional parser guard | deterministic parser now escalates `সাড়ে` / `দেড়` / `আড়াই` / `সোয়া` / `পৌনে` / `half` with `unparseable_fraction` instead of silently truncating; regression test added after the fine-tune probe exposed the old 5.0 read |
 | Live escalation probe (stock 4B) | valid JSON returned and written at `confidence: low`, but a Bengali fractional area was misread — model-quality finding for W1.6/W1.9 |
 | Automated tests | 19 new (scenario validation, runner honesty, CLI smoke) — 475 → 494 at W1.12; the suite total is asserted by CI, not by this table |
 | cp1252 console | narration survives a captured cp1252 pipe (`PYTHONIOENCODING=cp1252` regression test); Bangla text is UTF-8 on stdout and stderr |
@@ -88,5 +91,5 @@ The runner never touches the spec directly; every write is the session's provena
 - **No production UI** — terminal transcript only; the app shell is P2.
 - **No interactive keyboard mode** — scenarios are data; a human can add a scenario or use the session API directly.
 - **No model-phrased questions** — prompts are the authored BN/EN flow-book text.
-- **No SFT model** — runs on the stock base (plan §4 fallback); W1.6 re-runs the same scenarios.
+- **No SFT model in the stock acceptance pair** — the original W1.12 runs used the stock base (plan §4 fallback). The W1.6 scripted fine-tune is now the selected chat model and the BN+EN scenarios re-ran on it (rows above); the full teacher batch and the fractional-area quality fix remain W1.6, so this is integration evidence, not W1.6 closure.
 - **No eval scoring** — W1.9 will consume these scenarios and artifacts as fixtures.

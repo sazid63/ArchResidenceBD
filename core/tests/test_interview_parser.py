@@ -115,6 +115,21 @@ def test_ambiguous_numbers_are_reasked(book) -> None:
 
 
 @pytest.mark.parametrize(
+    "text",
+    [
+        "সাড়ে ৫ কাঠা",
+        "প্রায় সাড়ে ৫ কাঠা",
+        "দেড় কাঠা",
+        "5 and a half katha",
+    ],
+)
+def test_fractional_quantifiers_escalate_instead_of_truncating(book, text) -> None:
+    result = parse(book, "plot-area", text)
+    assert result.decision == "escalate"
+    assert result.reason == "unparseable_fraction"
+
+
+@pytest.mark.parametrize(
     ("text", "value"),
     [
         ("yes", True),

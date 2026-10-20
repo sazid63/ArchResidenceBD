@@ -197,15 +197,26 @@ CPU kernel `tools/training/kaggle/chat-preflight/` verifies the mount without sp
   `model.parse` misses remain and are enumerated by the reproducible gated report; no 1.0 claim.
 - **GGUF:** the Kaggle build step failed with `ImportError: incompatible torchao 0.10.0`
   (requires >0.16.0); this is a packaging error, not a training result. The CPU converter
-  (`tools/training/convert_gguf.py`, no torchao) is the build path; the artifact/sha used by the
-  fleet is recorded in `docs/spec/model-serving-v0.md` after it lands.
+  (`tools/training/convert_gguf.py`, no torchao) built the artifact locally:
+  `data/downloads/s2/models/archie-chat-v0-Q4_K_M.gguf`, **2,497,278,880 bytes**, SHA-256
+  `bea406a8bafb47c076f4bc2b61ed481cd88c3eff094171af6046a2aad2a54f73`, Q4_K_M. The first
+  conversion hit a relative-path bug in the converter; it is fixed and covered by
+  `core/tests/test_convert_gguf.py` (`6b44ee0`).
+- **Fleet:** `spec/models/registry.json` replaces the stock `archie-chat` entry with
+  `archie-chat-v0`; `tools/serving/fleet.py --check` reports **4 routes / 2 modes**;
+  `llama-swap -validate` reports **4 models**. The stock artifact stays on disk for rollback.
+  Live BN+EN fine-tune demos completed in 2.389 s / 1.991 s with 61 accept + 2 fallback and
+  0 open essentials; `preload("interview")` warmed in 4.9 s. The forced fractional-area probe
+  (`সাড়ে ৫ কাঠা`) returned **5.0 katha instead of 5.5** and was accepted at `confidence: low`;
+  the deterministic parser now escalates fractional quantifiers (W1.4 guard + regression test)
+  rather than silently truncating. The teacher batch must cover this case.
 - **Local fallback:** the RTX 4050 run was stopped after **28/104 steps in 2h51m**
   (~360-420 s/step, projected >7h remaining) and produced no adapter/replies. The 6 GB local
   floor is a smoke venue, not a viable full-run venue for this configuration; Kaggle is the
   selected candidate. No local result is claimed.
 - **Scope:** this is the **414-record scripted round** (~197k tokens). The plan's ~0.5M-token
-  teacher-augmented batch remains a W1.6 job and is not silently dropped; **W1.6 is not ticked**
-  by this candidate.
+  teacher-augmented batch remains a W1.6 job and is not silently dropped; the fractional-area
+  miss above is a measured example of what it must fix. **W1.6 is not ticked** by this candidate.
 
 ## Units
 

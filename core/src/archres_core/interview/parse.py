@@ -105,6 +105,10 @@ BANGLISH_NUMBER_WORDS: dict[str, int] = {
 
 _ALL_NUMBER_WORDS: dict[str, int] = {**NUMBER_WORDS, **BN_NUMBER_WORDS, **BANGLISH_NUMBER_WORDS}
 
+#: Fractional quantifiers outside the deterministic number vocabulary. They must escalate
+#: instead of being silently dropped: "সাড়ে ৫" is 5.5, not 5, and "5 and a half" is not 5.
+_FRACTION_HINTS = ("সাড়ে", "দেড়", "আড়াই", "সোয়া", "পৌনে", "half")
+
 YES_WORDS = (
     "yes",
     "y",
@@ -531,6 +535,8 @@ def _parse_number(
 ) -> ParseResult:
     if _any_phrase(norm, DONT_KNOW_PHRASES):
         return ParseResult("skip", reason="dont_know", as_entered=raw)
+    if any(_contains(norm, hint) for hint in _FRACTION_HINTS):
+        return ParseResult("escalate", reason="unparseable_fraction", as_entered=raw)
 
     norm = _leading_number_word(norm)
     integer = question.type == "integer"

@@ -88,14 +88,24 @@ uv run --directory core python ../tools/serving/serve.py --mode design --once
 data/downloads/s2/bin/llama-swap/llama-swap.exe -config spec/models/llama-swap.yaml -validate
 ```
 
+## W1.6 chat fine-tune (selected 2026-10-20)
+
+- **Registry:** `archie-chat-v0` (`role: chat`) replaces the stock `archie-chat` entry. The stock artifact `Qwen3-4B-Instruct-2507-Q4_K_M.gguf` remains on disk for rollback but is no longer routed by `llama-swap.yaml`.
+- **Artifact:** `data/downloads/s2/models/archie-chat-v0-Q4_K_M.gguf`, **2,497,278,880 bytes**, SHA-256 `bea406a8bafb47c076f4bc2b61ed481cd88c3eff094171af6046a2aad2a54f73`, Q4_K_M. Built locally from the Kaggle adapter by `tools/training/convert_gguf.py`; the Kaggle GGUF step failed only on `torchao` packaging.
+- **Candidate:** 43/60 `model.parse` vs stock 32/60; decision 0.867, value 0.706, `accuracy:bn` 0.600, `accuracy:en` 0.833; all recorded floors pass and none moved. Full evidence: `docs/spec/training-data-v0.md`.
+- **Fleet gate:** `tools/serving/fleet.py --check` reports 4 routes / 2 modes; `llama-swap -validate` reports 4 models.
+- **Live:** BN fine-tune demo 63 writing turns / 61 accept + 2 fallback / 0 open in 2.389 s; EN fine-tune demo 1.991 s. `preload("interview")` warmed in 4.9 s (chat 2.3 s, embed 1.3 s, rerank 1.3 s). A forced fractional-area escalation (`plot-area: সাড়ে ৫ কাঠা`) produced valid JSON `{"value":5.0,"unit":"katha"}` — **5.0 instead of 5.5** — and was accepted only at `confidence: low`; this is a W1.6 teacher-batch quality item, not a serving failure. The parser now escalates fractional quantifiers rather than silently truncating them.
+
 ## Verified on the reference machine (real binary, real GGUFs)
 
 | Check | Result |
 |---|---|
 | `-validate` (v265) | `config is valid: 4 model(s)` |
 | Router readiness | 0.57 s to `/v1/models` |
-| `preload("interview")` | 9.8 s total (chat 5.2 s, embed 2.3 s, rerank 2.3 s) |
-| Chat completion through `LlamaSwapClient` | 0.06 s warm, correct reply |
+| `preload("interview")` — stock | 9.8 s total (chat 5.2 s, embed 2.3 s, rerank 2.3 s) |
+| `preload("interview")` — W1.6 fine-tune | 4.9 s warm (chat 2.3 s, embed 1.3 s, rerank 1.3 s); 8.0 s cold |
+| Chat completion through `LlamaSwapClient` — stock | 0.06 s warm, correct reply |
+| Chat escalation through the fine-tune | valid JSON returned; fractional 5.5 read as 5.0 at low confidence (see W1.6 note) |
 | `preload("design")` | 3.6 s (repair loads; embed/rerank stayed warm) |
 | Shutdown | clean, no orphan processes |
 

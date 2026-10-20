@@ -3,7 +3,7 @@
   "fleetId": "archie-fleet-v1",
   "models": [
     {
-      "id": "archie-chat",
+      "id": "archie-chat-v0",
       "role": "chat",
       "displayName": {
         "bn": "আর্চি চ্যাট",
@@ -14,22 +14,24 @@
         "license": "Apache-2.0"
       },
       "artifact": {
-        "file": "Qwen3-4B-Instruct-2507-Q4_K_M.gguf",
+        "file": "archie-chat-v0-Q4_K_M.gguf",
         "format": "gguf",
         "quantization": "Q4_K_M",
-        "sizeBytes": 2497281120,
-        "sha256": "3605803b982cb64aead44f6c1b2ae36e3acdb41d8e46c8a94c6533bc4c67e597"
+        "sizeBytes": 2497278880,
+        "sha256": "bea406a8bafb47c076f4bc2b61ed481cd88c3eff094171af6046a2aad2a54f73"
       },
       "runtime": {
         "engine": "llama.cpp",
         "device": "gpu",
         "gpuLayers": 99,
         "context": 8192,
-        "flags": ["--no-webui"]
+        "flags": [
+          "--no-webui"
+        ]
       },
       "swapGroup": "gpu-models",
       "distribution": "bundled",
-      "notes": "Fleet v1 base; the P1 fine-tune (Archie-Chat archetype) lands as a new entry, never an edit. S2 measured ~58 tok/s at Q4_K_M on the 6 GB floor."
+      "notes": "W1.6 scripted-round fine-tune (Kaggle T4, QLoRA r16): 43/60 model.parse, decision 0.867, value 0.706, bn 0.600, en 0.833; all recorded floors pass. Replaces the stock Qwen3-4B chat entry; the ~0.5M-token teacher batch remains open."
     },
     {
       "id": "archie-repair",
@@ -54,7 +56,9 @@
         "device": "gpu",
         "gpuLayers": 99,
         "context": 8192,
-        "flags": ["--no-webui"]
+        "flags": [
+          "--no-webui"
+        ]
       },
       "swapGroup": "gpu-models",
       "distribution": "bundled",
@@ -83,7 +87,12 @@
         "device": "cpu",
         "gpuLayers": 0,
         "context": 2048,
-        "flags": ["--embeddings", "--pooling", "last", "--no-webui"]
+        "flags": [
+          "--embeddings",
+          "--pooling",
+          "last",
+          "--no-webui"
+        ]
       },
       "swapGroup": "cpu-services",
       "distribution": "bundled",
@@ -112,12 +121,15 @@
         "device": "cpu",
         "gpuLayers": 0,
         "context": 2048,
-        "flags": ["--reranking", "--no-webui"]
+        "flags": [
+          "--reranking",
+          "--no-webui"
+        ]
       },
       "swapGroup": "cpu-services",
       "distribution": "bundled",
       "notes": "CPU-pinned (-ngl 0); needs its own instruct template for meaningful scores (S2)."
     }
   ],
-  "notes": "Fleet v1 (S2). Deliberately excluded: Qwen3-0.6B draft - speculative decoding measured ~8% acceptance and 3.5x slower on GPU draft; do not re-add without a new measurement. sha256/sizeBytes are of the artifacts measured on the reference machine in S2."
+  "notes": "Fleet v1 (S2). Deliberately excluded: Qwen3-0.6B draft - speculative decoding measured ~8% acceptance and 3.5x slower on GPU draft; do not re-add without a new measurement. sha256/sizeBytes are of the artifacts measured on the reference machine in S2. W1.6 adds the scripted-round chat fine-tune as a new entry; the stock chat entry is removed; the teacher batch remains open."
 }

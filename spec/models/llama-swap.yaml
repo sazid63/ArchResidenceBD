@@ -18,10 +18,10 @@ models:
     name: "Archie Chat"
     cmd: |
       ${llama-server} --host 127.0.0.1 --port ${PORT}
-      -m ${models}/Qwen3-4B-Instruct-2507-Q4_K_M.gguf
+      -m ${models}/archie-chat-v0-Q4_K_M.gguf
       -ngl 99 -c 8192 -np 1 --no-webui
     ttl: 0
-    # archie-chat | sha256 3605803b982cb64aead44f6c1b2ae36e3acdb41d8e46c8a94c6533bc4c67e597
+    # archie-chat-v0 | sha256 bea406a8bafb47c076f4bc2b61ed481cd88c3eff094171af6046a2aad2a54f73
   "repair":
     name: "Archie Repair"
     cmd: |

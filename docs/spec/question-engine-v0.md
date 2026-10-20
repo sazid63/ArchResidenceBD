@@ -43,6 +43,8 @@ The parser (`parse.py`) is pure and total over user input: it returns a decision
 
 **Units.** Storage is canonical (`m2`, `m`, `kPa`, `BDT`) and conversion is Decimal-only via `archres_core.units`: 5 katha → `334.45 m²`, 20 ft → `6.096 m`, 12′6″ → `3.81 m`, 12 mm → `0.012 m`. A **bare number** on a unit question uses the project's current display unit (`displayUnits.area` / `.length`) and is recorded at `confidence: medium`; an explicit unit always wins. A wrong dimension (`5 ft` for an area) is a re-ask, never a guess.
 
+**Fractions.** Fractional quantifiers (`সাড়ে`, `দেড়`, `আড়াই`, `সোয়া`, `পৌনে`, English `half`) are outside the deterministic number vocabulary and return `escalate` with reason `unparseable_fraction` instead of being silently dropped: `সাড়ে ৫ কাঠা` must never be read as 5 katha. The model may parse the value in the user's unit, and the resulting write stays `confidence: low`. This guard was added after the W1.6 fine-tune live probe found the earlier parser silently truncating the fraction; the regression test is in `core/tests/test_interview_parser.py`.
+
 **Chips** (`chips()`) are the option buttons plus one explicit **"I don't know"** shortcut when the question has a fallback. Essential questions have no skip chip — they cannot be assumed.
 
 ## Answer → spec mapping
