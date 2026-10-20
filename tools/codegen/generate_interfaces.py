@@ -1,6 +1,6 @@
 """Regenerate W0.9 interface artifacts from the JSON Schemas (single source of truth).
 
-For each schema in spec/schemas/{job-protocol,model-registry,rate-card,verdict}.schema.json
+For each schema in spec/schemas/{job-protocol,model-registry,rate-card,verdict,bbs}.schema.json
 writes (or, with --check, verifies the freshness of):
   - core/src/archres_core/interfaces/<name>.py              (pydantic v2, datamodel-codegen)
   - app/src/interfaces/<name>.gen.ts                        (TS types, json-schema-to-typescript)
@@ -34,6 +34,7 @@ SCHEMAS: dict[str, str] = {
     "model-registry": "model_registry.py",
     "rate-card": "rate_card.py",
     "verdict": "verdict.py",
+    "bbs": "bbs.py",
 }
 
 NPM_PKG = "json-schema-to-typescript@15"

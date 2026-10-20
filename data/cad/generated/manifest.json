@@ -2,7 +2,8 @@
   "cases": {
     "entries": [
       "floor:two-storey-residential",
-      "foundation:two-storey-residential"
+      "foundation:two-storey-residential",
+      "rebar:two-storey-residential"
     ]
   },
   "files": {
@@ -17,6 +18,12 @@
     },
     "foundation-two-storey-residential.py": {
       "bytes": 3419
+    },
+    "rebar-two-storey-residential.design.json": {
+      "bytes": 7308
+    },
+    "rebar-two-storey-residential.py": {
+      "bytes": 77343
     }
   },
   "manifestVersion": "1",

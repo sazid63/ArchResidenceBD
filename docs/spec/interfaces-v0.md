@@ -68,6 +68,27 @@ One compliance-evaluation run of a Building Spec revision against one rule pack 
 - **Invariant (test-enforced):** `summary` counts equal the `verdicts[]` status counts.
 - **Consumers:** compliance engine (W1.2) → UI check results + Deviation Register + engineer review pack.
 
+## 5 — Bar Bending Schedule (`bbs.schema.json`)
+
+The schedule as **data**: one mark per bar shape, repeated. Added by W2.4 (plan Appendix C).
+
+- **A mark is one bar, repeated:** `lengthMm` is the **centreline** length (the industry
+  convention for bent bars — a link is its perimeter) and `count` is how many times it occurs.
+  `weightKg` = `count × length × π/4 d² × density`, with the density in the document
+  (`densityKgPerM3`, 7850 for mild steel).
+- **The same steel is measured from the geometry.** A round bar's length is recovered from its
+  volume (`Shape.Volume / (π/4 d²)`, spike S5), so the schedule and the CAD engine are two
+  independent computations of the same quantity and the probe compares them. A *welded* bar
+  measures slightly **less** than its centreline length (the corners overlap) — the effect spike
+  S5 measured (1.8 %); the comparison tolerance is declared, not assumed.
+- **Shapes:** `straight · link · bent · hook · starter` — v0 builds straight bars, links and
+  starters; the rest are reserved for the richer detailing.
+- **The assumptions travel with it:** `assumptions[]` carries every authored detailing value
+  (diameters, spacings, cover) with its reason, because the rule pack (v0) has no detailing
+  rules. The schedule is never a number without a provenance.
+- **Consumers:** the rebar generator (W2.4) → the BBS (W3.4) → the BOQ (W2.6) and the engineer
+  review pack.
+
 ## Conventions (shared)
 
 - **Absence = omitted field.** No nulls anywhere.

@@ -19,6 +19,16 @@ from .floor import (
     design_typical_floor,
     render_floor_macro,
 )
+from .rebar import (
+    BBS_SCHEMA_VERSION,
+    SHAPES,
+    STEEL_DENSITY_KG_PER_M3,
+    Bar,
+    RebarDesign,
+    build_bbs,
+    design_rebar,
+    render_rebar_macro,
+)
 from .foundation import (
     ASSUMED_EXCAVATION_MARGIN_MM,
     ASSUMED_FOOTING_DEPTH_MM,
@@ -38,6 +48,11 @@ from .foundation import (
 )
 
 __all__ = [
+    "BBS_SCHEMA_VERSION",
+    "SHAPES",
+    "STEEL_DENSITY_KG_PER_M3",
+    "Bar",
+    "RebarDesign",
     "ASSUMED_BEAM_DEPTH_MM",
     "ASSUMED_BEAM_WIDTH_MM",
     "ASSUMED_COLUMN_SIZE_MM",
@@ -59,8 +74,11 @@ __all__ = [
     "GradeBeam",
     "Slab",
     "Value",
+    "build_bbs",
     "design_foundation",
+    "design_rebar",
     "design_typical_floor",
     "render_floor_macro",
     "render_macro",
+    "render_rebar_macro",
 ]

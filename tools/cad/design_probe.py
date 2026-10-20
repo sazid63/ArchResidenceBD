@@ -32,7 +32,10 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 WORKER = ROOT / "cad" / "worker" / "worker.py"
 LAUNCHER = ROOT / "core" / "src" / "archres_core" / "cad" / "launcher.py"
 GENERATED = ROOT / "data" / "cad" / "generated"
-VOLUME_TOLERANCE = 0.001
+#: 1 % on a measured volume. A *welded* bar (a link is four segments) measures slightly less
+#: than its centreline length, because the corners overlap - the same effect spike S5 measured
+#: between the addon's BBS and the geometry (1.8 %).
+VOLUME_TOLERANCE = 0.01
 POSITION_TOLERANCE_MM = 0.01
 
 

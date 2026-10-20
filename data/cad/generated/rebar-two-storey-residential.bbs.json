@@ -1,0 +1,329 @@
+{
+  "assumptions": [
+    {
+      "pointer": "/phases/foundation/data/rebarCoverMm",
+      "reason": "the rule pack (v0) has no detailing rule; v0 assumes a 40 mm cover",
+      "unit": "mm",
+      "value": 40.0
+    },
+    {
+      "pointer": "/phases/foundation/data/columnMainDiameterMm",
+      "reason": "the rule pack (v0) has no rebar detailing rule; v0 assumes 16 mm column mains",
+      "unit": "mm",
+      "value": 16.0
+    },
+    {
+      "pointer": "/phases/foundation/data/linkDiameterMm",
+      "reason": "the rule pack (v0) has no rebar detailing rule; v0 assumes 8 mm links",
+      "unit": "mm",
+      "value": 8.0
+    },
+    {
+      "pointer": "/phases/foundation/data/linkSpacingMm",
+      "reason": "the rule pack (v0) has no rebar detailing rule; v0 assumes 150 mm link spacing",
+      "unit": "mm",
+      "value": 150.0
+    },
+    {
+      "pointer": "/phases/foundation/data/footingMeshDiameterMm",
+      "reason": "the rule pack (v0) has no rebar detailing rule; v0 assumes 12 mm footing mesh",
+      "unit": "mm",
+      "value": 12.0
+    }
+  ],
+  "densityKgPerM3": 7850.0,
+  "items": [
+    {
+      "count": 4,
+      "diameterMm": 16.0,
+      "lengthMm": 2920.0,
+      "mark": "C1-MAINS",
+      "member": "C1",
+      "role": "mains",
+      "shape": "straight",
+      "weightKg": 18.435
+    },
+    {
+      "count": 20,
+      "diameterMm": 8.0,
+      "lengthMm": 880.0,
+      "mark": "C1-LINK-1",
+      "member": "C1",
+      "role": "links",
+      "shape": "link",
+      "weightKg": 6.9447
+    },
+    {
+      "count": 4,
+      "diameterMm": 16.0,
+      "lengthMm": 2920.0,
+      "mark": "C2-MAINS",
+      "member": "C2",
+      "role": "mains",
+      "shape": "straight",
+      "weightKg": 18.435
+    },
+    {
+      "count": 20,
+      "diameterMm": 8.0,
+      "lengthMm": 880.0,
+      "mark": "C2-LINK-1",
+      "member": "C2",
+      "role": "links",
+      "shape": "link",
+      "weightKg": 6.9447
+    },
+    {
+      "count": 4,
+      "diameterMm": 16.0,
+      "lengthMm": 2920.0,
+      "mark": "C3-MAINS",
+      "member": "C3",
+      "role": "mains",
+      "shape": "straight",
+      "weightKg": 18.435
+    },
+    {
+      "count": 20,
+      "diameterMm": 8.0,
+      "lengthMm": 880.0,
+      "mark": "C3-LINK-1",
+      "member": "C3",
+      "role": "links",
+      "shape": "link",
+      "weightKg": 6.9447
+    },
+    {
+      "count": 4,
+      "diameterMm": 16.0,
+      "lengthMm": 2920.0,
+      "mark": "C4-MAINS",
+      "member": "C4",
+      "role": "mains",
+      "shape": "straight",
+      "weightKg": 18.435
+    },
+    {
+      "count": 20,
+      "diameterMm": 8.0,
+      "lengthMm": 880.0,
+      "mark": "C4-LINK-1",
+      "member": "C4",
+      "role": "links",
+      "shape": "link",
+      "weightKg": 6.9447
+    },
+    {
+      "count": 4,
+      "diameterMm": 16.0,
+      "lengthMm": 2920.0,
+      "mark": "B1-MAINS",
+      "member": "B1",
+      "role": "mains",
+      "shape": "straight",
+      "weightKg": 18.435
+    },
+    {
+      "count": 20,
+      "diameterMm": 8.0,
+      "lengthMm": 1180.0,
+      "mark": "B1-LINK-1",
+      "member": "B1",
+      "role": "links",
+      "shape": "link",
+      "weightKg": 9.3122
+    },
+    {
+      "count": 4,
+      "diameterMm": 16.0,
+      "lengthMm": 2920.0,
+      "mark": "B2-MAINS",
+      "member": "B2",
+      "role": "mains",
+      "shape": "straight",
+      "weightKg": 18.435
+    },
+    {
+      "count": 20,
+      "diameterMm": 8.0,
+      "lengthMm": 1180.0,
+      "mark": "B2-LINK-1",
+      "member": "B2",
+      "role": "links",
+      "shape": "link",
+      "weightKg": 9.3122
+    },
+    {
+      "count": 4,
+      "diameterMm": 16.0,
+      "lengthMm": 2920.0,
+      "mark": "B3-MAINS",
+      "member": "B3",
+      "role": "mains",
+      "shape": "straight",
+      "weightKg": 18.435
+    },
+    {
+      "count": 20,
+      "diameterMm": 8.0,
+      "lengthMm": 1180.0,
+      "mark": "B3-LINK-1",
+      "member": "B3",
+      "role": "links",
+      "shape": "link",
+      "weightKg": 9.3122
+    },
+    {
+      "count": 2,
+      "diameterMm": 10.0,
+      "lengthMm": 9220.0,
+      "mark": "S1-MAINS",
+      "member": "Slab_1",
+      "role": "mains",
+      "shape": "straight",
+      "weightKg": 11.369
+    },
+    {
+      "count": 47,
+      "diameterMm": 8.0,
+      "lengthMm": 220.0,
+      "mark": "S1-DIST",
+      "member": "Slab_1",
+      "role": "distribution",
+      "shape": "straight",
+      "weightKg": 4.08
+    },
+    {
+      "count": 8,
+      "diameterMm": 12.0,
+      "lengthMm": 1120.0,
+      "mark": "F1-MESH-X",
+      "member": "F1",
+      "role": "mesh",
+      "shape": "straight",
+      "weightKg": 7.9548
+    },
+    {
+      "count": 8,
+      "diameterMm": 12.0,
+      "lengthMm": 1120.0,
+      "mark": "F1-MESH-Y",
+      "member": "F1",
+      "role": "mesh",
+      "shape": "straight",
+      "weightKg": 7.9548
+    },
+    {
+      "count": 4,
+      "diameterMm": 16.0,
+      "lengthMm": 600.0,
+      "mark": "F1-START",
+      "member": "F1",
+      "role": "starters",
+      "shape": "starter",
+      "weightKg": 3.788
+    },
+    {
+      "count": 8,
+      "diameterMm": 12.0,
+      "lengthMm": 1120.0,
+      "mark": "F2-MESH-X",
+      "member": "F2",
+      "role": "mesh",
+      "shape": "straight",
+      "weightKg": 7.9548
+    },
+    {
+      "count": 8,
+      "diameterMm": 12.0,
+      "lengthMm": 1120.0,
+      "mark": "F2-MESH-Y",
+      "member": "F2",
+      "role": "mesh",
+      "shape": "straight",
+      "weightKg": 7.9548
+    },
+    {
+      "count": 4,
+      "diameterMm": 16.0,
+      "lengthMm": 600.0,
+      "mark": "F2-START",
+      "member": "F2",
+      "role": "starters",
+      "shape": "starter",
+      "weightKg": 3.788
+    },
+    {
+      "count": 8,
+      "diameterMm": 12.0,
+      "lengthMm": 1120.0,
+      "mark": "F3-MESH-X",
+      "member": "F3",
+      "role": "mesh",
+      "shape": "straight",
+      "weightKg": 7.9548
+    },
+    {
+      "count": 8,
+      "diameterMm": 12.0,
+      "lengthMm": 1120.0,
+      "mark": "F3-MESH-Y",
+      "member": "F3",
+      "role": "mesh",
+      "shape": "straight",
+      "weightKg": 7.9548
+    },
+    {
+      "count": 4,
+      "diameterMm": 16.0,
+      "lengthMm": 600.0,
+      "mark": "F3-START",
+      "member": "F3",
+      "role": "starters",
+      "shape": "starter",
+      "weightKg": 3.788
+    },
+    {
+      "count": 8,
+      "diameterMm": 12.0,
+      "lengthMm": 1120.0,
+      "mark": "F4-MESH-X",
+      "member": "F4",
+      "role": "mesh",
+      "shape": "straight",
+      "weightKg": 7.9548
+    },
+    {
+      "count": 8,
+      "diameterMm": 12.0,
+      "lengthMm": 1120.0,
+      "mark": "F4-MESH-Y",
+      "member": "F4",
+      "role": "mesh",
+      "shape": "straight",
+      "weightKg": 7.9548
+    },
+    {
+      "count": 4,
+      "diameterMm": 16.0,
+      "lengthMm": 600.0,
+      "mark": "F4-START",
+      "member": "F4",
+      "role": "starters",
+      "shape": "starter",
+      "weightKg": 3.788
+    }
+  ],
+  "projectId": "7c9e6f10-2a3b-4c5d-9e8f-1a2b3c4d5e6f",
+  "schemaVersion": "0.1.0",
+  "totals": {
+    "barCount": 297,
+    "byDiameterKg": {
+      "10": 11.369,
+      "12": 63.6384,
+      "16": 144.197,
+      "8": 59.7954
+    },
+    "weightKg": 278.9998
+  }
+}
