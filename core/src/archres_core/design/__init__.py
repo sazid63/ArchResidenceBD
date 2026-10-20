@@ -7,6 +7,19 @@ the assumptions are handed back so the app can record them in the spec. See
 
 from __future__ import annotations
 
+from .drawing import (
+    PAGE_H_MM,
+    PAGE_W_MM,
+    SCALE,
+    SCALE_LABEL,
+    SHEET_STATUS,
+    VIEW_FRONT,
+    VIEW_TOP,
+    Dimension,
+    DrawingDesign,
+    design_sheet,
+    render_sheet_macro,
+)
 from .floor import (
     ASSUMED_BEAM_DEPTH_MM,
     ASSUMED_BEAM_WIDTH_MM,
@@ -49,6 +62,15 @@ from .foundation import (
 
 __all__ = [
     "BBS_SCHEMA_VERSION",
+    "PAGE_H_MM",
+    "PAGE_W_MM",
+    "SCALE",
+    "SCALE_LABEL",
+    "SHEET_STATUS",
+    "VIEW_FRONT",
+    "VIEW_TOP",
+    "Dimension",
+    "DrawingDesign",
     "SHAPES",
     "STEEL_DENSITY_KG_PER_M3",
     "Bar",
@@ -77,8 +99,10 @@ __all__ = [
     "build_bbs",
     "design_foundation",
     "design_rebar",
+    "design_sheet",
     "design_typical_floor",
     "render_floor_macro",
     "render_macro",
     "render_rebar_macro",
+    "render_sheet_macro",
 ]

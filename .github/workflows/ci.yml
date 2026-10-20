@@ -140,6 +140,11 @@ jobs:
           uv run --directory core python ../tools/cad/rebar_probe.py \
             --engine "$ARCHRES_FREECADCMD" \
             --json "$GITHUB_WORKSPACE/data/tmp/cad-ci/rebar-probe.json"
+      - name: Probe the drawing sheet (a sheet a human can read, byte-stable)
+        run: |
+          uv run --directory core python ../tools/cad/sheet_probe.py \
+            --engine "$ARCHRES_FREECADCMD" \
+            --json "$GITHUB_WORKSPACE/data/tmp/cad-ci/sheet-probe.json"
       - name: Upload the execution report
         if: always()
         uses: actions/upload-artifact@v4

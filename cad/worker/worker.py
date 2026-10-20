@@ -45,7 +45,7 @@ import xmlrpc.server
 
 PROTOCOL_VERSION = "0.1.0"
 JOB_KINDS = ("geometry.build", "drawing.sheet", "rebar.build")
-IMPLEMENTED_KINDS = ("geometry.build",)
+IMPLEMENTED_KINDS = ("geometry.build", "drawing.sheet")
 ERROR_CODES = ("invalid_params", "worker_down", "worker_restarted", "timeout", "engine_error", "internal")
 
 #: The measurement result travels as a JSON artifact: the frozen JobResult has no free-form
