@@ -39,7 +39,6 @@ import tempfile
 from archres_core.cad import (
     EngineMissing,
     find_engine,
-    load_case_document,
     load_cases,
     run_candidate,
     verify_result,
@@ -146,6 +145,41 @@ def _rate(summary: dict, metric: str) -> float:
     return round(summary[metric] / total, 4) if total else 0.0
 
 
+def _self_test(engine, cases: dict, target_source: str) -> int:
+    """The judge must not be a rubber stamp: the good macro passes, the broken one does not.
+
+    The known-good macro is judged on every holdout case (it must pass all of them), and the
+    *broken* source of the first holdout mutation is judged on its own case (it must fail). A
+    judge that cannot tell those two apart measures nothing.
+    """
+    from archres_core.training import apply_mutation, mutation_by_id
+
+    holdout = load_jsonl(SPLIT)
+    failures: list[str] = []
+    with tempfile.TemporaryDirectory(prefix="repair-selftest-") as temp:
+        root = pathlib.Path(temp)
+        for record in holdout:
+            case = cases.get(record["input"]["caseId"])
+            if case is None:
+                failures.append(f"{record['id']}: its case is not in the case file")
+                continue
+            outcome = _run_case(engine, target_source, case, root / f"good-{record['id']}")
+            if not verify_result(case, outcome).ok:
+                failures.append(f"the known-good macro failed {case.id}: {outcome.code}")
+        first = holdout[0]
+        broken = apply_mutation(target_source, mutation_by_id(first["input"]["mutation"]["id"]))
+        case = cases.get(first["input"]["caseId"])
+        outcome = _run_case(engine, broken, case, root / "broken")
+        if verify_result(case, outcome).ok:
+            failures.append("the broken macro passed its own case - the judge measures nothing")
+    for failure in failures:
+        print(f"FAIL {failure}", file=sys.stderr)
+    if failures:
+        return 1
+    print("repair judge self-test: the good macro passes, the broken one fails")
+    return 0
+
+
 def main() -> int:
     utf8_stdio()
     parser = argparse.ArgumentParser(description="Judge repair replies in the real engine.")
@@ -154,7 +188,26 @@ def main() -> int:
     parser.add_argument("--json", help="write the machine-readable report here")
     parser.add_argument("--markdown", help="write the human-readable report here")
     parser.add_argument("--no-gates", action="store_true", help="report without failing on a floor")
+    parser.add_argument(
+        "--self-test",
+        action="store_true",
+        help="check that the judge separates the known-good macro from a broken one",
+    )
     args = parser.parse_args()
+
+    try:
+        engine = find_engine(args.engine)
+    except EngineMissing as exc:
+        print(f"no CAD engine: {exc}", file=sys.stderr)
+        return 1
+    cases = {
+        case.id: case
+        for case in load_cases(CASES, root=ROOT)
+        if case.kind == "geometry.build" and (case.expect.get("status") or "") == "ok"
+    }
+    target_source = TARGET.read_text(encoding="utf-8")
+    if args.self_test:
+        return _self_test(engine, cases, target_source)
 
     reply_path = _reply_path(args.model)
     if not reply_path.is_file():
@@ -165,19 +218,6 @@ def main() -> int:
         print(f"the reply set {reply_path.name} is empty", file=sys.stderr)
         return 1
 
-    try:
-        engine = find_engine(args.engine)
-    except EngineMissing as exc:
-        print(f"no CAD engine: {exc}", file=sys.stderr)
-        return 1
-
-    raw_cases = load_case_document(CASES)
-    cases = {
-        case.id: case
-        for case in load_cases(CASES, root=ROOT)
-        if case.kind == "geometry.build" and (case.expect.get("status") or "") == "ok"
-    }
-    target_source = TARGET.read_text(encoding="utf-8")
     holdout = load_jsonl(SPLIT)
     expected = {record["input"]["mutation"]["id"] for record in holdout}
     seen = {str(reply.get("mutationId")) for reply in replies}
