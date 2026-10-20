@@ -35,6 +35,7 @@ SCHEMAS: dict[str, str] = {
     "rate-card": "rate_card.py",
     "verdict": "verdict.py",
     "bbs": "bbs.py",
+    "boq": "boq.py",
 }
 
 NPM_PKG = "json-schema-to-typescript@15"

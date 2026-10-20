@@ -85,6 +85,8 @@ jobs:
         run: uv run --directory core python ../tools/cad/foundation_probe.py --check
       - name: Generated floor fixtures are fresh (offline, no engine)
         run: uv run --directory core python ../tools/cad/floor_probe.py --check
+      - name: The committed BOQ is fresh and its arithmetic adds up
+        run: uv run --directory core python ../tools/boq/build_boq.py --check
       - name: Generated rebar fixtures are fresh (offline, no engine)
         run: uv run --directory core python ../tools/cad/rebar_probe.py --check
 

@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.archresidencebd.app/boq/0.1.0.json",
+  "title": "BillOfQuantities",
+  "description": "ArchResidenceBD BOQ v0.1.0 (plan §6 - BOQ: per-phase and single-page view divided by phase with subtotals + grand total; cost types per line: material / labour / machinery / subcontract / others; deviation-flagged line notes) - the priced data behind the xlsx/PDF renderers (P3). Quantities are measured from the design (the engine's volumes, the BBS's steel); rates come from the frozen rate-card interface (W0.9) and are never typed here. A line whose rate is missing stays in the document, unpriced and visible: no silent gaps. The card's status travels with the document - a candidate card is not a verified price list.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "projectId", "currency", "rateCard", "lines", "subtotals", "totals", "notes"],
+  "properties": {
+    "schemaVersion": { "const": "0.1.0" },
+    "projectId": { "type": "string", "minLength": 1 },
+    "currency": { "const": "BDT" },
+    "rateCard": { "$ref": "#/$defs/RateCardRef" },
+    "lines": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/BoqLine" } },
+    "subtotals": { "$ref": "#/$defs/Subtotals" },
+    "totals": { "$ref": "#/$defs/Totals" },
+    "notes": { "type": "string" }
+  },
+  "$defs": {
+    "Localized": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bn", "en"],
+      "properties": { "bn": { "type": "string", "minLength": 1 }, "en": { "type": "string", "minLength": 1 } }
+    },
+    "RateCardRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cardId", "region", "status", "effectiveFrom", "source"],
+      "properties": {
+        "cardId": { "type": "string", "minLength": 1 },
+        "region": { "type": "string", "minLength": 1 },
+        "status": {
+          "type": "string",
+          "enum": ["candidate", "active", "archived"],
+          "description": "The card's own status travels with the BOQ: a candidate card is an unverified price list."
+        },
+        "effectiveFrom": { "type": "string", "format": "date" },
+        "source": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "The rate card's source (kind, name, url, retrievedAt, sha256)."
+        }
+      }
+    },
+    "BoqLine": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "label",
+        "phase",
+        "costType",
+        "unit",
+        "quantity",
+        "rateKey",
+        "provenance",
+        "source",
+        "note"
+      ],
+      "properties": {
+        "key": { "type": "string", "minLength": 1 },
+        "label": { "$ref": "#/$defs/Localized" },
+        "phase": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The phase the line belongs to (the plan divides the BOQ by phase)."
+        },
+        "costType": {
+          "type": "string",
+          "enum": ["material", "labour", "machinery", "subcontract", "other"],
+          "description": "Plan §6 cost types."
+        },
+        "unit": { "type": "string", "minLength": 1 },
+        "quantity": { "type": "number", "minimum": 0 },
+        "rateKey": {
+          "type": "string",
+          "description": "The rate-card line this line priced itself from (empty when it is measured but unpriced)."
+        },
+        "provenance": {
+          "type": "string",
+          "enum": ["spec", "derived", "assumed", "rule"],
+          "description": "Where the quantity came from: the spec, the design, an authored assumption, or a rule."
+        },
+        "source": { "type": "string", "minLength": 1 },
+        "note": { "type": "string" },
+        "rateBdt": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "The rate the line was priced at; null when the card has no rate for it (absence, not a zero)."
+        },
+        "amountBdt": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "description": "quantity * rate; null when the line is unpriced."
+        },
+        "priced": { "type": "boolean" },
+        "rateCostType": { "type": "string" }
+      }
+    },
+    "Subtotals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["byPhase", "byCostType"],
+      "properties": {
+        "byPhase": { "type": "object", "additionalProperties": { "type": "number", "minimum": 0 } },
+        "byCostType": { "type": "object", "additionalProperties": { "type": "number", "minimum": 0 } }
+      }
+    },
+    "Totals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["amountBdt", "pricedLines", "unpricedLines"],
+      "properties": {
+        "amountBdt": { "type": "number", "minimum": 0 },
+        "pricedLines": { "type": "integer", "minimum": 0 },
+        "unpricedLines": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "The lines the card could not price - visible, never dropped."
+        }
+      }
+    }
+  }
+}

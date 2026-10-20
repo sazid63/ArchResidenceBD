@@ -1,0 +1,246 @@
+{
+  "currency": "BDT",
+  "lines": [
+    {
+      "amountBdt": 68574.8,
+      "costType": "machinery",
+      "key": "excavation",
+      "label": {
+        "bn": "খনন (যন্ত্র)",
+        "en": "Excavation (machinery)"
+      },
+      "note": "the declared excavation prism (293.892 m3) at an assumed 12.0 m3/hour",
+      "phase": "site-excavation",
+      "priced": true,
+      "provenance": "assumed",
+      "quantity": 24.491,
+      "rateBdt": 2800.0,
+      "rateCostType": "machinery",
+      "rateKey": "excavator",
+      "source": "v0 productivity assumption (12 m3/hour)",
+      "unit": "hour"
+    },
+    {
+      "amountBdt": 11583.0,
+      "costType": "material",
+      "key": "cement-foundation",
+      "label": {
+        "bn": "সিমেন্ট (ভিত্তি)",
+        "en": "Cement (foundation)"
+      },
+      "note": "the mix is an assumption, not a pack rule",
+      "phase": "foundation",
+      "priced": true,
+      "provenance": "assumed",
+      "quantity": 21.06,
+      "rateBdt": 550.0,
+      "rateCostType": "material",
+      "rateKey": "cement-opc-43",
+      "source": "v0 mix assumption (7.5 bags/m3)",
+      "unit": "bag"
+    },
+    {
+      "amountBdt": 10905.45,
+      "costType": "material",
+      "key": "cement-floor",
+      "label": {
+        "bn": "সিমেন্ট (তলা)",
+        "en": "Cement (floor)"
+      },
+      "note": "the mix is an assumption, not a pack rule",
+      "phase": "floor",
+      "priced": true,
+      "provenance": "assumed",
+      "quantity": 19.8281,
+      "rateBdt": 550.0,
+      "rateCostType": "material",
+      "rateKey": "cement-opc-43",
+      "source": "v0 mix assumption (7.5 bags/m3)",
+      "unit": "bag"
+    },
+    {
+      "amountBdt": 208.75,
+      "costType": "material",
+      "key": "sand-foundation",
+      "label": {
+        "bn": "বালি (ভিত্তি)",
+        "en": "Sand (foundation)"
+      },
+      "note": "",
+      "phase": "foundation",
+      "priced": true,
+      "provenance": "assumed",
+      "quantity": 4.9702,
+      "rateBdt": 42.0,
+      "rateCostType": "material",
+      "rateKey": "sand-fine",
+      "source": "v0 mix assumption (1.77 cft/m3)",
+      "unit": "cft"
+    },
+    {
+      "amountBdt": 196.53,
+      "costType": "material",
+      "key": "sand-floor",
+      "label": {
+        "bn": "বালি (তলা)",
+        "en": "Sand (floor)"
+      },
+      "note": "",
+      "phase": "floor",
+      "priced": true,
+      "provenance": "assumed",
+      "quantity": 4.6794,
+      "rateBdt": 42.0,
+      "rateCostType": "material",
+      "rateKey": "sand-fine",
+      "source": "v0 mix assumption (1.77 cft/m3)",
+      "unit": "cft"
+    },
+    {
+      "amountBdt": 24831.0,
+      "costType": "material",
+      "key": "steel",
+      "label": {
+        "bn": "স্টিল রিড",
+        "en": "Steel reinforcement"
+      },
+      "note": "the scheduled steel, not an estimate",
+      "phase": "floor",
+      "priced": true,
+      "provenance": "derived",
+      "quantity": 0.279,
+      "rateBdt": 89000.0,
+      "rateCostType": "material",
+      "rateKey": "rod-60g",
+      "source": "BBS (W2.4)",
+      "unit": "ton"
+    },
+    {
+      "amountBdt": 1067.04,
+      "costType": "labour",
+      "key": "mason",
+      "label": {
+        "bn": "মেসন",
+        "en": "Mason (labour)"
+      },
+      "note": "",
+      "phase": "foundation",
+      "priced": true,
+      "provenance": "assumed",
+      "quantity": 1.1232,
+      "rateBdt": 950.0,
+      "rateCostType": "labour",
+      "rateKey": "mason",
+      "source": "v0 productivity assumption (2.5 m3/day)",
+      "unit": "day"
+    },
+    {
+      "amountBdt": 1004.63,
+      "costType": "labour",
+      "key": "mason-floor",
+      "label": {
+        "bn": "মেসন (তলা)",
+        "en": "Mason (floor, labour)"
+      },
+      "note": "",
+      "phase": "floor",
+      "priced": true,
+      "provenance": "assumed",
+      "quantity": 1.0575,
+      "rateBdt": 950.0,
+      "rateCostType": "labour",
+      "rateKey": "mason",
+      "source": "v0 productivity assumption (2.5 m3/day)",
+      "unit": "day"
+    },
+    {
+      "amountBdt": 1228.5,
+      "costType": "machinery",
+      "key": "mixer",
+      "label": {
+        "bn": "মিক্সার",
+        "en": "Concrete mixer"
+      },
+      "note": "",
+      "phase": "foundation",
+      "priced": true,
+      "provenance": "assumed",
+      "quantity": 0.351,
+      "rateBdt": 3500.0,
+      "rateCostType": "machinery",
+      "rateKey": "mixer-diesel",
+      "source": "v0 productivity assumption (8 m3/day)",
+      "unit": "day"
+    },
+    {
+      "amountBdt": null,
+      "costType": "other",
+      "key": "formwork-foundation",
+      "label": {
+        "bn": "ফর্মওয়ার্ক (ভিত্তি)",
+        "en": "Formwork (foundation)"
+      },
+      "note": "no formwork rate in the v0 card: the line is measured, not priced",
+      "phase": "foundation",
+      "priced": false,
+      "provenance": "derived",
+      "quantity": 5.76,
+      "rateBdt": null,
+      "rateKey": "",
+      "source": "foundation design",
+      "unit": "sqm"
+    },
+    {
+      "amountBdt": null,
+      "costType": "other",
+      "key": "formwork-floor",
+      "label": {
+        "bn": "ফর্মওয়ার্ক (তলা)",
+        "en": "Formwork (floor)"
+      },
+      "note": "no formwork rate in the v0 card: the line is measured, not priced",
+      "phase": "floor",
+      "priced": false,
+      "provenance": "derived",
+      "quantity": 17.19,
+      "rateBdt": null,
+      "rateKey": "",
+      "source": "floor design",
+      "unit": "sqm"
+    }
+  ],
+  "notes": "the quantities are measured from the design; the rates come from the rate card (dhaka-example-2026-10, status candidate)",
+  "projectId": "7c9e6f10-2a3b-4c5d-9e8f-1a2b3c4d5e6f",
+  "rateCard": {
+    "cardId": "dhaka-example-2026-10",
+    "effectiveFrom": "2026-10-01",
+    "region": "dhaka",
+    "source": {
+      "kind": "manual",
+      "name": "Illustrative example card (structure demo)",
+      "note": "Placeholder numbers to exercise the schema - never use for a BOQ."
+    },
+    "status": "candidate"
+  },
+  "schemaVersion": "0.1.0",
+  "subtotals": {
+    "byCostType": {
+      "labour": 2071.67,
+      "machinery": 69803.3,
+      "material": 47724.73
+    },
+    "byPhase": {
+      "floor": 36937.61,
+      "foundation": 14087.29,
+      "site-excavation": 68574.8
+    }
+  },
+  "totals": {
+    "amountBdt": 119599.7,
+    "pricedLines": 9,
+    "unpricedLines": [
+      "formwork-foundation",
+      "formwork-floor"
+    ]
+  }
+}
