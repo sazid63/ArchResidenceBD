@@ -1,0 +1,85 @@
+[
+  {
+    "id": "foundation.pads.1x1",
+    "kind": "geometry.build",
+    "script": "tools/cad/candidates/geometry_build.py",
+    "params": {
+      "pads": 1,
+      "columnsPerPad": 1,
+      "padMm": [1200, 1200, 300],
+      "columnMm": [300, 300, 2700]
+    },
+    "expect": {
+      "status": "ok",
+      "documentObjects": { "min": 1 },
+      "totals": {
+        "volumeM3": { "min": 0.674, "max": 0.676 }
+      },
+      "objects": [
+        {
+          "name": "Pad_1",
+          "volumeM3": { "min": 0.674, "max": 0.676 },
+          "bboxMm": [
+            { "min": 1199.9, "max": 1200.1 },
+            { "min": 1199.9, "max": 1200.1 },
+            { "min": 2999.9, "max": 3000.1 }
+          ],
+          "solids": 1,
+          "valid": true
+        }
+      ],
+      "artifacts": ["foundation-summary.json"]
+    },
+    "determinism": true,
+    "timeoutMs": 180000,
+    "notes": "Pad 1x1 with 1 pad and 1 column stacked on it; harness measures the fused solid."
+  },
+  {
+    "id": "foundation.pads.6x3",
+    "kind": "geometry.build",
+    "script": "tools/cad/candidates/geometry_build.py",
+    "params": {
+      "pads": 6,
+      "columnsPerPad": 3,
+      "padMm": [1200, 1200, 300],
+      "columnMm": [300, 300, 2700]
+    },
+    "expect": {
+      "status": "ok",
+      "documentObjects": { "min": 6 },
+      "totals": {
+        "volumeM3": { "min": 6.964, "max": 6.968 },
+        "objects": { "min": 6, "max": 6 }
+      },
+      "objects": [
+        {
+          "name": "Pad_1",
+          "volumeM3": { "min": 1.16, "max": 1.162 },
+          "solids": 1,
+          "valid": true
+        }
+      ],
+      "artifacts": [
+        {"name": "foundation-summary.json", "kind": "json", "minBytes": 80}
+      ]
+    },
+    "determinism": true,
+    "timeoutMs": 240000,
+    "notes": "Six pads, three columns each. Checks the first pad explicitly and the total."
+  },
+  {
+    "id": "foundation.broken.missing-column",
+    "kind": "geometry.build",
+    "script": "tools/cad/candidates/broken_generator.py",
+    "params": {
+      "pads": 1,
+      "columnsPerPad": 3
+    },
+    "expect": {
+      "status": "error"
+    },
+    "determinism": false,
+    "timeoutMs": 120000,
+    "notes": "Candidate raises mid-build; harness must capture the traceback and report engine_error."
+  }
+]
