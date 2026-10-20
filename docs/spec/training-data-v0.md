@@ -149,6 +149,9 @@ uv run --directory core python ../tools/training/build_repair_dataset.py --check
   FreeCAD version and the counts. A change to any pinned input makes the corpus visibly stale.
 - Round 1 is **six mutations** (four exception classes, two measured bugs). It proves the
   pipeline, not the breadth of the CAD failure space; more mutations are a new reviewed corpus.
+- The corpus is portable: recorded on FreeCAD 1.1.4 (Windows) and replayed byte-identically on
+  FreeCAD 1.1.3 (Ubuntu, conda-forge) on 2026-10-20. The trace normalisation is what makes that
+  true; the manifest still records the recording engine.
 - Repair records are a separate corpus: they do not join `sft-v0` and never train the chat
   adapter.
 
