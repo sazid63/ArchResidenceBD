@@ -11,6 +11,7 @@
 - v1.5 — one-app **NativeCAD** integration (branded, embedded, invisible engine); left navigation + Project Setup + Source Registry; BOQ cost types (labour / machinery / subcontract) + machinery rate cards; Claude-style soft theme with the **no-sharp-edges** corner policy; Work Breakdown added (Appendix C) *(this document)*
 - v1.5.1 — branding/attribution policy: required licensing notices confined to the app's **Licences** screen; engine name kept out of branding, UI copy and generated documents (ADR-0004). No functional change.
 - v1.6 — owner-approved: the **~0.5M-token teacher target is retired** (§7). The teacher produced 111 unique paraphrases from 88 seed questions and its one trained round tied the scripted model on the W1.9 gate; it stays a parked offline tool, never a fleet member. Scripted generation remains the training data (ADR-0024). No other section changes.
+- v1.6.1 — §2.1 gains the **cost-risk** tier: a price override is registered in the Deviation Register like any other override, and it is not a compliance risk (ADR-0030). The risk tiers for *rule* deviations are unchanged. No other section changes.
 
 ---
 
@@ -30,7 +31,7 @@ A self-contained Windows desktop app that acts as an **AI civil engineer for Ban
 
 1. **Engineer, not judge.** Requests are never refused.
    - User says nothing → codes and rules are followed (compliant by default).
-   - User overrides → the app explains what rule is left behind, the risk tier (cosmetic / approval-risk / structural-attention), asks for confirmation, **proceeds**, and records the entry in the **Deviation Register**.
+   - User overrides → the app explains what rule is left behind, the risk tier (cosmetic / approval-risk / structural-attention; a **price** override is a **cost-risk** — it moves the project's money, never its compliance), asks for confirmation, **proceeds**, and records the entry in the **Deviation Register**.
    - Impossible requests (physics) → explained in engineering terms, with the nearest feasible alternatives offered. "Impossible" is a physics statement, not a moral one.
    - No falsification: the app never forges compliant-looking documents. Transparency (the deviation register) is the line. Nothing in the tool exists to deceive an authority.
 2. **Scripts first, AI last-mile.** Deterministic Python does math, geometry, rules, BOQ, drawings, takeoff. The AI phrases questions, parses free text, explains results with citations, and repairs scripts. No AI where a script suffices.

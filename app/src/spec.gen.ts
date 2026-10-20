@@ -179,6 +179,28 @@ export interface Pricing {
    */
   source: "user" | "fetched" | "default" | "mixed";
   asOf?: string;
+  /**
+   * What the price service did: the card it resolved, the multipliers it applied, the rows it could not use. Never a silent gap.
+   */
+  notes?: string;
+  /**
+   * The rate card the prices came from (W2.7). The card's identity travels with the prices so a BOQ priced from this block can say which list, which region and which verification state it used.
+   */
+  card?: {
+    cardId: string;
+    /**
+     * The region these prices are for (the resolved region, after the card's multipliers).
+     */
+    region: string;
+    status: "candidate" | "active" | "archived";
+    effectiveFrom: string;
+    /**
+     * The card's source (kind, name, url, retrievedAt, sha256, note).
+     */
+    source: {
+      [k: string]: unknown;
+    };
+  };
   materials?: MaterialRate[];
   labour?: LabourRate[];
   machinery?: MachineryRate[];
@@ -226,6 +248,10 @@ export interface MachineryRate {
    * True when the rate includes fuel.
    */
   fuelIncluded?: boolean;
+  /**
+   * Machinery lines only: the minimum billable time per mobilization, when the source states one (W2.7).
+   */
+  minimumChargeHours?: number;
   asOf?: string;
   note?: string;
 }
@@ -259,7 +285,10 @@ export interface Deviation {
   ruleTitle?: string;
   expected: string;
   actual: string;
-  riskTier: "cosmetic" | "approval_risk" | "structural_attention";
+  /**
+   * How much attention the deviation deserves. cost_risk is a price deviation (a rate the user overrode); it touches the project's money, never its compliance (W2.7).
+   */
+  riskTier: "cosmetic" | "approval_risk" | "structural_attention" | "cost_risk";
   /**
    * User's reason for the override.
    */

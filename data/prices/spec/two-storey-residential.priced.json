@@ -1,0 +1,280 @@
+{
+  "assumptions": [
+    {
+      "basis": "area_default",
+      "id": "asm-soil",
+      "relatedPath": "/site/soil/sbcKpa",
+      "statement": "Conservative area default 70 kPa (no soil report). Assumption - verify on site.",
+      "subject": "Soil bearing capacity",
+      "verifyOnSite": true
+    }
+  ],
+  "building": {
+    "groundFloorUsage": "parking",
+    "occupancy": "residential",
+    "storeys": {
+      "count": 2,
+      "groundFloorHeightM": 3.2,
+      "hasBasement": false,
+      "typicalFloorHeightM": 3.0
+    },
+    "structureType": "rcc_frame",
+    "typicalUnitAreaSqm": 60.0,
+    "unitsPerFloor": 2
+  },
+  "createdAt": "2026-09-02T11:05:00+06:00",
+  "deviations": [
+    {
+      "acknowledged": true,
+      "actual": "2.4 m",
+      "expected": "3.0 m",
+      "id": "dev-001",
+      "nearestCompliantAlternative": "Shift the front wall to 3.0 m from the road edge.",
+      "phaseId": "foundation",
+      "rationale": "Existing front boundary wall retained by owner.",
+      "recordedAt": "2026-10-05T14:20:00+06:00",
+      "riskTier": "approval_risk",
+      "ruleRef": "rajuk@2008.1#setback-schedule",
+      "ruleTitle": "Front setback"
+    }
+  ],
+  "documents": [
+    {
+      "generatedAt": "2026-10-12T10:15:00+06:00",
+      "id": "doc-001",
+      "kind": "drawing_pdf",
+      "path": "documents/foundation-plan-draft.pdf",
+      "phaseId": "foundation",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "title": "Foundation plan (draft)"
+    }
+  ],
+  "locked": false,
+  "phases": [
+    {
+      "data": {
+        "excavationDepthM": 1.8,
+        "method": "manual",
+        "shoring": "none"
+      },
+      "id": "site-excavation",
+      "kind": "site_excavation",
+      "label": "Site & Excavation",
+      "status": "designed"
+    },
+    {
+      "data": {
+        "footingDepthM": 1.5,
+        "foundationType": "isolated_footing",
+        "sbcUsedKpa": 70
+      },
+      "id": "foundation",
+      "kind": "foundation",
+      "label": "Foundation",
+      "status": "designed"
+    },
+    {
+      "data": {
+        "slabThicknessMm": 125
+      },
+      "id": "floor-0",
+      "kind": "floor",
+      "label": "Ground Floor",
+      "status": "designed",
+      "storeyIndex": 0
+    },
+    {
+      "data": {
+        "slabThicknessMm": 125
+      },
+      "id": "floor-1",
+      "kind": "floor",
+      "label": "Floor 1",
+      "status": "designed",
+      "storeyIndex": 1
+    },
+    {
+      "data": {},
+      "id": "roof-boundary",
+      "kind": "roof_boundary",
+      "label": "Roof & Boundary",
+      "status": "gathering_info"
+    },
+    {
+      "data": {
+        "hasLift": false,
+        "stairType": "dog_legged"
+      },
+      "id": "common-services",
+      "kind": "common_services",
+      "label": "Common Services",
+      "status": "stale"
+    }
+  ],
+  "pricing": {
+    "asOf": "2026-10-05",
+    "card": {
+      "cardId": "dhaka-example-2026-10",
+      "effectiveFrom": "2026-10-01",
+      "region": "dhaka",
+      "source": {
+        "kind": "manual",
+        "name": "Illustrative example card (structure demo)",
+        "note": "Placeholder numbers to exercise the schema - never use for a BOQ. | resolved for dhaka from card dhaka-example-2026-10 (base region dhaka); cement-opc-43 550 bag (own-region); rod-60g 89000 ton (own-region); sand-fine 42 cft (own-region); brick-1st 12 each (own-region); mason 950 day (own-region); mixer-diesel 3500 day (own-region); excavator 2800 hour (own-region); piling-450 42000 per_pile (own-region)"
+      },
+      "status": "candidate"
+    },
+    "currency": "BDT",
+    "labour": [
+      {
+        "asOf": "2026-10-05",
+        "key": "mason",
+        "label": "Mason (daily wage)",
+        "note": "card dhaka-example-2026-10 is a candidate (not verified)",
+        "rateBdt": 950.0,
+        "source": "default",
+        "unit": "day"
+      }
+    ],
+    "machinery": [
+      {
+        "asOf": "2026-10-05",
+        "fuelIncluded": true,
+        "key": "mixer-diesel",
+        "label": "Concrete mixer (diesel)",
+        "note": "card dhaka-example-2026-10 is a candidate (not verified)",
+        "operatorIncluded": true,
+        "rateBdt": 3500.0,
+        "source": "default",
+        "unit": "day"
+      },
+      {
+        "asOf": "2026-10-05",
+        "fuelIncluded": false,
+        "key": "excavator",
+        "label": "Excavator (hourly)",
+        "minimumChargeHours": 2.0,
+        "note": "card dhaka-example-2026-10 is a candidate (not verified); minimum 2 hour per mobilization; Fuel billed separately; minimum 2 h per mobilization.",
+        "operatorIncluded": true,
+        "rateBdt": 2800.0,
+        "source": "default",
+        "unit": "hour"
+      }
+    ],
+    "materials": [
+      {
+        "asOf": "2026-10-05",
+        "key": "cement-opc-43",
+        "label": "Cement (OPC 43 grade)",
+        "note": "card dhaka-example-2026-10 is a candidate (not verified)",
+        "rateBdt": 550.0,
+        "source": "default",
+        "unit": "bag"
+      },
+      {
+        "asOf": "2026-10-05",
+        "key": "rod-60g",
+        "label": "Rod (60 grade)",
+        "note": "card dhaka-example-2026-10 is a candidate (not verified)",
+        "rateBdt": 89000.0,
+        "source": "default",
+        "unit": "ton"
+      },
+      {
+        "asOf": "2026-10-05",
+        "key": "sand-fine",
+        "label": "Sand (fine)",
+        "note": "card dhaka-example-2026-10 is a candidate (not verified)",
+        "rateBdt": 42.0,
+        "source": "default",
+        "unit": "cft"
+      },
+      {
+        "asOf": "2026-10-05",
+        "key": "brick-1st",
+        "label": "Brick (1st class)",
+        "note": "card dhaka-example-2026-10 is a candidate (not verified)",
+        "rateBdt": 12.0,
+        "source": "default",
+        "unit": "each"
+      }
+    ],
+    "notes": "Placeholder numbers to exercise the schema - never use for a BOQ. | resolved for dhaka from card dhaka-example-2026-10 (base region dhaka); cement-opc-43 550 bag (own-region); rod-60g 89000 ton (own-region); sand-fine 42 cft (own-region); brick-1st 12 each (own-region); mason 950 day (own-region); mixer-diesel 3500 day (own-region); excavator 2800 hour (own-region); piling-450 42000 per_pile (own-region)",
+    "source": "default",
+    "subcontract": [
+      {
+        "asOf": "2026-10-05",
+        "key": "piling-450",
+        "label": "Piling - 450 mm (subcontract)",
+        "note": "card dhaka-example-2026-10 is a candidate (not verified); 450 mm dia bored pile; mode per plan §6.",
+        "rateBdt": 42000.0,
+        "source": "default",
+        "unit": "per_pile"
+      }
+    ]
+  },
+  "project": {
+    "displayUnits": {
+      "area": "sqm",
+      "currency": "BDT",
+      "length": "m"
+    },
+    "id": "7c9e6f10-2a3b-4c5d-9e8f-1a2b3c4d5e6f",
+    "language": "en",
+    "name": "Mirpur Duplex (internal test)",
+    "notes": "Internal test project for the walking skeleton."
+  },
+  "provenance": {
+    "/building/storeys/count": {
+      "at": "2026-09-02T11:21:00+06:00",
+      "confidence": "high",
+      "detail": "Project Setup: 2 stories",
+      "source": "user"
+    },
+    "/pricing": {
+      "at": "2026-10-05T00:00:00+00:00",
+      "detail": "price service: card dhaka-example-2026-10 (dhaka, candidate)",
+      "source": "default"
+    },
+    "/site/plot/areaSqm": {
+      "at": "2026-09-02T11:20:00+06:00",
+      "confidence": "high",
+      "detail": "Entered as 2 katha (land-unit module)",
+      "source": "user"
+    },
+    "/site/soil/sbcKpa": {
+      "at": "2026-09-02T11:20:00+06:00",
+      "confidence": "assumption",
+      "detail": "Source Registry: area default Dhaka",
+      "source": "assumption"
+    }
+  },
+  "revision": 3,
+  "schemaVersion": "0.1.0",
+  "site": {
+    "address": {
+      "areaName": "Mirpur",
+      "district": "Dhaka",
+      "division": "Dhaka",
+      "upazilaOrThana": "Mirpur"
+    },
+    "jurisdiction": {
+      "authority": "rajuk",
+      "rulePack": "rajuk@2008.1",
+      "seismicZone": 2
+    },
+    "plot": {
+      "areaSqm": 133.78,
+      "cornerPlot": true,
+      "existingStructure": false,
+      "frontageM": 10.0,
+      "roadWidthM": 9.0
+    },
+    "soil": {
+      "note": "Conservative area default for Mirpur.",
+      "sbcKpa": 70,
+      "status": "area_default"
+    }
+  },
+  "updatedAt": "2026-10-15T18:40:00+06:00"
+}

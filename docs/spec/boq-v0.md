@@ -56,8 +56,10 @@ document's own numbers.
 
 ## What is deliberately not here
 
-- **The xlsx/PDF renderers** (P3) and the **price service** (W2.7): v0 prices from one card,
-  read from a file. A *candidate* card is never used silently.
+- **The xlsx/PDF renderers** (P3). v0 prices from one card, read from a file; the **price
+  service** (W2.7) is the live path that resolves a card for the project's region and writes the
+  prices into the spec — the BOQ reads a card *or* the spec's pricing block, and the two give the
+  same total. A *candidate* card is never used silently.
 - **A structural mix, a productivity figure or a formwork rate from the pack** — the pack has
   none, so these are authored assumptions and every line that uses one says so.
 - **Subcontract lines**: v0's foundation is isolated footings, so nothing is subcontracted; the

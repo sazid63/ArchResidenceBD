@@ -24,6 +24,7 @@ from typing import Any
 from .floor import FloorDesign
 from .foundation import PROVENANCE_ASSUMED, PROVENANCE_DERIVED, FoundationDesign, Value
 from .rebar import RebarDesign, build_bbs
+from ..pricing import billable_quantity
 
 #: The assumed concrete mix and productivity (v0). The pack has no mix or productivity rule, so
 #: these are authored assumptions and the BOQ says so on every line that uses one.
@@ -292,9 +293,53 @@ def design_takeoff(
     return Takeoff(project_id=project_id, lines=tuple(lines), values=values)
 
 
-def build_boq(takeoff: Takeoff, rate_card: dict[str, Any]) -> dict[str, Any]:
-    """Price the takeoff with a rate card and group it by phase and cost type."""
-    rates = {line["key"]: line for line in rate_card.get("lines") or []}
+def _rate_table(prices: dict[str, Any]) -> tuple[dict[str, dict[str, Any]], dict[str, Any]]:
+    """The rate map and the card identity, from a rate card **or** the spec's inline pricing.
+
+    The price service (W2.7) pushes the resolved rates into the Building Spec's inline pricing
+    block, and that block is a first-class price source: the BOQ reads it the same way it reads
+    a card, and the card's identity travels with it either way.
+    """
+    if isinstance(prices.get("lines"), list):
+        rates = {str(line["key"]): line for line in prices["lines"]}
+        identity = {
+            "cardId": prices.get("cardId"),
+            "region": prices.get("region"),
+            "status": prices.get("status"),
+            "effectiveFrom": prices.get("effectiveFrom"),
+            "source": prices.get("source"),
+        }
+        return rates, identity
+    buckets = (
+        ("materials", "material"),
+        ("labour", "labour"),
+        ("machinery", "machinery"),
+        ("subcontract", "subcontract"),
+    )
+    rates = {
+        str(entry["key"]): {**entry, "key": entry["key"], "costType": cost_type}
+        for bucket, cost_type in buckets
+        for entry in (prices.get(bucket) or [])
+    }
+    card = prices.get("card") or {}
+    identity = {
+        "cardId": card.get("cardId"),
+        "region": card.get("region"),
+        "status": card.get("status"),
+        "effectiveFrom": card.get("effectiveFrom"),
+        "source": card.get("source"),
+    }
+    return rates, identity
+
+
+def build_boq(takeoff: Takeoff, prices: dict[str, Any]) -> dict[str, Any]:
+    """Price the takeoff with a rate card (or the spec's inline pricing) and group it.
+
+    The rates come from the card; the quantities come from the design. A machinery line the
+    card gives a minimum billable time for is billed at that minimum (W2.7), and the line says
+    so: a quantity the reader cannot reconcile is a number nobody trusts.
+    """
+    rates, identity = _rate_table(prices)
     priced: list[dict[str, Any]] = []
     for line in takeoff.lines:
         entry = line.as_dict()
@@ -315,6 +360,10 @@ def build_boq(takeoff: Takeoff, rate_card: dict[str, Any]) -> dict[str, Any]:
             ).strip(" |")
         else:
             rate_bdt = float(rate["rateBdt"])
+            billed, bill_note = billable_quantity(entry["quantity"], rate)
+            if bill_note:
+                entry["quantity"] = billed
+                entry["note"] = f"{entry['note']} | {bill_note}".strip(" |")
             entry["rateBdt"] = rate_bdt
             # The amount is computed from the *document's* quantity, so anyone can re-derive it
             # from the line itself (the check in tools/boq/build_boq.py does exactly that).
@@ -339,13 +388,7 @@ def build_boq(takeoff: Takeoff, rate_card: dict[str, Any]) -> dict[str, Any]:
         "schemaVersion": "0.1.0",
         "projectId": takeoff.project_id,
         "currency": "BDT",
-        "rateCard": {
-            "cardId": rate_card.get("cardId"),
-            "region": rate_card.get("region"),
-            "status": rate_card.get("status"),
-            "effectiveFrom": rate_card.get("effectiveFrom"),
-            "source": rate_card.get("source"),
-        },
+        "rateCard": identity,
         "lines": priced,
         "subtotals": {
             "byPhase": dict(sorted(by_phase.items())),
@@ -358,7 +401,7 @@ def build_boq(takeoff: Takeoff, rate_card: dict[str, Any]) -> dict[str, Any]:
         },
         "notes": (
             "the quantities are measured from the design; the rates come from the rate card "
-            f"({rate_card.get('cardId')}, status {rate_card.get('status')})"
+            f"({identity.get('cardId')}, status {identity.get('status')})"
         ),
     }
 

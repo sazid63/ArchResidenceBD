@@ -1,0 +1,39 @@
+{
+  "cards": [
+    {
+      "cardId": "dhaka-example-2026-10",
+      "effectiveFrom": "2026-10-01",
+      "effectiveTo": null,
+      "file": "spec/examples/interfaces/rate-card-dhaka-example.json",
+      "lines": 8,
+      "region": "dhaka",
+      "sha256": "83364e9140aa65d8b70bdef69c333fcf272eb7b0c68311799d9b14d536b545c6",
+      "source": {
+        "kind": "manual",
+        "name": "Illustrative example card (structure demo)",
+        "retrievedAt": null,
+        "sha256": null,
+        "url": null
+      },
+      "status": "candidate"
+    }
+  ],
+  "skipped": [
+    {
+      "file": "spec/examples/interfaces/job-request-geometry.json",
+      "reason": "not a rate card"
+    },
+    {
+      "file": "spec/examples/interfaces/job-result-drawing.json",
+      "reason": "not a rate card"
+    },
+    {
+      "file": "spec/examples/interfaces/job-result-error.json",
+      "reason": "not a rate card"
+    },
+    {
+      "file": "spec/examples/interfaces/verdict-set-example.json",
+      "reason": "not a rate card"
+    }
+  ]
+}

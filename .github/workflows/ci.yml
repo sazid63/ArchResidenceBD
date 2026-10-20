@@ -87,6 +87,8 @@ jobs:
         run: uv run --directory core python ../tools/cad/floor_probe.py --check
       - name: The committed BOQ is fresh and its arithmetic adds up
         run: uv run --directory core python ../tools/boq/build_boq.py --check
+      - name: The committed price-service artefacts are fresh
+        run: uv run --directory core python ../tools/pricing/price_service.py --check
       - name: The committed walking-skeleton report is present and passed
         run: uv run --directory core python ../tools/walking_skeleton/run.py --check
       - name: Generated rebar fixtures are fresh (offline, no engine)

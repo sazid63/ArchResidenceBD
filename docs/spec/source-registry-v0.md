@@ -73,9 +73,15 @@ Bangladesh has **no authoritative public point-level soil API**. The app uses BN
 
 ## Deliberately NOT in v0
 
-- Auto-parsers per source (`json-path` / `csv-columns`) — land with the price service (W2.7).
+- Auto-parsers per source (`json-path` / `csv-columns`) — **landed with the price service**
+  (W2.7): `archres_core.pricing.parse_rates` reads a CSV or a JSON list through a **recipe**
+  (which column holds the key, the unit, the rate and the labels), and a row without a usable
+  key, a usable rate or a reviewed Bangla **and** English label is skipped and reported.
 - Fetch scheduling / auto-refresh and the consent UI — Project Setup flow (P1/P2).
-- District → project rate derivation and regional multipliers application — W2.7 (multipliers already exist in the rate-card schema).
+- District → project rate derivation and regional multipliers application — **landed with the
+  price service** (W2.7): `region_for_district` maps the project's district to the card's
+  region, the card's published multipliers are applied, and a region the card says nothing
+  about is priced at 1.00 and marked `source: default`.
 - The soil defaults dataset itself (`soil-area-defaults` is the registry row; the data lands with core, W2.x).
 - Source screens in the UI (the registry is a core service first).
 

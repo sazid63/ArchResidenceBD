@@ -39,9 +39,9 @@ spec/schemas/building-spec.schema.json          (source of truth)
 | Site | `/site` | Address, plot, soil (flagged assumptions), jurisdiction / rule pack / seismic zone |
 | Building | `/building` | Occupancy, structure type, storeys, units per floor |
 | Phase | `/phases[]` | The five phase kinds; per-phase status + decision payload |
-| Pricing | `/pricing` | Rate cards: materials / labour / machinery / subcontract (cost types per plan §6) |
+| Pricing | `/pricing` | Rate cards: materials / labour / machinery / subcontract (cost types per plan §6); `card` = the rate card the prices came from (W2.7) |
 | Assumption | `/assumptions[]` | Flagged assumptions (soil defaults etc.) — "assumption — verify on site" |
-| Deviation | `/deviations[]` | Deviation Register: rule left behind, risk tier, acknowledgment, nearest compliant alternative |
+| Deviation | `/deviations[]` | Deviation Register: rule left behind, risk tier (cosmetic / approval_risk / structural_attention / **cost_risk** — a price override, W2.7), acknowledgment, nearest compliant alternative |
 | DocumentRef | `/documents[]` | Generated documents registry (drawings / BBS / BOQ / packs / bundles) |
 | ProvenanceEntry | `/provenance{}` | Per-field provenance |
 
@@ -58,3 +58,7 @@ spec/schemas/building-spec.schema.json          (source of truth)
 - `schemaVersion` is semver and `const` in each schema file: validators pick the schema by version; old files stay valid against their own version.
 - Additive change → minor bump + example updates + regeneration commit. Breaking change → major bump + migration script + ADR.
 - CI guards: examples validate, round-trip is byte-stable, packaged schema is fresh, negative cases stay rejected.
+- **W2.7 (2026-10-21) — additive, no version move.** `Deviation.riskTier` gained `cost_risk`
+  (a price override), `Pricing` gained `card` (the rate card the prices came from) and `notes`,
+  and `MachineryRate` gained `minimumChargeHours`. Nothing moved or changed shape, so the
+  document format stays `0.1.0`: an enum grew and three optional fields appeared (ADR-0030).

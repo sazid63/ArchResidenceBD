@@ -91,7 +91,7 @@
   "generatorVersion": "build_chat_dataset-0.1.0",
   "manifestVersion": "1",
   "pins": {
-    "buildingSpecSchemaSha256": "45a5f296a4f3208509074fc4cc205348d1a94e13cdf2fcc5b96cab2deb8cda9a",
+    "buildingSpecSchemaSha256": "e960c080090a3476f730c9764593c8a95d9d748628f7cd8206381ddd5300c92f",
     "examplesSha256": {
       "new-project": "da8f11c46179ba517d3b6c1b25423886399b76fe95f91f65bc32ccf82014d035",
       "three-storey-with-soil-report": "57c0906734c5bcc6036f13cf90d87f2a6cd1dd2b89fb921e682573d7bce33751",

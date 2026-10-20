@@ -366,6 +366,10 @@ class MachineryRate(BaseModel):
     """
     True when the rate includes fuel.
     """
+    minimum_charge_hours: float | None = Field(None, alias='minimumChargeHours', gt=0.0)
+    """
+    Machinery lines only: the minimum billable time per mobilization, when the source states one (W2.7).
+    """
     as_of: date | None = Field(None, alias='asOf')
     note: str | None = None
 
@@ -404,6 +408,34 @@ class Source4(StrEnum):
     mixed = 'mixed'
 
 
+class Status2(StrEnum):
+    candidate = 'candidate'
+    active = 'active'
+    archived = 'archived'
+
+
+class Card(BaseModel):
+    """
+    The rate card the prices came from (W2.7). The card's identity travels with the prices so a BOQ priced from this block can say which list, which region and which verification state it used.
+    """
+
+    model_config = ConfigDict(
+        extra='forbid',
+        populate_by_name=True,
+    )
+    card_id: str = Field(..., alias='cardId', min_length=1)
+    region: str = Field(..., min_length=1)
+    """
+    The region these prices are for (the resolved region, after the card's multipliers).
+    """
+    status: Status2
+    effective_from: date = Field(..., alias='effectiveFrom')
+    source: dict[str, Any]
+    """
+    The card's source (kind, name, url, retrievedAt, sha256, note).
+    """
+
+
 class Pricing(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
@@ -415,6 +447,14 @@ class Pricing(BaseModel):
     Overall provenance of this price set; each entry also carries its own source.
     """
     as_of: date | None = Field(None, alias='asOf')
+    notes: str | None = None
+    """
+    What the price service did: the card it resolved, the multipliers it applied, the rows it could not use. Never a silent gap.
+    """
+    card: Card | None = None
+    """
+    The rate card the prices came from (W2.7). The card's identity travels with the prices so a BOQ priced from this block can say which list, which region and which verification state it used.
+    """
     materials: list[MaterialRate] | None = None
     labour: list[LabourRate] | None = None
     machinery: list[MachineryRate] | None = None
@@ -445,9 +485,14 @@ class Assumption(BaseModel):
 
 
 class RiskTier(StrEnum):
+    """
+    How much attention the deviation deserves. cost_risk is a price deviation (a rate the user overrode); it touches the project's money, never its compliance (W2.7).
+    """
+
     cosmetic = 'cosmetic'
     approval_risk = 'approval_risk'
     structural_attention = 'structural_attention'
+    cost_risk = 'cost_risk'
 
 
 class Deviation(BaseModel):
@@ -465,6 +510,9 @@ class Deviation(BaseModel):
     expected: str
     actual: str
     risk_tier: RiskTier = Field(..., alias='riskTier')
+    """
+    How much attention the deviation deserves. cost_risk is a price deviation (a rate the user overrode); it touches the project's money, never its compliance (W2.7).
+    """
     rationale: str | None = None
     """
     User's reason for the override.

@@ -465,6 +465,11 @@
           "type": "boolean",
           "description": "True when the rate includes fuel."
         },
+        "minimumChargeHours": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Machinery lines only: the minimum billable time per mobilization, when the source states one (W2.7)."
+        },
         "asOf": {
           "type": "string",
           "format": "date"
@@ -526,6 +531,40 @@
         "asOf": {
           "type": "string",
           "format": "date"
+        },
+        "notes": {
+          "type": "string",
+          "description": "What the price service did: the card it resolved, the multipliers it applied, the rows it could not use. Never a silent gap."
+        },
+        "card": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["cardId", "region", "status", "effectiveFrom", "source"],
+          "description": "The rate card the prices came from (W2.7). The card's identity travels with the prices so a BOQ priced from this block can say which list, which region and which verification state it used.",
+          "properties": {
+            "cardId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "region": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The region these prices are for (the resolved region, after the card's multipliers)."
+            },
+            "status": {
+              "type": "string",
+              "enum": ["candidate", "active", "archived"]
+            },
+            "effectiveFrom": {
+              "type": "string",
+              "format": "date"
+            },
+            "source": {
+              "type": "object",
+              "additionalProperties": true,
+              "description": "The card's source (kind, name, url, retrievedAt, sha256, note)."
+            }
+          }
         },
         "materials": {
           "type": "array",
@@ -610,7 +649,8 @@
         },
         "riskTier": {
           "type": "string",
-          "enum": ["cosmetic", "approval_risk", "structural_attention"]
+          "enum": ["cosmetic", "approval_risk", "structural_attention", "cost_risk"],
+          "description": "How much attention the deviation deserves. cost_risk is a price deviation (a rate the user overrode); it touches the project's money, never its compliance (W2.7)."
         },
         "rationale": {
           "type": "string",
