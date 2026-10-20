@@ -59,6 +59,8 @@ from .teacher import (
     ChatCompletionClient,
     TeacherError,
     build_teacher_records,
+    dedupe_teacher_records,
+    train_ask_records,
 )
 from .verify import VerifyContext, numbers_in, verify_record
 
@@ -88,6 +90,7 @@ __all__ = [
     "build_repair_record",
     "build_teacher_records",
     "counts_of",
+    "dedupe_teacher_records",
     "dumps_record",
     "load_flow_book",
     "load_jsonl",
@@ -103,6 +106,7 @@ __all__ = [
     "sha256_text",
     "source_question_id",
     "split_sft_records",
+    "train_ask_records",
     "validate_record",
     "verification_failure",
     "verify_record",

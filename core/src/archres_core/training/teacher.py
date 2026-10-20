@@ -112,6 +112,45 @@ def _teacher_user(lang: str, question: str) -> str:
     return f"Question:\n{question}\n\nRephrase it now."
 
 
+def train_ask_records(
+    ask_records: Iterable[dict[str, Any]], train_ids: Iterable[str]
+) -> list[dict[str, Any]]:
+    """Keep only ask records whose source id is on the frozen train side.
+
+    The eval split is frozen by source question id before any paraphrase exists
+    (ADR-0015). A teacher batch that included a holdout question would leak that
+    question's paraphrases into training even though the original record stayed on the
+    holdout side. The CLI uses this filter for every batch, including smoke runs.
+    """
+    allowed = set(train_ids)
+    return [
+        record
+        for record in ask_records
+        if record.get("task") == "interview.ask" and record.get("id") in allowed
+    ]
+
+
+def dedupe_teacher_records(candidates: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Drop repeated paraphrases of the same source question.
+
+    The teacher is stochastic; the same source can return the same assistant text for
+    two variants. The records have different ids, so a duplicate would otherwise inflate
+    the token target without adding variety.
+    """
+    seen: set[tuple[str, str]] = set()
+    kept: list[dict[str, Any]] = []
+    for record in candidates:
+        source_id = str(record.get("input", {}).get("sourceRecordId", ""))
+        messages = record.get("messages") or []
+        text = str(messages[-1].get("content", "")) if messages else ""
+        key = (source_id, text)
+        if key in seen:
+            continue
+        seen.add(key)
+        kept.append(record)
+    return kept
+
+
 def build_teacher_records(
     scripted_ask_records: Iterable[dict[str, Any]],
     client: CompletionClient,

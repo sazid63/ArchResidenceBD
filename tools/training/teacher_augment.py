@@ -1,10 +1,12 @@
 """Teacher augmentation CLI (W1.5) - candidates only, never part of the scripted dataset.
 
 The teacher rephrases flow-book questions through an OpenAI-compatible endpoint
-(llama-server exposes one at /v1/chat/completions). Every output is a candidate: the
-deterministic verifier runs schema/labels/language checks, but meaning preservation
-needs the W1.6 eval/human gate. Candidates are written outside the committed dataset
-tree (data/training/teacher-candidates/ is gitignored).
+(llama-server exposes one at /v1/chat/completions). Only ask records on the frozen
+**train** side are eligible; holdout questions are never paraphrased (ADR-0015). Every
+output is a candidate: the deterministic verifier runs schema/labels/language checks,
+but meaning preservation needs the W1.6 eval/human gate. Duplicate paraphrases of the
+same source are dropped. Candidates are written outside the committed dataset tree
+(data/training/teacher-candidates/ is gitignored).
 
 Usage (from the repo root):
   uv run --directory core python ../tools/training/teacher_augment.py \
@@ -17,6 +19,7 @@ Exit codes: 0 = candidates written and all passed deterministic checks;
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import pathlib
 import sys
@@ -29,7 +32,9 @@ from archres_core.training import (
     VerifyContext,
     build_chat_dataset,
     build_teacher_records,
+    dedupe_teacher_records,
     load_flow_book,
+    train_ask_records,
     verify_record,
     write_jsonl,
 )
@@ -41,6 +46,7 @@ PACK = ROOT / "spec" / "rules" / "rajuk-2008.yaml"
 EXAMPLES = ROOT / "spec" / "examples"
 SFT_SCHEMA = ROOT / "spec" / "schemas" / "sft-record.schema.json"
 SPEC_SCHEMA = ROOT / "spec" / "schemas" / "building-spec.schema.json"
+SFT_TRAIN = ROOT / "data" / "training" / "sft-v0" / "train.jsonl"
 DEFAULT_OUT = ROOT / "data" / "training" / "teacher-candidates"
 
 
@@ -51,7 +57,9 @@ def main() -> int:
     parser.add_argument("--model", default="chat")
     parser.add_argument("--variants", type=int, default=1)
     parser.add_argument("--temperature", type=float, default=0.7)
-    parser.add_argument("--limit", type=int, help="use only the first N scripted ask records (smoke run)")
+    parser.add_argument(
+        "--limit", type=int, help="use only the first N train-split ask records (smoke run)"
+    )
     parser.add_argument("--out", default=str(DEFAULT_OUT))
     args = parser.parse_args()
     out = pathlib.Path(args.out)
@@ -65,17 +73,22 @@ def main() -> int:
             sft_schema_path=SFT_SCHEMA,
             building_spec_schema_path=SPEC_SCHEMA,
         )
-        sources = dataset.by_task("interview.ask")
-        if args.limit:
-            sources = sources[: args.limit]
+        train_ids = {
+            json.loads(line)["id"]
+            for line in SFT_TRAIN.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        }
+        all_sources = train_ask_records(dataset.by_task("interview.ask"), train_ids)
+        sources = all_sources[: args.limit] if args.limit else all_sources
         client = ChatCompletionClient(endpoint=args.endpoint, model=args.model)
-        candidates = build_teacher_records(
+        raw_candidates = build_teacher_records(
             sources,
             client,
             variants=args.variants,
             temperature=args.temperature,
             batch=f"teacher-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}",
         )
+        candidates = dedupe_teacher_records(raw_candidates)
     except (TeacherError, OSError, ValueError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
@@ -92,6 +105,14 @@ def main() -> int:
     stats = write_jsonl(candidates, out / "candidates.jsonl")
     manifest = {
         "purpose": "teacher candidates - unverified until the W1.6 eval/human gate",
+        "source": {
+            "split": "train",
+            "splitManifest": "data/training/sft-v0/manifest.json",
+            "trainFile": "data/training/sft-v0/train.jsonl",
+            "trainFileSha256": hashlib.sha256(SFT_TRAIN.read_bytes()).hexdigest(),
+            "trainAskRecords": len(all_sources),
+            "usedAskRecords": len(sources),
+        },
         "teacher": {
             "endpoint": args.endpoint,
             "model": args.model,
@@ -99,6 +120,8 @@ def main() -> int:
             "temperature": args.temperature,
         },
         "records": stats["records"],
+        "rawRecords": len(raw_candidates),
+        "duplicatesDropped": len(raw_candidates) - len(candidates),
         "sha256": stats["sha256"],
         "failures": len(failures),
     }

@@ -14,6 +14,8 @@ from archres_core.training import (
     TeacherError,
     VerifyContext,
     build_teacher_records,
+    dedupe_teacher_records,
+    train_ask_records,
     verify_record,
 )
 from archres_core.training.generators import build_ask_records, load_flow_book, question_dict
@@ -53,6 +55,30 @@ class FakeClient:
 def _sources() -> list[dict]:
     questions = load_flow_book(FLOW_BOOK)
     return build_ask_records(questions[:1])
+
+
+def test_teacher_sources_are_train_side_only() -> None:
+    sources = _sources()
+    assert sources
+    train = train_ask_records(sources, {sources[0]["id"]})
+    assert [record["id"] for record in train] == [sources[0]["id"]]
+
+    parse = dict(sources[0])
+    parse["id"] = "chat-parse-teacher-test"
+    parse["task"] = "interview.parse"
+    assert train_ask_records([parse], {parse["id"]}) == []
+    assert train_ask_records(sources, set()) == []
+
+
+def test_duplicate_teacher_paraphrases_are_dropped() -> None:
+    sources = _sources()
+    candidates = build_teacher_records(sources, FakeClient(), variants=2)
+    assert len(candidates) == len(sources) * 2
+    kept = dedupe_teacher_records(candidates)
+    assert len(kept) == len(sources)
+    assert {record["input"]["sourceRecordId"] for record in kept} == {
+        record["id"] for record in sources
+    }
 
 
 def _context() -> VerifyContext:

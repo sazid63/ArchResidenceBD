@@ -89,6 +89,8 @@ uv run --directory core python ../tools/training/teacher_augment.py \
 
 Output goes to `data/training/teacher-candidates/` (gitignored) as `candidates.jsonl`. Every teacher record is `status: candidate`; the deterministic verifier checks schema/labels/language, but meaning preservation is not machine-provable. Promotion belongs to the W1.6 eval/human gate — there is no auto-promotion path in this pipeline. The full teacher batch (plan §7's ~0.5M-token target) is a W1.6 job; the committed scripted dataset is ~197k tokens.
 
+The batch is **train-side only**. The CLI loads the frozen `data/training/sft-v0/train.jsonl`, filters ask records by source id before calling the teacher, and never paraphrases a holdout question (ADR-0015). The candidate manifest records the source split, train-file sha256, raw/used counts, duplicate paraphrases dropped and verifier failures. The production teacher is the plan §7 local Qwen3-8B Q4 on a standalone llama-server (the 8787 example above is the 4B fleet smoke); the full batch uses 17 variants of the 88 train ask records, aimed at the ~0.5M-token target.
+
 ## SFT split (W1.6 preparation)
 
 `data/training/sft-v0/` is the training-side mirror of the frozen eval split. It is derived, not
