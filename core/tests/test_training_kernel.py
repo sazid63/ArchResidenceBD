@@ -48,6 +48,29 @@ def test_the_kernel_refuses_a_tampered_dataset(tmp_path: pathlib.Path) -> None:
         _kernel().check_inputs(data)
 
 
+def test_the_collator_pads_labels_and_inputs_to_the_same_width() -> None:
+    batch = _kernel().pad_batch(
+        [
+            {"input_ids": [10, 11], "labels": [-100, 11]},
+            {"input_ids": [20, 21, 22], "labels": [-100, 21, 22]},
+        ],
+        pad_token_id=0,
+    )
+    assert batch == {
+        "input_ids": [[10, 11, 0], [20, 21, 22]],
+        "labels": [[-100, 11, -100], [-100, 21, 22]],
+        "attention_mask": [[1, 1, 0], [1, 1, 1]],
+    }
+
+
+def test_the_collator_refuses_misaligned_labels() -> None:
+    with pytest.raises(ValueError, match="different lengths"):
+        _kernel().pad_batch(
+            [{"input_ids": [10, 11], "labels": [-100]}],
+            pad_token_id=0,
+        )
+
+
 def test_the_kernel_refuses_a_model_case_outside_the_holdout(tmp_path: pathlib.Path) -> None:
     data = _inputs(tmp_path)
     train_id = json.loads((data / "train.jsonl").read_text(encoding="utf-8").splitlines()[0])["id"]

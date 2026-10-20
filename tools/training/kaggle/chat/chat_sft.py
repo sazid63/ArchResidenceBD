@@ -212,6 +212,61 @@ def encode_records(train: list[dict], tokenizer) -> tuple[list[dict], dict]:
     return records, stats
 
 
+def pad_batch(features: list[dict], pad_token_id: int) -> dict[str, list[list[int]]]:
+    """Pad a causal-LM batch, labels included.
+
+    The stock `DataCollatorForLanguageModeling` delegates padding to the tokenizer, which does
+    not pad `labels`; a batch with two different sequence lengths then fails while the tensor is
+    built.  Padding is explicit here so every feature is the same width and label padding is -100
+    (ignored by the loss).  Per-feature input/label alignment is checked before padding: a
+    mismatch is a tokenisation bug, not something to hide with padding.
+    """
+    if not features:
+        raise ValueError("empty batch")
+    widths: list[int] = []
+    for index, feature in enumerate(features):
+        input_ids = feature.get("input_ids")
+        labels = feature.get("labels")
+        if not isinstance(input_ids, list) or not isinstance(labels, list):
+            raise ValueError(f"feature {index}: input_ids and labels must be lists")
+        if len(input_ids) != len(labels):
+            raise ValueError(
+                f"feature {index}: input_ids length {len(input_ids)} and labels length "
+                f"{len(labels)} are different lengths"
+            )
+        if not input_ids:
+            raise ValueError(f"feature {index}: empty input_ids")
+        widths.append(len(input_ids))
+    width = max(widths)
+    return {
+        "input_ids": [
+            feature["input_ids"] + [pad_token_id] * (width - len(feature["input_ids"]))
+            for feature in features
+        ],
+        "labels": [
+            feature["labels"] + [-100] * (width - len(feature["labels"]))
+            for feature in features
+        ],
+        "attention_mask": [
+            [1] * len(feature["input_ids"]) + [0] * (width - len(feature["input_ids"]))
+            for feature in features
+        ],
+    }
+
+
+class CausalLMCollator:
+    """Tokenize-free collator: the kernel already produced ids and labels."""
+
+    def __init__(self, pad_token_id: int) -> None:
+        self.pad_token_id = pad_token_id
+
+    def __call__(self, features: list[dict]) -> dict:
+        import torch
+
+        batch = pad_batch(features, self.pad_token_id)
+        return {name: torch.tensor(values, dtype=torch.long) for name, values in batch.items()}
+
+
 def train(records: list[dict], tokenizer) -> tuple[object, dict]:
     import torch
     from datasets import Dataset
@@ -219,7 +274,6 @@ def train(records: list[dict], tokenizer) -> tuple[object, dict]:
     from transformers import (
         AutoModelForCausalLM,
         BitsAndBytesConfig,
-        DataCollatorForLanguageModeling,
         Trainer,
         TrainingArguments,
     )
@@ -285,11 +339,15 @@ def train(records: list[dict], tokenizer) -> tuple[object, dict]:
         dataloader_num_workers=2,
         remove_unused_columns=False,
     )
+    log(
+        f"batch: per_device={arguments.per_device_train_batch_size}, "
+        f"accum={arguments.gradient_accumulation_steps}, effective={arguments.train_batch_size}"
+    )
     trainer = Trainer(
         model=model,
         args=arguments,
         train_dataset=Dataset.from_list(subset),
-        data_collator=DataCollatorForLanguageModeling(tokenizer=tokenizer, mlm=False),
+        data_collator=CausalLMCollator(tokenizer.pad_token_id),
     )
     started = time.time()
     result = trainer.train()
