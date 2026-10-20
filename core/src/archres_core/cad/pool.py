@@ -119,6 +119,7 @@ class WorkerPool:
         self._stopping = False
         self._spawns = 0
         self._watchdog_error = ""
+        self._artifacts_by_job: dict[str, dict[str, pathlib.Path]] = {}
 
     # -- lifecycle -------------------------------------------------------
     def start(self) -> None:
@@ -295,6 +296,7 @@ class WorkerPool:
             return self._client_error(payload, "worker_down", str(exc))
         try:
             result = self._call(worker, payload, timeout_s=deadline_ms / 1000.0)
+            self._remember_artifacts(worker, payload, result)
         except _WorkerGone as exc:
             self._handle_death(worker, str(exc))
             return self._client_error(payload, "worker_restarted", str(exc))
@@ -384,6 +386,29 @@ class WorkerPool:
             "warnings": [],
             "error": {"code": code, "message": message},
         }
+
+    def _remember_artifacts(
+        self, worker: _Worker, payload: dict[str, Any], result: dict[str, Any]
+    ) -> None:
+        """Remember where the job's artifacts landed, so the app can read them back.
+
+        The wire result carries the artifact *name* and hash; the bytes stay in the worker's
+        per-job output directory until the app moves them into the project store (the job
+        protocol says exactly that).
+        """
+        job_id = str(payload.get("jobId") or "")
+        out_dir = self.config.workdir / worker.name / job_id / "out"
+        paths: dict[str, pathlib.Path] = {}
+        for artifact in result.get("artifacts") or []:
+            name = str(artifact.get("name") or "")
+            if name:
+                paths[name] = out_dir / name
+        if paths:
+            self._artifacts_by_job[job_id] = paths
+
+    def artifact_path(self, job_id: str, name: str) -> pathlib.Path | None:
+        """Where an artifact of a finished job landed (None when the job had none)."""
+        return self._artifacts_by_job.get(str(job_id), {}).get(name)
 
     # -- introspection ---------------------------------------------------
     @property

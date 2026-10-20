@@ -1,0 +1,17 @@
+{
+  "case": "two-storey-residential",
+  "files": {
+    "foundation-two-storey-residential.design.json": {
+      "bytes": 4318
+    },
+    "foundation-two-storey-residential.py": {
+      "bytes": 3419
+    }
+  },
+  "generator": "archres_core.design.foundation-0.1.0",
+  "manifestVersion": "1",
+  "notes": "The generated macro is the exact source the CAD worker pool runs. It is committed so a reviewer can read what the engine will build; regenerate it with tools/cad/foundation_probe.py --check.",
+  "spec": {
+    "path": "spec/examples/two-storey-residential.json"
+  }
+}
