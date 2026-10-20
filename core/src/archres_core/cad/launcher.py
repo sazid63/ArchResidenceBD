@@ -104,18 +104,13 @@ def _frames(exc: BaseException, limit: int = 6) -> list[dict]:
     ]
 
 
-def main() -> int:
-    out_path = pathlib.Path(_env(OUT_MARKER))
-    out_dir = pathlib.Path(_env("ARCHRES_JOB_OUTDIR"))
-    params_path = pathlib.Path(_env("ARCHRES_JOB_PARAMS"))
-    candidate = pathlib.Path(_env("ARCHRES_CANDIDATE"))
+def execute(candidate: pathlib.Path, out_dir: pathlib.Path, params: dict) -> dict:
+    """Run one candidate in a fresh document and measure what it actually built.
 
-    try:
-        params = json.loads(params_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        print(f"cannot read job params: {exc}", file=sys.stderr)
-        return 3
-
+    Returns the result payload instead of writing it: the one-shot launcher writes it to
+    ``result.json`` (W1.8), and the persistent worker (W2.1) returns it over the frozen job
+    protocol. Same measurement, same shape, one implementation.
+    """
     started = time.monotonic()
     result: dict = {
         "status": "ok",
@@ -156,7 +151,23 @@ def main() -> int:
             result["warnings"].append("document could not be closed cleanly")
         result["artifacts"] = _artifacts(out_dir)
         result["durationMs"] = round((time.monotonic() - started) * 1000.0, 3)
-        _write(out_path, result)
+    return result
+
+
+def main() -> int:
+    out_path = pathlib.Path(_env(OUT_MARKER))
+    out_dir = pathlib.Path(os.environ.get("ARCHRES_JOB_OUTDIR"))
+    params_path = pathlib.Path(_env("ARCHRES_JOB_PARAMS"))
+    candidate = pathlib.Path(_env("ARCHRES_CANDIDATE"))
+
+    try:
+        params = json.loads(params_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"cannot read job params: {exc}", file=sys.stderr)
+        return 3
+
+    result = execute(candidate, out_dir, params)
+    _write(out_path, result)
     return 0
 
 

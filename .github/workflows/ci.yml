@@ -113,6 +113,12 @@ jobs:
             --markdown "$GITHUB_WORKSPACE/data/tmp/cad-ci/report.md"
       - name: Replay the repair corpus against the engine
         run: uv run --directory core python ../tools/training/build_repair_dataset.py --check --engine "$ARCHRES_FREECADCMD"
+      - name: Probe the CAD worker pool (two workers, a crash, a recovery)
+        run: |
+          uv run --directory core python ../tools/cad/pool_probe.py \
+            --engine "$ARCHRES_FREECADCMD" \
+            --workdir "$RUNNER_TEMP/pool-probe" \
+            --json "$GITHUB_WORKSPACE/data/tmp/cad-ci/pool-probe.json"
       - name: Upload the execution report
         if: always()
         uses: actions/upload-artifact@v4
