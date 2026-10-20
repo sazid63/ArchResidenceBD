@@ -36,6 +36,7 @@ from .records import (
     validate_record,
     write_jsonl,
 )
+from .split import SPLITTER_VERSION, SftSplit, SplitError, source_question_id, split_sft_records
 from .teacher import (
     TEACHER_PROMPT_VERSION,
     ChatCompletionClient,
@@ -47,12 +48,15 @@ from .verify import VerifyContext, numbers_in, verify_record
 __all__ = [
     "GENERATOR_VERSION",
     "SCHEMA_VERSION",
+    "SPLITTER_VERSION",
     "TEACHER_PROMPT_VERSION",
     "ChatCompletionClient",
     "Dataset",
     "GeneratorError",
     "Question",
     "RecordError",
+    "SftSplit",
+    "SplitError",
     "TeacherError",
     "VerifyContext",
     "build_chat_dataset",
@@ -67,6 +71,8 @@ __all__ = [
     "sample_records",
     "sha256_file",
     "sha256_text",
+    "source_question_id",
+    "split_sft_records",
     "validate_record",
     "verify_record",
     "write_jsonl",

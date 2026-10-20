@@ -89,6 +89,35 @@ uv run --directory core python ../tools/training/teacher_augment.py \
 
 Output goes to `data/training/teacher-candidates/` (gitignored) as `candidates.jsonl`. Every teacher record is `status: candidate`; the deterministic verifier checks schema/labels/language, but meaning preservation is not machine-provable. Promotion belongs to the W1.6 eval/human gate — there is no auto-promotion path in this pipeline. The full teacher batch (plan §7's ~0.5M-token target) is a W1.6 job; the committed scripted dataset is ~197k tokens.
 
+## SFT split (W1.6 preparation)
+
+`data/training/sft-v0/` is the training-side mirror of the frozen eval split. It is derived, not
+re-drawn:
+
+```powershell
+uv run --directory core python ../tools/training/build_sft_split.py
+uv run --directory core python ../tools/training/build_sft_split.py --check
+```
+
+- `holdout.jsonl` — verified chat records whose **source question id** is an eval holdout
+  question (from `data/eval/chat-v0/split.json`). It is never trained on; the file exists so the
+  W1.6 evaluation can compare like with like without re-reading the eval set.
+- `train.jsonl` — every other verified record, including the explain/override records, which
+  carry no interview question (`rule.explain`, `deviation.override`) and cannot contaminate a
+  question-level holdout.
+- `manifest.json` — pins the dataset and split by sha256, records counts per side/task, and
+  **declares the questions the eval does not measure** (`unmeasured`). Those questions go to
+  train because no holdout contains them; dropping them would shrink training for no
+  protection, and hiding them would be a silent coverage gap.
+- The splitter refuses unverified records, non-chat records, duplicate ids, a parse record with
+  no source question, and a split with an empty side or an overlapping question. A question the
+  eval does measure but the splitter cannot place cannot exist by construction: holdout is a
+  forbidden list, not a whitelist.
+
+The files are canonical JSONL (UTF-8, LF, sorted, compact) and CI checks freshness. Moving a
+question across the line is an edit to the frozen eval split — a reviewed event (ADR-0015) —
+never a re-run of this tool.
+
 ## Units
 
 `archres_core.units` is the only conversion home: Decimal-based katha/shotok/bigha/gonda/sqft ⇄ m² and m/ft/inch, with hand-authored English/Bangla unit words. `kani` is deliberately absent until an authoritative factor is pinned — adding a regional guess would violate the provenance rule. The module has its own tests (`core/tests/test_units.py`).
@@ -103,7 +132,7 @@ Output goes to `data/training/teacher-candidates/` (gitignored) as `candidates.j
 
 - **Repair records** (Archie-Repair) — additive with W1.7; the schema's `kind: repair` is reserved.
 - **Full teacher batch / paraphrase promotion** — W1.6, after the eval harness (W1.9) can measure meaning preservation.
-- **A train/validation split** — W1.6 owns the split, seeded and recorded in its training manifest.
+- **The Kaggle training run itself** — the split is prepared here; the QLoRA notebook, adapter, GGUF conversion and fleet registration are W1.6.
 - **Masked-token / loss-mask metadata** — the SFT trainer derives it from `messages` roles; no separate format yet.
 - **Conversation-level multi-turn samples beyond the override confirmation pair** — v0 records are single-task; longer dialogues come from the orchestrator (W1.10) and its transcript capture.
 
@@ -113,5 +142,6 @@ Output goes to `data/training/teacher-candidates/` (gitignored) as `candidates.j
 uv run --directory core pytest -q                         # suite total is asserted by CI, not hard-coded here
 uv run --directory core pytest -q tests/test_training_pipeline.py   # 56 training-specific
 uv run --directory core python ../tools/training/build_chat_dataset.py --check
+uv run --directory core python ../tools/training/build_sft_split.py --check
 python tools/ci/brand_guard.py
 ```

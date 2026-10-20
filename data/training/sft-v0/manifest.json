@@ -1,0 +1,72 @@
+{
+  "counts": {
+    "byTask": {
+      "holdout": {
+        "interview.ask": 32,
+        "interview.parse": 215
+      },
+      "train": {
+        "deviation.override": 6,
+        "interview.ask": 88,
+        "interview.parse": 308,
+        "rule.explain": 12
+      }
+    },
+    "holdout": 247,
+    "noSource": 18,
+    "questions": {
+      "holdout": 16,
+      "train": 24
+    },
+    "total": 661,
+    "train": 414,
+    "unmeasured": [
+      "adjacent-close",
+      "anti-termite",
+      "attached-bath",
+      "bedrooms-per-unit",
+      "boundary-markers",
+      "boundary-wall-height",
+      "depth-constraint",
+      "keep-boundary-wall",
+      "material-prices",
+      "mep-points-note",
+      "overhead-tank",
+      "parapet-height",
+      "plinth-height",
+      "plot-depth",
+      "soil-has-report",
+      "soil-report-file",
+      "solar-provision",
+      "underground-tank",
+      "units-override",
+      "water-hit-digging"
+    ],
+    "unmeasuredQuestions": 20
+  },
+  "files": {
+    "holdout.jsonl": {
+      "bytes": 527155,
+      "records": 247,
+      "sha256": "d5122fbe26c84c33f9a879b451151b962a971b171f9337b2bee671e8924adba8"
+    },
+    "train.jsonl": {
+      "bytes": 901123,
+      "records": 414,
+      "sha256": "0e13abc26adc9742266d84155d6a02734135a8871ed7bd41f70aedd30feab44a"
+    }
+  },
+  "manifestVersion": "1",
+  "notes": "train/holdout follow data/eval/chat-v0/split.json by source question id; holdout.jsonl is never trained on. Regenerate with tools/training/build_sft_split.py; CI checks freshness.",
+  "pins": {
+    "dataset": {
+      "path": "data/training/chat-v0/dataset.jsonl",
+      "sha256": "d6d1e8804e893605c7169fd9c6dab9b8d7d2607dd59b9976e1542779097c7acb"
+    },
+    "evalSplit": {
+      "path": "data/eval/chat-v0/split.json",
+      "sha256": "fe569206fe2e9d949da73177d07ddc6ff4bac0639a52d156a1284dc559e82c0e"
+    }
+  },
+  "splitterVersion": "0.1.0"
+}

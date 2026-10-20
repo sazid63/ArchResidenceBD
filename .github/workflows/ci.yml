@@ -55,6 +55,8 @@ jobs:
         run: uv run --directory core pytest -q
       - name: Training dataset freshness
         run: uv run --directory core python ../tools/training/build_chat_dataset.py --check
+      - name: SFT split freshness
+        run: uv run --directory core python ../tools/training/build_sft_split.py --check
       - name: Spec codegen freshness
         run: python tools/codegen/generate_spec.py --check
       - name: Interfaces codegen freshness
