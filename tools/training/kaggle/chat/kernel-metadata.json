@@ -1,13 +1,13 @@
 {
-  "id": "sajidhossain004/archresidencebd-chat-sft-v0",
-  "title": "ArchResidenceBD chat SFT v0",
+  "id": "sajidhossain004/archresidencebd-chat-sft-v1",
+  "title": "ArchResidenceBD chat SFT v1",
   "code_file": "chat_sft.py",
   "language": "python",
   "kernel_type": "script",
   "is_private": true,
   "enable_gpu": true,
   "enable_internet": true,
-  "dataset_sources": ["sajidhossain004/archresbd-sft-v0"],
+  "dataset_sources": ["sajidhossain004/archresbd-sft-v1"],
   "competition_sources": [],
   "kernel_sources": []
 }

@@ -311,8 +311,17 @@ new `--model` name, never a masquerade under `stock`. The JSON report records bo
 ## Next
 
 W1.6 (chat SFT round 1) trains on the `train` split and is judged on the `holdout` floors
-recorded here; the 2026-10-20 scripted-round `finetune` set is pinned and passes all four floors
-(43/60 model.parse), while the teacher batch remains open. W1.7 (repair SFT) adds its own
-suites; W1.12 re-runs the demo on the fine-tune.
+recorded here. Two candidates are pinned as recorded reply sets:
+
+| `--model` | Round | model.parse | decision | value | bn | en | Outcome |
+|---|---|---:|---:|---:|---:|---:|---|
+| `finetune` | scripted `sft-v0` (414 records) | **43/60 = 0.717** | 0.867 | 0.706 | 0.600 | 0.833 | selected → `archie-chat-v0` |
+| `finetune-v1` | teacher-augmented `sft-v1` (475 records) | 42/60 = 0.700 | 0.867 | 0.676 | 0.600 | 0.800 | all floors pass, **not selected** |
+
+Both sets pass all four floors, so neither moves a floor. The teacher round fixed **no** case
+that the scripted round had and broke exactly one (`model.parse:chat-parse-gas-source-slp-typo-label-en`),
+so `archie-chat-v0` stays in the fleet. `finetune-v1` is committed and pinned precisely so the
+comparison stays reproducible in CI.
+W1.7 (repair SFT) adds its own suites; W1.12 re-runs the demo on the fine-tune.
 A floor may only move with a recorded reason — quote the measured number, the model and the
 commit, and update `gates.json` and this table together.

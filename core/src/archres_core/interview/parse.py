@@ -105,9 +105,34 @@ BANGLISH_NUMBER_WORDS: dict[str, int] = {
 
 _ALL_NUMBER_WORDS: dict[str, int] = {**NUMBER_WORDS, **BN_NUMBER_WORDS, **BANGLISH_NUMBER_WORDS}
 
-#: Fractional quantifiers outside the deterministic number vocabulary. They must escalate
-#: instead of being silently dropped: "সাড়ে ৫" is 5.5, not 5, and "5 and a half" is not 5.
-_FRACTION_HINTS = ("সাড়ে", "দেড়", "আড়াই", "সোয়া", "পৌনে", "half")
+#: Fractional quantifiers. These are expanded to a decimal *before* number extraction;
+#: a hint that survives expansion (e.g. "সাড়ে কাঠা" with no base number) still escalates.
+#: The app must never silently drop the fractional part: "সাড়ে ৫" is 5.5, not 5.
+_FRACTION_HINTS = ("সাড়ে", "সাড়ে", "দেড়", "দেড়", "আড়াই", "আড়াই", "সোয়া", "সোয়া", "পৌনে", "half")
+_FRACTION_PREFIXES: dict[str, Decimal] = {
+    "সাড়ে": Decimal("0.5"),
+    "সাড়ে": Decimal("0.5"),
+    "sare": Decimal("0.5"),
+    "sarey": Decimal("0.5"),
+    "sara": Decimal("0.5"),
+    "সোয়া": Decimal("0.25"),
+    "সোয়া": Decimal("0.25"),
+    "sowa": Decimal("0.25"),
+    "পৌনে": Decimal("-0.25"),
+    "poune": Decimal("-0.25"),
+}
+_FRACTION_STANDALONE: dict[str, Decimal] = {
+    "দেড়": Decimal("1.5"),
+    "দেড়": Decimal("1.5"),
+    "dedh": Decimal("1.5"),
+    "আড়াই": Decimal("2.5"),
+    "আড়াই": Decimal("2.5"),
+    "arai": Decimal("2.5"),
+    "সোয়া": Decimal("1.25"),
+    "sowa": Decimal("1.25"),
+    "পৌনে": Decimal("0.75"),
+    "poune": Decimal("0.75"),
+}
 
 YES_WORDS = (
     "yes",
@@ -379,6 +404,67 @@ def _numbers(norm: str) -> list[Decimal]:
     return out
 
 
+def _decimal_text(value: Decimal) -> str:
+    """Render a Decimal without exponent or needless trailing zeros."""
+    text = format(value.normalize(), "f")
+    return text.rstrip("0").rstrip(".") if "." in text else text
+
+
+def _number_token(token: str) -> Decimal | None:
+    token = token.strip(" \t.,;:!?।")
+    if re.fullmatch(r"\d+(?:\.\d+)?", token):
+        return Decimal(token)
+    value = _ALL_NUMBER_WORDS.get(token)
+    return Decimal(value) if value is not None else None
+
+
+def _expand_fractions(norm: str) -> str:
+    """Turn BN/EN fractional phrases into decimal numbers before extraction.
+
+    ``সাড়ে ৫`` -> ``5.5``, ``পৌনে পাঁচ`` -> ``4.75``, ``5 and a half`` -> ``5.5``.
+    A fraction word with no resolvable base (``সাড়ে কাঠা``) is left in place so the
+    caller can escalate instead of guessing.
+    """
+    # English "N and a half" / "N and half", including number words.
+    def english_half(match: re.Match[str]) -> str:
+        base = _number_token(match.group(1))
+        if base is None:
+            return match.group(0)
+        return _decimal_text(base + Decimal("0.5"))
+
+    norm = re.sub(
+        r"(?<!\w)(\d+(?:\.\d+)?|[A-Za-z]+)\s+and\s+(?:a\s+)?half(?!\w)",
+        english_half,
+        norm,
+        flags=re.IGNORECASE,
+    )
+
+    # Bengali/Banglish prefix fractions: সাড়ে ৫, পৌনে পাঁচ, sowa 5.
+    for word, delta in sorted(_FRACTION_PREFIXES.items(), key=lambda item: len(item[0]), reverse=True):
+        pattern = re.compile(rf"(?<![\w\u0980-\u09ff]){re.escape(word)}\s+(\S+)")
+
+        def prefix(match: re.Match[str], delta: Decimal = delta) -> str:
+            base = _number_token(match.group(1))
+            if base is None:
+                return match.group(0)
+            value = base + delta
+            if value <= 0:
+                return match.group(0)
+            return _decimal_text(value)
+
+        norm = pattern.sub(prefix, norm)
+
+    # Standalone fractions: দেড়, আড়াই, half.
+    for word, value in sorted(_FRACTION_STANDALONE.items(), key=lambda item: len(item[0]), reverse=True):
+        norm = re.sub(
+            rf"(?<![\w\u0980-\u09ff]){re.escape(word)}(?![\w\u0980-\u09ff])",
+            _decimal_text(value),
+            norm,
+        )
+    norm = re.sub(r"(?<!\w)half(?!\w)", "0.5", norm)
+    return norm
+
+
 def _leading_number_word(norm: str) -> str:
     """Replace a leading number word ('five katha', 'পাঁচ কাঠা', 'panch katha')."""
     first, _, rest = norm.partition(" ")
@@ -535,6 +621,7 @@ def _parse_number(
 ) -> ParseResult:
     if _any_phrase(norm, DONT_KNOW_PHRASES):
         return ParseResult("skip", reason="dont_know", as_entered=raw)
+    norm = _expand_fractions(norm)
     if any(_contains(norm, hint) for hint in _FRACTION_HINTS):
         return ParseResult("escalate", reason="unparseable_fraction", as_entered=raw)
 

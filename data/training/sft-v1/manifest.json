@@ -1,0 +1,102 @@
+{
+  "counts": {
+    "byTask": {
+      "holdout": {
+        "interview.ask": 32,
+        "interview.parse": 215
+      },
+      "train": {
+        "deviation.override": 6,
+        "interview.ask": 149,
+        "interview.parse": 308,
+        "rule.explain": 12
+      }
+    },
+    "holdout": 247,
+    "questions": {
+      "holdout": 16,
+      "train": 44
+    },
+    "scripted": 661,
+    "teacherAccepted": 61,
+    "teacherRejected": 50,
+    "total": 722,
+    "train": 475
+  },
+  "files": {
+    "cases.jsonl": {
+      "bytes": 269780,
+      "records": 655,
+      "sha256": "c9b8e5ebd9a098d52dfe63c2023a99e96849f2d3462c336caed8d19eb8962124"
+    },
+    "dataset.jsonl": {
+      "bytes": 1549042,
+      "records": 722,
+      "sha256": "35e6c34b25a64089015e2b1ba4b05330bdaa10f259fdfa15c0fd3aba16c24dca"
+    },
+    "holdout.jsonl": {
+      "bytes": 527155,
+      "records": 247,
+      "sha256": "d5122fbe26c84c33f9a879b451151b962a971b171f9337b2bee671e8924adba8"
+    },
+    "train.jsonl": {
+      "bytes": 1021887,
+      "records": 475,
+      "sha256": "bef2b7a21e1139d8ae2f13865f1a4e20d8b149f72a5227cda0bc999c33938c44"
+    }
+  },
+  "manifestVersion": "1",
+  "notes": "train/holdout follow data/eval/chat-v0/split.json by source question id. Regenerate with tools/training/build_sft_teacher.py; the Kaggle kernel consumes dataset.jsonl, train.jsonl, holdout.jsonl, cases.jsonl and this manifest.",
+  "pins": {
+    "acceptedTeacher": {
+      "path": "data/training/teacher-review/accepted.jsonl",
+      "sha256": "762d50912e41c000de0d4ed33d0a5c7bc9f7271d3bc0b69427f0e88ad536d943"
+    },
+    "cases": {
+      "path": "data/eval/chat-v0/cases.jsonl",
+      "sha256": "c9b8e5ebd9a098d52dfe63c2023a99e96849f2d3462c336caed8d19eb8962124"
+    },
+    "dataset": {
+      "path": "data/training/sft-v1/dataset.jsonl",
+      "sha256": "35e6c34b25a64089015e2b1ba4b05330bdaa10f259fdfa15c0fd3aba16c24dca"
+    },
+    "scriptedDataset": {
+      "path": "data/training/chat-v0/dataset.jsonl",
+      "sha256": "d6d1e8804e893605c7169fd9c6dab9b8d7d2607dd59b9976e1542779097c7acb"
+    },
+    "scriptedHoldout": {
+      "path": "data/training/sft-v0/holdout.jsonl",
+      "sha256": "d5122fbe26c84c33f9a879b451151b962a971b171f9337b2bee671e8924adba8"
+    },
+    "scriptedSplitManifest": {
+      "path": "data/training/sft-v0/manifest.json",
+      "sha256": "6f835c8887bd85a6fd9114f31500cd071e10382036d2d0f61862e2434d77ef6c"
+    },
+    "scriptedTrain": {
+      "path": "data/training/sft-v0/train.jsonl",
+      "sha256": "0e13abc26adc9742266d84155d6a02734135a8871ed7bd41f70aedd30feab44a"
+    },
+    "teacherReviewManifest": {
+      "path": "data/training/teacher-review/manifest.json",
+      "sha256": "c650c35a6d74a906e6e6f303972f59f2fc7aaf0372d6b7a839f0bb12c66ffabb"
+    }
+  },
+  "purpose": "W1.6 teacher-augmented SFT split: scripted sft-v0 plus the reviewed 8B subset; holdout is byte-identical to sft-v0",
+  "teacher": {
+    "accepted": 61,
+    "model": "qwen3-8b-q4",
+    "promptVersion": "teacher-paraphrase-v0.3",
+    "rejected": 50,
+    "reviewManifest": "data/training/teacher-review/manifest.json"
+  },
+  "tokens": {
+    "declaredShortfall": true,
+    "method": "chars/4 over full message text (plan §7 estimate)",
+    "note": "The shortfall is a reviewed W1.6 decision (path A): the 8B teacher produced only 111 unique paraphrases from 88 seed questions; seed-only variants cannot reach 0.5M tokens. It is recorded, not hidden.",
+    "scripted": 196821,
+    "shortfall": 292442,
+    "target": 500000,
+    "teacherAccepted": 10737,
+    "total": 207558
+  }
+}

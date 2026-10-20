@@ -57,6 +57,8 @@ jobs:
         run: uv run --directory core python ../tools/training/build_chat_dataset.py --check
       - name: SFT split freshness
         run: uv run --directory core python ../tools/training/build_sft_split.py --check
+      - name: Teacher-augmented SFT split freshness
+        run: uv run --directory core python ../tools/training/build_sft_teacher.py --check
       - name: Repair corpus freshness (offline)
         run: uv run --directory core python ../tools/training/build_repair_dataset.py --check
       - name: Spec codegen freshness

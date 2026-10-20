@@ -115,15 +115,30 @@ def test_ambiguous_numbers_are_reasked(book) -> None:
 
 
 @pytest.mark.parametrize(
-    "text",
+    ("text", "value"),
     [
-        "সাড়ে ৫ কাঠা",
-        "প্রায় সাড়ে ৫ কাঠা",
-        "দেড় কাঠা",
-        "5 and a half katha",
+        ("সাড়ে ৫ কাঠা", 367.90),
+        ("প্রায় সাড়ে ৫ কাঠা", 367.90),
+        ("সাড়ে ৫ কাঠা", 367.90),
+        ("sare panch katha", 367.90),
+        ("দেড় কাঠা", 100.34),
+        ("dedh katha", 100.34),
+        ("আড়াই কাঠা", 167.23),
+        ("সোয়া ৫ কাঠা", 351.17),
+        ("পৌনে ৫ কাঠা", 317.73),
+        ("5 and a half katha", 367.90),
+        ("five and a half katha", 367.90),
+        ("half katha", 33.45),
     ],
 )
-def test_fractional_quantifiers_escalate_instead_of_truncating(book, text) -> None:
+def test_fractional_quantifiers_are_expanded_not_truncated(book, text, value) -> None:
+    result = parse(book, "plot-area", text)
+    assert result.decision == "accept"
+    assert result.value == pytest.approx(value)
+
+
+@pytest.mark.parametrize("text", ["সাড়ে কাঠা", "সাড়ে"])
+def test_fraction_without_a_base_number_still_escalates(book, text) -> None:
     result = parse(book, "plot-area", text)
     assert result.decision == "escalate"
     assert result.reason == "unparseable_fraction"

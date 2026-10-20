@@ -13,6 +13,7 @@ import pytest
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 KERNEL = ROOT / "tools" / "training" / "kaggle" / "chat" / "chat_sft.py"
 SFT = ROOT / "data" / "training" / "sft-v0"
+SFT1 = ROOT / "data" / "training" / "sft-v1"
 CHAT = ROOT / "data" / "training" / "chat-v0"
 EVAL = ROOT / "data" / "eval" / "chat-v0"
 
@@ -25,11 +26,15 @@ def _kernel():
     return module
 
 
-def _inputs(tmp_path: pathlib.Path) -> pathlib.Path:
+def _inputs(tmp_path: pathlib.Path, base: pathlib.Path = SFT) -> pathlib.Path:
     for name in ("train.jsonl", "holdout.jsonl", "manifest.json"):
-        shutil.copyfile(SFT / name, tmp_path / name)
-    shutil.copyfile(CHAT / "dataset.jsonl", tmp_path / "dataset.jsonl")
-    shutil.copyfile(EVAL / "cases.jsonl", tmp_path / "cases.jsonl")
+        shutil.copyfile(base / name, tmp_path / name)
+    if base == SFT:
+        shutil.copyfile(CHAT / "dataset.jsonl", tmp_path / "dataset.jsonl")
+        shutil.copyfile(EVAL / "cases.jsonl", tmp_path / "cases.jsonl")
+    else:
+        shutil.copyfile(base / "dataset.jsonl", tmp_path / "dataset.jsonl")
+        shutil.copyfile(base / "cases.jsonl", tmp_path / "cases.jsonl")
     return tmp_path
 
 
@@ -39,6 +44,15 @@ def test_the_kernel_checks_pinned_inputs(tmp_path: pathlib.Path) -> None:
     assert len(dataset) == 661
     assert len(cases) == 655
     assert manifest["counts"]["holdout"] == 247
+
+
+def test_the_kernel_accepts_the_teacher_augmented_split(tmp_path: pathlib.Path) -> None:
+    train, dataset, cases, manifest = _kernel().check_inputs(_inputs(tmp_path, SFT1))
+    assert len(train) == 475
+    assert len(dataset) == 722
+    assert len(cases) == 655
+    assert manifest["counts"]["teacherAccepted"] == 61
+    assert manifest["tokens"]["declaredShortfall"] is True
 
 
 def test_the_kernel_refuses_a_tampered_dataset(tmp_path: pathlib.Path) -> None:

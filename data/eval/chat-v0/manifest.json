@@ -16,6 +16,10 @@
       "count": 60,
       "sha256": "b970f0904cca89d8f6315c362a2515713e79e42272b91032cb3e4209d240dbb0"
     },
+    "finetune-v1": {
+      "count": 60,
+      "sha256": "34beaa1a7093ef7e8d89435e5a2503af2944f17f6217fd75d47b3faa67cd7942"
+    },
     "stock": {
       "count": 60,
       "sha256": "6f0135e36e5435f535d231f62ac28a99597b49e1327ed8e931e1e5b1bf3f7f9e"

@@ -4,7 +4,7 @@ QLoRA on Qwen3-4B-Instruct-2507 with the frozen train split, then greedy replies
 `model.parse` holdout cases (the W1.9 gate set) and a merged Q4_K_M GGUF artifact for the fleet.
 
 Primary venue: Kaggle *script* kernel (ADR-0018) with
-  - dataset:  sajidhossain004/archresbd-sft-v0 (train/holdout/dataset/cases/manifest)
+  - dataset:  sajidhossain004/archresbd-sft-v1 (train/holdout/dataset/cases/manifest)
   - GPU:      T4 x1 (16 GB)  - 4-bit QLoRA fits
   - internet: on (base model + llama.cpp)
   - output:   /kaggle/working (adapter/, replies/finetune.jsonl, archres-chat-v0-Q4_K_M.gguf)
@@ -44,7 +44,7 @@ SMOKE = os.environ.get("ARCHRES_SFT_SMOKE") == "1"
 SKIP_GGUF = os.environ.get("ARCHRES_SFT_SKIP_GGUF") == "1"
 NO_INSTALL = os.environ.get("ARCHRES_SFT_NO_INSTALL") == "1"
 BASE = os.environ.get("ARCHRES_SFT_BASE", "Qwen/Qwen3-4B-Instruct-2507")
-DATA = pathlib.Path(os.environ.get("ARCHRES_SFT_DATA", "/kaggle/input/archresbd-sft-v0"))
+DATA = pathlib.Path(os.environ.get("ARCHRES_SFT_DATA", "/kaggle/input/archresbd-sft-v1"))
 OUT = pathlib.Path(os.environ.get("ARCHRES_SFT_OUT", "/kaggle/working"))
 LLAMA = OUT / "llama.cpp"
 MAX_LEN = int(os.environ.get("ARCHRES_SFT_MAX_LEN", "2048"))

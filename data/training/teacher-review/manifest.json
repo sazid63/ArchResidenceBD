@@ -1,0 +1,40 @@
+{
+  "accepted": {
+    "bytes": 120764,
+    "path": "accepted.jsonl",
+    "records": 61,
+    "sha256": "762d50912e41c000de0d4ed33d0a5c7bc9f7271d3bc0b69427f0e88ad536d943"
+  },
+  "candidateManifest": {
+    "path": "data/training/teacher-candidates/manifest.json",
+    "sha256": "3029a7c65f6ab3da470329aa04b31403fceee2975dd9f0dc86662f6bdc7e57cd"
+  },
+  "candidates": {
+    "path": "data/training/teacher-candidates/candidates.jsonl",
+    "records": 111,
+    "sha256": "a16705fbf386d28a28a04cc0fcbf0b032b7d2d137e39d00cccbd93a5c0d5c5fd"
+  },
+  "manifestVersion": "1",
+  "ownerDecision": "A - reviewed 8B subset, declared shortfall, targeted fractional coverage",
+  "promotionGate": "Every accepted record passed the deterministic verifier; meaning was reviewed against its source. The resulting SFT candidate still has to pass the W1.9 floors and a live probe before the model is registered.",
+  "purpose": "teacher paraphrases accepted after meaning review; candidate-only until the W1.6/W1.9 promotion gate and owner spot-check",
+  "review": {
+    "accepted": 61,
+    "byLang": {
+      "bn": {
+        "accepted": 30,
+        "rejected": 29
+      },
+      "en": {
+        "accepted": 31,
+        "rejected": 21
+      }
+    },
+    "path": "data/training/teacher-review/review.jsonl",
+    "records": 111,
+    "rejected": 50,
+    "sha256": "1a955fc9ae4380dd384509ebf400ecb1631d0a999627b144697a2708c7dac648"
+  },
+  "reviewedAt": "2026-10-20",
+  "reviewer": "agent-assisted review (DeepSeek V4.1 Flash); owner selected path A"
+}

@@ -1,6 +1,6 @@
 # Training data pipeline — v0 (W1.5)
 
-**Status:** v0.1.0 — deterministic scripted dataset committed; the plan's Qwen3-8B Q4 and a 4B fallback both ran on 2026-10-20 (1,496 raw calls each; 111 vs 114 unique candidates; 106/105 deterministic-pass; ~18.8k/~18.4k passing tokens); no candidate promoted; the ~0.5M-token target is unmet and remains a W1.6 decision.
+**Status:** v0.2.0 — deterministic scripted dataset committed; the plan's Qwen3-8B Q4 and a 4B fallback both ran on 2026-10-20 (1,496 raw calls each; 111 vs 114 unique candidates; 106/105 deterministic-pass; ~18.8k/~18.4k passing tokens); the 8B pool was reviewed record by record (61 accepted / 50 rejected) and the accepted subset is the committed `sft-v1` split (722 records, 207,558 tokens); the ~0.5M-token target is **292,442 tokens short — a declared gap**, not a silent omission. The teacher-augmented v1 round was then trained and measured (42/60 model.parse, all floors pass) and **not selected**: it broke one case the scripted round passed, so `archie-chat-v0` (43/60) stays in the fleet. No teacher record is auto-promoted.
 **Code:** `core/src/archres_core/training/{records,prompts,mutations,generators,verify,teacher}.py` · CLI `tools/training/build_chat_dataset.py`, `tools/training/teacher_augment.py`.
 **Schema:** `spec/schemas/sft-record.schema.json` (v0.1.0).
 **Decision record:** **ADR-0009**.
@@ -87,7 +87,7 @@ uv run --directory core python ../tools/training/teacher_augment.py \
   --endpoint http://127.0.0.1:8787/v1/chat/completions --model chat --variants 1
 ```
 
-Output goes to `data/training/teacher-candidates/` (gitignored) as `candidates.jsonl`. Every teacher record is `status: candidate`; the deterministic verifier checks schema/labels/language, but meaning preservation is not machine-provable. Promotion belongs to the W1.6 eval/human gate — there is no auto-promotion path in this pipeline. The full teacher batch (plan §7's ~0.5M-token target) is a W1.6 job; the committed scripted dataset is ~197k tokens.
+Output goes to `data/training/teacher-candidates/` (gitignored) as `candidates.jsonl`. Every teacher record is `status: candidate`; the deterministic verifier checks schema/labels/language, but meaning preservation is not machine-provable. Promotion belongs to the W1.6 eval/human gate — there is no auto-promotion path in this pipeline. The reviewed 8B subset is the exception in provenance, not in the law: each accepted record carries an `input.review` block and `review.meaning` in `verifyChecks`, and the model built from it is still candidate-only (ADR-0020). The full teacher batch (plan §7's ~0.5M-token target) remains short; the committed scripted dataset is ~197k tokens and the reviewed teacher subset adds ~10.7k.
 
 The batch is **train-side only**. The CLI loads the frozen `data/training/sft-v0/train.jsonl`, filters ask records by source id before calling the teacher, and never paraphrases a holdout question (ADR-0015). The candidate manifest records the source split, train-file sha256, raw/used counts, duplicate paraphrases dropped and verifier failures. The plan §7 local teacher is **Qwen3-8B Q4** (~5 GB), not an 8B-2507 variant; the Qwen3-2507 family has no 8B release. The on-disk public hybrid `Qwen3-8B-GGUF` is that model. Its default thinking block spends the completion budget and fails the one-question gate; the client's `--no-think` switch appends `/no_think`, and a 2-record smoke with `--max-tokens 160` passed. The 4B batch remains the fallback evidence from before that switch was exercised; candidates stay candidate-only and W1.6 stays open for the human/eval promotion gate. The client default cap is 96 tokens; `--max-tokens` raises it for long Bangla questions (the 4B batch measured seven truncations at 96). A first-line stop was removed because this template can return empty content after a leading newline. `/no_think` is opt-in for hybrid teachers only (`--no-think`), not used for the 2507 teacher. The full batch uses 17 variants of the 88 train ask records, aimed at the ~0.5M-token target. The first uncapped hybrid smoke generated 213+ tokens for one one-line question, so the cap is a measured correction, not a cosmetic one.
 
@@ -142,9 +142,61 @@ and ~18.8k versus ~18.4k passing tokens. Seed-only variants collapse to at most 
 distinct paraphrases per question, so the ~0.5M-token target cannot be reached by adding
 seeds alone. Quality is better than the 4B overall but still mixed — for example
 `ছাদে পানির ট্যাংক থাকবে?` → `কীভাবে ছাদ থেকে পানি সঞ্চয় করা হয়?` changes a yes/no
-question into a method question, and `পাইলের ধরন` → `পাইলের বিধ` is a typo. Reaching the
-target needs prompt-style variants and/or teacher augmentation of longer explain/parse
-records, or a formally recorded shortfall. W1.6 stays open.
+question into a method question, and `পাইলের ধরন` → `পাইলের বিধ` is a typo.
+
+### Review result and `sft-v1` (2026-10-20)
+
+The owner selected **path A**: review the 8B pool, accept only faithful paraphrases, record the
+shortfall, and cover the measured fractional-area case. The review is committed, one decision per
+candidate, in `data/training/teacher-review/`:
+
+- `review.jsonl` — **111 decisions: 61 accept / 50 reject**, each pinned by the candidate text
+  sha256; every rejection has a reason. Rejections include question-type changes
+  (`Are neighbouring buildings close?` → `How close?`), scope changes
+  (`প্রতিটি বেডরুমে` → `প্রতিটি ঘরে`), option changes (wide gate → wide door), typos
+  (`পাইলের বিধ`), and garbled/gate-artefact output. Two faithful `soil-report-file`
+  imperative paraphrases are rejected only because the ask shape gate requires a question;
+  that is declared, not hidden.
+- `accepted.jsonl` — the **61 accepted records**, `status: verified`, with
+  `review.meaning` in `verifyChecks` and an `input.review` block. One BN record had an echoed
+  `প্রশ্ন:` label removed as a declared normalization; the raw text is still pinned in the
+  ledger.
+- `manifest.json` — pins the raw candidate file/manifest, the ledger, and the accepted file.
+
+The review is **agent-assisted** and says so in the ledger (`reviewer`) and in the manifest; the
+owner chose path A, not each individual paraphrase. A **human spot-check of the 61 accepted
+records is still owed** before `sft-v1` is treated as *the* training set. Nothing depends on that
+yet: the shipped chat model is the scripted `archie-chat-v0`, which contains no teacher text.
+
+`tools/training/build_teacher_review.py` applies the ledger and re-runs the deterministic
+verifier on every accepted record; `--check` reproduces the committed bytes. The raw candidate
+file stays gitignored. `tools/training/build_sft_teacher.py` then builds
+`data/training/sft-v1/`:
+
+| Split | Records | Notes |
+|---|---:|---|
+| train | 475 | 414 scripted + 61 reviewed teacher paraphrases |
+| holdout | 247 | byte-identical to `sft-v0`; no teacher paraphrase crosses the line |
+| total | 722 | 661 scripted + 61 reviewed |
+
+`counts.questions` in the v1 manifest counts the **distinct question ids represented in that
+side's records** (44 train / 16 holdout). The frozen split's *measured* question lists are
+24 train / 16 holdout (`sft-v0/manifest.json`), and the 20 questions the eval does not measure
+stay on the train side as declared there.
+
+Token accounting uses chars ÷ 4 over full message text, the plan §7 estimate: **196,821
+scripted + 10,737 teacher = 207,558 total**, against the 500,000 target. The manifest declares
+**shortfall: 292,442**. More teacher passes over the same 88 seed questions are not a credible
+fix; reaching the target needs new prompt styles, longer explain/parse records, or a new
+corpus.
+
+### Fractional coverage belongs to the parser
+
+The 8B teacher rephrases questions; it cannot fix an arithmetic misread. The live probe's
+`সাড়ে ৫ কাঠা` → 5.0 failure is therefore covered at the deterministic layer (ADR-0020): the
+parser expands `সাড়ে`/`পৌনে`/`সোয়া`/`দেড়`/`আড়াই` and English “N and a half” to decimals
+before unit conversion, and still escalates a fraction with no resolvable base. The model path
+remains the fallback and stays gated; no SFT record claims to fix the arithmetic.
 
 ## SFT split (W1.6 preparation)
 
@@ -214,9 +266,11 @@ uv run --directory core python ../tools/training/build_repair_dataset.py --check
 
 ## Kaggle preflight (2026-10-20)
 
-The training inputs travel as the private Kaggle dataset `sajidhossain004/archresbd-sft-v0`
-(`train.jsonl`, `holdout.jsonl`, `dataset.jsonl`, `cases.jsonl`, `manifest.json`). The committed
-CPU kernel `tools/training/kaggle/chat-preflight/` verifies the mount without spending GPU quota:
+The training inputs travel as the private Kaggle dataset `sajidhossain004/archresbd-sft-v1`
+(`train.jsonl`, `holdout.jsonl`, `dataset.jsonl`, `cases.jsonl`, `manifest.json`). The v0 dataset
+and its preflight remain the historical record; v1 is the reviewed teacher-augmented split. The
+committed CPU kernel `tools/training/kaggle/chat-preflight/` verifies a mount without spending
+GPU quota:
 
 - **Result:** COMPLETE in 49 s; mount discovered at
   `/kaggle/input/datasets/sajidhossain004/archresbd-sft-v0` (Kaggle now nests dataset mounts;
@@ -224,6 +278,10 @@ CPU kernel `tools/training/kaggle/chat-preflight/` verifies the mount without sp
 - Counts match the manifest: 414 train / 247 holdout / 661 records / 655 eval cases; every one of
   the 60 `model.parse` holdout cases resolves to a prompt record (no missing prompt, no silent
   fallback).
+- **v1 upload (2026-10-20):** the private dataset `sajidhossain004/archresbd-sft-v1` has the five
+  files and 3,371,397 bytes; the chat kernel re-checks 475 train / 247 holdout / 722 total and
+  every pinned sha256 before training. The v1 manifest records 61 reviewed teacher records and
+  the declared 292,442-token shortfall.
 - The chat template is prefix-stable and the assistant span survives masking (2 sample records,
   385 prefix tokens masked); `transformers` 4.57.6 on the Kaggle image.
 - The GPU training kernel (`tools/training/kaggle/chat/`, ADR-0018) is no longer queued: after the
@@ -275,6 +333,38 @@ CPU kernel `tools/training/kaggle/chat-preflight/` verifies the mount without sp
   teacher-augmented batch remains a W1.6 job and is not silently dropped; the fractional-area
   miss above is a measured example of what it must fix. **W1.6 is not ticked** by this candidate.
 
+## Teacher-augmented v1 round (2026-10-20)
+
+The reviewed teacher subset was trained as a **second** candidate round. It is a separate
+measurement, not a replacement: the scripted round stays the selected model unless the new one
+measures better.
+
+- **Run:** Kaggle kernel `sajidhossain004/archresidencebd-chat-sft-v1` on the private dataset
+  `sajidhossain004/archresbd-sft-v1`; Qwen3-4B-Instruct-2507, 2 epochs / **120 steps** / 475
+  train records, max length 2048, seed 20261020, bf16, Tesla T4. `train-summary.json`:
+  loss **0.23197**, 60 replies in 298.0 s, 5,176.3 s total; 0 records skipped, mean 314.5
+  tokens, max 962. The GGUF step failed again with the known `torchao 0.10.0` packaging error —
+  a packaging error, not a training result, and no artifact was needed because this candidate
+  was not selected.
+- **Reply set:** `data/eval/chat-v0/replies/finetune-v1.jsonl` (60 lines, 60 unique case ids),
+  sha256 `34beaa1a…d7942`, now **pinned in the eval manifest** so CI re-scores the same bytes.
+- **Measured:** `model.parse` **42/60 = 0.700** — decision **0.867** (floor 0.650), value
+  **0.676** (0.500), `accuracy:bn` **0.600** (0.5667), `accuracy:en` **0.800** (0.500). All four
+  floors pass and **none was moved**.
+- **Outcome: not selected.** Compared case by case with the scripted round, the teacher round
+  fixed **no** case and **broke exactly one**
+  (`model.parse:chat-parse-gas-source-slp-typo-label-en`): 43/60 → 42/60. Adding 61 reviewed
+  question paraphrases (10,737 tokens, 5.2 % of the v1 corpus) did not improve parse accuracy, and
+  the W1.9 suite does not measure ask phrasing at all. `archie-chat-v0` therefore stays in the
+  fleet; the v1 adapter is not registered, not converted to GGUF and not shipped. The run is
+  reproducible from the pinned dataset plus the committed kernel, so the adapter is not
+  committed either.
+- **What this says about the data, honestly:** the reviewed subset is *usable* (it trains, it
+  passes every floor) but not *useful* on the measured suite. Ask-paraphrase variety is not
+  what the gated suite measures, and the suite is the only thing that can say "useful". A
+  future teacher round must therefore either (a) add a gated ask-phrasing suite, or (b) target
+  parse/explain records where the suite can see the gain.
+
 ## Units
 
 `archres_core.units` is the only conversion home: Decimal-based katha/shotok/bigha/gonda/sqft ⇄ m² and m/ft/inch, with hand-authored English/Bangla unit words. `kani` is deliberately absent until an authoritative factor is pinned — adding a regional guess would violate the provenance rule. The module has its own tests (`core/tests/test_units.py`).
@@ -285,11 +375,14 @@ CPU kernel `tools/training/kaggle/chat-preflight/` verifies the mount without sp
 - Real teacher smoke: local Qwen3-4B-Instruct-2507 Q4_K_M via llama-server on `127.0.0.1:8790`, `--limit 2 --variants 1` → 2 candidates (bn/en), 0 deterministic failures, both left `candidate`. The server was stopped after the run; candidates are gitignored.
 - Full 4B fallback batch (2026-10-20): 1,496 raw calls → 114 unique candidates (1,382 duplicates), 105 deterministic-pass / 9 failures, 58 BN + 47 EN, ~18.4k passing tokens (chars ÷ 4); no candidate promoted. Seven failures are cut mid-sentence at the 96-token cap and two echo the editor prompt. The BN review sample shows meaning drift, so the 4B fallback is not accepted as the plan's 8B teacher.
 - Full Qwen3-8B Q4 batch (2026-10-20): 1,496 raw calls → 111 unique candidates (1,385 duplicates), 106 deterministic-pass / 5 failures, 59 BN + 52 EN, ~18.8k passing tokens (chars ÷ 4); no variant skipped and no candidate promoted. Two failures echo the editor label, two are `soil-report-file` imperatives rejected by the question-mark gate, and one emitted two questions. Quality is better than the 4B but still mixed; the ~0.5M-token target is unmet.
+- Review (2026-10-20): **61 accepted / 50 rejected** with a committed one-line-per-candidate ledger; the accepted 61 are in `sft-v1` (475 train / 247 holdout / 722 total). Token total **207,558**, shortfall **292,442** declared in `sft-v1/manifest.json`. No teacher record was auto-promoted; the teacher-augmented model stays candidate-only until the W1.9 gate and live probe.
+- Fractional coverage (2026-10-20): the parser expands `সাড়ে`/`পৌনে`/`সোয়া`/`দেড়`/`আড়াই` and English “N and a half” to decimals before unit conversion; `সাড়ে ৫ কাঠা` now yields 5.5 katha deterministically, and a base-less fraction still escalates. This is the parser's fix, not a teacher/SFT claim.
 - The teacher prompt is an editor prompt, not the product's JSON-oriented system prompt. A shape gate rejects non-questions (no question mark, more than one question, echoed editor instructions, or JSON/quoted output).
 
 ## Deliberately NOT in v0
 
-- **An accepted teacher batch** — both the 4B fallback and the plan's 8B pool are measured but not accepted; the ~0.5M-token target is unmet and remains a W1.6 decision.
+- **A full ~0.5M-token teacher batch** — the reviewed 8B subset is accepted (61 records), but the total is 207,558 tokens; the 292,442 shortfall is declared. The 4B fallback remains archived and rejected.
+- **Teacher augmentation of parse/explain records** — round 1 rephrases interview questions only; longer record types are the next corpus decision (ADR-0020).
 - **Masked-token / loss-mask metadata** — the SFT trainer derives it from `messages` roles; no separate format yet.
 - **Conversation-level multi-turn samples beyond the override confirmation pair** — v0 records are single-task; longer dialogues come from the orchestrator (W1.10) and its transcript capture.
 
@@ -300,6 +393,8 @@ uv run --directory core pytest -q                         # suite total is asser
 uv run --directory core pytest -q tests/test_training_pipeline.py   # 56 training-specific
 uv run --directory core python ../tools/training/build_chat_dataset.py --check
 uv run --directory core python ../tools/training/build_sft_split.py --check
+uv run --directory core python ../tools/training/build_teacher_review.py --check   # needs raw candidates
+uv run --directory core python ../tools/training/build_sft_teacher.py --check
 uv run --directory core python ../tools/training/build_repair_dataset.py --check
 python tools/ci/brand_guard.py
 ```
