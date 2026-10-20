@@ -58,6 +58,12 @@ def main() -> int:
     parser.add_argument("--variants", type=int, default=1)
     parser.add_argument("--temperature", type=float, default=0.7)
     parser.add_argument(
+        "--max-tokens",
+        type=int,
+        default=96,
+        help="completion cap; raise for long Bangla questions (the 4B fallback truncated at 96)",
+    )
+    parser.add_argument(
         "--limit", type=int, help="use only the first N train-split ask records (smoke run)"
     )
     parser.add_argument(
@@ -86,7 +92,10 @@ def main() -> int:
         all_sources = train_ask_records(dataset.by_task("interview.ask"), train_ids)
         sources = all_sources[: args.limit] if args.limit else all_sources
         client = ChatCompletionClient(
-            endpoint=args.endpoint, model=args.model, no_think=args.no_think
+            endpoint=args.endpoint,
+            model=args.model,
+            max_tokens=args.max_tokens,
+            no_think=args.no_think,
         )
         raw_candidates = build_teacher_records(
             sources,

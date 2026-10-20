@@ -192,6 +192,12 @@ def test_chat_client_caps_the_teacher_and_disables_thinking(endpoint: str) -> No
     assert body["messages"][-1]["content"].endswith("/no_think")
 
 
+def test_chat_client_honours_a_custom_completion_cap(endpoint: str) -> None:
+    client = ChatCompletionClient(endpoint=endpoint, model="chat", timeout=5, max_tokens=160)
+    client.complete([{"role": "user", "content": "hi"}], temperature=0.7, seed=1)
+    assert json.loads(_Handler.last_body)["max_tokens"] == 160
+
+
 def test_chat_client_retries_a_transient_connection_reset() -> None:
     class FlakyHandler(http.server.BaseHTTPRequestHandler):
         calls = 0
