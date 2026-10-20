@@ -281,6 +281,8 @@ uv run --directory core python ../tools/eval/run_eval.py
 uv run --directory core python ../tools/eval/run_eval.py --json data/tmp/eval.json --markdown data/tmp/eval.md
 # record a new baseline (starts the S2 fleet if --root is given)
 uv run --directory core python ../tools/eval/record_baseline.py --root data/downloads/s2 --name stock
+# then rebuild the manifest pin; run_eval refuses bytes that do not match it
+uv run --directory core python ../tools/eval/build_cases.py
 ```
 
 Exit code is 0 only when every gate holds. `--no-gates` prints the numbers without failing
@@ -296,6 +298,11 @@ Exit code is 0 only when every gate holds. `--no-gates` prints the numbers witho
 | `manifest.json` | `build_cases.py` | pins dataset / pack / corpus / split sha256 and the reply files |
 | `replies/<model>.jsonl` | `record_baseline.py` | one `{caseId, reply}` per line; sha pinned in the manifest |
 | `gates.json` | human | a floor is a reviewed number, not a target |
+
+`run_eval.py` hashes the reply file it actually scores. When a `--model` name is pinned in
+`manifest.json`, a byte mismatch is refused before a report is written; a new reply set gets a
+new `--model` name, never a masquerade under `stock`. The JSON report records both the scored
+`replySha256` and the `pinnedReplySha256` (null when the set is not pinned).
 
 ## Next
 
