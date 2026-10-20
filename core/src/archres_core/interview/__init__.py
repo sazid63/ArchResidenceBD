@@ -40,7 +40,9 @@ from .parse import (
     ParseResult,
     normalize,
     parse_answer,
+    units_in_text,
 )
+from .seam import validate_external_answer
 
 __all__ = [
     "ConditionError",
@@ -70,4 +72,6 @@ __all__ = [
     "parse_answer",
     "parse_when",
     "pointer_for",
+    "units_in_text",
+    "validate_external_answer",
 ]

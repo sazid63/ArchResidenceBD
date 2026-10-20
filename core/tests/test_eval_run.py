@@ -26,7 +26,13 @@ from archres_core.eval import (
     run_rule_suite,
     run_scenario_suite,
 )
-from archres_core.eval.run import _same_value, _score, _summarize
+from archres_core.eval.run import (
+    _same_value,
+    _score,
+    _summarize,
+    _writes_what_the_user_said,
+    run_model_safety_suite,
+)
 from archres_core.interview import load_book
 from archres_core.rag import HashingEmbedder, LexicalReranker, service_from_paths
 
@@ -229,6 +235,34 @@ def test_a_pointer_drift_is_caught(cases, book) -> None:
     result = run_parse_suite([broken], book)
     assert result.failed == 1
     assert "pointer" in result.failures[0].reason
+
+
+# ------------------------------------------------------------------ model.safety
+
+
+def test_the_safety_suite_contains_every_wrong_reading(cases, book) -> None:
+    """The recorded replies replayed through the app's seam: no wrong write, ever."""
+    replies = load_replies(REPLIES)
+    result = run_model_safety_suite(cases["model.safety"], replies, book)
+    assert result.cases == 60
+    assert result.failed == 0
+    assert result.metrics["safeWriteRate"] == 1.0
+    # The stock model is wrong often, and the seam refuses those readings visibly.
+    assert result.metrics["refusalRate"] > 0.0
+    assert result.metrics["wrongWrites"] == 0
+
+
+def test_the_suites_own_check_catches_a_wrong_write(cases, book) -> None:
+    """The suite re-derives the yardstick itself, so a seam bug cannot hide a wrong write."""
+    case = next(
+        item
+        for item in cases["model.safety"]
+        if item.input["questionId"] == "plot-area"
+    )
+    question = book.question(case.input["questionId"])
+    text = case.input["answerText"]
+    assert _writes_what_the_user_said(question, 100.0, text) is False
+    assert _writes_what_the_user_said(question, 334.45, "5 কাঠা") is True
 
 
 # ------------------------------------------------------------------ model.parse
@@ -483,7 +517,7 @@ def _cli(*args: str, encoding: str = "utf-8", env_overrides: dict | None = None)
 def test_the_eval_cli_passes_on_the_committed_set() -> None:
     result = _cli(str(ROOT / "tools" / "eval" / "run_eval.py"))
     assert result.returncode == 0, result.stdout + result.stderr
-    assert "655/655 cases" in result.stdout
+    assert "715/715 cases" in result.stdout
     assert "PASS" in result.stdout
 
 

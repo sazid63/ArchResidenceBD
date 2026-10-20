@@ -14,19 +14,81 @@
     "number, the model and the reason in the commit and in docs/spec/eval-harness-v0.md.",
     "The deterministic parser's overall agreement is deliberately NOT gated: a third of its",
     "misses are the model's job (fuzzy labels, topicality) and the rest are recorded W1.4 gaps.",
-    "What is gated is its safety contract - no stall, and no rejected clean answer."
+    "What is gated is its safety contract - no stall, and no rejected clean answer.",
+    "The model.safety suite is a different question from model.parse: not 'did the model read it right' but 'could a wrong reading become a written value'. The recorded replies are pushed through the app's own seam, and a case passes when the seam refuses the reading or writes exactly what the user said. The floor is 1.0 because a wrong write is never acceptable; a refusal of a correct reading is reported as falseRefusalRate, not gated, because it costs the user a re-ask and not correctness."
   ],
   "gates": [
-    { "suite": "rule.vector", "metric": "accuracy", "floor": 1.0, "note": "frozen pack vectors" },
-    { "suite": "parse", "metric": "neverStalled", "floor": 1.0, "note": "no answer input raises or returns an unknown decision" },
-    { "suite": "parse", "metric": "agreement:clean", "floor": 1.0, "note": "an unmutated answer is never rejected" },
-    { "suite": "model.parse", "metric": "decisionAccuracy", "floor": 0.65, "note": "stock baseline 2026-10-20 (39/60 decisions)" },
-    { "suite": "model.parse", "metric": "valueAccuracy", "floor": 0.5, "note": "stock baseline 2026-10-20 (17/34 accepted values)" },
-    { "suite": "model.parse", "metric": "accuracy:bn", "floor": 0.5667, "note": "stock baseline (17/30 correct parses); no Bangla regression" },
-    { "suite": "model.parse", "metric": "accuracy:en", "floor": 0.5, "note": "stock baseline (15/30 correct parses); no English regression" },
-    { "suite": "rag", "metric": "citationRecall", "floor": 1.0, "note": "expected doc in top-5" },
-    { "suite": "rag", "metric": "abstentionAccuracy", "floor": 1.0, "note": "declared gaps are not answered" },
-    { "suite": "scenario", "metric": "accuracy", "floor": 1.0, "note": "demo end state is frozen" },
-    { "suite": "register", "metric": "accuracy", "floor": 1.0, "note": "deviation round-trip" }
+    {
+      "suite": "rule.vector",
+      "metric": "accuracy",
+      "floor": 1.0,
+      "note": "frozen pack vectors"
+    },
+    {
+      "suite": "parse",
+      "metric": "neverStalled",
+      "floor": 1.0,
+      "note": "no answer input raises or returns an unknown decision"
+    },
+    {
+      "suite": "parse",
+      "metric": "agreement:clean",
+      "floor": 1.0,
+      "note": "an unmutated answer is never rejected"
+    },
+    {
+      "suite": "model.safety",
+      "metric": "safeWriteRate",
+      "floor": 1.0,
+      "note": "the recorded model replies replayed through the app's escalation seam: a wrong reading must become a visible refusal, never a written value"
+    },
+    {
+      "suite": "model.parse",
+      "metric": "decisionAccuracy",
+      "floor": 0.65,
+      "note": "stock baseline 2026-10-20 (39/60 decisions)"
+    },
+    {
+      "suite": "model.parse",
+      "metric": "valueAccuracy",
+      "floor": 0.5,
+      "note": "stock baseline 2026-10-20 (17/34 accepted values)"
+    },
+    {
+      "suite": "model.parse",
+      "metric": "accuracy:bn",
+      "floor": 0.5667,
+      "note": "stock baseline (17/30 correct parses); no Bangla regression"
+    },
+    {
+      "suite": "model.parse",
+      "metric": "accuracy:en",
+      "floor": 0.5,
+      "note": "stock baseline (15/30 correct parses); no English regression"
+    },
+    {
+      "suite": "rag",
+      "metric": "citationRecall",
+      "floor": 1.0,
+      "note": "expected doc in top-5"
+    },
+    {
+      "suite": "rag",
+      "metric": "abstentionAccuracy",
+      "floor": 1.0,
+      "note": "declared gaps are not answered"
+    },
+    {
+      "suite": "scenario",
+      "metric": "accuracy",
+      "floor": 1.0,
+      "note": "demo end state is frozen"
+    },
+    {
+      "suite": "register",
+      "metric": "accuracy",
+      "floor": 1.0,
+      "note": "deviation round-trip"
+    }
   ]
 }

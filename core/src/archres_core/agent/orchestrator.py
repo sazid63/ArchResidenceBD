@@ -350,7 +350,12 @@ class Session:
         except ModelValueError as exc:
             self._event("model_invalid", model=self.client.name, error=str(exc))
             return turn, self.client.name, context, str(exc)
-        accepted = self.interview.accept_external(value, unit=unit, lang=self.language)
+        accepted = self.interview.accept_external(
+            value,
+            unit=unit,
+            lang=self.language,
+            answer_text=str(payload.get("answer") or ""),
+        )
         return accepted, self.client.name, context, None
 
     def _commit_turn(self, turn: Turn) -> Revision | None:

@@ -42,7 +42,7 @@ def test_the_kernel_checks_pinned_inputs(tmp_path: pathlib.Path) -> None:
     train, dataset, cases, manifest = _kernel().check_inputs(_inputs(tmp_path))
     assert len(train) == 414
     assert len(dataset) == 661
-    assert len(cases) == 655
+    assert len(cases) == 715
     assert manifest["counts"]["holdout"] == 247
 
 
@@ -50,6 +50,8 @@ def test_the_kernel_accepts_the_teacher_augmented_split(tmp_path: pathlib.Path) 
     train, dataset, cases, manifest = _kernel().check_inputs(_inputs(tmp_path, SFT1))
     assert len(train) == 475
     assert len(dataset) == 722
+    # The split carries the eval-case *snapshot the chat run consumed* (655 cases, before the
+    # model.safety suite existed); the live eval set has grown since.
     assert len(cases) == 655
     assert manifest["counts"]["teacherAccepted"] == 61
     assert manifest["tokens"]["declaredShortfall"] is True

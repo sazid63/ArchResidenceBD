@@ -53,6 +53,7 @@ from .flow import (
     pointer_for,
 )
 from .parse import CANONICAL_DIMENSION, DIMENSION, ParseResult, bn_digits, canonical_value, parse_answer
+from .seam import validate_external_answer
 
 ENGINE_ID = "question-engine@0.1.0"
 
@@ -509,6 +510,7 @@ class Interview:
         *,
         unit: str | None = None,
         lang: str | None = None,
+        answer_text: str = "",
         detail: str = "model-parsed (escalation)",
     ) -> Turn:
         """Accept a model-parsed value for the current question (the escalation seam).
@@ -516,13 +518,19 @@ class Interview:
         The value is re-validated here; nothing is written if it does not fit. Provenance is
         ``source: user`` with ``confidence: low`` — the content is the user's, the reading
         was a model's.
+
+        ``answer_text`` is the user's own answer, when the caller has it. It lets the seam
+        check the model's reading against the user's words: a model may not rewrite a text
+        answer, and it may not name a unit the user did not use (or ignore the one they did).
         """
         lang = lang or self.lang
         step = self._current
         if step is None:
             return Turn("done", reply=dict(REPLY_DONE))
         try:
-            parsed = self._external_result(step.question, value, unit)
+            parsed = validate_external_answer(
+                step.question, value, unit, answer_text=answer_text
+            )
         except (ValueError, ArithmeticError) as exc:
             return self._ask_again(step, "model_invalid", unit_hint=str(exc), lang=lang)
         return self._store(
@@ -598,66 +606,6 @@ class Interview:
                 as_entered=choice,
             )
         return ParseResult("accept", value=option["value"], as_entered=choice)
-
-    def _external_result(self, question: Question, value: Any, unit: str | None) -> ParseResult:
-        kind = question.type
-        as_entered = f"{value}" if unit is None else f"{value} {unit}"
-        if kind == "choice":
-            if not isinstance(value, str):
-                raise ValueError("choice answer must be a string option value")
-            option = question.option(value)
-            if option is None:
-                hits = [item for item in question.options if item["value"].casefold() == value.casefold()]
-                if not hits:
-                    raise ValueError(f"{value!r} is not an option of {question.id}")
-                option = hits[0]
-            return ParseResult("accept", value=option["value"], as_entered=as_entered)
-        if kind == "multi_choice":
-            if not isinstance(value, list):
-                raise ValueError("multi-choice answer must be a list")
-            picked = []
-            for item in value:
-                option = question.option(str(item))
-                if option is None:
-                    raise ValueError(f"{item!r} is not an option of {question.id}")
-                if option["value"] not in picked:
-                    picked.append(option["value"])
-            return ParseResult("accept", value=picked, as_entered=as_entered)
-        if kind == "yes_no":
-            if isinstance(value, bool):
-                return ParseResult("accept", value=value, as_entered=as_entered)
-            text = str(value).strip().casefold()
-            if text in ("yes", "true", "ha", "হ্যাঁ", "1"):
-                return ParseResult("accept", value=True, as_entered=as_entered)
-            if text in ("no", "false", "na", "না", "0"):
-                return ParseResult("accept", value=False, as_entered=as_entered)
-            raise ValueError(f"{value!r} is not a yes/no answer")
-        if kind == "integer":
-            if isinstance(value, bool):
-                raise ValueError("integer expected, got a boolean")
-            number = Decimal(str(value))
-            if number != number.to_integral_value():
-                raise ValueError(f"{value!r} is not a whole number")
-            return ParseResult("accept", value=int(number), as_entered=str(value))
-        if kind == "number":
-            if isinstance(value, bool):
-                raise ValueError("number expected, got a boolean")
-            number = Decimal(str(value))
-            if number <= 0:
-                raise ValueError(f"{value!r} must be positive")
-            entered_unit = unit or question.unit_code
-            canonical = canonical_value(question, number, entered_unit or "")
-            return ParseResult(
-                "accept",
-                value=canonical,
-                unit=entered_unit,
-                as_entered=as_entered,
-            )
-        if kind in ("text", "file"):
-            if not isinstance(value, str) or not value.strip():
-                raise ValueError("a non-empty text answer is required")
-            return ParseResult("accept", value=value.strip(), as_entered=as_entered)
-        raise InterviewError(f"{question.id}: unsupported question type {kind!r}")
 
     def _handle(self, step: Step, parsed: ParseResult, *, raw: str, lang: str) -> Turn:
         if parsed.decision == "accept":

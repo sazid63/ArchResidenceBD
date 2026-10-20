@@ -1,9 +1,9 @@
 {
   "cases": {
-    "bytes": 269780,
-    "count": 655,
+    "bytes": 293156,
+    "count": 715,
     "path": "data/eval/chat-v0/cases.jsonl",
-    "sha256": "c9b8e5ebd9a098d52dfe63c2023a99e96849f2d3462c336caed8d19eb8962124"
+    "sha256": "861feec455d86c12d5b3d7b1f3820c210b1837c7078f8a854d97cd04a9e3afee"
   },
   "harnessVersion": "eval-harness-0.1.0",
   "pins": {
@@ -36,11 +36,12 @@
   },
   "splits": {
     "engine": 52,
-    "holdout": 295,
+    "holdout": 355,
     "train": 308
   },
   "suites": {
     "model.parse": 60,
+    "model.safety": 60,
     "parse": 523,
     "rag": 18,
     "register": 3,

@@ -130,11 +130,16 @@ def _build(out: pathlib.Path) -> dict:
             "bytes": stats["bytes"],
             "sha256": stats["sha256"],
         }
-    shutil.copyfile(CASES, out / "cases.jsonl")
+    # The eval case set is *derived* and grows when a suite is added. The copy here is the
+    # snapshot the training run actually consumed, so it is kept, not refreshed: the run's
+    # input is a historical fact, not a rebuild. The manifest pins the snapshot it holds.
+    snapshot = out / "cases.jsonl"
+    if not snapshot.is_file():
+        shutil.copyfile(CASES, snapshot)
     cases_stats = {
-        "records": len(load_jsonl(out / "cases.jsonl")),
-        "bytes": (out / "cases.jsonl").stat().st_size,
-        "sha256": sha256_file(out / "cases.jsonl"),
+        "records": len(load_jsonl(snapshot)),
+        "bytes": snapshot.stat().st_size,
+        "sha256": sha256_file(snapshot),
     }
     files["cases.jsonl"] = cases_stats
 
@@ -155,7 +160,15 @@ def _build(out: pathlib.Path) -> dict:
             "scriptedSplitManifest": _pin(SFT0 / "manifest.json"),
             "acceptedTeacher": _pin(ACCEPTED),
             "teacherReviewManifest": _pin(REVIEW_MANIFEST),
-            "cases": _pin(CASES),
+            "cases": {
+            "path": "data/training/sft-v1/cases.jsonl",
+            "sha256": files["cases.jsonl"]["sha256"],
+            "note": (
+                "the snapshot the chat run consumed; the live eval set "
+                "(data/eval/chat-v0/cases.jsonl) has grown since (the model.safety suite was "
+                "added), and the run's input is a historical fact, not a rebuild"
+            ),
+        },
             "dataset": {"path": "data/training/sft-v1/dataset.jsonl", "sha256": files["dataset.jsonl"]["sha256"]},
         },
         "counts": {
@@ -239,10 +252,18 @@ def main() -> int:
         return 0
 
     with tempfile.TemporaryDirectory() as temp:
-        _build(pathlib.Path(temp))
+        temp_out = pathlib.Path(temp)
+        # The cases snapshot is an input, not a derived file: the check rebuilds against the
+        # committed copy, so the run's historical input stays the run's historical input.
+        committed_snapshot = out / "cases.jsonl"
+        if committed_snapshot.is_file():
+            shutil.copyfile(committed_snapshot, temp_out / "cases.jsonl")
+        _build(temp_out)
         ok = True
         for name in FILES:
-            ok = _compare(pathlib.Path(temp) / name, out / name) and ok
+            if name == "cases.jsonl":
+                continue
+            ok = _compare(temp_out / name, out / name) and ok
         if ok:
             print("teacher-augmented SFT split is fresh")
             return 0

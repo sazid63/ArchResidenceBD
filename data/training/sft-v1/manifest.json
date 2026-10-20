@@ -53,7 +53,8 @@
       "sha256": "762d50912e41c000de0d4ed33d0a5c7bc9f7271d3bc0b69427f0e88ad536d943"
     },
     "cases": {
-      "path": "data/eval/chat-v0/cases.jsonl",
+      "note": "the snapshot the chat run consumed; the live eval set (data/eval/chat-v0/cases.jsonl) has grown since (the model.safety suite was added), and the run's input is a historical fact, not a rebuild",
+      "path": "data/training/sft-v1/cases.jsonl",
       "sha256": "c9b8e5ebd9a098d52dfe63c2023a99e96849f2d3462c336caed8d19eb8962124"
     },
     "dataset": {

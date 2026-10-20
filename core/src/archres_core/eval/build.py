@@ -191,6 +191,27 @@ def build_model_cases(parse_cases: Iterable[EvalCase], *, count: int = MODEL_SAM
     ]
 
 
+def build_model_safety_cases(parse_cases: Iterable[EvalCase], *, count: int = MODEL_SAMPLE) -> list[EvalCase]:
+    """The same frozen questions, for the app's seam: what the model may become.
+
+    The safety suite replays the *recorded* model replies through the escalation seam, so the
+    question is not "did the model read it right" (that is ``model.parse``) but "could a wrong
+    reading become a written value" (that is the product's job to prevent).
+    """
+    return [
+        EvalCase(
+            id=f"model.safety:{case.source['recordId']}",
+            suite="model.safety",
+            lang=case.lang,
+            split="holdout",
+            source={"kind": "model-sample", "parseCase": case.id, "recordId": case.source["recordId"]},
+            input={"questionId": case.input["questionId"], "answerText": case.input["answerText"]},
+            expect={"decision": case.expect["decision"], "value": case.expect["value"]},
+        )
+        for case in build_model_cases(parse_cases, count=count)
+    ]
+
+
 # --------------------------------------------------------------------- authored
 
 
@@ -353,6 +374,7 @@ def build_cases(
         build_rule_cases(pack)
         + parse_cases
         + build_model_cases(parse_cases)
+        + build_model_safety_cases(parse_cases)
         + authored_cases
     )
 

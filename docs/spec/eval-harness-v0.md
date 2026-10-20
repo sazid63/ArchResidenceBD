@@ -18,7 +18,7 @@ nothing is transcribed twice; the only hand-written file is `authored.yaml`.
 ```text
 rule pack ──┐
 dataset ────┤
-flow book ──┼──▶ build_cases.py ──▶ cases.jsonl (655, byte-stable, --check in CI)
+flow book ──┼──▶ build_cases.py ──▶ cases.jsonl (715, byte-stable, --check in CI)
 authored ───┘                         │  ▲ split.json (frozen by hashed question id)
                                       ▼  │
                          run_eval.py ──▶ report.json ──▶ gates.json ──▶ exit 0/1
@@ -49,6 +49,7 @@ or extra key is a build error. `lang` is `bn`, `en` or `null` (deterministic mac
 | `rule.vector` | 49 | every frozen test vector of the rule pack still evaluates as declared | `accuracy` = 1.0 |
 | `parse` | 523 | the deterministic parser replayed over every recorded answer: never stalls, never invents an acceptance, never rejects a clean answer | `neverStalled` = 1.0, `agreement:clean` = 1.0 |
 | `model.parse` | 60 | a **recorded model** answers the holdout parse questions; right decision *and* right value | stock-baseline floors (below) |
+| `model.safety` | 60 | the **recorded model replies replayed through the app's escalation seam**: a wrong reading must become a visible refusal, never a written value | `safeWriteRate` = 1.0 |
 | `rag` | 18 | the cited corpus retrieves the expected document in the top 5, or declares the gap | `citationRecall` = 1.0, `abstentionAccuracy` = 1.0 |
 | `scenario` | 2 | the BN and EN demo scenarios reach the frozen end state (steps, coverage, accepts, revisions) | `accuracy` = 1.0 |
 | `register` | 3 | override → acknowledge → restore → idempotent re-ack round-trip through the deviation register | `accuracy` = 1.0 |
@@ -84,6 +85,7 @@ fine-tune that scores below the base model fails CI instead of being celebrated.
 | `model.parse/valueAccuracy` | 0.50 (17/34) | 0.50 | accepted values match |
 | `model.parse/accuracy:bn` | 0.5667 (17/30) | 0.5667 | correct parses, Bangla |
 | `model.parse/accuracy:en` | 0.50 (15/30) | 0.50 | correct parses, English |
+| `model.safety/safeWriteRate` | 1.0 (60/60) | 1.0 | a wrong model reading is refused, never written |
 | `rag/citationRecall` | 1.0 (18/18) | 1.0 | expected document in top 5 |
 | `rag/abstentionAccuracy` | 1.0 (3/3) | 1.0 | a declared gap is not answered |
 | `rule.vector/accuracy` | 1.0 (49/49) | 1.0 | pack vectors unchanged |
@@ -100,6 +102,32 @@ case: a hard 1.0 has to be earned by measured cases.
 2026-10-20 at temperature 0, 60 calls, `data/eval/chat-v0/replies/stock.jsonl`. A model case
 passes only when the decision **and** the accepted value are right — accepting the wrong value
 is the worst outcome this suite exists to catch, so it never counts as a pass.
+
+### `model.safety` — the product's question, not the model's
+
+`model.parse` asks whether the **model** read the answer right. `model.safety` asks the
+**product's** question: could a wrong reading become a written value? The recorded replies are
+pushed through the app's own escalation seam (`archres_core.interview.seam`), and a case passes
+when the seam either refuses the reading (a visible `ask_again` with `model_invalid`) or writes
+exactly what the user said.
+
+The seam enforces four laws, all machine-checkable:
+
+1. the value fits the question (an option id, a boolean, a whole number in range, a positive
+   number);
+2. "I don't know" is an answer, not a value — it becomes a skip or a re-ask;
+3. a text answer is the user's own words (a model may not rewrite them);
+4. a number answer is the number the user's words say, converted with the unit they used — so a
+   mis-conversion ("০.২৫ বিঘা" read as "100 sqm") can never be written.
+
+The suite re-derives that yardstick **itself** (the number in the text, the unit in the text), so
+a bug in the seam cannot hide a wrong write. A refusal of a *correct* reading is reported as
+`falseRefusalRate` and is not gated: it costs the user a re-ask, not correctness. The floor is
+1.0 because a wrong write is never acceptable.
+
+Measured 2026-10-21: all three recorded reply sets (`stock` 32/60, `finetune` 43/60,
+`finetune-v1` 42/60 on `model.parse`) score **60/60 on `model.safety`** — every wrong reading
+is contained as a visible refusal, and no wrong value reaches the spec.
 
 Every number above comes from `tools/eval/run_eval.py` on `main`; the report is the authority,
 not this table.
@@ -298,7 +326,7 @@ Exit code is 0 only when every gate holds. `--no-gates` prints the numbers witho
 |---|---|---|
 | `authored.yaml` | human | the only hand-written eval data; validated strictly (unknown keys, mode/lang vocabularies, corpus doc ids) |
 | `split.json` | `--init-split` once | frozen by hashed id; a plain build fails without it |
-| `cases.jsonl` | `build_cases.py` | 655 cases, byte-stable, `--check`ed in CI |
+| `cases.jsonl` | `build_cases.py` | 715 cases, byte-stable, `--check`ed in CI |
 | `manifest.json` | `build_cases.py` | pins dataset / pack / corpus / split sha256 and the reply files |
 | `replies/<model>.jsonl` | `record_baseline.py` for stock; a scored training candidate for `finetune` | one `{caseId, reply}` per line; sha pinned in the manifest |
 | `gates.json` | human | a floor is a reviewed number, not a target |

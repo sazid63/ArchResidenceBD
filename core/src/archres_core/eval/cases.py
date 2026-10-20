@@ -36,6 +36,7 @@ SUITES = (
     "rule.vector",
     "parse",
     "model.parse",
+    "model.safety",
     "rag",
     "scenario",
     "register",
@@ -64,12 +65,14 @@ REQUIRED_INPUT = {
     "rag": {"query"},
     "scenario": {"scenario"},
     "register": {"spec", "ops"},
+    "model.safety": {"questionId", "answerText"},
 }
 
 REQUIRED_EXPECT = {
     "rule.vector": {"ok"},
     "parse": {"decision", "value"},
     "model.parse": {"decision"},
+    "model.safety": {"decision", "value"},
     "rag": {"mode", "docId"},
     "scenario": {"steps", "coverage", "openEssential", "decisions", "revision"},
     "register": {"ruleRef", "pointer", "restoreValue", "entryId", "remainingAfterRestore"},
@@ -271,7 +274,7 @@ def assign_split(case: EvalCase, document: dict[str, Any]) -> str:
         return "holdout"  # nothing about retrieval was trained on
     if case.suite in ("rule.vector", "register"):
         return "engine"
-    if case.suite in ("parse", "model.parse"):
+    if case.suite in ("parse", "model.parse", "model.safety"):
         key = case.input["questionId"]
         block = document["questions"]
         if key in block["holdout"]:

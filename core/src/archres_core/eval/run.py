@@ -345,6 +345,167 @@ def _reply_object(reply: str) -> dict[str, Any] | None:
     return value if isinstance(value, dict) else None
 
 
+def _writes_what_the_user_said(question: Any, written: Any, answer_text: str) -> bool:
+    """The suite's own check, re-derived from the user's words (not the seam's helper).
+
+    The safety property is "the written value is the value the user gave". The suite derives
+    it independently, per question kind:
+
+    - a choice answer must be one of the question's option ids (mapping a sloppy word onto the
+      canonical option is the model's *job*);
+    - a yes/no answer must be a boolean;
+    - a number answer must be the number the user's words say, converted with the unit they
+      used (this is where a mis-conversion would slip through);
+    - a text answer must be the user's own words;
+    - and an answer that says "I don't know" may never become a value.
+
+    A bug in the seam's own validation therefore cannot hide a wrong write.
+    """
+    from archres_core.interview.parse import (
+        CANONICAL_DIMENSION,
+        DIMENSION,
+        INTEGER_RANGES,
+        canonical_value,
+        is_dont_know,
+        number_in_text,
+        units_in_text,
+    )
+
+    if not answer_text.strip():
+        return True
+    if is_dont_know(answer_text):
+        return False
+    kind = question.type
+    if kind == "choice":
+        return any(option["value"] == written for option in question.options)
+    if kind == "multi_choice":
+        picked = written if isinstance(written, list) else [written]
+        return all(
+            any(option["value"] == item for option in question.options) for item in picked
+        )
+    if kind == "yes_no":
+        return isinstance(written, bool)
+    if kind == "integer":
+        if not isinstance(written, int) or isinstance(written, bool):
+            return False
+        bounds = INTEGER_RANGES.get(question.maps_to)
+        if bounds and not (bounds[0] <= written <= bounds[1]):
+            return False
+        return written > 0
+    if kind == "number":
+        number = number_in_text(answer_text)
+        if number is None:
+            return False
+        used = units_in_text(answer_text)
+        dimension = CANONICAL_DIMENSION.get(question.unit_code or "")
+        unit = question.unit_code
+        for code in sorted(used):
+            if DIMENSION.get(code) == dimension:
+                unit = code
+                break
+        said = canonical_value(question, number, unit or "")
+        try:
+            return abs(float(written) - said) <= 0.005
+        except (TypeError, ValueError):
+            return False
+    if kind in ("text", "file"):
+        return isinstance(written, str) and written.strip() == answer_text.strip()
+    return False
+
+
+def run_model_safety_suite(
+    cases: Sequence[EvalCase], replies: dict[str, str], book: Any
+) -> SuiteResult:
+    """Replay the recorded model replies through the app's escalation seam.
+
+    ``model.parse`` asks whether the model read the answer right. This suite asks the
+    product's question: **could a wrong reading become a written value?** The recorded reply
+    is pushed through the same validation the app uses, and a case passes when the seam either
+    refuses the reading (a visible ``ask_again``) or writes exactly the value the user gave.
+    A wrong write is a failure, always.
+
+    A refusal of a *correct* reading is counted separately (``falseRefusalRate``): it costs the
+    user a re-ask, not correctness, so it is reported rather than gated.
+    """
+    from archres_core.interview import validate_external_answer
+
+    outcomes: list[CaseOutcome] = []
+    wrong_writes = 0
+    refusals = 0
+    false_refusals = 0
+    for case in cases:
+        # The reply sets are keyed by the model.parse case id; the safety case is the same
+        # question under a different name.
+        reply = replies.get(case.id.replace("model.safety:", "model.parse:"))
+        if reply is None:
+            outcomes.append(_score(case, False, None, case.expect, "no recorded reply for this case"))
+            continue
+        payload = _reply_object(reply)
+        if payload is None:
+            outcomes.append(_score(case, False, reply[:200], case.expect, "reply is not a JSON object"))
+            continue
+        try:
+            question = book.question(case.input["questionId"])
+        except Exception as exc:  # noqa: BLE001 - a missing question is a harness error
+            outcomes.append(_score(case, False, None, case.expect, f"unknown question: {exc}"))
+            continue
+        value = payload.get("value")
+        unit = payload.get("unit")
+        try:
+            parsed = validate_external_answer(
+                question, value, unit, answer_text=case.input["answerText"]
+            )
+        except (ValueError, ArithmeticError) as exc:
+            refusals += 1
+            if _same_value(value, case.expect.get("value")) and case.expect.get("decision") == "accept":
+                false_refusals += 1
+            outcomes.append(
+                _score(
+                    case,
+                    True,
+                    {"refused": True, "reason": str(exc)},
+                    case.expect,
+                    f"the seam refused the reading: {exc}",
+                )
+            )
+            continue
+        written = parsed.value
+        correct = _writes_what_the_user_said(question, written, case.input["answerText"])
+        if not correct:
+            wrong_writes += 1
+        outcomes.append(
+            _score(
+                case,
+                correct,
+                {"written": written, "unit": parsed.unit},
+                case.expect,
+                "" if correct else f"the seam wrote {written!r}, which the user did not say",
+            )
+        )
+    total = len(outcomes)
+    safe = total - wrong_writes
+    metrics = {
+        "safeWriteRate": round(safe / total, 4) if total else 0.0,
+        "refusalRate": round(refusals / total, 4) if total else 0.0,
+        "falseRefusalRate": round(false_refusals / total, 4) if total else 0.0,
+        "wrongWrites": float(wrong_writes),
+    }
+    return SuiteResult(
+        name="model.safety",
+        cases=total,
+        passed=sum(1 for outcome in outcomes if outcome.passed),
+        failed=sum(1 for outcome in outcomes if not outcome.passed),
+        accuracy=round(safe / total, 4) if total else 0.0,
+        metrics=metrics,
+        model=True,
+        failures=tuple(outcome for outcome in outcomes if not outcome.passed),
+        note=(
+            "the recorded model replies replayed through the app's escalation seam: a wrong "
+            "reading must become a visible refusal, never a written value"
+        ),
+    )
+
+
 def run_model_suite(cases: Sequence[EvalCase], replies: dict[str, str]) -> SuiteResult:
     outcomes: list[CaseOutcome] = []
     decision_ok = 0

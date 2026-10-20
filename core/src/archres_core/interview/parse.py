@@ -394,6 +394,44 @@ def _find_unit(norm: str) -> str | None:
     return None
 
 
+def units_in_text(text: str) -> set[str]:
+    """Every unit the text mentions (the canonical codes of the parser's own vocabulary).
+
+    The escalation seam uses this to check the model's reading against the user's words: a
+    model that names a unit the user did not use - or that ignores the unit the user did use -
+    has misread the answer, and a misread must not become a written value.
+    """
+    norm = normalize(text or "")
+    found: set[str] = set()
+    for alias in _UNIT_ALIASES_BY_LENGTH:
+        if _contains(norm, alias):
+            found.add(UNIT_ALIASES[alias])
+    return found
+
+
+def numbers_in_text(text: str) -> list[Decimal]:
+    """The numbers the text contains (in the order they appear)."""
+    return _numbers(normalize(text or ""))
+
+
+def number_in_text(text: str) -> Decimal | None:
+    """The one number the text says: the first digit number, else the leading number word.
+
+    "5 katha" -> 5, "panch" -> 5, "০.২৫ বিঘা" -> 0.25, "no idea" -> None.
+    """
+    numbers = numbers_in_text(text)
+    if numbers:
+        return numbers[0]
+    word = _leading_number_word(normalize(text or ""))
+    numbers = _numbers(word)
+    return numbers[0] if numbers else None
+
+
+def is_dont_know(text: str) -> bool:
+    """Whether the text says "I don't know" (the parser's own vocabulary)."""
+    return _any_phrase(normalize(text or ""), DONT_KNOW_PHRASES)
+
+
 def _numbers(norm: str) -> list[Decimal]:
     out = []
     for token in re.findall(r"\d+(?:\.\d+)?", norm):

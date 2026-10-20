@@ -21,7 +21,7 @@ engine, advisor/override behavior; first evals."*
 | Rule engine | **Yes.** 49/49 pack vectors, verdicts, deviation register, restore-to-compliant. | `archres_core.compliance`, ADR-0008 |
 | Spec engine | **Yes.** Patch/validate/version, revision log, provenance, spec sha256. | `archres_core.spec`, ADR-0007 |
 | Advisor / override behaviour | **Yes, in the brain; not yet in the app.** The behavioural curriculum exists as data (12 `rule.explain` + 6 `deviation.override` records), the register is live, and the model is only asked for the *value* it cannot parse. | `data/training/chat-v0/` (byTask), `archres_core.compliance`, ADR-0008/0010 |
-| First evals | **Yes, and they are the spine of the phase.** 655 cases, 6 suites, deterministic suites gated at 1.0, model suite gated at the recorded stock baseline. | `data/eval/chat-v0/`, ADR-0015 |
+| First evals | **Yes, and they are the spine of the phase.** 715 cases, 7 suites, deterministic suites gated at 1.0, model suite gated at the recorded stock baseline. | `data/eval/chat-v0/`, ADR-0015 |
 | Chat-loop E2E demo in BN+EN (P1 exit criterion) | **Yes.** 69 coverage / 63 writing turns per language, 61 accept + 2 authored fallbacks, 0 open essentials, exit 0. | `docs/spec/chat-loop-demo-v0.md` (BN 2.125 s, EN 2.068 s, warm 4.922 s) |
 
 ## 2. The measured numbers (not the claims)
@@ -130,7 +130,7 @@ rule engine (verdicts, register, restore) · question engine (chips, determinist
 escalation seam) · flow book (60 questions, BN+EN) · orchestrator + session (snapshot commits,
 fenced context, deny-by-default tools) · RAG service (cited corpus, hybrid retrieval, clause
 cache) · CAD harness (headless runs, measured geometry, failure traces) · model fleet (4 routes,
-2 modes) · eval harness (655 cases, 6 suites, pinned floors) · training pipeline (scripted data
+2 modes) · eval harness (715 cases, 7 suites, pinned floors) · training pipeline (scripted data
 builder, teacher harness, Kaggle kernels for chat and repair) · the app shell and design tokens.
 
 **P2 entry point:** W2.1 (FreeCAD addon + worker pool) needs W0.9 ✓; W2.10 (walking skeleton)
