@@ -31,7 +31,7 @@ jobs:
       - name: Sync workspace
         run: uv sync --all-packages
       - name: Console encoding, RAG and demo tests
-        run: uv run --directory core pytest -q tests/test_stdio.py tests/test_rag_corpus.py tests/test_rag_retrieval.py tests/test_rag_service.py tests/test_demo.py
+        run: uv run --directory core pytest -q tests/test_stdio.py tests/test_rag_corpus.py tests/test_rag_retrieval.py tests/test_rag_service.py tests/test_demo.py tests/test_agent_law.py tests/test_eval_run.py
       - name: Rule pack vectors (candidate honesty)
         run: uv run --directory core python ../tools/rules/eval_spec.py
       - name: RAG corpus freshness
@@ -62,6 +62,10 @@ jobs:
         run: uv run --directory core python ../tools/rag/build_corpus.py --check
       - name: Fleet config freshness
         run: uv run --directory core python ../tools/serving/fleet.py --check
+      - name: Eval case set freshness
+        run: uv run --directory core python ../tools/eval/build_cases.py --check
+      - name: Eval gates
+        run: uv run --directory core python ../tools/eval/run_eval.py
 
   app:
     runs-on: ubuntu-latest

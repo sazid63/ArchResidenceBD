@@ -30,6 +30,9 @@ models/checkpoints/
 # Teacher output is unverified (candidates); the scripted dataset is committed.
 data/training/teacher-candidates/
 
+# Eval run output (regenerate; the committed baseline is replies/ + gates.json)
+data/eval/last.*
+
 # --- Tool workspace metadata ---
 .freebuff/
 

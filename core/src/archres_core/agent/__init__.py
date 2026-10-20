@@ -34,6 +34,7 @@ from .injection import (
     strip_hidden,
     worst_severity,
 )
+from .law import LawAnswer, LawDesk
 from .orchestrator import ORCHESTRATOR_ID, OrchestratorError, Result, Session
 from .tools import (
     TOOLS,
@@ -54,6 +55,8 @@ __all__ = [
     "Decision",
     "Finding",
     "HIGH_RULES",
+    "LawAnswer",
+    "LawDesk",
     "LlamaSwapClient",
     "ModelClient",
     "ModelError",

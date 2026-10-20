@@ -1,0 +1,202 @@
+# Authored eval data (W1.9) — the only hand-written part of the case set.
+#
+# Everything here was observed to hold against the real code before it was pinned; nothing
+# is aspirational. `tools/eval/build_cases.py` compiles this file together with the rule
+# pack vectors and the training dataset into `cases.jsonl`, and `--check` fails if the
+# compiled file drifts from its sources.
+#
+# RAG cases are questions the corpus can actually answer (`mode: answer`) or questions whose
+# answer the pack explicitly declares missing (`mode: declared_gap`). Questions the corpus
+# neither answers nor declares live under `coverage_probes`: they are reported with their top
+# hit so the gap is visible, but they are not dressed up as passing cases.
+
+rag:
+  - id: rag:setback-from-boundary-en
+    lang: en
+    query: What is the minimum setback from the plot boundary?
+    mode: answer
+    docId: rajuk@2008.1:provision:s46-3-4:en
+  - id: rag:setback-from-boundary-bn
+    lang: bn
+    query: প্লটের সীমানা থেকে সর্বনিম্ন কতটুকু ছাড় দিতে হবে?
+    mode: answer
+    docId: rajuk@2008.1:provision:s46-3-4:bn
+  - id: rag:far-six-metre-road-en
+    lang: en
+    query: What is the maximum FAR for a 6 metre road?
+    mode: answer
+    docId: rajuk@2008.1:far_table:far-a1a4:en
+  - id: rag:far-six-metre-road-bn
+    lang: bn
+    query: ৬ মিটার রাস্তায় সর্বোচ্চ FAR কত?
+    mode: answer
+    docId: rajuk@2008.1:far_table:far-a1a4:bn
+  - id: rag:paved-open-space-en
+    lang: en
+    query: How much of the mandatory open space may be paved?
+    mode: answer
+    docId: rajuk@2008.1:provision:s46-5-items-1:en
+  - id: rag:paved-open-space-bn
+    lang: bn
+    query: বাধ্যতামূলক খোলা জায়গার কত অংশ পাকা করা যাবে?
+    mode: answer
+    docId: rajuk@2008.1:provision:s46-5-items-1:bn
+  - id: rag:parking-150-sqm-flat-en
+    lang: en
+    query: How many car parking spaces for a 150 sqm flat?
+    mode: answer
+    docId: rajuk@2008.1:parking_row:park-flat-140-to-200:en
+    note: ranked 4th of 5 - the offline lexical path is weak on numeric table rows
+  - id: rag:parking-150-sqm-flat-bn
+    lang: bn
+    query: ১৫০ বর্গমিটারের ফ্ল্যাটে কতটি পার্কিং লাগবে?
+    mode: answer
+    docId: rajuk@2008.1:parking_row:park-flat-140-to-200:bn
+  - id: rag:corner-plot-en
+    lang: en
+    query: What are the rules for a corner plot?
+    mode: answer
+    docId: rajuk@2008.1:provision:s55-corner-clear-zone:en
+  - id: rag:corner-plot-bn
+    lang: bn
+    query: কর্নার প্লটের নিয়ম কী?
+    mode: answer
+    docId: rajuk@2008.1:provision:s55-corner-clear-zone:bn
+  - id: rag:maximum-ground-coverage-en
+    lang: en
+    query: What is the maximum ground coverage?
+    mode: answer
+    docId: rajuk@2008.1:provision:s50-mgc:en
+  - id: rag:maximum-ground-coverage-bn
+    lang: bn
+    query: MGC কী?
+    mode: answer
+    docId: rajuk@2008.1:provision:s50-mgc:bn
+  - id: rag:entrance-ramp-en
+    lang: en
+    query: Is a ramp required at a building entrance?
+    mode: answer
+    docId: rajuk@2008.1:geometry_rule:s56-7-15-ramps:en
+  - id: rag:entrance-ramp-bn
+    lang: bn
+    query: বাড়ির প্রবেশপথে র‍্যাম্প লাগবে কি?
+    mode: answer
+    docId: rajuk@2008.1:geometry_rule:s56-7-15-ramps:bn
+  - id: rag:dead-end-road-front-en
+    lang: en
+    query: How far must a building be from the front boundary on a dead-end road?
+    mode: answer
+    docId: rajuk@2008.1:provision:s46-6-8:en
+
+  # The pack says out loud that it has not transcribed these; citing a clause or a page
+  # would be an invention, so the desk must answer with the declared gap instead.
+  - id: rag:habitable-room-ceiling-height-en
+    lang: en
+    query: What is the minimum ceiling height of a habitable room?
+    mode: declared_gap
+    docId: rajuk@2008.1:declared_gap:gap-c11:en
+  - id: rag:habitable-room-space-requirements-en
+    lang: en
+    query: What are the minimum space requirements for a habitable room?
+    mode: declared_gap
+    docId: rajuk@2008.1:declared_gap:gap-c11:en
+  - id: rag:habitable-room-space-requirements-bn
+    lang: bn
+    query: বসবাসযোগ্য ঘরের ন্যূনতম জায়গার চাহিদা কী?
+    mode: declared_gap
+    docId: rajuk@2008.1:declared_gap:gap-c11:bn
+
+scenarios:
+  - id: scenario:dhaka-house-bn
+    lang: bn
+    scenario: tools/demo/scenarios/dhaka-house-bn.json
+    steps: 63
+    coverage: 69
+    openEssential: []
+    decisions:
+      accept: 61
+      fallback: 2
+    revision: 63
+  - id: scenario:dhaka-house-en
+    lang: en
+    scenario: tools/demo/scenarios/dhaka-house-en.json
+    steps: 63
+    coverage: 69
+    openEssential: []
+    decisions:
+      accept: 61
+      fallback: 2
+    revision: 63
+
+# One case per deviation: patch a compliant project into three violations, register them,
+# acknowledge one, restore it, and check that exactly that entry leaves the register.
+register:
+  - id: register:setback-deviation-roundtrip
+    spec: spec/examples/new-project.json
+    ops:
+      - { op: add, path: /phases/0/data/setbackFrontM, value: 1.2 }
+      - { op: add, path: /phases/0/data/setbackRearM, value: 2.0 }
+      - { op: add, path: /phases/0/data/setbackSideLeftM, value: 1.25 }
+      - { op: add, path: /phases/0/data/setbackSideRightM, value: 1.25 }
+      - { op: add, path: /phases/0/data/plannedTotalFloorAreaSqm, value: 1400 }
+      - { op: add, path: /phases/0/data/parkingSpaces, value: 1 }
+      - { op: add, path: /building/typicalUnitAreaSqm, value: 150 }
+    ruleRef: rajuk@2008.1#setback-schedule
+    pointer: /phases/site-excavation/data/setbackFrontM
+    restoreValue: 1.5
+    entryId: dev-setback-schedule-setbackfrontm
+    remainingAfterRestore:
+      - dev-far-tables-plannedtotalfloorareasqm
+      - dev-schedule4-parking-parkingspaces
+  - id: register:far-deviation-roundtrip
+    spec: spec/examples/new-project.json
+    ops:
+      - { op: add, path: /phases/0/data/setbackFrontM, value: 1.2 }
+      - { op: add, path: /phases/0/data/setbackRearM, value: 2.0 }
+      - { op: add, path: /phases/0/data/setbackSideLeftM, value: 1.25 }
+      - { op: add, path: /phases/0/data/setbackSideRightM, value: 1.25 }
+      - { op: add, path: /phases/0/data/plannedTotalFloorAreaSqm, value: 1400 }
+      - { op: add, path: /phases/0/data/parkingSpaces, value: 1 }
+      - { op: add, path: /building/typicalUnitAreaSqm, value: 150 }
+    ruleRef: rajuk@2008.1#far-tables
+    pointer: /phases/site-excavation/data/plannedTotalFloorAreaSqm
+    restoreValue: 1170.57
+    entryId: dev-far-tables-plannedtotalfloorareasqm
+    remainingAfterRestore:
+      - dev-setback-schedule-setbackfrontm
+      - dev-schedule4-parking-parkingspaces
+  - id: register:parking-deviation-roundtrip
+    spec: spec/examples/new-project.json
+    ops:
+      - { op: add, path: /phases/0/data/setbackFrontM, value: 1.2 }
+      - { op: add, path: /phases/0/data/setbackRearM, value: 2.0 }
+      - { op: add, path: /phases/0/data/setbackSideLeftM, value: 1.25 }
+      - { op: add, path: /phases/0/data/setbackSideRightM, value: 1.25 }
+      - { op: add, path: /phases/0/data/plannedTotalFloorAreaSqm, value: 1400 }
+      - { op: add, path: /phases/0/data/parkingSpaces, value: 1 }
+      - { op: add, path: /building/typicalUnitAreaSqm, value: 150 }
+    ruleRef: rajuk@2008.1#schedule4-parking
+    pointer: /phases/site-excavation/data/parkingSpaces
+    restoreValue: 7
+    entryId: dev-schedule4-parking-parkingspaces
+    remainingAfterRestore:
+      - dev-far-tables-plannedtotalfloorareasqm
+      - dev-setback-schedule-setbackfrontm
+
+# Questions the corpus neither answers nor declares. Reported with their top hit and never
+# gated: the honest product behaviour for these needs a grounded model, which v0's law desk
+# does not have (it returns `retrieved` because retrieval has no relevance floor). Closing
+# them is data work (BNBC text, §58, staircase/parapet rules) plus W1.1 ranking work.
+coverage_probes:
+  - lang: en
+    query: What is the minimum width of a staircase?
+    note: no staircase-width rule in the pack; top hit is a road-width provision
+  - lang: en
+    query: What is the minimum height of a parapet wall?
+    note: the pack mentions parapets only inside portico footnotes, never a minimum height
+  - lang: en
+    query: What concrete grade should a 6 storey building use?
+    note: structural material rules are BNBC, not in the RAJUK pack
+  - lang: bn
+    query: ২০ তলা টাওয়ারে কতটি লিফট লাগবে?
+    note: lift count depends on the building code and a lift study, not in the pack

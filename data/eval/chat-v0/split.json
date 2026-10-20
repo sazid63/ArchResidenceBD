@@ -1,0 +1,60 @@
+{
+  "notes": "Frozen before W1.6. Holdout cases are never trained on. Regenerating this file moves questions across the line and must be a reviewed event, not a re-run.",
+  "questions": {
+    "holdout": [
+      "area-name",
+      "authority",
+      "balcony",
+      "existing-structure",
+      "gas-source",
+      "ground-floor-usage",
+      "has-basement",
+      "kitchen-pref",
+      "plot-area",
+      "project-name",
+      "road-width",
+      "soil-groundwater",
+      "spoil-disposal",
+      "storeys-count",
+      "units-per-floor",
+      "water-source"
+    ],
+    "train": [
+      "boundary-gate",
+      "corner-plot",
+      "display-units",
+      "district",
+      "division",
+      "electrical-supply",
+      "excavation-depth-req",
+      "floor-usage",
+      "foundation-system",
+      "ground-floor-height",
+      "lift-plan",
+      "machinery-access",
+      "old-building-action",
+      "pile-preference",
+      "plot-frontage",
+      "rebar-grade",
+      "roof-access",
+      "roof-type",
+      "sewage",
+      "soil-sbc",
+      "stair-position",
+      "stair-type",
+      "typical-floor-height",
+      "typical-unit-area"
+    ]
+  },
+  "rule": "holdout iff the first sha256 byte of the text 'seed:key' is below the threshold; key = question id (parse/model.parse) or scenario name (scenario); rag is always holdout (seed=20261020, threshold=96)",
+  "scenarios": {
+    "holdout": [
+      "dhaka-house-bn",
+      "dhaka-house-en"
+    ],
+    "train": []
+  },
+  "schemaVersion": "0.1.0",
+  "seed": 20261020,
+  "threshold": 96
+}

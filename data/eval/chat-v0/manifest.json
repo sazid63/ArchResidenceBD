@@ -1,0 +1,42 @@
+{
+  "cases": {
+    "bytes": 269780,
+    "count": 655,
+    "path": "data/eval/chat-v0/cases.jsonl",
+    "sha256": "c9b8e5ebd9a098d52dfe63c2023a99e96849f2d3462c336caed8d19eb8962124"
+  },
+  "harnessVersion": "eval-harness-0.1.0",
+  "pins": {
+    "corpusSha256": "9646f07e7387826e0679e2cebb58cde6bd66a57fd57da9ba7fa78735aca71beb",
+    "datasetSha256": "d6d1e8804e893605c7169fd9c6dab9b8d7d2607dd59b9976e1542779097c7acb",
+    "packSha256": "d50cce8c4f08246f8ed7ab6576f7ecbfc672e29d340510b799bf679a924551d1"
+  },
+  "replies": {
+    "stock": {
+      "count": 60,
+      "sha256": "6f0135e36e5435f535d231f62ac28a99597b49e1327ed8e931e1e5b1bf3f7f9e"
+    }
+  },
+  "schemaVersion": "0.1.0",
+  "splitDocument": {
+    "holdoutQuestions": 16,
+    "path": "data/eval/chat-v0/split.json",
+    "seed": 20261020,
+    "sha256": "fe569206fe2e9d949da73177d07ddc6ff4bac0639a52d156a1284dc559e82c0e",
+    "threshold": 96,
+    "trainQuestions": 24
+  },
+  "splits": {
+    "engine": 52,
+    "holdout": 295,
+    "train": 308
+  },
+  "suites": {
+    "model.parse": 60,
+    "parse": 523,
+    "rag": 18,
+    "register": 3,
+    "rule.vector": 49,
+    "scenario": 2
+  }
+}

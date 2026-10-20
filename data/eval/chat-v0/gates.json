@@ -1,0 +1,32 @@
+{
+  "schemaVersion": "0.1.0",
+  "notes": [
+    "A floor is not a target. A hard 1.0 means the suite is deterministic: any drop is a",
+    "regression. The model.parse floors are the recorded stock baseline (Qwen3-4B-Instruct-2507",
+    "on the 60-case holdout sample, data/eval/chat-v0/replies/stock.jsonl) and act as a",
+    "regression floor across SFT rounds - a fine-tune that scores below the stock base model",
+    "must fail CI, not be celebrated.",
+    "A model.parse case passes only when the decision AND the accepted value are right, so",
+    "'accuracy' is correct parses, 'decisionAccuracy' is decision-only, and 'valueAccuracy'",
+    "is values among the answers the dataset accepts. Accepting the wrong value is the worst",
+    "failure mode this suite exists to catch, so it never counts as a pass.",
+    "Moving a floor changes what 'passing' means, so it is a reviewed event: quote the measured",
+    "number, the model and the reason in the commit and in docs/spec/eval-harness-v0.md.",
+    "The deterministic parser's overall agreement is deliberately NOT gated: a third of its",
+    "misses are the model's job (fuzzy labels, topicality) and the rest are recorded W1.4 gaps.",
+    "What is gated is its safety contract - no stall, and no rejected clean answer."
+  ],
+  "gates": [
+    { "suite": "rule.vector", "metric": "accuracy", "floor": 1.0, "note": "frozen pack vectors" },
+    { "suite": "parse", "metric": "neverStalled", "floor": 1.0, "note": "no answer input raises or returns an unknown decision" },
+    { "suite": "parse", "metric": "agreement:clean", "floor": 1.0, "note": "an unmutated answer is never rejected" },
+    { "suite": "model.parse", "metric": "decisionAccuracy", "floor": 0.65, "note": "stock baseline 2026-10-20 (39/60 decisions)" },
+    { "suite": "model.parse", "metric": "valueAccuracy", "floor": 0.5, "note": "stock baseline 2026-10-20 (17/34 accepted values)" },
+    { "suite": "model.parse", "metric": "accuracy:bn", "floor": 0.5667, "note": "stock baseline (17/30 correct parses); no Bangla regression" },
+    { "suite": "model.parse", "metric": "accuracy:en", "floor": 0.5, "note": "stock baseline (15/30 correct parses); no English regression" },
+    { "suite": "rag", "metric": "citationRecall", "floor": 1.0, "note": "expected doc in top-5" },
+    { "suite": "rag", "metric": "abstentionAccuracy", "floor": 1.0, "note": "declared gaps are not answered" },
+    { "suite": "scenario", "metric": "accuracy", "floor": 1.0, "note": "demo end state is frozen" },
+    { "suite": "register", "metric": "accuracy", "floor": 1.0, "note": "deviation round-trip" }
+  ]
+}
