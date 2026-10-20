@@ -31,7 +31,15 @@ import pathlib
 from dataclasses import dataclass, field
 from typing import Any
 
-__all__ = ["CadCase", "CadError", "load_cases", "CASE_KEYS", "EXPECT_KEYS", "DEFAULT_TIMEOUT_MS"]
+__all__ = [
+    "CadCase",
+    "CadError",
+    "load_case_document",
+    "load_cases",
+    "CASE_KEYS",
+    "EXPECT_KEYS",
+    "DEFAULT_TIMEOUT_MS",
+]
 
 DEFAULT_TIMEOUT_MS = 120_000
 
@@ -267,12 +275,11 @@ def _case(raw: dict[str, Any], root: pathlib.Path, where: str) -> CadCase:
     )
 
 
-def load_cases(path: str | pathlib.Path, *, root: str | pathlib.Path | None = None) -> list[CadCase]:
-    """Read a case file (JSON or a JSON list); duplicates and shape errors are fatal."""
+def load_case_document(path: str | pathlib.Path) -> list[dict[str, Any]]:
+    """Read a case file (JSON or YAML) into raw case mappings, before shape validation."""
     file = pathlib.Path(path)
     if not file.is_file():
         raise CadError(f"case file not found: {file}")
-    base = pathlib.Path(root) if root is not None else file.parent
     try:
         if file.suffix.lower() in (".yaml", ".yml"):
             import yaml  # noqa: PLC0415 - PyYAML is already a core dependency
@@ -287,11 +294,20 @@ def load_cases(path: str | pathlib.Path, *, root: str | pathlib.Path | None = No
         raw_document = raw_document.get("cases")
     if not isinstance(raw_document, list) or not raw_document:
         raise CadError(f"{file}: expected a non-empty list of cases")
-    cases: list[CadCase] = []
-    seen: set[str] = set()
     for index, entry in enumerate(raw_document):
         if not isinstance(entry, dict):
             raise CadError(f"{file}[{index}]: expected a mapping")
+    return raw_document
+
+
+def load_cases(path: str | pathlib.Path, *, root: str | pathlib.Path | None = None) -> list[CadCase]:
+    """Read a case file (JSON or YAML); duplicates and shape errors are fatal."""
+    file = pathlib.Path(path)
+    base = pathlib.Path(root) if root is not None else file.parent
+    raw_document = load_case_document(file)
+    cases: list[CadCase] = []
+    seen: set[str] = set()
+    for index, entry in enumerate(raw_document):
         case = _case(entry, base, f"{file}[{index}]")
         if case.id in seen:
             raise CadError(f"{file}: duplicate case id {case.id!r}")

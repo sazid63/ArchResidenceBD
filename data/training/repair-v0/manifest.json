@@ -1,0 +1,53 @@
+{
+  "counts": {
+    "byErrorType": {
+      "AttributeError": 1,
+      "KeyError": 1,
+      "NameError": 1,
+      "ValueError": 1,
+      "verification": 2
+    },
+    "byFailureCode": {
+      "engine_error": 4,
+      "verification": 2
+    },
+    "mutations": [
+      "call-typo",
+      "mm-arity",
+      "gap-key",
+      "api-typo",
+      "fuse-to-cut",
+      "column-off-by-one"
+    ],
+    "records": 6
+  },
+  "engine": {
+    "name": "freecad",
+    "version": "1.1.4"
+  },
+  "files": {
+    "dataset.jsonl": {
+      "bytes": 107657,
+      "records": 6,
+      "sha256": "8beaf96eb17d4e84f691faa5b1f3f62d11028209e7be5530694a4ee0c1b25df5"
+    }
+  },
+  "generator": "build_repair_dataset-0.1.0",
+  "manifestVersion": "1",
+  "notes": "Each record pairs a deterministically mutated macro + the case it failed + a normalised trace with the known-good macro that passes the same case. Regenerate with tools/training/build_repair_dataset.py against a CAD engine; CI checks the offline contract and the weekly cad job re-executes it.",
+  "pins": {
+    "caseFile": {
+      "path": "tools/cad/cases/foundation.json",
+      "sha256": "9fb9f6b620d1d25e39d3efc44409252535da16206dd9852c697eeb7ca9ca0ea6"
+    },
+    "schema": {
+      "path": "spec/schemas/sft-record.schema.json",
+      "sha256": "4b206516988e9aa75837b053bbdfc004e7411af118a679e86a5d17350010832a"
+    },
+    "targetCandidate": {
+      "path": "tools/cad/candidates/geometry_build.py",
+      "sha256": "a3226104f1de74f8cc88b3057afe4ff9687891c1640b04fb379736565b0d63a6"
+    }
+  },
+  "promptVersion": "repair-prompt-v0"
+}

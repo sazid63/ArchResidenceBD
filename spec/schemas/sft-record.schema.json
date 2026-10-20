@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schemas.archresidencebd.app/sft-record/0.1.0.json",
+  "$id": "https://schemas.archresidencebd.app/sft-record/0.2.0.json",
   "title": "SftRecord",
-  "description": "ArchResidenceBD SFT record schema v0.1.0 (W1.5, plan §7) - one training example for a fleet member. Scripts generate the substrate (structure, numbers, templates); teacher models add natural-language variety. Every record carries machine-checkable labels, the generator/teacher provenance, and a status: verified records are training-eligible, candidate records await deterministic verification (quality law: unverified content is a candidate). Labels are task-extensible (additional properties allowed); the core fields per task are required. Repair records (Archie-Repair) are added additively with W1.7.",
+  "description": "ArchResidenceBD SFT record schema v0.2.0 (W1.5 + W1.7, plan §7) - one training example for a fleet member. Scripts generate the substrate (structure, numbers, templates); teacher models add natural-language variety. Every record carries machine-checkable labels, the generator/teacher provenance, and a status: verified records are training-eligible, candidate records await deterministic verification (quality law: unverified content is a candidate). v0.2.0 adds the repair family (W1.7): kind=repair, task=repair.fix, lang=code, difficulty=broken, and a failure block whose trace is normalised (candidate frames only). Chat records written by W1.5 remain schemaVersion 0.1.0 and stay valid.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -19,7 +19,11 @@
     "status"
   ],
   "properties": {
-    "schemaVersion": { "const": "0.1.0" },
+    "schemaVersion": {
+      "type": "string",
+      "enum": ["0.1.0", "0.2.0"],
+      "description": "Version of this shape the record was written against; chat=0.1.0, repair=0.2.0."
+    },
     "id": {
       "type": "string",
       "pattern": "^[a-z0-9][a-z0-9-]*$",
@@ -32,13 +36,19 @@
     },
     "task": {
       "type": "string",
-      "enum": ["interview.ask", "interview.parse", "rule.explain", "deviation.override"],
-      "description": "Narrow task contract of the record. repair.fix arrives with W1.7."
+      "enum": [
+        "interview.ask",
+        "interview.parse",
+        "rule.explain",
+        "deviation.override",
+        "repair.fix"
+      ],
+      "description": "Narrow task contract of the record."
     },
     "lang": {
       "type": "string",
-      "enum": ["bn", "en", "mixed"],
-      "description": "Language of the user-side content (assistant follows the user)."
+      "enum": ["bn", "en", "mixed", "code"],
+      "description": "Language of the user-side content (assistant follows the user); code = a Python macro."
     },
     "messages": {
       "type": "array",
@@ -85,7 +95,11 @@
             "riskTier": { "type": "string", "enum": ["cosmetic", "approval_risk", "structural_attention"] }
           }
         },
-        "specPatch": { "type": "array", "items": { "type": "object" } }
+        "specPatch": { "type": "array", "items": { "type": "object" } },
+        "caseId": { "type": "string" },
+        "errorType": { "type": "string" },
+        "failureCode": { "type": "string", "enum": ["engine_error", "verification"] },
+        "check": { "type": "string" }
       },
       "additionalProperties": true
     },
@@ -113,8 +127,8 @@
     },
     "difficulty": {
       "type": "string",
-      "enum": ["clean", "sloppy"],
-      "description": "sloppy = the sloppy-input class (Banglish, typos, unit confusion, 'don't know', off-topic); it must trigger defaults/clarification, never stall."
+      "enum": ["clean", "sloppy", "broken"],
+      "description": "sloppy = the sloppy-input class (Banglish, typos, unit confusion, 'don't know', off-topic); it must trigger defaults/clarification, never stall. broken = a code repair input (W1.7)."
     },
     "status": {
       "type": "string",
@@ -142,6 +156,18 @@
     {
       "if": { "properties": { "task": { "const": "deviation.override" } } },
       "then": { "properties": { "labels": { "required": ["ruleRef", "citations", "allowedNumbers", "registerEntry"] } } }
+    },
+    {
+      "if": { "properties": { "task": { "const": "repair.fix" } } },
+      "then": {
+        "properties": {
+          "kind": { "const": "repair" },
+          "lang": { "const": "code" },
+          "difficulty": { "const": "broken" },
+          "messages": { "minItems": 3, "maxItems": 3 },
+          "labels": { "required": ["caseId", "errorType", "failureCode"] }
+        }
+      }
     }
   ]
 }

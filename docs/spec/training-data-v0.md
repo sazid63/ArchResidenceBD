@@ -118,6 +118,40 @@ The files are canonical JSONL (UTF-8, LF, sorted, compact) and CI checks freshne
 question across the line is an edit to the frozen eval split — a reviewed event (ADR-0015) —
 never a re-run of this tool.
 
+## Repair corpus (W1.7)
+
+`data/training/repair-v0/` is Archie-Repair's substrate: code + a real execution failure →
+the known-good code. It is generated, never authored:
+
+```powershell
+# write (needs FreeCAD)
+uv run --directory core python ../tools/training/build_repair_dataset.py --engine "<freecadcmd>"
+# offline check (CI, every push)
+uv run --directory core python ../tools/training/build_repair_dataset.py --check
+# live replay (weekly cad job / dev machine): re-executes and demands byte-identical traces
+uv run --directory core python ../tools/training/build_repair_dataset.py --check --engine "<freecadcmd>"
+```
+
+- Each record is one deterministic mutation of `tools/cad/candidates/geometry_build.py`
+  (ADR-0017). The broken macro must fail exactly as declared — an exception type
+  (`NameError`, `ValueError`, `KeyError`, `AttributeError`) or a named measured check
+  (`objects[Pad_1].volumeM3`, `totals.volumeM3`). The target is the known-good macro, which must
+  pass the same case **twice** with identical verdicts and artifact trees.
+- The trace is normalised at capture: candidate frames only (basename `candidate.py`, line,
+  source), the exception type/message, and a short rendered trace. No temp paths, timings or
+  engine strings; a record that leaks a machine path is rejected.
+- Shape: `kind: repair`, `task: repair.fix`, `lang: code`, `difficulty: broken`, labels
+  `{caseId, errorType, failureCode[, check]}`, exactly system/user/assistant. The user message
+  carries the case, params, harness expectations and trace; the assistant message is the full
+  corrected macro. Schema v0.2.0 is additive — v0.1.0 chat records stay valid and are not
+  rebuilt.
+- `manifest.json` pins the case file, the target candidate and the schema by sha256, records the
+  FreeCAD version and the counts. A change to any pinned input makes the corpus visibly stale.
+- Round 1 is **six mutations** (four exception classes, two measured bugs). It proves the
+  pipeline, not the breadth of the CAD failure space; more mutations are a new reviewed corpus.
+- Repair records are a separate corpus: they do not join `sft-v0` and never train the chat
+  adapter.
+
 ## Units
 
 `archres_core.units` is the only conversion home: Decimal-based katha/shotok/bigha/gonda/sqft ⇄ m² and m/ft/inch, with hand-authored English/Bangla unit words. `kani` is deliberately absent until an authoritative factor is pinned — adding a regional guess would violate the provenance rule. The module has its own tests (`core/tests/test_units.py`).
@@ -130,9 +164,7 @@ never a re-run of this tool.
 
 ## Deliberately NOT in v0
 
-- **Repair records** (Archie-Repair) — additive with W1.7; the schema's `kind: repair` is reserved.
-- **Full teacher batch / paraphrase promotion** — W1.6, after the eval harness (W1.9) can measure meaning preservation.
-- **The Kaggle training run itself** — the split is prepared here; the QLoRA notebook, adapter, GGUF conversion and fleet registration are W1.6.
+- **The Kaggle training run itself** — the split and the repair corpus are prepared here; the QLoRA notebook, adapter, GGUF conversion, fleet registration and the W1.9/W1.12 re-runs on the fine-tune are the training runs.
 - **Masked-token / loss-mask metadata** — the SFT trainer derives it from `messages` roles; no separate format yet.
 - **Conversation-level multi-turn samples beyond the override confirmation pair** — v0 records are single-task; longer dialogues come from the orchestrator (W1.10) and its transcript capture.
 
@@ -143,5 +175,6 @@ uv run --directory core pytest -q                         # suite total is asser
 uv run --directory core pytest -q tests/test_training_pipeline.py   # 56 training-specific
 uv run --directory core python ../tools/training/build_chat_dataset.py --check
 uv run --directory core python ../tools/training/build_sft_split.py --check
+uv run --directory core python ../tools/training/build_repair_dataset.py --check
 python tools/ci/brand_guard.py
 ```

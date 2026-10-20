@@ -101,7 +101,7 @@
     "generatorVersion": "build_chat_dataset-0.1.0",
     "promptVersion": "chat-system-v0",
     "rulePackSha256": "d50cce8c4f08246f8ed7ab6576f7ecbfc672e29d340510b799bf679a924551d1",
-    "sftSchemaSha256": "82a11cd46d31e278f8f25cfdd91a70a0148ede4ae410e31b825c7bdb7480195a"
+    "sftSchemaSha256": "4b206516988e9aa75837b053bbdfc004e7411af118a679e86a5d17350010832a"
   },
   "promptVersion": "chat-system-v0"
 }

@@ -57,6 +57,8 @@ jobs:
         run: uv run --directory core python ../tools/training/build_chat_dataset.py --check
       - name: SFT split freshness
         run: uv run --directory core python ../tools/training/build_sft_split.py --check
+      - name: Repair corpus freshness (offline)
+        run: uv run --directory core python ../tools/training/build_repair_dataset.py --check
       - name: Spec codegen freshness
         run: python tools/codegen/generate_spec.py --check
       - name: Interfaces codegen freshness
@@ -79,31 +81,34 @@ jobs:
   # Real FreeCAD, weekly and on demand. Not on every push: this is a private repository and a
   # full engine install per push would spend the monthly Actions minutes for no extra signal.
   # The Windows dev machine runs the same probe at every CAD change and records the numbers in
-  # docs/spec/cad-verify-v0.md.
+  # docs/spec/cad-verify-v0.md. Ubuntu 24.04 has no freecad deb (snap only), so the engine comes
+  # from conda-forge into a job-local prefix.
   cad-execution:
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    timeout-minutes: 45
-    env:
-      DEBIAN_FRONTEND: noninteractive
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
-      - name: Install FreeCAD (headless)
+      - name: Install FreeCAD (conda-forge, headless)
         run: |
-          sudo apt-get update -o Acquire::Retries=3
-          sudo apt-get install -y --no-install-recommends -o Acquire::Retries=3 freecad
-          freecadcmd --version
+          curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba
+          export MAMBA_ROOT_PREFIX="$RUNNER_TEMP/mamba"
+          ./bin/micromamba create -y -p "$RUNNER_TEMP/cad" -c conda-forge freecad=1.1.3
+          CMD="$RUNNER_TEMP/cad/bin/freecadcmd"
+          if [ ! -x "$CMD" ]; then CMD="$RUNNER_TEMP/cad/bin/FreeCADCmd"; fi
+          "$CMD" --version
+          echo "ARCHRES_FREECADCMD=$CMD" >> "$GITHUB_ENV"
       - uses: astral-sh/setup-uv@v10.3.0
       - name: Sync workspace
         run: uv sync --all-packages
       - name: Execute the committed CAD cases
-        env:
-          ARCHRES_FREECADCMD: /usr/bin/freecadcmd
         run: |
           uv run --directory core python ../tools/cad/verify.py --run \
             --workdir "$GITHUB_WORKSPACE/data/tmp/cad-ci" \
             --json "$GITHUB_WORKSPACE/data/tmp/cad-ci/report.json" \
             --markdown "$GITHUB_WORKSPACE/data/tmp/cad-ci/report.md"
+      - name: Replay the repair corpus against the engine
+        run: uv run --directory core python ../tools/training/build_repair_dataset.py --check
       - name: Upload the execution report
         if: always()
         uses: actions/upload-artifact@v4

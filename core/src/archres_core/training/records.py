@@ -15,7 +15,7 @@ from typing import Any, Iterable
 import jsonschema
 
 SCHEMA_VERSION = "0.1.0"
-TASK_ORDER = ("interview.ask", "interview.parse", "rule.explain", "deviation.override")
+TASK_ORDER = ("interview.ask", "interview.parse", "rule.explain", "deviation.override", "repair.fix")
 
 
 class RecordError(ValueError):
