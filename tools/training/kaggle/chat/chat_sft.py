@@ -23,6 +23,7 @@ conversion to a CPU host.
 from __future__ import annotations
 
 import gc
+import hashlib
 import importlib.metadata
 import json
 import os
@@ -96,27 +97,69 @@ def write_jsonl(rows: list[dict], path: pathlib.Path) -> None:
             handle.write(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n")
 
 
+def _sha256(path: pathlib.Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def check_inputs(data: pathlib.Path) -> tuple[list[dict], list[dict], list[dict], dict]:
     for name in ("train.jsonl", "holdout.jsonl", "dataset.jsonl", "cases.jsonl", "manifest.json"):
         if not (data / name).is_file():
             raise SystemExit(f"missing dataset file: {data / name}")
     manifest = json.loads((data / "manifest.json").read_text(encoding="utf-8"))
     train = read_jsonl(data / "train.jsonl")
+    holdout = read_jsonl(data / "holdout.jsonl")
     dataset = read_jsonl(data / "dataset.jsonl")
     cases = read_jsonl(data / "cases.jsonl")
-    if manifest["counts"]["train"] != len(train):
-        raise SystemExit(
-            f"train count {len(train)} != manifest {manifest['counts']['train']}"
-        )
-    if any(record.get("status") != "verified" for record in train):
-        raise SystemExit("the train split contains an unverified record")
-    if any(record.get("kind") != "chat" for record in train):
-        raise SystemExit("the train split contains a non-chat record")
-    holdout_ids = {record["id"] for record in read_jsonl(data / "holdout.jsonl")}
-    overlap = holdout_ids & {record["id"] for record in train}
+    counts = manifest.get("counts") or {}
+    if counts.get("train") != len(train):
+        raise SystemExit(f"train count {len(train)} != manifest {counts.get('train')}")
+    if counts.get("holdout") != len(holdout):
+        raise SystemExit(f"holdout count {len(holdout)} != manifest {counts.get('holdout')}")
+    if counts.get("total") != len(dataset):
+        raise SystemExit(f"dataset count {len(dataset)} != manifest {counts.get('total')}")
+    for name, rows in (("train", train), ("holdout", holdout)):
+        if any(record.get("status") != "verified" for record in rows):
+            raise SystemExit(f"the {name} split contains an unverified record")
+        if any(record.get("kind") != "chat" for record in rows):
+            raise SystemExit(f"the {name} split contains a non-chat record")
+    dataset_ids = [record["id"] for record in dataset]
+    if len(dataset_ids) != len(set(dataset_ids)):
+        raise SystemExit("dataset.jsonl contains duplicate ids")
+    train_ids = {record["id"] for record in train}
+    holdout_ids = {record["id"] for record in holdout}
+    overlap = holdout_ids & train_ids
     if overlap:
         raise SystemExit(f"train/holdout leakage: {sorted(overlap)[:3]}")
-    log(f"inputs: {len(train)} train, {len(dataset)} dataset, {len(cases)} eval cases")
+    if train_ids | holdout_ids != set(dataset_ids):
+        raise SystemExit("train + holdout do not exactly partition dataset.jsonl")
+    pins = manifest.get("pins") or {}
+    files = manifest.get("files") or {}
+    expected = {
+        "dataset.jsonl": (pins.get("dataset") or {}).get("sha256"),
+        "train.jsonl": (files.get("train.jsonl") or {}).get("sha256"),
+        "holdout.jsonl": (files.get("holdout.jsonl") or {}).get("sha256"),
+    }
+    for name, pinned in expected.items():
+        if pinned is None:
+            raise SystemExit(f"manifest does not pin {name}")
+        actual = _sha256(data / name)
+        if actual != pinned:
+            raise SystemExit(f"{name} sha256 {actual} does not match the manifest pin {pinned}")
+    model_cases = [case for case in cases if case.get("suite") == "model.parse"]
+    if len(model_cases) != 60:
+        raise SystemExit(f"expected 60 model.parse cases, found {len(model_cases)}")
+    leaked = sorted(
+        case["id"]
+        for case in model_cases
+        if (case.get("source") or {}).get("recordId") not in holdout_ids
+    )
+    if leaked:
+        raise SystemExit(f"model cases not in the holdout split: {leaked[:3]}")
+    log(f"inputs: {len(train)} train, {len(holdout)} holdout, {len(dataset)} dataset, {len(cases)} eval cases")
     return train, dataset, cases, manifest
 
 

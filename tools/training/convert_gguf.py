@@ -7,6 +7,11 @@ Training produces an adapter; the fleet needs a GGUF. Neither step needs a GPU:
 2. convert - run llama.cpp's `convert_hf_to_gguf.py` (the checkout must match the quantizer build);
 3. quantize- run the fleet's `llama-quantize` (the binary and its DLLs must sit together).
 
+The merged directory is removed as soon as the f16 GGUF exists, so the 4B merge, the f16 file
+and the quantized output do not all have to fit on a 16 GB dev disk at once. A failed quantize
+can be retried with `--skip-convert`; a pre-existing merged dir is left alone with
+`--skip-convert`.
+
 Run it with the training venv (torch/transformers/peft/accelerate installed), not the app env:
 
   data\\tmp\\train-venv\\Scripts\\python.exe tools\\training\\convert_gguf.py ^
@@ -126,13 +131,16 @@ def main() -> int:
         merge(args.base, args.adapter, merged)
     if not args.skip_convert:
         convert(args.llama_src, merged, f16)
+        # The f16 GGUF is now the source of truth; drop the merged weights *before*
+        # quantization so the 4B merge + f16 + Q4 do not all have to fit on a 16 GB dev
+        # disk at once. A failed quantize can be retried with --skip-convert.
+        shutil.rmtree(merged, ignore_errors=True)
     if not f16.is_file():
         raise SystemExit(f"f16 GGUF missing: {f16}")
     args.out.parent.mkdir(parents=True, exist_ok=True)
     quantize(args.quantize, f16, args.out, args.quant)
     if not args.keep_f16:
         f16.unlink(missing_ok=True)
-        shutil.rmtree(merged, ignore_errors=True)
 
     report = {
         "base": args.base,
