@@ -13,6 +13,7 @@
       "value": 300.0
     }
   ],
+  "baseZMm": 3200.0,
   "beams": [
     {
       "depthMm": 450.0,
@@ -129,6 +130,13 @@
       "source": "/phases/floor-1/data/slabThicknessMm",
       "unit": "mm",
       "value": 125.0
+    },
+    "storey.baseElevationM": {
+      "provenance": "derived",
+      "reason": "the storeys below, added up",
+      "source": "building.storeys",
+      "unit": "m",
+      "value": 3.2
     },
     "storey.heightM": {
       "provenance": "spec",

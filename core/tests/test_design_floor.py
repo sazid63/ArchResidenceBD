@@ -52,6 +52,20 @@ def test_the_ground_storey_uses_its_own_height() -> None:
     assert floor.values["storey.heightM"].source == "/building/storeys/groundFloorHeightM"
 
 
+def test_the_storeys_stack_on_top_of_each_other() -> None:
+    spec, _foundation, ground = _floor(storey_index=0)
+    _spec_obj, _foundation2, first = _floor(storey_index=1)
+    assert ground.base_z_mm == 0.0
+    expected = spec["building"]["storeys"]["groundFloorHeightM"] * 1000.0
+    assert first.base_z_mm == pytest.approx(expected, rel=1e-6)
+    assert first.values["storey.baseElevationM"].provenance == "derived"
+    # The storey above starts where the one below ends, and the expectation carries the
+    # elevation so the engine can be asked where the shape actually sits.
+    column = first.columns[0]
+    expected_objects = first.expected_objects()
+    assert expected_objects[0]["bboxZMm"] == [first.base_z_mm, first.base_z_mm + column.height_mm]
+
+
 def test_a_spec_without_a_storey_height_is_refused() -> None:
     spec = _spec()
     del spec["building"]["storeys"]["typicalFloorHeightM"]

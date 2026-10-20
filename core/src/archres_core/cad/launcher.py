@@ -89,6 +89,10 @@ def _objects(doc) -> list[dict]:
                     round(box.YLength, 6),
                     round(box.ZLength, 6),
                 ],
+                # Where the shape *sits*, not only how big it is: a storey that is built at
+                # the wrong elevation has the same extent as the right one (W2.3).
+                "bboxMinMm": [round(box.XMin, 6), round(box.YMin, 6), round(box.ZMin, 6)],
+                "bboxMaxMm": [round(box.XMax, 6), round(box.YMax, 6), round(box.ZMax, 6)],
                 "solids": len(shape.Solids),
                 "valid": bool(shape.isValid()),
             }

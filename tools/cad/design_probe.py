@@ -33,6 +33,7 @@ WORKER = ROOT / "cad" / "worker" / "worker.py"
 LAUNCHER = ROOT / "core" / "src" / "archres_core" / "cad" / "launcher.py"
 GENERATED = ROOT / "data" / "cad" / "generated"
 VOLUME_TOLERANCE = 0.001
+POSITION_TOLERANCE_MM = 0.01
 
 
 @dataclass(frozen=True)
@@ -126,6 +127,20 @@ def compare_measurement(measured: dict, expected_objects: list[dict[str, Any]]) 
             )
         if not actual.get("valid"):
             problems.append(f"{expected['name']}: the measured shape is not valid")
+        wanted_z = expected.get("bboxZMm")
+        if wanted_z:
+            measured_min = (actual.get("bboxMinMm") or [0, 0, 0])[2]
+            measured_max = (actual.get("bboxMaxMm") or [0, 0, 0])[2]
+            if abs(measured_min - wanted_z[0]) > POSITION_TOLERANCE_MM:
+                problems.append(
+                    f"{expected['name']}: the measured base is {measured_min:g} mm, "
+                    f"the design says {wanted_z[0]:g} mm"
+                )
+            if abs(measured_max - wanted_z[1]) > POSITION_TOLERANCE_MM:
+                problems.append(
+                    f"{expected['name']}: the measured top is {measured_max:g} mm, "
+                    f"the design says {wanted_z[1]:g} mm"
+                )
     extra = sorted(set(objects) - {item["name"] for item in expected_objects})
     if extra:
         problems.append(f"the document holds objects the design does not declare: {extra}")

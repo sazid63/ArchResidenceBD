@@ -25,6 +25,11 @@ independent guesses.
 - **Columns** — one per footing (a real derivation), the section an authored assumption
   (300 × 300 mm; the rule pack has no column rule in v0) and the **height from the spec**
   (`building.storeys.typicalFloorHeightM`, `groundFloorHeightM` for the ground storey).
+- **The storeys stack.** A storey sits at the elevation the storeys below add up to
+  (`storey.baseElevationM`, derived): the ground storey at 0, the first floor at the ground
+  floor's height. Without this a first floor would be built *inside* the ground floor — the
+  extents would look right and the position would be wrong, which is why the measurement now
+  carries the shape's **position** (`bboxMinMm` / `bboxMaxMm`) and not only its size.
 - **Beams** — one between every pair of columns; the lengths come from the grid, the section is
   an authored assumption (300 × 450 mm).
 - **The slab** — the plate over the grid, with the **thickness from the spec's floor phase**
@@ -41,11 +46,11 @@ independent guesses.
 | Measurement | Value |
 |---|---|
 | Design | 4 columns + 3 beams + 1 slab, on the foundation's 4-footing grid |
-| Measured, every column | **0.27 m³** (300 × 300 × 3000 mm), 1 solid, valid |
-| Measured, every beam | **0.405 m³** (3000 × 300 × 450 mm), 1 solid, valid |
-| Measured, the slab | **0.34875 m³** (9300 × 300 × 125 mm — the 125 mm thickness is the spec's) |
+| Measured, every column | **0.27 m³** (300 × 300 × 3000 mm), 1 solid, valid, **z 3200 → 6200 mm** |
+| Measured, every beam | **0.405 m³** (3000 × 300 × 450 mm), 1 solid, valid, z 3200 → 3650 mm |
+| Measured, the slab | **0.34875 m³** (9300 × 300 × 125 mm — the 125 mm thickness is the spec's), z 3200 → 3325 mm |
 | The measurement vs the design | **equal** — computed expectations, not copied numbers |
-| Two runs | **identical artifact** (sha256 `244a6e2b804c1cce…`) |
+| Two runs | **identical artifact** (sha256 `9fe031ff8e3abaed…`) |
 | Whole probe | 1.844 s, exit 0 |
 
 ## The assumptions (v0, all authored, all returned to the app)

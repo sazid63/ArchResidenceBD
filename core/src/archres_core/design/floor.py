@@ -115,6 +115,7 @@ class FloorDesign:
     columns: tuple[Column, ...]
     beams: tuple[Beam, ...]
     slab: Slab
+    base_z_mm: float = 0.0
     walls: tuple[()] = ()
     values: dict[str, Value] = field(default_factory=dict)
     assumptions: tuple[Assumption, ...] = ()
@@ -130,6 +131,7 @@ class FloorDesign:
                     "volumeM3": round(
                         column.size_mm * column.size_mm * column.height_mm / 1_000_000_000.0, 6
                     ),
+                    "bboxZMm": [self.base_z_mm, self.base_z_mm + column.height_mm],
                 }
             )
         for beam in self.beams:
@@ -139,6 +141,7 @@ class FloorDesign:
                     "volumeM3": round(
                         beam.length_mm * beam.width_mm * beam.depth_mm / 1_000_000_000.0, 6
                     ),
+                    "bboxZMm": [self.base_z_mm, self.base_z_mm + beam.depth_mm],
                 }
             )
         expected.append(
@@ -149,6 +152,7 @@ class FloorDesign:
                     / 1_000_000_000.0,
                     6,
                 ),
+                "bboxZMm": [self.base_z_mm, self.base_z_mm + self.slab.thickness_mm],
             }
         )
         return expected
@@ -158,6 +162,7 @@ class FloorDesign:
             "projectId": self.project_id,
             "storeyIndex": self.storey_index,
             "storeyLabel": self.storey_label,
+            "baseZMm": self.base_z_mm,
             "columns": [item.as_dict() for item in self.columns],
             "beams": [item.as_dict() for item in self.beams],
             "slab": self.slab.as_dict(),
@@ -187,6 +192,26 @@ def _storey_height_m(spec: dict[str, Any], storey_index: int) -> tuple[float, st
     raise DesignError("the spec carries no storey height for this storey")
 
 
+def storey_base_z_m(spec: dict[str, Any], storey_index: int) -> float:
+    """The elevation of a storey's floor level: the storeys below it, added up.
+
+    The storeys must **stack**: a first floor built at z = 0 would sit inside the ground
+    floor. The elevation is derived from the spec's own storey heights - the ground storey
+    starts at 0 and every storey above starts where the one below ends.
+    """
+    storeys = (spec.get("building") or {}).get("storeys") or {}
+    base = 0.0
+    for index in range(storey_index):
+        if index == 0:
+            height = storeys.get("groundFloorHeightM")
+        else:
+            height = storeys.get("typicalFloorHeightM")
+        if not isinstance(height, (int, float)) or height <= 0:
+            raise DesignError(f"the spec carries no height for the storey below {storey_index}")
+        base += float(height)
+    return round(base, 4)
+
+
 def design_typical_floor(
     spec: dict[str, Any], foundation: FoundationDesign, *, storey_index: int = 1
 ) -> FloorDesign:
@@ -195,9 +220,18 @@ def design_typical_floor(
     project_id = str(project.get("id") or "unknown")
     height_m, height_source = _storey_height_m(spec, storey_index)
     height_mm = height_m * 1000.0
+    base_z_m = storey_base_z_m(spec, storey_index)
+    base_z_mm = base_z_m * 1000.0
 
     values: dict[str, Value] = {
         "storey.heightM": Value(height_m, "m", PROVENANCE_SPEC, height_source),
+        "storey.baseElevationM": Value(
+            base_z_m,
+            "m",
+            PROVENANCE_DERIVED,
+            "building.storeys",
+            "the storeys below, added up",
+        ),
         "column.count": Value(
             len(foundation.footings),
             "1",
@@ -313,6 +347,7 @@ def design_typical_floor(
         columns=columns,
         beams=tuple(beams),
         slab=slab,
+        base_z_mm=round(base_z_mm, 3),
         values=values,
         assumptions=tuple(assumptions),
         declared_absent=declared_absent,
@@ -324,6 +359,7 @@ def render_floor_macro(design: FloorDesign) -> str:
     payload = {
         "projectId": design.project_id,
         "storeyIndex": design.storey_index,
+        "baseZMm": design.base_z_mm,
         "columns": [item.as_dict() for item in design.columns],
         "beams": [item.as_dict() for item in design.beams],
         "slab": design.slab.as_dict(),
@@ -347,12 +383,13 @@ DESIGN = json.loads(r"""
 """)
 
 
-def _box(x_mm, y_mm, z_mm, size_x, size_y, size_z):
+def _box(x_mm, y_mm, z_bottom_mm, size_x, size_y, size_z):
+    """A box whose *bottom* sits at z_bottom_mm (the storey's own level)."""
     return Part.makeBox(
         size_x,
         size_y,
         size_z,
-        App.Vector(x_mm - size_x / 2.0, y_mm - size_y / 2.0, z_mm),
+        App.Vector(x_mm - size_x / 2.0, y_mm - size_y / 2.0, z_bottom_mm),
     )
 
 
@@ -360,11 +397,12 @@ def build():
     document = App.ActiveDocument
     if document is None:
         raise RuntimeError("no active document: the launcher always creates one")
+    base_z = DESIGN["baseZMm"]
     for column in DESIGN["columns"]:
         shape = _box(
             column["xMm"],
             column["yMm"],
-            0.0,
+            base_z,
             column["sizeMm"],
             column["sizeMm"],
             column["heightMm"],
@@ -376,7 +414,7 @@ def build():
         shape = _box(
             beam["xMm"],
             beam["yMm"],
-            0.0,
+            base_z,
             beam["lengthMm"],
             beam["widthMm"],
             beam["depthMm"],
@@ -389,7 +427,7 @@ def build():
         slab["sizeXMm"],
         slab["sizeYMm"],
         slab["thicknessMm"],
-        App.Vector(slab["originXMm"], slab["originYMm"], 0.0),
+        App.Vector(slab["originXMm"], slab["originYMm"], base_z),
     )
     obj = document.addObject("Part::Feature", "Slab_1")
     obj.Shape = shape

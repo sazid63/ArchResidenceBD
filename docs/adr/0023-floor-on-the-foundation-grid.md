@@ -42,6 +42,12 @@ decide what to do with what it was not told.
 6. **v0 keeps the honest limits visible.** The grid is a single row, so the slab is as deep as
    the grid; the plan's storey layout (units per floor, room grid) is a later decision and is
    named as such rather than faked.
+7. **The storeys stack, and the measurement can prove it.** A storey sits at the elevation the
+   storeys below add up to (`storey.baseElevationM`, derived from the spec's own heights): the
+   ground storey at 0, the first floor at the ground floor's height. A first floor built at
+   z = 0 would have the right *extents* and the wrong *position* — which is why the W1.8
+   measurement now carries the shape's position (`bboxMinMm` / `bboxMaxMm`) next to its size,
+   and why the probe checks the elevation, not just the volume.
 
 ## Consequences
 
@@ -51,4 +57,6 @@ decide what to do with what it was not told.
 - The app still refuses to guess structure it was not told about (no walls, no openings), and
   says so in the design instead of in a comment.
 - A second storey is a parameter (`storeyIndex`), not a second implementation: the ground
-  storey already uses its own height.
+  storey already uses its own height, and the elevation is derived from the spec.
+- The harness measures **where** a shape is, not only how big it is - a measurement that cannot
+  see a storey at the wrong level is a measurement that cannot catch the mistake.

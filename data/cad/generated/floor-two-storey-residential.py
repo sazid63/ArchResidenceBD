@@ -13,6 +13,7 @@ import Part
 
 DESIGN = json.loads(r"""
 {
+ "baseZMm": 3200.0,
  "beams": [
   {
    "depthMm": 450.0,
@@ -86,12 +87,13 @@ DESIGN = json.loads(r"""
 """)
 
 
-def _box(x_mm, y_mm, z_mm, size_x, size_y, size_z):
+def _box(x_mm, y_mm, z_bottom_mm, size_x, size_y, size_z):
+    """A box whose *bottom* sits at z_bottom_mm (the storey's own level)."""
     return Part.makeBox(
         size_x,
         size_y,
         size_z,
-        App.Vector(x_mm - size_x / 2.0, y_mm - size_y / 2.0, z_mm),
+        App.Vector(x_mm - size_x / 2.0, y_mm - size_y / 2.0, z_bottom_mm),
     )
 
 
@@ -99,11 +101,12 @@ def build():
     document = App.ActiveDocument
     if document is None:
         raise RuntimeError("no active document: the launcher always creates one")
+    base_z = DESIGN["baseZMm"]
     for column in DESIGN["columns"]:
         shape = _box(
             column["xMm"],
             column["yMm"],
-            0.0,
+            base_z,
             column["sizeMm"],
             column["sizeMm"],
             column["heightMm"],
@@ -115,7 +118,7 @@ def build():
         shape = _box(
             beam["xMm"],
             beam["yMm"],
-            0.0,
+            base_z,
             beam["lengthMm"],
             beam["widthMm"],
             beam["depthMm"],
@@ -128,7 +131,7 @@ def build():
         slab["sizeXMm"],
         slab["sizeYMm"],
         slab["thicknessMm"],
-        App.Vector(slab["originXMm"], slab["originYMm"], 0.0),
+        App.Vector(slab["originXMm"], slab["originYMm"], base_z),
     )
     obj = document.addObject("Part::Feature", "Slab_1")
     obj.Shape = shape
