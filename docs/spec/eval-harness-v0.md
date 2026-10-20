@@ -245,6 +245,12 @@ fabricate a match or encode "always abstain", which is false for the 15 answerab
 
 ## What this harness does not cover (declared)
 
+- **`model.parse` checks decision and value, not the unit string.** The app normalizes units
+  through the question engine, and the recorded stock set's only unit-label differences are
+  accepted aliases (`sqm` for `m2`). A reply that carries the right number with a wrong-dimension
+  unit is not caught by the numeric comparison alone; the runtime `accept_external` gate remains
+  the authority. This is a declared eval limitation, not a claim that units are verified.
+
 - **`LawDesk` is not wired into `Session`.** The orchestrator's turn loop (W1.10) has no law
   dispatch; `LawDesk` is the seam and a CLI/eval surface only. Wiring it into the interview
   turn is P2 chat-shell work (ADR-0015 §6). Until then the `rag` suite measures the desk, not

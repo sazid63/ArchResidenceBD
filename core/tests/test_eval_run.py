@@ -487,6 +487,32 @@ def test_the_eval_cli_passes_on_the_committed_set() -> None:
     assert "PASS" in result.stdout
 
 
+def test_the_eval_cli_refuses_a_reply_file_that_does_not_match_its_pin(
+    tmp_path: pathlib.Path,
+) -> None:
+    source = ROOT / "data" / "eval" / "chat-v0" / "replies" / "stock.jsonl"
+    lines = source.read_text(encoding="utf-8").splitlines()
+    tampered = tmp_path / "stock.jsonl"
+    tampered.write_text(
+        lines[0].replace('"decision": "fallback"', '"decision": "escalate"')
+        + "\n"
+        + "\n".join(lines[1:])
+        + "\n",
+        encoding="utf-8",
+    )
+    result = _cli(
+        str(ROOT / "tools" / "eval" / "run_eval.py"),
+        "--model",
+        "stock",
+        "--replies",
+        str(tampered),
+        "--no-gates",
+        "--no-probes",
+    )
+    assert result.returncode == 1
+    assert "does not match the manifest pin" in result.stderr
+
+
 def test_the_eval_cli_survives_a_cp1252_console() -> None:
     """Failures and probes carry Bangla queries; a captured cp1252 stdout must not raise."""
     result = _cli(

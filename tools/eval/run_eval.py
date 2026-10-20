@@ -18,6 +18,7 @@ incomplete, or the harness could not run. There is no "skip" exit code on purpos
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import pathlib
 import sys
@@ -128,13 +129,22 @@ def main(argv: list[str] | None = None) -> int:
     suites = [suite for suite in suites if suite.cases > 0]
 
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+    reply_sha = hashlib.sha256(reply_path.read_bytes()).hexdigest()
+    pinned_reply = (manifest.get("replies") or {}).get(args.model, {}).get("sha256")
+    if pinned_reply is not None and pinned_reply != reply_sha:
+        print(
+            f"eval harness cannot run: {reply_path.name} sha256 {reply_sha} "
+            f"does not match the manifest pin {pinned_reply}",
+            file=sys.stderr,
+        )
+        return 1
     pins = {
         **manifest["pins"],
         "casesSha256": manifest["cases"]["sha256"],
         "splitSha256": manifest["splitDocument"]["sha256"],
-        "replySha256": manifest["replies"][args.model]["sha256"]
-        if args.model in manifest.get("replies", {})
-        else None,
+        "replyFile": reply_path.name,
+        "replySha256": reply_sha,
+        "pinnedReplySha256": pinned_reply,
     }
 
     try:
