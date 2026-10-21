@@ -11,6 +11,8 @@ import { NativeCadScreen } from "./screens/NativeCadScreen";
 import { PhaseChatScreen } from "./screens/PhaseChatScreen";
 import { ProjectSetupScreen } from "./screens/ProjectSetupScreen";
 import { ProjectsScreen } from "./screens/ProjectsScreen";
+import { TemplatesScreen } from "./screens/TemplatesScreen";
+import { UnitsScreen } from "./screens/UnitsScreen";
 import "./app.css";
 
 export function App() {
@@ -35,6 +37,10 @@ function renderView(view: string, navigate: (id: string) => void) {
   if (view === "licences") return <LicencesScreen />;
   // The offline help: the app answers with no network and no model (W5.5).
   if (view === "help") return <HelpScreen />;
+  // The land-unit converter and the project's templates (W5.7).
+  if (view === "units") return <UnitsScreen />;
+  if (view === "templates")
+    return <TemplatesScreen onPick={() => navigate("setup")} />;
   if (view === "about")
     return <AboutScreen onOpenLicences={() => navigate("licences")} />;
   if (view.startsWith("docs:")) return <DocumentsScreen />;

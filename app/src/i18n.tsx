@@ -140,6 +140,20 @@ const en = {
   aboutCoreConnected: "Connected",
   aboutCoreAbsent: "Not running",
   aboutCoreUnknown: "Checking...",
+  unitsTitle: "Land units",
+  unitsSubtitle: "Convert between the units a Bangladeshi plot is measured in.",
+  unitsConvert: "Convert",
+  unitsConverted: "Converted",
+  unitsFailed: "The conversion could not be made",
+  unitsNeedsShell:
+    "The conversion is the core's, and the core runs inside the desktop shell.",
+  templatesTitle: "Templates",
+  templatesSubtitle: "Start a new project from a house type the repo holds.",
+  templatesHouse: "House",
+  templatesFloors: "{n} floors",
+  templatesNoFloors: "A project of its own",
+  templatesUse: "Use this",
+  templatesNone: "There are no templates yet.",
   locked: "Locked",
   revisionLabel: "Revision {n}",
   helpTitle: "Help",
@@ -324,6 +338,20 @@ const bn: typeof en = {
 
   locked: "লক করা",
   revisionLabel: "সংশোধন {n}",
+
+  unitsTitle: "জমিদির রেলয়",
+  unitsSubtitle: "বাংলাদেশীর ন্যেডের প্রযুগেনয়ড রূরূপরতে বতলত্রণকণে।",
+  unitsConvert: "রূপান্তরিত করুন",
+  unitsConverted: "রূপান্তরিত হয়েছে",
+  unitsFailed: "রূপান্তরিত করা লেয়া লেই",
+  unitsNeedsShell: "রূপান্তরিততের কোরের করে, আফ়ে ডেসক্রোপ শেলের ভিতরে চলে।",
+  templatesTitle: "ঠেম্প্লেট",
+  templatesSubtitle: "রিপডেরে বাঁছিয়ারডে ডাডারে রেখেয়েরুক প্রক্রণে খুরূং করুন।",
+  templatesHouse: "বাঁছিডানন্রি",
+  templatesFloors: "{n} তলা",
+  templatesNoFloors: "নিগ্রণ নিঁতি প্রসিয়",
+  templatesUse: "ব্যবহার নিযে",
+  templatesNone: "একেণী তৈম্প্লেট নেইই।",
 };
 
 export const STRINGS = { en, bn } as const;

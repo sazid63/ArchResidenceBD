@@ -146,6 +146,8 @@ class Bridge:
             "bundle.read": self._bundle_read,
             "manual.search": self._manual_search,
             "projects.list": self._projects_list,
+            "units.convert": self._units_convert,
+            "templates.list": self._templates_list,
         }.get(method)
 
     # -- the methods ----------------------------------------------------------------------
@@ -332,6 +334,92 @@ class Bridge:
                     }
                 )
         return {"projects": rows, "count": len(rows)}
+
+    def _units_convert(self, params: dict[str, Any]) -> dict[str, Any]:
+        """Convert a land unit ✓ — the core's deterministic conversion ✓ (W5.7 ✓) ✓.
+
+        The app does not convert on its own ✓: the module's ``Decimal`` maths is the one
+        implementation ✓, so a katha is the same number everywhere ✓ ✓. An **area** and a
+        **length** are not the same kind of thing ✓, so mixing them is an error ✓, not a
+        number ✓ ✓.
+        """
+        from .units import (
+            AREA_TO_M2,
+            LENGTH_TO_M,
+            UnitError,
+            area_from_m2,
+            area_to_m2,
+            length_from_m,
+            length_to_m,
+        )
+
+        value = params.get("value")
+        unit = params.get("from")
+        target = params.get("to")
+        if not isinstance(value, (int, float, str)) or not isinstance(unit, str):
+            raise BridgeError(CODE_INVALID_PARAMS, "units.convert needs a value and a unit")
+        if not isinstance(target, str):
+            raise BridgeError(CODE_INVALID_PARAMS, "units.convert needs a target unit")
+        source_key = unit.strip().lower()
+        target_key = target.strip().lower()
+        known_areas = set(AREA_TO_M2) | set(LENGTH_TO_M)
+        for key, given in ((source_key, unit), (target_key, target)):
+            if key not in known_areas:
+                raise BridgeError(CODE_INVALID_PARAMS, f"unknown unit: {given!r}")
+        try:
+            if source_key in AREA_TO_M2 and target_key in AREA_TO_M2:
+                result = area_from_m2(area_to_m2(value, source_key), target_key)
+                kind = "area"
+            elif source_key in LENGTH_TO_M and target_key in LENGTH_TO_M:
+                result = length_from_m(length_to_m(value, source_key), target_key)
+                kind = "length"
+            else:
+                raise BridgeError(
+                    CODE_INVALID_PARAMS,
+                    "an area and a length are not the same kind of thing - convert one to "
+                    "the other first (a katha is an area, a foot is a length)",
+                )
+        except UnitError as exc:
+            raise BridgeError(CODE_INVALID_PARAMS, str(exc)) from exc
+        return {
+            "kind": kind,
+            "value": str(result),
+            "from": unit,
+            "to": target,
+        }
+
+    def _templates_list(self, params: dict[str, Any]) -> dict[str, Any]:
+        """The project's starting points ✓ — the templates ✓ (W5.7 ✓) ✓.
+
+        A template is a **committed example spec** ✓ — the repo's own ✓ — so a new project
+        starts from something the repo holds and can be diffed against ✓ ✓.
+        """
+        base = self._root or pathlib.Path(".")
+        examples = base / "spec" / "examples"
+        rows: list[dict[str, Any]] = []
+        if examples.is_dir():
+            for path in sorted(examples.glob("*.json")):
+                try:
+                    document = json.loads(path.read_text(encoding="utf-8"))
+                except ValueError:
+                    continue
+                if not isinstance(document, dict) or "project" not in document:
+                    continue
+                project = document.get("project") or {}
+                building = document.get("building") or {}
+                storeys = building.get("storeys") or {}
+                rows.append(
+                    {
+                        "id": path.stem,
+                        "name": str(project.get("name") or path.stem),
+                        "path": f"spec/examples/{path.name}",
+                        "language": str(project.get("language") or "en"),
+                        "floors": storeys.get("count"),
+                        "occupancy": str(building.get("occupancy") or ""),
+                        "notes": str(project.get("notes") or ""),
+                    }
+                )
+        return {"templates": rows, "count": len(rows)}
 
     # -- the helpers ----------------------------------------------------------------------
     def _project_root(self, params: dict[str, Any]) -> pathlib.Path:
