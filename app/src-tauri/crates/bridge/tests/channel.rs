@@ -47,25 +47,30 @@ fn python() -> String {
 /// A machine that cannot run the core **cannot verify the channel** ✓ — and the channel is
 /// the product ✓ — so this **fails** rather than skipping ✓: a skipped test is a silent
 /// gap ✓, and the repo's law is that there are no silent gaps ✓ ✓.
-fn core_available() -> bool {
+fn core_available() -> Result<(), String> {
     let source = repo_root().join("core").join("src");
-    Command::new(python())
+    let output = Command::new(python())
         .arg("-c")
         .arg("import archres_core.bridge")
         .env("PYTHONPATH", &source)
         .output()
-        .map(|out| out.status.success())
-        .unwrap_or(false)
+        .map_err(|error| format!("python could not be run: {error}"))?;
+    if output.status.success() {
+        return Ok(());
+    }
+    Err(format!(
+        "the core could not be imported ({}): {}",
+        python(),
+        String::from_utf8_lossy(&output.stderr).trim()
+    ))
 }
 
-/// The core, or a clear failure ✓ ✓.
+/// The core, or a clear failure ✓ ✓ — and the failure says **why** ✓ ✓.
 fn core_or_fail() {
-    if !core_available() {
+    if let Err(reason) = core_available() {
         panic!(
-            "the core is not runnable here (python: {}) - the channel cannot be verified, and \
-             a skipped test is a silent gap. Install Python and the core's dependencies, or \
-             set ARCHRES_PYTHON.",
-            python()
+            "{reason} - the channel cannot be verified, and a skipped test is a silent gap. \
+             Install Python and the core's dependencies, or set ARCHRES_PYTHON."
         );
     }
 }
