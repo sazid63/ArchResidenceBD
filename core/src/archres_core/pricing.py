@@ -769,7 +769,10 @@ def apply_override(
         (i for i, item in enumerate(existing) if isinstance(item, dict) and item.get("id") == entry["id"]),
         None,
     )
-    if index is None:
+    if "deviations" not in spec:
+        # The register may not exist yet on a fresh project: the override creates it.
+        ops.append({"op": "add", "path": "/deviations", "value": [entry]})
+    elif index is None:
         ops.append({"op": "add", "path": "/deviations/-", "value": entry})
     else:
         merged = dict(entry)
