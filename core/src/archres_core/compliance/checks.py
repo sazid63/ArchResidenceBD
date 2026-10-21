@@ -20,6 +20,7 @@ from __future__ import annotations
 from decimal import ROUND_DOWN, Decimal
 from typing import Any, Callable
 
+from ..bengali import bn_number
 from ..spec import PointerError, resolve
 from . import tables
 from .pack import rule_ref
@@ -83,15 +84,9 @@ def _num(value: Any) -> str:
     return str(value)
 
 
-def _bn(value: Any) -> str:
-    """Bangla display number: two decimals, Bangla digits (hand-authored strings stay in bn)."""
-    if isinstance(value, bool):
-        return "সত্য" if value else "মিথ্যা"
-    if isinstance(value, int):
-        return str(value).translate(_BN_DIGITS)
-    if isinstance(value, float):
-        return f"{value:.2f}".translate(_BN_DIGITS)
-    return str(value).translate(_BN_DIGITS)
+#: The Bangla display number: the core owns it (core/src/archres_core/bengali.py), so the
+#: documents, the reports and the cost meter cannot disagree about how a number is written.
+_bn = bn_number
 
 
 def _floor2(value: float) -> float:

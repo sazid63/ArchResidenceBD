@@ -71,6 +71,12 @@ const en = {
   amount: "Amount",
   subtotal: "Subtotal",
   grandTotal: "Grand total",
+  costMeter: "Live cost",
+  costBefore: "before the change",
+  costAfter: "after the change",
+  costChange: "the change",
+  costMoved: "what moved",
+  costNoChange: "Nothing moved.",
   costMaterial: "Material",
   costLabour: "Labour",
   costMachinery: "Machinery",
@@ -176,6 +182,12 @@ const bn: typeof en = {
   amount: "টাকা",
   subtotal: "উপমোট",
   grandTotal: "সর্বমোট",
+  costMeter: "লাইভ খরচ",
+  costBefore: "পরিবর্তনি আগে",
+  costAfter: "পরিবর্তনি পরে",
+  costChange: "পরিবর্তন",
+  costMoved: "যা বদলেছে",
+  costNoChange: "কিছুই বদলাযনি।",
   costMaterial: "উপকরণ",
   costLabour: "শ্রম",
   costMachinery: "যন্ত্রপাতি",
@@ -237,6 +249,12 @@ export function fmtNum(value: number, lang: Lang): string {
 
 export function fmtBdt(value: number, lang: Lang): string {
   return "৳ " + fmtNum(value, lang);
+}
+
+export function fmtDelta(value: number, lang: Lang): string {
+  // A delta without a sign lies about which way the money moved.
+  const sign = value > 0 ? "+" : value < 0 ? "-" : "";
+  return sign + fmtBdt(Math.abs(value), lang);
 }
 
 export function floorName(storeyIndex: number, lang: Lang): string {

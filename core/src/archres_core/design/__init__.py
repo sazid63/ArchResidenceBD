@@ -16,6 +16,13 @@ from .boq import (
     design_takeoff,
     render_boq_markdown,
 )
+from .cost_meter import (
+    CURRENCY,
+    CostDelta,
+    LineDelta,
+    cost_delta,
+    render_cost_meter,
+)
 from .drawing import (
     PAGE_H_MM,
     PAGE_W_MM,
@@ -101,9 +108,14 @@ __all__ = [
     "MepDesign",
     "MepPoint",
     "ScheduleRow",
+    "CURRENCY",
+    "CostDelta",
+    "LineDelta",
     "build_boq",
+    "cost_delta",
     "design_takeoff",
     "render_boq_markdown",
+    "render_cost_meter",
     "PAGE_H_MM",
     "PAGE_W_MM",
     "SCALE",

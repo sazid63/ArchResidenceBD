@@ -38,6 +38,8 @@ export interface BoqLine {
   rate: number;
   cost: CostType;
   deviation?: boolean;
+  /** The quantity before the last change - the live cost meter's "before" (W3.8). */
+  qtyBefore?: number;
 }
 
 export interface BoqPhase {
@@ -49,8 +51,8 @@ export const boq: BoqPhase[] = [
   {
     phaseId: "foundation",
     lines: [
-      { item: "OPC cement, 50 kg bag", unit: "bag", qty: 120, rate: 640, cost: "material" },
-      { item: "Rebar B500 (60 grade)", unit: "ton", qty: 1.8, rate: 92500, cost: "material" },
+      { item: "OPC cement, 50 kg bag", unit: "bag", qty: 120, qtyBefore: 110, rate: 640, cost: "material" },
+      { item: "Rebar B500 (60 grade)", unit: "ton", qty: 1.8, qtyBefore: 1.62, rate: 92500, cost: "material" },
       { item: "Sylhet sand (FM 1.5)", unit: "m³", qty: 8, rate: 2600, cost: "material" },
       { item: "Stone chips (20 mm)", unit: "m³", qty: 6, rate: 3200, cost: "material" },
       { item: "Mason", unit: "day", qty: 24, rate: 900, cost: "labour" },
@@ -62,7 +64,7 @@ export const boq: BoqPhase[] = [
   {
     phaseId: "floor-0",
     lines: [
-      { item: "OPC cement, 50 kg bag", unit: "bag", qty: 90, rate: 640, cost: "material" },
+      { item: "OPC cement, 50 kg bag", unit: "bag", qty: 90, qtyBefore: 84, rate: 640, cost: "material" },
       { item: "Rebar B500 (60 grade)", unit: "ton", qty: 1.2, rate: 92500, cost: "material" },
       { item: "Sylhet sand (FM 1.5)", unit: "m³", qty: 6, rate: 2600, cost: "material" },
       { item: "Stone chips (20 mm)", unit: "m³", qty: 5, rate: 3200, cost: "material" },
