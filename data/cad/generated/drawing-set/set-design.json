@@ -1,0 +1,577 @@
+{
+ "drawingNumber": "ARRB-P3-001",
+ "issuedOn": "2026-10-21",
+ "projectId": "7c9e6f10-2a3b-4c5d-9e8f-1a2b3c4d5e6f",
+ "projectName": "Mirpur Duplex (internal test)",
+ "scaleLabel": "1 : 30",
+ "sheets": [
+  {
+   "dimensions": [
+    {
+     "axis": "h",
+     "label": "18.75 m",
+     "valueMm": 18750.0,
+     "view": "top"
+    },
+    {
+     "axis": "v",
+     "label": "1.80 m",
+     "valueMm": 1800.0,
+     "view": "top"
+    },
+    {
+     "axis": "h",
+     "label": "18.75 m",
+     "valueMm": 18750.0,
+     "view": "front"
+    },
+    {
+     "axis": "v",
+     "label": "3.50 m",
+     "valueMm": 3500.0,
+     "view": "front"
+    }
+   ],
+   "drawingNumber": "ARRB-P3-001-1",
+   "issuedOn": "2026-10-21",
+   "model": [
+    {
+     "hMm": 300.0,
+     "id": "F1",
+     "kind": "footing",
+     "lMm": 1200.0,
+     "wMm": 1200.0,
+     "xMm": -100.0,
+     "yMm": 6089.0,
+     "zMm": -300.0
+    },
+    {
+     "hMm": 300.0,
+     "id": "F2",
+     "kind": "footing",
+     "lMm": 1200.0,
+     "wMm": 1200.0,
+     "xMm": 2900.0,
+     "yMm": 6089.0,
+     "zMm": -300.0
+    },
+    {
+     "hMm": 300.0,
+     "id": "F3",
+     "kind": "footing",
+     "lMm": 1200.0,
+     "wMm": 1200.0,
+     "xMm": 5900.0,
+     "yMm": 6089.0,
+     "zMm": -300.0
+    },
+    {
+     "hMm": 300.0,
+     "id": "F4",
+     "kind": "footing",
+     "lMm": 1200.0,
+     "wMm": 1200.0,
+     "xMm": 8900.0,
+     "yMm": 6089.0,
+     "zMm": -300.0
+    },
+    {
+     "hMm": 400.0,
+     "id": "GB1",
+     "kind": "grade-beam",
+     "lMm": 3000.0,
+     "wMm": 300.0,
+     "xMm": 2000.0,
+     "yMm": 6689.0,
+     "zMm": 0.0
+    },
+    {
+     "hMm": 400.0,
+     "id": "GB2",
+     "kind": "grade-beam",
+     "lMm": 3000.0,
+     "wMm": 300.0,
+     "xMm": 5000.0,
+     "yMm": 6689.0,
+     "zMm": 0.0
+    },
+    {
+     "hMm": 400.0,
+     "id": "GB3",
+     "kind": "grade-beam",
+     "lMm": 3000.0,
+     "wMm": 300.0,
+     "xMm": 8000.0,
+     "yMm": 6689.0,
+     "zMm": 0.0
+    },
+    {
+     "hMm": 3200.0,
+     "id": "C1",
+     "kind": "column",
+     "lMm": 300.0,
+     "wMm": 300.0,
+     "xMm": 350.0,
+     "yMm": 6539.0,
+     "zMm": 0.0
+    },
+    {
+     "hMm": 3200.0,
+     "id": "C2",
+     "kind": "column",
+     "lMm": 300.0,
+     "wMm": 300.0,
+     "xMm": 3350.0,
+     "yMm": 6539.0,
+     "zMm": 0.0
+    },
+    {
+     "hMm": 3200.0,
+     "id": "C3",
+     "kind": "column",
+     "lMm": 300.0,
+     "wMm": 300.0,
+     "xMm": 6350.0,
+     "yMm": 6539.0,
+     "zMm": 0.0
+    },
+    {
+     "hMm": 3200.0,
+     "id": "C4",
+     "kind": "column",
+     "lMm": 300.0,
+     "wMm": 300.0,
+     "xMm": 9350.0,
+     "yMm": 6539.0,
+     "zMm": 0.0
+    },
+    {
+     "hMm": 125.0,
+     "id": "Slab_1",
+     "kind": "slab",
+     "lMm": 9300.0,
+     "wMm": 300.0,
+     "xMm": 350.0,
+     "yMm": 6539.0,
+     "zMm": 0.0
+    }
+   ],
+   "projectId": "7c9e6f10-2a3b-4c5d-9e8f-1a2b3c4d5e6f",
+   "projectName": "Mirpur Duplex (internal test)",
+   "scale": "1 : 30",
+   "sheetTitle": "Floor 0 plan and elevation",
+   "values": {
+    "sheet.overallDepthMm": {
+     "provenance": "derived",
+     "reason": "the model's overall depth",
+     "source": "the design",
+     "unit": "mm",
+     "value": 1800.0
+    },
+    "sheet.overallWidthMm": {
+     "provenance": "derived",
+     "reason": "the model's overall width",
+     "source": "the design",
+     "unit": "mm",
+     "value": 18750.0
+    }
+   },
+   "views": [
+    {
+     "direction": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "id": "top",
+     "label": "FLOOR 0 PLAN",
+     "xMm": 150.0,
+     "yMm": 140.0
+    },
+    {
+     "direction": [
+      0.0,
+      -1.0,
+      0.0
+     ],
+     "id": "front",
+     "label": "FRONT ELEVATION",
+     "xMm": 150.0,
+     "yMm": 60.0
+    }
+   ]
+  },
+  {
+   "dimensions": [
+    {
+     "axis": "h",
+     "label": "18.75 m",
+     "valueMm": 18750.0,
+     "view": "top"
+    },
+    {
+     "axis": "v",
+     "label": "1.80 m",
+     "valueMm": 1800.0,
+     "view": "top"
+    },
+    {
+     "axis": "h",
+     "label": "18.75 m",
+     "valueMm": 18750.0,
+     "view": "front"
+    },
+    {
+     "axis": "v",
+     "label": "3.30 m",
+     "valueMm": 3300.0,
+     "view": "front"
+    }
+   ],
+   "drawingNumber": "ARRB-P3-001-2",
+   "issuedOn": "2026-10-21",
+   "model": [
+    {
+     "hMm": 300.0,
+     "id": "F1",
+     "kind": "footing",
+     "lMm": 1200.0,
+     "wMm": 1200.0,
+     "xMm": -100.0,
+     "yMm": 6089.0,
+     "zMm": -300.0
+    },
+    {
+     "hMm": 300.0,
+     "id": "F2",
+     "kind": "footing",
+     "lMm": 1200.0,
+     "wMm": 1200.0,
+     "xMm": 2900.0,
+     "yMm": 6089.0,
+     "zMm": -300.0
+    },
+    {
+     "hMm": 300.0,
+     "id": "F3",
+     "kind": "footing",
+     "lMm": 1200.0,
+     "wMm": 1200.0,
+     "xMm": 5900.0,
+     "yMm": 6089.0,
+     "zMm": -300.0
+    },
+    {
+     "hMm": 300.0,
+     "id": "F4",
+     "kind": "footing",
+     "lMm": 1200.0,
+     "wMm": 1200.0,
+     "xMm": 8900.0,
+     "yMm": 6089.0,
+     "zMm": -300.0
+    },
+    {
+     "hMm": 400.0,
+     "id": "GB1",
+     "kind": "grade-beam",
+     "lMm": 3000.0,
+     "wMm": 300.0,
+     "xMm": 2000.0,
+     "yMm": 6689.0,
+     "zMm": 0.0
+    },
+    {
+     "hMm": 400.0,
+     "id": "GB2",
+     "kind": "grade-beam",
+     "lMm": 3000.0,
+     "wMm": 300.0,
+     "xMm": 5000.0,
+     "yMm": 6689.0,
+     "zMm": 0.0
+    },
+    {
+     "hMm": 400.0,
+     "id": "GB3",
+     "kind": "grade-beam",
+     "lMm": 3000.0,
+     "wMm": 300.0,
+     "xMm": 8000.0,
+     "yMm": 6689.0,
+     "zMm": 0.0
+    },
+    {
+     "hMm": 3000.0,
+     "id": "C1",
+     "kind": "column",
+     "lMm": 300.0,
+     "wMm": 300.0,
+     "xMm": 350.0,
+     "yMm": 6539.0,
+     "zMm": 3200.0
+    },
+    {
+     "hMm": 3000.0,
+     "id": "C2",
+     "kind": "column",
+     "lMm": 300.0,
+     "wMm": 300.0,
+     "xMm": 3350.0,
+     "yMm": 6539.0,
+     "zMm": 3200.0
+    },
+    {
+     "hMm": 3000.0,
+     "id": "C3",
+     "kind": "column",
+     "lMm": 300.0,
+     "wMm": 300.0,
+     "xMm": 6350.0,
+     "yMm": 6539.0,
+     "zMm": 3200.0
+    },
+    {
+     "hMm": 3000.0,
+     "id": "C4",
+     "kind": "column",
+     "lMm": 300.0,
+     "wMm": 300.0,
+     "xMm": 9350.0,
+     "yMm": 6539.0,
+     "zMm": 3200.0
+    },
+    {
+     "hMm": 125.0,
+     "id": "Slab_1",
+     "kind": "slab",
+     "lMm": 9300.0,
+     "wMm": 300.0,
+     "xMm": 350.0,
+     "yMm": 6539.0,
+     "zMm": 3200.0
+    }
+   ],
+   "projectId": "7c9e6f10-2a3b-4c5d-9e8f-1a2b3c4d5e6f",
+   "projectName": "Mirpur Duplex (internal test)",
+   "scale": "1 : 30",
+   "sheetTitle": "Floor 1 plan and elevation",
+   "values": {
+    "sheet.overallDepthMm": {
+     "provenance": "derived",
+     "reason": "the model's overall depth",
+     "source": "the design",
+     "unit": "mm",
+     "value": 1800.0
+    },
+    "sheet.overallWidthMm": {
+     "provenance": "derived",
+     "reason": "the model's overall width",
+     "source": "the design",
+     "unit": "mm",
+     "value": 18750.0
+    }
+   },
+   "views": [
+    {
+     "direction": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "id": "top",
+     "label": "FLOOR 1 PLAN",
+     "xMm": 150.0,
+     "yMm": 140.0
+    },
+    {
+     "direction": [
+      0.0,
+      -1.0,
+      0.0
+     ],
+     "id": "front",
+     "label": "FRONT ELEVATION",
+     "xMm": 150.0,
+     "yMm": 60.0
+    }
+   ]
+  },
+  {
+   "dimensions": [
+    {
+     "axis": "h",
+     "label": "18.75 m",
+     "valueMm": 18750.0,
+     "view": "front"
+    },
+    {
+     "axis": "v",
+     "label": "3.30 m",
+     "valueMm": 3300.0,
+     "view": "front"
+    },
+    {
+     "axis": "h",
+     "label": "1.80 m",
+     "valueMm": 1800.0,
+     "view": "side"
+    }
+   ],
+   "drawingNumber": "ARRB-P3-001-3",
+   "issuedOn": "2026-10-21",
+   "model": [
+    {
+     "hMm": 300.0,
+     "id": "F1",
+     "kind": "footing",
+     "lMm": 1200.0,
+     "wMm": 1200.0,
+     "xMm": -100.0,
+     "yMm": 6089.0,
+     "zMm": -300.0
+    },
+    {
+     "hMm": 300.0,
+     "id": "F2",
+     "kind": "footing",
+     "lMm": 1200.0,
+     "wMm": 1200.0,
+     "xMm": 2900.0,
+     "yMm": 6089.0,
+     "zMm": -300.0
+    },
+    {
+     "hMm": 300.0,
+     "id": "F3",
+     "kind": "footing",
+     "lMm": 1200.0,
+     "wMm": 1200.0,
+     "xMm": 5900.0,
+     "yMm": 6089.0,
+     "zMm": -300.0
+    },
+    {
+     "hMm": 300.0,
+     "id": "F4",
+     "kind": "footing",
+     "lMm": 1200.0,
+     "wMm": 1200.0,
+     "xMm": 8900.0,
+     "yMm": 6089.0,
+     "zMm": -300.0
+    },
+    {
+     "hMm": 400.0,
+     "id": "GB1",
+     "kind": "grade-beam",
+     "lMm": 3000.0,
+     "wMm": 300.0,
+     "xMm": 2000.0,
+     "yMm": 6689.0,
+     "zMm": 0.0
+    },
+    {
+     "hMm": 400.0,
+     "id": "GB2",
+     "kind": "grade-beam",
+     "lMm": 3000.0,
+     "wMm": 300.0,
+     "xMm": 5000.0,
+     "yMm": 6689.0,
+     "zMm": 0.0
+    },
+    {
+     "hMm": 400.0,
+     "id": "GB3",
+     "kind": "grade-beam",
+     "lMm": 3000.0,
+     "wMm": 300.0,
+     "xMm": 8000.0,
+     "yMm": 6689.0,
+     "zMm": 0.0
+    },
+    {
+     "hMm": 3000.0,
+     "id": "C1",
+     "kind": "column",
+     "lMm": 300.0,
+     "wMm": 300.0,
+     "xMm": 350.0,
+     "yMm": 6539.0,
+     "zMm": 3200.0
+    },
+    {
+     "hMm": 3000.0,
+     "id": "C2",
+     "kind": "column",
+     "lMm": 300.0,
+     "wMm": 300.0,
+     "xMm": 3350.0,
+     "yMm": 6539.0,
+     "zMm": 3200.0
+    },
+    {
+     "hMm": 3000.0,
+     "id": "C3",
+     "kind": "column",
+     "lMm": 300.0,
+     "wMm": 300.0,
+     "xMm": 6350.0,
+     "yMm": 6539.0,
+     "zMm": 3200.0
+    },
+    {
+     "hMm": 3000.0,
+     "id": "C4",
+     "kind": "column",
+     "lMm": 300.0,
+     "wMm": 300.0,
+     "xMm": 9350.0,
+     "yMm": 6539.0,
+     "zMm": 3200.0
+    },
+    {
+     "hMm": 125.0,
+     "id": "Slab_1",
+     "kind": "slab",
+     "lMm": 9300.0,
+     "wMm": 300.0,
+     "xMm": 350.0,
+     "yMm": 6539.0,
+     "zMm": 3200.0
+    }
+   ],
+   "projectId": "7c9e6f10-2a3b-4c5d-9e8f-1a2b3c4d5e6f",
+   "projectName": "Mirpur Duplex (internal test)",
+   "scale": "1 : 30",
+   "sheetTitle": "Elevations",
+   "values": {},
+   "views": [
+    {
+     "direction": [
+      0.0,
+      -1.0,
+      0.0
+     ],
+     "id": "front",
+     "label": "FRONT ELEVATION",
+     "xMm": 95.0,
+     "yMm": 140.0
+    },
+    {
+     "direction": [
+      1.0,
+      0.0,
+      0.0
+     ],
+     "id": "side",
+     "label": "SIDE ELEVATION",
+     "xMm": 215.0,
+     "yMm": 140.0
+    }
+   ]
+  }
+ ],
+ "status": "Candidate - not for construction"
+}
