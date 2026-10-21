@@ -136,6 +136,10 @@ const en = {
   aboutVersionValue: "0.1.0",
   aboutBuild: "Build",
   aboutBuildValue: "W5.1 (prototype)",
+  aboutCore: "Core",
+  aboutCoreConnected: "Connected",
+  aboutCoreAbsent: "Not running",
+  aboutCoreUnknown: "Checking...",
   aboutLicencesLine: "Third-party notices and licences",
   aboutTermsPending: "The app's own terms are set by its publisher.",
 };
@@ -277,6 +281,12 @@ const bn: typeof en = {
   aboutBuildValue: "W5.1 (প্রোটোটাইপ)",
   aboutLicencesLine: "তৃতীয় পক্ষের নোটিশ ও লাইসেন্স",
   aboutTermsPending: "অ্যাপের নিজের শর্তাবলি তার প্রকাশক নির্ধারণ করেন।",
+
+  aboutCore: "কর্",
+  aboutCoreConnected: "সন্যোগ",
+  aboutCoreAbsent: "চলেনি",
+  aboutCoreUnknown: "ঠিক্সার হচ্যে...",
+
 };
 
 export const STRINGS = { en, bn } as const;

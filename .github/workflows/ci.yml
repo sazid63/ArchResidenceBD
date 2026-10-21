@@ -235,3 +235,15 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Typecheck
         run: pnpm --dir app typecheck
+
+  # The desktop shell (W5.1). The channel crate carries no Tauri dependency on purpose,
+  # so this job is light: the runners ship the Rust toolchain, and the full desktop build
+  # needs the WebView2 SDK (the dev machine's linker is the owner's item #1).
+  shell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: The channel's tests (the shell's bridge crate)
+        run: cargo test --locked -p archres-bridge --manifest-path app/src-tauri/Cargo.toml
+      - name: The shell's crate is formatted
+        run: cargo fmt --check --manifest-path app/src-tauri/Cargo.toml
