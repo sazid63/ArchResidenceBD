@@ -140,6 +140,17 @@ const en = {
   aboutCoreConnected: "Connected",
   aboutCoreAbsent: "Not running",
   aboutCoreUnknown: "Checking...",
+  helpTitle: "Help",
+  helpSubtitle: "Answers that work offline - no network and no model.",
+  helpPlaceholder: "Ask a question (Bangla or English)",
+  helpSearch: "Search",
+  helpFailed: "The help could not be searched",
+  helpNoAnswer: "Nothing in the manual answers that",
+  helpNoAnswerNote: "The manual only says what it knows - it never invents an answer.",
+  helpRule: "Rule",
+  helpFlow: "App",
+  helpNeedsShell:
+    "The manual is searched by the app's core, which runs inside the desktop shell.",
   bundleExported: "The project's bundle is written",
   bundleFailed: "The bundle could not be written",
   bundleNeedsShell:
@@ -292,9 +303,22 @@ const bn: typeof en = {
   aboutCoreUnknown: "ঠিক্সার হচ্যে...",
 
 
-  bundleExported: "\u09aa\u09cd\u09b0\u0995\u09b2\u09cd\u09af\u09c7\u09b0 \u09ac\u09cd\u09af\u09a8\u09cd\u09a1\u09c7\u09b2 \u09b2\u09c7\u0996\u09c7\u09b0 \u09b9\u09af\u09bc\u09c7\u09b0",
-  bundleFailed: "\u09ac\u09cd\u09af\u09a8\u09cd\u09a1\u09c7\u09b2 \u09b2\u09c7\u0996\u09c7\u09b0 \u09b9\u09af\u09bc\u09c7\u09b0 \u09a7\u09c7\u09b2\u09c7\u09a8\u09bf",
-  bundleNeedsShell: "\u09ac\u09cd\u09af\u09a8\u09cd\u09a1\u09c7\u09b2 \u09a7\u09c1\u09ac\u09c7\u09b0 \u09b6\u09c7\u09b2\u09c7\u09b0 \u09a1\u09c7\u09b8\u0995\u09cd\u09b0\u09cb\u09aa\u09c7\u09b0 \u09b8\u09a4\u09c7\u09b0 \u09a4\u09cd\u09af\u09be\u09b0\u09a3\u09a1 \u0995\u09b0\u09c7\u09b0\u09b9\u09c7\u09a8\u0964",
+  bundleExported: "প্রকল্যের ব্যন্ডেল লেখের হয়ের",
+  bundleFailed: "ব্যন্ডেল লেখের হয়ের ধেলেনি",
+  bundleNeedsShell: "ব্যন্ডেল ধুবের শেলের ডেসক্রোপের সতের ত্যারণড করেরহেন।",
+
+
+  helpTitle: "সহায়তা",
+  helpSubtitle: "অফলাইনে উত্তর - নেটওয়ার্ক নেই, মডেলও নেই।",
+  helpPlaceholder: "প্রশ্ন লিখুন (বাংলা বা ইংরেজি)",
+  helpSearch: "খুঁজুন",
+  helpFailed: "সহায়তা খোঁজা যায়নি",
+  helpNoAnswer: "সম্পূর্ণ সহায়তায় এর উত্তর নেই",
+  helpNoAnswerNote: "সহায়তা শুধু যা জানে তাই বলে - কখনও উত্তর বানিয়ে বলে না।",
+  helpRule: "বিধান",
+  helpFlow: "অ্যাপ",
+  helpNeedsShell: "সহায়তা খোঁজে অ্যাপের কোর, যা ডেস্কটপ শেলের ভেতরে চলে।",
+
 };
 
 export const STRINGS = { en, bn } as const;

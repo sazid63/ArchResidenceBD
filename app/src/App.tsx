@@ -4,6 +4,7 @@ import { Sidebar } from "./layout/Sidebar";
 import { AboutScreen } from "./screens/AboutScreen";
 import { BoqScreen } from "./screens/BoqScreen";
 import { DocumentsScreen } from "./screens/DocumentsScreen";
+import { HelpScreen } from "./screens/HelpScreen";
 import { ImportReviewScreen } from "./screens/ImportReviewScreen";
 import { LicencesScreen } from "./screens/LicencesScreen";
 import { NativeCadScreen } from "./screens/NativeCadScreen";
@@ -32,6 +33,8 @@ function renderView(view: string, navigate: (id: string) => void) {
   if (view === "import-review") return <ImportReviewScreen />;
   // The legal surface: the required notices live here and nowhere else (ADR-0004).
   if (view === "licences") return <LicencesScreen />;
+  // The offline help: the app answers with no network and no model (W5.5).
+  if (view === "help") return <HelpScreen />;
   if (view === "about")
     return <AboutScreen onOpenLicences={() => navigate("licences")} />;
   if (view.startsWith("docs:")) return <DocumentsScreen />;

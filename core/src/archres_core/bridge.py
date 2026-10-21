@@ -143,6 +143,7 @@ class Bridge:
             "session.coverage": self._session_coverage,
             "bundle.export": self._bundle_export,
             "bundle.read": self._bundle_read,
+            "manual.search": self._manual_search,
         }.get(method)
 
     # -- the methods ----------------------------------------------------------------------
@@ -251,6 +252,39 @@ class Bridge:
         except BundleError as exc:
             raise BridgeError(CODE_INTERNAL, str(exc)) from exc
         return {"manifest": manifest.as_dict()}
+
+    def _manual_search(self, params: dict[str, Any]) -> dict[str, Any]:
+        """The offline manual ✓ — a question in, the sourced answers out ✓ (W5.5 ✓).
+
+        No network ✓, no model ✓ — the manual is derived from the repo's facts ✓ and
+        searched by terms ✓ ✓.
+        """
+        from .manual import ManualError, build_manual, search_manual
+
+        query = params.get("query")
+        if not isinstance(query, str):
+            raise BridgeError(CODE_INVALID_PARAMS, "manual.search needs a query")
+        lang = str(params.get("lang") or "en")
+        try:
+            entries = build_manual(self._book_path(), self._pack_paths())
+        except ManualError as exc:
+            raise BridgeError(CODE_INTERNAL, str(exc)) from exc
+        hits = search_manual(entries, query, lang=lang)
+        return {
+            "query": query,
+            "lang": lang,
+            "answers": [
+                {"entry": entry.as_dict(), "score": score} for entry, score in hits
+            ],
+        }
+
+    def _book_path(self) -> pathlib.Path:
+        base = self._root or pathlib.Path(".")
+        return base / "spec" / "flows" / "phase-flow-book.yaml"
+
+    def _pack_paths(self) -> list[pathlib.Path]:
+        base = self._root or pathlib.Path(".")
+        return sorted((base / "spec" / "rules").glob("*.yaml"))
 
     # -- the helpers ----------------------------------------------------------------------
     def _project_root(self, params: dict[str, Any]) -> pathlib.Path:
