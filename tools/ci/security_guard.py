@@ -57,6 +57,16 @@ OUT = ROOT / "data" / "security" / "security-pass.json"
 FAIL_SEVERITY = "high"
 
 
+def _redact(text: str) -> str:
+    """A reason without this machine's paths.
+
+    The report is committed and compared byte for byte in CI, and CI runs on a different
+    machine - so a path in it would be stale everywhere and true nowhere. The boot report
+    learned this the same way (ADR-0044).
+    """
+    return text.replace(str(ROOT), "<repo>").replace(str(ROOT.parent), "<above-repo>")
+
+
 def _text_of(path: pathlib.Path) -> str:
     """The scannable text of a surface file."""
     if path.suffix.lower() == ".json":
@@ -92,7 +102,7 @@ def policy_laws(sandbox: pathlib.Path) -> list[dict]:
     decisions = 0
 
     def record(name: str, holds: bool, detail: str) -> None:
-        laws.append({"law": name, "holds": holds, "detail": detail})
+        laws.append({"law": name, "holds": holds, "detail": _redact(detail)})
 
     policy = PermissionPolicy(sandbox=sandbox)
     outside = Call("fs.read", {"path": str(ROOT.parent / "outside-the-sandbox.txt")})
@@ -100,7 +110,9 @@ def policy_laws(sandbox: pathlib.Path) -> list[dict]:
     record(
         "a path outside the sandbox is refused",
         decision.status == "deny",
-        decision.reason,
+        # The reason quotes the path that was refused, and a path is this machine's - the
+        # report is committed and compared in CI, which runs on another machine.
+        "the path is outside the project sandbox",
     )
 
     unknown = policy.authorize(Call("rm.rf", {}), trust="user")

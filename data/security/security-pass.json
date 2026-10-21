@@ -52,7 +52,7 @@
  ],
  "laws": [
   {
-   "detail": "'C:\\\\1_SAJID\\\\OpenCode\\\\outside-the-sandbox.txt' is outside the project sandbox",
+   "detail": "the path is outside the project sandbox",
    "holds": true,
    "law": "a path outside the sandbox is refused"
   },
