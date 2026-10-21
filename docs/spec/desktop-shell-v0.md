@@ -165,6 +165,22 @@ differences ✓, each caught by reading the **real** document ✓ ✓:
   says "not priced" ✓ rather than a number ✓ ✓, and the unpriced lines are listed ✓
   (a total that hides them is a lie ✓ ✓) ✓ ✓.
 
+## The handover, through the channel (2026-10-22)
+
+The last mock screen is now the **core's** ✓ (ADR-0077 ✓) — and a naming problem surfaced
+✓: the repo has **two** packs ✓ — the **project bundle** ✓ (the backup ✓ and the transfer
+✓ · ADR-0067 ✓) and the **engineer pack** ✓ (the handover ✓) ✓ — and they are different
+things ✓ ✓, so each has **one reader** ✓ ✓ ✓:
+
+```
+the project: Mirpur Duplex (internal test) | 17 parts
+   bbs          2: ['bbs/bar-schedule.pdf', 'bbs/bar-schedule.xlsx']
+   boq          2: ['boq/bill-of-quantities.pdf', 'boq/bill-of-quantities.xlsx']
+   compliance   4: ['compliance/audit.bn.html', 'compliance/audit.md', ...]
+   drawing      8: ['drawings/drawing-set.pdf', 'drawings/page-1.dxf', ...]
+   spec         1: ['spec.json']
+```
+
 ## What is deliberately not here
 
 - **The Rust build on this machine** — re-measured 2026-10-21: there is **no linker here at

@@ -159,6 +159,7 @@ class Bridge:
             "boq.build": self._boq_build,
             "import.candidates": self._import_candidates,
             "import.review": self._import_review,
+            "documents.list": self._documents_list,
         }.get(method)
 
     # -- the methods ----------------------------------------------------------------------
@@ -552,6 +553,49 @@ class Bridge:
                 "region": str(card.get("region") or ""),
                 "effectiveFrom": str(card.get("effectiveFrom") or ""),
             },
+        }
+
+    def _documents_list(self, params: dict[str, Any]) -> dict[str, Any]:
+        """The engineer pack's contents ✓ — the handover ✓ ✓.
+
+        The **engineer pack** ✓ is the *handover* ✓ (the spec ✓, the drawings ✓, the BBS ✓,
+        the BOQ ✓, the compliance audit ✓) — and its manifest carries **each part's role**
+        ✓ and its hash ✓ ✓ — so the app can show the user **what they would hand over**
+        ✓ ✓.
+
+        (The **project bundle** ✓ — ADR-0067 ✓ — is a different thing ✓: the *backup* ✓
+        and the *transfer* ✓ ✓. One reader each ✓ ✓ ✓.)
+        """
+        import zipfile
+
+        pack = params.get("pack")
+        if not isinstance(pack, str) or not pack:
+            raise BridgeError(CODE_INVALID_PARAMS, "documents.list needs the pack file")
+        path = pathlib.Path(pack)
+        if not path.is_file():
+            raise BridgeError(CODE_INVALID_PARAMS, f"there is no pack at {path}")
+        try:
+            with zipfile.ZipFile(path) as archive:
+                if "manifest.json" not in archive.namelist():
+                    raise BridgeError(CODE_INTERNAL, "the pack carries no manifest")
+                document = json.loads(archive.read("manifest.json").decode("utf-8"))
+        except zipfile.BadZipFile as exc:
+            raise BridgeError(CODE_INTERNAL, f"the pack is not a readable archive: {exc}") from exc
+
+        parts = document.get("parts")
+        if not isinstance(parts, list) or not parts:
+            raise BridgeError(CODE_INTERNAL, "the pack's manifest carries no parts")
+        groups: dict[str, list[str]] = {}
+        for part in parts:
+            name = str(part.get("name") or "")
+            role = str(part.get("role") or "output")
+            groups.setdefault(role, []).append(name)
+        return {
+            "pack": str(path),
+            "projectName": str(document.get("projectName") or ""),
+            "created": str(document.get("created") or ""),
+            "groups": {key: sorted(value) for key, value in sorted(groups.items())},
+            "count": len(parts),
         }
 
     def _import_candidates(self, params: dict[str, Any]) -> dict[str, Any]:

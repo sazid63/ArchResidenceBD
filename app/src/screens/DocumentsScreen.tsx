@@ -1,83 +1,115 @@
 import { useState } from "react";
 
-import { documents } from "../data/mock";
-import type { DocItem } from "../data/mock";
 import { ask, isDesktopShell } from "../ipc/core";
-import { fmtNum, useI18n } from "../i18n";
-import type { TKey } from "../i18n";
-import type { Tone } from "../theme/tokens";
+import { useI18n } from "../i18n";
 import { Badge, Button, Callout, Card, PageHeader } from "../ui/kit";
 
-const META: Record<DocItem["id"], { label: TKey; desc: TKey; tone: Tone }> = {
-  drawings: { label: "drawings", desc: "drawingsDesc", tone: "sky" },
-  bbs: { label: "bbs", desc: "bbsDesc", tone: "sage" },
-  reports: { label: "reports", desc: "reportsDesc", tone: "lavender" },
-  "engineer-pack": { label: "engineerPack", desc: "engineerPackDesc", tone: "amber" },
+interface DocumentsReply {
+  pack: string;
+  projectName: string;
+  created: string;
+  groups: Record<string, string[]>;
+  count: number;
+}
+
+/** The engineer pack's own roles ✓ (the pack's manifest names them ✓ ✓). */
+const GROUP_KEY: Record<
+  string,
+  | "documentsProject"
+  | "documentsDrawings"
+  | "documentsBbs"
+  | "documentsBoq"
+  | "documentsReports"
+  | "documentsOutputs"
+> = {
+  spec: "documentsProject",
+  drawing: "documentsDrawings",
+  bbs: "documentsBbs",
+  boq: "documentsBoq",
+  compliance: "documentsReports",
+  output: "documentsOutputs",
 };
 
+/**
+ * The documents (the engine pack).
+ *
+ * The pack is the **core's** ✓ — one bundle ✓ (ADR-0067 ✓) — and this screen shows what
+ * it holds ✓: the drawings ✓, the BBS ✓, the BOQ ✓, the compliance audit ✓ and the spec
+ * ✓ ✓. The user sees the handover before they hand it over ✓ ✓.
+ */
 export function DocumentsScreen() {
-  const { t, lang } = useI18n();
-  const [exported, setExported] = useState<string | null>(null);
+  const { t } = useI18n();
+  const [pack, setPack] = useState("");
+  const [documents, setDocuments] = useState<DocumentsReply | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
 
-  /** The project's bundle: one file, the whole history, checked (W5.5). */
-  const exportBundle = async () => {
+  const load = async () => {
     if (!isDesktopShell()) {
-      setProblem(t("bundleNeedsShell"));
+      setProblem(t("documentsNeedsShell"));
+      return;
+    }
+    if (!pack.trim()) {
+      setProblem(t("documentsNeedsPack"));
       return;
     }
     try {
-      const reply = await ask("bundle.export", {
-        project: "projects/current",
-        target: "projects/current.bundle.zip",
-      });
+      const reply = await ask("documents.list", { pack: pack.trim() });
       if (reply.error) {
         setProblem(String(reply.error.message));
+        setDocuments(null);
         return;
       }
-      setExported("projects/current.bundle.zip");
+      setDocuments(reply.result as DocumentsReply);
       setProblem(null);
     } catch (error) {
       setProblem(error instanceof Error ? error.message : String(error));
     }
   };
 
+  const groups = documents ? Object.entries(documents.groups) : [];
+
   return (
     <div className="screen">
-      <PageHeader title={t("docsTitle")} subtitle={t("engineerPending")} />
-      <div className="stack">
-        {documents.map((doc) => {
-          const meta = META[doc.id];
-          return (
-            <Card key={doc.id} className="doc-row">
-              <Badge tone={meta.tone}>{t(meta.label)}</Badge>
-              <div className="grow">
-                <div className="doc-desc muted">{t(meta.desc)}</div>
-                <div className="faint small">
-                  {t("sheets").replace("{n}", fmtNum(doc.sheets, lang))}
-                </div>
-              </div>
-              <Badge tone={doc.status === "ready" ? "sage" : "amber"}>
-                {doc.status === "ready" ? t("docsReady") : t("docsDraft")}
-              </Badge>
-              <Button variant="ghost">{t("openFolder")}</Button>
-              <Button variant="soft" onClick={exportBundle}>
-                {t("exportLabel")}
-              </Button>
-            </Card>
-          );
-        })}
+      <PageHeader title={t("documentsTitle")} subtitle={t("documentsSubtitle")} />
+      <div className="row">
+        <input
+          className="input grow"
+          value={pack}
+          placeholder={t("documentsPackPlaceholder")}
+          onChange={(event) => setPack(event.target.value)}
+        />
+        <Button variant="soft" onClick={() => void load()}>
+          {t("documentsOpen")}
+        </Button>
       </div>
-      {exported ? (
-        <Callout title={t("bundleExported")}>
-          <span className="small">{exported}</span>
-        </Callout>
-      ) : null}
       {problem ? (
-        <Callout title={t("bundleFailed")}>
+        <Callout title={t("documentsFailed")}>
           <span className="small">{problem}</span>
         </Callout>
       ) : null}
+      {documents ? (
+        <div className="row">
+          <Badge tone="sky">{documents.projectName}</Badge>
+          <Badge tone="lavender">
+            {t("documentsCount").replace("{n}", String(documents.count))}
+          </Badge>
+        </div>
+      ) : null}
+      {groups.map(([group, files]) => (
+        <Card key={group} className="stack">
+          <div className="row-between">
+            <h3>{t(GROUP_KEY[group] ?? "documentsOutputs")}</h3>
+            <Badge tone="neutral">{files.length}</Badge>
+          </div>
+          <div className="row">
+            {files.map((file) => (
+              <Badge key={file} tone="neutral">
+                {file.split("/").pop()}
+              </Badge>
+            ))}
+          </div>
+        </Card>
+      ))}
     </div>
   );
 }

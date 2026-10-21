@@ -201,6 +201,22 @@ const en = {
   helpFlow: "App",
   helpNeedsShell:
     "The manual is searched by the app's core, which runs inside the desktop shell.",
+  documentsTitle: "Documents",
+  documentsSubtitle: "What the engine pack holds - the handover, before it is handed over.",
+  documentsPackPlaceholder: "The path of the engineer pack",
+  documentsOpen: "Open the pack",
+  documentsFailed: "The pack could not be read",
+  documentsNeedsShell:
+    "The pack is the core's, and the core runs inside the desktop shell.",
+  documentsNeedsPack: "The documents screen needs the engineer pack.",
+  documentsProject: "The project",
+  documentsDrawings: "Drawings",
+  documentsBbs: "Bar schedule",
+  documentsBoq: "Bill of quantities",
+  documentsReports: "Compliance",
+  documentsOutputs: "Outputs",
+  documentsRevisions: "{n} revisions",
+  documentsCount: "{n} files",
   importFailed: "The import could not be read",
   importPdfPlaceholder: "The path of your own PDF",
   importRead: "Read the PDF",
@@ -432,6 +448,22 @@ const bn: typeof en = {
   importNeedsPdf: "ইমপোর্টের খুরয় কাঠির PDF দরকার করে।",
 
   importFailed: "ইমপোর্ট পডছা পরতি সমভবেতে হয়তা",
+
+  documentsTitle: "ডধাকুমেন্ত",
+  documentsSubtitle: "ইংজিনিয়ার প্যাকের কণা ররেশে - হস্টাতের পেতে পহের পহনে।",
+  documentsPackPlaceholder: "ইংজিনিয়ার প্যাকের পথ",
+  documentsOpen: "প্যাকের খোলতেই",
+  documentsFailed: "প্যাকের পডছা পরতি সমভবেতে হয়তা",
+  documentsNeedsShell: "প্যাকের কোরেরটী, আফ়ে ডেসক্রোপ শেলের ভিতরে চলে।",
+  documentsNeedsPack: "ডধাকুমেন্ত স্ক্রেনটার ইংজিনিয়ার প্যাকের কাটায় করুন।",
+  documentsProject: "প্রতিরার",
+  documentsDrawings: "ড্রাটিংস",
+  documentsBbs: "বার সকেডুল",
+  documentsBoq: "বিল কারাকাতণানয়রাট",
+  documentsReports: "কণডধাইন্স",
+  documentsOutputs: "আউটপুট",
+  documentsRevisions: "{n} স্রতান",
+  documentsCount: "{n} ডাইল",
 };
 
 export const STRINGS = { en, bn } as const;
