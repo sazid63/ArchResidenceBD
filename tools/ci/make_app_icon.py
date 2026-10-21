@@ -34,7 +34,8 @@ def _png(path: pathlib.Path) -> None:
     for y in range(SIZE):
         raw.append(0)  # the filter byte: none
         for x in range(SIZE):
-            raw.extend(_pixel(x, y))
+            red, green, blue = _pixel(x, y)
+            raw.extend((red, green, blue, 255))  # RGBA - the shell's icon reader wants it
 
     def chunk(kind: bytes, payload: bytes) -> bytes:
         return (
@@ -44,7 +45,8 @@ def _png(path: pathlib.Path) -> None:
             + struct.pack(">I", zlib.crc32(kind + payload) & 0xFFFFFFFF)
         )
 
-    header = struct.pack(">IIBBBBB", SIZE, SIZE, 8, 2, 0, 0, 0)
+    # colour type 6 is RGBA (8 bits per channel, with alpha).
+    header = struct.pack(">IIBBBBB", SIZE, SIZE, 8, 6, 0, 0, 0)
     data = (
         b"\x89PNG\r\n\x1a\n"
         + chunk(b"IHDR", header)

@@ -31,7 +31,7 @@ fn ask(state: State<'_, CoreSidecar>, id: String, method: String, params: Value)
             })
         }
     };
-    let request = archres_bridge::Request::with_params(id, method, params);
+    let request = archres_bridge::Request::with_params(id.clone(), method, params);
     match bridge.call(&request) {
         Ok(response) => serde_json::to_value(response).unwrap_or_else(|error| {
             serde_json::json!({
