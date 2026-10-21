@@ -66,9 +66,12 @@ def test_the_review_quotes_the_equivalence_gate() -> None:
 
 def test_the_review_quotes_the_price_services_numbers() -> None:
     registry = _json(ROOT / "data" / "prices" / "registry.json")
-    assert len(registry["cards"]) == 1
-    assert registry["cards"][0]["cardId"] == "dhaka-example-2026-10"
-    assert registry["cards"][0]["lines"] == 8
+    cards = {card["cardId"]: card for card in registry["cards"]}
+    # The placeholder the phase closed with, and the official card transcribed since.
+    assert "dhaka-example-2026-10" in cards
+    assert cards["dhaka-example-2026-10"]["lines"] == 8
+    assert "pwd-sor-2022-civil-works" in cards
+    assert cards["pwd-sor-2022-civil-works"]["status"] == "candidate"
     assert len(registry["skipped"]) == 4
 
     # The BOQ priced from the resolved card must equal the BOQ priced from the card.

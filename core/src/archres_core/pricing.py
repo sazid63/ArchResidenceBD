@@ -264,6 +264,11 @@ class CardRegistry:
         return sorted(found, key=lambda entry: entry.effective_from, reverse=True)
 
     def latest_for_region(self, region: str, *, on: str | None = None) -> CardEntry:
+        """The card that covers a region: an **active** one first, then the newest candidate.
+
+        A candidate card is unverified content (plan §9), so it never silently takes the place
+        of a verified one — the activation is a human's act and the order respects it.
+        """
         found = self.for_region(region, on=on)
         if not found:
             raise PriceServiceError(
@@ -271,7 +276,8 @@ class CardRegistry:
                 + (f" on {on}" if on else "")
                 + "; the prices are missing, not zero"
             )
-        return found[0]
+        active = [entry for entry in found if entry.status == "active"]
+        return (active or found)[0]
 
 
 def _covers(entry: CardEntry, on: str) -> bool:

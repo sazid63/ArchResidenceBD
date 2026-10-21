@@ -9,6 +9,7 @@
 | Card | Region | Status | From | Lines | File |
 |---|---|---|---|---:|---|
 | `dhaka-example-2026-10` | dhaka | candidate | 2026-10-01 | 8 | `spec/examples/interfaces/rate-card-dhaka-example.json` |
+| `pwd-sor-2022-civil-works` | dhaka | candidate | 2023-02-23 | 9 | `data/prices/cards/pwd-sor-2022-civil-works-candidate.json` |
 
 Files that are not rate cards (skipped, reported):
 
