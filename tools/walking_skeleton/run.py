@@ -30,6 +30,7 @@ import sys
 
 from archres_core.cad.pool import WorkerConfig, WorkerPool
 from archres_core.design import (
+    design_mep,
     build_boq,
     design_project,
     render_boq_markdown,
@@ -213,6 +214,39 @@ def _run(engine: pathlib.Path, workdir: pathlib.Path) -> dict:
         if boq["totals"]["amountBdt"] != total:
             report["failures"].append("the BOQ total is not the sum of its priced lines")
         report["boqMarkdown"] = render_boq_markdown(boq)
+        # 5. the MEP: the point layouts, the circuits and the schedules (the plan's pipeline
+        #    ends the structural stages with "per-floor + MEP (layouts/schedules/sizing)").
+        meps = [
+            design_mep(spec, floor, storey_index=floor.storey_index)
+            for floor in design.floors
+        ]
+        points = [point for mep in meps for point in mep.points]
+        circuits = [circuit for mep in meps for circuit in mep.circuits]
+        schedules = [row for mep in meps for row in mep.schedules]
+        report["mep"] = {
+            "storeys": len(meps),
+            "points": len(points),
+            "circuits": len(circuits),
+            "scheduleRows": len(schedules),
+            "loadW": round(sum(point.load_w for point in points), 3),
+            "fixtureUnits": round(sum(point.fixture_units for point in points), 3),
+        }
+        # The circuits carry what their points carry: the load a reader reconciles by hand.
+        point_load = round(sum(point.load_w for point in points), 3)
+        circuit_load = round(sum(circuit.load_w for circuit in circuits), 3)
+        if abs(point_load - circuit_load) > 0.01:
+            report["failures"].append(
+                f"the circuits carry {circuit_load:g} W and the points {point_load:g} W"
+            )
+        if not schedules:
+            report["failures"].append("the MEP carries no schedules")
+        for mep in meps:
+            for circuit in mep.circuits:
+                if circuit.load_w > 3000.0 + 0.01:
+                    report["failures"].append(
+                        f"the circuit {circuit.id} carries {circuit.load_w:g} W, over the "
+                        "cable's limit"
+                    )
     finally:
         pool.stop()
     report["ok"] = not report["failures"]

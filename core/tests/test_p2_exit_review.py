@@ -31,6 +31,12 @@ def test_the_review_quotes_the_walking_skeletons_end_state() -> None:
     assert len(report["boq"]["unpriced"]) == 2
     assert report["steel"]["scheduledKg"] == 278.9998
     assert report["steel"]["measuredKg"] == 278.785
+    # the chain's MEP stage (ADR-0051): the points, the circuits and the schedules
+    mep = report["mep"]
+    assert mep["points"] == 22
+    assert mep["circuits"] == 1
+    assert mep["scheduleRows"] == 11
+    assert mep["loadW"] == 720.0
 
 
 def test_the_review_quotes_the_meshes_numbers() -> None:

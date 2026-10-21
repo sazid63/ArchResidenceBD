@@ -24,6 +24,14 @@
   "boqMarkdown": "# Bill of Quantities\n\n- Project: `7c9e6f10-2a3b-4c5d-9e8f-1a2b3c4d5e6f`\n- Rate card: `dhaka-example-2026-10` (dhaka, from 2026-10-01, status **candidate**)\n- Source: Illustrative example card (structure demo) (manual)\n\n| Phase | Description | Type | Qty | Unit | Rate BDT | Amount BDT |\n|---|---|---|---:|---|---:|---:|\n| site-excavation | Excavation (machinery) | machinery | 24.491 | hour | 2,800.00 | 68,574.80 |\n| foundation | Cement (foundation) | material | 72.900 | bag | 550.00 | 40,095.00 |\n| floor | Cement (floor) | material | 19.828 | bag | 550.00 | 10,905.45 |\n| foundation | Sand (foundation) | material | 17.204 | cft | 42.00 | 722.58 |\n| floor | Sand (floor) | material | 4.679 | cft | 42.00 | 196.53 |\n| floor | Steel reinforcement | material | 0.279 | ton | 89,000.00 | 24,831.00 |\n| foundation | Mason (labour) | labour | 3.888 | day | 950.00 | 3,693.60 |\n| floor | Mason (floor, labour) | labour | 1.058 | day | 950.00 | 1,004.63 |\n| foundation | Concrete mixer | machinery | 1.215 | day | 3,500.00 | 4,252.50 |\n| foundation | Formwork (foundation) | other | 28.800 | sqm | - | - |\n| floor | Formwork (floor) | other | 17.190 | sqm | - | - |\n\n## Subtotals\n\n- floor: 36,937.61 BDT\n- foundation: 48,763.68 BDT\n- site-excavation: 68,574.80 BDT\n\n## By cost type\n\n- labour: 4,698.23 BDT\n- machinery: 72,827.30 BDT\n- material: 76,750.56 BDT\n\n**Total: 154,276.09 BDT** (9 priced lines, 2 unpriced: formwork-foundation, formwork-floor)\n\n_the quantities are measured from the design; the rates come from the rate card (dhaka-example-2026-10, status candidate)_\n\n> **The rate card is a candidate**: it has not been verified against its source, so these prices are not a quotation. Acknowledge it before this BOQ is used.\n",
   "checks": {},
   "failures": [],
+  "mep": {
+    "circuits": 1,
+    "fixtureUnits": 14.0,
+    "loadW": 720.0,
+    "points": 22,
+    "scheduleRows": 11,
+    "storeys": 1
+  },
   "model": {
     "designVolumeM3": 12.36375,
     "objects": 15,
@@ -40,7 +48,7 @@
       },
       "page.pdf": {
         "bytes": 447996,
-        "sha256": "8caec79d307be66a586cc482cef9b360bccf2df8e95777bf051942c4c7f2e300"
+        "sha256": "397fa5522a9634e21828f829e6f009659565e28af5b55de4836ff7dfe240017d"
       },
       "page.svg": {
         "bytes": 14456,
@@ -63,6 +71,10 @@
     {
       "phase": "floor",
       "stage": "floor"
+    },
+    {
+      "phase": "floor",
+      "stage": "mep"
     },
     {
       "phase": "roof-boundary",

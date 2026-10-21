@@ -26,6 +26,9 @@ PIPELINE = (
     ("site-excavation", "excavation"),
     ("foundation", "foundation"),
     ("floor", "floor"),
+    # The per-floor MEP (plan §6: "per-floor + MEP (layouts/schedules/sizing)") - the point
+    # layouts, the circuits and the schedules (W3.1).
+    ("floor", "mep"),
     ("roof-boundary", "not covered in v0"),
     ("common-services", "not covered in v0"),
     ("drawings", "sheet"),
