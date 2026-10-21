@@ -34,6 +34,11 @@ shell and the core.
   its own, and the Tauri glue is a thin layer on top of it.
 - **An error is an error, not a dead channel** — a malformed line, an unknown method and a
   missing session all come back as an envelope, and the next request still works.
+- **The channel speaks UTF-8 in every locale** — the shell writes UTF-8 bytes ✓ and the core
+  says so on the way in ✓, because a pipe on Windows is decoded in the *locale code page* ✗:
+  a user's machine in cp1252 would otherwise hand the core a mangled Bangla answer ✗ (and
+  the reader crashes on it ✗) ✓ — and a test forces that locale so the case is the same on
+  every machine ✓ ✓.
 - **The core's health is a first-class fact of the app** — the About screen shows it, and in
   a browser (the prototype) it says plainly that there is no core.
 
@@ -82,6 +87,14 @@ the respond: {"id": "s3", "result": {"turn": {"decision": "ask_again",
 (The answer "I do not know" to an **essential** question is an `ask_again` — the interview
 never assumes an essential value — and the Bangla reply comes back through the same
 channel, in UTF-8, un-mangled.)
+
+## The bug the locale test found (2026-10-21)
+
+The channel read **stdin** in the locale code page ✗ — the fix was to reconfigure the
+*input* as well as the output ✓ (`utf8_stdio((sys.stdin, sys.stdout, sys.stderr))` ✓).
+Proved by forcing the locale: the channel without the fix **crashes** on a Bangla answer ✗
+(the JSON cannot be read ✗), and with the fix the answer comes back exactly as it was
+typed ✓ — `আমার বাড়ি` ✓ ✓.
 
 ## What is deliberately not here
 

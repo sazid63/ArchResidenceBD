@@ -269,7 +269,10 @@ def main(argv: Iterable[str] | None = None) -> int:
     """Run the bridge on stdio ✓ (the shell spawns this ✓)."""
     from .stdio import utf8_stdio
 
-    utf8_stdio()
+    # The **input** matters as much as the output: the app's answers are in the user's
+    # language (Bangla ✓), and a piped stdin on Windows is decoded in the locale code
+    # page ✗ — so the channel would read a mangled answer ✗ and write a mangled reply ✗.
+    utf8_stdio((sys.stdin, sys.stdout, sys.stderr))
     import argparse
 
     parser = argparse.ArgumentParser(description="The core, spoken over stdio (the shell's bridge).")

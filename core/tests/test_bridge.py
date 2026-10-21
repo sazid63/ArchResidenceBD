@@ -121,6 +121,68 @@ def test_a_malformed_line_is_an_error_and_the_channel_survives() -> None:
     assert second["result"]["name"] == "archres-core"
 
 
+def test_the_channel_speaks_utf8_in_a_cp1252_locale(tmp_path: pathlib.Path) -> None:
+    """A user's machine may be in a cp1252 locale - the channel must not inherit that.
+
+    The shell writes UTF-8 bytes (serde_json writes text ✓) ✓, and the core reads them ✓ -
+    but a pipe on Windows is decoded in the *locale code page* ✗, so without the channel
+    saying so, a Bangla answer arrives mangled ✗ (or crashes the reader ✗). The locale is
+    forced here so the test is the same on every machine ✓.
+    """
+    import os
+    import subprocess
+    import sys
+
+    core = ROOT / "core"
+    spec = json.loads(EXAMPLE_SPEC.read_text(encoding="utf-8"))
+    answer = "আমার বাড়ি"
+
+    process = subprocess.Popen(
+        [sys.executable, "-m", "archres_core.bridge", "--root", str(ROOT)],
+        cwd=core,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        env={
+            **os.environ,
+            "PYTHONPATH": str(core / "src"),
+            "PYTHONIOENCODING": "cp1252",  # a user's machine in the code page
+        },
+    )
+
+    def ask(request: dict) -> dict:
+        assert process.stdin is not None and process.stdout is not None
+        process.stdin.write((json.dumps(request, ensure_ascii=False) + "\n").encode("utf-8"))
+        process.stdin.flush()
+        line = process.stdout.readline()
+        if not line:
+            raise AssertionError("the bridge closed the channel")
+        return json.loads(line)
+
+    try:
+        created = ask(
+            {
+                "id": "1",
+                "method": "session.create",
+                "params": {"root": str(tmp_path), "spec": spec, "sessionId": "bn"},
+            }
+        )
+        assert created["result"]["prompt"]["questionId"]
+        replied = ask(
+            {
+                "id": "2",
+                "method": "session.respond",
+                "params": {"sessionId": "bn", "text": answer},
+            }
+        )
+        turn = replied["result"]["turn"]["turn"]
+        assert turn["value"] == answer, "the Bangla answer did not survive the channel"
+    finally:
+        if process.stdin is not None:
+            process.stdin.close()
+        process.wait(timeout=30)
+
+
 def test_the_error_codes_are_the_job_protocol_s() -> None:
     """One vocabulary for the app: the codes are the frozen ones."""
     schema = json.loads(JOB_PROTOCOL.read_text(encoding="utf-8"))
