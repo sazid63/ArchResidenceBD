@@ -50,7 +50,7 @@ Building Spec ─▶ the shared datum (the project origin, mm, z up)
 - **The master agrees with the design**: every linked object's volume is within the declared 1 %
   of the design's, and the object count matches the design exactly.
 - The phase files are **8,143 B** (the foundation) and **9,026 B** (the floor); the master is
-  **6,573 B** — it is smaller than the phases it links, because it holds links, not shapes.
+  **6,605 B** — it is smaller than the phases it links, because it holds links, not shapes.
 - The master document holds the datum as a property ✓.
 
 ## What is deliberately not here

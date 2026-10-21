@@ -51,7 +51,7 @@ carry timestamps, so they cannot be byte-compared in CI).
 
 - The phases are separate documents in one datum, so "regenerate only the phase that changed" is
   now *possible*; W2.11 turns it into a *gate*.
-- The master is small (6,573 B) because it holds links, not shapes — and it cannot drift from the
+- The master is small (6,605 B) because it holds links, not shapes — and it cannot drift from the
   phases, because it has no copy of them.
 - The app can load the master or a single phase; the workspace (W2.8) draws the mesh of one
   document today, and the linked master is the next layer.
