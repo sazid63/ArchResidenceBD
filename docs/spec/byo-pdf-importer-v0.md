@@ -57,6 +57,26 @@ nothing that turned a PDF into rule data.
   state — unreviewed, accepted or rejected · — and a reviewer can accept or reject each one
   ·.
 
+## In the app (2026-10-22)
+
+The plan's W4.7 names *"candidate extraction + **review UI**"* ✓ — and the screen is now the
+**core's** ✓ (ADR-0076 ✓) ✓. Through the channel the app uses ✓:
+
+```
+the candidates: 3
+   clause-3-15: page 1 | candidate | 3.15 A room shall be 2.75 m high
+   clause-3-16: page 1 | candidate | 3.16 A door shall be 0.9 m wide
+   clause-3-17: page 1 | candidate | 3.17 A stair shall be 1.2 m wide
+the review: {'ledger': '...\rule-book.pdf.review.json', 'candidateId': 'clause-3-15',
+             'decision': 'accepted', 'reviewed': 1}
+a bad decision: the decision must be accepted or rejected
+an unknown candidate: no candidate 'clause-9-9' in this PDF
+```
+
+The extraction is the **core's** ✓ (the app never reads a clause itself ✓ ✓), every candidate
+carries its **page** ✓ and is a **candidate** ✓, and the decision is **recorded** ✓ — in the
+core's ledger ✓, the same record the CLI writes ✓ ✓ ✓.
+
 ## What is deliberately not here
 
 - **Promoting accepted candidates into a pack** — a pack is written by hand, from reviewed

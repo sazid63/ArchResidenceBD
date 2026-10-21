@@ -157,6 +157,8 @@ class Bridge:
             "templates.list": self._templates_list,
             "project.create": self._project_create,
             "boq.build": self._boq_build,
+            "import.candidates": self._import_candidates,
+            "import.review": self._import_review,
         }.get(method)
 
     # -- the methods ----------------------------------------------------------------------
@@ -550,6 +552,84 @@ class Bridge:
                 "region": str(card.get("region") or ""),
                 "effectiveFrom": str(card.get("effectiveFrom") or ""),
             },
+        }
+
+    def _import_candidates(self, params: dict[str, Any]) -> dict[str, Any]:
+        """A user's own PDF as **candidate clauses** ✓ — candidates, never law ✓ ✓.
+
+        The importer is the core's ✓ (W4.7 ✓) ✓ — the app never extracts a clause itself
+        ✓ ✓ — and every candidate carries its **page** ✓ (a clause without a page cannot
+        be checked ✓ ✓) ✓ ✓.
+        """
+        from .importer import ImporterError, candidates_from_pdf
+
+        pdf = params.get("pdf")
+        if not isinstance(pdf, str) or not pdf:
+            raise BridgeError(CODE_INVALID_PARAMS, "import.candidates needs a PDF")
+        try:
+            candidates = candidates_from_pdf(pdf)
+        except ImporterError as exc:
+            raise BridgeError(CODE_INVALID_PARAMS, str(exc)) from exc
+        return {
+            "pdf": pdf,
+            "candidates": [candidate.as_dict() for candidate in candidates],
+            "count": len(candidates),
+        }
+
+    def _import_review(self, params: dict[str, Any]) -> dict[str, Any]:
+        """Record a reviewer's decision on a candidate ✓ — in the core's ledger ✓ ✓.
+
+        The decision is **recorded** ✓ (who ✓, when ✓, why ✓) — it is the evidence that a
+        rule entered a pack deliberately ✓ ✓ — and a candidate with no decision is
+        visibly unreviewed ✓ ✓.
+        """
+        from .importer import (
+            DECISION_ACCEPTED,
+            DECISION_REJECTED,
+            Review,
+            candidates_from_pdf,
+            load_review,
+            save_review,
+        )
+
+        pdf = params.get("pdf")
+        candidate_id = params.get("candidateId")
+        if not isinstance(pdf, str) or not pdf:
+            raise BridgeError(CODE_INVALID_PARAMS, "import.review needs a PDF")
+        if not isinstance(candidate_id, str) or not candidate_id:
+            raise BridgeError(CODE_INVALID_PARAMS, "import.review needs a candidate id")
+        decision = str(params.get("decision") or "")
+        if decision not in (DECISION_ACCEPTED, DECISION_REJECTED):
+            raise BridgeError(
+                CODE_INVALID_PARAMS,
+                f"the decision must be {DECISION_ACCEPTED} or {DECISION_REJECTED}",
+            )
+        try:
+            candidates = candidates_from_pdf(pdf)
+        except ImporterError as exc:
+            raise BridgeError(CODE_INVALID_PARAMS, str(exc)) from exc
+        if not any(candidate.id == candidate_id for candidate in candidates):
+            raise BridgeError(CODE_INVALID_PARAMS, f"no candidate {candidate_id!r} in this PDF")
+
+        ledger = pathlib.Path(str(pdf) + ".review.json")
+        reviews = [
+            review for review in load_review(ledger) if review.candidate_id != candidate_id
+        ]
+        reviews.append(
+            Review(
+                candidate_id=candidate_id,
+                decision=decision,
+                reviewed_by=str(params.get("reviewedBy") or ""),
+                reviewed_at=str(params.get("reviewedAt") or ""),
+                note=str(params.get("note") or ""),
+            )
+        )
+        save_review(ledger, reviews)
+        return {
+            "ledger": str(ledger),
+            "candidateId": candidate_id,
+            "decision": decision,
+            "reviewed": len(reviews),
         }
 
     def _price_card(self) -> dict[str, Any]:

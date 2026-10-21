@@ -201,6 +201,12 @@ const en = {
   helpFlow: "App",
   helpNeedsShell:
     "The manual is searched by the app's core, which runs inside the desktop shell.",
+  importFailed: "The import could not be read",
+  importPdfPlaceholder: "The path of your own PDF",
+  importRead: "Read the PDF",
+  importNeedsShell:
+    "The import is the core's, and the core runs inside the desktop shell.",
+  importNeedsPdf: "The import needs a PDF.",
   bundleExported: "The project's bundle is written",
   bundleFailed: "The bundle could not be written",
   bundleNeedsShell:
@@ -419,6 +425,13 @@ const bn: typeof en = {
   boqUnpricedNote: "এই লাইনের থেকতে নেই - সামূ্য়রতের মধত্তার নেই, আরেরেওরে স্ষণিয়ে রহেছে।",
 
   costOther: "অন্যা",
+
+  importPdfPlaceholder: "আপনার নিগের PDF স্থান",
+  importRead: "PDF পড়নক তয়লয়",
+  importNeedsShell: "ইমপোর্ট কোরের করে, আফ়ে ডেসক্রোপ শেলের ভিতরে চলে।",
+  importNeedsPdf: "ইমপোর্টের খুরয় কাঠির PDF দরকার করে।",
+
+  importFailed: "ইমপোর্ট পডছা পরতি সমভবেতে হয়তা",
 };
 
 export const STRINGS = { en, bn } as const;

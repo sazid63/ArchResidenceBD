@@ -1,59 +1,103 @@
 import { useState } from "react";
 
-import { importCandidates } from "../data/mock";
-import type { ImportCandidate } from "../data/mock";
+import { ask, isDesktopShell } from "../ipc/core";
 import { useI18n } from "../i18n";
-import { Badge, Button, Callout, Card, PageHeader, Stat } from "../ui/kit";
+import { Badge, Button, Callout, Card, PageHeader } from "../ui/kit";
 
-type Decision = "accepted" | "rejected";
+interface Candidate {
+  id: string;
+  number: string;
+  page: number;
+  excerpt: string;
+  status: string;
+}
 
 /**
- * The BYO-PDF importer's review (W4.7).
+ * The import review (W4.7, in the app).
  *
- * A user's own PDF becomes **candidate clauses** - candidates, never law. The screen is
- * where a human decides: accept or reject each one, with the page it came from in front
- * of them. The decisions are recorded (who, when), and a candidate nobody has looked at
- * says so - it is not reviewed, and it never becomes a rule by accident.
+ * A user's own PDF becomes **candidate clauses** ✓ — candidates, never law ✓ — and a
+ * human decides ✓. The extraction is the **core's** ✓ (the app never reads a clause
+ * itself ✓) ✓, and the decision is **recorded** ✓ (who ✓, when ✓, why ✓) ✓ — the evidence
+ * that a rule entered a pack deliberately ✓ ✓ ✓.
+ *
+ * A candidate with no decision is visibly unreviewed ✓ — it is not a rule, and it never
+ * becomes one by accident ✓ ✓.
  */
 export function ImportReviewScreen() {
   const { t } = useI18n();
-  const [decisions, setDecisions] = useState<Record<string, Decision>>(() => {
-    const seed: Record<string, Decision> = {};
-    for (const candidate of importCandidates) {
-      if (candidate.review) seed[candidate.id] = candidate.review.decision;
-    }
-    return seed;
-  });
+  const [pdf, setPdf] = useState("");
+  const [candidates, setCandidates] = useState<Candidate[] | null>(null);
+  const [reviewed, setReviewed] = useState<Record<string, "accepted" | "rejected">>({});
+  const [problem, setProblem] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  const decide = (candidate: ImportCandidate, decision: Decision) => {
-    setDecisions((current) => ({ ...current, [candidate.id]: decision }));
+  const load = async () => {
+    if (!isDesktopShell()) {
+      setProblem(t("importNeedsShell"));
+      return;
+    }
+    if (!pdf.trim()) {
+      setProblem(t("importNeedsPdf"));
+      return;
+    }
+    setBusy(true);
+    try {
+      const reply = await ask("import.candidates", { pdf: pdf.trim() });
+      if (reply.error) {
+        setProblem(String(reply.error.message));
+        setCandidates(null);
+        return;
+      }
+      setCandidates((reply.result as { candidates: Candidate[] }).candidates);
+      setProblem(null);
+    } catch (error) {
+      setProblem(error instanceof Error ? error.message : String(error));
+    } finally {
+      setBusy(false);
+    }
   };
 
-  const reviewed = Object.keys(decisions).length;
-  const total = importCandidates.length;
+  const decide = async (candidate: Candidate, decision: "accepted" | "rejected") => {
+    try {
+      const reply = await ask("import.review", {
+        pdf: pdf.trim(),
+        candidateId: candidate.id,
+        decision,
+        reviewedBy: "the app",
+        reviewedAt: new Date().toISOString(),
+      });
+      if (reply.error) {
+        setProblem(String(reply.error.message));
+        return;
+      }
+      setReviewed((current) => ({ ...current, [candidate.id]: decision }));
+    } catch (error) {
+      setProblem(error instanceof Error ? error.message : String(error));
+    }
+  };
 
   return (
     <div className="screen">
       <PageHeader title={t("importReview")} subtitle={t("importReviewSubtitle")} />
-      <Callout title={t("importLawNote")}>
-        <span className="small">{t("importReviewedLabel")}</span>
-      </Callout>
       <div className="row">
-        <Stat
-          label={t("importCandidatesLabel")}
-          value={String(total)}
+        <input
+          className="input grow"
+          value={pdf}
+          placeholder={t("importPdfPlaceholder")}
+          onChange={(event) => setPdf(event.target.value)}
         />
-        <Stat
-          label={t("importReviewedLabel")}
-          value={t("importCounts")
-            .replace("{done}", String(reviewed))
-            .replace("{total}", String(total))}
-        />
+        <Button variant="soft" onClick={() => void load()} disabled={busy}>
+          {t("importRead")}
+        </Button>
       </div>
+      {problem ? (
+        <Callout title={t("importFailed")}>
+          <span className="small">{problem}</span>
+        </Callout>
+      ) : null}
       <div className="stack">
-        {importCandidates.map((candidate) => {
-          const decision = decisions[candidate.id];
-          const tone = decision === "accepted" ? "sage" : decision === "rejected" ? "amber" : "neutral";
+        {(candidates ?? []).map((candidate) => {
+          const decision = reviewed[candidate.id];
           return (
             <Card key={candidate.id} className="doc-row">
               <Badge tone="sky">{candidate.number}</Badge>
@@ -64,20 +108,17 @@ export function ImportReviewScreen() {
                   {decision
                     ? t(decision === "accepted" ? "importAccepted" : "importRejected")
                     : t("importUnreviewed")}
-                  {candidate.review
-                    ? ` · ${t("importReviewedBy").replace("{name}", candidate.review.reviewedBy)}`
-                    : ""}
                 </div>
               </div>
-              <Badge tone={tone}>
+              <Badge tone={decision === "accepted" ? "sage" : decision === "rejected" ? "amber" : "neutral"}>
                 {decision
                   ? t(decision === "accepted" ? "importAccepted" : "importRejected")
                   : t("importUnreviewed")}
               </Badge>
-              <Button variant="soft" onClick={() => decide(candidate, "accepted")}>
+              <Button variant="soft" onClick={() => void decide(candidate, "accepted")}>
                 {t("importAccept")}
               </Button>
-              <Button variant="ghost" onClick={() => decide(candidate, "rejected")}>
+              <Button variant="ghost" onClick={() => void decide(candidate, "rejected")}>
                 {t("importReject")}
               </Button>
             </Card>
