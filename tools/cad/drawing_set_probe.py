@@ -34,6 +34,7 @@ LAUNCHER = ROOT / "core" / "src" / "archres_core" / "cad" / "launcher.py"
 EXAMPLE = ROOT / "spec" / "examples" / "two-storey-residential.json"
 GENERATED = ROOT / "data" / "cad" / "generated" / "drawing-set"
 SET_ARTIFACTS = ("drawing-set.pdf", "set-design.json", "set-manifest.json")
+MACRO_PATH = GENERATED / "set-macro.py"
 
 
 def _sha256(path: pathlib.Path) -> str:
@@ -43,14 +44,10 @@ def _sha256(path: pathlib.Path) -> str:
 def main() -> int:
     utf8_stdio()
     parser = argparse.ArgumentParser(description="Probe the drawing set.")
-    parser.add_argument("--engine", required=True, help="freecadcmd path")
+    parser.add_argument("--engine", help="freecadcmd path (omit for the offline check)")
+    parser.add_argument("--check", action="store_true", help="check the committed set (no engine)")
     parser.add_argument("--json", help="write the measured report here")
     args = parser.parse_args()
-
-    engine = pathlib.Path(args.engine)
-    if not engine.is_file():
-        print(f"no engine at {engine}", file=sys.stderr)
-        return 1
 
     spec = json.loads(EXAMPLE.read_text(encoding="utf-8"))
     foundation = design_foundation(spec)
@@ -60,6 +57,33 @@ def main() -> int:
     )
     design = design_drawing_set(spec, foundation, floors)
     macro = render_set_macro(design)
+
+    if args.check:
+        # The offline check: the macro the engine runs is the committed one, and the committed
+        # set is there. The measured numbers need the engine (the weekly job).
+        problems: list[str] = []
+        if not MACRO_PATH.is_file():
+            problems.append(f"missing {MACRO_PATH.relative_to(ROOT).as_posix()}")
+        elif MACRO_PATH.read_text(encoding="utf-8") != macro:
+            problems.append(f"{MACRO_PATH.relative_to(ROOT).as_posix()} is stale")
+        for name in SET_ARTIFACTS:
+            if not (GENERATED / name).is_file():
+                problems.append(f"missing {name}")
+        for index in range(1, len(design.sheets) + 1):
+            for name in (f"page-{index}.svg", f"page-{index}.dxf"):
+                if not (GENERATED / name).is_file():
+                    problems.append(f"missing {name}")
+        for problem in problems:
+            print(f"FAIL {problem}", file=sys.stderr)
+        if problems:
+            return 1
+        print("the committed drawing set is fresh")
+        return 0
+
+    engine = pathlib.Path(args.engine or "")
+    if not engine.is_file():
+        print(f"no engine at {engine}", file=sys.stderr)
+        return 1
 
     pool = WorkerPool(
         WorkerConfig(
@@ -127,6 +151,7 @@ def main() -> int:
                 GENERATED.mkdir(parents=True, exist_ok=True)
                 for name in names:
                     (GENERATED / name).write_bytes((folder / name).read_bytes())
+                MACRO_PATH.write_text(macro, encoding="utf-8", newline="\n")
                 report["committed"] = sorted(names)
     finally:
         pool.stop()

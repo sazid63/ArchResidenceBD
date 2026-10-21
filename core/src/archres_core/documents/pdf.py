@@ -72,6 +72,24 @@ def _escape(text: str) -> str:
     )
 
 
+def _check_encodable(text: str) -> str:
+    """Refuse text the PDF's font cannot carry.
+
+    The built-in faces are WinAnsi (cp1252): a Bangla line or a curly quote would silently
+    become "?" in the finished document, and a document that quietly mangles its text is worse
+    than one that refuses. The Bangla belongs to the browser's print (the plan's HTML->print-PDF
+    route); this writer says so instead of pretending.
+    """
+    try:
+        str(text).encode("cp1252")
+    except UnicodeEncodeError as exc:
+        raise PdfError(
+            f"the text cannot be written in the PDF's font (WinAnsi): {text!r} "
+            "(the Bangla reports are the browser's print - HTML->print-PDF)"
+        ) from exc
+    return str(text)
+
+
 def _page_stream(page: Page) -> str:
     parts = ["BT"]
     for line in page.lines:
@@ -79,7 +97,7 @@ def _page_stream(page: Page) -> str:
         parts.append(f"/{font} {line.size:g} Tf")
         parts.append(f"{line.gray:g} g")
         parts.append(f"1 0 0 1 {line.x:.2f} {PAGE_HEIGHT - line.y:.2f} Tm")
-        parts.append(f"({_escape(line.text)}) Tj")
+        parts.append(f"({_escape(_check_encodable(line.text))}) Tj")
     parts.append("ET")
     return "\n".join(parts).encode("latin-1", errors="replace").decode("latin-1")
 

@@ -103,6 +103,10 @@ jobs:
         run: uv run --directory core python ../tools/cad/federation_probe.py --check
       - name: The generated common-services fixtures are fresh (offline, no engine)
         run: uv run --directory core python ../tools/cad/commons_probe.py --check
+      - name: The committed drawing set is fresh (offline, no engine)
+        run: uv run --directory core python ../tools/cad/drawing_set_probe.py --check
+      - name: The spec engine survives the fuzzer (plan section 9)
+        run: uv run --directory core python ../tools/ci/spec_fuzz_guard.py
 
   # Real FreeCAD, weekly and on demand. Not on every push: this is a private repository and a
   # full engine install per push would spend the monthly Actions minutes for no extra signal.
@@ -181,6 +185,11 @@ jobs:
           uv run --directory core python ../tools/cad/commons_probe.py \
             --engine "$ARCHRES_FREECADCMD" \
             --json "$GITHUB_WORKSPACE/data/tmp/cad-ci/commons-probe.json"
+      - name: Probe the drawing set (the sheets an engineer sends)
+        run: |
+          uv run --directory core python ../tools/cad/drawing_set_probe.py \
+            --engine "$ARCHRES_FREECADCMD" \
+            --json "$GITHUB_WORKSPACE/data/tmp/cad-ci/drawing-set-probe.json"
       - name: Run the walking skeleton (one house, end to end, every stage checked)
         run: |
           uv run --directory core python ../tools/walking_skeleton/run.py \

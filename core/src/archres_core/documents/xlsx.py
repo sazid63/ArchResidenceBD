@@ -59,11 +59,17 @@ def _column_name(index: int) -> str:
     return name
 
 
+#: The number formats the writer knows, and the style each one uses.
+NUMBER_FORMATS = {"0.000": 2, "0.00": 3}
+
+
 def _cell_xml(reference: str, cell: Cell, style_default: int, style_header: int) -> str:
     if cell.header:
         style = style_header
     elif cell.number_format:
-        style = style_default
+        style = NUMBER_FORMATS.get(cell.number_format)
+        if style is None:
+            raise DocumentError(f"unknown number format: {cell.number_format!r}")
     else:
         style = 0
     value = cell.value
@@ -83,6 +89,15 @@ def _cell_xml(reference: str, cell: Cell, style_default: int, style_header: int)
     )
 
 
+def _number_format(value: Any) -> str | None:
+    """The format a number wants: a weight to three decimals, a rate to two."""
+    if isinstance(value, bool) or not isinstance(value, float):
+        return None
+    if abs(value - round(value, 2)) < 1e-9:
+        return "0.00"
+    return "0.000"
+
+
 def _sheet_xml(sheet: Sheet) -> str:
     rows_xml: list[str] = []
     if sheet.header:
@@ -95,7 +110,7 @@ def _sheet_xml(sheet: Sheet) -> str:
         cells = "".join(
             _cell_xml(
                 f"{_column_name(index)}{offset}",
-                Cell(value),
+                Cell(value, number_format=_number_format(value)),
                 0,
                 1,
             )
@@ -143,8 +158,12 @@ STYLES = (
     '<fill><patternFill patternType="gray125"/></fill></fills>'
     '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'
     '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
-    '<cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
-    '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs>'
+    '<numFmts count="2"><numFmt numFmtId="164" formatCode="0.000"/>'
+    '<numFmt numFmtId="165" formatCode="0.00"/></numFmts>'
+    '<cellXfs count="4"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
+    '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>'
+    '<xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>'
+    '<xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs>'
     '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>'
     "</styleSheet>"
 )
