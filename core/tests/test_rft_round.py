@@ -23,6 +23,8 @@ from archres_core.training.rft import (
     RFT_VERSION,
     build_rft_records,
     judge_answer,
+    judge_repair,
+    read_code,
     round_document,
     sample_round,
     same_value,
@@ -31,6 +33,7 @@ from archres_core.training.records import RecordError, validate_record
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 SFT_SCHEMA = ROOT / "spec" / "schemas" / "sft-record.schema.json"
+REPAIR_TRAIN = ROOT / "data" / "training" / "repair-v1" / "train.jsonl"
 
 
 def _record(record_id: str = "chat-parse-area-name-slp-as-given-bn") -> dict:
@@ -93,8 +96,8 @@ def test_an_answer_that_differs_is_dropped_with_the_reason() -> None:
 
 def test_an_unreadable_answer_is_dropped() -> None:
     record = _record()
-    value, reason = judge_answer(record, "I could not read that")
-    assert value is None
+    payload, reason = judge_answer(record, "I could not read that")
+    assert payload == {}
     assert reason.startswith("unreadable")
 
 
@@ -197,3 +200,107 @@ def test_a_model_that_cannot_be_reached_is_a_dropped_sample() -> None:
 def test_a_round_needs_at_least_one_sample() -> None:
     with pytest.raises(ValueError):
         sample_round(ScriptedClient(), [_record()], samples=0)
+
+
+def _repair_record() -> dict:
+    """A real repair record from the committed training side."""
+    from archres_core.training.records import load_jsonl
+
+    return load_jsonl(REPAIR_TRAIN)[0]
+
+
+def test_a_fenced_macro_is_unwrapped() -> None:
+    """The models fence their code; the engine must not be asked to run the fence."""
+    assert read_code("```python\nprint('hi')\n```") == "print('hi')"
+    assert read_code("print('hi')") == "print('hi')"
+
+
+def test_a_fix_that_verifies_is_kept() -> None:
+    """The engine says it works - that is the truth, not the text's appearance."""
+    record = _repair_record()
+    seen: list[str] = []
+
+    def verify(source: str, case_id: str, params: dict) -> tuple[bool, str]:
+        seen.append(case_id)
+        return True, ""
+
+    payload, reason = judge_repair(record, "```python\npass\n```", verify=verify)
+    assert reason == ""
+    assert payload["passed"] is True
+    assert payload["caseId"] == record["input"]["caseId"]
+    assert seen == [record["input"]["caseId"]]
+
+
+def test_a_fix_that_fails_is_dropped_with_the_reason() -> None:
+    """A repair is not judged by whether it looks like the known-good one."""
+    record = _repair_record()
+
+    def verify(source: str, case_id: str, params: dict) -> tuple[bool, str]:
+        return False, "pads.1x1: the pad count is 1, expected 2"
+
+    payload, reason = judge_repair(record, "pass", verify=verify)
+    assert reason.startswith("failed:")
+    assert "pads.1x1" in reason
+    assert payload["passed"] is False
+
+
+def test_an_answer_with_no_code_is_dropped() -> None:
+    record = _repair_record()
+    payload, reason = judge_repair(
+        record, "   ", verify=lambda source, case_id, params: (True, "")
+    )
+    assert reason.startswith("unreadable")
+    assert payload == {}
+
+
+def test_a_repair_round_keeps_only_the_fixes_that_work() -> None:
+    """The whole way through: the model's own macro, judged by the engine, into a record."""
+    record = _repair_record()
+    client = ScriptedClient(replies=["```python\nimport FreeCAD\n```", "```python\nbroken\n```"])
+    calls: list[str] = []
+
+    def verify(source: str, case_id: str, params: dict) -> tuple[bool, str]:
+        calls.append(source)
+        return ("FreeCAD" in source), "the macro did not build the pads"
+
+    samples = sample_round(
+        client,
+        [record],
+        samples=2,
+        tasks=("repair.fix",),
+        judge=lambda rec, answer: judge_repair(rec, answer, verify=verify),
+    )
+    assert [sample.kept for sample in samples] == [True, False]
+
+    built = build_rft_records(
+        samples, [record], round_id="r1", model="archie-repair", verify_checks=("rft.case",)
+    )
+    assert len(built) == 1
+    rft = built[0]
+    assert rft["source"] == {"kind": "rft", "batch": "r1", "model": "archie-repair"}
+    assert rft["status"] == "verified"
+    assert rft["verifyChecks"] == ["rft.case"]
+    assistant = [message for message in rft["messages"] if message["role"] == "assistant"]
+    assert assistant[0]["content"] == "```python\nimport FreeCAD\n```"
+    # the record still says what the failure was - that truth did not change
+    assert rft["labels"] == record["labels"]
+
+
+def test_a_repair_rft_record_validates_against_the_sft_schema() -> None:
+    """A kept fix is a training record - the schema says so, and it must hold."""
+    schema = json.loads(SFT_SCHEMA.read_text(encoding="utf-8"))
+    record = _repair_record()
+    client = ScriptedClient(replies=["```python\\nimport FreeCAD\\n```"])
+    samples = sample_round(
+        client,
+        [record],
+        samples=1,
+        tasks=("repair.fix",),
+        judge=lambda rec, answer: judge_repair(
+            rec, answer, verify=lambda source, case_id, params: (True, "")
+        ),
+    )
+    built = build_rft_records(
+        samples, [record], round_id="r1", model="archie-repair", verify_checks=("rft.case",)
+    )
+    validate_record(built[0], schema)

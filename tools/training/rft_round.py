@@ -23,11 +23,16 @@ import argparse
 import json
 import pathlib
 import sys
+import tempfile
+from typing import Any
 
 from archres_core.agent.client import LlamaSwapClient, ModelError
+from archres_core.cad import find_engine, load_cases, run_candidate, verify_result
 from archres_core.stdio import utf8_stdio
 from archres_core.training.rft import (
     build_rft_records,
+    judge_answer,
+    judge_repair,
     round_document,
     sample_round,
 )
@@ -35,7 +40,45 @@ from archres_core.training.records import load_jsonl, write_jsonl
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 TRAIN = ROOT / "data" / "training" / "sft-v1" / "train.jsonl"
+REPAIR_TRAIN = ROOT / "data" / "training" / "repair-v1" / "train.jsonl"
+CASES = ROOT / "tools" / "cad" / "cases" / "foundation.json"
 OUT_ROOT = ROOT / "data" / "training" / "rft"
+
+#: The tasks a round may sample, and where each one's training side lives. The **holdout** of
+#: each split is never read (ADR-0015), so it cannot be trained on by accident.
+TASKS = {
+    "interview.parse": {"train": TRAIN, "checks": ("rft.truth",)},
+    "repair.fix": {"train": REPAIR_TRAIN, "checks": ("rft.case",)},
+}
+
+
+def _verifier(engine, cases):  # noqa: ANN001, ANN202
+    """Run a candidate macro against its case, and report the engine's verdict."""
+
+    def verify(source: str, case_id: str, params: dict[str, Any]) -> tuple[bool, str]:
+        case = cases.get(case_id)
+        if case is None:
+            return False, f"the case {case_id!r} is not in the case file"
+        with tempfile.TemporaryDirectory(prefix="rft-repair-") as temp:
+            root = pathlib.Path(temp)
+            candidate = root / "candidate.py"
+            candidate.write_text(source, encoding="utf-8", newline="\n")
+            outcome = run_candidate(
+                engine,
+                candidate,
+                {"kind": case.kind, "params": case.params, "caseId": case.id},
+                root / "run",
+                timeout_ms=case.timeout_ms,
+            )
+            verdict = verify_result(case, outcome)
+            if verdict.ok:
+                return True, ""
+            failures = "; ".join(
+                f"{row.check}: {row.message}" for row in verdict.failures
+            )
+            return False, failures or f"the run ended as {outcome.code!r}"
+
+    return verify
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -44,16 +87,24 @@ def main(argv: list[str] | None = None) -> int:
         description="Run one rejection-sampling round over the training side of the split."
     )
     parser.add_argument("--round", default="r1", help="the round's id (r1, r2, ...)")
-    parser.add_argument("--train", default=str(TRAIN), help="the training records to sample")
+    parser.add_argument(
+        "--task",
+        default="interview.parse",
+        choices=sorted(TASKS),
+        help="the task to sample (the parse task or the repair task)",
+    )
+    parser.add_argument("--train", help="the training records to sample (the split's train side)")
     parser.add_argument("--out", help="where to write the round (default data/training/rft/<round>)")
     parser.add_argument("--samples", type=int, default=4, help="samples per record")
     parser.add_argument("--temperature", type=float, default=0.7, help="the sampling temperature")
     parser.add_argument("--limit", type=int, default=0, help="sample only the first N records")
     parser.add_argument("--base-url", default="http://127.0.0.1:8787", help="the local router")
     parser.add_argument("--model", default="chat", help="the fleet route to sample")
+    parser.add_argument("--engine", help="the CAD engine (the repair task runs macros)")
     args = parser.parse_args(argv)
 
-    train = pathlib.Path(args.train)
+    task = TASKS[args.task]
+    train = pathlib.Path(args.train) if args.train else task["train"]
     if not train.is_file():
         print(f"no training records at {train}", file=sys.stderr)
         return 1
@@ -64,12 +115,30 @@ def main(argv: list[str] | None = None) -> int:
         print(f"no records to sample in {train}", file=sys.stderr)
         return 1
 
+    judge = judge_answer
+    if args.task == "repair.fix":
+        try:
+            engine = find_engine(args.engine)
+        except Exception as exc:  # the engine's own error
+            print(f"the CAD engine could not be found: {exc}", file=sys.stderr)
+            return 1
+        cases = {case.id: case for case in load_cases(CASES, root=ROOT)}
+        verifier = _verifier(engine, cases)
+        judge = lambda record, answer: judge_repair(  # noqa: E731
+            record, answer, verify=verifier
+        )
+
     out = pathlib.Path(args.out) if args.out else OUT_ROOT / args.round
 
     client = LlamaSwapClient(base_url=args.base_url, model=args.model)
     try:
         samples = sample_round(
-            client, records, samples=args.samples, temperature=args.temperature
+            client,
+            records,
+            samples=args.samples,
+            temperature=args.temperature,
+            tasks=(args.task,),
+            judge=judge,
         )
     except ModelError as exc:
         print(f"the fleet is not answering: {exc}", file=sys.stderr)
@@ -110,7 +179,13 @@ def main(argv: list[str] | None = None) -> int:
         newline="\n",
     )
 
-    kept = build_rft_records(samples, records, round_id=args.round, model=args.model)
+    kept = build_rft_records(
+        samples,
+        records,
+        round_id=args.round,
+        model=args.model,
+        verify_checks=task["checks"],
+    )
     write_jsonl(kept, out / "records.jsonl")
 
     # the next round's training set: the scripted records plus the round's kept answers.

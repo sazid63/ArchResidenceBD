@@ -22,8 +22,9 @@ What is deterministic, and what is not:
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
-from typing import Any, Iterable, Sequence
+from typing import Any, Callable, Iterable, Sequence
 
 from ..agent.client import (
     ModelClient,
@@ -47,14 +48,17 @@ NUMBER_TOLERANCE = 1e-6
 
 @dataclass(frozen=True)
 class Sample:
-    """One sampled answer, and what the truth said about it."""
+    """One sampled answer, and what the truth said about it.
+
+    ``payload`` is the judge's reading of the answer - the parsed JSON for the parse task,
+    the case's verdict for the repair task - and ``reason`` says why it was kept or
+    dropped. A dropped sample's reason is the evidence the next round reads.
+    """
 
     record_id: str
     attempt: int
     answer: str
-    decision: str | None
-    pointer: str | None
-    value: Any
+    payload: dict[str, Any]
     kept: bool
     reason: str
 
@@ -63,9 +67,7 @@ class Sample:
             "recordId": self.record_id,
             "attempt": self.attempt,
             "answer": self.answer,
-            "decision": self.decision,
-            "pointer": self.pointer,
-            "value": self.value,
+            "payload": self.payload,
             "kept": self.kept,
             "reason": self.reason,
         }
@@ -99,7 +101,7 @@ def same_value(expected: Any, actual: Any) -> bool:
     return expected == actual
 
 
-def judge_answer(record: dict[str, Any], answer: str) -> tuple[dict[str, Any] | None, str]:
+def judge_answer(record: dict[str, Any], answer: str) -> tuple[dict[str, Any], str]:
     """The model's answer read, and why it was kept or dropped.
 
     The check reads the **labels** (the scripted truth) and the model's own JSON - never the
@@ -108,7 +110,7 @@ def judge_answer(record: dict[str, Any], answer: str) -> tuple[dict[str, Any] | 
     try:
         value = read_json_object(answer)
     except ModelValueError as exc:
-        return None, f"unreadable: {exc}"
+        return {}, f"unreadable: {exc}"
     labels = record.get("labels") or {}
     for key in ("decision", "pointer", "value"):
         expected = labels.get(key)
@@ -122,6 +124,43 @@ def judge_answer(record: dict[str, Any], answer: str) -> tuple[dict[str, Any] | 
     return value, ""
 
 
+#: A fenced code block, as the models emit their macros.
+_FENCED_CODE = re.compile(r"```(?:python|py)?\s*(.*?)```", re.DOTALL)
+
+
+def read_code(answer: str) -> str:
+    """The macro in a repair answer - a fenced block is unwrapped, the rest is as written."""
+    match = _FENCED_CODE.search(answer)
+    if match:
+        return match.group(1).strip()
+    return answer.strip()
+
+
+def judge_repair(
+    record: dict[str, Any],
+    answer: str,
+    *,
+    verify: Callable[[str, str, dict[str, Any]], tuple[bool, str]],
+) -> tuple[dict[str, Any], str]:
+    """Does the model's fix **work**? The engine says, not the text.
+
+    A repair is not judged by whether the fix looks like the known-good one - there is more
+    than one way to repair a macro - but by whether the macro runs and the case's
+    expectations hold. So the truth here is the **engine's verdict**, and the verifier is
+    injected (the tests use a fake; the tool uses the real engine).
+    """
+    body = record.get("input") or {}
+    case_id = str(body.get("caseId") or "")
+    params = body.get("params") or {}
+    if not case_id:
+        return {}, "unreadable: the record names no case"
+    source = read_code(answer)
+    if not source:
+        return {}, "unreadable: the answer carried no code"
+    passed, reason = verify(source, case_id, params)
+    return {"caseId": case_id, "passed": bool(passed)}, "" if passed else f"failed: {reason}"
+
+
 def sample_round(
     client: ModelClient,
     records: Iterable[dict[str, Any]],
@@ -130,6 +169,7 @@ def sample_round(
     temperature: float = 0.7,
     max_tokens: int = 256,
     tasks: Sequence[str] = DEFAULT_TASKS,
+    judge: Callable[[dict[str, Any], str], tuple[dict[str, Any], str]] | None = None,
 ) -> list[Sample]:
     """Ask the fleet the scripted questions, and judge every answer.
 
@@ -138,6 +178,7 @@ def sample_round(
     """
     if samples < 1:
         raise ValueError("a round needs at least one sample per record")
+    judge = judge or judge_answer
     out: list[Sample] = []
     for record in records:
         if record.get("task") not in tasks:
@@ -159,23 +200,19 @@ def sample_round(
                         record_id=record_id,
                         attempt=attempt,
                         answer="",
-                        decision=None,
-                        pointer=None,
-                        value=None,
+                        payload={},
                         kept=False,
                         reason=f"unreachable: {exc}",
                     )
                 )
                 continue
-            value, reason = judge_answer(record, answer)
+            payload, reason = judge(record, answer)
             out.append(
                 Sample(
                     record_id=record_id,
                     attempt=attempt,
                     answer=answer,
-                    decision=(value or {}).get("decision"),
-                    pointer=(value or {}).get("pointer"),
-                    value=(value or {}).get("value"),
+                    payload=payload,
                     kept=not reason,
                     reason=reason or "agrees with the scripted truth",
                 )
@@ -189,6 +226,7 @@ def build_rft_records(
     *,
     round_id: str,
     model: str,
+    verify_checks: Sequence[str] = ("rft.truth",),
 ) -> list[dict[str, Any]]:
     """The kept samples, as training records.
 
@@ -219,7 +257,7 @@ def build_rft_records(
                 "messages": messages,
                 "source": {"kind": SOURCE_KIND, "batch": round_id, "model": model},
                 "status": "verified",
-                "verifyChecks": ["rft.truth"],
+                "verifyChecks": list(verify_checks),
             }
         )
     return out
@@ -271,6 +309,8 @@ __all__ = [
     "Sample",
     "build_rft_records",
     "judge_answer",
+    "judge_repair",
+    "read_code",
     "round_document",
     "same_value",
     "sample_round",
