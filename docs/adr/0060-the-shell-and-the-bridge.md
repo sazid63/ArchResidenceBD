@@ -47,9 +47,11 @@ engine workers* (the CAD ✓, spike S4 ✓) — not between the shell and the co
   commands ✓ and the sidecar ✓ — and the channel is **probed live** ✓ (the spec doc has
   the output ✓ ✓).
 - **The Rust code is not built on the dev machine** ✓ — re-measured 2026-10-21: there is no
-  linker here at all (no `link.exe` ✗, no `gcc` ✗) — so the bridge crate's tests and the
-  workspace's formatting run in **CI** ✓ (the runners ship MSVC ✓), and the *desktop* build
-  needs the WebView2 SDK on top of that ✗ (the owner's item #1 ✓ ✓).
+  linker here at all (no `link.exe` ✗, no `gcc` ✗) — so it is verified in **CI** ✓: the
+  bridge crate's **tests** ✓, the **desktop shell's compile** ✓ (`cargo check` ✓, on Linux ✓,
+  where the WebView2 SDK is not needed ✓) and the workspace's **formatting** ✓ — and the
+  *desktop bundle* (the installer ✓, W5.1's remaining half ✓) needs the WebView2 SDK on top
+  of that ✗ (the owner's item #1 ✓ ✓).
 - **What remains in W5.1** ✓: the **installer** (the app + the CAD engine + the Python
   runtime + the model pack ✓, laid down progressively ✓), the **install folder's licence
   files** ✓, and the app's own terms ✓ (the owner's ✓ ✓).

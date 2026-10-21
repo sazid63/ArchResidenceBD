@@ -86,10 +86,12 @@ channel, in UTF-8, un-mangled.)
 ## What is deliberately not here
 
 - **The Rust build on this machine** — re-measured 2026-10-21: there is **no linker here at
-  all** (no `link.exe`, no `gcc`), so the bridge crate's tests and the workspace's
-  formatting run in **CI** (the runners ship MSVC), and the *desktop* build needs the
-  WebView2 SDK on top of that — the owner's item #1. The repo's Rust code is therefore
-  verified in CI, not on this machine.
+  all** (no `link.exe`, no `gcc`), so the Rust is verified in **CI** instead: the bridge
+  crate's **tests**, the **desktop shell's compile** (`cargo check -p archres-app`, on Linux
+  where the WebView2 SDK is not needed) and the workspace's **formatting**. The *desktop
+  bundle* — the installer, W5.1's remaining half — needs the WebView2 SDK on top of that:
+  the owner's item #1. The repo's Rust code is therefore verified in CI, not on this
+  machine.
 - **The installer itself** — the app, the CAD engine, the Python runtime and the model
   pack, laid down progressively — and the **install folder's licence files**. That is the
   rest of W5.1 (and W5.2 is the installer's download slice).
@@ -100,6 +102,10 @@ channel, in UTF-8, un-mangled.)
 ```powershell
 uv run --directory core pytest -q tests/test_bridge.py
 cargo test --locked -p archres-bridge --manifest-path app/src-tauri/Cargo.toml
+cargo check --locked -p archres-app --manifest-path app/src-tauri/Cargo.toml
 cargo fmt --check --manifest-path app/src-tauri/Cargo.toml
 pnpm --dir app typecheck
 ```
+
+(The three cargo steps need a Rust toolchain with a linker; on this machine they run in CI
+— the `shell` job.)
