@@ -15,6 +15,7 @@ from .client import (
     ModelValueError,
     ScriptedClient,
     parse_model_value,
+    read_json_object,
 )
 from .context import (
     CONTEXT_VERSION,
@@ -79,6 +80,7 @@ __all__ = [
     "has_high",
     "parse_model_value",
     "project_card",
+    "read_json_object",
     "scan",
     "strip_hidden",
     "worst_severity",

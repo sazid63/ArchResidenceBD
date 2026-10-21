@@ -34,7 +34,7 @@
     },
     "corpusManifest": {
       "path": "data/training/repair-v0/manifest.json",
-      "sha256": "1c63d9ebca1d21af98b1e01d28c738f5884922101fbb062ecbd16c23cc2153db"
+      "sha256": "24fe984e0f64562b5fc8790950cecb01e2b459593140e75baff687e396f1cc0a"
     }
   },
   "purpose": "W1.7 repair SFT split: the executed repair corpus cut by a frozen holdout of mutation ids; the holdout is judged by re-executing the repaired macro in FreeCAD",

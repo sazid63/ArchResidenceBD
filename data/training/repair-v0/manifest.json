@@ -57,7 +57,7 @@
     },
     "schema": {
       "path": "spec/schemas/sft-record.schema.json",
-      "sha256": "4b206516988e9aa75837b053bbdfc004e7411af118a679e86a5d17350010832a"
+      "sha256": "2c76824a6f4e6a36972021c55b4ad08ab5c552ea0f0a295b12b7db5babd69132"
     },
     "targetCandidate": {
       "path": "tools/cad/candidates/geometry_build.py",

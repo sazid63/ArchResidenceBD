@@ -8,9 +8,11 @@ back through ``Interview.accept_external`` (ADR-0010). This module is the transp
   Offline-first is enforced, not assumed: a non-loopback URL is refused at construction.
 - ``ScriptedClient`` — deterministic replies for tests and the E2E demo.
 
-``parse_model_value`` accepts exactly one JSON object (a fenced ```json block is tolerated,
-because small models emit them) and rejects everything else — the interview re-validates
-the value itself, so an unreadable reply is a visible retry, never a write.
+``read_json_object`` reads one JSON object out of a reply (a fenced ```json block is
+tolerated, because small models emit them) and rejects everything else, and
+``parse_model_value`` reads the interview's ``{"value": ..., "unit": ...}`` shape from it -
+the interview re-validates the value itself, so an unreadable reply is a visible retry,
+never a write.
 """
 
 from __future__ import annotations
@@ -155,7 +157,13 @@ class LlamaSwapClient:
 _FENCED = re.compile(r"```(?:json)?\s*(.*?)```", re.DOTALL)
 
 
-def _json_object(text: str) -> dict[str, Any]:
+def read_json_object(text: str) -> dict[str, Any]:
+    """Read one JSON object out of a model's reply; raise if there is not one.
+
+    A fenced ```json block is tolerated, because small models emit them, and the text
+    between the first ``{`` and the last ``}`` is tried too - a model that says "here you
+    go: {...}" is understood, but a model that says two things is not.
+    """
     candidates = [match.group(1).strip() for match in _FENCED.finditer(text)]
     candidates.append(text.strip())
     start, end = text.find("{"), text.rfind("}")
@@ -175,7 +183,7 @@ def parse_model_value(reply: str) -> tuple[Any, str | None]:
     """Read ``{"value": ..., "unit": ...}`` from a reply; raise if it cannot be used."""
     if not isinstance(reply, str) or not reply.strip():
         raise ModelValueError("the model reply is empty")
-    payload = _json_object(reply)
+    payload = read_json_object(reply)
     if "value" not in payload:
         raise ModelValueError('the model reply has no "value" field')
     value = payload["value"]
