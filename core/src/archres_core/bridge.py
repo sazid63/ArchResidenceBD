@@ -156,6 +156,7 @@ class Bridge:
             "units.convert": self._units_convert,
             "templates.list": self._templates_list,
             "project.create": self._project_create,
+            "boq.build": self._boq_build,
         }.get(method)
 
     # -- the methods ----------------------------------------------------------------------
@@ -506,6 +507,70 @@ class Bridge:
             "name": name.strip(),
             "prompt": prompt,
         }
+
+    def _boq_build(self, params: dict[str, Any]) -> dict[str, Any]:
+        """The project's BOQ ✓ — the money ✓ ✓.
+
+        The **project's own spec** ✓ (the store's tip ✓) is designed ✓ and priced ✓ — and
+        the card it is priced from is **named** ✓, with its status ✓, because the plan's
+        money law says a card that is a candidate says so ✓ (the acknowledgement is the
+        owner's ✓ ✓) ✓ ✓.
+        """
+        from .design import (
+            build_boq,
+            design_foundation,
+            design_rebar,
+            design_takeoff,
+            design_typical_floor,
+        )
+
+        project = params.get("project")
+        if not isinstance(project, str) or not project:
+            raise BridgeError(CODE_INVALID_PARAMS, "boq.build needs the project folder")
+        try:
+            store = SpecStore(project)
+            spec = store.load(store.tip().sha256)
+        except Exception as exc:
+            raise BridgeError(CODE_INVALID_PARAMS, f"the project cannot be read: {exc}") from exc
+
+        card = self._price_card()
+        try:
+            foundation = design_foundation(spec)
+            floor = design_typical_floor(spec, foundation)
+            rebar = design_rebar(spec, foundation, floor)
+            takeoff = design_takeoff(spec, foundation, floor, rebar)
+            boq = build_boq(takeoff, card)
+        except Exception as exc:
+            raise BridgeError(CODE_INTERNAL, f"the BOQ could not be built: {exc}") from exc
+        return {
+            "boq": boq,
+            "pricedFrom": {
+                "cardId": str(card.get("cardId") or ""),
+                "status": str(card.get("status") or ""),
+                "region": str(card.get("region") or ""),
+                "effectiveFrom": str(card.get("effectiveFrom") or ""),
+            },
+        }
+
+    def _price_card(self) -> dict[str, Any]:
+        """The rate card ✓ — the committed one ✓ ✓.
+
+        The card's **status** travels with the BOQ ✓ — a candidate card says so ✓ (the
+        money law ✓ ✓) ✓ ✓.
+        """
+        base = self._root or pathlib.Path(".")
+        cards = sorted((base / "data" / "prices" / "cards").glob("*.json"))
+        if cards:
+            try:
+                document = json.loads(cards[0].read_text(encoding="utf-8"))
+            except ValueError as exc:
+                raise BridgeError(CODE_INTERNAL, f"the rate card is not readable: {exc}") from exc
+            if isinstance(document, dict):
+                return document
+        example = base / "spec" / "examples" / "interfaces" / "rate-card-dhaka-example.json"
+        if example.is_file():
+            return json.loads(example.read_text(encoding="utf-8"))
+        raise BridgeError(CODE_INTERNAL, "no rate card is available")
 
     def _template_spec(self, template_id: str | None) -> dict[str, Any]:
         """The spec a template carries ✓ — the repo's own example ✓ ✓."""

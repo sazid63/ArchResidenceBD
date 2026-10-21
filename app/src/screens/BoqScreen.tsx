@@ -1,42 +1,128 @@
-import { boq, phases } from "../data/mock";
-import type { BoqLine, CostType } from "../data/mock";
-import { fmtBdt, fmtDelta, fmtNum, useI18n } from "../i18n";
-import type { TKey } from "../i18n";
-import { phaseName } from "../labels";
-import { costTone } from "../theme/tokens";
-import { Badge, Card, PageHeader } from "../ui/kit";
+import { useEffect, useState } from "react";
 
-const COST_KEY: Record<CostType, TKey> = {
+import { ask, isDesktopShell } from "../ipc/core";
+import { fmtBdt, fmtNum, useI18n } from "../i18n";
+import { Badge, Card, PageHeader, Stat } from "../ui/kit";
+
+interface BoqLine {
+  item: string;
+  unit: string;
+  quantity: number;
+  rateBdt: number;
+  amountBdt: number;
+  cost: "material" | "labour" | "machinery" | "subcontract";
+  phase: string;
+  priced: boolean;
+  key: string;
+  deviation?: boolean;
+}
+
+interface Boq {
+  lines: BoqLine[];
+  totals: { amountBdt: number };
+  subtotals: { byPhase: Record<string, number> };
+}
+
+interface PricedFrom {
+  cardId: string;
+  status: string;
+  region: string;
+  effectiveFrom: string;
+}
+
+const COST_TONE: Record<BoqLine["cost"], "sky" | "sage" | "amber" | "lavender"> = {
+  material: "sky",
+  labour: "sage",
+  machinery: "amber",
+  subcontract: "lavender",
+};
+
+const COST_KEY: Record<BoqLine["cost"], string> = {
   material: "costMaterial",
   labour: "costLabour",
   machinery: "costMachinery",
   subcontract: "costSubcontract",
 };
 
+/**
+ * The BOQ (W5.1's last wiring).
+ *
+ * The money is the **core's** ✓ — the project's own spec ✓ designed ✓ and priced ✓ — and
+ * the **card it is priced from is named** ✓, with its status ✓: a candidate card says so ✓
+ * (the plan's money law ✓ ✓), and the app shows it rather than hiding it ✓ ✓.
+ */
 export function BoqScreen() {
   const { t, lang } = useI18n();
-  const groups = boq.map((g) => ({
-    phaseId: g.phaseId,
-    phase: phases.find((p) => p.id === g.phaseId),
-    lines: g.lines,
-  }));
-  const sum = (lines: BoqLine[]) => lines.reduce((s, l) => s + l.qty * l.rate, 0);
-  const grand = groups.reduce((s, g) => s + sum(g.lines), 0);
-  // The live cost meter (W3.8): what the last change cost. A line that carries the quantity
-  // it had before the change is a line that moved; the rest did not.
-  const allLines = groups.flatMap((g) => g.lines);
-  const before = allLines.reduce((s, l) => s + (l.qtyBefore ?? l.qty) * l.rate, 0);
-  const moved = allLines.filter((l) => l.qtyBefore !== undefined && l.qtyBefore !== l.qty);
+  const [boq, setBoq] = useState<Boq | null>(null);
+  const [pricedFrom, setPricedFrom] = useState<PricedFrom | null>(null);
+  const [problem, setProblem] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isDesktopShell()) return;
+    let live = true;
+    const load = async () => {
+      const projects = await ask("projects.list", {});
+      const rows =
+        !projects.error && projects.result
+          ? ((projects.result as { projects: { path: string }[] }).projects ?? [])
+          : [];
+      if (!rows.length) {
+        if (live) setProblem(t("boqNoProject"));
+        return;
+      }
+      const reply = await ask("boq.build", { project: rows[0].path });
+      if (!live) return;
+      if (reply.error) {
+        setProblem(String(reply.error.message));
+        return;
+      }
+      const result = reply.result as { boq: Boq; pricedFrom: PricedFrom };
+      setBoq(result.boq);
+      setPricedFrom(result.pricedFrom);
+      setProblem(null);
+    };
+    void load();
+    return () => {
+      live = false;
+    };
+  }, [t]);
+
+  if (!boq) {
+    return (
+      <div className="screen">
+        <PageHeader title={t("boqTitle")} subtitle={t("priceNote")} />
+        {problem ? (
+          <Card>
+            <span className="faint small">{problem}</span>
+          </Card>
+        ) : null}
+      </div>
+    );
+  }
+
+  const phases = Object.keys(boq.subtotals.byPhase);
 
   return (
     <div className="screen">
       <PageHeader title={t("boqTitle")} subtitle={t("priceNote")} />
-      {groups.map((g) => (
-        <Card key={g.phaseId} className="stack">
+      <div className="row">
+        <Stat label={t("grandTotal")} value={fmtBdt(boq.totals.amountBdt, lang)} />
+        <Stat
+          label={t("boqPricedFrom")}
+          value={pricedFrom ? `${pricedFrom.cardId} · ${pricedFrom.status}` : "—"}
+        />
+      </div>
+      {pricedFrom?.status === "candidate" ? (
+        <Card>
+          <span className="small">{t("boqCandidateNote")}</span>
+        </Card>
+      ) : null}
+      {phases.map((phase) => (
+        <Card key={phase} className="stack">
           <div className="row-between">
-            <h3>{g.phase ? phaseName(g.phase, lang, t) : g.phaseId}</h3>
+            <h3>{phase}</h3>
             <Badge tone="sage">
-              {t("subtotal")}: {fmtBdt(sum(g.lines), lang)}
+              {t("subtotal")}: {fmtBdt(boq.subtotals.byPhase[phase] ?? 0, lang)}
             </Badge>
           </div>
           <table className="table">
@@ -51,80 +137,39 @@ export function BoqScreen() {
               </tr>
             </thead>
             <tbody>
-              {g.lines.map((l, i) => (
-                <tr key={i}>
-                  <td>
-                    <span className="row">
-                      {l.item}
-                      {l.deviation ? <Badge tone="amber">{t("deviation")}</Badge> : null}
-                    </span>
-                  </td>
-                  <td>
-                    <Badge tone={costTone[l.cost]}>{t(COST_KEY[l.cost])}</Badge>
-                  </td>
-                  <td className="muted">{l.unit}</td>
-                  <td className="num">{fmtNum(l.qty, lang)}</td>
-                  <td className="num">{fmtBdt(l.rate, lang)}</td>
-                  <td className="num">{fmtBdt(l.qty * l.rate, lang)}</td>
-                </tr>
-              ))}
-              <tr className="subtotal">
-                <td colSpan={5}>
-                  {t("subtotal")} · {g.phase ? phaseName(g.phase, lang, t) : ""}
-                </td>
-                <td className="num">{fmtBdt(sum(g.lines), lang)}</td>
-              </tr>
+              {boq.lines
+                .filter((line) => line.phase === phase)
+                .map((line) => (
+                  <tr key={line.key}>
+                    <td>
+                      <span className="row">
+                        {line.item}
+                        {line.deviation ? (
+                          <Badge tone="amber">{t("deviation")}</Badge>
+                        ) : null}
+                      </span>
+                    </td>
+                    <td>
+                      <Badge tone={COST_TONE[line.cost]}>{t(COST_KEY[line.cost] as never)}</Badge>
+                    </td>
+                    <td className="muted">{line.unit}</td>
+                    <td className="num">{fmtNum(line.quantity, lang)}</td>
+                    <td className="num">
+                      {line.priced ? fmtBdt(line.rateBdt, lang) : "—"}
+                    </td>
+                    <td className="num">
+                      {line.priced ? fmtBdt(line.amountBdt, lang) : "—"}
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </Card>
       ))}
       <div className="grand">
         <span className="muted">{t("grandTotal")}</span>
-        <span className="amount">{fmtBdt(grand, lang)}</span>
+        <span className="amount">{fmtBdt(boq.totals.amountBdt, lang)}</span>
       </div>
-      <Card className="stack">
-        <div className="row-between">
-          <h3>{t("costMeter")}</h3>
-          <Badge tone={grand - before > 0 ? "amber" : "sage"}>
-            {t("costChange")}: {fmtDelta(grand - before, lang)}
-          </Badge>
-        </div>
-        <div className="row-between">
-          <span className="muted">{t("costBefore")}</span>
-          <span className="amount">{fmtBdt(before, lang)}</span>
-        </div>
-        <div className="row-between">
-          <span className="muted">{t("costAfter")}</span>
-          <span className="amount">{fmtBdt(grand, lang)}</span>
-        </div>
-        {moved.length ? (
-          <>
-            <h4>{t("costMoved")}</h4>
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>{t("item")}</th>
-                  <th className="num">{t("qty")}</th>
-                  <th className="num">{t("amount")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {moved.map((l, i) => (
-                  <tr key={i}>
-                    <td>{l.item}</td>
-                    <td className="num">
-                      {fmtNum(l.qtyBefore ?? l.qty, lang)} &rarr; {fmtNum(l.qty, lang)}
-                    </td>
-                    <td className="num">{fmtDelta((l.qty - (l.qtyBefore ?? l.qty)) * l.rate, lang)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </>
-        ) : (
-          <p className="muted">{t("costNoChange")}</p>
-        )}
-      </Card>
     </div>
   );
 }

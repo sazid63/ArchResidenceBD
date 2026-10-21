@@ -130,6 +130,25 @@ the same name again: there is already a project at mirpur-duplex
 no name: project.create needs a name
 ```
 
+## The money, through the channel (2026-10-22)
+
+The BOQ screen showed a **mock** BOQ — invented numbers. Now the money is the **core's**
+✓ (ADR-0075 ✓) — the project's own spec designed and priced ✓ — and the **card it came
+from is named** ✓:
+
+```
+the lines: 11
+the total: 119548.68
+the priced from: {"cardId": "pwd-sor-2022-civil-works", "status": "candidate",
+                  "region": "dhaka", "effectiveFrom": "2023-02-23"}
+the priced lines: 8
+a missing project: the project cannot be read: no revisions in store \nope
+```
+
+Note the **status**: `candidate` ✓ — the committed rate card is not verified against its
+source yet ✓ (the owner's act ✓ ✓), so the money is a candidate too ✓ and the app says so ✓
+✓.
+
 ## What is deliberately not here
 
 - **The Rust build on this machine** — re-measured 2026-10-21: there is **no linker here at

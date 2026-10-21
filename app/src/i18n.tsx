@@ -140,6 +140,10 @@ const en = {
   aboutCoreConnected: "Connected",
   aboutCoreAbsent: "Not running",
   aboutCoreUnknown: "Checking...",
+  boqPricedFrom: "Priced from",
+  boqCandidateNote:
+    "The rate card is a candidate - it is not verified against its source yet, so the money is a candidate too.",
+  boqNoProject: "There is no project yet - create one first.",
   setupSubtitle: "Name the project and choose where it starts from.",
   setupName: "The project",
   setupNameLabel: "Project name",
@@ -396,6 +400,10 @@ const bn: typeof en = {
   setupNeedsShell: "প্রতিরারটি অ্যাপের কোরের তবেচে।",
   setupNeedsName: "প্রতিরারের নাম দরণারর করেন।",
   setupAreaHint: "টলাকের রাশি প্রশ্নত্তে পরেস্সে ({n} তণ পর্যেমার।",
+
+  boqPricedFrom: "কান কেতে",
+  boqCandidateNote: "রেইড কার৕ প্রতিখনেরসরে স্রতত্রণে পরীক্ধতা নয়বন, তেমে ডতাবায়তাওপ্রতীয়ন।",
+  boqNoProject: "একী প্রতিরারে নেই - আপনির আগেপেরেন।",
 };
 
 export const STRINGS = { en, bn } as const;
