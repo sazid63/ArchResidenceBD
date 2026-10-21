@@ -30,14 +30,22 @@ export function Button({
   variant = "soft",
   onClick,
   className,
+  disabled,
 }: {
   children: ReactNode;
   variant?: "primary" | "soft" | "ghost";
   onClick?: () => void;
   className?: string;
+  /** A button that cannot be pressed yet (the work is in flight ✓) says so ✓. */
+  disabled?: boolean;
 }) {
   return (
-    <button type="button" className={cx("button", `button--${variant}`, className)} onClick={onClick}>
+    <button
+      type="button"
+      className={cx("button", `button--${variant}`, className)}
+      onClick={onClick}
+      disabled={disabled}
+    >
       {children}
     </button>
   );

@@ -140,6 +140,22 @@ const en = {
   aboutCoreConnected: "Connected",
   aboutCoreAbsent: "Not running",
   aboutCoreUnknown: "Checking...",
+  setupSubtitle: "Name the project and choose where it starts from.",
+  setupName: "The project",
+  setupNameLabel: "Project name",
+  setupNamePlaceholder: "e.g. Mirpur Duplex",
+  setupTemplate: "Start from",
+  setupStoriesNote:
+    "The stories and the units per floor are asked one by one, so they can be changed later.",
+  setupNext: "What happens next",
+  setupNextNote:
+    "The project is written by the app's core, and the interview asks the rest of the details.",
+  setupCreate: "Create the project",
+  setupFailed: "The project could not be created",
+  setupNeedsShell:
+    "The project is written by the app's core, which runs inside the desktop shell.",
+  setupNeedsName: "The project needs a name.",
+  setupAreaHint: "The plot's area is asked in the interview ({n} so far).",
   chatStart: "Start the conversation",
   chatWhy: "Why it is asked",
   chatProgress: "Progress",
@@ -366,6 +382,20 @@ const bn: typeof en = {
   chatProgressValue: "{answered} এরিড, {open} কলক আও",
   chatNeedsShell: "করণারর্গগেররর কোরের ররফেইয়ায়ের শেলের ঵িতে।",
   chatNoProject: "একী প্রতিরে নেই - আপনির আগেপেরেন্তুন করুন।",
+
+  setupSubtitle: "প্রতিরার নাম দিন ও কেতে শুরুয় থেকে।",
+  setupName: "প্রতিরার",
+  setupNameLabel: "প্রতিরার নাম",
+  setupNamePlaceholder: "যথেমিতাতর বাঁরায়়ার",
+  setupTemplate: "কেতে শুরু",
+  setupStoriesNote: "তালার ও প্রতি প্রতিরের কেক্তা প্রশ্ননেয়ন পডরে পরিলেনের পর঵ত্তন করা যার।",
+  setupNext: "তারুনি কী ঙেবে",
+  setupNextNote: "প্রতিরারটি লেখেই অ্যাপের করে বাকীডেক থ঵ের কনেসক গারিন পরেসে।",
+  setupCreate: "প্রতিরার অবস্টাই",
+  setupFailed: "প্রতিরারটি অবস্টার হয়তা পরেসে",
+  setupNeedsShell: "প্রতিরারটি অ্যাপের কোরের তবেচে।",
+  setupNeedsName: "প্রতিরারের নাম দরণারর করেন।",
+  setupAreaHint: "টলাকের রাশি প্রশ্নত্তে পরেস্সে ({n} তণ পর্যেমার।",
 };
 
 export const STRINGS = { en, bn } as const;

@@ -116,6 +116,20 @@ flow book's ✓ (with their **id** ✓ — the answer goes back as that id ✓, 
 Bangla reply that says so ✓ — the interview's own honesty ✓ ✓ — and the **Bangla survives
 the round trip** ✓ ✓ (the locale fix ✓).
 
+## The project's creation, through the channel (2026-10-22)
+
+The app's *New Project* button used to lead to a form that changed nothing. Now the
+**project is the core's** ✓ (ADR-0074 ✓) — the app names it ✓ and picks the template ✓,
+and the core writes the spec ✓ and opens the interview ✓ ✓:
+
+```
+the project: Mirpur Duplex | ...\projects\mirpur-duplex
+the first question: project-name | What should we call this project?
+the projects now: [('Mirpur Duplex', 0)]
+the same name again: there is already a project at mirpur-duplex
+no name: project.create needs a name
+```
+
 ## What is deliberately not here
 
 - **The Rust build on this machine** — re-measured 2026-10-21: there is **no linker here at

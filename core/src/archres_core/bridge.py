@@ -31,6 +31,7 @@ from __future__ import annotations
 import json
 import os
 import pathlib
+import re
 import sys
 import time
 from typing import Any, Callable, Iterable, TextIO
@@ -71,6 +72,12 @@ class BridgeError(Exception):
         super().__init__(message)
         self.code = code
         self.message = message
+
+
+def _slug(name: str) -> str:
+    """A folder name for a project ✓ — safe ✓ and readable ✓ ✓."""
+    cleaned = re.sub(r"[^A-Za-z0-9]+", "-", name.strip()).strip("-").lower()
+    return cleaned or "project"
 
 
 class Bridge:
@@ -148,6 +155,7 @@ class Bridge:
             "projects.list": self._projects_list,
             "units.convert": self._units_convert,
             "templates.list": self._templates_list,
+            "project.create": self._project_create,
         }.get(method)
 
     # -- the methods ----------------------------------------------------------------------
@@ -451,6 +459,73 @@ class Bridge:
                     }
                 )
         return {"templates": rows, "count": len(rows)}
+
+    def _project_create(self, params: dict[str, Any]) -> dict[str, Any]:
+        """Start a project ✓ — from a template ✓, with its own name ✓ ✓.
+
+        The project is the core's ✓ — the spec engine writes it ✓ and the interview
+        interviews it ✓ — and the app only says **what** to start it from ✓ ✓.
+        """
+        name = params.get("name")
+        if not isinstance(name, str) or not name.strip():
+            raise BridgeError(CODE_INVALID_PARAMS, "project.create needs a name")
+        template_id = params.get("template")
+        base = self._root or pathlib.Path(".")
+        projects_dir = pathlib.Path(
+            params.get("projects") or str(base / "projects")
+        )
+        target = projects_dir / _slug(name)
+        if (target / "log.jsonl").exists():
+            raise BridgeError(
+                CODE_INVALID_PARAMS, f"there is already a project at {target.name}"
+            )
+
+        spec = self._template_spec(template_id)
+        project = spec.get("project") or {}
+        spec["project"] = {**project, "name": name.strip()}
+        spec.pop("revision", None)
+        spec.pop("locked", None)
+        spec.pop("createdAt", None)
+        spec.pop("updatedAt", None)
+
+        try:
+            session = Session.create(
+                self.book(),
+                target,
+                spec,
+                client=self._client,
+                language=str(params.get("lang") or "en"),
+            )
+        except Exception as exc:
+            raise BridgeError(CODE_INTERNAL, f"the project could not be started: {exc}") from exc
+        self._sessions[f"project-{target.name}"] = session
+        prompt = session.prompt()
+        return {
+            "sessionId": f"project-{target.name}",
+            "path": str(target),
+            "name": name.strip(),
+            "prompt": prompt,
+        }
+
+    def _template_spec(self, template_id: str | None) -> dict[str, Any]:
+        """The spec a template carries ✓ — the repo's own example ✓ ✓."""
+        base = self._root or pathlib.Path(".")
+        examples = base / "spec" / "examples"
+        wanted = template_id or "new-project"
+        path = examples / f"{wanted}.json"
+        if not path.is_file():
+            # the first example is the empty one ✓ - a new project starts from it ✓ ✓
+            fallback = sorted(examples.glob("*.json")) if examples.is_dir() else []
+            if not fallback:
+                raise BridgeError(CODE_INTERNAL, f"no template is available: {path}")
+            path = fallback[0]
+        try:
+            document = json.loads(path.read_text(encoding="utf-8"))
+        except ValueError as exc:
+            raise BridgeError(CODE_INTERNAL, f"the template is not readable: {exc}") from exc
+        if not isinstance(document, dict):
+            raise BridgeError(CODE_INTERNAL, "the template is not a spec")
+        return document
 
     # -- the helpers ----------------------------------------------------------------------
     def _project_root(self, params: dict[str, Any]) -> pathlib.Path:
