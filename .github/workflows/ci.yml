@@ -148,7 +148,7 @@ jobs:
       # The plan's v1 gate (section 7): "CAD execution success >90%". The verify harness
       # already fails on any failing case; this records the number the plan names, so the
       # gate is a measured rate and not an all-or-nothing pass.
-      - name: The CAD execution success gate (plan section 7: above 90%)
+      - name: "The CAD execution success gate (plan section 7: above 90%)"
         run: |
           uv run --directory core python ../tools/cad/verify.py --gate-min-success-rate 0.9 \
             --json "$GITHUB_WORKSPACE/data/tmp/cad-ci/report.json"
