@@ -38,6 +38,7 @@ from typing import Any, Callable, Iterable, TextIO
 from .agent import Session
 from .agent.client import ModelClient
 from .interview import FlowBook, load_book
+from .spec import SpecStore
 
 __all__ = [
     "BRIDGE_VERSION",
@@ -144,6 +145,7 @@ class Bridge:
             "bundle.export": self._bundle_export,
             "bundle.read": self._bundle_read,
             "manual.search": self._manual_search,
+            "projects.list": self._projects_list,
         }.get(method)
 
     # -- the methods ----------------------------------------------------------------------
@@ -285,6 +287,51 @@ class Bridge:
     def _pack_paths(self) -> list[pathlib.Path]:
         base = self._root or pathlib.Path(".")
         return sorted((base / "spec" / "rules").glob("*.yaml"))
+
+    def _projects_list(self, params: dict[str, Any]) -> dict[str, Any]:
+        """The projects on this machine ✓ — the dashboard's list ✓ (W5.6 ✓) ✓.
+
+        A project folder is a **store** ✓ (the revisions ✓ and the log ✓), so the list is
+        the folders that carry one ✓ — and each project is read from its **tip** ✓, so the
+        dashboard shows the project's own facts ✓ and not a mock ✓ ✓.
+        """
+        base = self._root or pathlib.Path(".")
+        projects_dir = params.get("projects") or str(base / "projects")
+        root = pathlib.Path(projects_dir)
+        rows: list[dict[str, Any]] = []
+        if root.is_dir():
+            for path in sorted(root.iterdir()):
+                if not path.is_dir() or not (path / "log.jsonl").is_file():
+                    continue
+                try:
+                    store = SpecStore(path)
+                    tip = store.tip()
+                    spec = store.load(tip.sha256)
+                except Exception:
+                    # a project that cannot be read is reported as unreadable, not hidden ✓
+                    rows.append({"name": path.name, "path": str(path), "readable": False})
+                    continue
+                project = spec.get("project") or {}
+                address = (spec.get("site") or {}).get("address") or {}
+                area = (
+                    address.get("areaName", "")
+                    if isinstance(address, dict)
+                    else str(address)
+                )
+                rows.append(
+                    {
+                        "name": str(project.get("name") or path.name),
+                        "path": str(path),
+                        "readable": True,
+                        "id": str(project.get("id") or ""),
+                        "address": str(area),
+                        "revision": tip.number,
+                        "sha256": tip.sha256,
+                        "updatedAt": tip.createdAt,
+                        "locked": bool(spec.get("locked")),
+                    }
+                )
+        return {"projects": rows, "count": len(rows)}
 
     # -- the helpers ----------------------------------------------------------------------
     def _project_root(self, params: dict[str, Any]) -> pathlib.Path:

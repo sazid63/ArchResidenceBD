@@ -24,6 +24,8 @@ jobs:
         run: python tools/ci/brand_guard.py
       - name: Licence notice guard
         run: python tools/ci/licence_notice_guard.py
+      - name: UI guard (the theme and the i18n)
+        run: python tools/ci/ui_guard.py
       - name: Bangla render guard
         run: python tools/ci/bangla_render_guard.py
 

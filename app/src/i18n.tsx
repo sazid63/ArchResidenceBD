@@ -140,6 +140,8 @@ const en = {
   aboutCoreConnected: "Connected",
   aboutCoreAbsent: "Not running",
   aboutCoreUnknown: "Checking...",
+  locked: "Locked",
+  revisionLabel: "Revision {n}",
   helpTitle: "Help",
   helpSubtitle: "Answers that work offline - no network and no model.",
   helpPlaceholder: "Ask a question (Bangla or English)",
@@ -319,6 +321,9 @@ const bn: typeof en = {
   helpFlow: "অ্যাপ",
   helpNeedsShell: "সহায়তা খোঁজে অ্যাপের কোর, যা ডেস্কটপ শেলের ভেতরে চলে।",
 
+
+  locked: "লক করা",
+  revisionLabel: "সংশোধন {n}",
 };
 
 export const STRINGS = { en, bn } as const;
