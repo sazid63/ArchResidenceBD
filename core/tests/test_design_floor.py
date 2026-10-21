@@ -97,7 +97,7 @@ def test_the_expected_objects_come_from_the_design() -> None:
     expected = floor.expected_objects()
     names = [item["name"] for item in expected]
     assert names[0].startswith("Column_")
-    assert names[-1] == "Slab_1"
+    assert names[-1] == f"Slab_{floor.storey_label.replace('-', '_')}"
     column = floor.columns[0]
     assert expected[0]["volumeM3"] == pytest.approx(
         column.size_mm * column.size_mm * column.height_mm / 1e9, rel=1e-6

@@ -34,17 +34,17 @@
     "units": "mm",
     "upAxis": "z"
   },
-  "elapsedSeconds": 1.641,
+  "elapsedSeconds": 1.625,
   "failures": [],
-  "masterBytes": 6573,
+  "masterBytes": 6605,
   "ok": true,
   "phaseFiles": [
     {
-      "bytes": 8143,
+      "bytes": 8136,
       "phase": "foundation"
     },
     {
-      "bytes": 9026,
+      "bytes": 9171,
       "phase": "floor"
     }
   ],

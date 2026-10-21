@@ -298,7 +298,8 @@ DESIGN = json.loads(r"""
   "sizeYMm": 300.0,
   "thicknessMm": 125.0
  },
- "storeyIndex": 1
+ "storeyIndex": 1,
+ "storeyLabel": "floor-1"
 }
 """)
 
@@ -318,6 +319,7 @@ def build():
     if document is None:
         raise RuntimeError("no active document: the launcher always creates one")
     base_z = DESIGN["baseZMm"]
+    storey = DESIGN["storeyLabel"].replace("-", "_")
     for column in DESIGN["columns"]:
         shape = _box(
             column["xMm"],
@@ -327,9 +329,9 @@ def build():
             column["sizeMm"],
             column["heightMm"],
         )
-        obj = document.addObject("Part::Feature", f"Column_{column['id']}")
+        obj = document.addObject("Part::Feature", f"Column_{storey}_{column['id']}")
         obj.Shape = shape
-        obj.Label = f"Column {column['id']}"
+        obj.Label = f"Column {DESIGN['storeyLabel']} {column['id']}"
     for beam in DESIGN["beams"]:
         shape = _box(
             beam["xMm"],
@@ -339,9 +341,9 @@ def build():
             beam["widthMm"],
             beam["depthMm"],
         )
-        obj = document.addObject("Part::Feature", f"Beam_{beam['id']}")
+        obj = document.addObject("Part::Feature", f"Beam_{storey}_{beam['id']}")
         obj.Shape = shape
-        obj.Label = f"Beam {beam['id']}"
+        obj.Label = f"Beam {DESIGN['storeyLabel']} {beam['id']}"
     slab = DESIGN["slab"]
     shape = Part.makeBox(
         slab["sizeXMm"],
@@ -349,9 +351,9 @@ def build():
         slab["thicknessMm"],
         App.Vector(slab["originXMm"], slab["originYMm"], base_z),
     )
-    obj = document.addObject("Part::Feature", "Slab_1")
+    obj = document.addObject("Part::Feature", f"Slab_{storey}")
     obj.Shape = shape
-    obj.Label = "Slab 1"
+    obj.Label = f"Slab {DESIGN['storeyLabel']}"
     document.recompute()
 
     out_dir = os.environ.get("ARCHRES_JOB_OUTDIR")

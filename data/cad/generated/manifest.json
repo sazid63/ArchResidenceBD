@@ -12,7 +12,7 @@
       "bytes": 3427
     },
     "floor-two-storey-residential.py": {
-      "bytes": 3580
+      "bytes": 3757
     },
     "foundation-two-storey-residential.design.json": {
       "bytes": 4318
@@ -27,10 +27,10 @@
       "bytes": 77343
     },
     "two-storey-residential.mesh-macro.py": {
-      "bytes": 12086
+      "bytes": 12263
     },
     "two-storey-residential.mesh.json": {
-      "bytes": 26385
+      "bytes": 26509
     }
   },
   "manifestVersion": "1",

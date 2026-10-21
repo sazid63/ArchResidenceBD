@@ -1,0 +1,112 @@
+{
+  "assumptions": [],
+  "declaredAbsent": [
+    "the lift shaft's opening in the slab: the v0 spec carries no opening data, so no hole is cut (a hole nobody asked for is a fabricated fact)",
+    "the stair's treads and railings: the v0 flight is the sloped slab only"
+  ],
+  "flights": [
+    {
+      "angleDeg": 36.8699,
+      "baseZMm": 3200.0,
+      "id": "1",
+      "riseMm": 3000.0,
+      "runMm": 4000.0,
+      "thicknessMm": 150.0,
+      "widthMm": 1000.0,
+      "xMm": 500.0,
+      "yMm": 6689.0
+    }
+  ],
+  "landings": [
+    {
+      "depthMm": 1200.0,
+      "id": "1",
+      "thicknessMm": 150.0,
+      "widthMm": 1000.0,
+      "xMm": 500.0,
+      "yMm": 6689.0,
+      "zMm": 6200.0
+    }
+  ],
+  "lifts": [
+    {
+      "baseZMm": 3200.0,
+      "carMm": 1400.0,
+      "fits": true,
+      "heightMm": 2400.0,
+      "id": "1",
+      "shaftMm": 1800.0,
+      "xMm": 10100.0,
+      "yMm": 7289.0
+    }
+  ],
+  "projectId": "7c9e6f10-2a3b-4c5d-9e8f-1a2b3c4d5e6f",
+  "runs": [
+    {
+      "diameterMm": 25.0,
+      "id": "1",
+      "kind": "conduit",
+      "lengthMm": 9000.0,
+      "xMm": 500.0,
+      "yMm": 6689.0,
+      "zMm": 3500.0
+    },
+    {
+      "diameterMm": 50.0,
+      "id": "1",
+      "kind": "waterPipe",
+      "lengthMm": 1.0,
+      "xMm": 500.0,
+      "yMm": 6689.0,
+      "zMm": 3450.0
+    },
+    {
+      "diameterMm": 25.0,
+      "id": "1",
+      "kind": "gasPipe",
+      "lengthMm": 1.0,
+      "xMm": 500.0,
+      "yMm": 6689.0,
+      "zMm": 3450.0
+    }
+  ],
+  "storeyIndex": 1,
+  "storeyLabel": "floor-1",
+  "values": {
+    "services.conduitDiameterMm": {
+      "provenance": "derived",
+      "reason": "16 outlets at 8 per unit",
+      "source": "the units this floor holds",
+      "unit": "mm",
+      "value": 25.0
+    },
+    "services.liftShaftMm": {
+      "provenance": "assumed",
+      "reason": "the shaft's size",
+      "source": "v0 default",
+      "unit": "mm",
+      "value": 1800.0
+    },
+    "services.stairRisers": {
+      "provenance": "assumed",
+      "reason": "the risers per flight",
+      "source": "v0 default",
+      "unit": "1",
+      "value": 16.0
+    },
+    "services.stairTreadMm": {
+      "provenance": "assumed",
+      "reason": "the going of a tread",
+      "source": "v0 default",
+      "unit": "mm",
+      "value": 250.0
+    },
+    "services.stairWidthMm": {
+      "provenance": "assumed",
+      "reason": "the stair's width",
+      "source": "v0 default",
+      "unit": "mm",
+      "value": 1000.0
+    }
+  }
+}

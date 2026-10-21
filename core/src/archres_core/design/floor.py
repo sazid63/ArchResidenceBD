@@ -36,6 +36,16 @@ from .foundation import (
 )
 
 ASSUMED_COLUMN_SIZE_MM = 300.0
+
+
+def _engine_token(storey_label: str) -> str:
+    """The storey label as the engine's object names carry it.
+
+    FreeCAD sanitises an object's name (a hyphen becomes an underscore), so the design has to
+    expect the sanitised form - otherwise the design and the engine disagree about what the
+    object is called, and the probe cannot check one against the other.
+    """
+    return storey_label.replace("-", "_")
 ASSUMED_BEAM_WIDTH_MM = 300.0
 ASSUMED_BEAM_DEPTH_MM = 450.0
 ASSUMED_SLAB_OVERHANG_MM = 150.0
@@ -127,7 +137,7 @@ class FloorDesign:
         for column in self.columns:
             expected.append(
                 {
-                    "name": f"Column_{column.id}",
+                    "name": f"Column_{_engine_token(self.storey_label)}_{column.id}",
                     "volumeM3": round(
                         column.size_mm * column.size_mm * column.height_mm / 1_000_000_000.0, 6
                     ),
@@ -137,7 +147,7 @@ class FloorDesign:
         for beam in self.beams:
             expected.append(
                 {
-                    "name": f"Beam_{beam.id}",
+                    "name": f"Beam_{_engine_token(self.storey_label)}_{beam.id}",
                     "volumeM3": round(
                         beam.length_mm * beam.width_mm * beam.depth_mm / 1_000_000_000.0, 6
                     ),
@@ -146,7 +156,7 @@ class FloorDesign:
             )
         expected.append(
             {
-                "name": "Slab_1",
+                "name": f"Slab_{_engine_token(self.storey_label)}",
                 "volumeM3": round(
                     self.slab.size_x_mm * self.slab.size_y_mm * self.slab.thickness_mm
                     / 1_000_000_000.0,
@@ -359,6 +369,7 @@ def render_floor_macro(design: FloorDesign) -> str:
     payload = {
         "projectId": design.project_id,
         "storeyIndex": design.storey_index,
+        "storeyLabel": design.storey_label,
         "baseZMm": design.base_z_mm,
         "columns": [item.as_dict() for item in design.columns],
         "beams": [item.as_dict() for item in design.beams],
@@ -398,6 +409,7 @@ def build():
     if document is None:
         raise RuntimeError("no active document: the launcher always creates one")
     base_z = DESIGN["baseZMm"]
+    storey = DESIGN["storeyLabel"].replace("-", "_")
     for column in DESIGN["columns"]:
         shape = _box(
             column["xMm"],
@@ -407,9 +419,9 @@ def build():
             column["sizeMm"],
             column["heightMm"],
         )
-        obj = document.addObject("Part::Feature", f"Column_{{column['id']}}")
+        obj = document.addObject("Part::Feature", f"Column_{{storey}}_{{column['id']}}")
         obj.Shape = shape
-        obj.Label = f"Column {{column['id']}}"
+        obj.Label = f"Column {{DESIGN['storeyLabel']}} {{column['id']}}"
     for beam in DESIGN["beams"]:
         shape = _box(
             beam["xMm"],
@@ -419,9 +431,9 @@ def build():
             beam["widthMm"],
             beam["depthMm"],
         )
-        obj = document.addObject("Part::Feature", f"Beam_{{beam['id']}}")
+        obj = document.addObject("Part::Feature", f"Beam_{{storey}}_{{beam['id']}}")
         obj.Shape = shape
-        obj.Label = f"Beam {{beam['id']}}"
+        obj.Label = f"Beam {{DESIGN['storeyLabel']}} {{beam['id']}}"
     slab = DESIGN["slab"]
     shape = Part.makeBox(
         slab["sizeXMm"],
@@ -429,9 +441,9 @@ def build():
         slab["thicknessMm"],
         App.Vector(slab["originXMm"], slab["originYMm"], base_z),
     )
-    obj = document.addObject("Part::Feature", "Slab_1")
+    obj = document.addObject("Part::Feature", f"Slab_{{storey}}")
     obj.Shape = shape
-    obj.Label = "Slab 1"
+    obj.Label = f"Slab {{DESIGN['storeyLabel']}}"
     document.recompute()
 
     out_dir = os.environ.get("ARCHRES_JOB_OUTDIR")
