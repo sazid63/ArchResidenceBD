@@ -289,9 +289,15 @@ def design_mep(
     # where the spec gives no unit area.
     unit_area = float(building.get("typicalUnitAreaSqm") or 0.0)
     area_m2 = unit_area * units_here if unit_area > 0.0 and units_here else slab_area_m2
-    x0, y0 = 0.0, 0.0
-    x1, y1 = slab.size_x_mm, slab.size_y_mm
+    x0, y0 = slab.origin_x_mm, slab.origin_y_mm
+    x1, y1 = slab.origin_x_mm + slab.size_x_mm, slab.origin_y_mm + slab.size_y_mm
     z = floor.base_z_mm
+    # The points keep clear of the floor's edge - but the v0 structure is a single line of
+    # footings along the frontage, so the floor can be narrower than the inset, and a point
+    # off the floor is a point on no floor at all.
+    inset = min(
+        ASSUMED_POINT_INSET_MM, (x1 - x0) / 2.0, (y1 - y0) / 2.0
+    )
 
     # --- the electrical layout: the points, sized by the floor's area ----------------
     lighting_count = max(1, round(area_m2 * ASSUMED_LIGHTING_POINTS_PER_100M2 / 100.0))
@@ -304,7 +310,7 @@ def design_mep(
         ("fan", fan_count, ASSUMED_FAN_LOAD_W, 2400.0, "a ceiling fan"),
     ):
         for number, (x_mm, y_mm) in enumerate(
-            _grid_positions(count, x0, y0, x1, y1, ASSUMED_POINT_INSET_MM), start=1
+            _grid_positions(count, x0, y0, x1, y1, inset), start=1
         ):
             points.append(
                 MepPoint(
@@ -334,7 +340,7 @@ def design_mep(
     if current:
         circuits.append(_make_circuit(len(circuits) + 1, index, current, current_load))
 
-    # --- the water layout: the fixture set of the units this floor holds ------------
+    # The water layout: the fixture set of the units this floor holds -------------
     fixtures = (
         ("basin", ASSUMED_WFU_BASIN, "a wash basin"),
         ("wc", ASSUMED_WFU_WC, "a WC (tank)"),
@@ -349,8 +355,8 @@ def design_mep(
                     system="water",
                     kind=kind,
                     storey_index=index,
-                    x_mm=round(x0 + ASSUMED_POINT_INSET_MM * number, 3),
-                    y_mm=round(y0 + ASSUMED_POINT_INSET_MM, 3),
+                    x_mm=round(x0 + inset * number, 3),
+                    y_mm=round(y0 + inset, 3),
                     z_mm=z + 450.0,
                     fixture_units=fixture_units,
                     note=note,
@@ -364,8 +370,8 @@ def design_mep(
         system="drainage",
         kind="soilStack",
         storey_index=index,
-        x_mm=round(x0 + ASSUMED_POINT_INSET_MM, 3),
-        y_mm=round(y0 + ASSUMED_POINT_INSET_MM, 3),
+        x_mm=round(x0 + inset, 3),
+        y_mm=round(y0 + inset, 3),
         z_mm=z,
         note=f"the soil stack; the branches are laid at {ASSUMED_DRAINAGE_FALL}",
     )

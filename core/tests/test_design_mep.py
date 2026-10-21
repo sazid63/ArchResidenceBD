@@ -50,6 +50,18 @@ def test_the_points_are_placed_on_the_floor() -> None:
         assert point.z_mm >= 0.0
 
 
+def test_the_points_are_on_the_slab_not_at_the_world_origin() -> None:
+    """The clash check found this: the layout was placed at (0, 0), not on the floor."""
+    spec = _spec()
+    foundation = design_foundation(spec)
+    floor = design_typical_floor(spec, foundation, storey_index=1)
+    mep = design_mep(spec, floor, storey_index=1)
+    slab = floor.slab
+    for point in mep.points:
+        assert slab.origin_x_mm <= point.x_mm <= slab.origin_x_mm + slab.size_x_mm
+        assert slab.origin_y_mm <= point.y_mm <= slab.origin_y_mm + slab.size_y_mm
+
+
 def test_the_electrical_layout_is_sized_by_the_floor_area() -> None:
     mep = _mep(1)
     lights = [point for point in mep.points if point.kind == "light"]

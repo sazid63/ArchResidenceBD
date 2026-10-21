@@ -107,6 +107,8 @@ jobs:
         run: uv run --directory core python ../tools/cad/drawing_set_probe.py --check
       - name: The committed MEP design and its schedules are fresh (offline, no engine)
         run: uv run --directory core python ../tools/mep/build_mep.py --check
+      - name: The committed clash and coordination report is fresh (offline, no engine)
+        run: uv run --directory core python ../tools/clash/build_clash.py --check
       - name: The spec engine survives the fuzzer (plan section 9)
         run: uv run --directory core python ../tools/ci/spec_fuzz_guard.py
 
