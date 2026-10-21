@@ -1,0 +1,60 @@
+{
+  "case": "two-storey-residential",
+  "datum": {
+    "axes": {
+      "x": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "y": [
+        0.0,
+        1.0,
+        0.0
+      ],
+      "z": [
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    "location": {
+      "district": "Dhaka",
+      "division": "Dhaka"
+    },
+    "name": "project-origin",
+    "note": "every phase's model is built in this datum; the master links the phase files without moving them",
+    "origin": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "projectId": "7c9e6f10-2a3b-4c5d-9e8f-1a2b3c4d5e6f",
+    "schemaVersion": "0.1.0",
+    "units": "mm",
+    "upAxis": "z"
+  },
+  "elapsedSeconds": 1.641,
+  "failures": [],
+  "masterBytes": 6573,
+  "ok": true,
+  "phaseFiles": [
+    {
+      "bytes": 8143,
+      "phase": "foundation"
+    },
+    {
+      "bytes": 9026,
+      "phase": "floor"
+    }
+  ],
+  "summary": {
+    "byPhase": {
+      "floor": 8,
+      "foundation": 7
+    },
+    "links": 15,
+    "objects": 15,
+    "volumeM3": 5.45175
+  }
+}
