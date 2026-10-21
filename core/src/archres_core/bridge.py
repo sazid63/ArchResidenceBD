@@ -141,6 +141,8 @@ class Bridge:
             "session.commit": self._session_commit,
             "session.history": self._session_history,
             "session.coverage": self._session_coverage,
+            "bundle.export": self._bundle_export,
+            "bundle.read": self._bundle_read,
         }.get(method)
 
     # -- the methods ----------------------------------------------------------------------
@@ -215,6 +217,40 @@ class Bridge:
 
     def _session_coverage(self, params: dict[str, Any]) -> dict[str, Any]:
         return {"coverage": self._session(params).coverage()}
+
+    def _bundle_export(self, params: dict[str, Any]) -> dict[str, Any]:
+        """Write the project's bundle ✓ — the one-file backup ✓ (W5.5 ✓) ✓."""
+        from .bundle import BundleError, export_bundle
+
+        project = params.get("project")
+        target = params.get("target")
+        if not isinstance(project, str) or not project:
+            raise BridgeError(CODE_INVALID_PARAMS, "bundle.export needs the project folder")
+        if not isinstance(target, str) or not target:
+            raise BridgeError(CODE_INVALID_PARAMS, "bundle.export needs a target file")
+        outputs = params.get("outputs")
+        try:
+            manifest = export_bundle(
+                project,
+                target,
+                outputs=outputs if isinstance(outputs, str) and outputs else None,
+            )
+        except BundleError as exc:
+            raise BridgeError(CODE_INTERNAL, str(exc)) from exc
+        return {"manifest": manifest.as_dict(), "target": target}
+
+    def _bundle_read(self, params: dict[str, Any]) -> dict[str, Any]:
+        """What a bundle holds ✓ — read without importing it ✓ ✓."""
+        from .bundle import BundleError, read_bundle
+
+        target = params.get("target")
+        if not isinstance(target, str) or not target:
+            raise BridgeError(CODE_INVALID_PARAMS, "bundle.read needs a bundle file")
+        try:
+            manifest = read_bundle(target)
+        except BundleError as exc:
+            raise BridgeError(CODE_INTERNAL, str(exc)) from exc
+        return {"manifest": manifest.as_dict()}
 
     # -- the helpers ----------------------------------------------------------------------
     def _project_root(self, params: dict[str, Any]) -> pathlib.Path:

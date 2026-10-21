@@ -140,6 +140,10 @@ const en = {
   aboutCoreConnected: "Connected",
   aboutCoreAbsent: "Not running",
   aboutCoreUnknown: "Checking...",
+  bundleExported: "The project's bundle is written",
+  bundleFailed: "The bundle could not be written",
+  bundleNeedsShell:
+    "The bundle is written by the app's core, which runs inside the desktop shell.",
   aboutLicencesLine: "Third-party notices and licences",
   aboutTermsPending: "The app's own terms are set by its publisher.",
 };
@@ -287,6 +291,10 @@ const bn: typeof en = {
   aboutCoreAbsent: "চলেনি",
   aboutCoreUnknown: "ঠিক্সার হচ্যে...",
 
+
+  bundleExported: "\u09aa\u09cd\u09b0\u0995\u09b2\u09cd\u09af\u09c7\u09b0 \u09ac\u09cd\u09af\u09a8\u09cd\u09a1\u09c7\u09b2 \u09b2\u09c7\u0996\u09c7\u09b0 \u09b9\u09af\u09bc\u09c7\u09b0",
+  bundleFailed: "\u09ac\u09cd\u09af\u09a8\u09cd\u09a1\u09c7\u09b2 \u09b2\u09c7\u0996\u09c7\u09b0 \u09b9\u09af\u09bc\u09c7\u09b0 \u09a7\u09c7\u09b2\u09c7\u09a8\u09bf",
+  bundleNeedsShell: "\u09ac\u09cd\u09af\u09a8\u09cd\u09a1\u09c7\u09b2 \u09a7\u09c1\u09ac\u09c7\u09b0 \u09b6\u09c7\u09b2\u09c7\u09b0 \u09a1\u09c7\u09b8\u0995\u09cd\u09b0\u09cb\u09aa\u09c7\u09b0 \u09b8\u09a4\u09c7\u09b0 \u09a4\u09cd\u09af\u09be\u09b0\u09a3\u09a1 \u0995\u09b0\u09c7\u09b0\u09b9\u09c7\u09a8\u0964",
 };
 
 export const STRINGS = { en, bn } as const;
