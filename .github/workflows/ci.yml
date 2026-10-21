@@ -165,6 +165,11 @@ jobs:
           uv run --directory core python ../tools/cad/federation_probe.py \
             --engine "$ARCHRES_FREECADCMD" \
             --json "$GITHUB_WORKSPACE/data/tmp/cad-ci/federation-probe.json"
+      - name: The equivalence gate (an incremental rebuild must equal a full rebuild)
+        run: |
+          uv run --directory core python ../tools/cad/equivalence_probe.py \
+            --engine "$ARCHRES_FREECADCMD" \
+            --json "$GITHUB_WORKSPACE/data/tmp/cad-ci/equivalence-probe.json"
       - name: Run the walking skeleton (one house, end to end, every stage checked)
         run: |
           uv run --directory core python ../tools/walking_skeleton/run.py \
