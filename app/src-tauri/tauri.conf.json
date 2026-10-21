@@ -28,7 +28,6 @@
   "bundle": {
     "active": true,
     "targets": ["nsis"],
-    "icon": ["icons/icon.png"],
-    "resources": ["licenses/**/*"]
+    "icon": ["icons/icon.png"]
   }
 }
