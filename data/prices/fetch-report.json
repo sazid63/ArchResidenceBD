@@ -1,0 +1,41 @@
+{
+  "artifacts": [
+    {
+      "contentType": "text/html",
+      "fileName": "20261021T013522Z-f43460c7cf1a.html",
+      "lastVerified": "2026-10-21",
+      "registryStatus": "active",
+      "sha256": "f43460c7cf1a11cc8643133dcbbf169c13e367087443467fb3e0baed07560b49",
+      "sizeBytes": 10665,
+      "sourceId": "pwd-schedule-of-rates",
+      "status": 200,
+      "url": "https://ss.pwd.gov.bd/sor"
+    },
+    {
+      "contentType": "text/html",
+      "fileName": "20261021T013522Z-4fa353d24f49.html",
+      "lastVerified": "2026-10-21",
+      "registryStatus": "active",
+      "sha256": "4fa353d24f49fa38459567fe551aeea3211f007d535527ae238f89133cad52ec",
+      "sizeBytes": 86978,
+      "sourceId": "lged-schedule-of-rates",
+      "status": 200,
+      "url": "https://lged.gov.bd/pages/static-pages/6922df17933eb65569e1fcb8"
+    },
+    {
+      "contentType": "application/pdf",
+      "fileName": "20261021T013523Z-bf7524a24d20.pdf",
+      "lastVerified": "2026-10-21",
+      "registryStatus": "linked file of pwd-schedule-of-rates",
+      "sha256": "bf7524a24d20a5b1d9f4b345a9ca6fa3bbeccebf6dabe44d84cb06fc3b82b47f",
+      "sizeBytes": 10435417,
+      "sourceId": "pwd-schedule-of-rates-pdf",
+      "status": 200,
+      "url": "https://ss.pwd.gov.bd/document/sor/PWDSoR2022-Revised-2.3.23-Website.pdf"
+    }
+  ],
+  "confirmedBy": "the owner, from a browser (2026-10-21)",
+  "fetchedAt": "2026-10-21",
+  "manifestRows": 1,
+  "note": "The artifacts are hashed and cached; the manifest rows are the provenance record (plan section 5.10). The values are NOT transcribed yet: a PDF list is read by a human and the lines enter as candidate rates until a human marks the card active."
+}

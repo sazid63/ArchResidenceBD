@@ -99,23 +99,43 @@ sources:
 
   - id: pwd-schedule-of-rates
     dataTypes: [material-price, labour-rate, machinery-rate]
-    status: candidate
+    status: active
     authority: "Public Works Department (PWD)"
     title:
-      bn: "গণপূর্ত অধিদপ্তরের দর তফসিল (সিডিউল অফ রেট)"
+      bn: "গণপূর্ত অধিদপ্তরের দর তফসিল (সিডিউল অব রেট)"
       en: "Public Works Department Schedule of Rates"
-    kind: pdf-document
-    url: "https://pwd.gov.bd/"
-    language: [bn]
+    kind: html-index
+    url: "https://ss.pwd.gov.bd/sor"
+    language: [bn, en]
     licence: "Government schedule publication; confirm the current edition's reuse terms."
     fetch:
       method: GET
       parser: manual-review
-      recipe: "Download the current SoR PDF; record its exact URL + sha256 in the fetch manifest; transcribe the building-works chapters into candidate rate-card lines (material / labour / machinery)."
+      recipe: "Fetch the SoR index page; it links the current edition's PDF (the 2022 revised edition: https://ss.pwd.gov.bd/document/sor/PWDSoR2022-Revised-2.3.23-Website.pdf). Record the index page's and the PDF's URL + sha256 in the fetch manifest; transcribe the building-works chapters into candidate rate-card lines (material / labour / machinery) with the page reference for each line."
     cadence: yearly
     cacheTtlDays: 365
-    notes: "The SoR used for government building estimates - the strongest official-list candidate for building works. Domain did not resolve from the build machine on 2026-10-18; host + current edition to confirm."
+    lastVerified: "2026-10-21"
+    notes: "The SoR used for government building estimates - the strongest official-list candidate for building works. URL confirmed by the owner from a browser on 2026-10-21 (the earlier pwd.gov.bd entry did not resolve from the build machine); the index page and the 2022 revised SoR PDF were fetched from the build machine on 2026-10-21 and hashed. The building-works chapters are still to be transcribed into a candidate card - the values enter as candidate lines until a human verifies them."
 
+  - id: lged-schedule-of-rates
+    dataTypes: [material-price, labour-rate, machinery-rate]
+    status: active
+    authority: "Local Government Engineering Department (LGED)"
+    title:
+      bn: "এলজিইডির দর তফসিল (স্কেডিউল অব রেটস)"
+      en: "LGED Schedule of Rates"
+    kind: html-index
+    url: "https://lged.gov.bd/pages/static-pages/6922df17933eb65569e1fcb8"
+    language: [bn, en]
+    licence: "Government schedule publication; confirm the reuse terms before redistributing any tables."
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: "Fetch the page; it links the current edition's PDFs (hosted on the ministry's object storage, 2024/12). Record the page's and the PDF's URL + sha256 in the fetch manifest; transcribe the building-works chapters into candidate rate-card lines with the page reference for each line."
+    cadence: yearly
+    cacheTtlDays: 365
+    lastVerified: "2026-10-21"
+    notes: "URL confirmed by the owner from a browser on 2026-10-21, and the page was fetched from the build machine the same day (the 2026-10-18 domain failure no longer holds). Which of the linked PDFs is the SoR itself is to be confirmed by a human - the page lists several publications; nothing is transcribed yet."
   - id: bwdb-schedule-of-rates
     dataTypes: [material-price, labour-rate, machinery-rate]
     status: active

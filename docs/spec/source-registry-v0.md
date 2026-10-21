@@ -60,6 +60,26 @@ The mechanism is `archres_core.sources` (stdlib only): `fetch_source(entry, cach
 
 **Provenance chain (end to end):** manifest row → rate-card `source` fields (`kind`, `name`, `url`, `retrievedAt`, `sha256` — W0.9 schema) → spec `provenance` entry keyed by JSON Pointer (`source: fetched`, `note: "Source Registry: bbs-price-wage 2026-10-01"`, confidence per verification level). Nothing enters the spec without all three hops.
 
+## Verification state (2026-10-21)
+
+- **The price lists are reachable, and two of them are now `active`.** The owner confirmed the
+  official pages from a browser on 2026-10-21: the **PWD Schedule of Rates**
+  (`https://ss.pwd.gov.bd/sor`) and the **LGED Schedule of Rates**
+  (`https://lged.gov.bd/pages/static-pages/6922df17933eb65569e1fcb8`) — the earlier
+  `pwd.gov.bd` entry never resolved from the build machine, and the two working addresses are
+  recorded as they are (the tracking parameter stripped ✓). Both pages were then **fetched from
+  the build machine** through `archres_core.sources` and hashed ✓, and the PWD index page's SoR
+  PDF was fetched as its own artifact ✓ (10.4 MB, sha256 `bf7524a2…` ✓). The report is
+  `data/prices/fetch-report.json` ✓.
+- **The values are not transcribed yet.** Both lists are PDFs read by a human; the building-works
+  chapters have to be transcribed into a **candidate** card with the page reference for each line
+  ✓ — the values enter as candidates until a human marks the card active ✓ (plan §9, the
+  registry's candidate-only policy ✓). Which of the LGED page's linked PDFs is the SoR itself is
+  still to be confirmed ✓.
+- `bbs-price-wage` (BBS) still has no working address from the build machine ✗ and stays
+  `candidate` ✓ — it is a **monthly** release with district tables, so it is the one that would
+  give a project's own district rather than a national schedule ✓.
+
 ## Verification state (2026-10-18)
 
 - `ffwc-flood` and `bwdb-schedule-of-rates`: **fetched and confirmed live** from the build machine (BWDB's SoR page is linked from its budget/procurement menu).

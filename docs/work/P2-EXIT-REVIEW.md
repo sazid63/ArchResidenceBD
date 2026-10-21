@@ -52,6 +52,12 @@ with a name and a place.
    BOQ"). The fetch path is implemented and consent-gated, but BBS, PWD and BWDB did not resolve
    from the build machine — an **owner item** (OWNER-ATTENTION #8). Nothing in the repo is a
    market price.
+   *(Amended 2026-10-21: the owner confirmed the two official price-list pages — the PWD and the
+   LGED Schedule of Rates — and both were fetched from the build machine and hashed
+   (`data/prices/fetch-report.json` ✓). The registry carries both as `active` ✓. The **values**
+   are still not transcribed: both lists are PDFs, and their building-works chapters have to be
+   transcribed into a candidate card with the page reference for each line ✓ — a declared
+   remainder, not a change to the gap above ✓.)*
 8. **Two of the plan's §9 CI guards have no package**: **spec fuzzing** and the **Bangla
    rendering regression** (the first Bangla PDF arrives with P3's reports). The third,
    incremental ≡ full rebuild, is **W2.11 — closed** ✓.
