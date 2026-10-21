@@ -140,6 +140,13 @@ const en = {
   aboutCoreConnected: "Connected",
   aboutCoreAbsent: "Not running",
   aboutCoreUnknown: "Checking...",
+  chatStart: "Start the conversation",
+  chatWhy: "Why it is asked",
+  chatProgress: "Progress",
+  chatProgressValue: "{answered} answered, {open} open",
+  chatNeedsShell:
+    "The conversation is the core's, and the core runs inside the desktop shell.",
+  chatNoProject: "There is no project yet - create one first.",
   unitsTitle: "Land units",
   unitsSubtitle: "Convert between the units a Bangladeshi plot is measured in.",
   unitsConvert: "Convert",
@@ -352,6 +359,13 @@ const bn: typeof en = {
   templatesNoFloors: "নিগ্রণ নিঁতি প্রসিয়",
   templatesUse: "ব্যবহার নিযে",
   templatesNone: "একেণী তৈম্প্লেট নেইই।",
+
+  chatStart: "কলাপ করেলা শুরু",
+  chatWhy: "কিন্যে কিনি করুনার",
+  chatProgress: "গতিরিকণ",
+  chatProgressValue: "{answered} এরিড, {open} কলক আও",
+  chatNeedsShell: "করণারর্গগেররর কোরের ররফেইয়ায়ের শেলের ঵িতে।",
+  chatNoProject: "একী প্রতিরে নেই - আপনির আগেপেরেন্তুন করুন।",
 };
 
 export const STRINGS = { en, bn } as const;

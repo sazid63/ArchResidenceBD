@@ -96,6 +96,26 @@ Proved by forcing the locale: the channel without the fix **crashes** on a Bangl
 (the JSON cannot be read ✗), and with the fix the answer comes back exactly as it was
 typed ✓ — `আমার বাড়ি` ✓ ✓.
 
+## The conversation, through the channel (2026-10-22)
+
+The app's main flow is now the **core's** conversation ✓ (ADR-0073 ✓) — probed through the
+channel the app uses ✓:
+
+```
+the projects: ['Mirpur Duplex (internal test)']
+the first question: plot-depth | And the depth, front to back?
+the chips: [{'id': '@skip', 'label': "I don't know", 'kind': 'skip'}]
+the decision: escalate | the reason: unparseable_number
+the reply: উত্তরটি একটু ভালোভাবে বুঝে নিচ্ছি।
+the next question: plot-depth
+```
+
+Three things that probe shows ✓: the question is the **flow book's** ✓, the chips are the
+flow book's ✓ (with their **id** ✓ — the answer goes back as that id ✓, not as the label
+✓ ✓), and an answer the engine cannot read comes back as an **escalation** ✓ with the
+Bangla reply that says so ✓ — the interview's own honesty ✓ ✓ — and the **Bangla survives
+the round trip** ✓ ✓ (the locale fix ✓).
+
 ## What is deliberately not here
 
 - **The Rust build on this machine** — re-measured 2026-10-21: there is **no linker here at
