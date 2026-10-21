@@ -15,7 +15,9 @@ use archres_bridge::{Bridge, Request};
 
 /// The repository's root (the test runs from the crate's directory ✓).
 fn repo_root() -> PathBuf {
+    // <repo>/app/src-tauri/crates/bridge -> <repo> ✓ (four levels up ✓) ✓
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("..")
         .join("..")
         .join("..")
         .join("..")
