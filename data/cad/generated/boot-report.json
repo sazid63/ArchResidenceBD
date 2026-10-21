@@ -16,10 +16,11 @@
     "visibleBrandActions": []
   },
   "command": [
-    "C:/1_SAJID/CE tools/FreeCAD/bin/freecad.exe",
     "cad/boot/nativecad_boot.py"
   ],
   "elapsedSeconds": 4.16,
+  "engine": "freecad.exe",
+  "evidence": "the engine's own UI facts, before the branding was applied",
   "facts": {
     "actions_total": 559,
     "brand_actions_hidden": [
@@ -35,13 +36,12 @@
     "title_after": "NativeCAD",
     "title_applied": true,
     "title_before": "FreeCAD 1.1.4",
-    "winid": 6293942
+    "winid": 3476878
   },
   "failures": [],
   "mode": {
     "mode": "embedded",
     "reasons": []
   },
-  "ok": true,
-  "profile": "data/tmp/boot-probe/profile"
+  "ok": true
 }

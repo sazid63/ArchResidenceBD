@@ -275,7 +275,7 @@ endobj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 13 0 R >>
 endobj
 15 0 obj
-<< /Title (ArchResidenceBD - Bill of Quantities) /Producer (NativeCAD (ArchResidenceBD)) >>
+<< /Title (ArchResidenceBD - Bill of Quantities) /Producer (ArchResidenceBD 0.0.0) >>
 endobj
 xref
 0 16
@@ -298,5 +298,5 @@ xref
 trailer
 << /Size 16 /Root 1 0 R /Info 15 0 R >>
 startxref
-7221
+7215
 %%EOF

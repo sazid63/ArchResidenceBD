@@ -58,7 +58,18 @@ def _engineer_parts() -> list[PackPart]:
     parts: list[PackPart] = [
         PackPart(name="spec.json", data=json.dumps(_spec(), ensure_ascii=False, indent=2).encode("utf-8"), role="spec"),
     ]
-    for name in ("drawing-set.pdf", "page-1.svg", "page-2.svg", "page-3.svg", "set-manifest.json"):
+    # The drawings travel with the CAD: the PDF, each sheet's SVG **and its DXF** (the engineer's
+    # handoff without the CAD is half a handoff), and the set's manifest.
+    for name in (
+        "drawing-set.pdf",
+        "page-1.svg",
+        "page-2.svg",
+        "page-3.svg",
+        "page-1.dxf",
+        "page-2.dxf",
+        "page-3.dxf",
+        "set-manifest.json",
+    ):
         parts.append(PackPart(name=f"drawings/{name}", data=_read(DRAWINGS / name), role="drawing"))
     for name in ("bar-schedule.xlsx", "bar-schedule.pdf"):
         parts.append(PackPart(name=f"bbs/{name}", data=_read(DOCUMENTS / name), role="bbs"))
@@ -91,8 +102,9 @@ def _bundle_parts() -> list[PackPart]:
 
 README = """# Engineer review pack
 
-This pack is the project's handoff: the Building Spec, the drawing set, the bar schedule, the
-priced BOQ and the compliance audit with the Deviation Register.
+This pack is the **ArchResidenceBD** project's handoff: the Building Spec, the **NativeCAD**
+drawing set, the bar schedule, the priced BOQ and the compliance audit with the Deviation
+Register.
 
 **Everything in here is a candidate.** The drawing set, the BBS and the BOQ carry the
 "candidate - not for construction" status, and the price list they were priced from is a
@@ -101,7 +113,7 @@ a part that arrived changed can be spotted.
 
 - `manifest.json` - what is in the pack and each part's hash
 - `spec.json` - the Building Spec (the source of truth)
-- `drawings/` - the drawing set (PDF, the sheets' SVG, the set's manifest)
+- `drawings/` - the drawing set (the PDF, each sheet's SVG **and its DXF**, the set's manifest)
 - `bbs/` - the bar schedule (xlsx + PDF)
 - `boq/` - the bill of quantities (xlsx + PDF)
 - `compliance/` - the compliance audit and the Deviation Register (markdown + the Bangla HTML)

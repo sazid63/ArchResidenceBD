@@ -22,6 +22,7 @@ import json
 import pathlib
 import sys
 
+from archres_core.cad.brand import dxf_problems
 from archres_core.cad.pool import WorkerConfig, WorkerPool
 from archres_core.design import design_foundation, design_typical_floor
 from archres_core.design.drawing_set import design_drawing_set
@@ -133,6 +134,9 @@ def main() -> int:
                     svg = (folder / f"page-{index}.svg").read_text(encoding="utf-8")
                     if "freecad" in svg.lower():
                         failures.append(f"sheet {index}: the engine name reached the paper")
+                    # The DXF ships too: no upstream name, and still a readable DXF.
+                    for problem in dxf_problems(folder / f"page-{index}.dxf"):
+                        failures.append(f"sheet {index}: {problem}")
                     if "not for construction" not in svg.lower():
                         failures.append(f"sheet {index}: the title block has no candidate status")
                     if sheet.sheet_title not in svg:

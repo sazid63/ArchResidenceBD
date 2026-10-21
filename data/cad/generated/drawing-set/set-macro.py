@@ -585,7 +585,8 @@ DESIGN = json.loads(r"""{
    ]
   }
  ],
- "status": "Candidate - not for construction"
+ "status": "Candidate - not for construction",
+ "version": "0.0.0"
 }
 """)
 
@@ -599,6 +600,20 @@ PAGE_H_MM = 210.0
 SCALE = 1.0 / 30.0
 TEXT_MM = 2.5
 
+
+def _strip_dxf(path):
+    """Replace the engine's name in a DXF header with the product's (ADR-0004).
+
+    The DXF writer stamps the engine's name into the file's header comment. A DXF is a
+    document the app ships, so the engine's name must not be in it - the attribution belongs on
+    the app's Licences screen, where the owner puts it.
+    """
+    path = pathlib.Path(path)
+    if not path.is_file():
+        return
+    text = path.read_text(encoding="utf-8", errors="replace")
+    text = re.sub(r"(?im)^.*FreeCAD.*$", "NativeCAD (ArchResidenceBD)", text)
+    path.write_text(text, encoding="utf-8", newline="\n")
 
 def build_model(sheet):
     document = App.ActiveDocument
@@ -760,6 +775,8 @@ def compose(sheet, index, total):
     (OUT / f"page-{index}.svg").write_text(composed, encoding="utf-8", newline="\n")
 
     TechDraw.writeDXFPage(page, str(OUT / f"page-{index}.dxf"))
+
+    _strip_dxf(pathlib.Path(OUT / f"page-{index}.dxf"))
     return composed
 
 
@@ -783,8 +800,8 @@ def main():
     writer.setPageLayout(layout)
     for setter, value in (
         ("setTitle", "ArchResidenceBD - " + DESIGN["drawingNumber"]),
-        ("setCreator", "NativeCAD (ArchResidenceBD)"),
-        ("setProducer", "NativeCAD (ArchResidenceBD)"),
+        ("setCreator", f"NativeCAD (ArchResidenceBD) {DESIGN['version']}"),
+        ("setProducer", f"NativeCAD (ArchResidenceBD) {DESIGN['version']}"),
     ):
         method = getattr(writer, setter, None)
         if method is not None:

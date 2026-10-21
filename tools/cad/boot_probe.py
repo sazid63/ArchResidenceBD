@@ -88,8 +88,12 @@ def _run(engine: pathlib.Path, workdir: pathlib.Path) -> dict[str, Any]:
     command = launch_command(engine)
 
     report: dict[str, Any] = {
-        "command": [_relative(part) for part in command],
-        "profile": _relative(profile),
+        # The report is development evidence, not a product document: it records what the
+        # engine called itself before the branding, and the engine's *name* only - never a
+        # machine's path.
+        "evidence": "the engine's own UI facts, before the branding was applied",
+        "engine": pathlib.Path(command[0]).name,
+        "command": [_relative(part) for part in command[1:]],
         "bootScript": _relative(BOOT_SCRIPT),
     }
     failures: list[str] = []

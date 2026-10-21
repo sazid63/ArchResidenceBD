@@ -19,7 +19,7 @@
 
 - Model: 15 objects, 5.45175 m³
 - Steel: scheduled 278.9998 kg vs measured 278.785 kg (0.077 % apart)
-- Sheet: page.svg 14466 B, page.dxf 19843 B, page.pdf 455726 B
+- Sheet: page.svg 14456 B, page.dxf 17282 B, page.pdf 448253 B
 - BOQ: 11 lines (9 priced, 2 unpriced), **119,599.70 BDT** from the card `dhaka-example-2026-10` (status candidate)
 
 ## Declared gaps

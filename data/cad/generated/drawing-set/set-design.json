@@ -573,5 +573,6 @@
    ]
   }
  ],
- "status": "Candidate - not for construction"
+ "status": "Candidate - not for construction",
+ "version": "0.0.0"
 }

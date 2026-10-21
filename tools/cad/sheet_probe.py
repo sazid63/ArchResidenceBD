@@ -21,6 +21,7 @@ import json
 import pathlib
 import sys
 
+from archres_core.cad.brand import dxf_problems
 from archres_core.cad.pool import WorkerConfig, WorkerPool
 from archres_core.design import (
     design_foundation,
@@ -97,6 +98,10 @@ def main() -> int:
             svg = (folder / "page.svg").read_text(encoding="utf-8")
             if "freecad" in svg.lower():
                 failures.append(f"run {attempt}: the engine name leaked into the sheet")
+            # The DXF is a document the app ships: the upstream name must not be in it, and the
+            # strip that removes it must leave the file a readable DXF.
+            for problem in dxf_problems(folder / "page.dxf"):
+                failures.append(f"run {attempt}: {problem}")
             if svg.count("<g") < 2:
                 failures.append(f"run {attempt}: the sheet carries no views")
             if "not for construction" not in svg:

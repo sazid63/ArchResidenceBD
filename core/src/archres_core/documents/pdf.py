@@ -20,6 +20,8 @@ from __future__ import annotations
 import pathlib
 from dataclasses import dataclass, field
 
+from ..cad.brand import producer_for
+
 #: A4 portrait, in PostScript points (1/72 inch).
 PAGE_WIDTH = 595.28
 PAGE_HEIGHT = 841.89
@@ -29,6 +31,9 @@ MARGIN = 40.0
 
 #: The line height of the body text.
 LINE_HEIGHT = 11.0
+
+#: The producer line: the app (the documents are the app's; the drawings carry the CAD's).
+PRODUCT_PRODUCER = producer_for("ArchResidenceBD")
 
 #: The built-in faces (no embedding needed).
 FONT_REGULAR = "Helvetica"
@@ -102,8 +107,18 @@ def _page_stream(page: Page) -> str:
     return "\n".join(parts).encode("latin-1", errors="replace").decode("latin-1")
 
 
-def write_pdf(path: str | pathlib.Path, pages: list[Page], *, title: str = "") -> pathlib.Path:
-    """Write the pages as a PDF and check that what came out is a PDF."""
+def write_pdf(
+    path: str | pathlib.Path,
+    pages: list[Page],
+    *,
+    title: str = "",
+    producer: str | None = None,
+) -> pathlib.Path:
+    """Write the pages as a PDF and check that what came out is a PDF.
+
+    The producer line names the product that made the document: the **app** (the BOQ, the BBS,
+    the reports ✓) - the drawings carry the CAD's name instead ✓ (the sheet's own macro ✓).
+    """
     if not pages:
         raise PdfError("a PDF needs at least one page")
     objects: list[bytes] = []
@@ -131,13 +146,15 @@ def write_pdf(path: str | pathlib.Path, pages: list[Page], *, title: str = "") -
                 f"{font_bold} 0 R >> >> /Contents {content_id} 0 R >>"
             )
         )
-    info_id = add(f"<< /Title ({_escape(title)}) /Producer (NativeCAD (ArchResidenceBD)) >>")
     objects[catalog_id - 1] = f"<< /Type /Catalog /Pages {pages_id} 0 R >>".encode()
     objects[pages_id - 1] = (
         f"<< /Type /Pages /Kids [{' '.join(f'{pid} 0 R' for pid in page_ids)}] "
         f"/Count {len(page_ids)} >>"
     ).encode()
 
+    info_id = add(
+        f"<< /Title ({_escape(title)}) /Producer ({_escape(producer or PRODUCT_PRODUCER)}) >>"
+    )
     out = bytearray(b"%PDF-1.4\n%\xe2\xe3\xcf\xd3\n")
     offsets = [0]
     for index, body in enumerate(objects, start=1):

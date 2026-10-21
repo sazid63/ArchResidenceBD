@@ -35,16 +35,16 @@
   "sheet": {
     "artifacts": {
       "page.dxf": {
-        "bytes": 19843,
-        "sha256": "76932ff932b2231bc1ed3fae4e94bef13220a0a3d99180415d857222502d6931"
+        "bytes": 17282,
+        "sha256": "f994f3f4308f147157d40b46a84d5efe4190c5bbbc19a19906118d3bd6bcb979"
       },
       "page.pdf": {
-        "bytes": 455726,
-        "sha256": "242886950aeb92db06ae17bf08b4ed5451510e67eaf054dc42ca3f2ae070cba2"
+        "bytes": 448253,
+        "sha256": "be248c4d0af99e9e2e72cc4e0e0a6e2968f212104d410c806c3d859f00f3976e"
       },
       "page.svg": {
-        "bytes": 14466,
-        "sha256": "9e41dff769d4a93116e4cea8c6de419edd69a91e17945f840d17dc1cc750c30e"
+        "bytes": 14456,
+        "sha256": "5d2c49dbe9fc0a7b74c19a4f615456f1eabf0fcbd5be195517574979fb4488e0"
       }
     },
     "carriesStatus": true,

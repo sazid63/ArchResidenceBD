@@ -14,6 +14,8 @@ rendering of it.
 
 from __future__ import annotations
 
+from archres_core.cad.brand import product_version
+
 import json
 from dataclasses import dataclass, field
 from typing import Any
@@ -182,7 +184,9 @@ def design_sheet(
         },
         {
             "id": VIEW_TOP,
-            "label": "GROUND FLOOR PLAN",
+            # The label must name the storey the sheet actually shows: the floor design
+            # carries it, so a sheet can never call the first floor the ground floor.
+            "label": f"{floor.storey_label.replace('-', ' ').upper()} PLAN",
             "direction": [0.0, 0.0, 1.0],
             "xMm": 215.0,
             "yMm": 145.0,
@@ -200,7 +204,7 @@ def design_sheet(
         project_id=str(project.get("id") or "unknown"),
         project_name=name,
         drawing_number=drawing_number,
-        sheet_title="Foundation + ground floor",
+        sheet_title=f"Foundation + {floor.storey_label.replace('-', ' ').title()}",
         issued_on=issued_on,
         scale_label=SCALE_LABEL,
         model=tuple(model),
@@ -220,6 +224,7 @@ def render_sheet_macro(design: DrawingDesign) -> str:
         "issuedOn": design.issued_on,
         "scaleLabel": design.scale_label,
         "status": SHEET_STATUS,
+        "version": product_version(),
         "pageWMm": PAGE_W_MM,
         "pageHMm": PAGE_H_MM,
         "scale": SCALE,
@@ -267,6 +272,20 @@ FONT = RES / "Mod" / "TechDraw" / "Resources" / "fonts" / "osifont-lgpl3fe.ttf"
 OUT = pathlib.Path(os.environ.get("ARCHRES_JOB_OUTDIR", "."))
 OUT.mkdir(parents=True, exist_ok=True)
 
+
+def _strip_dxf(path):
+    """Replace the engine's name in a DXF header with the product's (ADR-0004).
+
+    The DXF writer stamps the engine's name into the file's header comment. A DXF is a
+    document the app ships, so the engine's name must not be in it - the attribution belongs on
+    the app's Licences screen, where the owner puts it.
+    """
+    path = pathlib.Path(path)
+    if not path.is_file():
+        return
+    text = path.read_text(encoding="utf-8", errors="replace")
+    text = re.sub(r"(?im)^.*FreeCAD.*$", "NativeCAD (ArchResidenceBD)", text)
+    path.write_text(text, encoding="utf-8", newline="\\n")
 
 def build_model():
     doc = App.newDocument("sheet")
@@ -424,6 +443,8 @@ def main():
 
     TechDraw.writeDXFPage(page, str(OUT / "page.dxf"))
 
+    _strip_dxf(pathlib.Path(OUT / "page.dxf"))
+
     from PySide6 import QtCore, QtGui, QtSvg
 
     app = QtGui.QGuiApplication.instance() or QtGui.QGuiApplication([])
@@ -440,8 +461,8 @@ def main():
     writer.setPageLayout(layout)
     for setter, value in (
         ("setTitle", "ArchResidenceBD - " + DESIGN["drawingNumber"]),
-        ("setCreator", "NativeCAD (ArchResidenceBD)"),
-        ("setProducer", "NativeCAD (ArchResidenceBD)"),
+        ("setCreator", f"NativeCAD (ArchResidenceBD) {DESIGN['version']}"),
+        ("setProducer", f"NativeCAD (ArchResidenceBD) {DESIGN['version']}"),
     ):
         method = getattr(writer, setter, None)
         if method is not None:
