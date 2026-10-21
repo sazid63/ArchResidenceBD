@@ -118,7 +118,14 @@ impl Bridge {
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::inherit());
-        let sources = root.join("core").join("src");
+        let mut sources = root.join("runtime").join("core");
+        if !sources.is_dir() {
+            // the dev tree: the core sits in the repo, not in an install folder
+            let dev = root.join("core").join("src");
+            if dev.is_dir() {
+                sources = dev;
+            }
+        }
         if sources.is_dir() {
             if let Ok(existing) = std::env::var("PYTHONPATH") {
                 if !existing.is_empty() {

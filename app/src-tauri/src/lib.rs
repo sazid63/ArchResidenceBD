@@ -59,6 +59,31 @@ fn core_health(state: State<'_, CoreSidecar>) -> Value {
     }
 }
 
+/// The bundled Python: the install folder's runtime, or whatever `ARCHRES_PYTHON` names.
+///
+/// A user installs **one thing** and it works: the Python the core needs is in the
+/// install folder, so nobody installs Python, Docker, or learns what Linux is.
+fn python_for(root: &std::path::Path) -> String {
+    if let Ok(python) = std::env::var("ARCHRES_PYTHON") {
+        return python;
+    }
+    let bundled = root.join("runtime").join("python.exe");
+    if bundled.is_file() {
+        return bundled.display().to_string();
+    }
+    "python".to_string()
+}
+
+/// The install root: the folder the shell itself lives in.
+fn install_root() -> std::path::PathBuf {
+    if let Ok(exe) = std::env::current_exe() {
+        if let Some(parent) = exe.parent() {
+            return parent.to_path_buf();
+        }
+    }
+    std::path::PathBuf::from(".")
+}
+
 /// Start the core as a sidecar and hand the window its commands.
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -67,11 +92,8 @@ pub fn run() {
         .setup(|app| {
             let handle = app.handle().clone();
             // The core is started after the window exists, so its stdio is the shell's.
-            let root = app
-                .path()
-                .resource_dir()
-                .unwrap_or_else(|_| std::path::PathBuf::from("."));
-            let python = std::env::var("ARCHRES_PYTHON").unwrap_or_else(|_| "python".to_string());
+            let root = install_root();
+            let python = python_for(&root);
             match Bridge::start(&python, &root) {
                 Ok(bridge) => {
                     let state = handle.state::<CoreSidecar>();

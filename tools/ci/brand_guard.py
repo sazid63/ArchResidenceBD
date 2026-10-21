@@ -54,7 +54,15 @@ TEXT_SUFFIXES = {
     ".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".json", ".html", ".htm",
     ".css", ".md", ".txt", ".svg", ".yml", ".yaml", ".xml", ".iss",
 }
-SKIP_DIRS = {"node_modules", "dist", "build", ".vite", "coverage", ".turbo"}
+SKIP_DIRS = {
+    "node_modules",
+    "dist",
+    "build",
+    ".vite",
+    "coverage",
+    ".turbo",
+    "target",  # the Rust build output (the shell, W5.1)
+}
 LEGAL_PART = "legal"  # ship path allowed to carry required licence notices (ADR-0004)
 
 
