@@ -1,0 +1,95 @@
+/* S6 - NativeCAD dark theme for the embedded engine (from docs/design/design-tokens-v0.md).
+   Applied to the engine main window at startup by tools/spikes/s6/s6_ui_init.py.
+   Proves QSS theming of the embedded engine; a fuller mapping lands in W1. */
+
+QMainWindow, QDialog {
+    background-color: #262119;   /* --paper */
+}
+QMenuBar {
+    background-color: #2e2820;   /* --surface */
+    color: #f1e9dd;              /* --ink */
+}
+QMenuBar::item:selected {
+    background: #423a30;         /* --surface-3 */
+}
+QMenu {
+    background-color: #2e2820;
+    color: #f1e9dd;
+    border: 1px solid #443c32;   /* --line */
+}
+QMenu::item:selected {
+    background: #e68a66;         /* --primary */
+    color: #2b2118;              /* --on-primary */
+}
+QToolBar {
+    background-color: #2e2820;
+    border: none;
+    spacing: 4px;
+}
+QToolButton {
+    color: #f1e9dd;
+    background: transparent;
+}
+QToolButton:hover {
+    background: #423a30;
+    border-radius: 4px;
+}
+QDockWidget {
+    color: #f1e9dd;
+    titlebar-close-icon: none;
+}
+QDockWidget::title {
+    background: #383129;         /* --surface-2 */
+    padding: 4px;
+}
+QTreeView, QListView, QTableView, QAbstractItemView {
+    background: #2e2820;
+    color: #f1e9dd;
+    alternate-background-color: #262119;
+}
+QTabBar::tab {
+    background: #383129;
+    color: #c9bcab;              /* --ink-soft */
+    padding: 4px 10px;
+}
+QTabBar::tab:selected {
+    background: #e68a66;
+    color: #2b2118;
+}
+QStatusBar {
+    background: #2e2820;
+    color: #c9bcab;
+}
+QPushButton {
+    background: #383129;
+    color: #f1e9dd;
+    border: 1px solid #443c32;
+    padding: 4px 10px;
+    border-radius: 4px;
+}
+QPushButton:hover {
+    background: #423a30;
+}
+QPushButton:default {
+    background: #e68a66;
+    color: #2b2118;
+}
+QLineEdit, QComboBox, QSpinBox, QDoubleSpinBox {
+    background: #2e2820;
+    color: #f1e9dd;
+    border: 1px solid #443c32;
+}
+QToolTip {
+    background: #423a30;
+    color: #f1e9dd;
+    border: 1px solid #443c32;
+}
+QScrollBar:vertical {
+    background: #262119;
+    width: 12px;
+}
+QScrollBar::handle:vertical {
+    background: #443c32;
+    border-radius: 6px;
+    min-height: 30px;
+}

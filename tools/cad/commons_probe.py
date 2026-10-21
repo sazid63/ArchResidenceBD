@@ -157,6 +157,42 @@ def _write(report: dict[str, Any], built: dict[str, Any]) -> None:
         encoding="utf-8",
         newline="\n",
     )
+    _manifest_entry()
+
+
+def _manifest_entry() -> None:
+    """The generated-files manifest lists every macro the pool runs (the commons macro too)."""
+    manifest_path = GENERATED / "manifest.json"
+    existing: dict[str, Any] = {}
+    if manifest_path.is_file():
+        existing = json.loads(manifest_path.read_text(encoding="utf-8"))
+    files = dict(existing.get("files") or {})
+    for name in ("commons-design.json", "commons-macro.py", "commons-report.json"):
+        path = GENERATED / name
+        if path.is_file():
+            files[name] = {"bytes": path.stat().st_size}
+    cases = existing.get("cases")
+    entries = set()
+    if isinstance(cases, dict):
+        entries.update(str(item) for item in (cases.get("entries") or []))
+    elif isinstance(cases, list):
+        entries.update(str(item) for item in cases)
+    entries.add(f"commons:{CASE}")
+    manifest = {
+        "manifestVersion": "1",
+        "cases": {"entries": sorted(entries)},
+        "files": files,
+        "notes": (
+            "The generated macros are the exact sources the CAD worker pool runs. They are "
+            "committed so a reviewer can read what the engine will build; regenerate them "
+            "with the matching tools/cad/*_probe.py --check."
+        ),
+    }
+    manifest_path.write_text(
+        json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
 
 
 def _check_offline() -> list[str]:

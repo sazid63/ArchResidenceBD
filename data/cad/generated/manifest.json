@@ -1,6 +1,7 @@
 {
   "cases": {
     "entries": [
+      "commons:two-storey-residential",
       "floor:two-storey-residential",
       "foundation:two-storey-residential",
       "mesh:two-storey-residential",
@@ -8,6 +9,15 @@
     ]
   },
   "files": {
+    "commons-design.json": {
+      "bytes": 2466
+    },
+    "commons-macro.py": {
+      "bytes": 6970
+    },
+    "commons-report.json": {
+      "bytes": 136
+    },
     "floor-two-storey-residential.design.json": {
       "bytes": 3427
     },
