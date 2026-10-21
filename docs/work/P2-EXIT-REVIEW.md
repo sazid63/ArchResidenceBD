@@ -18,7 +18,7 @@ blocked by an open P1 package) · **Owner items:** `docs/work/OWNER-ATTENTION.md
 | **W2.6** BOQ v0 | the takeoff priced from a card | 11 lines, **154,276.09 BDT**, 9 priced, 2 unpriced (the formwork) |
 | **W2.7** price service | cards → region → the spec's pricing → the override register | the BOQ from the resolved card = **154,276.09 BDT** — the same as from the card; Chattogram ×1.06 published, Rajshahi 1.00 *assumed and labelled* |
 | **W2.8** NativeCAD workspace | the app's real design surface: viewport, model tree, parametric panel | 15 objects, 180 triangles, 12.36375 m³; verified in a browser (the frame buffer holds the two phase colours) |
-| **W2.9** federation | a shared datum, one file per phase, a master that links | 15 links, 15 objects, 12.36375 m³; the master (6,605 B) is smaller than the phases it links |
+| **W2.9** federation | a shared datum, one file per phase, a master that links | 15 links, 15 objects, 12.36375 m³; the master carries the MEP and the clash report as well as the links, so it is no longer smaller than a phase file — what it must not do is drift from them |
 | **W2.10** walking skeleton | the whole chain, end to end | **15 objects, 12.36375 m³**, steel 279.0 vs 278.8 kg, a sheet, a priced BOQ |
 | **W2.11** equivalence gate | incremental ≡ full rebuild | rebuilt `floor-1`, reused `foundation`, the meshes **byte-identical**; the design half in CI on every push |
 | **W2.12** scale-out | two storeys, the stair, the lift, the service runs | **28 objects, 1,800 triangles**; every probe re-measured, no number moved |

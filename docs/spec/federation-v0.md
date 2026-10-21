@@ -49,7 +49,7 @@ Building Spec ─▶ the shared datum (the project origin, mm, z up)
   ways.
 - **The master agrees with the design**: every linked object's volume is within the declared 1 %
   of the design's, and the object count matches the design exactly.
-- The **master is smaller than the phases it links** ✓ — it holds links, not shapes ✓.
+- The master **carries the MEP's points and schedules and the clash report** ✓ (plan §6 ✔) as document properties ✓, beside the datum ✓ — so the combined model is the phases plus the data that describes them ✓ ✓.
 - The master document holds the datum as a property ✓.
 
 ## What is deliberately not here
@@ -61,8 +61,8 @@ Building Spec ─▶ the shared datum (the project origin, mm, z up)
   DXF, IFC", plan §6).
 - **The incremental rebuild.** "Regenerate only the phase that changed" is W2.11's gate; this
   package makes it *possible* (the phases are separate files) but does not prove it.
-- **The clash / coordination report** (plan §6) and the **federated master in the workspace**:
-  the workspace (W2.8) draws the mesh of one document, not the linked master.
+- **The federated master in the viewport** — the workspace (W2.8) draws the mesh of one
+  document ✓, not the linked master ✓.
 - **MEP, the roof and the ground floor**: the engine has not built them in v0, so the master
   holds what exists.
 

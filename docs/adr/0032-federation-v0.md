@@ -51,9 +51,8 @@ carry timestamps, so they cannot be byte-compared in CI).
 
 - The phases are separate documents in one datum, so "regenerate only the phase that changed" is
   now *possible*; W2.11 turns it into a *gate*.
-- The master is small because it holds links, not shapes — and it cannot drift from the
+- The master holds links, not shapes — and it now also carries the MEP's points and schedules and the clash report (plan §6) as properties, so it is bigger than a phase file and still cannot drift from the
   phases, because it has no copy of them.
 - The app can load the master or a single phase; the workspace (W2.8) draws the mesh of one
   document today, and the linked master is the next layer.
-- The clash / coordination report (plan §6), the federated master in the viewport, the MEP and
-  the ground floor are not here: the engine has not built them, so the master holds what exists.
+- The federated master in the viewport, the roof and the ground floor are not here: the engine has not built them, so the master holds what exists.

@@ -80,3 +80,36 @@ def test_the_committed_master_agrees_with_the_design() -> None:
     assert summary["objects"] == len(foundation.expected_objects()) + len(floor.expected_objects())
     assert abs(summary["volumeM3"] - designed) <= 0.01 * designed
     assert (GENERATED / DATUM_FILE).is_file()
+
+
+def test_the_master_carries_the_mep_and_the_clash_report() -> None:
+    """The combined master holds the MEP points + schedules and the clash report (§6)."""
+    report = json.loads(
+        (GENERATED / "master-report.json").read_text(encoding="utf-8")
+    )
+    mep = report.get("mep")
+    assert mep, "the master must carry the MEP"
+    storeys = mep["storeys"]
+    assert len(storeys) == 2
+    for storey in storeys:
+        assert storey["points"], "the MEP's points must travel with the master"
+        assert storey["schedules"], "the MEP's schedules must travel with the master"
+        assert storey["declaredAbsent"], "the MEP's declared gaps travel with it too"
+    clash = report.get("clashReport")
+    assert clash, "the master must carry the clash and coordination report"
+    assert "Clash and coordination report" in clash
+
+
+def test_the_masters_mep_is_the_designs_mep() -> None:
+    """What the master carries is the MEP the design produced - not a copy of it."""
+    from archres_core.design import design_foundation, design_mep, design_typical_floor
+
+    spec = _spec()
+    foundation = design_foundation(spec)
+    floor = design_typical_floor(spec, foundation, storey_index=1)
+    mep = design_mep(spec, floor, storey_index=1)
+    report = json.loads(
+        (GENERATED / "master-report.json").read_text(encoding="utf-8")
+    )
+    carried = report["mep"]["storeys"][1]
+    assert carried["points"] == [point.as_dict() for point in mep.points]

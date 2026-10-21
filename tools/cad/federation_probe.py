@@ -36,12 +36,21 @@ from archres_core.cad.federation import (
     summarize_master,
 )
 from archres_core.cad.pool import WorkerConfig, WorkerPool
+from archres_core.design.clash import (
+    clash_report,
+    members_from_commons,
+    members_from_floor,
+    members_from_foundation,
+    render_clash_markdown,
+)
 from archres_core.design import (
     design_foundation,
+    design_mep,
     design_typical_floor,
     render_floor_macro,
     render_macro,
 )
+from archres_core.design.commons import design_common_services
 from archres_core.stdio import utf8_stdio
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -112,12 +121,45 @@ def _run(engine: pathlib.Path, workdir: pathlib.Path) -> dict[str, Any]:
             phases.append({"phase": phase, "path": str(path)})
         if failures:
             return {"report": report, "failures": failures}
+        # The master carries the MEP's points and schedules and the clash report (plan §6).
+        # Both come from the design, so they are built here and handed to the job.
+        spec = json.loads(EXAMPLE.read_text(encoding="utf-8"))
+        floors = {
+            index: design_typical_floor(spec, foundation, storey_index=index)
+            for index in (0, 1)
+        }
+        commons = {
+            index: design_common_services(spec, floors[index], storey_index=index)
+            for index in (0, 1)
+        }
+        meps = {
+            index: design_mep(
+                spec,
+                floors[index],
+                storey_index=index,
+                lift=commons[index].lifts[0] if commons[index].lifts else None,
+            )
+            for index in (0, 1)
+        }
+        mep_payload = {"storeys": [meps[index].as_dict() for index in (0, 1)]}
+        members = list(members_from_foundation(foundation))
+        points = []
+        for index in (0, 1):
+            members.extend(members_from_floor(floors[index]))
+            members.extend(members_from_commons(commons[index]))
+            points.extend(meps[index].points)
+        clash_markdown = render_clash_markdown(clash_report(tuple(members), tuple(points)))
         master_job = "federation-master"
         result = pool.submit(
             kind="geometry.build",
             params={
                 "script": master_macro(),
-                "scriptParams": {"datum": datum, "phases": phases},
+                "scriptParams": {
+                    "datum": datum,
+                    "phases": phases,
+                    "mep": mep_payload,
+                    "clashReport": clash_markdown,
+                },
             },
             job_id=master_job,
         )
@@ -129,7 +171,15 @@ def _run(engine: pathlib.Path, workdir: pathlib.Path) -> dict[str, Any]:
             failures.append("the master wrote no measurement")
             return {"report": report, "failures": failures}
         measurement = json.loads(measurement_path.read_text(encoding="utf-8"))
+        # The master must carry the MEP and the clash report (plan §6).
+        if not measurement.get("mep"):
+            failures.append("the master carries no MEP")
+        if not measurement.get("clashReport"):
+            failures.append("the master carries no clash report")
         master_path = pool.artifact_path(master_job, MASTER_FILE)
+        # The report is the committed record of what the master carries (plan §6).
+        report["mep"] = measurement.get("mep")
+        report["clashReport"] = measurement.get("clashReport")
         summary = summarize_master(measurement)
         report["summary"] = summary
         report["masterBytes"] = master_path.stat().st_size if master_path else 0

@@ -46,7 +46,7 @@ def test_the_review_quotes_the_federations_numbers() -> None:
     assert report["summary"]["links"] == 15
     assert report["summary"]["objects"] == 15
     assert report["summary"]["volumeM3"] == 12.36375
-    assert report["masterBytes"] == 6609
+    assert report["masterBytes"] == 10438
 
 
 def test_the_review_quotes_the_scale_outs_numbers() -> None:

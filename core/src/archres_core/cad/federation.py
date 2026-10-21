@@ -125,6 +125,28 @@ _master.addProperty(
 )
 _master.ArchresDatum = _json.dumps(_params.get("datum") or {}, sort_keys=True)
 
+# The master carries the MEP's points and schedules and the clash report (plan §6: the
+# combined master holds the MEP points + schedules and the clash/coordination report). They
+# are properties, because the phases' geometry is linked and their data travels with it.
+_mep = _params.get("mep")
+if _mep:
+    _master.addProperty(
+        "App::PropertyString",
+        "ArchresMep",
+        "ArchResidenceBD",
+        "the MEP points and schedules",
+    )
+    _master.ArchresMep = _json.dumps(_mep, ensure_ascii=False, sort_keys=True)
+_clashes = _params.get("clashReport")
+if _clashes:
+    _master.addProperty(
+        "App::PropertyString",
+        "ArchresClashReport",
+        "ArchResidenceBD",
+        "the clash and coordination report",
+    )
+    _master.ArchresClashReport = _clashes
+
 links = []
 for entry in _params.get("phases") or []:
     _document = _App.openDocument(str(entry["path"]))
@@ -148,7 +170,13 @@ _master.recompute()
 _master.save()
 (_out / ''' + repr(MASTER_MEASUREMENT) + ''').write_text(
     _json.dumps(
-        {"links": len(links), "objects": links, "master": str(_out / ''' + repr(MASTER_FILE) + ''')},
+        {
+            "links": len(links),
+            "objects": links,
+            "master": str(_out / ''' + repr(MASTER_FILE) + '''),
+            "mep": _mep or None,
+            "clashReport": _clashes or None,
+        },
         ensure_ascii=False,
         indent=1,
         sort_keys=True,
