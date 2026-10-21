@@ -1,0 +1,115 @@
+{
+ "failedLaws": [],
+ "findings": [
+  {
+   "excerpt": "(বাংলা):** ফুটপাত, র্যাম্প, ক্লিয়ারেন্স",
+   "rule": "hidden_text",
+   "severity": "medium",
+   "surface": "docs/rules/rajuk-pack-v0.md"
+  },
+  {
+   "excerpt": "্ষের অনুমতিতে; (৮) র্যাম্পের ঢাল সর্বোচ্",
+   "rule": "hidden_text",
+   "severity": "medium",
+   "surface": "docs/rules/rajuk-pack-v0.md"
+  },
+  {
+   "excerpt": " ঢাল সর্বোচ্চ ১:৮, র্যাম্পের পূর্বে ন্যূ",
+   "rule": "hidden_text",
+   "severity": "medium",
+   "surface": "docs/rules/rajuk-pack-v0.md"
+  },
+  {
+   "excerpt": " পর্যন্ত পার্থক্যে র্যাম্প লাগিবে না; (৯",
+   "rule": "hidden_text",
+   "severity": "medium",
+   "surface": "docs/rules/rajuk-pack-v0.md"
+  },
+  {
+   "excerpt": "ম্প লাগিবে না; (৯) র্যাম্প সেটব্যাকের ভি",
+   "rule": "hidden_text",
+   "severity": "medium",
+   "surface": "docs/rules/rajuk-pack-v0.md"
+  },
+  {
+   "excerpt": " গণ্য; (১০) একমুখী র্যাম্প ন্যূনতম ৩.০০ ",
+   "rule": "hidden_text",
+   "severity": "medium",
+   "surface": "docs/rules/rajuk-pack-v0.md"
+  },
+  {
+   "excerpt": " উঁচু হইতে পারিবে; র্যাম্প সেটব্যাকের মধ",
+   "rule": "hidden_text",
+   "severity": "medium",
+   "surface": "docs/rules/rajuk-pack-v0.md"
+  },
+  {
+   "excerpt": "বিগুণ; ড্রাইভওয়ে, র্যাম্প ও লিফটসহ); ড্",
+   "rule": "hidden_text",
+   "severity": "medium",
+   "surface": "docs/rules/rajuk-pack-v0.md"
+  }
+ ],
+ "laws": [
+  {
+   "detail": "'C:\\\\1_SAJID\\\\OpenCode\\\\outside-the-sandbox.txt' is outside the project sandbox",
+   "holds": true,
+   "law": "a path outside the sandbox is refused"
+  },
+  {
+   "detail": "'rm.rf' is not a known tool",
+   "holds": true,
+   "law": "an unknown tool is refused"
+  },
+  {
+   "detail": "network tools are off (offline-first)",
+   "holds": true,
+   "law": "the network is off while offline-first"
+  },
+  {
+   "detail": "shell tools are off for this session",
+   "holds": true,
+   "law": "the shell is off unless the session allows it"
+  },
+  {
+   "detail": "external content cannot call a write tool (fleet isolation)",
+   "holds": true,
+   "law": "external content cannot drive a write tool (fleet isolation)"
+  },
+  {
+   "detail": "external content cannot call a net tool (fleet isolation)",
+   "holds": true,
+   "law": "external content cannot drive a network tool (fleet isolation)"
+  },
+  {
+   "detail": "untrusted content raised an injection alert (high); no tool may run",
+   "holds": true,
+   "law": "a high-severity finding refuses every tool"
+  },
+  {
+   "detail": "not granted yet (high-risk)",
+   "holds": true,
+   "law": "a tool that has not been granted asks for approval"
+  },
+  {
+   "detail": "granted for this session",
+   "holds": true,
+   "law": "a granted tool is allowed"
+  },
+  {
+   "detail": "7 decision(s) logged, each with its tool and its reason",
+   "holds": true,
+   "law": "every decision is logged (no silent anything)"
+  }
+ ],
+ "ok": true,
+ "schemaVersion": "0.1.0",
+ "severities": [
+  "medium"
+ ],
+ "surfaces": [
+  "docs/rules",
+  "data/prices/cards"
+ ],
+ "worstSeverity": "medium"
+}
