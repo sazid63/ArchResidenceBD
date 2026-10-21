@@ -1,5 +1,48 @@
 {
-  "assumptions": [],
+  "assumptions": [
+    {
+      "pointer": "/phases/common-services/data/stairWidthMm",
+      "reason": "the stair's width",
+      "unit": "mm",
+      "value": 1000.0
+    },
+    {
+      "pointer": "/phases/common-services/data/stairFlightThicknessMm",
+      "reason": "the stair flight's thickness",
+      "unit": "mm",
+      "value": 150.0
+    },
+    {
+      "pointer": "/phases/common-services/data/landingDepthMm",
+      "reason": "the landing's depth",
+      "unit": "mm",
+      "value": 1200.0
+    },
+    {
+      "pointer": "/phases/common-services/data/stairRisers",
+      "reason": "the risers per flight",
+      "unit": "1",
+      "value": 16.0
+    },
+    {
+      "pointer": "/phases/common-services/data/conduitDiameterMm",
+      "reason": "the conduit's diameter; more than 32 outlets and it steps up",
+      "unit": "mm",
+      "value": 25.0
+    },
+    {
+      "pointer": "/phases/common-services/data/waterPipeDiameterMm",
+      "reason": "the water pipe's diameter",
+      "unit": "mm",
+      "value": 50.0
+    },
+    {
+      "pointer": "/phases/common-services/data/gasPipeDiameterMm",
+      "reason": "the gas pipe's diameter",
+      "unit": "mm",
+      "value": 25.0
+    }
+  ],
   "declaredAbsent": [
     "the lift shaft's opening in the slab: the v0 spec carries no opening data, so no hole is cut (a hole nobody asked for is a fabricated fact)",
     "the stair's treads and railings: the v0 flight is the sloped slab only"
@@ -62,10 +105,24 @@
   "storeyIndex": 1,
   "storeyLabel": "floor-1",
   "values": {
+    "services.conduitBaseDiameterMm": {
+      "provenance": "assumed",
+      "reason": "the conduit's diameter; more than 32 outlets and it steps up",
+      "source": "v0 default",
+      "unit": "mm",
+      "value": 25.0
+    },
     "services.conduitDiameterMm": {
       "provenance": "derived",
       "reason": "16 outlets at 8 per unit",
       "source": "the units this floor holds",
+      "unit": "mm",
+      "value": 25.0
+    },
+    "services.gasPipeDiameterMm": {
+      "provenance": "assumed",
+      "reason": "the gas pipe's diameter",
+      "source": "v0 default",
       "unit": "mm",
       "value": 25.0
     },
@@ -76,12 +133,19 @@
       "unit": "1",
       "value": 0.0
     },
-    "services.liftShaftMm": {
+    "services.landingDepthMm": {
       "provenance": "assumed",
-      "reason": "the shaft's size",
+      "reason": "the landing's depth",
       "source": "v0 default",
       "unit": "mm",
-      "value": 1800.0
+      "value": 1200.0
+    },
+    "services.stairFlightThicknessMm": {
+      "provenance": "assumed",
+      "reason": "the stair flight's thickness",
+      "source": "v0 default",
+      "unit": "mm",
+      "value": 150.0
     },
     "services.stairRisers": {
       "provenance": "assumed",
@@ -103,6 +167,13 @@
       "source": "v0 default",
       "unit": "mm",
       "value": 1000.0
+    },
+    "services.waterPipeDiameterMm": {
+      "provenance": "assumed",
+      "reason": "the water pipe's diameter",
+      "source": "v0 default",
+      "unit": "mm",
+      "value": 50.0
     }
   }
 }

@@ -7,6 +7,7 @@ import pathlib
 
 import pytest
 
+from archres_core.design.foundation import PROVENANCE_SPEC
 from archres_core.design import (
     DesignError,
     design_foundation,
@@ -117,7 +118,23 @@ def test_the_floor_macro_is_valid_python_and_deterministic() -> None:
 def test_the_assumptions_are_handed_back() -> None:
     _spec_obj, _foundation, floor = _floor()
     pointers = {item.pointer for item in floor.assumptions}
-    assert "/phases/floor/data/columnSizeMm" in pointers
-    assert "/phases/floor/data/beamMm" in pointers
+    # the storey's own phase, and one key per value
+    assert "/phases/floor-1/data/columnSizeMm" in pointers
+    assert "/phases/floor-1/data/beamWidthMm" in pointers
+    assert "/phases/floor-1/data/beamDepthMm" in pointers
     for item in floor.assumptions:
         assert item.reason
+
+
+def test_the_floor_reads_back_what_it_hands_back() -> None:
+    """The loop closes: a value the app writes into the spec is honoured."""
+    spec, foundation, _built = _floor()
+    for phase in spec["phases"]:
+        if phase["id"] == "floor-1":
+            phase.setdefault("data", {})["columnSizeMm"] = 350.0
+    floor = design_typical_floor(spec, foundation, storey_index=1)
+    assert floor.columns[0].size_mm == 350.0
+    assert floor.values["column.sizeMm"].provenance == PROVENANCE_SPEC
+    # and what the spec carries is not handed back as an assumption any more
+    pointers = {item.pointer for item in floor.assumptions}
+    assert "/phases/floor-1/data/columnSizeMm" not in pointers

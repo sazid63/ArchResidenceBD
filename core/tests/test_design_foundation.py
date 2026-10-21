@@ -7,6 +7,7 @@ import pathlib
 
 import pytest
 
+from archres_core.design.foundation import PROVENANCE_SPEC
 from archres_core.design import (
     DesignError,
     design_foundation,
@@ -50,11 +51,25 @@ def test_the_assumptions_are_handed_back_for_the_spec() -> None:
     # handed back points at the spec's own keys, so the app writes where the design reads.
     assert "/phases/foundation/data/footingDepthM" not in pointers
     assert all(
-        pointer.startswith("/phases/foundation/data/") for pointer in pointers
+        pointer.startswith(("/phases/foundation/data/", "/phases/site-excavation/data/"))
+        for pointer in pointers
     ), pointers
     for item in design.assumptions:
         assert item.reason, item.pointer
         assert item.unit in ("mm", "m"), item.pointer
+
+
+def test_the_foundation_reads_back_what_it_hands_back() -> None:
+    """The loop closes: a value the app writes into the spec is honoured."""
+    spec = _spec()
+    for phase in spec["phases"]:
+        if phase["id"] == "foundation":
+            phase.setdefault("data", {})["footingSizeMm"] = 1000.0
+    design = design_foundation(spec)
+    assert design.footings[0].size_x_mm == 1000.0
+    assert design.values["footing.sizeMm"].provenance == PROVENANCE_SPEC
+    pointers = {item.pointer for item in design.assumptions}
+    assert "/phases/foundation/data/footingSizeMm" not in pointers
 
 
 def test_a_spec_without_a_usable_plot_is_refused() -> None:

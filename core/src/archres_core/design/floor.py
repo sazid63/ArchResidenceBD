@@ -26,6 +26,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from .foundation import (
+    spec_value,
     PROVENANCE_ASSUMED,
     PROVENANCE_DERIVED,
     PROVENANCE_SPEC,
@@ -250,36 +251,49 @@ def design_typical_floor(
             "one column per footing, on the foundation grid",
         ),
     }
+    # The floor phase's own data - the storey's overrides. The assumptions the design hands
+    # back point at exactly these keys, so the app writes where the design reads.
+    floor_phase_id = f"floor-{storey_index}"
+    floor_data = _phase_data(spec, floor_phase_id)
+    column_size, column_value, column_assumption = spec_value(
+        floor_data,
+        floor_phase_id,
+        "columnSizeMm",
+        ASSUMED_COLUMN_SIZE_MM,
+        "mm",
+        "the rule pack (v0) has no column-sizing rule; v0 assumes a 300 mm square column",
+    )
+    beam_width, width_value, width_assumption = spec_value(
+        floor_data,
+        floor_phase_id,
+        "beamWidthMm",
+        ASSUMED_BEAM_WIDTH_MM,
+        "mm",
+        "the rule pack (v0) has no beam-sizing rule; v0 assumes 300 x 450 mm",
+    )
+    beam_depth, depth_value, depth_assumption = spec_value(
+        floor_data,
+        floor_phase_id,
+        "beamDepthMm",
+        ASSUMED_BEAM_DEPTH_MM,
+        "mm",
+        "the rule pack (v0) has no beam-sizing rule; v0 assumes 300 x 450 mm",
+    )
     assumptions: list[Assumption] = [
-        Assumption(
-            "/phases/floor/data/columnSizeMm",
-            ASSUMED_COLUMN_SIZE_MM,
-            "mm",
-            "the rule pack (v0) has no column-sizing rule; v0 assumes a 300 mm square column",
-        ),
-        Assumption(
-            "/phases/floor/data/beamMm",
-            ASSUMED_BEAM_WIDTH_MM,
-            "mm",
-            "the rule pack (v0) has no beam-sizing rule; v0 assumes 300 x 450 mm",
-        ),
+        item
+        for item in (column_assumption, width_assumption, depth_assumption)
+        if item is not None
     ]
-    values["column.sizeMm"] = Value(
-        ASSUMED_COLUMN_SIZE_MM, "mm", PROVENANCE_ASSUMED, "v0 default", "no column rule in the pack"
-    )
-    values["beam.widthMm"] = Value(
-        ASSUMED_BEAM_WIDTH_MM, "mm", PROVENANCE_ASSUMED, "v0 default", "no beam rule in the pack"
-    )
-    values["beam.depthMm"] = Value(
-        ASSUMED_BEAM_DEPTH_MM, "mm", PROVENANCE_ASSUMED, "v0 default", "no beam rule in the pack"
-    )
+    values["column.sizeMm"] = column_value
+    values["beam.widthMm"] = width_value
+    values["beam.depthMm"] = depth_value
 
     columns = tuple(
         Column(
             id=f"C{index + 1}",
             x_mm=footing.x_mm,
             y_mm=footing.y_mm,
-            size_mm=ASSUMED_COLUMN_SIZE_MM,
+            size_mm=column_size,
             height_mm=round(height_mm, 3),
             footing_id=footing.id,
         )
@@ -296,8 +310,8 @@ def design_typical_floor(
                 x_mm=round((left.x_mm + right.x_mm) / 2.0, 3),
                 y_mm=round(left.y_mm, 3),
                 length_mm=round(right.x_mm - left.x_mm, 3),
-                width_mm=ASSUMED_BEAM_WIDTH_MM,
-                depth_mm=ASSUMED_BEAM_DEPTH_MM,
+                width_mm=beam_width,
+                depth_mm=beam_depth,
             )
         )
 
@@ -326,10 +340,17 @@ def design_typical_floor(
 
     xs = [footing.x_mm for footing in foundation.footings]
     ys = [footing.y_mm for footing in foundation.footings]
-    overhang = ASSUMED_SLAB_OVERHANG_MM
-    values["slab.overhangMm"] = Value(
-        overhang, "mm", PROVENANCE_ASSUMED, "v0 default", "a 150 mm slab overhang past the grid"
+    overhang, overhang_value, overhang_assumption = spec_value(
+        floor_data,
+        floor_phase_id,
+        "slabOverhangMm",
+        ASSUMED_SLAB_OVERHANG_MM,
+        "mm",
+        "a 150 mm slab overhang past the grid",
     )
+    values["slab.overhangMm"] = overhang_value
+    if overhang_assumption is not None:
+        assumptions.append(overhang_assumption)
     slab = Slab(
         origin_x_mm=round(min(xs) - overhang, 3),
         origin_y_mm=round(min(ys) - overhang, 3),

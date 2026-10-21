@@ -23,7 +23,11 @@ from archres_core.design import (
     design_typical_floor,
 )
 from archres_core.design.commons import design_common_services
-from archres_core.design.foundation import PROVENANCE_ASSUMED, PROVENANCE_DERIVED
+from archres_core.design.foundation import (
+    PROVENANCE_ASSUMED,
+    PROVENANCE_DERIVED,
+    PROVENANCE_SPEC,
+)
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 EXAMPLE = ROOT / "spec" / "examples" / "two-storey-residential.json"
@@ -164,10 +168,35 @@ def test_the_assumptions_are_handed_back_for_the_spec() -> None:
     mep = _mep(1)
     assert mep.assumptions
     for assumption in mep.assumptions:
-        assert assumption.pointer.startswith("mep.")
+        # a real JSON pointer into the spec, so the app can write it
+        assert assumption.pointer.startswith("/phases/common-services/data/mep."), (
+            assumption.pointer
+        )
         assert assumption.reason, "an assumption without a reason is not handed back"
+
+
+def test_the_mep_reads_back_what_it_hands_back() -> None:
+    """The loop closes: a value the app writes into the spec is honoured."""
+    spec = _spec()
+    for phase in spec["phases"]:
+        if phase["id"] == "common-services":
+            phase.setdefault("data", {})["mep.lightingPointsPer100m2"] = 6.0
+    foundation = design_foundation(spec)
+    floor = design_typical_floor(spec, foundation, storey_index=1)
+    mep = design_mep(spec, floor, storey_index=1)
+    assert mep.values["mep.lightingPointsPer100m2"].provenance == PROVENANCE_SPEC
+    assert mep.values["mep.lightingPointsPer100m2"].value == 6.0
+    # more lights per 100 m², more lights
+    lights = [point for point in mep.points if point.kind == "light"]
+    assert lights, "the storey still has lights"
+    pointers = {item.pointer for item in mep.assumptions}
+    assert "/phases/common-services/data/mep.lightingPointsPer100m2" not in pointers
     for key, value in mep.values.items():
-        assert value.provenance in (PROVENANCE_ASSUMED, PROVENANCE_DERIVED)
+        assert value.provenance in (
+            PROVENANCE_ASSUMED,
+            PROVENANCE_DERIVED,
+            PROVENANCE_SPEC,
+        )
         assert value.source, f"{key} must say where it came from"
 
 

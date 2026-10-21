@@ -7,16 +7,28 @@
       "value": 1200.0
     },
     {
-      "pointer": "/phases/foundation/data/gradeBeamMm",
+      "pointer": "/phases/foundation/data/gradeBeamWidthMm",
       "reason": "the rule pack (v0) has no grade-beam rule; v0 assumes 300 x 400 mm",
       "unit": "mm",
       "value": 300.0
+    },
+    {
+      "pointer": "/phases/foundation/data/gradeBeamDepthMm",
+      "reason": "the rule pack (v0) has no grade-beam rule; v0 assumes 300 x 400 mm",
+      "unit": "mm",
+      "value": 400.0
     },
     {
       "pointer": "/phases/foundation/data/footingSpacingMm",
       "reason": "v0 lays the footings on a 3 m grid along the frontage",
       "unit": "mm",
       "value": 3000.0
+    },
+    {
+      "pointer": "/phases/site-excavation/data/excavationMarginMm",
+      "reason": "a 600 mm working margin around the plot",
+      "unit": "mm",
+      "value": 600.0
     }
   ],
   "excavation": {
@@ -129,28 +141,28 @@
     },
     "footing.sizeMm": {
       "provenance": "assumed",
-      "reason": "the rule pack has no footing size",
+      "reason": "the rule pack (v0) has no footing-sizing rule; v0 assumes a 1200 mm square footing",
       "source": "v0 default",
       "unit": "mm",
       "value": 1200.0
     },
     "footing.spacingMm": {
       "provenance": "assumed",
-      "reason": "v0 lays the footings on a 3 m grid",
+      "reason": "v0 lays the footings on a 3 m grid along the frontage",
       "source": "v0 default",
       "unit": "mm",
       "value": 3000.0
     },
     "gradeBeam.depthMm": {
       "provenance": "assumed",
-      "reason": "the rule pack has no grade-beam size",
+      "reason": "the rule pack (v0) has no grade-beam rule; v0 assumes 300 x 400 mm",
       "source": "v0 default",
       "unit": "mm",
       "value": 400.0
     },
     "gradeBeam.widthMm": {
       "provenance": "assumed",
-      "reason": "the rule pack has no grade-beam size",
+      "reason": "the rule pack (v0) has no grade-beam rule; v0 assumes 300 x 400 mm",
       "source": "v0 default",
       "unit": "mm",
       "value": 300.0

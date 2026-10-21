@@ -27,6 +27,7 @@ from typing import Any
 
 from .floor import FloorDesign
 from .foundation import (
+    spec_value,
     PROVENANCE_ASSUMED,
     PROVENANCE_DERIVED,
     PROVENANCE_SPEC,
@@ -281,14 +282,50 @@ def design_common_services(
     units = int(building.get("unitsPerFloor") or 1)
     base_z = floor.base_z_mm
 
+    # The stair's dimensions: the spec's when it carries them, the authored default otherwise -
+    # and the assumption names the key the design read, so the app writes where it looks.
+    services_data = _phase_data(spec, "common-services")
+    risers, risers_value, risers_assumption = spec_value(
+        services_data,
+        "common-services",
+        "stairRisers",
+        float(ASSUMED_STAIR_RISERS_PER_FLIGHT),
+        "1",
+        "the risers per flight",
+    )
+    risers = int(risers)
+
     # The stair: it sits at the grid's first bay, climbing to the next level.
-    risers = ASSUMED_STAIR_RISERS_PER_FLIGHT
     rise_mm = height_mm / risers
     run_mm = 250.0  # the assumed going (a 250 mm tread, the usual BD rule of thumb)
     flight_length = (run_mm**2 + rise_mm**2) ** 0.5
     angle = 180.0 / math.pi * math.atan2(rise_mm, run_mm)
     stair_x = floor.columns[0].x_mm if floor.columns else 0.0
     stair_y = floor.columns[0].y_mm if floor.columns else 0.0
+    stair_width, stair_width_value, stair_width_assumption = spec_value(
+        services_data,
+        "common-services",
+        "stairWidthMm",
+        ASSUMED_STAIR_WIDTH_MM,
+        "mm",
+        "the stair's width",
+    )
+    flight_thickness, flight_thickness_value, flight_thickness_assumption = spec_value(
+        services_data,
+        "common-services",
+        "stairFlightThicknessMm",
+        ASSUMED_STAIR_FLIGHT_THICKNESS_MM,
+        "mm",
+        "the stair flight's thickness",
+    )
+    landing_depth, landing_depth_value, landing_depth_assumption = spec_value(
+        services_data,
+        "common-services",
+        "landingDepthMm",
+        ASSUMED_LANDING_DEPTH_MM,
+        "mm",
+        "the landing's depth",
+    )
     flight = StairFlight(
         id="1",
         x_mm=stair_x,
@@ -296,8 +333,8 @@ def design_common_services(
         base_z_mm=base_z,
         run_mm=run_mm * risers,
         rise_mm=height_mm,
-        width_mm=ASSUMED_STAIR_WIDTH_MM,
-        thickness_mm=ASSUMED_STAIR_FLIGHT_THICKNESS_MM,
+        width_mm=stair_width,
+        thickness_mm=flight_thickness,
         angle_deg=angle,
     )
     landing = Landing(
@@ -305,29 +342,66 @@ def design_common_services(
         x_mm=stair_x,
         y_mm=stair_y,
         z_mm=base_z + height_mm,
-        depth_mm=ASSUMED_LANDING_DEPTH_MM,
-        width_mm=ASSUMED_STAIR_WIDTH_MM,
-        thickness_mm=ASSUMED_STAIR_FLIGHT_THICKNESS_MM,
+        depth_mm=landing_depth,
+        width_mm=stair_width,
+        thickness_mm=flight_thickness,
     )
 
     # The lift: a shaft at the grid's last bay, with a car that has to fit inside it. The
     # spec says whether the building has one - and when it says nothing, v0 assumes one and
     # hands the assumption back at the spec's own key.
-    services_data = _phase_data(spec, "common-services")
     has_lift = services_data.get("hasLift")
+    # A building with no lift has no lift dimensions, so the values and the assumptions for
+    # them exist only when the lift does.
+    lift_values: dict[str, Value] = {}
+    lift_assumptions: list[Assumption] = []
     if has_lift is False:
         lift = None
     else:
         last = floor.columns[-1] if floor.columns else None
+        lift_shaft, lift_shaft_value, lift_shaft_assumption = spec_value(
+            services_data,
+            "common-services",
+            "liftShaftMm",
+            ASSUMED_LIFT_SHAFT_MM,
+            "mm",
+            "the lift shaft's size",
+        )
+        lift_car, lift_car_value, lift_car_assumption = spec_value(
+            services_data,
+            "common-services",
+            "liftCarMm",
+            ASSUMED_LIFT_CAR_MM,
+            "mm",
+            "the lift car's size",
+        )
+        lift_height, lift_height_value, lift_height_assumption = spec_value(
+            services_data,
+            "common-services",
+            "liftShaftHeightMm",
+            ASSUMED_LIFT_SHAFT_HEIGHT_MM,
+            "mm",
+            "the lift shaft's height",
+        )
         lift = Lift(
             id="1",
             x_mm=(last.x_mm if last else 0.0) + 600.0,
             y_mm=(last.y_mm if last else 0.0) + 600.0,
             base_z_mm=base_z,
-            shaft_mm=ASSUMED_LIFT_SHAFT_MM,
-            car_mm=ASSUMED_LIFT_CAR_MM,
-            height_mm=ASSUMED_LIFT_SHAFT_HEIGHT_MM,
+            shaft_mm=lift_shaft,
+            car_mm=lift_car,
+            height_mm=lift_height,
         )
+        lift_values = {
+            "services.liftShaftMm": lift_shaft_value,
+            "services.liftCarMm": lift_car_value,
+            "services.liftShaftHeightMm": lift_height_value,
+        }
+        lift_assumptions = [
+            item
+            for item in (lift_shaft_assumption, lift_car_assumption, lift_height_assumption)
+            if item is not None
+        ]
 
     # The service runs: the conduit (sized by the units it serves), the water and the gas.
     # The runs follow the **grid's** extent (the columns), not the slab strip's.
@@ -342,9 +416,36 @@ def design_common_services(
     span_x = max(1.0, grid_max_x - grid_min_x)
     span_y = max(1.0, grid_max_y - grid_min_y)
     outlets = units * ASSUMED_CONDUIT_OUTLETS_PER_UNIT
-    conduit_diameter = ASSUMED_CONDUIT_DIAMETER_MM
+    # The base diameter the spec may carry, and the diameter the run actually uses (it steps
+    # up past 32 outlets). Both are recorded: the base says where it came from, the used one
+    # says what was built.
+    conduit_base, conduit_base_value, conduit_assumption = spec_value(
+        services_data,
+        "common-services",
+        "conduitDiameterMm",
+        ASSUMED_CONDUIT_DIAMETER_MM,
+        "mm",
+        "the conduit's diameter; more than 32 outlets and it steps up",
+    )
+    conduit_diameter = conduit_base
     if outlets > 32:
-        conduit_diameter = ASSUMED_CONDUIT_DIAMETER_MM + 5.0
+        conduit_diameter += 5.0
+    water_pipe, water_pipe_value, water_pipe_assumption = spec_value(
+        services_data,
+        "common-services",
+        "waterPipeDiameterMm",
+        ASSUMED_WATER_PIPE_DIAMETER_MM,
+        "mm",
+        "the water pipe's diameter",
+    )
+    gas_pipe, gas_pipe_value, gas_pipe_assumption = spec_value(
+        services_data,
+        "common-services",
+        "gasPipeDiameterMm",
+        ASSUMED_GAS_PIPE_DIAMETER_MM,
+        "mm",
+        "the gas pipe's diameter",
+    )
     runs = (
         ServiceRun(
             id="1",
@@ -362,7 +463,7 @@ def design_common_services(
             y_mm=grid_min_y,
             z_mm=base_z + 250.0,
             length_mm=span_y,
-            diameter_mm=ASSUMED_WATER_PIPE_DIAMETER_MM,
+            diameter_mm=water_pipe,
         ),
         ServiceRun(
             id="1",
@@ -371,7 +472,7 @@ def design_common_services(
             y_mm=grid_min_y,
             z_mm=base_z + 250.0,
             length_mm=span_y,
-            diameter_mm=ASSUMED_GAS_PIPE_DIAMETER_MM,
+            diameter_mm=gas_pipe,
         ),
     )
 
@@ -383,18 +484,16 @@ def design_common_services(
             "/phases/common-services/data/hasLift" if has_lift is not None else "v0 default",
             "the spec says whether the building has a lift",
         ),
-        "services.stairWidthMm": Value(
-            ASSUMED_STAIR_WIDTH_MM, "mm", PROVENANCE_ASSUMED, "v0 default", "the stair's width"
-        ),
-        "services.stairRisers": Value(
-            float(risers), "1", PROVENANCE_ASSUMED, "v0 default", "the risers per flight"
-        ),
+        "services.stairWidthMm": stair_width_value,
+        "services.stairRisers": risers_value,
+        "services.stairFlightThicknessMm": flight_thickness_value,
+        "services.landingDepthMm": landing_depth_value,
+        "services.waterPipeDiameterMm": water_pipe_value,
+        "services.gasPipeDiameterMm": gas_pipe_value,
         "services.stairTreadMm": Value(
             run_mm, "mm", PROVENANCE_ASSUMED, "v0 default", "the going of a tread"
         ),
-        "services.liftShaftMm": Value(
-            ASSUMED_LIFT_SHAFT_MM, "mm", PROVENANCE_ASSUMED, "v0 default", "the shaft's size"
-        ),
+        "services.conduitBaseDiameterMm": conduit_base_value,
         "services.conduitDiameterMm": Value(
             conduit_diameter,
             "mm",
@@ -403,10 +502,26 @@ def design_common_services(
             f"{outlets} outlets at {ASSUMED_CONDUIT_OUTLETS_PER_UNIT} per unit",
         ),
     }
+    values.update(lift_values)
 
-    assumptions = ()
+    # Every authored value the design hands back names the key it read, so the app writes the
+    # assumption where the next design looks for it.
+    assumptions = tuple(
+        item
+        for item in (
+            stair_width_assumption,
+            flight_thickness_assumption,
+            landing_depth_assumption,
+            risers_assumption,
+            *lift_assumptions,
+            conduit_assumption,
+            water_pipe_assumption,
+            gas_pipe_assumption,
+        )
+        if item is not None
+    )
     if has_lift is None:
-        assumptions = (
+        assumptions = assumptions + (
             Assumption(
                 "/phases/common-services/data/hasLift",
                 1.0,

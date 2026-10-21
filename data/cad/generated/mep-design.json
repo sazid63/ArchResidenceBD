@@ -5,76 +5,142 @@
   {
    "assumptions": [
     {
-     "pointer": "mep.electrical.lightingPointsPer100m2",
+     "pointer": "/phases/common-services/data/mep.lightingPointsPer100m2",
      "reason": "the lighting layout is computed from the floor's area, not from a room plan",
      "unit": "points/100m²",
      "value": 3.0
     },
     {
-     "pointer": "mep.electrical.powerOutletsPer100m2",
+     "pointer": "/phases/common-services/data/mep.powerOutletsPer100m2",
      "reason": "the outlet layout is computed from the floor's area, not from a room plan",
      "unit": "points/100m²",
      "value": 4.0
     },
     {
-     "pointer": "mep.electrical.maxCircuitLoadW",
-     "reason": "the load one circuit may carry; the points are packed up to it",
-     "unit": "W",
-     "value": 3000.0
+     "pointer": "/phases/common-services/data/mep.fansPer100m2",
+     "reason": "the fan layout is computed from the floor's area, not from a room plan",
+     "unit": "points/100m²",
+     "value": 1.0
     },
     {
-     "pointer": "mep.electrical.lightingLoadW",
+     "pointer": "/phases/common-services/data/mep.lightingLoadW",
      "reason": "the connected load of one lighting point",
      "unit": "W",
      "value": 40.0
     },
     {
-     "pointer": "mep.electrical.outletLoadW",
+     "pointer": "/phases/common-services/data/mep.outletLoadW",
      "reason": "the connected load of one power outlet",
      "unit": "W",
      "value": 100.0
     },
     {
-     "pointer": "mep.electrical.fanLoadW",
+     "pointer": "/phases/common-services/data/mep.fanLoadW",
      "reason": "the connected load of one ceiling fan",
      "unit": "W",
      "value": 60.0
     },
     {
-     "pointer": "mep.water.fixtureUnits",
-     "reason": "the fixture set of one unit; the v0 spec carries no room programme",
+     "pointer": "/phases/common-services/data/mep.maxCircuitLoadW",
+     "reason": "the load one circuit may carry; the points are packed up to it",
+     "unit": "W",
+     "value": 3000.0
+    },
+    {
+     "pointer": "/phases/common-services/data/mep.circuitCableSqMm",
+     "reason": "the cable that carries a circuit's load",
+     "unit": "mm²",
+     "value": 2.5
+    },
+    {
+     "pointer": "/phases/common-services/data/mep.circuitBreakerA",
+     "reason": "the breaker's rating",
+     "unit": "A",
+     "value": 20.0
+    },
+    {
+     "pointer": "/phases/common-services/data/mep.supplyVoltageV",
+     "reason": "the supply voltage",
+     "unit": "V",
+     "value": 230.0
+    },
+    {
+     "pointer": "/phases/common-services/data/mep.fixtureUnitsBasin",
+     "reason": "the wash basin's fixture units",
      "unit": "FU",
-     "value": 7.0
+     "value": 1.0
     },
     {
-     "pointer": "mep.drainage.fall",
-     "reason": "the fall the horizontal branches are laid to; it is what carries the water",
-     "unit": "1:60",
-     "value": 0.0
+     "pointer": "/phases/common-services/data/mep.fixtureUnitsWc",
+     "reason": "the WC's fixture units",
+     "unit": "FU",
+     "value": 2.0
     },
     {
-     "pointer": "mep.drainage.stackDiameterMm",
+     "pointer": "/phases/common-services/data/mep.fixtureUnitsShower",
+     "reason": "the shower's fixture units",
+     "unit": "FU",
+     "value": 2.0
+    },
+    {
+     "pointer": "/phases/common-services/data/mep.fixtureUnitsKitchenSink",
+     "reason": "the kitchen sink's fixture units",
+     "unit": "FU",
+     "value": 2.0
+    },
+    {
+     "pointer": "/phases/common-services/data/mep.drainageFallDenominator",
+     "reason": "the fall the horizontal branches are laid to (1:N); it is what carries the water",
+     "unit": "1/N",
+     "value": 60.0
+    },
+    {
+     "pointer": "/phases/common-services/data/mep.drainageStackDiameterMm",
      "reason": "the soil stack's size; the v0 spec carries no drainage layout",
      "unit": "mm",
      "value": 100.0
     },
     {
-     "pointer": "mep.gas.cookerLoadM3PerH",
+     "pointer": "/phases/common-services/data/mep.drainageBranchDiameterMm",
+     "reason": "the branch drain's size",
+     "unit": "mm",
+     "value": 50.0
+    },
+    {
+     "pointer": "/phases/common-services/data/mep.gasCookerLoadM3PerH",
      "reason": "the load of one domestic cooker (Titas)",
      "unit": "m³/h",
      "value": 0.5
     },
     {
-     "pointer": "mep.gas.pipeDiameterMm",
+     "pointer": "/phases/common-services/data/mep.gasPipeDiameterMm",
      "reason": "the gas run's size; the v0 spec carries no gas layout",
      "unit": "mm",
      "value": 15.0
     },
     {
-     "pointer": "mep.lift.powerKw",
+     "pointer": "/phases/common-services/data/mep.gasMeterOffsetMm",
+     "reason": "the meter's offset from the grid's corner",
+     "unit": "mm",
+     "value": 300.0
+    },
+    {
+     "pointer": "/phases/common-services/data/mep.liftPowerKw",
      "reason": "the lift's motor power; the fit check itself is W2.12's",
      "unit": "kW",
      "value": 5.0
+    },
+    {
+     "pointer": "/phases/common-services/data/mep.liftPersons",
+     "reason": "the lift's rated load, in people",
+     "unit": "1",
+     "value": 5.0
+    },
+    {
+     "pointer": "/phases/common-services/data/mep.pointInsetMm",
+     "reason": "the points keep clear of the floor's edge",
+     "unit": "mm",
+     "value": 600.0
     }
    ],
    "circuits": [
@@ -197,6 +263,41 @@
      "unit": "m²",
      "value": 2.79
     },
+    "mep.circuitBreakerA": {
+     "provenance": "assumed",
+     "reason": "the breaker's rating",
+     "source": "v0 default",
+     "unit": "A",
+     "value": 20.0
+    },
+    "mep.circuitCableSqMm": {
+     "provenance": "assumed",
+     "reason": "the cable that carries a circuit's load",
+     "source": "v0 default",
+     "unit": "mm²",
+     "value": 2.5
+    },
+    "mep.drainageBranchDiameterMm": {
+     "provenance": "assumed",
+     "reason": "the branch drain's size",
+     "source": "v0 default",
+     "unit": "mm",
+     "value": 50.0
+    },
+    "mep.drainageFallDenominator": {
+     "provenance": "assumed",
+     "reason": "the fall the horizontal branches are laid to (1:N); it is what carries the water",
+     "source": "v0 default",
+     "unit": "1/N",
+     "value": 60.0
+    },
+    "mep.drainageStackDiameterMm": {
+     "provenance": "assumed",
+     "reason": "the soil stack's size; the v0 spec carries no drainage layout",
+     "source": "v0 default",
+     "unit": "mm",
+     "value": 100.0
+    },
     "mep.electrical.totalLoadW": {
      "provenance": "derived",
      "reason": "1 circuits",
@@ -204,12 +305,138 @@
      "unit": "W",
      "value": 200.0
     },
+    "mep.fanLoadW": {
+     "provenance": "assumed",
+     "reason": "the connected load of one ceiling fan",
+     "source": "v0 default",
+     "unit": "W",
+     "value": 60.0
+    },
+    "mep.fansPer100m2": {
+     "provenance": "assumed",
+     "reason": "the fan layout is computed from the floor's area, not from a room plan",
+     "source": "v0 default",
+     "unit": "points/100m²",
+     "value": 1.0
+    },
+    "mep.fixtureUnitsBasin": {
+     "provenance": "assumed",
+     "reason": "the wash basin's fixture units",
+     "source": "v0 default",
+     "unit": "FU",
+     "value": 1.0
+    },
+    "mep.fixtureUnitsKitchenSink": {
+     "provenance": "assumed",
+     "reason": "the kitchen sink's fixture units",
+     "source": "v0 default",
+     "unit": "FU",
+     "value": 2.0
+    },
+    "mep.fixtureUnitsShower": {
+     "provenance": "assumed",
+     "reason": "the shower's fixture units",
+     "source": "v0 default",
+     "unit": "FU",
+     "value": 2.0
+    },
+    "mep.fixtureUnitsWc": {
+     "provenance": "assumed",
+     "reason": "the WC's fixture units",
+     "source": "v0 default",
+     "unit": "FU",
+     "value": 2.0
+    },
     "mep.gas.totalLoadM3PerH": {
      "provenance": "derived",
      "reason": "0 cooker(s)",
      "source": "the cookers on this storey",
      "unit": "m³/h",
      "value": 0.0
+    },
+    "mep.gasCookerLoadM3PerH": {
+     "provenance": "assumed",
+     "reason": "the load of one domestic cooker (Titas)",
+     "source": "v0 default",
+     "unit": "m³/h",
+     "value": 0.5
+    },
+    "mep.gasMeterOffsetMm": {
+     "provenance": "assumed",
+     "reason": "the meter's offset from the grid's corner",
+     "source": "v0 default",
+     "unit": "mm",
+     "value": 300.0
+    },
+    "mep.gasPipeDiameterMm": {
+     "provenance": "assumed",
+     "reason": "the gas run's size; the v0 spec carries no gas layout",
+     "source": "v0 default",
+     "unit": "mm",
+     "value": 15.0
+    },
+    "mep.liftPersons": {
+     "provenance": "assumed",
+     "reason": "the lift's rated load, in people",
+     "source": "v0 default",
+     "unit": "1",
+     "value": 5.0
+    },
+    "mep.liftPowerKw": {
+     "provenance": "assumed",
+     "reason": "the lift's motor power; the fit check itself is W2.12's",
+     "source": "v0 default",
+     "unit": "kW",
+     "value": 5.0
+    },
+    "mep.lightingLoadW": {
+     "provenance": "assumed",
+     "reason": "the connected load of one lighting point",
+     "source": "v0 default",
+     "unit": "W",
+     "value": 40.0
+    },
+    "mep.lightingPointsPer100m2": {
+     "provenance": "assumed",
+     "reason": "the lighting layout is computed from the floor's area, not from a room plan",
+     "source": "v0 default",
+     "unit": "points/100m²",
+     "value": 3.0
+    },
+    "mep.maxCircuitLoadW": {
+     "provenance": "assumed",
+     "reason": "the load one circuit may carry; the points are packed up to it",
+     "source": "v0 default",
+     "unit": "W",
+     "value": 3000.0
+    },
+    "mep.outletLoadW": {
+     "provenance": "assumed",
+     "reason": "the connected load of one power outlet",
+     "source": "v0 default",
+     "unit": "W",
+     "value": 100.0
+    },
+    "mep.pointInsetMm": {
+     "provenance": "assumed",
+     "reason": "the points keep clear of the floor's edge",
+     "source": "v0 default",
+     "unit": "mm",
+     "value": 600.0
+    },
+    "mep.powerOutletsPer100m2": {
+     "provenance": "assumed",
+     "reason": "the outlet layout is computed from the floor's area, not from a room plan",
+     "source": "v0 default",
+     "unit": "points/100m²",
+     "value": 4.0
+    },
+    "mep.supplyVoltageV": {
+     "provenance": "assumed",
+     "reason": "the supply voltage",
+     "source": "v0 default",
+     "unit": "V",
+     "value": 230.0
     },
     "mep.water.supplyPipeMm": {
      "provenance": "derived",
@@ -230,76 +457,142 @@
   {
    "assumptions": [
     {
-     "pointer": "mep.electrical.lightingPointsPer100m2",
+     "pointer": "/phases/common-services/data/mep.lightingPointsPer100m2",
      "reason": "the lighting layout is computed from the floor's area, not from a room plan",
      "unit": "points/100m²",
      "value": 3.0
     },
     {
-     "pointer": "mep.electrical.powerOutletsPer100m2",
+     "pointer": "/phases/common-services/data/mep.powerOutletsPer100m2",
      "reason": "the outlet layout is computed from the floor's area, not from a room plan",
      "unit": "points/100m²",
      "value": 4.0
     },
     {
-     "pointer": "mep.electrical.maxCircuitLoadW",
-     "reason": "the load one circuit may carry; the points are packed up to it",
-     "unit": "W",
-     "value": 3000.0
+     "pointer": "/phases/common-services/data/mep.fansPer100m2",
+     "reason": "the fan layout is computed from the floor's area, not from a room plan",
+     "unit": "points/100m²",
+     "value": 1.0
     },
     {
-     "pointer": "mep.electrical.lightingLoadW",
+     "pointer": "/phases/common-services/data/mep.lightingLoadW",
      "reason": "the connected load of one lighting point",
      "unit": "W",
      "value": 40.0
     },
     {
-     "pointer": "mep.electrical.outletLoadW",
+     "pointer": "/phases/common-services/data/mep.outletLoadW",
      "reason": "the connected load of one power outlet",
      "unit": "W",
      "value": 100.0
     },
     {
-     "pointer": "mep.electrical.fanLoadW",
+     "pointer": "/phases/common-services/data/mep.fanLoadW",
      "reason": "the connected load of one ceiling fan",
      "unit": "W",
      "value": 60.0
     },
     {
-     "pointer": "mep.water.fixtureUnits",
-     "reason": "the fixture set of one unit; the v0 spec carries no room programme",
+     "pointer": "/phases/common-services/data/mep.maxCircuitLoadW",
+     "reason": "the load one circuit may carry; the points are packed up to it",
+     "unit": "W",
+     "value": 3000.0
+    },
+    {
+     "pointer": "/phases/common-services/data/mep.circuitCableSqMm",
+     "reason": "the cable that carries a circuit's load",
+     "unit": "mm²",
+     "value": 2.5
+    },
+    {
+     "pointer": "/phases/common-services/data/mep.circuitBreakerA",
+     "reason": "the breaker's rating",
+     "unit": "A",
+     "value": 20.0
+    },
+    {
+     "pointer": "/phases/common-services/data/mep.supplyVoltageV",
+     "reason": "the supply voltage",
+     "unit": "V",
+     "value": 230.0
+    },
+    {
+     "pointer": "/phases/common-services/data/mep.fixtureUnitsBasin",
+     "reason": "the wash basin's fixture units",
      "unit": "FU",
-     "value": 7.0
+     "value": 1.0
     },
     {
-     "pointer": "mep.drainage.fall",
-     "reason": "the fall the horizontal branches are laid to; it is what carries the water",
-     "unit": "1:60",
-     "value": 0.0
+     "pointer": "/phases/common-services/data/mep.fixtureUnitsWc",
+     "reason": "the WC's fixture units",
+     "unit": "FU",
+     "value": 2.0
     },
     {
-     "pointer": "mep.drainage.stackDiameterMm",
+     "pointer": "/phases/common-services/data/mep.fixtureUnitsShower",
+     "reason": "the shower's fixture units",
+     "unit": "FU",
+     "value": 2.0
+    },
+    {
+     "pointer": "/phases/common-services/data/mep.fixtureUnitsKitchenSink",
+     "reason": "the kitchen sink's fixture units",
+     "unit": "FU",
+     "value": 2.0
+    },
+    {
+     "pointer": "/phases/common-services/data/mep.drainageFallDenominator",
+     "reason": "the fall the horizontal branches are laid to (1:N); it is what carries the water",
+     "unit": "1/N",
+     "value": 60.0
+    },
+    {
+     "pointer": "/phases/common-services/data/mep.drainageStackDiameterMm",
      "reason": "the soil stack's size; the v0 spec carries no drainage layout",
      "unit": "mm",
      "value": 100.0
     },
     {
-     "pointer": "mep.gas.cookerLoadM3PerH",
+     "pointer": "/phases/common-services/data/mep.drainageBranchDiameterMm",
+     "reason": "the branch drain's size",
+     "unit": "mm",
+     "value": 50.0
+    },
+    {
+     "pointer": "/phases/common-services/data/mep.gasCookerLoadM3PerH",
      "reason": "the load of one domestic cooker (Titas)",
      "unit": "m³/h",
      "value": 0.5
     },
     {
-     "pointer": "mep.gas.pipeDiameterMm",
+     "pointer": "/phases/common-services/data/mep.gasPipeDiameterMm",
      "reason": "the gas run's size; the v0 spec carries no gas layout",
      "unit": "mm",
      "value": 15.0
     },
     {
-     "pointer": "mep.lift.powerKw",
+     "pointer": "/phases/common-services/data/mep.gasMeterOffsetMm",
+     "reason": "the meter's offset from the grid's corner",
+     "unit": "mm",
+     "value": 300.0
+    },
+    {
+     "pointer": "/phases/common-services/data/mep.liftPowerKw",
      "reason": "the lift's motor power; the fit check itself is W2.12's",
      "unit": "kW",
      "value": 5.0
+    },
+    {
+     "pointer": "/phases/common-services/data/mep.liftPersons",
+     "reason": "the lift's rated load, in people",
+     "unit": "1",
+     "value": 5.0
+    },
+    {
+     "pointer": "/phases/common-services/data/mep.pointInsetMm",
+     "reason": "the points keep clear of the floor's edge",
+     "unit": "mm",
+     "value": 600.0
     }
    ],
    "circuits": [
@@ -743,6 +1036,41 @@
      "unit": "m²",
      "value": 120.0
     },
+    "mep.circuitBreakerA": {
+     "provenance": "assumed",
+     "reason": "the breaker's rating",
+     "source": "v0 default",
+     "unit": "A",
+     "value": 20.0
+    },
+    "mep.circuitCableSqMm": {
+     "provenance": "assumed",
+     "reason": "the cable that carries a circuit's load",
+     "source": "v0 default",
+     "unit": "mm²",
+     "value": 2.5
+    },
+    "mep.drainageBranchDiameterMm": {
+     "provenance": "assumed",
+     "reason": "the branch drain's size",
+     "source": "v0 default",
+     "unit": "mm",
+     "value": 50.0
+    },
+    "mep.drainageFallDenominator": {
+     "provenance": "assumed",
+     "reason": "the fall the horizontal branches are laid to (1:N); it is what carries the water",
+     "source": "v0 default",
+     "unit": "1/N",
+     "value": 60.0
+    },
+    "mep.drainageStackDiameterMm": {
+     "provenance": "assumed",
+     "reason": "the soil stack's size; the v0 spec carries no drainage layout",
+     "source": "v0 default",
+     "unit": "mm",
+     "value": 100.0
+    },
     "mep.electrical.totalLoadW": {
      "provenance": "derived",
      "reason": "1 circuits",
@@ -750,12 +1078,138 @@
      "unit": "W",
      "value": 720.0
     },
+    "mep.fanLoadW": {
+     "provenance": "assumed",
+     "reason": "the connected load of one ceiling fan",
+     "source": "v0 default",
+     "unit": "W",
+     "value": 60.0
+    },
+    "mep.fansPer100m2": {
+     "provenance": "assumed",
+     "reason": "the fan layout is computed from the floor's area, not from a room plan",
+     "source": "v0 default",
+     "unit": "points/100m²",
+     "value": 1.0
+    },
+    "mep.fixtureUnitsBasin": {
+     "provenance": "assumed",
+     "reason": "the wash basin's fixture units",
+     "source": "v0 default",
+     "unit": "FU",
+     "value": 1.0
+    },
+    "mep.fixtureUnitsKitchenSink": {
+     "provenance": "assumed",
+     "reason": "the kitchen sink's fixture units",
+     "source": "v0 default",
+     "unit": "FU",
+     "value": 2.0
+    },
+    "mep.fixtureUnitsShower": {
+     "provenance": "assumed",
+     "reason": "the shower's fixture units",
+     "source": "v0 default",
+     "unit": "FU",
+     "value": 2.0
+    },
+    "mep.fixtureUnitsWc": {
+     "provenance": "assumed",
+     "reason": "the WC's fixture units",
+     "source": "v0 default",
+     "unit": "FU",
+     "value": 2.0
+    },
     "mep.gas.totalLoadM3PerH": {
      "provenance": "derived",
      "reason": "2 cooker(s)",
      "source": "the cookers on this storey",
      "unit": "m³/h",
      "value": 1.0
+    },
+    "mep.gasCookerLoadM3PerH": {
+     "provenance": "assumed",
+     "reason": "the load of one domestic cooker (Titas)",
+     "source": "v0 default",
+     "unit": "m³/h",
+     "value": 0.5
+    },
+    "mep.gasMeterOffsetMm": {
+     "provenance": "assumed",
+     "reason": "the meter's offset from the grid's corner",
+     "source": "v0 default",
+     "unit": "mm",
+     "value": 300.0
+    },
+    "mep.gasPipeDiameterMm": {
+     "provenance": "assumed",
+     "reason": "the gas run's size; the v0 spec carries no gas layout",
+     "source": "v0 default",
+     "unit": "mm",
+     "value": 15.0
+    },
+    "mep.liftPersons": {
+     "provenance": "assumed",
+     "reason": "the lift's rated load, in people",
+     "source": "v0 default",
+     "unit": "1",
+     "value": 5.0
+    },
+    "mep.liftPowerKw": {
+     "provenance": "assumed",
+     "reason": "the lift's motor power; the fit check itself is W2.12's",
+     "source": "v0 default",
+     "unit": "kW",
+     "value": 5.0
+    },
+    "mep.lightingLoadW": {
+     "provenance": "assumed",
+     "reason": "the connected load of one lighting point",
+     "source": "v0 default",
+     "unit": "W",
+     "value": 40.0
+    },
+    "mep.lightingPointsPer100m2": {
+     "provenance": "assumed",
+     "reason": "the lighting layout is computed from the floor's area, not from a room plan",
+     "source": "v0 default",
+     "unit": "points/100m²",
+     "value": 3.0
+    },
+    "mep.maxCircuitLoadW": {
+     "provenance": "assumed",
+     "reason": "the load one circuit may carry; the points are packed up to it",
+     "source": "v0 default",
+     "unit": "W",
+     "value": 3000.0
+    },
+    "mep.outletLoadW": {
+     "provenance": "assumed",
+     "reason": "the connected load of one power outlet",
+     "source": "v0 default",
+     "unit": "W",
+     "value": 100.0
+    },
+    "mep.pointInsetMm": {
+     "provenance": "assumed",
+     "reason": "the points keep clear of the floor's edge",
+     "source": "v0 default",
+     "unit": "mm",
+     "value": 600.0
+    },
+    "mep.powerOutletsPer100m2": {
+     "provenance": "assumed",
+     "reason": "the outlet layout is computed from the floor's area, not from a room plan",
+     "source": "v0 default",
+     "unit": "points/100m²",
+     "value": 4.0
+    },
+    "mep.supplyVoltageV": {
+     "provenance": "assumed",
+     "reason": "the supply voltage",
+     "source": "v0 default",
+     "unit": "V",
+     "value": 230.0
     },
     "mep.water.supplyPipeMm": {
      "provenance": "derived",

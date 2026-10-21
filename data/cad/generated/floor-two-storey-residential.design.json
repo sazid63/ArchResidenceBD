@@ -1,16 +1,28 @@
 {
   "assumptions": [
     {
-      "pointer": "/phases/floor/data/columnSizeMm",
+      "pointer": "/phases/floor-1/data/columnSizeMm",
       "reason": "the rule pack (v0) has no column-sizing rule; v0 assumes a 300 mm square column",
       "unit": "mm",
       "value": 300.0
     },
     {
-      "pointer": "/phases/floor/data/beamMm",
+      "pointer": "/phases/floor-1/data/beamWidthMm",
       "reason": "the rule pack (v0) has no beam-sizing rule; v0 assumes 300 x 450 mm",
       "unit": "mm",
       "value": 300.0
+    },
+    {
+      "pointer": "/phases/floor-1/data/beamDepthMm",
+      "reason": "the rule pack (v0) has no beam-sizing rule; v0 assumes 300 x 450 mm",
+      "unit": "mm",
+      "value": 450.0
+    },
+    {
+      "pointer": "/phases/floor-1/data/slabOverhangMm",
+      "reason": "a 150 mm slab overhang past the grid",
+      "unit": "mm",
+      "value": 150.0
     }
   ],
   "baseZMm": 3200.0,
@@ -91,14 +103,14 @@
   "values": {
     "beam.depthMm": {
       "provenance": "assumed",
-      "reason": "no beam rule in the pack",
+      "reason": "the rule pack (v0) has no beam-sizing rule; v0 assumes 300 x 450 mm",
       "source": "v0 default",
       "unit": "mm",
       "value": 450.0
     },
     "beam.widthMm": {
       "provenance": "assumed",
-      "reason": "no beam rule in the pack",
+      "reason": "the rule pack (v0) has no beam-sizing rule; v0 assumes 300 x 450 mm",
       "source": "v0 default",
       "unit": "mm",
       "value": 300.0
@@ -112,7 +124,7 @@
     },
     "column.sizeMm": {
       "provenance": "assumed",
-      "reason": "no column rule in the pack",
+      "reason": "the rule pack (v0) has no column-sizing rule; v0 assumes a 300 mm square column",
       "source": "v0 default",
       "unit": "mm",
       "value": 300.0

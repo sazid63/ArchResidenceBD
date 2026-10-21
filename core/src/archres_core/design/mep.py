@@ -31,7 +31,13 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 from .floor import FloorDesign
-from .foundation import PROVENANCE_ASSUMED, PROVENANCE_DERIVED, Assumption, Value
+from .foundation import (
+    PROVENANCE_ASSUMED,
+    PROVENANCE_DERIVED,
+    Assumption,
+    Value,
+    spec_value,
+)
 
 if TYPE_CHECKING:  # the lift's type is only needed for the annotation
     from .commons import Lift
@@ -97,6 +103,186 @@ ASSUMED_METER_OFFSET_MM = 300.0
 ASSUMED_LIFT_POWER_KW = 5.0
 #: The lift's rated load (five people).
 ASSUMED_LIFT_PERSONS = 5
+
+
+def _phase_data(spec: dict[str, Any], phase_id: str) -> dict[str, Any]:
+    """The data of one phase of the spec (an empty dict when the phase is not there)."""
+    for phase in spec.get("phases") or []:
+        if phase.get("id") == phase_id:
+            return phase.get("data") or {}
+    return {}
+
+
+#: The MEP's authored values: the key the spec carries the value under (in the services
+#: phase's data), the authored default, the unit, and the reason. One table is the single
+#: source of truth - the design reads the defaults from here, the spec's values win when it
+#: carries them, and the assumption handed back names the key that was read.
+_AUTHORED: tuple[tuple[str, float, str, str], ...] = (
+    (
+        "lightingPointsPer100m2",
+        ASSUMED_LIGHTING_POINTS_PER_100M2,
+        "points/100m²",
+        "the lighting layout is computed from the floor's area, not from a room plan",
+    ),
+    (
+        "powerOutletsPer100m2",
+        ASSUMED_POWER_OUTLETS_PER_100M2,
+        "points/100m²",
+        "the outlet layout is computed from the floor's area, not from a room plan",
+    ),
+    (
+        "fansPer100m2",
+        ASSUMED_FANS_PER_100M2,
+        "points/100m²",
+        "the fan layout is computed from the floor's area, not from a room plan",
+    ),
+    (
+        "lightingLoadW",
+        ASSUMED_LIGHTING_LOAD_W,
+        "W",
+        "the connected load of one lighting point",
+    ),
+    (
+        "outletLoadW",
+        ASSUMED_OUTLET_LOAD_W,
+        "W",
+        "the connected load of one power outlet",
+    ),
+    (
+        "fanLoadW",
+        ASSUMED_FAN_LOAD_W,
+        "W",
+        "the connected load of one ceiling fan",
+    ),
+    (
+        "maxCircuitLoadW",
+        ASSUMED_MAX_CIRCUIT_LOAD_W,
+        "W",
+        "the load one circuit may carry; the points are packed up to it",
+    ),
+    (
+        "circuitCableSqMm",
+        ASSUMED_CIRCUIT_CABLE_SQMM,
+        "mm²",
+        "the cable that carries a circuit's load",
+    ),
+    (
+        "circuitBreakerA",
+        ASSUMED_CIRCUIT_BREAKER_A,
+        "A",
+        "the breaker's rating",
+    ),
+    (
+        "supplyVoltageV",
+        ASSUMED_SUPPLY_VOLTAGE_V,
+        "V",
+        "the supply voltage",
+    ),
+    (
+        "fixtureUnitsBasin",
+        ASSUMED_WFU_BASIN,
+        "FU",
+        "the wash basin's fixture units",
+    ),
+    (
+        "fixtureUnitsWc",
+        ASSUMED_WFU_WC,
+        "FU",
+        "the WC's fixture units",
+    ),
+    (
+        "fixtureUnitsShower",
+        ASSUMED_WFU_SHOWER,
+        "FU",
+        "the shower's fixture units",
+    ),
+    (
+        "fixtureUnitsKitchenSink",
+        ASSUMED_WFU_KITCHEN_SINK,
+        "FU",
+        "the kitchen sink's fixture units",
+    ),
+    (
+        "drainageFallDenominator",
+        60.0,
+        "1/N",
+        "the fall the horizontal branches are laid to (1:N); it is what carries the water",
+    ),
+    (
+        "drainageStackDiameterMm",
+        ASSUMED_STACK_DIAMETER_MM,
+        "mm",
+        "the soil stack's size; the v0 spec carries no drainage layout",
+    ),
+    (
+        "drainageBranchDiameterMm",
+        ASSUMED_BRANCH_DIAMETER_MM,
+        "mm",
+        "the branch drain's size",
+    ),
+    (
+        "gasCookerLoadM3PerH",
+        ASSUMED_COOKER_LOAD_M3_PER_H,
+        "m³/h",
+        "the load of one domestic cooker (Titas)",
+    ),
+    (
+        "gasPipeDiameterMm",
+        ASSUMED_GAS_PIPE_DIAMETER_MM,
+        "mm",
+        "the gas run's size; the v0 spec carries no gas layout",
+    ),
+    (
+        "gasMeterOffsetMm",
+        ASSUMED_METER_OFFSET_MM,
+        "mm",
+        "the meter's offset from the grid's corner",
+    ),
+    (
+        "liftPowerKw",
+        ASSUMED_LIFT_POWER_KW,
+        "kW",
+        "the lift's motor power; the fit check itself is W2.12's",
+    ),
+    (
+        "liftPersons",
+        float(ASSUMED_LIFT_PERSONS),
+        "1",
+        "the lift's rated load, in people",
+    ),
+    (
+        "pointInsetMm",
+        ASSUMED_POINT_INSET_MM,
+        "mm",
+        "the points keep clear of the floor's edge",
+    ),
+)
+
+#: The authored values that only exist when the building has a lift.
+_LIFT_KEYS = ("liftPowerKw", "liftPersons")
+
+
+def _authored_values(
+    spec: dict[str, Any], phase_id: str
+) -> tuple[dict[str, float], dict[str, Value], list[Assumption]]:
+    """The MEP's authored values: the spec's when it carries them, the defaults otherwise.
+
+    The key is the services phase's data under an ``mep.`` prefix - so the app writes where
+    the design looks - and the assumption handed back names exactly that key.
+    """
+    data = _phase_data(spec, phase_id)
+    resolved: dict[str, float] = {}
+    records: dict[str, Value] = {}
+    assumptions: list[Assumption] = []
+    for key, default, unit, reason in _AUTHORED:
+        value, record, assumption = spec_value(
+            data, phase_id, f"mep.{key}", default, unit, reason
+        )
+        resolved[key] = value
+        records[f"mep.{key}"] = record
+        if assumption is not None:
+            assumptions.append(assumption)
+    return resolved, records, assumptions
 
 
 @dataclass(frozen=True)
@@ -277,6 +463,10 @@ def design_mep(
     index = floor.storey_index if storey_index is None else storey_index
     units = int(building.get("unitsPerFloor") or 1)
 
+    # The MEP's authored values: the spec's when it carries them, the table's defaults
+    # otherwise - and the assumption names the key the design read.
+    authored, authored_records, authored_assumptions = _authored_values(spec, "common-services")
+
     slab = floor.slab
     slab_area_m2 = (slab.size_x_mm * slab.size_y_mm) / 1_000_000.0
     # The spec says what the ground floor is used for. A parking ground floor holds no
@@ -296,18 +486,20 @@ def design_mep(
     # footings along the frontage, so the floor can be narrower than the inset, and a point
     # off the floor is a point on no floor at all.
     inset = min(
-        ASSUMED_POINT_INSET_MM, (x1 - x0) / 2.0, (y1 - y0) / 2.0
+        authored["pointInsetMm"], (x1 - x0) / 2.0, (y1 - y0) / 2.0
     )
 
     # --- the electrical layout: the points, sized by the floor's area ----------------
-    lighting_count = max(1, round(area_m2 * ASSUMED_LIGHTING_POINTS_PER_100M2 / 100.0))
-    outlet_count = max(1, round(area_m2 * ASSUMED_POWER_OUTLETS_PER_100M2 / 100.0))
-    fan_count = max(1, round(area_m2 * ASSUMED_FANS_PER_100M2 / 100.0))
+    lighting_count = max(1, round(area_m2 * authored["lightingPointsPer100m2"] / 100.0))
+    outlet_count = max(1, round(area_m2 * authored["powerOutletsPer100m2"] / 100.0))
+    fan_count = max(1, round(area_m2 * authored["fansPer100m2"] / 100.0))
+    # The fall is a ratio (1:N), so the label is built from the value the spec carried.
+    fall_label = f"1:{int(authored['drainageFallDenominator'])}"
     points: list[MepPoint] = []
     for kind, count, load, height, note in (
-        ("light", lighting_count, ASSUMED_LIGHTING_LOAD_W, 2700.0, "a ceiling lighting point"),
-        ("outlet", outlet_count, ASSUMED_OUTLET_LOAD_W, 300.0, "a power outlet"),
-        ("fan", fan_count, ASSUMED_FAN_LOAD_W, 2400.0, "a ceiling fan"),
+        ("light", lighting_count, authored["lightingLoadW"], 2700.0, "a ceiling lighting point"),
+        ("outlet", outlet_count, authored["outletLoadW"], 300.0, "a power outlet"),
+        ("fan", fan_count, authored["fanLoadW"], 2400.0, "a ceiling fan"),
     ):
         for number, (x_mm, y_mm) in enumerate(
             _grid_positions(count, x0, y0, x1, y1, inset), start=1
@@ -331,21 +523,41 @@ def design_mep(
     current: list[MepPoint] = []
     current_load = 0.0
     for point in points:
-        if current and current_load + point.load_w > ASSUMED_MAX_CIRCUIT_LOAD_W:
-            circuits.append(_make_circuit(len(circuits) + 1, index, current, current_load))
+        if current and current_load + point.load_w > authored["maxCircuitLoadW"]:
+            circuits.append(
+                _make_circuit(
+                    len(circuits) + 1,
+                    index,
+                    current,
+                    current_load,
+                    cable_sqmm=authored["circuitCableSqMm"],
+                    breaker_a=authored["circuitBreakerA"],
+                    voltage_v=authored["supplyVoltageV"],
+                )
+            )
             current = []
             current_load = 0.0
         current.append(point)
         current_load += point.load_w
     if current:
-        circuits.append(_make_circuit(len(circuits) + 1, index, current, current_load))
+        circuits.append(
+            _make_circuit(
+                len(circuits) + 1,
+                index,
+                current,
+                current_load,
+                cable_sqmm=authored["circuitCableSqMm"],
+                breaker_a=authored["circuitBreakerA"],
+                voltage_v=authored["supplyVoltageV"],
+            )
+        )
 
     # The water layout: the fixture set of the units this floor holds -------------
     fixtures = (
-        ("basin", ASSUMED_WFU_BASIN, "a wash basin"),
-        ("wc", ASSUMED_WFU_WC, "a WC (tank)"),
-        ("shower", ASSUMED_WFU_SHOWER, "a shower"),
-        ("kitchenSink", ASSUMED_WFU_KITCHEN_SINK, "a kitchen sink"),
+        ("basin", authored["fixtureUnitsBasin"], "a wash basin"),
+        ("wc", authored["fixtureUnitsWc"], "a WC (tank)"),
+        ("shower", authored["fixtureUnitsShower"], "a shower"),
+        ("kitchenSink", authored["fixtureUnitsKitchenSink"], "a kitchen sink"),
     )
     for kind, fixture_units, note in fixtures:
         for number in range(1, units_here + 1):
@@ -373,7 +585,7 @@ def design_mep(
         x_mm=round(x0 + inset, 3),
         y_mm=round(y0 + inset, 3),
         z_mm=z,
-        note=f"the soil stack; the branches are laid at {ASSUMED_DRAINAGE_FALL}",
+        note=f"the soil stack; the branches are laid at {fall_label}",
     )
     points.append(stack)
 
@@ -385,10 +597,10 @@ def design_mep(
                 system="gas",
                 kind="cooker",
                 storey_index=index,
-                x_mm=round(x1 - ASSUMED_METER_OFFSET_MM * number, 3),
-                y_mm=round(y1 - ASSUMED_METER_OFFSET_MM, 3),
+                x_mm=round(x1 - authored["gasMeterOffsetMm"] * number, 3),
+                y_mm=round(y1 - authored["gasMeterOffsetMm"], 3),
                 z_mm=z + 900.0,
-                load_m3_per_h=ASSUMED_COOKER_LOAD_M3_PER_H,
+                load_m3_per_h=authored["gasCookerLoadM3PerH"],
                 note="a domestic gas cooker (Titas)",
             )
         )
@@ -399,8 +611,8 @@ def design_mep(
                 system="gas",
                 kind="meter",
                 storey_index=index,
-                x_mm=round(x1 - ASSUMED_METER_OFFSET_MM, 3),
-                y_mm=round(y0 + ASSUMED_METER_OFFSET_MM, 3),
+                x_mm=round(x1 - authored["gasMeterOffsetMm"], 3),
+                y_mm=round(y0 + authored["gasMeterOffsetMm"], 3),
                 z_mm=z + 1500.0,
                 note="the gas meter; the run is sized by the load it carries",
             )
@@ -429,7 +641,7 @@ def design_mep(
             description="The total connected load",
             quantity=len(circuits),
             unit="circuits",
-            size=f"{ASSUMED_SUPPLY_VOLTAGE_V:g} V",
+            size=f"{authored["supplyVoltageV"]:g} V",
             load=f"{total_load:g} W",
             note="the sum of the circuits' loads; the service capacity is not designed here",
         )
@@ -474,7 +686,7 @@ def design_mep(
             description="The soil stack",
             quantity=1,
             unit="no.",
-            size=f"{ASSUMED_STACK_DIAMETER_MM:g} mm",
+            size=f"{authored["drainageStackDiameterMm"]:g} mm",
             load="",
             note="vertical; the branches that discharge into it carry the fall",
         )
@@ -487,8 +699,8 @@ def design_mep(
                 description="The branch drains",
                 quantity=len(fixtures) * units_here,
                 unit="no.",
-                size=f"{ASSUMED_BRANCH_DIAMETER_MM:g} mm",
-                load=ASSUMED_DRAINAGE_FALL,
+                size=f"{authored["drainageBranchDiameterMm"]:g} mm",
+                load=fall_label,
                 note="the horizontal run's fall; the fall is what carries the water",
             )
         )
@@ -502,8 +714,8 @@ def design_mep(
                 description="A domestic gas cooker (Titas)",
                 quantity=cookers,
                 unit="no.",
-                size=f"{ASSUMED_GAS_PIPE_DIAMETER_MM:g} mm pipe",
-                load=f"{ASSUMED_COOKER_LOAD_M3_PER_H:g} m³/h each",
+                size=f"{authored["gasPipeDiameterMm"]:g} mm pipe",
+                load=f"{authored["gasCookerLoadM3PerH"]:g} m³/h each",
                 note="the meter serves every cooker on the run",
             )
         )
@@ -514,7 +726,7 @@ def design_mep(
                 description="The gas run",
                 quantity=1,
                 unit="no.",
-                size=f"{ASSUMED_GAS_PIPE_DIAMETER_MM:g} mm",
+                size=f"{authored["gasPipeDiameterMm"]:g} mm",
                 load=f"{gas_load:g} m³/h",
                 note="the run is sized by the total load it carries",
             )
@@ -529,7 +741,7 @@ def design_mep(
                 quantity=1,
                 unit="no.",
                 size=f"{lift.shaft_mm:g} mm shaft, {lift.car_mm:g} mm car",
-                load=f"{ASSUMED_LIFT_POWER_KW:g} kW, {ASSUMED_LIFT_PERSONS} persons",
+                load=f"{authored["liftPowerKw"]:g} kW, {int(authored["liftPersons"])} persons",
                 note=(
                     "the car fits inside the shaft, with a hand's width of clearance on each side"
                     if lift.fits
@@ -538,7 +750,9 @@ def design_mep(
             )
         )
 
-    values = {
+    # The authored values (with their provenance) and the derived ones together.
+    values: dict[str, Value] = dict(authored_records)
+    values.update({
         "mep.area.floorAreaM2": Value(
             area_m2,
             "m²",
@@ -574,83 +788,11 @@ def design_mep(
             "the cookers on this storey",
             f"{cookers} cooker(s)",
         ),
-    }
+    })
 
-    assumptions = (
-        Assumption(
-            pointer="mep.electrical.lightingPointsPer100m2",
-            value=ASSUMED_LIGHTING_POINTS_PER_100M2,
-            unit="points/100m²",
-            reason="the lighting layout is computed from the floor's area, not from a room plan",
-        ),
-        Assumption(
-            pointer="mep.electrical.powerOutletsPer100m2",
-            value=ASSUMED_POWER_OUTLETS_PER_100M2,
-            unit="points/100m²",
-            reason="the outlet layout is computed from the floor's area, not from a room plan",
-        ),
-        Assumption(
-            pointer="mep.electrical.maxCircuitLoadW",
-            value=ASSUMED_MAX_CIRCUIT_LOAD_W,
-            unit="W",
-            reason="the load one circuit may carry; the points are packed up to it",
-        ),
-        Assumption(
-            pointer="mep.electrical.lightingLoadW",
-            value=ASSUMED_LIGHTING_LOAD_W,
-            unit="W",
-            reason="the connected load of one lighting point",
-        ),
-        Assumption(
-            pointer="mep.electrical.outletLoadW",
-            value=ASSUMED_OUTLET_LOAD_W,
-            unit="W",
-            reason="the connected load of one power outlet",
-        ),
-        Assumption(
-            pointer="mep.electrical.fanLoadW",
-            value=ASSUMED_FAN_LOAD_W,
-            unit="W",
-            reason="the connected load of one ceiling fan",
-        ),
-        Assumption(
-            pointer="mep.water.fixtureUnits",
-            value=sum(unit for _, unit, _ in fixtures),
-            unit="FU",
-            reason="the fixture set of one unit; the v0 spec carries no room programme",
-        ),
-        Assumption(
-            pointer="mep.drainage.fall",
-            value=0.0,
-            unit="1:60",
-            reason="the fall the horizontal branches are laid to; it is what carries the water",
-        ),
-        Assumption(
-            pointer="mep.drainage.stackDiameterMm",
-            value=ASSUMED_STACK_DIAMETER_MM,
-            unit="mm",
-            reason="the soil stack's size; the v0 spec carries no drainage layout",
-        ),
-        Assumption(
-            pointer="mep.gas.cookerLoadM3PerH",
-            value=ASSUMED_COOKER_LOAD_M3_PER_H,
-            unit="m³/h",
-            reason="the load of one domestic cooker (Titas)",
-        ),
-        Assumption(
-            pointer="mep.gas.pipeDiameterMm",
-            value=ASSUMED_GAS_PIPE_DIAMETER_MM,
-            unit="mm",
-            reason="the gas run's size; the v0 spec carries no gas layout",
-        ),
-        Assumption(
-            pointer="mep.lift.powerKw",
-            value=ASSUMED_LIFT_POWER_KW,
-            unit="kW",
-            reason="the lift's motor power; the fit check itself is W2.12's",
-        ),
-    )
-
+    # The assumptions the design hands back come from the table, so what the app writes
+    # and what the design reads can never drift apart.
+    assumptions = tuple(authored_assumptions)
     return MepDesign(
         project_id=str(project.get("id") or "unknown"),
         storey_index=index,
@@ -676,7 +818,14 @@ def design_mep(
 
 
 def _make_circuit(
-    number: int, storey_index: int, points: list[MepPoint], load_w: float
+    number: int,
+    storey_index: int,
+    points: list[MepPoint],
+    load_w: float,
+    *,
+    cable_sqmm: float,
+    breaker_a: float,
+    voltage_v: float,
 ) -> Circuit:
     """One circuit, from the points it serves."""
     return Circuit(
@@ -685,9 +834,9 @@ def _make_circuit(
         kind="lighting-and-power",
         point_ids=tuple(point.id for point in points),
         load_w=round(load_w, 3),
-        cable_sqmm=ASSUMED_CIRCUIT_CABLE_SQMM,
-        breaker_a=ASSUMED_CIRCUIT_BREAKER_A,
-        voltage_v=ASSUMED_SUPPLY_VOLTAGE_V,
+        cable_sqmm=cable_sqmm,
+        breaker_a=breaker_a,
+        voltage_v=voltage_v,
     )
 
 

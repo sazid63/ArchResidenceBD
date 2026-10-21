@@ -234,6 +234,36 @@ def _phase_data(spec: dict[str, Any], phase_id: str) -> dict[str, Any]:
     return {}
 
 
+def spec_value(
+    data: dict[str, Any],
+    phase_id: str,
+    key: str,
+    default: float,
+    unit: str,
+    reason: str,
+) -> tuple[float, Value, Assumption | None]:
+    """One authored value: the spec's when it carries the key, the default otherwise.
+
+    The pointer the assumption names is the pointer the design read, so the app writes the
+    value where the next design looks for it - the loop closes. The value is in the same unit
+    as the key (``slabThicknessMm`` is millimetres, ``footingDepthM`` is metres), and the
+    design converts where it needs another unit.
+
+    Returns the value, the ``Value`` that says where it came from, and the assumption to hand
+    back - which is ``None`` when the spec carried the value, because nothing was assumed.
+    """
+    pointer = f"/phases/{phase_id}/data/{key}"
+    raw = data.get(key)
+    if isinstance(raw, (int, float)) and not isinstance(raw, bool) and raw > 0:
+        value = float(raw)
+        return value, Value(value, unit, PROVENANCE_SPEC, pointer, "the spec carries this value"), None
+    return (
+        float(default),
+        Value(float(default), unit, PROVENANCE_ASSUMED, "v0 default", reason),
+        Assumption(pointer, float(default), unit, reason),
+    )
+
+
 def design_foundation(spec: dict[str, Any]) -> FoundationDesign:
     """Turn a Building Spec into a foundation design (deterministic, provenance-carrying)."""
     project = spec.get("project") or {}
@@ -291,18 +321,17 @@ def design_foundation(spec: dict[str, Any]) -> FoundationDesign:
             )
         )
 
-    footing_size = ASSUMED_FOOTING_SIZE_MM
-    values["footing.sizeMm"] = Value(
-        footing_size, "mm", PROVENANCE_ASSUMED, "v0 default", "the rule pack has no footing size"
+    footing_size, size_value, size_assumption = spec_value(
+        foundation_data,
+        "foundation",
+        "footingSizeMm",
+        ASSUMED_FOOTING_SIZE_MM,
+        "mm",
+        "the rule pack (v0) has no footing-sizing rule; v0 assumes a 1200 mm square footing",
     )
-    assumptions.append(
-        Assumption(
-            "/phases/foundation/data/footingSizeMm",
-            footing_size,
-            "mm",
-            "the rule pack (v0) has no footing-sizing rule; v0 assumes a 1200 mm square footing",
-        )
-    )
+    values["footing.sizeMm"] = size_value
+    if size_assumption is not None:
+        assumptions.append(size_assumption)
     # The spec's own footing depth, when it carries one. The key is the spec's key - in
     # metres - and the assumption below points at the same key, so the app writes the
     # assumption where the design reads it (the loop closes).
@@ -333,35 +362,40 @@ def design_foundation(spec: dict[str, Any]) -> FoundationDesign:
                 "the rule pack (v0) has no footing-depth rule; v0 assumes a 300 mm footing",
             )
         )
-    beam_width = ASSUMED_GRADE_BEAM_WIDTH_MM
-    beam_depth = ASSUMED_GRADE_BEAM_DEPTH_MM
-    values["gradeBeam.widthMm"] = Value(
-        beam_width, "mm", PROVENANCE_ASSUMED, "v0 default", "the rule pack has no grade-beam size"
+    beam_width, width_value, width_assumption = spec_value(
+        foundation_data,
+        "foundation",
+        "gradeBeamWidthMm",
+        ASSUMED_GRADE_BEAM_WIDTH_MM,
+        "mm",
+        "the rule pack (v0) has no grade-beam rule; v0 assumes 300 x 400 mm",
     )
-    values["gradeBeam.depthMm"] = Value(
-        beam_depth, "mm", PROVENANCE_ASSUMED, "v0 default", "the rule pack has no grade-beam size"
+    values["gradeBeam.widthMm"] = width_value
+    if width_assumption is not None:
+        assumptions.append(width_assumption)
+    beam_depth, depth_value, depth_assumption = spec_value(
+        foundation_data,
+        "foundation",
+        "gradeBeamDepthMm",
+        ASSUMED_GRADE_BEAM_DEPTH_MM,
+        "mm",
+        "the rule pack (v0) has no grade-beam rule; v0 assumes 300 x 400 mm",
     )
-    assumptions.append(
-        Assumption(
-            "/phases/foundation/data/gradeBeamMm",
-            beam_width,
-            "mm",
-            "the rule pack (v0) has no grade-beam rule; v0 assumes 300 x 400 mm",
-        )
-    )
+    values["gradeBeam.depthMm"] = depth_value
+    if depth_assumption is not None:
+        assumptions.append(depth_assumption)
 
-    spacing = ASSUMED_FOOTING_SPACING_MM
-    values["footing.spacingMm"] = Value(
-        spacing, "mm", PROVENANCE_ASSUMED, "v0 default", "v0 lays the footings on a 3 m grid"
+    spacing, spacing_value, spacing_assumption = spec_value(
+        foundation_data,
+        "foundation",
+        "footingSpacingMm",
+        ASSUMED_FOOTING_SPACING_MM,
+        "mm",
+        "v0 lays the footings on a 3 m grid along the frontage",
     )
-    assumptions.append(
-        Assumption(
-            "/phases/foundation/data/footingSpacingMm",
-            spacing,
-            "mm",
-            "v0 lays the footings on a 3 m grid along the frontage",
-        )
-    )
+    values["footing.spacingMm"] = spacing_value
+    if spacing_assumption is not None:
+        assumptions.append(spacing_assumption)
 
     # The footing line: one isolated footing per structural grid line along the frontage.
     # v0 derives the count from the plot width and the grid spacing, never from the unit count
@@ -404,7 +438,14 @@ def design_foundation(spec: dict[str, Any]) -> FoundationDesign:
             )
         )
 
-    margin = ASSUMED_EXCAVATION_MARGIN_MM
+    margin, margin_value, margin_assumption = spec_value(
+        excavation_data,
+        "site-excavation",
+        "excavationMarginMm",
+        ASSUMED_EXCAVATION_MARGIN_MM,
+        "mm",
+        "a 600 mm working margin around the plot",
+    )
     excavation = Excavation(
         origin_x_mm=round(-margin, 3),
         origin_y_mm=round(-margin, 3),
@@ -412,9 +453,9 @@ def design_foundation(spec: dict[str, Any]) -> FoundationDesign:
         size_y_mm=round(depth_m * 1000.0 + 2 * margin, 3),
         depth_mm=round(float(excavation_depth) * 1000.0, 3),
     )
-    values["excavation.marginMm"] = Value(
-        margin, "mm", PROVENANCE_ASSUMED, "v0 default", "a 600 mm working margin around the plot"
-    )
+    values["excavation.marginMm"] = margin_value
+    if margin_assumption is not None:
+        assumptions.append(margin_assumption)
 
     return FoundationDesign(
         project_id=project_id,
