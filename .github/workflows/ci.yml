@@ -249,6 +249,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+      - name: The core's dependencies (the channel's integration test spawns the real core)
+        run: pip install --disable-pip-version-check "pydantic>=2.9" "jsonschema>=4.23" "pyyaml>=6.0.3"
       - name: The channel's tests (the shell's bridge crate)
         run: cargo test --locked -p archres-bridge --manifest-path app/src-tauri/Cargo.toml
       - name: The desktop shell compiles

@@ -183,6 +183,26 @@ impl Bridge {
         })
     }
 
+    /// Send a raw line to the core and read its raw answer.
+    ///
+    /// The channel's own framing is exposed here so a caller can see what the core really
+    /// said ✓ - a malformed line included ✓ - without the bridge deciding what it means ✓.
+    pub fn call_raw(&mut self, line: &str) -> std::io::Result<String> {
+        let stdin = self
+            .stdin
+            .as_mut()
+            .ok_or_else(|| std::io::Error::other("the core's stdin is closed"))?;
+        stdin.write_all(line.as_bytes())?;
+        stdin.write_all(b"\n")?;
+        stdin.flush()?;
+        let mut answer = String::new();
+        let read = self.stdout.read_line(&mut answer)?;
+        if read == 0 {
+            return Err(std::io::Error::other("the core closed the channel"));
+        }
+        Ok(answer)
+    }
+
     /// Ask the core whether it is alive.
     pub fn ping(&mut self) -> std::io::Result<Response> {
         let request = Request::new(self.next_id(), "ping");
