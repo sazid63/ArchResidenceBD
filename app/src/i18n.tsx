@@ -126,6 +126,18 @@ const en = {
   importAccept: "Accept",
   importReject: "Reject",
   importReviewedBy: "by {name}",
+  licencesTitle: "Licences",
+  licencesSubtitle: "The required notices for the components this app uses.",
+  licencesBundled: "Bundled",
+  licencesPlanned: "Not bundled yet",
+  aboutTitle: "About",
+  aboutTagline: "Your AI civil engineer",
+  aboutVersion: "Version",
+  aboutVersionValue: "0.1.0",
+  aboutBuild: "Build",
+  aboutBuildValue: "W5.1 (prototype)",
+  aboutLicencesLine: "Third-party notices and licences",
+  aboutTermsPending: "The app's own terms are set by its publisher.",
 };
 
 const bn: typeof en = {
@@ -252,6 +264,19 @@ const bn: typeof en = {
   importAccept: "গ্রহণ করুন",
   importReject: "বাতিল করুন",
   importReviewedBy: "{name} কর্তৃক",
+
+  licencesTitle: "লাইসেন্স",
+  licencesSubtitle: "এই অ্যাপ ব্যবহার করা উপাদানগুলোর প্রয়োজনীয় নোটিশ।",
+  licencesBundled: "সংযুক্ত",
+  licencesPlanned: "এখনও সংযুক্ত নয়",
+  aboutTitle: "পরিচিতি",
+  aboutTagline: "আপনার এআই সিভিল ইঞ্জিনিয়ার",
+  aboutVersion: "সংস্করণ",
+  aboutVersionValue: "0.1.0",
+  aboutBuild: "বিল্ড",
+  aboutBuildValue: "W5.1 (প্রোটোটাইপ)",
+  aboutLicencesLine: "তৃতীয় পক্ষের নোটিশ ও লাইসেন্স",
+  aboutTermsPending: "অ্যাপের নিজের শর্তাবলি তার প্রকাশক নির্ধারণ করেন।",
 };
 
 export const STRINGS = { en, bn } as const;
