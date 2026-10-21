@@ -172,7 +172,7 @@ jobs:
           uv run --directory core python ../tools/cad/equivalence_probe.py \
             --engine "$ARCHRES_FREECADCMD" \
             --json "$GITHUB_WORKSPACE/data/tmp/cad-ci/equivalence-probe.json"
-      - name: Probe the common services (the scale-out: two storeys, stair, lift, runs)
+      - name: "Probe the common services (the scale-out - two storeys, stair, lift, runs)"
         run: |
           uv run --directory core python ../tools/cad/commons_probe.py \
             --engine "$ARCHRES_FREECADCMD" \
