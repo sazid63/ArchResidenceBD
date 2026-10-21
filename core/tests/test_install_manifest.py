@@ -18,14 +18,19 @@ import pytest
 
 from archres_core.install import (
     INSTALL_LAYOUT,
+    LICENCE_FILES,
     TIERS,
     InstallManifest,
     ManifestError,
     ManifestPart,
+    apply_plan,
+    install_plan,
     manifest_document,
     parse_manifest,
     the_manifest,
 )
+
+ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 
 def _part(**overrides) -> dict:
@@ -127,3 +132,56 @@ def test_an_empty_manifest_is_refused() -> None:
         parse_manifest({"parts": []})
     with pytest.raises(ManifestError, match="no parts"):
         parse_manifest({})
+
+
+def test_the_plan_names_the_folders_the_copies_and_what_is_missing(tmp_path) -> None:
+    """An installer that quietly skips a piece ships a broken product."""
+    manifest = the_manifest()
+    plan = install_plan(manifest, tmp_path, repo_root=ROOT)
+    assert plan.root == str(tmp_path)
+    for key in ("runtime", "engine", "models", "packs", "licenses", "projects"):
+        assert INSTALL_LAYOUT[key] in plan.directories
+    # the pieces this machine has are copied; the rest are named
+    copied = {target for _source, target in plan.copies}
+    assert INSTALL_LAYOUT["core"] in copied
+    assert INSTALL_LAYOUT["packs"] in copied
+    assert "engine" in plan.missing
+    assert "model-chat" in plan.missing
+    assert plan.missing == tuple(sorted(set(plan.missing)))
+
+
+def test_the_plan_writes_the_licence_files_the_app_expects(tmp_path) -> None:
+    """The install folder carries the files the Licences screen points at."""
+    plan = install_plan(the_manifest(), tmp_path, repo_root=ROOT)
+    files = {name for name, _text in plan.notices}
+    for component, file_name in LICENCE_FILES.items():
+        assert f"{INSTALL_LAYOUT['licenses']}/{file_name}" in files, component
+
+
+def test_applying_the_plan_lays_the_folder_down(tmp_path) -> None:
+    """The folders exist, the core is copied, the notices are written."""
+    plan = install_plan(the_manifest(), tmp_path, repo_root=ROOT)
+    written = apply_plan(plan, tmp_path)
+    for key in ("runtime", "engine", "models", "packs", "licenses", "projects"):
+        assert (tmp_path / INSTALL_LAYOUT[key]).is_dir(), key
+    # the core package is in place, with its modules
+    core = tmp_path / INSTALL_LAYOUT["core"]
+    assert (core / "importer.py").is_file()
+    assert (core / "bridge.py").is_file()
+    # the rule packs are in place
+    assert (tmp_path / INSTALL_LAYOUT["packs"] / "rajuk-2008.yaml").is_file()
+    # the notices are written
+    for component, file_name in LICENCE_FILES.items():
+        notice = tmp_path / INSTALL_LAYOUT["licenses"] / file_name
+        assert notice.is_file(), component
+        assert component in notice.read_text(encoding="utf-8")
+    assert written
+
+
+def test_applying_the_plan_never_downloads_and_never_invents(tmp_path) -> None:
+    """It copies what is here and names what is not - it does not fetch."""
+    plan = install_plan(the_manifest(), tmp_path, repo_root=ROOT)
+    apply_plan(plan, tmp_path)
+    # the pieces that were missing are still missing, and still named
+    assert not (tmp_path / INSTALL_LAYOUT["engine"]).joinpath("freecadcmd.exe").exists()
+    assert plan.missing

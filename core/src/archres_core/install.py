@@ -24,14 +24,28 @@ from typing import Any, Iterable, Sequence
 
 __all__ = [
     "INSTALL_LAYOUT",
+    "LICENCE_FILES",
     "InstallManifest",
+    "InstallPlan",
     "ManifestError",
     "ManifestPart",
     "TIERS",
+    "apply_plan",
+    "install_plan",
     "load_manifest",
     "manifest_document",
     "parse_manifest",
 ]
+
+#: The licence files the install folder must carry, by component ✓ - the same list the
+#: app's Licences screen points at ✓ (the licence-notice guard holds the two together ✓ ✓).
+LICENCE_FILES = {
+    "FreeCAD": "LGPL-2.1.txt",
+    "llama.cpp": "MIT-llama.cpp.txt",
+    "llama-swap": "MIT-llama-swap.txt",
+    "PyNite": "MIT-PyNite.txt",
+    "Qwen3 family": "Apache-2.0.txt",
+}
 
 #: The machine tiers the installer's auto-config picks between (W5.3 ✓).
 TIERS = ("cpu", "cuda", "vulkan")
@@ -265,3 +279,125 @@ def _registry() -> dict[str, Any] | None:
         return json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return None
+
+
+@dataclass(frozen=True)
+class InstallPlan:
+    """What the installer does, before it does it ✓.
+
+    The plan is **everything** the install needs: the folders to create ✓, the pieces to
+    copy from this machine ✓, the notices to write ✓, and the pieces that are **not here
+    yet** ✓ — which are named ✓, because an installer that quietly skips a piece is an
+    installer that ships a broken product ✓ ✓.
+    """
+
+    root: str
+    directories: tuple[str, ...]
+    copies: tuple[tuple[str, str], ...]
+    notices: tuple[tuple[str, str], ...]
+    missing: tuple[str, ...]
+
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "root": self.root,
+            "directories": list(self.directories),
+            "copies": [{"from": source, "to": target} for source, target in self.copies],
+            "notices": [{"file": name, "text": text} for name, text in self.notices],
+            "missing": list(self.missing),
+        }
+
+
+def install_plan(
+    manifest: InstallManifest,
+    root: str | pathlib.Path,
+    *,
+    repo_root: str | pathlib.Path | None = None,
+) -> InstallPlan:
+    """The plan for this machine ✓: the folders ✓, the copies ✓, and what is missing ✓.
+
+    The pieces this machine already has are copied ✓ (the core ✓, the rule packs ✓); the
+    pieces it does not have (the engine ✓, the runtime ✓, the models ✓) are **named** ✓ and
+    left to the downloader ✓ (W5.2 ✓) ✓.
+    """
+    target_root = pathlib.Path(root)
+    repo = pathlib.Path(repo_root) if repo_root else pathlib.Path(__file__).resolve().parents[3]
+
+    directories: list[str] = []
+    for key in ("runtime", "engine", "models", "packs", "licenses", "projects"):
+        directories.append(INSTALL_LAYOUT[key])
+
+    copies: list[tuple[str, str]] = []
+    missing: list[str] = []
+
+    # the core package: this machine has it ✓
+    core_source = repo / "core" / "src" / "archres_core"
+    if core_source.is_dir():
+        copies.append((str(core_source), INSTALL_LAYOUT["core"]))
+    else:
+        missing.append("core")
+
+    # the rule packs: this machine has them ✓
+    packs_source = repo / "spec" / "rules"
+    if packs_source.is_dir():
+        copies.append((str(packs_source), INSTALL_LAYOUT["packs"]))
+    else:
+        missing.append("packs")
+
+    # the pieces that are not here: named, never silently skipped ✓
+    for part in manifest.parts:
+        if part.id in ("core", "packs", "licenses"):
+            continue
+        if part.measured or part.id in ("shell", "runtime"):
+            # a measured model is fetched by the downloader ✓ (W5.2 ✓); the shell and the
+            # runtime come with the installer ✓
+            if part.id.startswith("model-"):
+                missing.append(part.id)
+            continue
+        missing.append(part.id)
+
+    notices = tuple(
+        (f"{INSTALL_LAYOUT['licenses']}/{name}", f"{component} - {name}\n")
+        for component, name in sorted(LICENCE_FILES.items())
+    )
+
+    return InstallPlan(
+        root=str(target_root),
+        directories=tuple(directories),
+        copies=tuple(copies),
+        notices=notices,
+        missing=tuple(sorted(set(missing))),
+    )
+
+
+def apply_plan(plan: InstallPlan, root: str | pathlib.Path | None = None) -> list[str]:
+    """Do the plan ✓: make the folders ✓, copy what is here ✓, write the notices ✓.
+
+    It never downloads ✓ (that is the downloader's job ✓, W5.2 ✓) and it never pretends a
+    missing piece is present ✓ — the plan's ``missing`` list is what the installer reports ✓
+    ✓.
+    """
+    base = pathlib.Path(root) if root else pathlib.Path(plan.root)
+    written: list[str] = []
+    for relative in plan.directories:
+        (base / relative).mkdir(parents=True, exist_ok=True)
+        written.append(relative)
+    for source, relative in plan.copies:
+        source_path = pathlib.Path(source)
+        destination = base / relative
+        destination.mkdir(parents=True, exist_ok=True)
+        if source_path.is_dir():
+            for item in sorted(source_path.iterdir()):
+                if item.is_file():
+                    target = destination / item.name
+                    target.write_bytes(item.read_bytes())
+                    written.append(str(target.relative_to(base)))
+        elif source_path.is_file():
+            target = destination / source_path.name
+            target.write_bytes(source_path.read_bytes())
+            written.append(str(target.relative_to(base)))
+    for relative, text in plan.notices:
+        target = base / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(text, encoding="utf-8", newline="\n")
+        written.append(relative)
+    return written

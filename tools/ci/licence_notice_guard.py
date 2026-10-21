@@ -28,7 +28,7 @@ NOTICES = ROOT / "app" / "src" / "legal" / "notices.ts"
 #: A row of the register's table: | component | role | licence | status |
 ROW = re.compile(r"^\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*$")
 #: A notice in the app's legal module.
-FIELD = re.compile(r'^\s*(id|component|licence|status):\s*"([^"]*)",\s*$')
+FIELD = re.compile(r'^\s*(id|component|licence|licenceFile|status):\s*"([^"]*)",\s*$')
 
 
 def _register_rows() -> list[tuple[str, str]]:
@@ -99,6 +99,26 @@ def main() -> int:
             problems.append(
                 f"{component}: the register's licence is not verified yet ({row[1]!r}) - a "
                 "candidate is not a notice"
+            )
+
+    # the install folder's licence files are the same list the app points at ✓
+    # (the core is the source of that list ✓ - the guard reaches it directly ✓, because
+    # this guard runs with a plain interpreter ✓)
+    sys.path.insert(0, str(ROOT / "core" / "src"))
+    from archres_core.install import LICENCE_FILES
+
+    app_files = {
+        notice.get("component", ""): notice.get("licenceFile", "")
+        for notice in notices
+    }
+    for component, file_name in LICENCE_FILES.items():
+        expected = f"licenses/{file_name}"
+        if component not in app_files:
+            problems.append(f"{component}: the app's legal module does not name it")
+        elif app_files[component] != expected:
+            problems.append(
+                f"{component}: the app points at {app_files[component]!r}, the install folder "
+                f"carries {expected!r}"
             )
 
     if problems:
