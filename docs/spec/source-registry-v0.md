@@ -74,8 +74,12 @@ The mechanism is `archres_core.sources` (stdlib only): `fetch_source(entry, cach
 - **The values are not transcribed yet.** Both lists are PDFs read by a human; the building-works
   chapters have to be transcribed into a **candidate** card with the page reference for each line
   ✓ — the values enter as candidates until a human marks the card active ✓ (plan §9, the
-  registry's candidate-only policy ✓). Which of the LGED page's linked PDFs is the SoR itself is
-  still to be confirmed ✓.
+  registry's candidate-only policy ✓). The LGED page's link texts name its documents ✓, and the
+  SoR itself is the **"Schedule of Rates-2022 [3rd Edition August 2025] Full Book"** ✓ (12.1 MB,
+  fetched and hashed ✓); the PWD's is the **2022 revised SoR PDF** ✓ (10.4 MB, fetched and hashed
+  ✓). The BBS release is still without a working address from the build machine ✗ and stays
+  `candidate` ✓ — it is a **monthly** release with district tables, so it is the one that would
+  give a project's own district rather than a national schedule ✓.
 - `bbs-price-wage` (BBS) still has no working address from the build machine ✗ and stays
   `candidate` ✓ — it is a **monthly** release with district tables, so it is the one that would
   give a project's own district rather than a national schedule ✓.
