@@ -2,8 +2,8 @@ import { useState } from "react";
 
 import { Sidebar } from "./layout/Sidebar";
 import { BoqScreen } from "./screens/BoqScreen";
-import { DesignScreen } from "./screens/DesignScreen";
 import { DocumentsScreen } from "./screens/DocumentsScreen";
+import { NativeCadScreen } from "./screens/NativeCadScreen";
 import { PhaseChatScreen } from "./screens/PhaseChatScreen";
 import { ProjectSetupScreen } from "./screens/ProjectSetupScreen";
 import { ProjectsScreen } from "./screens/ProjectsScreen";
@@ -23,7 +23,8 @@ export function App() {
 function renderView(view: string, navigate: (id: string) => void) {
   if (view === "setup") return <ProjectSetupScreen onNavigate={navigate} />;
   if (view.startsWith("phase:")) return <PhaseChatScreen phaseId={view.slice("phase:".length)} />;
-  if (view.startsWith("design:")) return <DesignScreen target={view.slice("design:".length)} />;
+  // The design section opens the NativeCAD workspace: the engine's own geometry, not a mock.
+  if (view.startsWith("design:")) return <NativeCadScreen />;
   if (view === "boq") return <BoqScreen />;
   if (view.startsWith("docs:")) return <DocumentsScreen />;
   return <ProjectsScreen onNavigate={navigate} />;

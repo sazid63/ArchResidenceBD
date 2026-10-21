@@ -93,6 +93,8 @@ jobs:
         run: uv run --directory core python ../tools/walking_skeleton/run.py --check
       - name: Generated rebar fixtures are fresh (offline, no engine)
         run: uv run --directory core python ../tools/cad/rebar_probe.py --check
+      - name: The committed mesh is fresh and agrees with the design (offline, no engine)
+        run: uv run --directory core python ../tools/cad/mesh_probe.py --check
 
   # Real FreeCAD, weekly and on demand. Not on every push: this is a private repository and a
   # full engine install per push would spend the monthly Actions minutes for no extra signal.
@@ -151,6 +153,11 @@ jobs:
           uv run --directory core python ../tools/cad/sheet_probe.py \
             --engine "$ARCHRES_FREECADCMD" \
             --json "$GITHUB_WORKSPACE/data/tmp/cad-ci/sheet-probe.json"
+      - name: Probe the mesh export (what the workspace draws)
+        run: |
+          uv run --directory core python ../tools/cad/mesh_probe.py \
+            --engine "$ARCHRES_FREECADCMD" \
+            --json "$GITHUB_WORKSPACE/data/tmp/cad-ci/mesh-probe.json"
       - name: Run the walking skeleton (one house, end to end, every stage checked)
         run: |
           uv run --directory core python ../tools/walking_skeleton/run.py \

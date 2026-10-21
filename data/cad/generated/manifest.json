@@ -3,6 +3,7 @@
     "entries": [
       "floor:two-storey-residential",
       "foundation:two-storey-residential",
+      "mesh:two-storey-residential",
       "rebar:two-storey-residential"
     ]
   },
@@ -24,6 +25,12 @@
     },
     "rebar-two-storey-residential.py": {
       "bytes": 77343
+    },
+    "two-storey-residential.mesh-macro.py": {
+      "bytes": 12086
+    },
+    "two-storey-residential.mesh.json": {
+      "bytes": 26385
     }
   },
   "manifestVersion": "1",
