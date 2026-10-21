@@ -3,5 +3,5 @@
   "identifier": "default",
   "description": "The shell's permissions (W5.1): the window may ask the core, and nothing else.",
   "windows": ["main"],
-  "permissions": ["core:default", "core:window:allow-show", "core:window:allow-close"]
+  "permissions": ["core:default"]
 }

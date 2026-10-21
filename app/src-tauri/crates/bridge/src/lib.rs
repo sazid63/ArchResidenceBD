@@ -96,7 +96,7 @@ impl Response {
 /// The core, as a running sidecar.
 pub struct Bridge {
     child: Child,
-    stdin: ChildStdin,
+    stdin: Option<ChildStdin>,
     stdout: BufReader<ChildStdout>,
     counter: u64,
 }
@@ -105,17 +105,30 @@ impl Bridge {
     /// Start the core as a sidecar.
     ///
     /// `python` is the interpreter that runs the core (the installer's job is to point this
-    /// at the bundled runtime), and `root` is the install root the core reads from.
+    /// at the bundled runtime), and `root` is the install root the core reads from. When the
+    /// root carries the core's sources (`core/src`), that path is put on `PYTHONPATH` so the
+    /// dev tree runs without an install.
     pub fn start(python: &str, root: &std::path::Path) -> std::io::Result<Self> {
-        let mut child = Command::new(python)
+        let mut command = Command::new(python);
+        command
             .arg("-m")
             .arg("archres_core.bridge")
             .arg("--root")
             .arg(root)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
-            .stderr(Stdio::inherit())
-            .spawn()?;
+            .stderr(Stdio::inherit());
+        let sources = root.join("core").join("src");
+        if sources.is_dir() {
+            if let Ok(existing) = std::env::var("PYTHONPATH") {
+                if !existing.is_empty() {
+                    command.env("PYTHONPATH", format!("{};{}", sources.display(), existing));
+                }
+            } else {
+                command.env("PYTHONPATH", sources.display().to_string());
+            }
+        }
+        let mut child = command.spawn()?;
         let stdin = child
             .stdin
             .take()
@@ -126,7 +139,7 @@ impl Bridge {
             .ok_or_else(|| std::io::Error::other("the core's stdout was not piped"))?;
         Ok(Self {
             child,
-            stdin,
+            stdin: Some(stdin),
             stdout: BufReader::new(stdout),
             counter: 0,
         })
@@ -147,8 +160,12 @@ impl Bridge {
             std::io::Error::other(format!("the request did not serialise: {error}"))
         })?;
         line.push('\n');
-        self.stdin.write_all(line.as_bytes())?;
-        self.stdin.flush()?;
+        let stdin = self
+            .stdin
+            .as_mut()
+            .ok_or_else(|| std::io::Error::other("the core's stdin is closed"))?;
+        stdin.write_all(line.as_bytes())?;
+        stdin.flush()?;
         let mut answer = String::new();
         let read = self.stdout.read_line(&mut answer)?;
         if read == 0 {
@@ -172,11 +189,10 @@ impl Bridge {
     }
 
     /// Close the channel and wait for the core to exit.
+    ///
+    /// Dropping the pipe is the signal: the core reads EOF and returns ✓.
     pub fn shutdown(&mut self) -> std::io::Result<()> {
-        drop(std::mem::replace(
-            &mut self.stdin,
-            Command::new("__none__").stdin().unwrap(),
-        ));
+        self.stdin = None;
         let _ = self.child.wait();
         Ok(())
     }
