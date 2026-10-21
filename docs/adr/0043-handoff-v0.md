@@ -49,9 +49,9 @@ arrived **changed** should do ✓, and whether the pack can be **checked** in CI
 
 ## Consequences
 
-- The handoff exists ✓: an **engineer review pack** (1,589,884 B ✓, 14 parts ✓ — the spec ✓,
+- The handoff exists ✓: an **engineer review pack** (17 parts ✓ — the spec ✓,
   the drawings ✓, the BBS ✓, the BOQ ✓, the compliance audit and the register ✓) and a
-  **project bundle** (1,570,233 B ✓) that imports back ✓.
+  **project bundle** that imports back ✓.
 - A tampered pack is caught ✓ (a test flips a byte ✓ and the import refuses it ✓) ✓.
 - The CI check is a byte comparison ✓ ✓ — fast ✓, no engine ✓, no network ✓.
 - What is still missing is named ✓: the revision database ✓ (the app's ✓, P5 ✓), the Bangla PDFs ✓

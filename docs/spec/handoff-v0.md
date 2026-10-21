@@ -13,19 +13,19 @@ report) · **Plan:** §6 ("Engineer pack" ✓ and "**Project bundle**: one-file 
 
 ## What they are
 
-**The engineer review pack** (1,589,884 B ✓, 14 parts ✓) is the handoff ✓:
+**The engineer review pack** (17 parts ✓) is the handoff ✓:
 
 | In the pack | What it is |
 |---|---|
 | `manifest.json` | what is in the pack, and each part's **sha256** ✓ |
 | `README.md` | what the pack is ✓ — and that everything in it is a **candidate** ✓ |
 | `spec.json` | the Building Spec ✓ (the source of truth ✓) |
-| `drawings/` | the drawing set: the PDF ✓, the three sheets' SVG ✓, the set's manifest ✓ |
+| `drawings/` | the drawing set: the PDF ✓, the three sheets' SVG ✓ **and their DXFs** ✓, the set's manifest ✓ |
 | `bbs/` | the bar schedule: the xlsx + the PDF ✓ |
 | `boq/` | the bill of quantities: the xlsx + the PDF ✓ |
 | `compliance/` | the compliance audit and the Deviation Register ✓ (markdown + the Bangla HTML ✓) |
 
-**The project bundle** (1,570,233 B ✓) is the portable one ✓: the spec ✓ and the outputs ✓
+**The project bundle** is the portable one ✓: the spec ✓ and the outputs ✓
 (the drawings ✓, the BBS ✓, the BOQ ✓, the compliance audit ✓) — for **backup** ✓, for **transfer
 between machines** ✓, and for the review handoff ✓.
 

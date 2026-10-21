@@ -14,7 +14,7 @@ blocked by an open P1 package) · **Owner items:** `docs/work/OWNER-ATTENTION.md
 | **W2.2** foundation | the spec → footings + grade beams + a declared excavation prism | 4 footings (0.432 m³ each) + 3 grade beams; two runs byte-identical |
 | **W2.3** floor | the storey on the foundation's grid: columns, beams, slab | 4 columns + 3 beams + 1 slab; the first floor at z 3,200 → 6,200 mm |
 | **W2.4** rebar + BBS | the storey detailed, the schedule as data | 28 marks / 297 bars; schedule 279.0 kg vs measured 278.8 kg (−0.08 %) |
-| **W2.5** drawing sheet | a sheet a human can read | SVG 14,466 B · DXF 19,843 B · PDF 455,726 B; byte-identical across runs; no engine name on the sheet |
+| **W2.5** drawing sheet | a sheet a human can read | SVG 14,456 B · DXF 17,282 B · PDF 448,253 B; byte-identical across runs; no engine name on the sheet — *the 2026-10-21 naming audit branded the DXF header and named the sheet's storey, so the byte counts moved; the sheet's structure did not* |
 | **W2.6** BOQ v0 | the takeoff priced from a card | 11 lines, **119,599.70 BDT**, 9 priced, 2 unpriced (the formwork) |
 | **W2.7** price service | cards → region → the spec's pricing → the override register | the BOQ from the resolved card = **119,599.70 BDT** — the same as from the card; Chattogram ×1.06 published, Rajshahi 1.00 *assumed and labelled* |
 | **W2.8** NativeCAD workspace | the app's real design surface: viewport, model tree, parametric panel | 15 objects, 180 triangles, 5.45175 m³; verified in a browser (the frame buffer holds the two phase colours) |

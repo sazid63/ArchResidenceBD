@@ -16,14 +16,14 @@ The BOQ has been **data** since W2.6 ✓ and its prices have been **live** since
 plan asks for the two forms an engineer uses ✓ — the editable workbook ✓ and the printable
 document ✓ — divided by phase ✓, with the deviations flagged ✓.
 
-**The workbook** (6,121 B ✓) has six sheets ✓: the **title block** ✓ (the project ✓, the
+**The workbook** has six sheets ✓: the **title block** ✓ (the project ✓, the
 document number ✓, the date ✓, the *candidate - not for construction* status ✓, **which rate
 card priced it** ✓ and its source ✓ and its effective date ✓), the **schedule** ✓ (the phase ✓,
 the description ✓, the cost type ✓, the unit ✓, the quantity ✓, the rate ✓, the amount ✓, the
 rate key ✓ and the note ✓), the **by phase** ✓ and **by cost type** subtotals ✓, the **totals** ✓
 (including the unpriced lines ✓) and the **deviations** ✓.
 
-**The PDF** (7,620 B ✓, 5 pages ✓) is the printable form ✓: the title block ✓, **one page per
+**The PDF** (5 pages ✓) is the printable form ✓: the title block ✓, **one page per
 phase** with its lines ✓, and the totals with the by-phase, by-cost-type and deviation tables ✓.
 
 ## The three laws
@@ -55,7 +55,7 @@ override** ✓ (the cement at 575 BDT/bag ✓ — the local mill quote ✓):
   9 priced lines ✓, 2 unpriced ✓ (the formwork ✓ — visible ✓, not zeroed ✓),
 - **2 deviations** ✓ (the engine's rule deviation ✓ and the price override ✓) and the price one
   is flagged on the cement lines ✓,
-- a 6,121 byte workbook ✓ and a 7,620 byte PDF ✓.
+- a workbook ✓ and a PDF ✓.
 
 ## What is deliberately not here
 

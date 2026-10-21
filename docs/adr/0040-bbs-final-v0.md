@@ -45,8 +45,8 @@ must carry besides the numbers ✓, and where the **Bangla** goes ✓.
 
 ## Consequences
 
-- The **BBS final** exists in the two forms the plan names ✓: a 5,147 byte workbook (four
-  sheets ✓) and a 7,493 byte PDF (three pages ✓) ✓, carrying **297 bars ✓ and 278.9998 kg** ✓ —
+- The **BBS final** exists in the two forms the plan names ✓: a workbook (four
+  sheets ✓) and a PDF (three pages ✓) ✓, carrying **297 bars ✓ and 278.9998 kg** ✓ —
   the same numbers the walking skeleton measured ✓.
 - The two writers are **reusable** ✓: the BOQ final (W3.5 ✓), the compliance report (W3.6 ✓) and
   the engineer pack (W3.7 ✓) will use them ✓ — one format decision ✓, not one per document ✓.

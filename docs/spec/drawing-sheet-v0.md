@@ -42,10 +42,10 @@ numbers rather than a renderer's guess.
 
 | Measurement | Value |
 |---|---|
-| `page.svg` | **14,466 B** — 15 groups, 111 paths, both views, four dimension texts, the title block |
-| `page.dxf` | **19,843 B** — the geometry layer (S3 measured: the DXF carries geometry, not the annotation) |
-| `page.pdf` | **455,726 B** — a real vector PDF (header + `%%EOF`), rendered from our SVG by the engine's bundled Qt |
-| `sheet-design.json` | 2,547 B — the design the sheet was drawn from |
+| `page.svg` | **14,456 B** — 15 groups, 111 paths, both views, four dimension texts, the title block |
+| `page.dxf` | **17,282 B** — the geometry layer (S3 measured: the DXF carries geometry, not the annotation) |
+| `page.pdf` | **448,253 B** — a real vector PDF (header + `%%EOF`), rendered from our SVG by the engine's bundled Qt |
+| `sheet-design.json` | 2,559 B — the design the sheet was drawn from |
 | Annotation values | 18.75 m overall, 3.30 m high, 1.65 m deep — the design's own numbers |
 | **Two runs** | **byte-identical SVG and DXF** (the PDF is exempt: it carries a `/CreationDate`, exactly as S3 measured) |
 | Engine name in the sheet | **none** |

@@ -42,12 +42,12 @@ each generator to police itself ✓ (the assumption the DXF leak slipped through
 
 ## The measured output (2026-10-21)
 
-- The **brand guard** is clean over **67 files** ✓ (the app ✓, the drawing set ✓, the documents ✓,
+- The **brand guard** is clean ✓ over the app ✓, the drawing set ✓, the documents ✓,
   the compliance reports ✓, the prices ✓ and the pack's 17 parts ✓).
 - The **DXF header** now reads "NativeCAD (ArchResidenceBD)" ✓ with its structure intact ✓
   (6 sections ✓, 106 entities ✓).
 - The **drawing set probe** passes ✓ — 3 sheets ✓ — and the **sheet probe** asserts the same ✓.
-- The **engine pack** is 1,596,617 B across **17 parts** ✓ (the DXFs among them ✓) and the
+- The **engine pack** holds **17 parts** ✓ (the DXFs among them ✓) and the
   bundle still imports back ✓.
 - The **BBS and BOQ PDFs** carry "ArchResidenceBD 0.0.0" ✓ — the app's name and the build ✓.
 

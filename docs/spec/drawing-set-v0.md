@@ -42,8 +42,7 @@ columns ✓, the slab ✓), so a reviewer can read what is on the paper without 
 `tools/cad/drawing_set_probe.py` runs the set through the worker pool, twice:
 
 - **3 sheets** ✓ — each with its views ✓, its dimensions ✓ and its title block ✓;
-- **one PDF, 1,559,969 bytes** ✓ with a page per sheet ✓, and **per-sheet SVG + DXF** ✓
-  (15,895 / 16,035 / 14,273 B of SVG ✓ and 25,626 / 25,903 / 18,467 B of DXF ✓);
+- **one PDF** ✓ with a page per sheet ✓, and **per-sheet SVG + DXF** ✓;
 - every sheet carries the candidate status ✓, its sheet number ✓ and no engine name ✓;
 - two runs → byte-identical SVGs and DXFs ✓.
 

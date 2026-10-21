@@ -16,7 +16,7 @@ W2.4 wrote the bar schedule as **data** ✓ — the marks ✓, the members ✓, 
 lengths ✓, the weights ✓, validated against the frozen `bbs.schema.json` ✓. The plan asks for
 the two forms an engineer actually uses ✓, and this is them ✓.
 
-**The workbook** (`bar-schedule.xlsx`, 5,147 B ✓) has four sheets ✓:
+**The workbook** (`bar-schedule.xlsx`) has four sheets ✓:
 
 | Sheet | What it holds |
 |---|---|
@@ -25,7 +25,7 @@ the two forms an engineer actually uses ✓, and this is them ✓.
 | **Totals** | the bar count ✓, the total weight ✓, the weight per diameter ✓ and the density ✓ |
 | **Assumptions** | the authored assumptions (the diameters ✓, the cover ✓, the laps ✓) and why ✓ |
 
-**The PDF** (`bar-schedule.pdf`, 7,493 B ✓, 3 pages ✓) is the printable form ✓: the title
+**The PDF** (`bar-schedule.pdf`, 3 pages ✓) is the printable form ✓: the title
 block ✓, the schedule over as many pages as it needs ✓, and the totals with the assumptions ✓
 on the last page ✓.
 
@@ -60,7 +60,7 @@ can write correctly ✓.
 
 `tools/documents/render_bbs.py` renders the schedule of the example project ✓: **297 bars ✓,
 278.9998 kg** ✓ (the same numbers the walking skeleton measured ✓ — 279.0 kg scheduled against
-278.8 kg measured ✓), a **5,147 byte** workbook ✓ and a **7,493 byte** PDF ✓.
+278.8 kg measured ✓), a workbook ✓ and a PDF ✓.
 
 ## What is deliberately not here
 

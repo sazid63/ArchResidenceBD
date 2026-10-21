@@ -36,7 +36,7 @@ through the whole chain:
 |---|---|
 | the model the engine builds vs the design that described it | **15 objects, 5.45175 m³** — the object count matches exactly (4 footings + 3 grade beams + 4 columns + 3 beams + 1 slab) and the volume is inside the declared 5 % fusion band |
 | the steel the BBS schedules vs the steel the engine built | **scheduled 279.0 kg vs measured 278.8 kg — 0.077 % apart** (spike S5's law: the bar length comes from the measured volume) |
-| the sheet | `page.svg` 14,466 B · `page.dxf` 19,843 B · `page.pdf` 455,726 B — the two views, the computed dimensions, the filled title block, no engine name, the candidate status on the sheet |
+| the sheet | `page.svg` 14,456 B · `page.dxf` 17,282 B · `page.pdf` 448,253 B — the two views, the computed dimensions, the filled title block, no engine name, the candidate status on the sheet |
 | the BOQ | 11 lines, 9 priced, 2 unpriced, **119,599.70 BDT** from the card `dhaka-example-2026-10` (status *candidate*) — every amount re-derives from the line's own quantity and rate |
 | the coverage | the two phases v0 does not build are named in the report, not implied |
 
