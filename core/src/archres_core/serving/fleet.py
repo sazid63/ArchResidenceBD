@@ -30,6 +30,12 @@ SAFE_FILE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 ENV_NAME = re.compile(r"^[A-Z][A-Z0-9_]*$")
 FLAG_TOKEN = re.compile(r"^(--[A-Za-z0-9][A-Za-z0-9-]*|[A-Za-z0-9._-]+)$")
 
+#: Speculative decoding is **rejected** (ADR-0054, spike S2): ~8 % acceptance, 3.5-11x slower,
+#: and it changed greedy outputs - so it was neither lossless nor worth it. The draft is not in
+#: the fleet, and these rules keep it out.
+DRAFT_ROLES = frozenset({"draft"})
+DRAFT_FLAGS = ("--spec-draft", "--draft-max", "--spec-type", "--spec-draft-ngl", "--spec-draft-n-max")
+
 
 class FleetError(RuntimeError):
     """The fleet config and the registry do not describe one usable fleet."""
@@ -317,6 +323,11 @@ def _load_registry(path: pathlib.Path) -> dict[str, ModelRoute]:
         if not isinstance(entry, dict):
             raise FleetError(f"{where}: expected an object")
         role = entry.get("role")
+        if role in DRAFT_ROLES:
+            raise FleetError(
+                f"{where}: a draft model is not in the fleet - speculative decoding was rejected "
+                "on the evidence of spike S2 (ADR-0054): it was not lossless and it was slower"
+            )
         if role not in ROUTE_ROLES:
             raise FleetError(f"{where}: unknown role {role!r}")
         if role in models:
@@ -355,6 +366,12 @@ def _load_registry(path: pathlib.Path) -> dict[str, ModelRoute]:
                 raise FleetError(f"{where}.runtime.flags: unsafe token {token!r}")
             if position == 0 and not token.startswith("--"):
                 raise FleetError(f"{where}.runtime.flags: must start with a --flag, got {token!r}")
+            if token.startswith(DRAFT_FLAGS):
+                raise FleetError(
+                    f"{where}.runtime.flags: {token!r} turns on speculative decoding, which was "
+                    "rejected on the evidence of spike S2 (ADR-0054) - it was not lossless and "
+                    "it was slower"
+                )
         group = _text(entry.get("swapGroup"), f"{where}.swapGroup")
         models[role] = ModelRoute(
             id=_text(entry.get("id"), f"{where}.id"),

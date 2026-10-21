@@ -11,6 +11,7 @@
 - v1.5 — one-app **NativeCAD** integration (branded, embedded, invisible engine); left navigation + Project Setup + Source Registry; BOQ cost types (labour / machinery / subcontract) + machinery rate cards; Claude-style soft theme with the **no-sharp-edges** corner policy; Work Breakdown added (Appendix C) *(this document)*
 - v1.5.1 — branding/attribution policy: required licensing notices confined to the app's **Licences** screen; engine name kept out of branding, UI copy and generated documents (ADR-0004). No functional change.
 - v1.6 — owner-approved: the **~0.5M-token teacher target is retired** (§7). The teacher produced 111 unique paraphrases from 88 seed questions and its one trained round tied the scripted model on the W1.9 gate; it stays a parked offline tool, never a fleet member. Scripted generation remains the training data (ADR-0024). No other section changes.
+- v1.6.2 — §5.9 and §7: **speculative decoding is rejected** on the evidence of spike S2 (ADR-0054). The plan's "lossless by construction" was wrong: the draft model measured ~8 % acceptance, ran 3.5–11x slower, and **changed greedy outputs** — so the draft is not in the fleet, and the fleet refuses one.
 - v1.6.1 — §2.1 gains the **cost-risk** tier: a price override is registered in the Deviation Register like any other override, and it is not a compliance risk (ADR-0030). The risk tiers for *rule* deviations are unchanged. No other section changes.
 
 ---
@@ -105,7 +106,7 @@ Fleet of specialists — separate models, each with the right base and its own n
 
 **5.8 Tools & MCP** — shell / fetch / web search with permission policies and sandboxing; native FreeCAD MCP; prompt-injection watch on all external content; fleet isolation (the model that touches the web cannot write CAD code).
 
-**5.9 Runtime stack** — bundled llama.cpp (+llama-swap); embedder/reranker on CPU; speculative decoding (Qwen3-0.6B draft for Chat; lossless — pilot in P1); flash attention; **f16 KV cache default** (Q8 only as eval-gated fallback for constrained machines — never Q4, never silent); mmap; prompt caching; task-complete context assembly.
+**5.9 Runtime stack** — bundled llama.cpp (+llama-swap); embedder/reranker on CPU; ~~speculative decoding (Qwen3-0.6B draft for Chat; lossless — pilot in P1)~~ **rejected on S2's evidence** (ADR-0054: ~8 % acceptance, 3.5–11x slower, and it changed greedy outputs — so it was neither lossless nor worth it; the draft is not in the fleet); flash attention; **f16 KV cache default** (Q8 only as eval-gated fallback for constrained machines — never Q4, never silent); mmap; prompt caching; task-complete context assembly.
 
 **5.10 Source Registry & Smart Fetch** — a curated, versioned registry of trusted sources per data type: material & machinery price lists, seismic zone maps (BNBC), flood / water-table references, city gazette / rule sources, soil references. The AI fetches **through the registry** instead of blind searching (less searching, more reliable, teachable); results are cached per location; every fetched value carries provenance. **Soil honesty:** Bangladesh has no authoritative public point-level soil API — the app uses BNBC seismic zone + conservative area defaults (improved over time with engineer-partner data and user-provided reports), always labeled *"assumption — verify on site."* No fake precision.
 
@@ -134,7 +135,7 @@ Fleet of specialists — separate models, each with the right base and its own n
 ## 8. Efficiency Pass (kept, quality-audited)
 
 - Zero-LLM fast paths: chips/numbers/choices are shortcuts, never constraints; free text and model takeover always available; parse failures escalate to the model; every patch keeps provenance.
-- Speculative decoding: lossless by construction (P1 pilot).
+- Speculative decoding: **rejected** — S2 measured it and it was neither lossless nor faster (ADR-0054).
 - Inference tuning: f16 KV default; Q8 only eval-gated; flash attention; mmap; prompt caching; task-complete context (budgets are targets, not caps).
 - RAG: CPU-side; candidate depth (k) tuned by citation-recall evals, not latency; full reference set loaded (BNBC core + active city + project-referenced packs); clause cache keyed to rule-pack version.
 - Two isolated persistent FreeCAD workers; fresh document per job; deterministic generators; auto-restart.
