@@ -149,6 +149,22 @@ Note the **status**: `candidate` ✓ — the committed rate card is not verified
 source yet ✓ (the owner's act ✓ ✓), so the money is a candidate too ✓ and the app says so ✓
 ✓.
 
+### The shape the screen must read (2026-10-22)
+
+The screen was written against the **mock** BOQ ✓ and the real document's lines have a
+different shape ✓ — so a screen written from the mock shows `undefined` ✓ ✓. Three
+differences ✓, each caught by reading the **real** document ✓ ✓:
+
+- the line's **name** is `label` ✓ and it carries **both languages** ✓ (`bn` ✓ and `en` ✓)
+  ✓ — so the app shows the user's language ✓ ✓;
+- the cost type is `costType` ✓ and the schema allows **five** ✓ (material ✓, labour ✓,
+  machinery ✓, subcontract ✓ — and **`other`** ✓) ✓ — and the two unpriced formwork lines
+  are exactly that fifth type ✓ ✓, so a screen with four would show `undefined` on the
+  lines a user notices most ✓ ✓;
+- an **unpriced** line has **no** amount and **no** rate ✓ (`null` ✓) ✓ — so the screen
+  says "not priced" ✓ rather than a number ✓ ✓, and the unpriced lines are listed ✓
+  (a total that hides them is a lie ✓ ✓) ✓ ✓.
+
 ## What is deliberately not here
 
 - **The Rust build on this machine** — re-measured 2026-10-21: there is **no linker here at

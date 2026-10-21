@@ -78,6 +78,7 @@ const en = {
   costMoved: "what moved",
   costNoChange: "Nothing moved.",
   costMaterial: "Material",
+  costOther: "Other",
   costLabour: "Labour",
   costMachinery: "Machinery",
   costSubcontract: "Subcontract",
@@ -141,6 +142,12 @@ const en = {
   aboutCoreAbsent: "Not running",
   aboutCoreUnknown: "Checking...",
   boqPricedFrom: "Priced from",
+  boqPricedLines: "Priced lines",
+  boqAssumed: "Assumed",
+  boqUnpriced: "not priced",
+  boqUnpricedTitle: "Not priced",
+  boqUnpricedNote:
+    "These lines have no rate yet - the total does not include them, and it says so here.",
   boqCandidateNote:
     "The rate card is a candidate - it is not verified against its source yet, so the money is a candidate too.",
   boqNoProject: "There is no project yet - create one first.",
@@ -404,6 +411,14 @@ const bn: typeof en = {
   boqPricedFrom: "কান কেতে",
   boqCandidateNote: "রেইড কার৕ প্রতিখনেরসরে স্রতত্রণে পরীক্ধতা নয়বন, তেমে ডতাবায়তাওপ্রতীয়ন।",
   boqNoProject: "একী প্রতিরারে নেই - আপনির আগেপেরেন।",
+
+  boqPricedLines: "প্রতিডিয় রেয়",
+  boqAssumed: "অনুমান",
+  boqUnpriced: "দরহতি নয়ই",
+  boqUnpricedTitle: "দরহতি নয়ই",
+  boqUnpricedNote: "এই লাইনের থেকতে নেই - সামূ্য়রতের মধত্তার নেই, আরেরেওরে স্ষণিয়ে রহেছে।",
+
+  costOther: "অন্যা",
 };
 
 export const STRINGS = { en, bn } as const;
