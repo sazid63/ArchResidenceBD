@@ -122,20 +122,20 @@ sources:
     status: active
     authority: "Local Government Engineering Department (LGED)"
     title:
-      bn: "এলজিইডির দর তফসিল (স্কেডিউল অব রেটস)"
-      en: "LGED Schedule of Rates"
-    kind: html-index
+      bn: "এলজিইডির দর তফসিল (স্কেডিউল অব রেটস) ২০২২, তৃতীয় প্রকাশ"
+      en: "LGED Schedule of Rates 2022, 3rd edition (August 2025)"
+    kind: pdf-document
     url: "https://lged.gov.bd/pages/static-pages/6922df17933eb65569e1fcb8"
     language: [bn, en]
     licence: "Government schedule publication; confirm the reuse terms before redistributing any tables."
     fetch:
       method: GET
       parser: manual-review
-      recipe: "Fetch the page; it links the current edition's PDFs (hosted on the ministry's object storage, 2024/12). Record the page's and the PDF's URL + sha256 in the fetch manifest; transcribe the building-works chapters into candidate rate-card lines with the page reference for each line."
+      recipe: "Fetch the index page; it links the edition's documents, the SoR book among them (the 3rd edition, August 2025: the page's 'Schedule of Rates-2022 [3rd Edition August 2025] Full Book'). Fetch that PDF directly, record both URLs + sha256 in the fetch manifest, and transcribe the building-works chapters into candidate rate-card lines with the page reference for each line."
     cadence: yearly
     cacheTtlDays: 365
     lastVerified: "2026-10-21"
-    notes: "URL confirmed by the owner from a browser on 2026-10-21, and the page was fetched from the build machine the same day (the 2026-10-18 domain failure no longer holds). Which of the linked PDFs is the SoR itself is to be confirmed by a human - the page lists several publications; nothing is transcribed yet."
+    notes: "URL confirmed by the owner from a browser on 2026-10-21, and the page was fetched from the build machine the same day (the 2026-10-18 domain failure no longer holds). The page's link texts name the documents: the SoR 2022 full book (3rd edition, August 2025), the approval letter, the approved rates of LGED's specialised items, the revised rates and the basic materials (23.02.2023). The full book was fetched and hashed on 2026-10-21 (12.1 MB). Nothing is transcribed yet - the building-works chapters are still to be read, and the lines enter as candidate rates until a human marks the card active."
   - id: bwdb-schedule-of-rates
     dataTypes: [material-price, labour-rate, machinery-rate]
     status: active

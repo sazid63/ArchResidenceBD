@@ -32,10 +32,21 @@
       "sourceId": "pwd-schedule-of-rates-pdf",
       "status": 200,
       "url": "https://ss.pwd.gov.bd/document/sor/PWDSoR2022-Revised-2.3.23-Website.pdf"
+    },
+    {
+      "contentType": "application/pdf",
+      "fileName": "20261021T013946Z-024854171c31.pdf",
+      "lastVerified": "2026-10-21",
+      "registryStatus": "the LGED Schedule of Rates 2022, 3rd edition (August 2025) - the full book",
+      "sha256": "024854171c313426d99ade61a451768edbb78b838e50c565e5a87afed9f75aaa",
+      "sizeBytes": 12067321,
+      "sourceId": "lged-schedule-of-rates-2022-3rd-edition",
+      "status": 200,
+      "url": "https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-lged/2024/12/dd4c6b82ec694933afdad89c6c8c2141.pdf"
     }
   ],
   "confirmedBy": "the owner, from a browser (2026-10-21)",
   "fetchedAt": "2026-10-21",
   "manifestRows": 1,
-  "note": "The artifacts are hashed and cached; the manifest rows are the provenance record (plan section 5.10). The values are NOT transcribed yet: a PDF list is read by a human and the lines enter as candidate rates until a human marks the card active."
+  "note": "The artifacts are hashed and cached; the manifest rows are the provenance record (plan section 5.10). The values are NOT transcribed yet: each list is a PDF read by a human, and the lines enter as candidate rates - with the page reference for each line - until a human marks the card active."
 }
