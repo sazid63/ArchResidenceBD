@@ -24,8 +24,6 @@ jobs:
         run: python tools/ci/brand_guard.py
       - name: Bangla render guard
         run: python tools/ci/bangla_render_guard.py
-      - name: The security pass (the external content and the permission layer)
-        run: python tools/ci/security_guard.py --check
 
   # The dev machine and every install are Windows (plan §1): a redirected console is cp1252,
   # not UTF-8, and `uv run --directory core` runs every tool from core/. Those two facts are
@@ -57,6 +55,10 @@ jobs:
         run: uv sync --all-packages
       - name: Core tests
         run: uv run --directory core pytest -q
+      # The security pass needs the agent package, and the agent package needs the workspace's
+      # dependencies (PyYAML, through the training prompts) - so it runs where they are synced.
+      - name: The security pass (the external content and the permission layer)
+        run: uv run --directory core python ../tools/ci/security_guard.py --check
       - name: Training dataset freshness
         run: uv run --directory core python ../tools/training/build_chat_dataset.py --check
       - name: SFT split freshness
