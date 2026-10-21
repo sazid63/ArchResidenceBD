@@ -1,0 +1,20 @@
+{
+  "cardId": "dhaka-example-2026-10",
+  "cardStatus": "candidate",
+  "deviations": 2,
+  "pages": 5,
+  "pdfBytes": 7620,
+  "pricedLines": 9,
+  "projectId": "7c9e6f10-2a3b-4c5d-9e8f-1a2b3c4d5e6f",
+  "sheets": [
+    "Title block",
+    "Schedule",
+    "By phase",
+    "By cost type",
+    "Totals",
+    "Deviations"
+  ],
+  "totalBdt": 120621.91,
+  "unpricedLines": 2,
+  "xlsxBytes": 6121
+}

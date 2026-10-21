@@ -1,0 +1,302 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [6 0 R 8 0 R 10 0 R 12 0 R 14 0 R] /Count 5 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Length 1000 >>
+stream
+BT
+/Helvetica-Bold 18 Tf
+0 g
+1 0 0 1 40.00 781.89 Tm
+(BILL OF QUANTITIES) Tj
+/Helvetica 9 Tf
+0 g
+1 0 0 1 40.00 749.89 Tm
+(Project: 7c9e6f10-2a3b-4c5d-9e8f-1a2b3c4d5e6f) Tj
+/Helvetica 9 Tf
+0 g
+1 0 0 1 40.00 733.89 Tm
+(Document number: ARRB-P3-BOQ-001) Tj
+/Helvetica 9 Tf
+0 g
+1 0 0 1 40.00 717.89 Tm
+(Issued: 2026-10-21) Tj
+/Helvetica 9 Tf
+0 g
+1 0 0 1 40.00 701.89 Tm
+(Status: Candidate - not for construction) Tj
+/Helvetica 9 Tf
+0 g
+1 0 0 1 40.00 679.89 Tm
+(Rate card: dhaka-example-2026-10 \(dhaka, status candidate\)) Tj
+/Helvetica 9 Tf
+0.35 g
+1 0 0 1 40.00 663.89 Tm
+(Rate source: Illustrative example card \(structure demo\) \(manual\)) Tj
+/Helvetica 9 Tf
+0.35 g
+1 0 0 1 40.00 647.89 Tm
+(Effective from: 2026-10-01) Tj
+/Helvetica 9 Tf
+0 g
+1 0 0 1 40.00 625.89 Tm
+(Grand total: 120621.91 BDT \(9 priced, 2 unpriced\)) Tj
+/Helvetica 9 Tf
+0.35 g
+1 0 0 1 40.00 605.89 Tm
+(the quantities are measured from the design; the rates come from the rate card \(dhaka-example-2026-10, status candidate\)) Tj
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 5 0 R >>
+endobj
+7 0 obj
+<< /Length 606 >>
+stream
+BT
+/Helvetica-Bold 12 Tf
+0 g
+1 0 0 1 40.00 793.89 Tm
+(PHASE: site-excavation) Tj
+/Helvetica-Bold 8 Tf
+0 g
+1 0 0 1 40.00 777.89 Tm
+(Description                                Type       Unit      Qty        Rate        Amount) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 766.89 Tm
+(Excavation \(machinery\)                       machinery  hour         24.491     2800.0      68574.8) Tj
+/Helvetica 7 Tf
+0.35 g
+1 0 0 1 40.00 757.89 Tm
+(    the declared excavation prism \(293.892 m3\) at an assumed 12.0 m3/hour) Tj
+/Helvetica-Bold 9 Tf
+0 g
+1 0 0 1 40.00 742.89 Tm
+(Subtotal \(site-excavation\): 68574.8 BDT) Tj
+ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 7 0 R >>
+endobj
+9 0 obj
+<< /Length 1404 >>
+stream
+BT
+/Helvetica-Bold 12 Tf
+0 g
+1 0 0 1 40.00 793.89 Tm
+(PHASE: foundation) Tj
+/Helvetica-Bold 8 Tf
+0 g
+1 0 0 1 40.00 777.89 Tm
+(Description                                Type       Unit      Qty        Rate        Amount) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 766.89 Tm
+(Cement \(foundation\)                          material   bag           21.06      575.0      12109.5) Tj
+/Helvetica 7 Tf
+0.35 g
+1 0 0 1 40.00 757.89 Tm
+(    the mix is an assumption, not a pack rule | DEVIATION \(cost_risk\): Price override: Cement \(OPC 43 grade\) - 575.00 BDT/bag against 550.00 BDT/bag - ack) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 746.89 Tm
+(Sand \(foundation\)                            material   cft          4.9702       42.0       208.75) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 735.89 Tm
+(Mason \(labour\)                               labour     day          1.1232      950.0      1067.04) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 724.89 Tm
+(Concrete mixer                               machinery  day           0.351     3500.0       1228.5) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 713.89 Tm
+(Formwork \(foundation\)                        other      sqm            5.76          -            -) Tj
+/Helvetica 7 Tf
+0.35 g
+1 0 0 1 40.00 704.89 Tm
+(    no formwork rate in the v0 card: the line is measured, not priced) Tj
+/Helvetica-Bold 9 Tf
+0 g
+1 0 0 1 40.00 689.89 Tm
+(Subtotal \(foundation\): 14613.79 BDT) Tj
+ET
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 9 0 R >>
+endobj
+11 0 obj
+<< /Length 1487 >>
+stream
+BT
+/Helvetica-Bold 12 Tf
+0 g
+1 0 0 1 40.00 793.89 Tm
+(PHASE: floor) Tj
+/Helvetica-Bold 8 Tf
+0 g
+1 0 0 1 40.00 777.89 Tm
+(Description                                Type       Unit      Qty        Rate        Amount) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 766.89 Tm
+(Cement \(floor\)                               material   bag         19.8281      575.0     11401.16) Tj
+/Helvetica 7 Tf
+0.35 g
+1 0 0 1 40.00 757.89 Tm
+(    the mix is an assumption, not a pack rule | DEVIATION \(cost_risk\): Price override: Cement \(OPC 43 grade\) - 575.00 BDT/bag against 550.00 BDT/bag - ack) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 746.89 Tm
+(Sand \(floor\)                                 material   cft          4.6794       42.0       196.53) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 735.89 Tm
+(Steel reinforcement                          material   ton           0.279    89000.0      24831.0) Tj
+/Helvetica 7 Tf
+0.35 g
+1 0 0 1 40.00 726.89 Tm
+(    the scheduled steel, not an estimate) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 715.89 Tm
+(Mason \(floor, labour\)                        labour     day          1.0575      950.0      1004.63) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 704.89 Tm
+(Formwork \(floor\)                             other      sqm           17.19          -            -) Tj
+/Helvetica 7 Tf
+0.35 g
+1 0 0 1 40.00 695.89 Tm
+(    no formwork rate in the v0 card: the line is measured, not priced) Tj
+/Helvetica-Bold 9 Tf
+0 g
+1 0 0 1 40.00 680.89 Tm
+(Subtotal \(floor\): 37433.32 BDT) Tj
+ET
+endstream
+endobj
+12 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 11 0 R >>
+endobj
+13 0 obj
+<< /Length 1293 >>
+stream
+BT
+/Helvetica-Bold 12 Tf
+0 g
+1 0 0 1 40.00 793.89 Tm
+(TOTALS) Tj
+/Helvetica-Bold 9 Tf
+0 g
+1 0 0 1 40.00 773.89 Tm
+(Grand total: 120621.91 BDT) Tj
+/Helvetica 9 Tf
+0 g
+1 0 0 1 40.00 757.89 Tm
+(Priced lines: 9) Tj
+/Helvetica 9 Tf
+0 g
+1 0 0 1 40.00 741.89 Tm
+(Unpriced lines: 2) Tj
+/Helvetica 9 Tf
+0.35 g
+1 0 0 1 40.00 725.89 Tm
+(  unpriced: formwork-foundation) Tj
+/Helvetica 9 Tf
+0.35 g
+1 0 0 1 40.00 725.89 Tm
+(  unpriced: formwork-floor) Tj
+/Helvetica-Bold 12 Tf
+0 g
+1 0 0 1 40.00 691.89 Tm
+(BY PHASE) Tj
+/Helvetica 9 Tf
+0 g
+1 0 0 1 40.00 671.89 Tm
+(floor: 37433.32 BDT) Tj
+/Helvetica 9 Tf
+0 g
+1 0 0 1 40.00 657.89 Tm
+(foundation: 14613.79 BDT) Tj
+/Helvetica 9 Tf
+0 g
+1 0 0 1 40.00 643.89 Tm
+(site-excavation: 68574.8 BDT) Tj
+/Helvetica-Bold 12 Tf
+0 g
+1 0 0 1 40.00 619.89 Tm
+(BY COST TYPE) Tj
+/Helvetica 9 Tf
+0 g
+1 0 0 1 40.00 599.89 Tm
+(labour: 2071.67 BDT) Tj
+/Helvetica 9 Tf
+0 g
+1 0 0 1 40.00 585.89 Tm
+(machinery: 69803.3 BDT) Tj
+/Helvetica 9 Tf
+0 g
+1 0 0 1 40.00 571.89 Tm
+(material: 48746.94 BDT) Tj
+/Helvetica-Bold 12 Tf
+0 g
+1 0 0 1 40.00 547.89 Tm
+(DEVIATIONS) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 527.89 Tm
+(dev-001 \(approval_risk\): 2.4 m against 3.0 m) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 515.89 Tm
+(price-cement-opc-43 \(cost_risk\): 575.00 BDT/bag against 550.00 BDT/bag) Tj
+ET
+endstream
+endobj
+14 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 13 0 R >>
+endobj
+15 0 obj
+<< /Title (ArchResidenceBD - Bill of Quantities) /Producer (NativeCAD (ArchResidenceBD)) >>
+endobj
+xref
+0 16
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000148 00000 n 
+0000000245 00000 n 
+0000000347 00000 n 
+0000001399 00000 n 
+0000001541 00000 n 
+0000002198 00000 n 
+0000002340 00000 n 
+0000003796 00000 n 
+0000003939 00000 n 
+0000005479 00000 n 
+0000005623 00000 n 
+0000006969 00000 n 
+0000007113 00000 n 
+trailer
+<< /Size 16 /Root 1 0 R /Info 15 0 R >>
+startxref
+7221
+%%EOF
