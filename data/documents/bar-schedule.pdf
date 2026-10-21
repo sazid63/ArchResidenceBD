@@ -1,0 +1,286 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [6 0 R 8 0 R 10 0 R] /Count 3 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Length 621 >>
+stream
+BT
+/Helvetica-Bold 18 Tf
+0 g
+1 0 0 1 40.00 781.89 Tm
+(BAR SCHEDULE) Tj
+/Helvetica 9 Tf
+0 g
+1 0 0 1 40.00 751.89 Tm
+(Project: 7c9e6f10-2a3b-4c5d-9e8f-1a2b3c4d5e6f) Tj
+/Helvetica 9 Tf
+0 g
+1 0 0 1 40.00 735.89 Tm
+(Drawing number: ARRB-P3-BBS-001) Tj
+/Helvetica 9 Tf
+0 g
+1 0 0 1 40.00 719.89 Tm
+(Issued: 2026-10-21) Tj
+/Helvetica 9 Tf
+0 g
+1 0 0 1 40.00 703.89 Tm
+(Status: Candidate - not for construction) Tj
+/Helvetica 9 Tf
+0 g
+1 0 0 1 40.00 681.89 Tm
+(Bars: 297   Total weight: 278.9998 kg) Tj
+/Helvetica 9 Tf
+0.35 g
+1 0 0 1 40.00 661.89 Tm
+(The schedule is data \(W2.4\); the engine measured the steel it describes.) Tj
+ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 5 0 R >>
+endobj
+7 0 obj
+<< /Length 3829 >>
+stream
+BT
+/Helvetica-Bold 12 Tf
+0 g
+1 0 0 1 40.00 793.89 Tm
+(BAR SCHEDULE \(continued\)) Tj
+/Helvetica-Bold 8 Tf
+0 g
+1 0 0 1 40.00 777.89 Tm
+(Mark          Member  Role         Shape      Dia   No.   Length     Weight) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 755.89 Tm
+(C1-MAINS       C1       mains         straight    16.0    4    2920.0    18.435) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 744.89 Tm
+(C1-LINK-1      C1       links         link         8.0   20     880.0    6.9447) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 733.89 Tm
+(C2-MAINS       C2       mains         straight    16.0    4    2920.0    18.435) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 722.89 Tm
+(C2-LINK-1      C2       links         link         8.0   20     880.0    6.9447) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 711.89 Tm
+(C3-MAINS       C3       mains         straight    16.0    4    2920.0    18.435) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 700.89 Tm
+(C3-LINK-1      C3       links         link         8.0   20     880.0    6.9447) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 689.89 Tm
+(C4-MAINS       C4       mains         straight    16.0    4    2920.0    18.435) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 678.89 Tm
+(C4-LINK-1      C4       links         link         8.0   20     880.0    6.9447) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 667.89 Tm
+(B1-MAINS       B1       mains         straight    16.0    4    2920.0    18.435) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 656.89 Tm
+(B1-LINK-1      B1       links         link         8.0   20    1180.0    9.3122) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 645.89 Tm
+(B2-MAINS       B2       mains         straight    16.0    4    2920.0    18.435) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 634.89 Tm
+(B2-LINK-1      B2       links         link         8.0   20    1180.0    9.3122) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 623.89 Tm
+(B3-MAINS       B3       mains         straight    16.0    4    2920.0    18.435) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 612.89 Tm
+(B3-LINK-1      B3       links         link         8.0   20    1180.0    9.3122) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 601.89 Tm
+(S1-MAINS       Slab_1   mains         straight    10.0    2    9220.0    11.369) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 590.89 Tm
+(S1-DIST        Slab_1   distribution  straight     8.0   47     220.0      4.08) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 579.89 Tm
+(F1-MESH-X      F1       mesh          straight    12.0    8    1120.0    7.9548) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 568.89 Tm
+(F1-MESH-Y      F1       mesh          straight    12.0    8    1120.0    7.9548) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 557.89 Tm
+(F1-START       F1       starters      starter     16.0    4     600.0     3.788) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 546.89 Tm
+(F2-MESH-X      F2       mesh          straight    12.0    8    1120.0    7.9548) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 535.89 Tm
+(F2-MESH-Y      F2       mesh          straight    12.0    8    1120.0    7.9548) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 524.89 Tm
+(F2-START       F2       starters      starter     16.0    4     600.0     3.788) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 513.89 Tm
+(F3-MESH-X      F3       mesh          straight    12.0    8    1120.0    7.9548) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 502.89 Tm
+(F3-MESH-Y      F3       mesh          straight    12.0    8    1120.0    7.9548) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 491.89 Tm
+(F3-START       F3       starters      starter     16.0    4     600.0     3.788) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 480.89 Tm
+(F4-MESH-X      F4       mesh          straight    12.0    8    1120.0    7.9548) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 469.89 Tm
+(F4-MESH-Y      F4       mesh          straight    12.0    8    1120.0    7.9548) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 458.89 Tm
+(F4-START       F4       starters      starter     16.0    4     600.0     3.788) Tj
+ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 7 0 R >>
+endobj
+9 0 obj
+<< /Length 1707 >>
+stream
+BT
+/Helvetica-Bold 12 Tf
+0 g
+1 0 0 1 40.00 793.89 Tm
+(TOTALS) Tj
+/Helvetica 9 Tf
+0 g
+1 0 0 1 40.00 773.89 Tm
+(Bars: 297) Tj
+/Helvetica 9 Tf
+0 g
+1 0 0 1 40.00 757.89 Tm
+(Total weight \(kg\): 278.9998) Tj
+/Helvetica 9 Tf
+0 g
+1 0 0 1 40.00 741.89 Tm
+(Dia 8 mm \(kg\): 59.7954) Tj
+/Helvetica 9 Tf
+0 g
+1 0 0 1 40.00 741.89 Tm
+(Dia 10 mm \(kg\): 11.369) Tj
+/Helvetica 9 Tf
+0 g
+1 0 0 1 40.00 741.89 Tm
+(Dia 12 mm \(kg\): 63.6384) Tj
+/Helvetica 9 Tf
+0 g
+1 0 0 1 40.00 741.89 Tm
+(Dia 16 mm \(kg\): 144.197) Tj
+/Helvetica-Bold 12 Tf
+0 g
+1 0 0 1 40.00 701.89 Tm
+(ASSUMPTIONS) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 681.89 Tm
+(/phases/foundation/data/rebarCoverMm: 40.0 mm) Tj
+/Helvetica 8 Tf
+0.35 g
+1 0 0 1 40.00 671.89 Tm
+(the rule pack \(v0\) has no detailing rule; v0 assumes a 40 mm cover) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 657.89 Tm
+(/phases/foundation/data/columnMainDiameterMm: 16.0 mm) Tj
+/Helvetica 8 Tf
+0.35 g
+1 0 0 1 40.00 647.89 Tm
+(the rule pack \(v0\) has no rebar detailing rule; v0 assumes 16 mm column mains) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 633.89 Tm
+(/phases/foundation/data/linkDiameterMm: 8.0 mm) Tj
+/Helvetica 8 Tf
+0.35 g
+1 0 0 1 40.00 623.89 Tm
+(the rule pack \(v0\) has no rebar detailing rule; v0 assumes 8 mm links) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 609.89 Tm
+(/phases/foundation/data/linkSpacingMm: 150.0 mm) Tj
+/Helvetica 8 Tf
+0.35 g
+1 0 0 1 40.00 599.89 Tm
+(the rule pack \(v0\) has no rebar detailing rule; v0 assumes 150 mm link spacing) Tj
+/Helvetica 8 Tf
+0 g
+1 0 0 1 40.00 585.89 Tm
+(/phases/foundation/data/footingMeshDiameterMm: 12.0 mm) Tj
+/Helvetica 8 Tf
+0.35 g
+1 0 0 1 40.00 575.89 Tm
+(the rule pack \(v0\) has no rebar detailing rule; v0 assumes 12 mm footing mesh) Tj
+ET
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 9 0 R >>
+endobj
+11 0 obj
+<< /Title (ArchResidenceBD - Bar Schedule) /Producer (NativeCAD (ArchResidenceBD)) >>
+endobj
+xref
+0 12
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000134 00000 n 
+0000000231 00000 n 
+0000000333 00000 n 
+0000001005 00000 n 
+0000001147 00000 n 
+0000005028 00000 n 
+0000005170 00000 n 
+0000006929 00000 n 
+0000007072 00000 n 
+trailer
+<< /Size 12 /Root 1 0 R /Info 11 0 R >>
+startxref
+7174
+%%EOF
