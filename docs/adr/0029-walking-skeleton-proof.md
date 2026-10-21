@@ -44,9 +44,9 @@ design measured.
 
 ## Consequences
 
-- P2's proof is a number set: 15 objects and 5.45175 m³ of structure, 278.8 kg of steel
+- P2's proof is a number set: 15 objects and 12.36375 m³ of structure, 278.8 kg of steel
   agreeing with the schedule to 0.077 %, a 14.5 kB sheet with two views and computed
-  dimensions, and a 119,599.70 BDT BOQ whose every amount re-derives from its own line.
+  dimensions, and a 154,276.09 BDT BOQ whose every amount re-derives from its own line.
 - A regression anywhere in the chain shows up here as a *disagreement between two stages*
   rather than as a wrong-looking number.
 - The uncovered phases are in the report, so nobody reads "one house" as "a house".

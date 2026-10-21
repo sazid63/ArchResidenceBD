@@ -51,7 +51,7 @@ override in the register and the *old* rate on the line ✓, so the document con
 `tools/documents/render_boq.py` renders the example project with one **acknowledged price
 override** ✓ (the cement at 575 BDT/bag ✓ — the local mill quote ✓):
 
-- **120,621.91 BDT** ✓ (the override applied ✓ — the un-overridden BOQ is 119,599.70 ✓),
+- **156,594.30 BDT** ✓ (the override applied ✓ — the un-overridden BOQ is 154,276.09 ✓),
   9 priced lines ✓, 2 unpriced ✓ (the formwork ✓ — visible ✓, not zeroed ✓),
 - **2 deviations** ✓ (the engine's rule deviation ✓ and the price override ✓) and the price one
   is flagged on the cement lines ✓,

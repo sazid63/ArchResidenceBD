@@ -15,16 +15,16 @@ blocked by an open P1 package) · **Owner items:** `docs/work/OWNER-ATTENTION.md
 | **W2.3** floor | the storey on the foundation's grid: columns, beams, slab | 4 columns + 3 beams + 1 slab; the first floor at z 3,200 → 6,200 mm |
 | **W2.4** rebar + BBS | the storey detailed, the schedule as data | 28 marks / 297 bars; schedule 279.0 kg vs measured 278.8 kg (−0.08 %) |
 | **W2.5** drawing sheet | a sheet a human can read | SVG 14,456 B · DXF 17,282 B · PDF 448,253 B; byte-identical across runs; no engine name on the sheet — *the 2026-10-21 naming audit branded the DXF header and named the sheet's storey, so the byte counts moved; the sheet's structure did not* |
-| **W2.6** BOQ v0 | the takeoff priced from a card | 11 lines, **119,599.70 BDT**, 9 priced, 2 unpriced (the formwork) |
-| **W2.7** price service | cards → region → the spec's pricing → the override register | the BOQ from the resolved card = **119,599.70 BDT** — the same as from the card; Chattogram ×1.06 published, Rajshahi 1.00 *assumed and labelled* |
-| **W2.8** NativeCAD workspace | the app's real design surface: viewport, model tree, parametric panel | 15 objects, 180 triangles, 5.45175 m³; verified in a browser (the frame buffer holds the two phase colours) |
-| **W2.9** federation | a shared datum, one file per phase, a master that links | 15 links, 15 objects, 5.45175 m³; the master (6,605 B) is smaller than the phases it links |
-| **W2.10** walking skeleton | the whole chain, end to end | **15 objects, 5.45175 m³**, steel 279.0 vs 278.8 kg, a sheet, a priced BOQ |
+| **W2.6** BOQ v0 | the takeoff priced from a card | 11 lines, **154,276.09 BDT**, 9 priced, 2 unpriced (the formwork) |
+| **W2.7** price service | cards → region → the spec's pricing → the override register | the BOQ from the resolved card = **154,276.09 BDT** — the same as from the card; Chattogram ×1.06 published, Rajshahi 1.00 *assumed and labelled* |
+| **W2.8** NativeCAD workspace | the app's real design surface: viewport, model tree, parametric panel | 15 objects, 180 triangles, 12.36375 m³; verified in a browser (the frame buffer holds the two phase colours) |
+| **W2.9** federation | a shared datum, one file per phase, a master that links | 15 links, 15 objects, 12.36375 m³; the master (6,605 B) is smaller than the phases it links |
+| **W2.10** walking skeleton | the whole chain, end to end | **15 objects, 12.36375 m³**, steel 279.0 vs 278.8 kg, a sheet, a priced BOQ |
 | **W2.11** equivalence gate | incremental ≡ full rebuild | rebuilt `floor-1`, reused `foundation`, the meshes **byte-identical**; the design half in CI on every push |
-| **W2.12** scale-out | two storeys, the stair, the lift, the service runs | **30 objects, 1,824 triangles**; every probe re-measured, no number moved |
+| **W2.12** scale-out | two storeys, the stair, the lift, the service runs | **28 objects, 1,800 triangles**; every probe re-measured, no number moved |
 | **W2.13** full-CAD tab | the engine's own window, branded | the title is **"NativeCAD"**, the theme and icon applied, 4 brand actions hidden out of 559, mode **embedded** |
 
-**Suite at the close:** 937 tests · 199 Python files compile clean · brand guard clean · every
+**Suite at the close:** 1,048 tests · 241 Python files compile clean · brand guard clean · every
 `--check` CLI fresh · the app typecheck clean · CI green on `fc02f7b`.
 
 ## The declared gaps (what P2 did **not** deliver)
@@ -47,7 +47,7 @@ with a name and a place.
    P3's; v0 has the runs and the lift's fit check.
 6. **The ground floor is not in the walking skeleton.** The skeleton's chain is the foundation
    and the first floor (the v0 walkthrough); the **scale-out** — two storeys plus the common
-   services — is measured by its own probe (30 objects) and the skeleton's numbers did not move.
+   services — is measured by its own probe (28 objects) and the skeleton's numbers did not move.
 7. **No real price list exists.** The only card is the illustrative candidate ("never use for a
    BOQ"). The fetch path is implemented and consent-gated, but BBS, PWD and BWDB did not resolve
    from the build machine — an **owner item** (OWNER-ATTENTION #8). Nothing in the repo is a
@@ -73,7 +73,7 @@ with a name and a place.
 
 ## The traps P3 must not inherit
 
-1. **119,599.70 BDT is not a price.** It is priced from a **candidate** card whose own note
+1. **154,276.09 BDT is not a price.** It is priced from a **candidate** card whose own note
    says "never use for a BOQ". A BOQ that carries that number without the candidate status
    beside it is a false document (plan §9).
 2. **The mix, the productivity and the common services' dimensions are assumptions, not rules.**

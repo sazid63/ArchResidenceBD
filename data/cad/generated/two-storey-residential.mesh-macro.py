@@ -26,7 +26,7 @@ DESIGN = json.loads(r"""
  },
  "footings": [
   {
-   "depthMm": 300.0,
+   "depthMm": 1500.0,
    "id": "F1",
    "sizeXMm": 1200.0,
    "sizeYMm": 1200.0,
@@ -34,7 +34,7 @@ DESIGN = json.loads(r"""
    "yMm": 6689.0
   },
   {
-   "depthMm": 300.0,
+   "depthMm": 1500.0,
    "id": "F2",
    "sizeXMm": 1200.0,
    "sizeYMm": 1200.0,
@@ -42,7 +42,7 @@ DESIGN = json.loads(r"""
    "yMm": 6689.0
   },
   {
-   "depthMm": 300.0,
+   "depthMm": 1500.0,
    "id": "F3",
    "sizeXMm": 1200.0,
    "sizeYMm": 1200.0,
@@ -50,7 +50,7 @@ DESIGN = json.loads(r"""
    "yMm": 6689.0
   },
   {
-   "depthMm": 300.0,
+   "depthMm": 1500.0,
    "id": "F4",
    "sizeXMm": 1200.0,
    "sizeYMm": 1200.0,

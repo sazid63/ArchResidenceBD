@@ -33,17 +33,7 @@ DESIGN = {
    "zMm": 6200.0
   }
  ],
- "lifts": [
-  {
-   "baseZMm": 3200.0,
-   "carMm": 1400.0,
-   "heightMm": 2400.0,
-   "id": "1",
-   "shaftMm": 1800.0,
-   "xMm": 10100.0,
-   "yMm": 7289.0
-  }
- ],
+ "lifts": [],
  "projectId": "7c9e6f10-2a3b-4c5d-9e8f-1a2b3c4d5e6f",
  "runs": [
   {

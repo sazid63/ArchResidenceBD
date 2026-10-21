@@ -56,6 +56,11 @@ OUT = ROOT / "data" / "security" / "security-pass.json"
 #: instruction in a price list is not an instruction.
 FAIL_SEVERITY = "high"
 
+#: The rules that fail the pass whatever their severity. A **hidden character** in the
+#: content is a defect ✓: it hides text from a human reader, and the product's content is
+#: read by humans ✓ ✓.
+FAIL_RULES = frozenset({"hidden_text"})
+
 
 def _redact(text: str) -> str:
     """A reason without this machine's paths.
@@ -184,6 +189,7 @@ def build() -> dict:
         if severity in severities:
             worst = severity
     failed = [law for law in laws if not law["holds"]]
+    hidden = [finding for finding in findings if finding["rule"] in FAIL_RULES]
     return {
         "schemaVersion": "0.1.0",
         "surfaces": [base.relative_to(ROOT).as_posix() for base in EXTERNAL_SURFACES],
@@ -192,7 +198,8 @@ def build() -> dict:
         "severities": sorted(severities),
         "laws": laws,
         "failedLaws": [law["law"] for law in failed],
-        "ok": not failed and (not findings or worst != FAIL_SEVERITY),
+        "hiddenFindings": len(hidden),
+        "ok": not failed and not hidden and (not findings or worst != FAIL_SEVERITY),
     }
 
 
@@ -219,6 +226,12 @@ def main() -> int:
                 f"a high-severity injection finding sits in the external content "
                 f"({len(report['findings'])} finding(s))"
             )
+        for finding in report["findings"]:
+            if finding["rule"] in FAIL_RULES:
+                problems.append(
+                    f"{finding['surface']}: a {finding['severity']} '{finding['rule']}' finding "
+                    f"({finding['excerpt'][:60]})"
+                )
         for problem in problems:
             print(f"FAIL {problem}", file=sys.stderr)
         if problems:

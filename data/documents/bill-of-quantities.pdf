@@ -13,7 +13,7 @@ endobj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
 endobj
 5 0 obj
-<< /Length 1000 >>
+<< /Length 999 >>
 stream
 BT
 /Helvetica-Bold 18 Tf
@@ -51,7 +51,7 @@ BT
 /Helvetica 9 Tf
 0 g
 1 0 0 1 40.00 625.89 Tm
-(Grand total: 120621.91 BDT \(9 priced, 2 unpriced\)) Tj
+(Grand total: 156594.3 BDT \(9 priced, 2 unpriced\)) Tj
 /Helvetica 9 Tf
 0.35 g
 1 0 0 1 40.00 605.89 Tm
@@ -107,7 +107,7 @@ BT
 /Helvetica 8 Tf
 0 g
 1 0 0 1 40.00 766.89 Tm
-(Cement \(foundation\)                          material   bag           21.06      575.0      12109.5) Tj
+(Cement \(foundation\)                          material   bag            72.9      575.0      41917.5) Tj
 /Helvetica 7 Tf
 0.35 g
 1 0 0 1 40.00 757.89 Tm
@@ -115,19 +115,19 @@ BT
 /Helvetica 8 Tf
 0 g
 1 0 0 1 40.00 746.89 Tm
-(Sand \(foundation\)                            material   cft          4.9702       42.0       208.75) Tj
+(Sand \(foundation\)                            material   cft         17.2044       42.0       722.58) Tj
 /Helvetica 8 Tf
 0 g
 1 0 0 1 40.00 735.89 Tm
-(Mason \(labour\)                               labour     day          1.1232      950.0      1067.04) Tj
+(Mason \(labour\)                               labour     day           3.888      950.0       3693.6) Tj
 /Helvetica 8 Tf
 0 g
 1 0 0 1 40.00 724.89 Tm
-(Concrete mixer                               machinery  day           0.351     3500.0       1228.5) Tj
+(Concrete mixer                               machinery  day           1.215     3500.0       4252.5) Tj
 /Helvetica 8 Tf
 0 g
 1 0 0 1 40.00 713.89 Tm
-(Formwork \(foundation\)                        other      sqm            5.76          -            -) Tj
+(Formwork \(foundation\)                        other      sqm            28.8          -            -) Tj
 /Helvetica 7 Tf
 0.35 g
 1 0 0 1 40.00 704.89 Tm
@@ -135,7 +135,7 @@ BT
 /Helvetica-Bold 9 Tf
 0 g
 1 0 0 1 40.00 689.89 Tm
-(Subtotal \(foundation\): 14613.79 BDT) Tj
+(Subtotal \(foundation\): 50586.18 BDT) Tj
 ET
 endstream
 endobj
@@ -197,7 +197,7 @@ endobj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 595.28 841.89] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 11 0 R >>
 endobj
 13 0 obj
-<< /Length 1293 >>
+<< /Length 1292 >>
 stream
 BT
 /Helvetica-Bold 12 Tf
@@ -207,7 +207,7 @@ BT
 /Helvetica-Bold 9 Tf
 0 g
 1 0 0 1 40.00 773.89 Tm
-(Grand total: 120621.91 BDT) Tj
+(Grand total: 156594.3 BDT) Tj
 /Helvetica 9 Tf
 0 g
 1 0 0 1 40.00 757.89 Tm
@@ -235,7 +235,7 @@ BT
 /Helvetica 9 Tf
 0 g
 1 0 0 1 40.00 657.89 Tm
-(foundation: 14613.79 BDT) Tj
+(foundation: 50586.18 BDT) Tj
 /Helvetica 9 Tf
 0 g
 1 0 0 1 40.00 643.89 Tm
@@ -247,15 +247,15 @@ BT
 /Helvetica 9 Tf
 0 g
 1 0 0 1 40.00 599.89 Tm
-(labour: 2071.67 BDT) Tj
+(labour: 4698.23 BDT) Tj
 /Helvetica 9 Tf
 0 g
 1 0 0 1 40.00 585.89 Tm
-(machinery: 69803.3 BDT) Tj
+(machinery: 72827.3 BDT) Tj
 /Helvetica 9 Tf
 0 g
 1 0 0 1 40.00 571.89 Tm
-(material: 48746.94 BDT) Tj
+(material: 79068.77 BDT) Tj
 /Helvetica-Bold 12 Tf
 0 g
 1 0 0 1 40.00 547.89 Tm
@@ -285,18 +285,18 @@ xref
 0000000148 00000 n 
 0000000245 00000 n 
 0000000347 00000 n 
-0000001399 00000 n 
-0000001541 00000 n 
-0000002198 00000 n 
-0000002340 00000 n 
-0000003796 00000 n 
-0000003939 00000 n 
-0000005479 00000 n 
-0000005623 00000 n 
-0000006969 00000 n 
-0000007113 00000 n 
+0000001397 00000 n 
+0000001539 00000 n 
+0000002196 00000 n 
+0000002338 00000 n 
+0000003794 00000 n 
+0000003937 00000 n 
+0000005477 00000 n 
+0000005621 00000 n 
+0000006966 00000 n 
+0000007110 00000 n 
 trailer
 << /Size 16 /Root 1 0 R /Info 15 0 R >>
 startxref
-7215
+7212
 %%EOF

@@ -42,8 +42,8 @@ package actually had to answer — **which prices the document uses** ✓.
 
 - The BOQ final exists in the two forms the plan names ✓: a workbook (six sheets ✓)
   and a PDF (five pages ✓ — the title block ✓, one per phase ✓, the totals ✓).
-- The measured document is **120,621.91 BDT** ✓ (the price override applied ✓ — the
-  un-overridden BOQ is 119,599.70 ✓), 9 priced lines ✓, 2 unpriced ✓, and 2 deviations ✓ with
+- The measured document is **156,594.30 BDT** ✓ (the price override applied ✓ — the
+  un-overridden BOQ is 154,276.09 ✓), 9 priced lines ✓, 2 unpriced ✓, and 2 deviations ✓ with
   the price one flagged on the cement lines ✓.
 - A price service's change now reaches the document ✓ — the contradiction the package found
   cannot come back ✓.

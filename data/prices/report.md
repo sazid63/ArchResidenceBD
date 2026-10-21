@@ -54,8 +54,8 @@ A region the card publishes no multiplier for (rajshahi, here) is priced at 1.00
 
 ## The BOQ those prices produce (the cross-check)
 
-- **119,599.70 BDT** (9 priced, 2 unpriced)
-- The committed BOQ (built straight from the card) totals the same: **119,599.70 BDT** — the service resolved the card, it did not move a price.
+- **154,276.09 BDT** (9 priced, 2 unpriced)
+- The committed BOQ (built straight from the card) totals the same: **154,276.09 BDT** — the service resolved the card, it did not move a price.
 
 ## What this service does not do (declared, not implied)
 

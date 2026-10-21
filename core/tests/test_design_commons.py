@@ -12,8 +12,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 EXAMPLE = ROOT / "spec" / "examples" / "two-storey-residential.json"
 
 
-def _design(storey_index: int = 1):
-    spec = json.loads(EXAMPLE.read_text(encoding="utf-8"))
+def _design(storey_index: int = 1, spec: dict | None = None):
+    spec = spec or json.loads(EXAMPLE.read_text(encoding="utf-8"))
     foundation = design_foundation(spec)
     floor = design_typical_floor(spec, foundation, storey_index=storey_index)
     return spec, design_common_services(spec, floor)
@@ -23,13 +23,21 @@ def test_the_services_sit_on_the_floor() -> None:
     _spec, design = _design()
     assert len(design.flights) == 1
     assert len(design.landings) == 1
-    assert len(design.lifts) == 1
+    # the spec says the building has no lift, so there is no lift
+    assert len(design.lifts) == 0
     assert len(design.runs) == 3
-    assert design.flights[0].base_z_mm == design.lifts[0].base_z_mm
+    # the flight climbs from its base to the landing
+    assert design.flights[0].base_z_mm + design.flights[0].rise_mm == design.landings[0].z_mm
 
 
 def test_the_lift_car_fits_its_shaft() -> None:
-    _spec, design = _design()
+    """When the spec asks for a lift, the car has to fit inside the shaft."""
+    spec, _design_ = _design()
+    for phase in spec["phases"]:
+        if phase.get("id") == "common-services":
+            phase.setdefault("data", {})["hasLift"] = True
+    _spec, design = _design(spec=spec)
+    assert len(design.lifts) == 1
     lift = design.lifts[0]
     assert lift.fits
     assert lift.car_mm < lift.shaft_mm

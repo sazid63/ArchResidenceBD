@@ -25,9 +25,9 @@ def test_the_review_quotes_the_walking_skeletons_end_state() -> None:
     report = _json(ROOT / "data" / "walking-skeleton" / "two-storey-residential.json")
     assert report["ok"] is True
     assert report["model"]["objects"] == 15
-    assert report["model"]["volumeM3"] == 5.45175
-    assert report["boq"]["totalBdt"] == 119_599.70
-    assert report["boq"]["sumOfLinesBdt"] == 119_599.70
+    assert report["model"]["volumeM3"] == 12.36375
+    assert report["boq"]["totalBdt"] == 154_276.09
+    assert report["boq"]["sumOfLinesBdt"] == 154_276.09
     assert len(report["boq"]["unpriced"]) == 2
     assert report["steel"]["scheduledKg"] == 278.9998
     assert report["steel"]["measuredKg"] == 278.785
@@ -45,15 +45,15 @@ def test_the_review_quotes_the_federations_numbers() -> None:
     assert report["ok"] is True
     assert report["summary"]["links"] == 15
     assert report["summary"]["objects"] == 15
-    assert report["summary"]["volumeM3"] == 5.45175
-    assert report["masterBytes"] == 6605
+    assert report["summary"]["volumeM3"] == 12.36375
+    assert report["masterBytes"] == 6609
 
 
 def test_the_review_quotes_the_scale_outs_numbers() -> None:
     report = _json(GENERATED / "commons-report.json")
     assert report["ok"] is True
-    assert report["objects"] == 30
-    assert report["triangles"] == 1824
+    assert report["objects"] == 28
+    assert report["triangles"] == 1800
 
 
 def test_the_review_quotes_the_equivalence_gate() -> None:
@@ -92,7 +92,7 @@ def test_the_review_quotes_the_price_services_numbers() -> None:
     card = _json(ROOT / "spec" / "examples" / "interfaces" / "rate-card-dhaka-example.json")
     from_card = build_boq(takeoff, card)
     from_service = build_boq(takeoff, pricing_block(resolve_card(card, "dhaka")))
-    assert from_card["totals"]["amountBdt"] == 119_599.70
+    assert from_card["totals"]["amountBdt"] == 154_276.09
     assert from_service["totals"]["amountBdt"] == from_card["totals"]["amountBdt"]
 
 
@@ -114,11 +114,11 @@ def test_the_review_text_carries_the_numbers_it_claims() -> None:
     """The review must say what the artefacts say - a stale sentence is a false claim."""
     text = REVIEW.read_text(encoding="utf-8")
     for needle in (
-        "119,599.70 BDT",
-        "5.45175 m³",
+        "154,276.09 BDT",
+        "12.36375 m³",
         "15 objects, 180 triangles",
-        "30 objects, 1,824 triangles",
-        "937 tests",
+        "28 objects, 1,800 triangles",
+        "1,048 tests",
         '"NativeCAD"',
         "4 brand actions hidden out of 559",
     ):

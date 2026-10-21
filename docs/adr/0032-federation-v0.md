@@ -44,7 +44,7 @@ carry timestamps, so they cannot be byte-compared in CI).
    (the FCStd export story is P3/P5's).
 6. **The master is checked against the phases, not against a stored number.** The probe compares
    the master's object count and its measured volume with the **design** (15 objects,
-   5.45175 m³) — the same volume the walking skeleton measured (W2.10) and the mesh export
+   12.36375 m³) — the same volume the walking skeleton measured (W2.10) and the mesh export
    carried (W2.8). Three stages, one building.
 
 ## Consequences

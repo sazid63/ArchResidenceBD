@@ -1,8 +1,8 @@
 {
   "case": "two-storey-residential",
-  "elapsedSeconds": 1.953,
+  "elapsedSeconds": 1.61,
   "failures": [],
-  "objects": 30,
+  "objects": 28,
   "ok": true,
-  "triangles": 1824
+  "triangles": 1800
 }

@@ -53,7 +53,7 @@ check. What was missing is everything that sits on top of the runs: **where the 
 committed artefact. The MEP has **no solids** ✓ (the plan's §5.7 puts the full 3D routing in
 v2 ✓), so the check needs **no engine** ✓ — it is the deterministic half ✓.
 
-- **26 points** ✓, **2 circuits** ✓, **15 schedule rows** ✓, **920 W** of connected load ✓,
+- **26 points** ✓, **2 circuits** ✓, **14 schedule rows** ✓, **920 W** of connected load ✓,
   **14 fixture units** ✓ and **1 m³/h** of gas ✓ across the two storeys.
 - The **CI step** re-derives the document and compares it with the committed one ✓ — a stale
   MEP fails the build ✓ ✓.

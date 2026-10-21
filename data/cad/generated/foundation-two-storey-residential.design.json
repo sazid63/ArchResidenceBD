@@ -7,12 +7,6 @@
       "value": 1200.0
     },
     {
-      "pointer": "/phases/foundation/data/footingDepthMm",
-      "reason": "the rule pack (v0) has no footing-depth rule; v0 assumes a 300 mm footing",
-      "unit": "mm",
-      "value": 300.0
-    },
-    {
       "pointer": "/phases/foundation/data/gradeBeamMm",
       "reason": "the rule pack (v0) has no grade-beam rule; v0 assumes 300 x 400 mm",
       "unit": "mm",
@@ -35,7 +29,7 @@
   },
   "footings": [
     {
-      "depthMm": 300.0,
+      "depthMm": 1500.0,
       "id": "F1",
       "sizeXMm": 1200.0,
       "sizeYMm": 1200.0,
@@ -43,7 +37,7 @@
       "yMm": 6689.0
     },
     {
-      "depthMm": 300.0,
+      "depthMm": 1500.0,
       "id": "F2",
       "sizeXMm": 1200.0,
       "sizeYMm": 1200.0,
@@ -51,7 +45,7 @@
       "yMm": 6689.0
     },
     {
-      "depthMm": 300.0,
+      "depthMm": 1500.0,
       "id": "F3",
       "sizeXMm": 1200.0,
       "sizeYMm": 1200.0,
@@ -59,7 +53,7 @@
       "yMm": 6689.0
     },
     {
-      "depthMm": 300.0,
+      "depthMm": 1500.0,
       "id": "F4",
       "sizeXMm": 1200.0,
       "sizeYMm": 1200.0,
@@ -102,7 +96,7 @@
   "projectId": "7c9e6f10-2a3b-4c5d-9e8f-1a2b3c4d5e6f",
   "totals": {
     "excavationVolumeM3": 293.89248,
-    "footingVolumeM3": 2.808
+    "footingVolumeM3": 9.72
   },
   "values": {
     "excavation.depthM": {
@@ -127,11 +121,11 @@
       "value": 4
     },
     "footing.depthMm": {
-      "provenance": "assumed",
-      "reason": "the rule pack has no footing depth",
-      "source": "v0 default",
+      "provenance": "spec",
+      "reason": "the spec's footing depth",
+      "source": "/phases/foundation/data/footingDepthM",
       "unit": "mm",
-      "value": 300.0
+      "value": 1500.0
     },
     "footing.sizeMm": {
       "provenance": "assumed",

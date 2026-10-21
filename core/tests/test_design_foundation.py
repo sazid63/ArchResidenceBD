@@ -46,7 +46,12 @@ def test_the_assumptions_are_handed_back_for_the_spec() -> None:
     assert design.assumptions
     pointers = {item.pointer for item in design.assumptions}
     assert "/phases/foundation/data/footingSizeMm" in pointers
-    assert "/phases/foundation/data/footingDepthMm" in pointers
+    # the depth comes from the spec, so there is nothing to hand back for it - and what is
+    # handed back points at the spec's own keys, so the app writes where the design reads.
+    assert "/phases/foundation/data/footingDepthM" not in pointers
+    assert all(
+        pointer.startswith("/phases/foundation/data/") for pointer in pointers
+    ), pointers
     for item in design.assumptions:
         assert item.reason, item.pointer
         assert item.unit in ("mm", "m"), item.pointer
@@ -71,7 +76,8 @@ def test_the_footings_sit_on_the_grid_inside_the_plot() -> None:
     for footing in design.footings:
         assert 0 <= footing.x_mm <= frontage_mm
         assert footing.size_x_mm == 1200.0
-        assert footing.depth_mm == 300.0
+        # the spec's footing depth (1.5 m), not the v0 assumption - the spec wins
+    assert footing.depth_mm == 1500.0
     assert design.footings[0].x_mm < design.footings[-1].x_mm
     assert len(design.grade_beams) == len(design.footings) - 1
     for beam in design.grade_beams:

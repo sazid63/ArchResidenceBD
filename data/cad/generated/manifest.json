@@ -10,13 +10,13 @@
   },
   "files": {
     "commons-design.json": {
-      "bytes": 2466
+      "bytes": 2493
     },
     "commons-macro.py": {
-      "bytes": 6970
+      "bytes": 6823
     },
     "commons-report.json": {
-      "bytes": 136
+      "bytes": 135
     },
     "floor-two-storey-residential.design.json": {
       "bytes": 3427
@@ -25,22 +25,22 @@
       "bytes": 3757
     },
     "foundation-two-storey-residential.design.json": {
-      "bytes": 4318
+      "bytes": 4130
     },
     "foundation-two-storey-residential.py": {
-      "bytes": 3419
+      "bytes": 3423
     },
     "rebar-two-storey-residential.design.json": {
       "bytes": 7308
     },
     "rebar-two-storey-residential.py": {
-      "bytes": 77343
+      "bytes": 77423
     },
     "two-storey-residential.mesh-macro.py": {
-      "bytes": 12263
+      "bytes": 12267
     },
     "two-storey-residential.mesh.json": {
-      "bytes": 26509
+      "bytes": 26589
     }
   },
   "manifestVersion": "1",

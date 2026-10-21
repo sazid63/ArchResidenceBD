@@ -39,8 +39,8 @@ DESIGN = json.loads(r"""{
     },
     {
      "axis": "v",
-     "label": "3.50 m",
-     "valueMm": 3500.0,
+     "label": "4.70 m",
+     "valueMm": 4700.0,
      "view": "front"
     }
    ],
@@ -48,44 +48,44 @@ DESIGN = json.loads(r"""{
    "issuedOn": "2026-10-21",
    "model": [
     {
-     "hMm": 300.0,
+     "hMm": 1500.0,
      "id": "F1",
      "kind": "footing",
      "lMm": 1200.0,
      "wMm": 1200.0,
      "xMm": -100.0,
      "yMm": 6089.0,
-     "zMm": -300.0
+     "zMm": -1500.0
     },
     {
-     "hMm": 300.0,
+     "hMm": 1500.0,
      "id": "F2",
      "kind": "footing",
      "lMm": 1200.0,
      "wMm": 1200.0,
      "xMm": 2900.0,
      "yMm": 6089.0,
-     "zMm": -300.0
+     "zMm": -1500.0
     },
     {
-     "hMm": 300.0,
+     "hMm": 1500.0,
      "id": "F3",
      "kind": "footing",
      "lMm": 1200.0,
      "wMm": 1200.0,
      "xMm": 5900.0,
      "yMm": 6089.0,
-     "zMm": -300.0
+     "zMm": -1500.0
     },
     {
-     "hMm": 300.0,
+     "hMm": 1500.0,
      "id": "F4",
      "kind": "footing",
      "lMm": 1200.0,
      "wMm": 1200.0,
      "xMm": 8900.0,
      "yMm": 6089.0,
-     "zMm": -300.0
+     "zMm": -1500.0
     },
     {
      "hMm": 400.0,
@@ -235,8 +235,8 @@ DESIGN = json.loads(r"""{
     },
     {
      "axis": "v",
-     "label": "3.30 m",
-     "valueMm": 3300.0,
+     "label": "4.50 m",
+     "valueMm": 4500.0,
      "view": "front"
     }
    ],
@@ -244,44 +244,44 @@ DESIGN = json.loads(r"""{
    "issuedOn": "2026-10-21",
    "model": [
     {
-     "hMm": 300.0,
+     "hMm": 1500.0,
      "id": "F1",
      "kind": "footing",
      "lMm": 1200.0,
      "wMm": 1200.0,
      "xMm": -100.0,
      "yMm": 6089.0,
-     "zMm": -300.0
+     "zMm": -1500.0
     },
     {
-     "hMm": 300.0,
+     "hMm": 1500.0,
      "id": "F2",
      "kind": "footing",
      "lMm": 1200.0,
      "wMm": 1200.0,
      "xMm": 2900.0,
      "yMm": 6089.0,
-     "zMm": -300.0
+     "zMm": -1500.0
     },
     {
-     "hMm": 300.0,
+     "hMm": 1500.0,
      "id": "F3",
      "kind": "footing",
      "lMm": 1200.0,
      "wMm": 1200.0,
      "xMm": 5900.0,
      "yMm": 6089.0,
-     "zMm": -300.0
+     "zMm": -1500.0
     },
     {
-     "hMm": 300.0,
+     "hMm": 1500.0,
      "id": "F4",
      "kind": "footing",
      "lMm": 1200.0,
      "wMm": 1200.0,
      "xMm": 8900.0,
      "yMm": 6089.0,
-     "zMm": -300.0
+     "zMm": -1500.0
     },
     {
      "hMm": 400.0,
@@ -419,8 +419,8 @@ DESIGN = json.loads(r"""{
     },
     {
      "axis": "v",
-     "label": "3.30 m",
-     "valueMm": 3300.0,
+     "label": "4.50 m",
+     "valueMm": 4500.0,
      "view": "front"
     },
     {
@@ -434,44 +434,44 @@ DESIGN = json.loads(r"""{
    "issuedOn": "2026-10-21",
    "model": [
     {
-     "hMm": 300.0,
+     "hMm": 1500.0,
      "id": "F1",
      "kind": "footing",
      "lMm": 1200.0,
      "wMm": 1200.0,
      "xMm": -100.0,
      "yMm": 6089.0,
-     "zMm": -300.0
+     "zMm": -1500.0
     },
     {
-     "hMm": 300.0,
+     "hMm": 1500.0,
      "id": "F2",
      "kind": "footing",
      "lMm": 1200.0,
      "wMm": 1200.0,
      "xMm": 2900.0,
      "yMm": 6089.0,
-     "zMm": -300.0
+     "zMm": -1500.0
     },
     {
-     "hMm": 300.0,
+     "hMm": 1500.0,
      "id": "F3",
      "kind": "footing",
      "lMm": 1200.0,
      "wMm": 1200.0,
      "xMm": 5900.0,
      "yMm": 6089.0,
-     "zMm": -300.0
+     "zMm": -1500.0
     },
     {
-     "hMm": 300.0,
+     "hMm": 1500.0,
      "id": "F4",
      "kind": "footing",
      "lMm": 1200.0,
      "wMm": 1200.0,
      "xMm": 8900.0,
      "yMm": 6089.0,
-     "zMm": -300.0
+     "zMm": -1500.0
     },
     {
      "hMm": 400.0,

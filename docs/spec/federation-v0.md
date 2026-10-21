@@ -44,7 +44,7 @@ Building Spec ─▶ the shared datum (the project origin, mm, z up)
 `tools/cad/federation_probe.py` runs the two phase macros and the master macro through the
 **worker pool** and measures:
 
-- **15 links, 15 objects, 5.45175 m³** — the same 15 objects and the same volume the walking
+- **15 links, 15 objects, 12.36375 m³** — the same 15 objects and the same volume the walking
   skeleton measured (W2.10) and the mesh export carried (W2.8) ✓ — the same building, three
   ways.
 - **The master agrees with the design**: every linked object's volume is within the declared 1 %

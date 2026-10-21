@@ -26,7 +26,13 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from .floor import FloorDesign
-from .foundation import PROVENANCE_ASSUMED, PROVENANCE_DERIVED, Value
+from .foundation import (
+    PROVENANCE_ASSUMED,
+    PROVENANCE_DERIVED,
+    PROVENANCE_SPEC,
+    Assumption,
+    Value,
+)
 
 #: The authored assumptions (v0). The pack has no rule for any of them.
 ASSUMED_STAIR_WIDTH_MM = 1000.0
@@ -41,6 +47,14 @@ ASSUMED_WATER_PIPE_DIAMETER_MM = 50.0
 ASSUMED_GAS_PIPE_DIAMETER_MM = 25.0
 #: The conduit's outlets per unit (the circuit's points of use).
 ASSUMED_CONDUIT_OUTLETS_PER_UNIT = 8
+
+
+def _phase_data(spec: dict[str, Any], phase_id: str) -> dict[str, Any]:
+    """The data of one phase of the spec (an empty dict when the phase is not there)."""
+    for phase in spec.get("phases") or []:
+        if phase.get("id") == phase_id:
+            return phase.get("data") or {}
+    return {}
 
 
 @dataclass(frozen=True)
@@ -296,17 +310,24 @@ def design_common_services(
         thickness_mm=ASSUMED_STAIR_FLIGHT_THICKNESS_MM,
     )
 
-    # The lift: a shaft at the grid's last bay, with a car that has to fit inside it.
-    last = floor.columns[-1] if floor.columns else None
-    lift = Lift(
-        id="1",
-        x_mm=(last.x_mm if last else 0.0) + 600.0,
-        y_mm=(last.y_mm if last else 0.0) + 600.0,
-        base_z_mm=base_z,
-        shaft_mm=ASSUMED_LIFT_SHAFT_MM,
-        car_mm=ASSUMED_LIFT_CAR_MM,
-        height_mm=ASSUMED_LIFT_SHAFT_HEIGHT_MM,
-    )
+    # The lift: a shaft at the grid's last bay, with a car that has to fit inside it. The
+    # spec says whether the building has one - and when it says nothing, v0 assumes one and
+    # hands the assumption back at the spec's own key.
+    services_data = _phase_data(spec, "common-services")
+    has_lift = services_data.get("hasLift")
+    if has_lift is False:
+        lift = None
+    else:
+        last = floor.columns[-1] if floor.columns else None
+        lift = Lift(
+            id="1",
+            x_mm=(last.x_mm if last else 0.0) + 600.0,
+            y_mm=(last.y_mm if last else 0.0) + 600.0,
+            base_z_mm=base_z,
+            shaft_mm=ASSUMED_LIFT_SHAFT_MM,
+            car_mm=ASSUMED_LIFT_CAR_MM,
+            height_mm=ASSUMED_LIFT_SHAFT_HEIGHT_MM,
+        )
 
     # The service runs: the conduit (sized by the units it serves), the water and the gas.
     # The runs follow the **grid's** extent (the columns), not the slab strip's.
@@ -355,6 +376,13 @@ def design_common_services(
     )
 
     values = {
+        "services.hasLift": Value(
+            1.0 if lift is not None else 0.0,
+            "1",
+            PROVENANCE_SPEC if has_lift is not None else PROVENANCE_ASSUMED,
+            "/phases/common-services/data/hasLift" if has_lift is not None else "v0 default",
+            "the spec says whether the building has a lift",
+        ),
         "services.stairWidthMm": Value(
             ASSUMED_STAIR_WIDTH_MM, "mm", PROVENANCE_ASSUMED, "v0 default", "the stair's width"
         ),
@@ -376,16 +404,27 @@ def design_common_services(
         ),
     }
 
+    assumptions = ()
+    if has_lift is None:
+        assumptions = (
+            Assumption(
+                "/phases/common-services/data/hasLift",
+                1.0,
+                "1",
+                "the v0 pack has no lift rule; v0 places a lift when the spec says nothing",
+            ),
+        )
+
     return CommonServicesDesign(
         project_id=str(project.get("id") or "unknown"),
         storey_index=index,
         storey_label=floor.storey_label,
         flights=(flight,),
         landings=(landing,),
-        lifts=(lift,),
+        lifts=((lift,) if lift is not None else ()),
         runs=runs,
         values=values,
-        assumptions=(),
+        assumptions=assumptions,
         declared_absent=(
             "the lift shaft's opening in the slab: the v0 spec carries no opening data, so no "
             "hole is cut (a hole nobody asked for is a fabricated fact)",

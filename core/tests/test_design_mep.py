@@ -135,15 +135,25 @@ def test_the_schedules_cover_every_system() -> None:
     for row in mep.schedules:
         assert row.description, "a schedule row must say what it is"
         assert row.quantity >= 0.0
-    # the lift is the building's, so it is scheduled once - on the ground floor
+    # the lift is the building's, so it is scheduled once - and only when the spec asks
+    # for one (the example says it has none)
     ground = _mep(0)
     lift_rows = [row for row in ground.schedules if row.system == "lift"]
-    assert len(lift_rows) == 1
+    assert not lift_rows, "the example's spec has no lift, so the meter has no lift row"
     assert not [row for row in mep.schedules if row.system == "lift"]
 
 
 def test_the_lift_row_reports_the_fit_check() -> None:
-    mep = _mep(0)
+    """When the spec asks for a lift, its row says whether the car fits."""
+    spec = _spec()
+    for phase in spec["phases"]:
+        if phase.get("id") == "common-services":
+            phase.setdefault("data", {})["hasLift"] = True
+    foundation = design_foundation(spec)
+    floor = design_typical_floor(spec, foundation, storey_index=0)
+    commons = design_common_services(spec, floor, storey_index=0)
+    lift = commons.lifts[0] if commons.lifts else None
+    mep = design_mep(spec, floor, storey_index=0, lift=lift)
     rows = [row for row in mep.schedules if row.system == "lift"]
     assert len(rows) == 1
     note = rows[0].note.lower()

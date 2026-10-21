@@ -56,7 +56,7 @@ first) and the common services, and runs them through the worker pool:
 - **Two runs produce the same mesh** ✓ (plan §9).
 - The whole chain re-measured after the id fix: the floor, the rebar, the sheet, the mesh, the
   federation, the walking skeleton and the equivalence gate all still pass ✓ — the numbers did
-  not move (15 objects, 5.45175 m³, 119,599.70 BDT) ✓, only the names did ✓.
+  not move (15 objects, 12.36375 m³, 154,276.09 BDT) ✓, only the names did ✓.
 
 ## What is deliberately not here
 

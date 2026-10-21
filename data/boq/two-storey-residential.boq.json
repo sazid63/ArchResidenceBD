@@ -21,7 +21,7 @@
       "unit": "hour"
     },
     {
-      "amountBdt": 11583.0,
+      "amountBdt": 40095.0,
       "costType": "material",
       "key": "cement-foundation",
       "label": {
@@ -32,7 +32,7 @@
       "phase": "foundation",
       "priced": true,
       "provenance": "assumed",
-      "quantity": 21.06,
+      "quantity": 72.9,
       "rateBdt": 550.0,
       "rateCostType": "material",
       "rateKey": "cement-opc-43",
@@ -59,7 +59,7 @@
       "unit": "bag"
     },
     {
-      "amountBdt": 208.75,
+      "amountBdt": 722.58,
       "costType": "material",
       "key": "sand-foundation",
       "label": {
@@ -70,7 +70,7 @@
       "phase": "foundation",
       "priced": true,
       "provenance": "assumed",
-      "quantity": 4.9702,
+      "quantity": 17.2044,
       "rateBdt": 42.0,
       "rateCostType": "material",
       "rateKey": "sand-fine",
@@ -116,7 +116,7 @@
       "unit": "ton"
     },
     {
-      "amountBdt": 1067.04,
+      "amountBdt": 3693.6,
       "costType": "labour",
       "key": "mason",
       "label": {
@@ -127,7 +127,7 @@
       "phase": "foundation",
       "priced": true,
       "provenance": "assumed",
-      "quantity": 1.1232,
+      "quantity": 3.888,
       "rateBdt": 950.0,
       "rateCostType": "labour",
       "rateKey": "mason",
@@ -154,7 +154,7 @@
       "unit": "day"
     },
     {
-      "amountBdt": 1228.5,
+      "amountBdt": 4252.5,
       "costType": "machinery",
       "key": "mixer",
       "label": {
@@ -165,7 +165,7 @@
       "phase": "foundation",
       "priced": true,
       "provenance": "assumed",
-      "quantity": 0.351,
+      "quantity": 1.215,
       "rateBdt": 3500.0,
       "rateCostType": "machinery",
       "rateKey": "mixer-diesel",
@@ -184,7 +184,7 @@
       "phase": "foundation",
       "priced": false,
       "provenance": "derived",
-      "quantity": 5.76,
+      "quantity": 28.8,
       "rateBdt": null,
       "rateKey": "",
       "source": "foundation design",
@@ -225,18 +225,18 @@
   "schemaVersion": "0.1.0",
   "subtotals": {
     "byCostType": {
-      "labour": 2071.67,
-      "machinery": 69803.3,
-      "material": 47724.73
+      "labour": 4698.23,
+      "machinery": 72827.3,
+      "material": 76750.56
     },
     "byPhase": {
       "floor": 36937.61,
-      "foundation": 14087.29,
+      "foundation": 48763.68,
       "site-excavation": 68574.8
     }
   },
   "totals": {
-    "amountBdt": 119599.7,
+    "amountBdt": 154276.09,
     "pricedLines": 9,
     "unpricedLines": [
       "formwork-foundation",

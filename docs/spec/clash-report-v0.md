@@ -48,10 +48,10 @@ And every clash carries its **cause** ✓ — a short key and the sentence that 
 
 ## The measured output (2026-10-21, `two-storey-residential`)
 
-- **29 members** and **26 MEP points** were checked ✓ — the foundation's footings and grade
+- **25 members** and **26 MEP points** were checked ✓ — the foundation's footings and grade
   beams ✓, both floors' columns, beams and slabs ✓, and both storeys' landings and lift
   shafts and cars ✓.
-- **67 clashes** ✓ — **25 declared** ✓ and **42 open** ✓ — in **five causes** ✓,
+- **48 clashes** ✓ — **25 declared** ✓ and **24 open** ✓ — in **five causes** ✓,
   because sixty of the same reason is **one** reason ✓, not sixty ✓ ✓:
 
   | Cause | Clashes | What it says |

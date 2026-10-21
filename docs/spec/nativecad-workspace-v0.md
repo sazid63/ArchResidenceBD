@@ -72,8 +72,8 @@ floor). No console errors.
 `tools/cad/mesh_probe.py` runs the foundation's and the floor's macro through the **worker pool**
 (the same pool the app uses) and measures:
 
-- **15 objects, 180 triangles, 5.45175 m³** — the same 15 objects and the same volume the
-  walking skeleton measured (W2.10: 15 objects, 5.45175 m³) ✓ — the mesh is that model, not a
+- **15 objects, 180 triangles, 12.36375 m³** — the same 15 objects and the same volume the
+  walking skeleton measured (W2.10: 15 objects, 12.36375 m³) ✓ — the mesh is that model, not a
   second model.
 - The mesh **agrees with the design**: every object's volume (within the declared 1 %) and its
   position (the first floor's columns measure z 3,200 → 6,200 mm ✓).

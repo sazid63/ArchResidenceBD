@@ -303,18 +303,36 @@ def design_foundation(spec: dict[str, Any]) -> FoundationDesign:
             "the rule pack (v0) has no footing-sizing rule; v0 assumes a 1200 mm square footing",
         )
     )
-    footing_depth = ASSUMED_FOOTING_DEPTH_MM
-    values["footing.depthMm"] = Value(
-        footing_depth, "mm", PROVENANCE_ASSUMED, "v0 default", "the rule pack has no footing depth"
-    )
-    assumptions.append(
-        Assumption(
-            "/phases/foundation/data/footingDepthMm",
+    # The spec's own footing depth, when it carries one. The key is the spec's key - in
+    # metres - and the assumption below points at the same key, so the app writes the
+    # assumption where the design reads it (the loop closes).
+    footing_depth_m = foundation_data.get("footingDepthM")
+    if isinstance(footing_depth_m, (int, float)) and footing_depth_m > 0:
+        footing_depth = round(float(footing_depth_m) * 1000.0, 3)
+        values["footing.depthMm"] = Value(
             footing_depth,
             "mm",
-            "the rule pack (v0) has no footing-depth rule; v0 assumes a 300 mm footing",
+            PROVENANCE_SPEC,
+            "/phases/foundation/data/footingDepthM",
+            "the spec's footing depth",
         )
-    )
+    else:
+        footing_depth = ASSUMED_FOOTING_DEPTH_MM
+        values["footing.depthMm"] = Value(
+            footing_depth,
+            "mm",
+            PROVENANCE_ASSUMED,
+            "v0 default",
+            "the rule pack has no footing depth",
+        )
+        assumptions.append(
+            Assumption(
+                "/phases/foundation/data/footingDepthM",
+                round(footing_depth / 1000.0, 3),
+                "m",
+                "the rule pack (v0) has no footing-depth rule; v0 assumes a 300 mm footing",
+            )
+        )
     beam_width = ASSUMED_GRADE_BEAM_WIDTH_MM
     beam_depth = ASSUMED_GRADE_BEAM_DEPTH_MM
     values["gradeBeam.widthMm"] = Value(

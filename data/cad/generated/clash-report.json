@@ -182,21 +182,11 @@
    "severity": "declared"
   },
   {
-   "a": "electrical:outlet-3",
-   "b": "liftShaft-services-1-1",
-   "cause": "the-lift-shaft-stands-where-a-column-is",
-   "detail": "the electrical point outlet-3 sits inside the liftShaft liftShaft-services-1-1",
-   "id": "clash-019",
-   "kind": "point-in-member",
-   "note": "the lift shaft stands beside the grid's last column and swallows it (W2.12's placement); nothing declares it",
-   "severity": "open"
-  },
-  {
    "a": "electrical:outlet-4",
    "b": "column-floor-1-C1",
    "cause": "the-grid-is-a-line",
    "detail": "the electrical point outlet-4 sits inside the column column-floor-1-C1",
-   "id": "clash-020",
+   "id": "clash-019",
    "kind": "point-in-member",
    "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
    "severity": "open"
@@ -206,7 +196,7 @@
    "b": "beam-floor-1-B1",
    "cause": "members-at-floor-level",
    "detail": "the electrical point outlet-4 sits inside the beam beam-floor-1-B1",
-   "id": "clash-021",
+   "id": "clash-020",
    "kind": "point-in-member",
    "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
    "severity": "declared"
@@ -216,7 +206,7 @@
    "b": "beam-floor-1-B2",
    "cause": "members-at-floor-level",
    "detail": "the electrical point outlet-5 sits inside the beam beam-floor-1-B2",
-   "id": "clash-022",
+   "id": "clash-021",
    "kind": "point-in-member",
    "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
    "severity": "declared"
@@ -226,7 +216,7 @@
    "b": "column-floor-1-C1",
    "cause": "the-grid-is-a-line",
    "detail": "the electrical point fan-1 sits inside the column column-floor-1-C1",
-   "id": "clash-023",
+   "id": "clash-022",
    "kind": "point-in-member",
    "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
    "severity": "open"
@@ -236,7 +226,7 @@
    "b": "column-floor-1-C1",
    "cause": "the-grid-is-a-line",
    "detail": "the water point basin-1 sits inside the column column-floor-1-C1",
-   "id": "clash-024",
+   "id": "clash-023",
    "kind": "point-in-member",
    "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
    "severity": "open"
@@ -246,7 +236,7 @@
    "b": "beam-floor-1-B1",
    "cause": "members-at-floor-level",
    "detail": "the water point basin-1 sits inside the beam beam-floor-1-B1",
-   "id": "clash-025",
+   "id": "clash-024",
    "kind": "point-in-member",
    "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
    "severity": "declared"
@@ -256,7 +246,7 @@
    "b": "column-floor-1-C1",
    "cause": "the-grid-is-a-line",
    "detail": "the water point basin-2 sits inside the column column-floor-1-C1",
-   "id": "clash-026",
+   "id": "clash-025",
    "kind": "point-in-member",
    "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
    "severity": "open"
@@ -266,7 +256,7 @@
    "b": "beam-floor-1-B1",
    "cause": "members-at-floor-level",
    "detail": "the water point basin-2 sits inside the beam beam-floor-1-B1",
-   "id": "clash-027",
+   "id": "clash-026",
    "kind": "point-in-member",
    "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
    "severity": "declared"
@@ -276,7 +266,7 @@
    "b": "column-floor-1-C1",
    "cause": "the-grid-is-a-line",
    "detail": "the water point wc-1 sits inside the column column-floor-1-C1",
-   "id": "clash-028",
+   "id": "clash-027",
    "kind": "point-in-member",
    "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
    "severity": "open"
@@ -286,7 +276,7 @@
    "b": "beam-floor-1-B1",
    "cause": "members-at-floor-level",
    "detail": "the water point wc-1 sits inside the beam beam-floor-1-B1",
-   "id": "clash-029",
+   "id": "clash-028",
    "kind": "point-in-member",
    "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
    "severity": "declared"
@@ -296,7 +286,7 @@
    "b": "column-floor-1-C1",
    "cause": "the-grid-is-a-line",
    "detail": "the water point wc-2 sits inside the column column-floor-1-C1",
-   "id": "clash-030",
+   "id": "clash-029",
    "kind": "point-in-member",
    "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
    "severity": "open"
@@ -306,7 +296,7 @@
    "b": "beam-floor-1-B1",
    "cause": "members-at-floor-level",
    "detail": "the water point wc-2 sits inside the beam beam-floor-1-B1",
-   "id": "clash-031",
+   "id": "clash-030",
    "kind": "point-in-member",
    "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
    "severity": "declared"
@@ -316,7 +306,7 @@
    "b": "column-floor-1-C1",
    "cause": "the-grid-is-a-line",
    "detail": "the water point shower-1 sits inside the column column-floor-1-C1",
-   "id": "clash-032",
+   "id": "clash-031",
    "kind": "point-in-member",
    "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
    "severity": "open"
@@ -326,7 +316,7 @@
    "b": "beam-floor-1-B1",
    "cause": "members-at-floor-level",
    "detail": "the water point shower-1 sits inside the beam beam-floor-1-B1",
-   "id": "clash-033",
+   "id": "clash-032",
    "kind": "point-in-member",
    "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
    "severity": "declared"
@@ -336,7 +326,7 @@
    "b": "column-floor-1-C1",
    "cause": "the-grid-is-a-line",
    "detail": "the water point shower-2 sits inside the column column-floor-1-C1",
-   "id": "clash-034",
+   "id": "clash-033",
    "kind": "point-in-member",
    "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
    "severity": "open"
@@ -346,7 +336,7 @@
    "b": "beam-floor-1-B1",
    "cause": "members-at-floor-level",
    "detail": "the water point shower-2 sits inside the beam beam-floor-1-B1",
-   "id": "clash-035",
+   "id": "clash-034",
    "kind": "point-in-member",
    "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
    "severity": "declared"
@@ -356,7 +346,7 @@
    "b": "column-floor-1-C1",
    "cause": "the-grid-is-a-line",
    "detail": "the water point kitchenSink-1 sits inside the column column-floor-1-C1",
-   "id": "clash-036",
+   "id": "clash-035",
    "kind": "point-in-member",
    "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
    "severity": "open"
@@ -366,7 +356,7 @@
    "b": "beam-floor-1-B1",
    "cause": "members-at-floor-level",
    "detail": "the water point kitchenSink-1 sits inside the beam beam-floor-1-B1",
-   "id": "clash-037",
+   "id": "clash-036",
    "kind": "point-in-member",
    "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
    "severity": "declared"
@@ -376,7 +366,7 @@
    "b": "column-floor-1-C1",
    "cause": "the-grid-is-a-line",
    "detail": "the water point kitchenSink-2 sits inside the column column-floor-1-C1",
-   "id": "clash-038",
+   "id": "clash-037",
    "kind": "point-in-member",
    "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
    "severity": "open"
@@ -386,7 +376,7 @@
    "b": "beam-floor-1-B1",
    "cause": "members-at-floor-level",
    "detail": "the water point kitchenSink-2 sits inside the beam beam-floor-1-B1",
-   "id": "clash-039",
+   "id": "clash-038",
    "kind": "point-in-member",
    "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
    "severity": "declared"
@@ -396,7 +386,7 @@
    "b": "column-floor-0-C1",
    "cause": "the-grid-is-a-line",
    "detail": "the drainage point stack-1 sits inside the column column-floor-0-C1",
-   "id": "clash-040",
+   "id": "clash-039",
    "kind": "point-in-member",
    "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
    "severity": "open"
@@ -406,7 +396,7 @@
    "b": "landing-services-0-1",
    "cause": "the-layout-is-an-even-grid",
    "detail": "the drainage point stack-1 sits inside the landing landing-services-0-1",
-   "id": "clash-041",
+   "id": "clash-040",
    "kind": "point-in-member",
    "note": "the MEP's layout is an even grid over the floor (W3.1), so a point can land on a member; the layout is not coordinated with the structure",
    "severity": "open"
@@ -416,7 +406,7 @@
    "b": "column-floor-1-C1",
    "cause": "the-grid-is-a-line",
    "detail": "the drainage point stack-1 sits inside the column column-floor-1-C1",
-   "id": "clash-042",
+   "id": "clash-041",
    "kind": "point-in-member",
    "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
    "severity": "open"
@@ -426,7 +416,7 @@
    "b": "beam-floor-1-B1",
    "cause": "members-at-floor-level",
    "detail": "the drainage point stack-1 sits inside the beam beam-floor-1-B1",
-   "id": "clash-043",
+   "id": "clash-042",
    "kind": "point-in-member",
    "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
    "severity": "declared"
@@ -436,7 +426,7 @@
    "b": "slab-floor-1",
    "cause": "no-openings",
    "detail": "the drainage point stack-1 sits inside the slab slab-floor-1",
-   "id": "clash-044",
+   "id": "clash-043",
    "kind": "point-in-member",
    "note": "the v0 slabs carry no openings, so nothing can pass through a slab",
    "severity": "declared"
@@ -446,19 +436,9 @@
    "b": "column-floor-1-C4",
    "cause": "the-grid-is-a-line",
    "detail": "the gas point cooker-1 sits inside the column column-floor-1-C4",
-   "id": "clash-045",
+   "id": "clash-044",
    "kind": "point-in-member",
    "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
-   "severity": "open"
-  },
-  {
-   "a": "gas:cooker-1",
-   "b": "liftShaft-services-1-1",
-   "cause": "the-lift-shaft-stands-where-a-column-is",
-   "detail": "the gas point cooker-1 sits inside the liftShaft liftShaft-services-1-1",
-   "id": "clash-046",
-   "kind": "point-in-member",
-   "note": "the lift shaft stands beside the grid's last column and swallows it (W2.12's placement); nothing declares it",
    "severity": "open"
   },
   {
@@ -466,127 +446,17 @@
    "b": "column-floor-1-C4",
    "cause": "the-grid-is-a-line",
    "detail": "the gas point meter-1 sits inside the column column-floor-1-C4",
-   "id": "clash-047",
+   "id": "clash-045",
    "kind": "point-in-member",
    "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
    "severity": "open"
-  },
-  {
-   "a": "gas:meter-1",
-   "b": "liftShaft-services-1-1",
-   "cause": "the-lift-shaft-stands-where-a-column-is",
-   "detail": "the gas point meter-1 sits inside the liftShaft liftShaft-services-1-1",
-   "id": "clash-048",
-   "kind": "point-in-member",
-   "note": "the lift shaft stands beside the grid's last column and swallows it (W2.12's placement); nothing declares it",
-   "severity": "open"
-  },
-  {
-   "a": "footing-F4",
-   "b": "liftShaft-services-0-1",
-   "cause": "the-lift-shaft-stands-where-a-column-is",
-   "detail": "the footing footing-F4 (foundation) and the liftShaft liftShaft-services-0-1 (services-0) overlap by 900 x 900 x 300 mm",
-   "id": "clash-049",
-   "kind": "member-over-member",
-   "note": "the lift shaft stands beside the grid's last column and swallows it (W2.12's placement); nothing declares it",
-   "severity": "open"
-  },
-  {
-   "a": "footing-F4",
-   "b": "liftCar-services-0-1",
-   "cause": "the-lift-shaft-stands-where-a-column-is",
-   "detail": "the footing footing-F4 (foundation) and the liftCar liftCar-services-0-1 (services-0) overlap by 700 x 700 x 300 mm",
-   "id": "clash-050",
-   "kind": "member-over-member",
-   "note": "the lift shaft stands beside the grid's last column and swallows it (W2.12's placement); nothing declares it",
-   "severity": "open"
-  },
-  {
-   "a": "gradeBeam-GB3",
-   "b": "liftShaft-services-0-1",
-   "cause": "the-lift-shaft-stands-where-a-column-is",
-   "detail": "the gradeBeam gradeBeam-GB3 (foundation) and the liftShaft liftShaft-services-0-1 (services-0) overlap by 1800 x 300 x 400 mm",
-   "id": "clash-051",
-   "kind": "member-over-member",
-   "note": "the lift shaft stands beside the grid's last column and swallows it (W2.12's placement); nothing declares it",
-   "severity": "open"
-  },
-  {
-   "a": "gradeBeam-GB3",
-   "b": "liftCar-services-0-1",
-   "cause": "the-lift-shaft-stands-where-a-column-is",
-   "detail": "the gradeBeam gradeBeam-GB3 (foundation) and the liftCar liftCar-services-0-1 (services-0) overlap by 1400 x 250 x 400 mm",
-   "id": "clash-052",
-   "kind": "member-over-member",
-   "note": "the lift shaft stands beside the grid's last column and swallows it (W2.12's placement); nothing declares it",
-   "severity": "open"
-  },
-  {
-   "a": "column-floor-0-C4",
-   "b": "liftShaft-services-0-1",
-   "cause": "the-lift-shaft-stands-where-a-column-is",
-   "detail": "the column column-floor-0-C4 (floor-0) and the liftShaft liftShaft-services-0-1 (services-0) overlap by 300 x 300 x 2400 mm",
-   "id": "clash-053",
-   "kind": "member-over-member",
-   "note": "the lift shaft stands beside the grid's last column and swallows it (W2.12's placement); nothing declares it",
-   "severity": "open"
-  },
-  {
-   "a": "column-floor-0-C4",
-   "b": "liftCar-services-0-1",
-   "cause": "the-lift-shaft-stands-where-a-column-is",
-   "detail": "the column column-floor-0-C4 (floor-0) and the liftCar liftCar-services-0-1 (services-0) overlap by 250 x 250 x 2400 mm",
-   "id": "clash-054",
-   "kind": "member-over-member",
-   "note": "the lift shaft stands beside the grid's last column and swallows it (W2.12's placement); nothing declares it",
-   "severity": "open"
-  },
-  {
-   "a": "beam-floor-0-B3",
-   "b": "liftShaft-services-0-1",
-   "cause": "the-lift-shaft-stands-where-a-column-is",
-   "detail": "the beam beam-floor-0-B3 (floor-0) and the liftShaft liftShaft-services-0-1 (services-0) overlap by 300 x 300 x 450 mm",
-   "id": "clash-055",
-   "kind": "member-over-member",
-   "note": "the lift shaft stands beside the grid's last column and swallows it (W2.12's placement); nothing declares it",
-   "severity": "open"
-  },
-  {
-   "a": "beam-floor-0-B3",
-   "b": "liftCar-services-0-1",
-   "cause": "the-lift-shaft-stands-where-a-column-is",
-   "detail": "the beam beam-floor-0-B3 (floor-0) and the liftCar liftCar-services-0-1 (services-0) overlap by 100 x 250 x 450 mm",
-   "id": "clash-056",
-   "kind": "member-over-member",
-   "note": "the lift shaft stands beside the grid's last column and swallows it (W2.12's placement); nothing declares it",
-   "severity": "open"
-  },
-  {
-   "a": "slab-floor-0",
-   "b": "liftShaft-services-0-1",
-   "cause": "no-openings",
-   "detail": "the slab slab-floor-0 (floor-0) and the liftShaft liftShaft-services-0-1 (services-0) overlap by 450 x 300 x 125 mm",
-   "id": "clash-057",
-   "kind": "member-over-member",
-   "note": "the v0 slabs carry no openings, so nothing can pass through a slab",
-   "severity": "declared"
-  },
-  {
-   "a": "slab-floor-0",
-   "b": "liftCar-services-0-1",
-   "cause": "no-openings",
-   "detail": "the slab slab-floor-0 (floor-0) and the liftCar liftCar-services-0-1 (services-0) overlap by 250 x 250 x 125 mm",
-   "id": "clash-058",
-   "kind": "member-over-member",
-   "note": "the v0 slabs carry no openings, so nothing can pass through a slab",
-   "severity": "declared"
   },
   {
    "a": "landing-services-0-1",
    "b": "column-floor-1-C1",
    "cause": "the-layout-is-an-even-grid",
    "detail": "the landing landing-services-0-1 (services-0) and the column column-floor-1-C1 (floor-1) overlap by 300 x 300 x 150 mm",
-   "id": "clash-059",
+   "id": "clash-046",
    "kind": "member-over-member",
    "note": "the MEP's layout is an even grid over the floor (W3.1), so a point can land on a member; the layout is not coordinated with the structure",
    "severity": "open"
@@ -596,7 +466,7 @@
    "b": "beam-floor-1-B1",
    "cause": "the-layout-is-an-even-grid",
    "detail": "the landing landing-services-0-1 (services-0) and the beam beam-floor-1-B1 (floor-1) overlap by 600 x 300 x 150 mm",
-   "id": "clash-060",
+   "id": "clash-047",
    "kind": "member-over-member",
    "note": "the MEP's layout is an even grid over the floor (W3.1), so a point can land on a member; the layout is not coordinated with the structure",
    "severity": "open"
@@ -606,67 +476,7 @@
    "b": "slab-floor-1",
    "cause": "no-openings",
    "detail": "the landing landing-services-0-1 (services-0) and the slab slab-floor-1 (floor-1) overlap by 750 x 300 x 125 mm",
-   "id": "clash-061",
-   "kind": "member-over-member",
-   "note": "the v0 slabs carry no openings, so nothing can pass through a slab",
-   "severity": "declared"
-  },
-  {
-   "a": "column-floor-1-C4",
-   "b": "liftShaft-services-1-1",
-   "cause": "the-lift-shaft-stands-where-a-column-is",
-   "detail": "the column column-floor-1-C4 (floor-1) and the liftShaft liftShaft-services-1-1 (services-1) overlap by 300 x 300 x 2400 mm",
-   "id": "clash-062",
-   "kind": "member-over-member",
-   "note": "the lift shaft stands beside the grid's last column and swallows it (W2.12's placement); nothing declares it",
-   "severity": "open"
-  },
-  {
-   "a": "column-floor-1-C4",
-   "b": "liftCar-services-1-1",
-   "cause": "the-lift-shaft-stands-where-a-column-is",
-   "detail": "the column column-floor-1-C4 (floor-1) and the liftCar liftCar-services-1-1 (services-1) overlap by 250 x 250 x 2400 mm",
-   "id": "clash-063",
-   "kind": "member-over-member",
-   "note": "the lift shaft stands beside the grid's last column and swallows it (W2.12's placement); nothing declares it",
-   "severity": "open"
-  },
-  {
-   "a": "beam-floor-1-B3",
-   "b": "liftShaft-services-1-1",
-   "cause": "the-lift-shaft-stands-where-a-column-is",
-   "detail": "the beam beam-floor-1-B3 (floor-1) and the liftShaft liftShaft-services-1-1 (services-1) overlap by 300 x 300 x 450 mm",
-   "id": "clash-064",
-   "kind": "member-over-member",
-   "note": "the lift shaft stands beside the grid's last column and swallows it (W2.12's placement); nothing declares it",
-   "severity": "open"
-  },
-  {
-   "a": "beam-floor-1-B3",
-   "b": "liftCar-services-1-1",
-   "cause": "the-lift-shaft-stands-where-a-column-is",
-   "detail": "the beam beam-floor-1-B3 (floor-1) and the liftCar liftCar-services-1-1 (services-1) overlap by 100 x 250 x 450 mm",
-   "id": "clash-065",
-   "kind": "member-over-member",
-   "note": "the lift shaft stands beside the grid's last column and swallows it (W2.12's placement); nothing declares it",
-   "severity": "open"
-  },
-  {
-   "a": "slab-floor-1",
-   "b": "liftShaft-services-1-1",
-   "cause": "no-openings",
-   "detail": "the slab slab-floor-1 (floor-1) and the liftShaft liftShaft-services-1-1 (services-1) overlap by 450 x 300 x 125 mm",
-   "id": "clash-066",
-   "kind": "member-over-member",
-   "note": "the v0 slabs carry no openings, so nothing can pass through a slab",
-   "severity": "declared"
-  },
-  {
-   "a": "slab-floor-1",
-   "b": "liftCar-services-1-1",
-   "cause": "no-openings",
-   "detail": "the slab slab-floor-1 (floor-1) and the liftCar liftCar-services-1-1 (services-1) overlap by 250 x 250 x 125 mm",
-   "id": "clash-067",
+   "id": "clash-048",
    "kind": "member-over-member",
    "note": "the v0 slabs carry no openings, so nothing can pass through a slab",
    "severity": "declared"
@@ -686,7 +496,7 @@
    "phase": "foundation",
    "sizeXMm": 1200.0,
    "sizeYMm": 1200.0,
-   "sizeZMm": 300.0,
+   "sizeZMm": 1500.0,
    "xMm": -100.0,
    "yMm": 6089.0,
    "zMm": 0.0
@@ -698,7 +508,7 @@
    "phase": "foundation",
    "sizeXMm": 1200.0,
    "sizeYMm": 1200.0,
-   "sizeZMm": 300.0,
+   "sizeZMm": 1500.0,
    "xMm": 2900.0,
    "yMm": 6089.0,
    "zMm": 0.0
@@ -710,7 +520,7 @@
    "phase": "foundation",
    "sizeXMm": 1200.0,
    "sizeYMm": 1200.0,
-   "sizeZMm": 300.0,
+   "sizeZMm": 1500.0,
    "xMm": 5900.0,
    "yMm": 6089.0,
    "zMm": 0.0
@@ -722,7 +532,7 @@
    "phase": "foundation",
    "sizeXMm": 1200.0,
    "sizeYMm": 1200.0,
-   "sizeZMm": 300.0,
+   "sizeZMm": 1500.0,
    "xMm": 8900.0,
    "yMm": 6089.0,
    "zMm": 0.0
@@ -872,30 +682,6 @@
    "zMm": 3200.0
   },
   {
-   "id": "liftShaft-services-0-1",
-   "kind": "liftShaft",
-   "note": "",
-   "phase": "services-0",
-   "sizeXMm": 1800.0,
-   "sizeYMm": 1800.0,
-   "sizeZMm": 2400.0,
-   "xMm": 9200.0,
-   "yMm": 6389.0,
-   "zMm": 0.0
-  },
-  {
-   "id": "liftCar-services-0-1",
-   "kind": "liftCar",
-   "note": "",
-   "phase": "services-0",
-   "sizeXMm": 1400.0,
-   "sizeYMm": 1400.0,
-   "sizeZMm": 2400.0,
-   "xMm": 9400.0,
-   "yMm": 6589.0,
-   "zMm": 0.0
-  },
-  {
    "id": "column-floor-1-C1",
    "kind": "column",
    "note": "",
@@ -1002,54 +788,29 @@
    "xMm": -100.0,
    "yMm": 6189.0,
    "zMm": 6200.0
-  },
-  {
-   "id": "liftShaft-services-1-1",
-   "kind": "liftShaft",
-   "note": "",
-   "phase": "services-1",
-   "sizeXMm": 1800.0,
-   "sizeYMm": 1800.0,
-   "sizeZMm": 2400.0,
-   "xMm": 9200.0,
-   "yMm": 6389.0,
-   "zMm": 3200.0
-  },
-  {
-   "id": "liftCar-services-1-1",
-   "kind": "liftCar",
-   "note": "",
-   "phase": "services-1",
-   "sizeXMm": 1400.0,
-   "sizeYMm": 1400.0,
-   "sizeZMm": 2400.0,
-   "xMm": 9400.0,
-   "yMm": 6589.0,
-   "zMm": 3200.0
   }
  ],
  "schemaVersion": "0.1.0",
  "summary": {
   "byCause": {
    "members-at-floor-level": 18,
-   "no-openings": 7,
+   "no-openings": 3,
    "the-grid-is-a-line": 24,
-   "the-layout-is-an-even-grid": 3,
-   "the-lift-shaft-stands-where-a-column-is": 15
+   "the-layout-is-an-even-grid": 3
   },
   "bySeverity": {
-   "declared": 25,
-   "open": 42
+   "declared": 21,
+   "open": 27
   },
-  "clashes": 67,
-  "members": 29,
+  "clashes": 48,
+  "members": 25,
   "points": 26
  },
  "values": {
-  "clash.clashes": 67,
-  "clash.declared": 25,
-  "clash.members": 29,
-  "clash.open": 42,
+  "clash.clashes": 48,
+  "clash.declared": 21,
+  "clash.members": 25,
+  "clash.open": 27,
   "clash.points": 26
  }
 }

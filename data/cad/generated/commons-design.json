@@ -28,18 +28,7 @@
       "zMm": 6200.0
     }
   ],
-  "lifts": [
-    {
-      "baseZMm": 3200.0,
-      "carMm": 1400.0,
-      "fits": true,
-      "heightMm": 2400.0,
-      "id": "1",
-      "shaftMm": 1800.0,
-      "xMm": 10100.0,
-      "yMm": 7289.0
-    }
-  ],
+  "lifts": [],
   "projectId": "7c9e6f10-2a3b-4c5d-9e8f-1a2b3c4d5e6f",
   "runs": [
     {
@@ -79,6 +68,13 @@
       "source": "the units this floor holds",
       "unit": "mm",
       "value": 25.0
+    },
+    "services.hasLift": {
+      "provenance": "spec",
+      "reason": "the spec says whether the building has a lift",
+      "source": "/phases/common-services/data/hasLift",
+      "unit": "1",
+      "value": 0.0
     },
     "services.liftShaftMm": {
       "provenance": "assumed",

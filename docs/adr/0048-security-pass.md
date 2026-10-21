@@ -42,17 +42,20 @@ with a runtime cost ✓ ✓.
    laws** ✓ — which is what the plan argued for in the first place ✓ ✓. A semgrep run is the
    **owner's** item ✓ ✓, named ✓ ✓.
 6. **The pack's hidden characters are not cleaned here.** The pass **reports** them ✓ (8
-   medium findings ✓ — the bidi characters the PDF transcription left in the rule pack ✓ ✓) —
-   and they are **not a risk** ✓, because the fencer strips the hidden characters before any
-   model sees the text ✓ ✓. Cleaning the pack would move the RAG corpus ✓ and the flow book ✓
-   with it ✓, so it is **a package of its own** ✓ — named ✓, not implied ✓ ✓.
+   medium findings ✓) — and this decision was **wrong about what they were** ✓ ✓.
+   **Amended 2026-10-21 by ADR-0049** ✓: every one of the 8 was **U+200D** ✓ — the **Bangla
+   virama** ✓, the character that forms the conjuncts ✓ ✓ — so they were **false positives** ✓,
+   not hidden text ✓. The rule was wrong ✓, the text was right ✓, and ADR-0049 fixes the rule
+   ✓ ✓. Nothing needed cleaning in the pack ✓ ✓ — and the pass now **fails on a real hidden
+   character** ✓, whatever its severity ✓ ✓.
 
 ## Consequences
 
 - The app's own surfaces are **watched on every push** ✓ ✓, and a law that stops holding fails
   the build ✓ ✓.
 - The permission layer's **fleet isolation** ✓ is now *proven* ✓, not asserted ✓ ✓.
-- The findings are **in the record** ✓ — 8 medium findings ✓, all the pack's hidden characters
-  ✓ — and nobody has to run the pass to know that ✓ ✓.
+- The findings are **in the record** ✓ — and the record is **amended** ✓: the 8 findings were
+  the Bangla virama ✓ ✓, and the rule that called them hidden was wrong ✓ ✓ (ADR-0049 ✓ ✓).
+  The pass now reports **zero** ✓ ✓ and fails on a real hidden character ✓ ✓.
 - **Two things are the owner's** ✓ ✓: a semgrep run ✓ (the CLI is not installed ✓), and the
   pack's hidden characters ✓ (a package ✓, because it moves the generated artefacts ✓ ✓).

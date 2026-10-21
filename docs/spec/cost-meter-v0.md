@@ -35,7 +35,7 @@ and two copies of one rule is how a rule drifts ✓ ✓). The app's screen has i
 
 ## The measured output (2026-10-21, `two-storey-residential`)
 
-- The meter's numbers come from the BOQ ✓ — **119,599.70 BDT** for the example ✓ — and a
+- The meter's numbers come from the BOQ ✓ — **154,276.09 BDT** for the example ✓ — and a
   **wider frontage** (12 m instead of 10 m ✓) means another footing ✓, and the meter says what
   that costs ✓.
 - The **app's screen** shows the total ✓, the change ✓, the "before" ✓ and "after" ✓, and the
@@ -57,7 +57,7 @@ ignores the spec's footing depth** ✓: the example's foundation phase carries
 `/phases/foundation/data/footingDepthMm` (millimetres ✓) and the spec carries `footingDepthM`
 (metres ✓). The spec's value is **silently ignored** ✓ ✓. The fix is **W2.2's** ✓ and it
 **moves the numbers** ✓ (the foundation's volumes ✓, the BOQ ✓, the walking skeleton's
-5.45175 m³ ✓ and every document that quotes them ✓), so it is **its own package** ✓ — recorded
+12.36375 m³ ✓ and every document that quotes them ✓), so it is **its own package** ✓ — recorded
 on the board ✓, not slipped in here ✓ ✓.
 
 ## Checks

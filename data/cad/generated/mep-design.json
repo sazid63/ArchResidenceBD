@@ -185,16 +185,6 @@
      "size": "100 mm",
      "system": "drainage",
      "unit": "no."
-    },
-    {
-     "description": "The lift",
-     "id": "1",
-     "load": "5 kW, 5 persons",
-     "note": "the car fits inside the shaft, with a hand's width of clearance on each side",
-     "quantity": 1,
-     "size": "1800 mm shaft, 1400 mm car",
-     "system": "lift",
-     "unit": "no."
     }
    ],
    "storeyIndex": 0,
@@ -790,6 +780,6 @@
   "gasLoadM3PerH": 1.0,
   "loadW": 920.0,
   "points": 26,
-  "scheduleRows": 15
+  "scheduleRows": 14
  }
 }

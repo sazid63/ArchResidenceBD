@@ -1,55 +1,7 @@
 {
  "failedLaws": [],
- "findings": [
-  {
-   "excerpt": "(বাংলা):** ফুটপাত, র্যাম্প, ক্লিয়ারেন্স",
-   "rule": "hidden_text",
-   "severity": "medium",
-   "surface": "docs/rules/rajuk-pack-v0.md"
-  },
-  {
-   "excerpt": "্ষের অনুমতিতে; (৮) র্যাম্পের ঢাল সর্বোচ্",
-   "rule": "hidden_text",
-   "severity": "medium",
-   "surface": "docs/rules/rajuk-pack-v0.md"
-  },
-  {
-   "excerpt": " ঢাল সর্বোচ্চ ১:৮, র্যাম্পের পূর্বে ন্যূ",
-   "rule": "hidden_text",
-   "severity": "medium",
-   "surface": "docs/rules/rajuk-pack-v0.md"
-  },
-  {
-   "excerpt": " পর্যন্ত পার্থক্যে র্যাম্প লাগিবে না; (৯",
-   "rule": "hidden_text",
-   "severity": "medium",
-   "surface": "docs/rules/rajuk-pack-v0.md"
-  },
-  {
-   "excerpt": "ম্প লাগিবে না; (৯) র্যাম্প সেটব্যাকের ভি",
-   "rule": "hidden_text",
-   "severity": "medium",
-   "surface": "docs/rules/rajuk-pack-v0.md"
-  },
-  {
-   "excerpt": " গণ্য; (১০) একমুখী র্যাম্প ন্যূনতম ৩.০০ ",
-   "rule": "hidden_text",
-   "severity": "medium",
-   "surface": "docs/rules/rajuk-pack-v0.md"
-  },
-  {
-   "excerpt": " উঁচু হইতে পারিবে; র্যাম্প সেটব্যাকের মধ",
-   "rule": "hidden_text",
-   "severity": "medium",
-   "surface": "docs/rules/rajuk-pack-v0.md"
-  },
-  {
-   "excerpt": "বিগুণ; ড্রাইভওয়ে, র্যাম্প ও লিফটসহ); ড্",
-   "rule": "hidden_text",
-   "severity": "medium",
-   "surface": "docs/rules/rajuk-pack-v0.md"
-  }
- ],
+ "findings": [],
+ "hiddenFindings": 0,
  "laws": [
   {
    "detail": "the path is outside the project sandbox",
@@ -104,12 +56,10 @@
  ],
  "ok": true,
  "schemaVersion": "0.1.0",
- "severities": [
-  "medium"
- ],
+ "severities": [],
  "surfaces": [
   "docs/rules",
   "data/prices/cards"
  ],
- "worstSeverity": "medium"
+ "worstSeverity": "none"
 }

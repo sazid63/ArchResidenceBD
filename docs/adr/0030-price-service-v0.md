@@ -65,7 +65,7 @@ plausible shortcut is a lie:
    the unit does not match.
 8. **The BOQ reads a card or the spec's pricing block.** The same call prices the takeoff from
    either, so the app can price from what the spec carries. The cross-check is in the artefacts:
-   the BOQ from the resolved card and the BOQ from the card total the same **119,599.70 BDT**.
+   the BOQ from the resolved card and the BOQ from the card total the same **154,276.09 BDT**.
 
 ## Consequences
 

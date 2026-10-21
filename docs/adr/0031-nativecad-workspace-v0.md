@@ -50,7 +50,7 @@ and a licence question), and the plan's law is that **the engine measures and th
 7. **The mesh is checked against the design, and against the walking skeleton.** The probe runs
    the foundation's and the floor's macro through the worker pool, compares every object's volume
    and position with the design, and the numbers must match the walking skeleton's (15 objects,
-   5.45175 m³) — the same model, not a second one. Two runs must produce the same mesh.
+   12.36375 m³) — the same model, not a second one. Two runs must produce the same mesh.
 
 ## Consequences
 

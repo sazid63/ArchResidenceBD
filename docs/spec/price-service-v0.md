@@ -79,7 +79,7 @@ per-day rate: that is a unit error, and the note says the minimum was not applie
   `/pricing` block and the spec's own provenance entry for it
   (`source: default` — "price service: card dhaka-example-2026-10 (dhaka, candidate)").
 - **The cross-check:** the BOQ built from the resolved card and the BOQ built straight from the
-  card both total **119,599.70 BDT** (9 priced, 2 unpriced) — the service resolved the card, it
+  card both total **154,276.09 BDT** (9 priced, 2 unpriced) — the service resolved the card, it
   did not move a price.
 
 ## The official-list path (fetch → parse → candidate card)

@@ -38,19 +38,19 @@ The pass has two halves ✓:
 ## The measured output (2026-10-21)
 
 - **10 laws, 10 hold** ✓ ✓.
-- **8 injection findings** in the external content ✓ — all **medium** ✓, all of them the
-  **hidden (bidi) characters** the rule pack carries from the PDF transcription ✓ ✓. They are
-  **reported, not hidden** ✓ ✓, and they are **not a risk** ✓: the fencer strips the hidden
-  characters before any model sees the text ✓ ✓ — the module says so in as many words ✓ (*"they
-  are never meaningful in a price list or a clause"* ✓ ✓).
+- **0 injection findings** in the external content ✓ ✓. The pass first reported **8** ✓ — and
+  every one of them was **U+200D** ✓, the **Bangla virama** ✓: the character that forms the
+  conjuncts ✓ ✓. They were **false positives** ✓ — the rule that called them hidden was wrong
+  ✓, and the text was right ✓ ✓ (ADR-0049 ✓ ✓). The rule is fixed ✓, the Bangla survives the
+  watch ✓, and the pass now **fails on a real hidden character** ✓ whatever its severity ✓ ✓.
 - The **CI step** re-runs the pass and compares the record ✓ ✓ — a law that stops holding, or
   a high-severity finding that appears in the content, **fails the build** ✓ ✓.
 
 ## What is deliberately not here
 
-- **The pack's hidden characters are not cleaned in this package** ✓ — the pack is a
-  transcribed artefact ✓ and cleaning it moves the RAG corpus ✓ and the flow book ✓ with it ✓,
-  so it is **a package of its own** ✓ (named here ✓ ✓, not implied ✓ ✓).
+- **The pack needs no cleaning** ✓ — the characters the pass found were the **Bangla
+  virama** ✓ ✓, and they are the text ✓ ✓ (ADR-0049 ✓ ✓). The rule was wrong, not the pack
+  ✓ ✓.
 - **A semgrep pass** ✓ — the plan's tooling table would have had semgrep for this package ✓,
   but the CLI is **not installed** ✓ and the $0 budget and the owner's standing rule forbid a
   new install without sign-off ✓ ✓. The pass therefore uses **the repo's own laws** ✓ — which

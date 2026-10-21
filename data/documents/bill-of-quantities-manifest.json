@@ -3,7 +3,7 @@
   "cardStatus": "candidate",
   "deviations": 2,
   "pages": 5,
-  "pdfBytes": 7614,
+  "pdfBytes": 7611,
   "pricedLines": 9,
   "projectId": "7c9e6f10-2a3b-4c5d-9e8f-1a2b3c4d5e6f",
   "sheets": [
@@ -14,7 +14,7 @@
     "Totals",
     "Deviations"
   ],
-  "totalBdt": 120621.91,
+  "totalBdt": 156594.3,
   "unpricedLines": 2,
-  "xlsxBytes": 6121
+  "xlsxBytes": 6116
 }

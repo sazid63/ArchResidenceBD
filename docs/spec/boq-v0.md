@@ -29,7 +29,7 @@ document those renderers will read:
 
 ## The example BOQ (2026-10-21, `two-storey-residential`)
 
-`data/boq/two-storey-residential.boq.{json,md}` — 11 lines, **119,599.70 BDT**, 9 priced and
+`data/boq/two-storey-residential.boq.{json,md}` — 11 lines, **154,276.09 BDT**, 9 priced and
 2 unpriced (the formwork, because the v0 card has no formwork rate):
 
 | Phase | Line | Type | Qty | Unit | Rate BDT | Amount BDT |

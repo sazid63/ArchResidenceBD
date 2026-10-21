@@ -7,30 +7,30 @@
 | Phase | Description | Type | Qty | Unit | Rate BDT | Amount BDT |
 |---|---|---|---:|---|---:|---:|
 | site-excavation | Excavation (machinery) | machinery | 24.491 | hour | 2,800.00 | 68,574.80 |
-| foundation | Cement (foundation) | material | 21.060 | bag | 550.00 | 11,583.00 |
+| foundation | Cement (foundation) | material | 72.900 | bag | 550.00 | 40,095.00 |
 | floor | Cement (floor) | material | 19.828 | bag | 550.00 | 10,905.45 |
-| foundation | Sand (foundation) | material | 4.970 | cft | 42.00 | 208.75 |
+| foundation | Sand (foundation) | material | 17.204 | cft | 42.00 | 722.58 |
 | floor | Sand (floor) | material | 4.679 | cft | 42.00 | 196.53 |
 | floor | Steel reinforcement | material | 0.279 | ton | 89,000.00 | 24,831.00 |
-| foundation | Mason (labour) | labour | 1.123 | day | 950.00 | 1,067.04 |
+| foundation | Mason (labour) | labour | 3.888 | day | 950.00 | 3,693.60 |
 | floor | Mason (floor, labour) | labour | 1.058 | day | 950.00 | 1,004.63 |
-| foundation | Concrete mixer | machinery | 0.351 | day | 3,500.00 | 1,228.50 |
-| foundation | Formwork (foundation) | other | 5.760 | sqm | - | - |
+| foundation | Concrete mixer | machinery | 1.215 | day | 3,500.00 | 4,252.50 |
+| foundation | Formwork (foundation) | other | 28.800 | sqm | - | - |
 | floor | Formwork (floor) | other | 17.190 | sqm | - | - |
 
 ## Subtotals
 
 - floor: 36,937.61 BDT
-- foundation: 14,087.29 BDT
+- foundation: 48,763.68 BDT
 - site-excavation: 68,574.80 BDT
 
 ## By cost type
 
-- labour: 2,071.67 BDT
-- machinery: 69,803.30 BDT
-- material: 47,724.73 BDT
+- labour: 4,698.23 BDT
+- machinery: 72,827.30 BDT
+- material: 76,750.56 BDT
 
-**Total: 119,599.70 BDT** (9 priced lines, 2 unpriced: formwork-foundation, formwork-floor)
+**Total: 154,276.09 BDT** (9 priced lines, 2 unpriced: formwork-foundation, formwork-floor)
 
 _the quantities are measured from the design; the rates come from the rate card (dhaka-example-2026-10, status candidate)_
 
