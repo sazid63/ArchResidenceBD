@@ -1,9 +1,9 @@
 {
   "cases": {
-    "bytes": 293156,
+    "bytes": 294871,
     "count": 715,
     "path": "data/eval/chat-v0/cases.jsonl",
-    "sha256": "861feec455d86c12d5b3d7b1f3820c210b1837c7078f8a854d97cd04a9e3afee"
+    "sha256": "1147dc7a7d59fc814f5f129477a98e1e5afb7780dca97b40238b7a923f660365"
   },
   "harnessVersion": "eval-harness-0.1.0",
   "pins": {

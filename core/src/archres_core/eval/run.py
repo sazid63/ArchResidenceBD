@@ -182,14 +182,49 @@ def _summarize(
 # ------------------------------------------------------------------ rule.vector
 
 
-def run_rule_suite(cases: Sequence[EvalCase], pack: dict[str, Any]) -> SuiteResult:
-    rows = {row["id"]: row for row in compliance.run_vectors(pack)}
+def run_rule_suite(
+    cases: Sequence[EvalCase], packs: Sequence[dict[str, Any]] | dict[str, Any]
+) -> SuiteResult:
+    """Every pack's frozen vectors: the engine must still get the frozen answer.
+
+    The pack set is the whole of ``spec/rules/`` ✓, and each case is scored against **its
+    own** pack ✓ (the case names it ✓) - so a city pack's vectors (W4.5 ✓) are gated by the
+    same suite ✓, with no second code path to forget ✓ ✓.
+    """
+    if isinstance(packs, dict):
+        packs = [packs]
+    by_id = {str(pack.get("id")): pack for pack in packs}
+    rows_by_pack: dict[str, dict[str, Any]] = {
+        str(pack.get("id")): {row["id"]: row for row in compliance.run_vectors(pack)}
+        for pack in packs
+    }
     outcomes: list[CaseOutcome] = []
     for case in cases:
         vector = case.input["vector"]
+        pack_id = str(case.source.get("pack") or "")
+        rows = rows_by_pack.get(pack_id)
+        if rows is None:
+            outcomes.append(
+                _score(
+                    case,
+                    False,
+                    None,
+                    True,
+                    f"the case names the pack {pack_id!r}, which is not in the pack set",
+                )
+            )
+            continue
         row = rows.get(vector)
         if row is None:
-            outcomes.append(_score(case, False, None, True, "vector is missing from the pack"))
+            outcomes.append(
+                _score(
+                    case,
+                    False,
+                    None,
+                    True,
+                    f"vector {vector!r} is missing from the pack {pack_id!r}",
+                )
+            )
             continue
         outcomes.append(
             _score(

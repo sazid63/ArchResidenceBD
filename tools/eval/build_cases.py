@@ -31,6 +31,7 @@ from archres_core.eval import (
     dataset_parse_records,
     dumps_split,
     load_authored,
+    load_pack_set,
     load_split,
     replies_document,
     split_document,
@@ -40,7 +41,10 @@ from archres_core.rag.corpus import load_corpus
 from archres_core.stdio import utf8_stdio
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-PACK = ROOT / "spec" / "rules" / "rajuk-2008.yaml"
+#: The rule packs, **discovered** (W4.6): every pack in the directory is loaded and every
+#: pack's test vectors become cases, so a city pack (W4.5) arrives with its own gate.
+PACK_DIR = ROOT / "spec" / "rules"
+PACKS = sorted(PACK_DIR.glob("*.yaml"))
 CORPUS = ROOT / "spec" / "rag" / "rajuk-2008.corpus.jsonl"
 DATASET = ROOT / "data" / "training" / "chat-v0" / "dataset.jsonl"
 OUT = ROOT / "data" / "eval" / "chat-v0"
@@ -103,10 +107,10 @@ def main(argv: list[str] | None = None) -> int:
                 return 0
 
         split = load_split(SPLIT)
-        pack = compliance.load_pack(PACK)
+        packs = load_pack_set(PACK_DIR)
         corpus_ids = [document.id for document in load_corpus(CORPUS).docs]
         cases = build_cases(
-            pack=pack,
+            packs=packs,
             dataset_path=DATASET,
             authored_path=AUTHORED,
             split=split,
@@ -121,8 +125,9 @@ def main(argv: list[str] | None = None) -> int:
             split_path=SPLIT,
             split=split,
             dataset_path=DATASET,
-            pack_path=PACK,
-            pack_sha256=compliance.pack_sha256(PACK),
+            pack_path=PACKS[0],
+            pack_sha256=compliance.pack_sha256(PACKS[0]),
+            pack_set=packs,
             corpus_path=CORPUS,
             replies=_reply_pins(),
         )

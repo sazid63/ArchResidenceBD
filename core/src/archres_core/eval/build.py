@@ -18,7 +18,7 @@ from __future__ import annotations
 import hashlib
 import json
 import pathlib
-from typing import Any, Iterable
+from typing import Any, Iterable, Sequence
 
 import yaml
 
@@ -61,24 +61,79 @@ def _sha256_file(path: pathlib.Path) -> str:
 # ------------------------------------------------------------------ rule vectors
 
 
+def load_pack_set(pack_dir: pathlib.Path) -> list[dict[str, Any]]:
+    """Every rule pack in the directory, loaded and checked.
+
+    A pack that does not load is an error, not a skip: a rule pack whose numbers cannot be
+    read is a rule pack nobody can rely on ✓ ✓.
+    """
+    from ..compliance import load_pack
+
+    paths = sorted(pathlib.Path(pack_dir).glob("*.yaml"))
+    if not paths:
+        raise EvalError(f"no rule pack found in {pack_dir}")
+    packs: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for path in paths:
+        pack = load_pack(path)
+        pack_id = str(pack.get("id") or "")
+        if not pack_id:
+            raise EvalError(f"{path.name}: the pack carries no id")
+        if pack_id in seen:
+            raise EvalError(f"two packs share the id {pack_id!r}")
+        seen.add(pack_id)
+        packs.append(pack)
+    return packs
+
+
 def build_rule_cases(pack: dict[str, Any]) -> list[EvalCase]:
-    """One case per pack test vector: the engine must still get the frozen answer."""
+    """One case per pack test vector: the engine must still get the frozen answer.
+
+    The case id is **pack-qualified** ✓: the vector ids are the pack's own names ✓, and two
+    packs may well use the same one ✓ (a FAR table row named the same in two authorities
+    ✓) - so the id carries the pack ✓, and what must be unique is the (pack, vector) pair
+    ✓ ✓.
+    """
     cases: list[EvalCase] = []
     for vector in pack.get("testVectors") or []:
         vector_id = vector["id"]
         cases.append(
             EvalCase(
-                id=f"rule.vector:{vector_id}",
+                id=f"rule.vector:{pack['id']}:{vector_id}",
                 suite="rule.vector",
                 lang=None,
                 split="engine",
                 source={"kind": "rule-pack", "pack": pack["id"]},
-                input={"vector": vector_id, "kind": vector.get("kind")},
+                input={"vector": vector_id, "kind": vector.get("kind"), "pack": pack["id"]},
                 expect={"ok": True},
             )
         )
     if not cases:
-        raise EvalError("the rule pack carries no test vectors")
+        raise EvalError(f"the rule pack {pack.get('id')!r} carries no test vectors")
+    return cases
+
+
+def build_rule_cases_for_packs(packs: Sequence[dict[str, Any]]) -> list[EvalCase]:
+    """Every pack's vectors, as one case set.
+
+    The pack set is **discovered** (every pack in ``spec/rules/`` ✓), so a city pack that
+    arrives (W4.5 ✓) brings its vectors with it ✓ - a pack whose numbers nobody checks is a
+    pack whose numbers are guesses ✓ ✓.
+    """
+    cases: list[EvalCase] = []
+    seen: set[tuple[str, str]] = set()
+    for pack in packs:
+        for case in build_rule_cases(pack):
+            key = (str(case.source.get("pack")), str(case.input.get("vector")))
+            if key in seen:
+                raise EvalError(
+                    f"the pack {key[0]!r} carries the test vector {key[1]!r} twice - the "
+                    "vectors must be unique within a pack"
+                )
+            seen.add(key)
+            cases.append(case)
+    if not cases:
+        raise EvalError("the pack set carries no test vectors")
     return cases
 
 
@@ -346,7 +401,7 @@ def dataset_parse_records(path: str | pathlib.Path) -> list[dict[str, Any]]:
 
 def build_cases(
     *,
-    pack: dict[str, Any],
+    packs: Sequence[dict[str, Any]],
     dataset_path: str | pathlib.Path,
     authored_path: str | pathlib.Path,
     split: dict[str, Any],
@@ -371,7 +426,7 @@ def build_cases(
                     "(rebuild it, or fix the authored doc id)"
                 )
     cases = (
-        build_rule_cases(pack)
+        build_rule_cases_for_packs(packs)
         + parse_cases
         + build_model_cases(parse_cases)
         + build_model_safety_cases(parse_cases)
@@ -400,6 +455,7 @@ def build_manifest(
     dataset_path: pathlib.Path,
     pack_path: pathlib.Path,
     pack_sha256: str,
+    pack_set: Sequence[dict[str, Any]] = (),
     corpus_path: pathlib.Path,
     replies: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:

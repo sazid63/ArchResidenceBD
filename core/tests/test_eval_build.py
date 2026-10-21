@@ -20,6 +20,7 @@ from archres_core.eval import (
     dumps_split,
     load_authored,
     load_cases,
+    load_pack_set,
     load_split,
     replies_document,
     split_document,
@@ -29,6 +30,7 @@ from archres_core.eval.cases import EvalError, cases_bytes
 from archres_core.rag.corpus import load_corpus
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
+PACK_DIR = ROOT / "spec" / "rules"
 OUT = ROOT / "data" / "eval" / "chat-v0"
 PACK = ROOT / "spec" / "rules" / "rajuk-2008.yaml"
 CORPUS = ROOT / "spec" / "rag" / "rajuk-2008.corpus.jsonl"
@@ -47,7 +49,7 @@ def pack() -> dict:
 @pytest.fixture(scope="module")
 def built(pack) -> list:
     return build_cases(
-        pack=pack,
+        packs=load_pack_set(PACK_DIR),
         dataset_path=DATASET,
         authored_path=AUTHORED,
         split=load_split(SPLIT),
@@ -110,7 +112,7 @@ def test_an_authored_document_id_must_exist_in_the_corpus(pack) -> None:
         path.write_text(yaml.safe_dump(document, allow_unicode=True), encoding="utf-8")
         with pytest.raises(EvalError, match="is not in the corpus"):
             build_cases(
-                pack=pack,
+        packs=load_pack_set(PACK_DIR),
                 dataset_path=DATASET,
                 authored_path=path,
                 split=load_split(SPLIT),
@@ -296,7 +298,7 @@ def test_manifest_pins_the_split_document(built) -> None:
         split_path=SPLIT,
         split=split,
         dataset_path=DATASET,
-        pack_path=PACK,
+        pack_path=PACK_DIR / "rajuk-2008.yaml",
         pack_sha256=compliance.pack_sha256(PACK),
         corpus_path=CORPUS,
         replies={},

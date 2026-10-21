@@ -33,6 +33,7 @@ from archres_core.eval import (
     dumps_report,
     load_authored,
     load_cases,
+    load_pack_set,
     load_replies,
     load_split,
     render_markdown,
@@ -51,7 +52,10 @@ from archres_core.rag import HashingEmbedder, LexicalReranker, service_from_path
 from archres_core.stdio import utf8_stdio
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-PACK = ROOT / "spec" / "rules" / "rajuk-2008.yaml"
+#: The rule packs, **discovered** (W4.6): every pack in the directory is loaded and every
+#: pack's test vectors become cases, so a city pack (W4.5) arrives with its own gate.
+PACK_DIR = ROOT / "spec" / "rules"
+PACKS = sorted(PACK_DIR.glob("*.yaml"))
 CORPUS = ROOT / "spec" / "rag" / "rajuk-2008.corpus.jsonl"
 OUT = ROOT / "data" / "eval" / "chat-v0"
 CASES = OUT / "cases.jsonl"
@@ -132,9 +136,10 @@ def main(argv: list[str] | None = None) -> int:
                 "the case file disagrees with the frozen split: " + "; ".join(problems[:5])
             )
         book = load_book(ROOT / "spec" / "flows" / "phase-flow-book.yaml")
-        pack = compliance.load_pack(PACK)
-        pack_path = PACK
-        pack_sha = compliance.pack_sha256(PACK)
+        packs = load_pack_set(PACK_DIR)
+        pack = packs[0]
+        pack_path = PACKS[0]
+        pack_sha = compliance.pack_sha256(pack_path)
         service = service_from_paths(
             CORPUS, embedder=HashingEmbedder(), reranker=LexicalReranker()
         )
@@ -155,7 +160,7 @@ def main(argv: list[str] | None = None) -> int:
         by_suite.setdefault(case.suite, []).append(case)
 
     suites = [
-        run_rule_suite(by_suite.get("rule.vector", []), pack),
+        run_rule_suite(by_suite.get("rule.vector", []), packs),
         run_parse_suite(by_suite.get("parse", []), book),
         run_model_suite(by_suite.get("model.parse", []), replies),
         run_model_safety_suite(by_suite.get("model.safety", []), replies, book),
