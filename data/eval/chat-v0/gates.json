@@ -85,6 +85,20 @@
       "note": "demo end state is frozen"
     },
     {
+      "suite": "golden",
+      "metric": "engineerCheckSigned",
+      "floor": 1.0,
+      "pending": true,
+      "ownerItem": 9,
+      "note": "plan section 7: the drawings engineer-checked - a human act, recorded in data/eval/chat-v0/engineer-check.json; pending until it is signed"
+    },
+    {
+      "suite": "golden",
+      "metric": "boqDeviationPct",
+      "max": 8.0,
+      "note": "plan section 7: the golden project's BOQ within 8% of the committed reference"
+    },
+    {
       "suite": "register",
       "metric": "accuracy",
       "floor": 1.0,

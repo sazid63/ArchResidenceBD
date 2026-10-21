@@ -26,6 +26,7 @@ import sys
 from archres_core import compliance
 from archres_core.agent import LawDesk
 from archres_core.eval import (
+    EvalCase,
     build_report,
     check_split,
     coverage_probes,
@@ -35,6 +36,7 @@ from archres_core.eval import (
     load_replies,
     load_split,
     render_markdown,
+    run_golden_suite,
     run_model_suite,
     run_model_safety_suite,
     run_parse_suite,
@@ -56,8 +58,33 @@ CASES = OUT / "cases.jsonl"
 SPLIT = OUT / "split.json"
 MANIFEST = OUT / "manifest.json"
 GATES = OUT / "gates.json"
+#: The golden project (plan section 7: "golden projects - BOQ within 8%"): the app's own
+#: path on the reference project, compared with the committed reference BOQ.
+GOLDEN_SPEC = ROOT / "spec" / "examples" / "two-storey-residential.json"
+GOLDEN_REFERENCE = ROOT / "data" / "boq" / "two-storey-residential.boq.json"
+GOLDEN_CARD = ROOT / "spec" / "examples" / "interfaces" / "rate-card-dhaka-example.json"
+#: The engineer's check (plan section 7: "drawings engineer-checked") is a human act; the
+#: record is where it is written down. Until it is signed the gate is *pending* - named, not
+#: silent, and not blocking the build.
+ENGINEER_CHECK = OUT / "engineer-check.json"
 AUTHORED = OUT / "authored.yaml"
 REPLIES = OUT / "replies"
+
+
+def _golden_case(tolerance_pct: float) -> EvalCase:
+    """The golden project's case: the app's path, against the committed reference BOQ."""
+    return EvalCase(
+        id="golden-two-storey-residential",
+        suite="golden",
+        lang=None,
+        split="engine",
+        source={"kind": "golden", "note": "the reference project (plan section 7)"},
+        input={
+            "spec": str(GOLDEN_SPEC.relative_to(ROOT)),
+            "reference": str(GOLDEN_REFERENCE.relative_to(ROOT)),
+        },
+        expect={"tolerancePct": tolerance_pct},
+    )
 
 
 def _path(value: str | None) -> pathlib.Path | None:
@@ -75,9 +102,13 @@ def _load_gates() -> list[dict]:
     if not isinstance(gates, list) or not gates:
         raise EvalError("gate file has no gates")
     for gate in gates:
-        for key in ("suite", "metric", "floor"):
+        for key in ("suite", "metric"):
             if key not in gate:
                 raise EvalError(f"gate {gate!r} is missing {key!r}")
+        # A gate carries a floor, a ceiling, or both - a band. "BOQ within 8% of the
+        # reference" is a band; "CAD execution success above 90%" is a floor.
+        if "floor" not in gate and "max" not in gate:
+            raise EvalError(f"gate {gate!r} has neither a 'floor' nor a 'max'")
     return gates
 
 
@@ -115,6 +146,10 @@ def main(argv: list[str] | None = None) -> int:
         print(f"eval harness cannot run: {exc}", file=sys.stderr)
         return 1
 
+    # The golden project (W4.3): the app's own path, against the committed reference BOQ.
+    golden_tolerance = 8.0
+    cases = [*cases, _golden_case(golden_tolerance)]
+
     by_suite: dict[str, list] = {}
     for case in cases:
         by_suite.setdefault(case.suite, []).append(case)
@@ -127,6 +162,17 @@ def main(argv: list[str] | None = None) -> int:
         run_rag_suite(by_suite.get("rag", []), desk),
         run_scenario_suite(by_suite.get("scenario", []), ROOT),
         run_register_suite(by_suite.get("register", []), pack, pack_path, ROOT),
+        run_golden_suite(
+            by_suite.get("golden", []),
+            ROOT,
+            json.loads(GOLDEN_REFERENCE.read_text(encoding="utf-8")),
+            json.loads(GOLDEN_CARD.read_text(encoding="utf-8")),
+            engineer_check=(
+                json.loads(ENGINEER_CHECK.read_text(encoding="utf-8"))
+                if ENGINEER_CHECK.is_file()
+                else {}
+            ),
+        ),
     ]
     suites = [suite for suite in suites if suite.cases > 0]
 
@@ -180,11 +226,24 @@ def main(argv: list[str] | None = None) -> int:
             + ("" if not suite["failed"] else f"  ({suite['failed']} failed)")
         )
     for gate in report["gates"]:
+        floor = gate.get("floor")
+        ceiling = gate.get("max")
+        if floor is not None and ceiling is not None:
+            bound = f"{floor:.3f} <= value <= {ceiling:.3f}"
+        elif floor is not None:
+            bound = f">= {floor:.3f}"
+        else:
+            bound = f"<= {ceiling:.3f}"
+        if gate.get("pending"):
+            # a pending gate is named, not hidden: it is waiting on a human or an owner item
+            owner = f" (owner item #{gate['ownerItem']})" if gate.get("ownerItem") else ""
+            print(
+                f"  gate {gate['suite']}/{gate['metric']}: {gate['value']:.3f} {bound} "
+                f"[PENDING{owner}]"
+            )
+            continue
         mark = "ok" if gate["ok"] else "FAIL"
-        print(
-            f"  gate {gate['suite']}/{gate['metric']}: {gate['value']:.3f} "
-            f">= {gate['floor']:.3f} [{mark}]"
-        )
+        print(f"  gate {gate['suite']}/{gate['metric']}: {gate['value']:.3f} {bound} [{mark}]")
 
     json_path = _path(args.json)
     if json_path:

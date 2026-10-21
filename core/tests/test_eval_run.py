@@ -517,7 +517,12 @@ def _cli(*args: str, encoding: str = "utf-8", env_overrides: dict | None = None)
 def test_the_eval_cli_passes_on_the_committed_set() -> None:
     result = _cli(str(ROOT / "tools" / "eval" / "run_eval.py"))
     assert result.returncode == 0, result.stdout + result.stderr
-    assert "715/715 cases" in result.stdout
+    # the golden project is the 716th case (715 in the frozen set + the golden run)
+    assert "716/716 cases" in result.stdout
+    # the plan's v1 gates are live: the BOQ band, and the engineer's check as a named pending gate
+    assert "gate golden/boqDeviationPct" in result.stdout
+    assert "gate golden/engineerCheckSigned" in result.stdout
+    assert "[PENDING (owner item #9)]" in result.stdout
     assert "PASS" in result.stdout
 
 

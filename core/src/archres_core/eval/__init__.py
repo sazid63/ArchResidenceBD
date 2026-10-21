@@ -57,6 +57,7 @@ from .run import (
     load_replies,
     render_markdown,
     run_model_safety_suite,
+    run_golden_suite,
     run_model_suite,
     run_parse_suite,
     run_rag_suite,

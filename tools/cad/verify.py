@@ -12,6 +12,7 @@ Exit code 1 on any failure.
 from __future__ import annotations
 
 import argparse
+import json
 import pathlib
 import sys
 
@@ -44,12 +45,44 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--json", help="write JSON report")
     parser.add_argument("--markdown", help="write Markdown report")
     parser.add_argument("--quiet", action="store_true", help="suppress stdout report")
+    parser.add_argument(
+        "--gate-min-success-rate",
+        type=float,
+        help=(
+            "the plan's v1 gate (section 7: CAD execution success above 90%%): read the report "
+            "at --json and fail when the success rate is below this"
+        ),
+    )
     args = parser.parse_args(argv)
 
     if args.check and args.run:
         parser.error("--check and --run are mutually exclusive")
+    if args.gate_min_success_rate is not None and not args.json:
+        parser.error("--gate-min-success-rate needs the report to read (--json)")
     if not args.check and not args.run:
         args.check = True
+
+    if args.gate_min_success_rate is not None:
+        # The gate reads the report the run wrote: the plan's v1 number is a **rate**, so the
+        # gate measures a rate rather than repeating the all-or-nothing verdict.
+        report_path = pathlib.Path(args.json)
+        if not report_path.is_file():
+            print(f"error: the gate needs the report {report_path} - run the cases first", file=sys.stderr)
+            return 1
+        document = json.loads(report_path.read_text(encoding="utf-8"))
+        verdicts = document.get("cases") or []
+        total = len(verdicts)
+        passed = sum(1 for verdict in verdicts if verdict.get("ok"))
+        rate = (passed / total) if total else 0.0
+        floor = float(args.gate_min_success_rate)
+        mark = "ok" if rate >= floor else "FAIL"
+        print(
+            f"gate cad/executionSuccessRate: {rate:.3f} >= {floor:.3f} "
+            f"({passed}/{total} cases) [{mark}]"
+        )
+        if rate < floor:
+            return 1
+        return 0
 
     try:
         if args.check:

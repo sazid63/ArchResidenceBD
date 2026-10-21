@@ -1,0 +1,7 @@
+{
+  "checkedAt": null,
+  "checkedBy": null,
+  "drawings": [],
+  "notes": "The engineer's check of the golden project's drawings (plan section 7: \"drawings engineer-checked\"). A human signs here: who, when, and what they saw. Until 'signed' is true the eval gate is PENDING - named, not silent - and it does not block the build.",
+  "signed": false
+}

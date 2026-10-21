@@ -37,6 +37,10 @@ from ..interview import load_book
 from ..interview.flow import FlowBook
 from ..interview.parse import DECISIONS, parse_answer
 from ..spec import apply_patch
+from ..design.boq import build_boq, design_takeoff
+from ..design.floor import design_typical_floor
+from ..design.foundation import design_foundation
+from ..design.rebar import design_rebar
 from .cases import EvalCase, EvalError
 
 HARNESS_VERSION = "eval-harness-0.1.0"
@@ -764,6 +768,71 @@ def _value_at(spec: dict[str, Any], pointer: str) -> Any:
     return node
 
 
+# ------------------------------------------------------------------ golden project
+
+
+def run_golden_suite(
+    cases: Sequence[EvalCase],
+    root: pathlib.Path,
+    reference: dict[str, Any],
+    card: dict[str, Any],
+    engineer_check: dict[str, Any] | None = None,
+) -> SuiteResult:
+    """The golden project: the app's own path, compared with the committed reference.
+
+    The plan's gate is "BOQ within 8%" (plan §7) - so the suite measures the **deviation**
+    from the reference and the gate carries the tolerance. The path is the app's real one
+    (the spec -> the foundation -> the floor -> the rebar -> the takeoff -> the priced BOQ), so
+    the number is the product's and not a re-statement of the reference.
+    """
+    outcomes: list[CaseOutcome] = []
+    for case in cases:
+        want = case.expect
+        try:
+            spec = json.loads((root / case.input["spec"]).read_text(encoding="utf-8"))
+            foundation = design_foundation(spec)
+            floor = design_typical_floor(spec, foundation, storey_index=1)
+            rebar = design_rebar(spec, foundation, floor)
+            takeoff = design_takeoff(spec, foundation, floor, rebar)
+            boq = build_boq(takeoff, card)
+            total = round(float(boq["totals"]["amountBdt"]), 2)
+            reference_total = round(float(reference["totals"]["amountBdt"]), 2)
+        except Exception as exc:  # noqa: BLE001 - a failed run is a failed case
+            outcomes.append(_score(case, False, None, want, f"raised {type(exc).__name__}: {exc}"))
+            continue
+        deviation = (
+            abs(total - reference_total) / reference_total * 100.0 if reference_total else 100.0
+        )
+        tolerance = float(want["tolerancePct"])
+        outcomes.append(
+            _score(
+                case,
+                deviation <= tolerance,
+                {
+                    "totalBdt": total,
+                    "referenceBdt": reference_total,
+                    "deviationPct": round(deviation, 4),
+                },
+                want,
+                f"the BOQ is {total:.2f} BDT against the reference {reference_total:.2f} BDT "
+                f"({deviation:.2f} % away, the tolerance is {tolerance:g} %)",
+            )
+        )
+    metrics: dict[str, float] = {}
+    if outcomes:
+        got = outcomes[0].got or {}
+        metrics = {
+            "boqTotalBdt": round(float(got.get("totalBdt") or 0.0), 2),
+            "boqReferenceBdt": round(float(got.get("referenceBdt") or 0.0), 2),
+            "boqDeviationPct": round(float(got.get("deviationPct") or 0.0), 4),
+        }
+    # The engineer's check is a human act (plan section 7: "drawings engineer-checked"). The
+    # suite reports whether it has happened; the gate says who is waiting for it.
+    signed = bool((engineer_check or {}).get("signed"))
+    metrics["engineerCheckSigned"] = 1.0 if signed else 0.0
+    return _summarize("golden", cases, outcomes, model=False, metrics=metrics)
+
+
 # ---------------------------------------------------------------------- report
 
 
@@ -786,13 +855,31 @@ def build_report(
         value = suite.metrics.get(gate["metric"])
         if value is None:
             raise EvalError(f"gate {gate['suite']}/{gate['metric']}: the suite reports no such metric")
+        # A gate may carry a floor, a ceiling, or both - a band. "BOQ within 8% of the
+        # reference" is a band; "CAD execution success above 90%" is a floor.
+        floor = gate.get("floor")
+        ceiling = gate.get("max")
+        if floor is None and ceiling is None:
+            raise EvalError(f"gate {gate!r} has neither a floor nor a ceiling")
+        ok = True
+        if floor is not None:
+            ok = ok and value >= float(floor)
+        if ceiling is not None:
+            ok = ok and value <= float(ceiling)
+        # A gate may be **pending** - waiting on a human, or on an owner item. A pending gate
+        # is not a pass and not a failure: it is reported, it is named, and it does not stop
+        # the build (plan section 9: explicit, user-visible state - never silent).
+        pending = bool(gate.get("pending"))
         gate_rows.append(
             {
                 "suite": gate["suite"],
                 "metric": gate["metric"],
-                "floor": gate["floor"],
+                "floor": floor,
+                "max": ceiling,
                 "value": value,
-                "ok": value >= gate["floor"],
+                "ok": ok,
+                "pending": pending,
+                "ownerItem": gate.get("ownerItem"),
                 "note": gate.get("note", ""),
             }
         )
@@ -825,7 +912,11 @@ def build_report(
         "suites": [suite.to_dict() for suite in suites],
         "gates": gate_rows,
         "coverageProbes": probes,
-        "ok": scored == len(cases) and all(row["ok"] for row in gate_rows),
+        "ok": (
+            scored == len(cases)
+            and all(row["ok"] for row in gate_rows if not row.get("pending"))
+        ),
+        "pendingGates": [row for row in gate_rows if row.get("pending")],
     }
 
 
