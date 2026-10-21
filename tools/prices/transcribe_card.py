@@ -156,13 +156,10 @@ UNIT_AT_END = re.compile(
 
 
 def _reader():
-    path = ROOT / "tools" / "prices" / "pdf_text.py"
-    spec = importlib.util.spec_from_file_location("pdf_text", path)
-    assert spec and spec.loader
-    module = importlib.util.module_from_spec(spec)
-    sys.modules["pdf_text"] = module
-    spec.loader.exec_module(module)
-    return module
+    """The PDF reader, from the core (W4.7: the core owns it, so the app can read a PDF)."""
+    from archres_core import pdf_text
+
+    return pdf_text
 
 
 def _book() -> pathlib.Path:

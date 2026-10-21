@@ -267,11 +267,41 @@ def _decode_string(token: bytes, cmap: dict[int, str]) -> str:
     return "".join(pieces)
 
 
-def _page_text(content: bytes, cmaps: dict[str, dict[int, str]]) -> str:
-    """The text of a content stream, with the words separated by spaces."""
+#: How far the text must move on the page before it counts as a new line (points).
+_LINE_EPSILON = 0.5
+
+
+def _numbers(stack: list[Any]) -> list[float]:
+    """The numbers on an operator's stack, in the order they were written."""
+    values: list[float] = []
+    for kind, value in stack:
+        if kind != "number":
+            continue
+        try:
+            values.append(float(value))
+        except (TypeError, ValueError):
+            continue
+    return values
+
+
+def _page_text(
+    content: bytes, cmaps: dict[str, dict[int, str]], *, lines: bool = False
+) -> str:
+    """The text of a content stream, with the words separated by spaces.
+
+    With ``lines`` the page keeps its **lines** - a newline is written whenever the text
+    moves to a different height on the page. That is the lightest reading of the layout:
+    it says where one line ends and the next begins, and nothing about columns, tables or
+    reading order. The default (``lines=False``) is the page's words run together, which is
+    what the price cards are read with.
+    """
     out: list[str] = []
     current: dict[int, str] = {}
     stack: list[Any] = []
+    # The text position: the line start (what Td is relative to) and the current point.
+    line_x = line_y = x = y = 0.0
+    leading = 0.0
+    last_y: float | None = None
     for match in _TOKEN_RE.finditer(content):
         if match.group("name"):
             stack.append(("name", match.group("name").decode("latin-1")))
@@ -288,18 +318,46 @@ def _page_text(content: bytes, cmaps: dict[str, dict[int, str]]) -> str:
             stack.append(("array", list(reversed(items))))
         elif match.group("other"):
             operator = match.group("other").decode("latin-1")
-            if operator == "Tf" and len(stack) >= 2:
+            if operator == "BT":
+                line_x = line_y = x = y = 0.0
+                leading = 0.0
+            elif operator in ("Td", "TD"):
+                numbers = _numbers(stack)
+                if len(numbers) >= 2:
+                    line_x += numbers[-2]
+                    line_y += numbers[-1]
+                    x, y = line_x, line_y
+                    if operator == "TD":
+                        leading = -numbers[-1]
+            elif operator == "Tm":
+                numbers = _numbers(stack)
+                if len(numbers) >= 6:
+                    line_x = x = numbers[-2]
+                    line_y = y = numbers[-1]
+            elif operator == "TL":
+                numbers = _numbers(stack)
+                if numbers:
+                    leading = numbers[-1]
+            elif operator == "T*":
+                line_y -= leading
+                x, y = line_x, line_y
+            elif operator == "Tf" and len(stack) >= 2:
                 name = next(
                     (value for kind, value in reversed(stack) if kind == "name"), None
                 )
                 if name:
                     current = cmaps.get(name.lstrip("/"), {})
             elif operator in ("Tj", "'", '"'):
+                if lines and last_y is not None and abs(y - last_y) > _LINE_EPSILON:
+                    out.append("\n")
                 for kind, value in reversed(stack):
                     if kind == "string":
                         out.append(_decode_string(value, current))
                         break
+                last_y = y
             elif operator == "TJ":
+                if lines and last_y is not None and abs(y - last_y) > _LINE_EPSILON:
+                    out.append("\n")
                 for kind, value in reversed(stack):
                     if kind == "array":
                         for element in value:
@@ -312,12 +370,19 @@ def _page_text(content: bytes, cmaps: dict[str, dict[int, str]]) -> str:
                                 except ValueError:
                                     pass
                         break
+                last_y = y
             stack.clear()
     return "".join(out)
 
 
-def read_pdf(path: str | pathlib.Path) -> PdfDocument:
-    """Read a PDF's pages and their text."""
+def read_pdf(path: str | pathlib.Path, *, lines: bool = False) -> PdfDocument:
+    """Read a PDF's pages and their text.
+
+    With ``lines`` the pages keep their **lines** (a newline where the text moves down the
+    page) - the BYO-PDF importer needs them, because a numbered provision opens a line
+    (W4.7). The default is the page's words run together, which is what the price cards
+    are read with.
+    """
     data = pathlib.Path(path).read_bytes()
     if not data.startswith(b"%PDF"):
         raise PdfError(f"{path} is not a PDF")
@@ -388,7 +453,7 @@ def read_pdf(path: str | pathlib.Path) -> PdfDocument:
                 cmaps[name.decode("latin-1")] = _parse_cmap(pdf.stream(to_unicode))
             except PdfError:
                 continue
-        text = _page_text(content, cmaps)
+        text = _page_text(content, cmaps, lines=lines)
         document.pages.append(PdfPage(number=index, text=text))
     return document
 

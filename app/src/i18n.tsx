@@ -112,6 +112,20 @@ const en = {
   cadOther: "Other",
   cadShow: "Show",
   cadHide: "Hide",
+  importReview: "Import review",
+  importReviewSubtitle: "Your own PDF becomes candidate clauses - candidates, never law.",
+  importLawNote:
+    "A candidate is not law. A human decides, and the decision is recorded with who and when.",
+  importCandidatesLabel: "Candidates",
+  importReviewedLabel: "Reviewed",
+  importCounts: "{done} of {total} reviewed",
+  importPage: "Page {n}",
+  importUnreviewed: "Not reviewed",
+  importAccepted: "Accepted",
+  importRejected: "Rejected",
+  importAccept: "Accept",
+  importReject: "Reject",
+  importReviewedBy: "by {name}",
 };
 
 const bn: typeof en = {
@@ -223,6 +237,21 @@ const bn: typeof en = {
   cadOther: "অন্যান্য",
   cadShow: "দেখান",
   cadHide: "লুকান",
+
+  importReview: "ইমপোর্ট পর্যালোচনা",
+  importReviewSubtitle: "আপনার নিজের PDF থেকে প্রার্থী বিধান তৈরি হয় — প্রার্থী, কখনও আইন নয়।",
+  importLawNote:
+    "একটি প্রার্থী আইন নয়। একজন মানুষ সিদ্ধান্ত নেন, এবং সেই সিদ্ধান্ত কে কখন নিয়েছেন তা নথিভুক্ত থাকে।",
+  importCandidatesLabel: "প্রার্থী",
+  importReviewedLabel: "পর্যালোচিত",
+  importCounts: "{total}টির মধ্যে {done}টি পর্যালোচিত",
+  importPage: "পৃষ্ঠা {n}",
+  importUnreviewed: "পর্যালোচনা হয়নি",
+  importAccepted: "গৃহীত",
+  importRejected: "বাতিল",
+  importAccept: "গ্রহণ করুন",
+  importReject: "বাতিল করুন",
+  importReviewedBy: "{name} কর্তৃক",
 };
 
 export const STRINGS = { en, bn } as const;

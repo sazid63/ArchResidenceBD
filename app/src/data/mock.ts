@@ -92,3 +92,72 @@ export const designStats = {
   model: "archie-r1 (preview)",
   phaseDesigns: "4 / 6",
 };
+
+/** A reviewer's decision on one candidate clause (W4.7). */
+export interface ImportReview {
+  decision: "accepted" | "rejected";
+  reviewedBy: string;
+  reviewedAt: string;
+  note: string;
+}
+
+/**
+ * One candidate clause from a user's own PDF (W4.7).
+ *
+ * The shape is the core's candidate document: a number, the page it is on, the excerpt,
+ * and the review - or `null`, which means nobody has looked at it yet. A candidate is
+ * never law: it is waiting for a human.
+ */
+export interface ImportCandidate {
+  id: string;
+  number: string;
+  page: number;
+  excerpt: string;
+  status: "candidate";
+  review: ImportReview | null;
+}
+
+export const importCandidates: ImportCandidate[] = [
+  {
+    id: "clause-3-15",
+    number: "3.15",
+    page: 12,
+    excerpt: "3.15 The minimum height of a room shall be 2.75 m.",
+    status: "candidate",
+    review: null,
+  },
+  {
+    id: "clause-3-16",
+    number: "3.16",
+    page: 12,
+    excerpt: "3.16 The clear width of a door shall not be less than 0.90 m.",
+    status: "candidate",
+    review: {
+      decision: "accepted",
+      reviewedBy: "an engineer",
+      reviewedAt: "2026-10-21",
+      note: "matches the gazette page 12",
+    },
+  },
+  {
+    id: "clause-3-17",
+    number: "3.17",
+    page: 12,
+    excerpt: "3.17 A flight of stairs shall not be steeper than 30 degrees.",
+    status: "candidate",
+    review: {
+      decision: "rejected",
+      reviewedBy: "an engineer",
+      reviewedAt: "2026-10-21",
+      note: "not a clause - it is a note under the table",
+    },
+  },
+  {
+    id: "clause-4-2",
+    number: "4.2",
+    page: 18,
+    excerpt: "4.2 A building shall be set back from the front boundary by the amount stated in the schedule.",
+    status: "candidate",
+    review: null,
+  },
+];

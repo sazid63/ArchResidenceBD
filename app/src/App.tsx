@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Sidebar } from "./layout/Sidebar";
 import { BoqScreen } from "./screens/BoqScreen";
 import { DocumentsScreen } from "./screens/DocumentsScreen";
+import { ImportReviewScreen } from "./screens/ImportReviewScreen";
 import { NativeCadScreen } from "./screens/NativeCadScreen";
 import { PhaseChatScreen } from "./screens/PhaseChatScreen";
 import { ProjectSetupScreen } from "./screens/ProjectSetupScreen";
@@ -26,6 +27,7 @@ function renderView(view: string, navigate: (id: string) => void) {
   // The design section opens the NativeCAD workspace: the engine's own geometry, not a mock.
   if (view.startsWith("design:")) return <NativeCadScreen />;
   if (view === "boq") return <BoqScreen />;
+  if (view === "import-review") return <ImportReviewScreen />;
   if (view.startsWith("docs:")) return <DocumentsScreen />;
   return <ProjectsScreen onNavigate={navigate} />;
 }

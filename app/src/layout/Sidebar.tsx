@@ -139,6 +139,13 @@ export function Sidebar({ active, onNavigate }: Props) {
         >
           <span className="grow">{t("boq")}</span>
         </button>
+        <button
+          type="button"
+          className={cx("nav-item", active === "import-review" && "active")}
+          onClick={() => onNavigate("import-review")}
+        >
+          <span className="grow">{t("importReview")}</span>
+        </button>
         {group("docs", t("documents"), docItems)}
       </nav>
       <div className="sidebar-foot">
