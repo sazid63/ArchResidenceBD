@@ -1,0 +1,795 @@
+{
+ "case": "two-storey-residential.json",
+ "schemaVersion": "0.1.0",
+ "storeys": [
+  {
+   "assumptions": [
+    {
+     "pointer": "mep.electrical.lightingPointsPer100m2",
+     "reason": "the lighting layout is computed from the floor's area, not from a room plan",
+     "unit": "points/100m²",
+     "value": 3.0
+    },
+    {
+     "pointer": "mep.electrical.powerOutletsPer100m2",
+     "reason": "the outlet layout is computed from the floor's area, not from a room plan",
+     "unit": "points/100m²",
+     "value": 4.0
+    },
+    {
+     "pointer": "mep.electrical.maxCircuitLoadW",
+     "reason": "the load one circuit may carry; the points are packed up to it",
+     "unit": "W",
+     "value": 3000.0
+    },
+    {
+     "pointer": "mep.electrical.lightingLoadW",
+     "reason": "the connected load of one lighting point",
+     "unit": "W",
+     "value": 40.0
+    },
+    {
+     "pointer": "mep.electrical.outletLoadW",
+     "reason": "the connected load of one power outlet",
+     "unit": "W",
+     "value": 100.0
+    },
+    {
+     "pointer": "mep.electrical.fanLoadW",
+     "reason": "the connected load of one ceiling fan",
+     "unit": "W",
+     "value": 60.0
+    },
+    {
+     "pointer": "mep.water.fixtureUnits",
+     "reason": "the fixture set of one unit; the v0 spec carries no room programme",
+     "unit": "FU",
+     "value": 7.0
+    },
+    {
+     "pointer": "mep.drainage.fall",
+     "reason": "the fall the horizontal branches are laid to; it is what carries the water",
+     "unit": "1:60",
+     "value": 0.0
+    },
+    {
+     "pointer": "mep.drainage.stackDiameterMm",
+     "reason": "the soil stack's size; the v0 spec carries no drainage layout",
+     "unit": "mm",
+     "value": 100.0
+    },
+    {
+     "pointer": "mep.gas.cookerLoadM3PerH",
+     "reason": "the load of one domestic cooker (Titas)",
+     "unit": "m³/h",
+     "value": 0.5
+    },
+    {
+     "pointer": "mep.gas.pipeDiameterMm",
+     "reason": "the gas run's size; the v0 spec carries no gas layout",
+     "unit": "mm",
+     "value": 15.0
+    },
+    {
+     "pointer": "mep.lift.powerKw",
+     "reason": "the lift's motor power; the fit check itself is W2.12's",
+     "unit": "kW",
+     "value": 5.0
+    }
+   ],
+   "circuits": [
+    {
+     "breakerA": 20.0,
+     "cableSqMm": 2.5,
+     "id": "circuit-0-1",
+     "kind": "lighting-and-power",
+     "loadW": 200.0,
+     "pointIds": [
+      "light-1",
+      "outlet-1",
+      "fan-1"
+     ],
+     "storeyIndex": 0,
+     "voltageV": 230.0
+    }
+   ],
+   "declaredAbsent": [
+    "the riser that serves the floors above: each storey is sized for its own fixtures, and the riser's design is not done here",
+    "the 3D routing between the points: the plan's §5.7 puts full 3D routing in v2, so v0 has the point layouts and the runs (W2.12) and no connection between them",
+    "the switchboards, the main incoming feeder and the service capacity: the v0 spec carries no supply data, so the schedules size the loads and stop there",
+    "the drainage's vent pipes and the floor-trap details: the v0 spec carries no drainage layout, so the branches carry the fall and nothing else",
+    "the points' coordination with the structure: the layouts are an even grid over the floor, and the clash report is W3.2's job"
+   ],
+   "points": [
+    {
+     "fixtureUnits": 0.0,
+     "id": "light-1",
+     "kind": "light",
+     "loadM3PerH": 0.0,
+     "loadW": 40.0,
+     "note": "a ceiling lighting point",
+     "storeyIndex": 0,
+     "system": "electrical",
+     "xMm": 600.0,
+     "yMm": 0.0,
+     "zMm": 2700.0
+    },
+    {
+     "fixtureUnits": 0.0,
+     "id": "outlet-1",
+     "kind": "outlet",
+     "loadM3PerH": 0.0,
+     "loadW": 100.0,
+     "note": "a power outlet",
+     "storeyIndex": 0,
+     "system": "electrical",
+     "xMm": 600.0,
+     "yMm": 0.0,
+     "zMm": 300.0
+    },
+    {
+     "fixtureUnits": 0.0,
+     "id": "fan-1",
+     "kind": "fan",
+     "loadM3PerH": 0.0,
+     "loadW": 60.0,
+     "note": "a ceiling fan",
+     "storeyIndex": 0,
+     "system": "electrical",
+     "xMm": 600.0,
+     "yMm": 0.0,
+     "zMm": 2400.0
+    },
+    {
+     "fixtureUnits": 0.0,
+     "id": "stack-1",
+     "kind": "soilStack",
+     "loadM3PerH": 0.0,
+     "loadW": 0.0,
+     "note": "the soil stack; the branches are laid at 1:60",
+     "storeyIndex": 0,
+     "system": "drainage",
+     "xMm": 600.0,
+     "yMm": 600.0,
+     "zMm": 0.0
+    }
+   ],
+   "projectId": "7c9e6f10-2a3b-4c5d-9e8f-1a2b3c4d5e6f",
+   "schedules": [
+    {
+     "description": "Circuit circuit-0-1 (storey 0)",
+     "id": "circuit-0-1",
+     "load": "200 W",
+     "note": "the connected load of the points on this circuit",
+     "quantity": 3,
+     "size": "2.5 mm² cable, 20 A breaker",
+     "system": "electrical",
+     "unit": "points"
+    },
+    {
+     "description": "The total connected load",
+     "id": "total",
+     "load": "200 W",
+     "note": "the sum of the circuits' loads; the service capacity is not designed here",
+     "quantity": 1,
+     "size": "230 V",
+     "system": "electrical",
+     "unit": "circuits"
+    },
+    {
+     "description": "The soil stack",
+     "id": "stack",
+     "load": "",
+     "note": "vertical; the branches that discharge into it carry the fall",
+     "quantity": 1,
+     "size": "100 mm",
+     "system": "drainage",
+     "unit": "no."
+    },
+    {
+     "description": "The lift",
+     "id": "1",
+     "load": "5 kW, 5 persons",
+     "note": "the car fits inside the shaft, with a hand's width of clearance on each side",
+     "quantity": 1,
+     "size": "1800 mm shaft, 1400 mm car",
+     "system": "lift",
+     "unit": "no."
+    }
+   ],
+   "storeyIndex": 0,
+   "storeyLabel": "floor-0",
+   "values": {
+    "mep.area.floorAreaM2": {
+     "provenance": "derived",
+     "reason": "0 unit(s) on this storey",
+     "source": "the slab's extent",
+     "unit": "m²",
+     "value": 2.79
+    },
+    "mep.electrical.totalLoadW": {
+     "provenance": "derived",
+     "reason": "1 circuits",
+     "source": "the points on this storey",
+     "unit": "W",
+     "value": 200.0
+    },
+    "mep.gas.totalLoadM3PerH": {
+     "provenance": "derived",
+     "reason": "0 cooker(s)",
+     "source": "the cookers on this storey",
+     "unit": "m³/h",
+     "value": 0.0
+    },
+    "mep.water.supplyPipeMm": {
+     "provenance": "derived",
+     "reason": "0 FU",
+     "source": "the fixture units it serves",
+     "unit": "mm",
+     "value": 15.0
+    },
+    "mep.water.totalFixtureUnits": {
+     "provenance": "derived",
+     "reason": "2 unit(s) x 7.0 FU",
+     "source": "the fixtures on this storey",
+     "unit": "FU",
+     "value": 0.0
+    }
+   }
+  },
+  {
+   "assumptions": [
+    {
+     "pointer": "mep.electrical.lightingPointsPer100m2",
+     "reason": "the lighting layout is computed from the floor's area, not from a room plan",
+     "unit": "points/100m²",
+     "value": 3.0
+    },
+    {
+     "pointer": "mep.electrical.powerOutletsPer100m2",
+     "reason": "the outlet layout is computed from the floor's area, not from a room plan",
+     "unit": "points/100m²",
+     "value": 4.0
+    },
+    {
+     "pointer": "mep.electrical.maxCircuitLoadW",
+     "reason": "the load one circuit may carry; the points are packed up to it",
+     "unit": "W",
+     "value": 3000.0
+    },
+    {
+     "pointer": "mep.electrical.lightingLoadW",
+     "reason": "the connected load of one lighting point",
+     "unit": "W",
+     "value": 40.0
+    },
+    {
+     "pointer": "mep.electrical.outletLoadW",
+     "reason": "the connected load of one power outlet",
+     "unit": "W",
+     "value": 100.0
+    },
+    {
+     "pointer": "mep.electrical.fanLoadW",
+     "reason": "the connected load of one ceiling fan",
+     "unit": "W",
+     "value": 60.0
+    },
+    {
+     "pointer": "mep.water.fixtureUnits",
+     "reason": "the fixture set of one unit; the v0 spec carries no room programme",
+     "unit": "FU",
+     "value": 7.0
+    },
+    {
+     "pointer": "mep.drainage.fall",
+     "reason": "the fall the horizontal branches are laid to; it is what carries the water",
+     "unit": "1:60",
+     "value": 0.0
+    },
+    {
+     "pointer": "mep.drainage.stackDiameterMm",
+     "reason": "the soil stack's size; the v0 spec carries no drainage layout",
+     "unit": "mm",
+     "value": 100.0
+    },
+    {
+     "pointer": "mep.gas.cookerLoadM3PerH",
+     "reason": "the load of one domestic cooker (Titas)",
+     "unit": "m³/h",
+     "value": 0.5
+    },
+    {
+     "pointer": "mep.gas.pipeDiameterMm",
+     "reason": "the gas run's size; the v0 spec carries no gas layout",
+     "unit": "mm",
+     "value": 15.0
+    },
+    {
+     "pointer": "mep.lift.powerKw",
+     "reason": "the lift's motor power; the fit check itself is W2.12's",
+     "unit": "kW",
+     "value": 5.0
+    }
+   ],
+   "circuits": [
+    {
+     "breakerA": 20.0,
+     "cableSqMm": 2.5,
+     "id": "circuit-1-1",
+     "kind": "lighting-and-power",
+     "loadW": 720.0,
+     "pointIds": [
+      "light-1",
+      "light-2",
+      "light-3",
+      "light-4",
+      "outlet-1",
+      "outlet-2",
+      "outlet-3",
+      "outlet-4",
+      "outlet-5",
+      "fan-1"
+     ],
+     "storeyIndex": 1,
+     "voltageV": 230.0
+    }
+   ],
+   "declaredAbsent": [
+    "the riser that serves the floors above: each storey is sized for its own fixtures, and the riser's design is not done here",
+    "the 3D routing between the points: the plan's §5.7 puts full 3D routing in v2, so v0 has the point layouts and the runs (W2.12) and no connection between them",
+    "the switchboards, the main incoming feeder and the service capacity: the v0 spec carries no supply data, so the schedules size the loads and stop there",
+    "the drainage's vent pipes and the floor-trap details: the v0 spec carries no drainage layout, so the branches carry the fall and nothing else",
+    "the points' coordination with the structure: the layouts are an even grid over the floor, and the clash report is W3.2's job"
+   ],
+   "points": [
+    {
+     "fixtureUnits": 0.0,
+     "id": "light-1",
+     "kind": "light",
+     "loadM3PerH": 0.0,
+     "loadW": 40.0,
+     "note": "a ceiling lighting point",
+     "storeyIndex": 1,
+     "system": "electrical",
+     "xMm": 600.0,
+     "yMm": 0.0,
+     "zMm": 5900.0
+    },
+    {
+     "fixtureUnits": 0.0,
+     "id": "light-2",
+     "kind": "light",
+     "loadM3PerH": 0.0,
+     "loadW": 40.0,
+     "note": "a ceiling lighting point",
+     "storeyIndex": 1,
+     "system": "electrical",
+     "xMm": 8700.0,
+     "yMm": 0.0,
+     "zMm": 5900.0
+    },
+    {
+     "fixtureUnits": 0.0,
+     "id": "light-3",
+     "kind": "light",
+     "loadM3PerH": 0.0,
+     "loadW": 40.0,
+     "note": "a ceiling lighting point",
+     "storeyIndex": 1,
+     "system": "electrical",
+     "xMm": 600.0,
+     "yMm": 0.0,
+     "zMm": 5900.0
+    },
+    {
+     "fixtureUnits": 0.0,
+     "id": "light-4",
+     "kind": "light",
+     "loadM3PerH": 0.0,
+     "loadW": 40.0,
+     "note": "a ceiling lighting point",
+     "storeyIndex": 1,
+     "system": "electrical",
+     "xMm": 8700.0,
+     "yMm": 0.0,
+     "zMm": 5900.0
+    },
+    {
+     "fixtureUnits": 0.0,
+     "id": "outlet-1",
+     "kind": "outlet",
+     "loadM3PerH": 0.0,
+     "loadW": 100.0,
+     "note": "a power outlet",
+     "storeyIndex": 1,
+     "system": "electrical",
+     "xMm": 600.0,
+     "yMm": 0.0,
+     "zMm": 3500.0
+    },
+    {
+     "fixtureUnits": 0.0,
+     "id": "outlet-2",
+     "kind": "outlet",
+     "loadM3PerH": 0.0,
+     "loadW": 100.0,
+     "note": "a power outlet",
+     "storeyIndex": 1,
+     "system": "electrical",
+     "xMm": 4650.0,
+     "yMm": 0.0,
+     "zMm": 3500.0
+    },
+    {
+     "fixtureUnits": 0.0,
+     "id": "outlet-3",
+     "kind": "outlet",
+     "loadM3PerH": 0.0,
+     "loadW": 100.0,
+     "note": "a power outlet",
+     "storeyIndex": 1,
+     "system": "electrical",
+     "xMm": 8700.0,
+     "yMm": 0.0,
+     "zMm": 3500.0
+    },
+    {
+     "fixtureUnits": 0.0,
+     "id": "outlet-4",
+     "kind": "outlet",
+     "loadM3PerH": 0.0,
+     "loadW": 100.0,
+     "note": "a power outlet",
+     "storeyIndex": 1,
+     "system": "electrical",
+     "xMm": 600.0,
+     "yMm": 0.0,
+     "zMm": 3500.0
+    },
+    {
+     "fixtureUnits": 0.0,
+     "id": "outlet-5",
+     "kind": "outlet",
+     "loadM3PerH": 0.0,
+     "loadW": 100.0,
+     "note": "a power outlet",
+     "storeyIndex": 1,
+     "system": "electrical",
+     "xMm": 4650.0,
+     "yMm": 0.0,
+     "zMm": 3500.0
+    },
+    {
+     "fixtureUnits": 0.0,
+     "id": "fan-1",
+     "kind": "fan",
+     "loadM3PerH": 0.0,
+     "loadW": 60.0,
+     "note": "a ceiling fan",
+     "storeyIndex": 1,
+     "system": "electrical",
+     "xMm": 600.0,
+     "yMm": 0.0,
+     "zMm": 5600.0
+    },
+    {
+     "fixtureUnits": 1.0,
+     "id": "basin-1",
+     "kind": "basin",
+     "loadM3PerH": 0.0,
+     "loadW": 0.0,
+     "note": "a wash basin",
+     "storeyIndex": 1,
+     "system": "water",
+     "xMm": 600.0,
+     "yMm": 600.0,
+     "zMm": 3650.0
+    },
+    {
+     "fixtureUnits": 1.0,
+     "id": "basin-2",
+     "kind": "basin",
+     "loadM3PerH": 0.0,
+     "loadW": 0.0,
+     "note": "a wash basin",
+     "storeyIndex": 1,
+     "system": "water",
+     "xMm": 1200.0,
+     "yMm": 600.0,
+     "zMm": 3650.0
+    },
+    {
+     "fixtureUnits": 2.0,
+     "id": "wc-1",
+     "kind": "wc",
+     "loadM3PerH": 0.0,
+     "loadW": 0.0,
+     "note": "a WC (tank)",
+     "storeyIndex": 1,
+     "system": "water",
+     "xMm": 600.0,
+     "yMm": 600.0,
+     "zMm": 3650.0
+    },
+    {
+     "fixtureUnits": 2.0,
+     "id": "wc-2",
+     "kind": "wc",
+     "loadM3PerH": 0.0,
+     "loadW": 0.0,
+     "note": "a WC (tank)",
+     "storeyIndex": 1,
+     "system": "water",
+     "xMm": 1200.0,
+     "yMm": 600.0,
+     "zMm": 3650.0
+    },
+    {
+     "fixtureUnits": 2.0,
+     "id": "shower-1",
+     "kind": "shower",
+     "loadM3PerH": 0.0,
+     "loadW": 0.0,
+     "note": "a shower",
+     "storeyIndex": 1,
+     "system": "water",
+     "xMm": 600.0,
+     "yMm": 600.0,
+     "zMm": 3650.0
+    },
+    {
+     "fixtureUnits": 2.0,
+     "id": "shower-2",
+     "kind": "shower",
+     "loadM3PerH": 0.0,
+     "loadW": 0.0,
+     "note": "a shower",
+     "storeyIndex": 1,
+     "system": "water",
+     "xMm": 1200.0,
+     "yMm": 600.0,
+     "zMm": 3650.0
+    },
+    {
+     "fixtureUnits": 2.0,
+     "id": "kitchenSink-1",
+     "kind": "kitchenSink",
+     "loadM3PerH": 0.0,
+     "loadW": 0.0,
+     "note": "a kitchen sink",
+     "storeyIndex": 1,
+     "system": "water",
+     "xMm": 600.0,
+     "yMm": 600.0,
+     "zMm": 3650.0
+    },
+    {
+     "fixtureUnits": 2.0,
+     "id": "kitchenSink-2",
+     "kind": "kitchenSink",
+     "loadM3PerH": 0.0,
+     "loadW": 0.0,
+     "note": "a kitchen sink",
+     "storeyIndex": 1,
+     "system": "water",
+     "xMm": 1200.0,
+     "yMm": 600.0,
+     "zMm": 3650.0
+    },
+    {
+     "fixtureUnits": 0.0,
+     "id": "stack-1",
+     "kind": "soilStack",
+     "loadM3PerH": 0.0,
+     "loadW": 0.0,
+     "note": "the soil stack; the branches are laid at 1:60",
+     "storeyIndex": 1,
+     "system": "drainage",
+     "xMm": 600.0,
+     "yMm": 600.0,
+     "zMm": 3200.0
+    },
+    {
+     "fixtureUnits": 0.0,
+     "id": "cooker-1",
+     "kind": "cooker",
+     "loadM3PerH": 0.5,
+     "loadW": 0.0,
+     "note": "a domestic gas cooker (Titas)",
+     "storeyIndex": 1,
+     "system": "gas",
+     "xMm": 9000.0,
+     "yMm": 0.0,
+     "zMm": 4100.0
+    },
+    {
+     "fixtureUnits": 0.0,
+     "id": "cooker-2",
+     "kind": "cooker",
+     "loadM3PerH": 0.5,
+     "loadW": 0.0,
+     "note": "a domestic gas cooker (Titas)",
+     "storeyIndex": 1,
+     "system": "gas",
+     "xMm": 8700.0,
+     "yMm": 0.0,
+     "zMm": 4100.0
+    },
+    {
+     "fixtureUnits": 0.0,
+     "id": "meter-1",
+     "kind": "meter",
+     "loadM3PerH": 0.0,
+     "loadW": 0.0,
+     "note": "the gas meter; the run is sized by the load it carries",
+     "storeyIndex": 1,
+     "system": "gas",
+     "xMm": 9000.0,
+     "yMm": 300.0,
+     "zMm": 4700.0
+    }
+   ],
+   "projectId": "7c9e6f10-2a3b-4c5d-9e8f-1a2b3c4d5e6f",
+   "schedules": [
+    {
+     "description": "Circuit circuit-1-1 (storey 1)",
+     "id": "circuit-1-1",
+     "load": "720 W",
+     "note": "the connected load of the points on this circuit",
+     "quantity": 10,
+     "size": "2.5 mm² cable, 20 A breaker",
+     "system": "electrical",
+     "unit": "points"
+    },
+    {
+     "description": "The total connected load",
+     "id": "total",
+     "load": "720 W",
+     "note": "the sum of the circuits' loads; the service capacity is not designed here",
+     "quantity": 1,
+     "size": "230 V",
+     "system": "electrical",
+     "unit": "circuits"
+    },
+    {
+     "description": "a wash basin",
+     "id": "basin",
+     "load": "2 FU",
+     "note": "the fixture unit is the sizing unit for the supply",
+     "quantity": 2,
+     "size": "1 fixture units",
+     "system": "water",
+     "unit": "no."
+    },
+    {
+     "description": "a WC (tank)",
+     "id": "wc",
+     "load": "4 FU",
+     "note": "the fixture unit is the sizing unit for the supply",
+     "quantity": 2,
+     "size": "2 fixture units",
+     "system": "water",
+     "unit": "no."
+    },
+    {
+     "description": "a shower",
+     "id": "shower",
+     "load": "4 FU",
+     "note": "the fixture unit is the sizing unit for the supply",
+     "quantity": 2,
+     "size": "2 fixture units",
+     "system": "water",
+     "unit": "no."
+    },
+    {
+     "description": "a kitchen sink",
+     "id": "kitchenSink",
+     "load": "4 FU",
+     "note": "the fixture unit is the sizing unit for the supply",
+     "quantity": 2,
+     "size": "2 fixture units",
+     "system": "water",
+     "unit": "no."
+    },
+    {
+     "description": "The fixture supply pipe",
+     "id": "supply",
+     "load": "14 FU",
+     "note": "sized by the fixture units it serves; the grid's main (W2.12) is the pipe these branches come off",
+     "quantity": 1,
+     "size": "25 mm",
+     "system": "water",
+     "unit": "no."
+    },
+    {
+     "description": "The soil stack",
+     "id": "stack",
+     "load": "",
+     "note": "vertical; the branches that discharge into it carry the fall",
+     "quantity": 1,
+     "size": "100 mm",
+     "system": "drainage",
+     "unit": "no."
+    },
+    {
+     "description": "The branch drains",
+     "id": "branch",
+     "load": "1:60",
+     "note": "the horizontal run's fall; the fall is what carries the water",
+     "quantity": 8,
+     "size": "50 mm",
+     "system": "drainage",
+     "unit": "no."
+    },
+    {
+     "description": "A domestic gas cooker (Titas)",
+     "id": "cooker",
+     "load": "0.5 m³/h each",
+     "note": "the meter serves every cooker on the run",
+     "quantity": 2,
+     "size": "15 mm pipe",
+     "system": "gas",
+     "unit": "no."
+    },
+    {
+     "description": "The gas run",
+     "id": "run",
+     "load": "1 m³/h",
+     "note": "the run is sized by the total load it carries",
+     "quantity": 1,
+     "size": "15 mm",
+     "system": "gas",
+     "unit": "no."
+    }
+   ],
+   "storeyIndex": 1,
+   "storeyLabel": "floor-1",
+   "values": {
+    "mep.area.floorAreaM2": {
+     "provenance": "derived",
+     "reason": "2 unit(s) on this storey",
+     "source": "the spec's unit area",
+     "unit": "m²",
+     "value": 120.0
+    },
+    "mep.electrical.totalLoadW": {
+     "provenance": "derived",
+     "reason": "1 circuits",
+     "source": "the points on this storey",
+     "unit": "W",
+     "value": 720.0
+    },
+    "mep.gas.totalLoadM3PerH": {
+     "provenance": "derived",
+     "reason": "2 cooker(s)",
+     "source": "the cookers on this storey",
+     "unit": "m³/h",
+     "value": 1.0
+    },
+    "mep.water.supplyPipeMm": {
+     "provenance": "derived",
+     "reason": "14 FU",
+     "source": "the fixture units it serves",
+     "unit": "mm",
+     "value": 25.0
+    },
+    "mep.water.totalFixtureUnits": {
+     "provenance": "derived",
+     "reason": "2 unit(s) x 7.0 FU",
+     "source": "the fixtures on this storey",
+     "unit": "FU",
+     "value": 14.0
+    }
+   }
+  }
+ ],
+ "totals": {
+  "circuits": 2,
+  "fixtureUnits": 14.0,
+  "gasLoadM3PerH": 1.0,
+  "loadW": 920.0,
+  "points": 26,
+  "scheduleRows": 15
+ }
+}

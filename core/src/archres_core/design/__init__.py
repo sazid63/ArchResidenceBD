@@ -29,6 +29,16 @@ from .drawing import (
     design_sheet,
     render_sheet_macro,
 )
+from .mep import (
+    ASSUMED_COOKER_LOAD_M3_PER_H,
+    ASSUMED_DRAINAGE_FALL,
+    ASSUMED_MAX_CIRCUIT_LOAD_W,
+    Circuit,
+    MepDesign,
+    MepPoint,
+    ScheduleRow,
+    design_mep,
+)
 from .floor import (
     ASSUMED_BEAM_DEPTH_MM,
     ASSUMED_BEAM_WIDTH_MM,
@@ -84,6 +94,13 @@ __all__ = [
     "PHASES",
     "Takeoff",
     "TakeoffLine",
+    "ASSUMED_COOKER_LOAD_M3_PER_H",
+    "ASSUMED_DRAINAGE_FALL",
+    "ASSUMED_MAX_CIRCUIT_LOAD_W",
+    "Circuit",
+    "MepDesign",
+    "MepPoint",
+    "ScheduleRow",
     "build_boq",
     "design_takeoff",
     "render_boq_markdown",
@@ -127,6 +144,7 @@ __all__ = [
     "design_rebar",
     "design_sheet",
     "design_typical_floor",
+    "design_mep",
     "render_floor_macro",
     "render_macro",
     "render_rebar_macro",
