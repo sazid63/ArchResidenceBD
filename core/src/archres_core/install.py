@@ -55,7 +55,10 @@ INSTALL_LAYOUT = {
     "shell": "ArchResidenceBD.exe",
     "runtime": "runtime",
     "python": "runtime/python.exe",
-    "core": "runtime/core",
+    # the core's **package** - the name matters, or the import fails ✓
+    "core": "runtime/core/archres_core",
+    # the core's **data** - the flow book and the schemas the app reads ✓
+    "coreData": "runtime/core",
     "engine": "engine",
     "models": "models",
     "packs": "packs",
@@ -329,12 +332,23 @@ def install_plan(
     copies: list[tuple[str, str]] = []
     missing: list[str] = []
 
-    # the core package: this machine has it ✓
+    # the core's **package** ✓ - the folder keeps its name ✓, or the import fails ✓ ✓
     core_source = repo / "core" / "src" / "archres_core"
     if core_source.is_dir():
         copies.append((str(core_source), INSTALL_LAYOUT["core"]))
     else:
         missing.append("core")
+
+    # the core's **data** ✓ - the flow book ✓ and the schemas ✓ the app reads at runtime ✓ ✓
+    for name, relative in (
+        ("flows", "flows"),
+        ("schemas", "schemas"),
+    ):
+        source = repo / "spec" / name
+        if source.is_dir():
+            copies.append((str(source), f"{INSTALL_LAYOUT['coreData']}/{relative}"))
+        else:
+            missing.append(f"core-data-{name}")
 
     # the rule packs: this machine has them ✓
     packs_source = repo / "spec" / "rules"
@@ -390,6 +404,14 @@ def apply_plan(plan: InstallPlan, root: str | pathlib.Path | None = None) -> lis
                 if item.is_file():
                     target = destination / item.name
                     target.write_bytes(item.read_bytes())
+                    written.append(str(target.relative_to(base)))
+                elif item.is_dir():
+                    # a subfolder keeps its name ✓ (a package inside a package ✓ ✓)
+                    target = destination / item.name
+                    target.mkdir(parents=True, exist_ok=True)
+                    for child in sorted(item.iterdir()):
+                        if child.is_file():
+                            (target / child.name).write_bytes(child.read_bytes())
                     written.append(str(target.relative_to(base)))
         elif source_path.is_file():
             target = destination / source_path.name

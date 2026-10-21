@@ -283,12 +283,43 @@ class Bridge:
         }
 
     def _book_path(self) -> pathlib.Path:
-        base = self._root or pathlib.Path(".")
-        return base / "spec" / "flows" / "phase-flow-book.yaml"
+        """The flow book ✓ — the install's place ✓ or the dev tree's ✓ ✓.
+
+        Two places ✓, and **loudly** ✓ when neither has it ✓ (the CAD engine's rule ✓:
+        discovery is explicit ✓ and its failure is loud ✓ ✓).
+        """
+        return self._data_path("flows", "phase-flow-book.yaml")
 
     def _pack_paths(self) -> list[pathlib.Path]:
+        """The rule packs ✓ — the install's place ✓ or the dev tree's ✓ ✓."""
         base = self._root or pathlib.Path(".")
-        return sorted((base / "spec" / "rules").glob("*.yaml"))
+        for relative in (("packs",), ("spec", "rules")):
+            folder = base.joinpath(*relative)
+            if folder.is_dir():
+                return sorted(folder.glob("*.yaml"))
+        return []
+
+    def _data_path(self, *parts: str) -> pathlib.Path:
+        """A data file ✓ — the install's place ✓ or the dev tree's ✓ ✓."""
+        base = self._root or pathlib.Path(".")
+        for relative in (
+            (self._core_data(), *parts),
+            ("spec", *parts),
+        ):
+            candidate = base.joinpath(*relative)
+            if candidate.is_file():
+                return candidate
+        raise BridgeError(
+            CODE_INTERNAL,
+            f"the core's data is missing: {base.joinpath(*parts)} is not there "
+            "(the install carries it under runtime/core; the dev tree under spec)",
+        )
+
+    def _core_data(self) -> str:
+        """The install's core-data folder ✓ — relative to the root ✓ ✓."""
+        from .install import INSTALL_LAYOUT
+
+        return INSTALL_LAYOUT["coreData"]
 
     def _projects_list(self, params: dict[str, Any]) -> dict[str, Any]:
         """The projects on this machine ✓ — the dashboard's list ✓ (W5.6 ✓) ✓.
