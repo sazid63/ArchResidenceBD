@@ -188,9 +188,10 @@ sources:
     status: candidate
     authority: Sylhet Development Authority (SDA)
     title:
-      bn: সিলেট উন্নয়ন কর্তৃপক্ষের ইমারত নির্মাণ বিধিমালা ১৯৯৬
+      bn: সিলেট উন্নয়ন কর্তৃপক্ষের ইমারত নির্মাণ বিধিমালা, ১৯৯৬
       en: Sylhet Development Authority Building Construction Rules, 1996
-    kind: manual-entry
+    kind: pdf-document
+    url: https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-sda/2026/8/19e74586-b7d8-44ee-8337-ddd731b57a07.pdf
     language:
     - bn
     licence: Government publication; confirm the reuse terms before extraction.
@@ -198,21 +199,27 @@ sources:
       method: GET
       parser: manual-review
       recipe: >-
-        The document is on the authority's laws page (the authority's site is the national
-        portal's); the link this entry carried answers the site's landing page, not the
-        document (checked 2026-10-22), so the document is not pinned yet and this entry
-        carries no URL. Once it is: hash it, and transcribe it into a new city pack
-        (ADR-0003) - the RAJUK pack (spec/rules/rajuk-2008.yaml) is the template.
+        The document is on the authority's laws page (its file list), and the file itself
+        is fetched from the URL above. It has a text layer, but its letters are in a legacy
+        Bangla font encoding and are mangled - the numbers are plain, the headings are not -
+        so a chart or a clause is read from the rendered page (the RAJUK pack's own method,
+        ADR-0003), not from the text.
     cadence: static
     lastVerified: "2026-10-22"
+    artifact:
+      fileName: "sylhet-building-construction-rules-1996.pdf"
+      sizeBytes: 157750
+      sha256: "0ccd24c82a24fb640acaf6c0f31a32e950a1ac14ec0885766d240992afe2ed9f"
+      pages: 19
     notes: >-
-      THE RULES ARE NAMED, THE DOCUMENT IS NOT PINNED 2026-10-22. The Building Construction
-      Rules 1996 are on the authority's laws page, with BNBC 2020, the SDA Act 2023 and the
-      Real Estate Development and Management Rules 2011 beside them; the link this entry
-      carried serves the site's landing page, so the document itself has not been fetched,
-      hashed or read. Nothing is transcribed from it, and the city pack falls back to the
-      national rules (rajuk@2008.1) and says so. A human read, or OCR (a new dependency, and
-      the owner call), once the document is pinned.
+      FOUND 2026-10-22 - the authority's laws page (the file list) serves the document, and
+      it was fetched, hashed and measured: 19 pages, 157750 bytes, a text layer whose
+      letters are mangled (the numbers are plain). What it holds is the national Building
+      Construction Rules 1996 - the predecessor of the 2008 rules the app applies - with the
+      FAR, the ground coverage and the heights in its schedule. It is therefore NOT a
+      city zoning of its own: the city falls back to the national rules (rajuk@2008.1) and
+      says so, and the document is kept as the authority's own publication of the rules it
+      administers.
 
   - id: rajshahi-rda-building-rules
     dataTypes:
@@ -220,26 +227,34 @@ sources:
     status: candidate
     authority: Rajshahi Development Authority (RDA)
     title:
-      bn: রাজশাহী উন্নয়ন কর্তৃপক্ষের ইমারত নির্মাণ বিধিমালা
-      en: Rajshahi Development Authority building rules
-    kind: manual-entry
+      bn: রাজশাহী উন্নয়ন কর্তৃপক্ষের আইন, বিধিমালা ও নীতিমালা
+      en: Rajshahi Development Authority's laws, rules and policies
+    kind: html-index
+    url: http://rdarajshahi.gov.bd/pages/static-pages/695e3b0bc4774958d7b72285
     language:
     - bn
+    cacheTtlDays: 180
     licence: Government publication; confirm the reuse terms before extraction.
     fetch:
       method: GET
       parser: manual-review
       recipe: >-
-        Obtain the authority rule book by hand (it is not on the site and no archived copy
-        was found), hash it, and transcribe it into a new city pack (ADR-0003) - the RAJUK
-        pack (spec/rules/rajuk-2008.yaml) is the template.
+        The rules page lists the authority's rule books with their titles; each file is served
+        from the authority's own file host. The file host did not answer from the build
+        machine on 2026-10-22, so the documents are named here and not fetched - the titles
+        are what the page carries.
     cadence: ad-hoc
+    lastVerified: "2026-10-22"
     notes: >-
-      NOT FOUND 2026-10-22 (the owner asked the agent to find the rules for each city and to
-      fall back to the national rules where one is not found). The authority site did not
-      resolve from the build machine and no archived copy of its rules was found, so this
-      city pack falls back to the national rules (rajuk@2008.1) and says so. The URL, when it
-      is found, goes here.
+      FOUND 2026-10-22 - the earlier "not found" was a wrong host. The authority's site is
+      rdarajshahi.gov.bd (not rda.gov.bd, which is the Bogra academy), and its rules page
+      lists the rule books with their titles: the RDA Ordinance 1976, the Rajshahi Town
+      Development Authority's Building Rules 1991 (the zoning one), the gazette of the RTDA's
+      building rules, the Plot Allocation Rules 2021, and the master-plan amendment for the
+      RDA's area. The files themselves are served from the authority's file host, which did
+      not answer from the build machine on 2026-10-22, so nothing is fetched, hashed or
+      transcribed from them yet. The city falls back to the national rules (rajuk@2008.1) and
+      says so.
 
   - id: city-authority-rules
     dataTypes: [rule-source]

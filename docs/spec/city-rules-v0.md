@@ -15,8 +15,8 @@ rules are **scans** ✓ — no text layer ✓ — so the repo's reader cannot tr
 | Chattogram | CDA | the CDA's own rules (সিডিএ প্রবিধানমালা) | the authority's laws page → the document's own object storage | **a scan** (50 pages, no text layer) |
 | Chattogram | CDA | the **Building Construction Act, 1952** (as amended in 2008) — it carries the FAR chart | the authority's laws page → the document's own object storage | **a text layer** (87 pages) — but the chart's *headings* are in a legacy font encoding and are mangled |
 | Khulna | KDA | the **setbacks by the plot size** and the **height by the road width** | the authority's plan-approval portal (its own service) | **machine-readable** ✓ |
-| Sylhet | SDA | the **Building Construction Rules, 1996** (with BNBC 2020, the SDA Act 2023 and the Real Estate Development and Management Rules 2011 beside them) | the authority's laws page | the document is **named, not pinned** ✓ |
-| Rajshahi | RDA | — | — | **not found** |
+| Sylhet | SDA | the **Building Construction Rules, 1996** (with BNBC 2020, the SDA Act 2023 and the Real Estate Development and Management Rules 2011 beside them) | the authority's laws page, and the document's own object storage | **fetched and pinned** (19 pages, a text layer whose letters are mangled) — but they are the *national* 1996 rules, not a city zoning of their own |
+| Rajshahi | RDA | the RDA Ordinance 1976, the **RTDA Building Rules 1991**, the gazette of the RTDA's building rules, the Plot Allocation Rules 2021, the master-plan amendment | the authority's rules page (the files are on its own file host) | **named, not fetched** — the file host did not answer from the build machine |
 
 All four are in the **Source Registry** now ✓ (candidate ✓ — a candidate until a human
 verifies it ✓ ✓) with the URL that was fetched on 2026-10-22 ✓, the artefact's **hash** and
@@ -37,6 +37,14 @@ The agent went back to the documents ✓ ✓ — and the record changed ✓ ✓:
   and the **gaps** declared ✓ ✓ (the FAR schedule ✓, the parking schedule ✓, the use classes
   ✓ — the portal does not publish them ✓ ✓) ✓ ✓ — a **candidate** ✓, because a fetched rule
   stays one until a human checks it ✓ ✓ (the money law ✓, applied to law ✓ ✓);
+- **Rajshahi was found too** - the earlier "not found" was a wrong host: the authority's site
+  is `rdarajshahi.gov.bd` (not `rda.gov.bd`, which is the Bogra academy), and its rules page
+  lists the rule books with their titles - among them the **RTDA Building Rules 1991**, which is
+  the zoning one. The files are served from the authority's own file host, and that host did
+  not answer from the build machine, so they are **named, not fetched**;
+- **Sylhet's document is fetched and pinned** - 19 pages, with a text layer whose letters are
+  mangled - and it holds the *national* Building Construction Rules 1996, the predecessor of
+  the 2008 rules the app applies, so it is **not a city zoning of its own**;
 - **the Chattogram FAR chart was found** - in the Building Construction Act 1952 (the
   CDA's copy - 87 pages, fetched and hashed) - where the chart's **numbers** are in the text
   layer, but its **headings** are in a legacy Bangla font encoding and are mangled. The

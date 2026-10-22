@@ -103,7 +103,7 @@ def test_the_registry_pins_the_chattogram_documents() -> None:
 
 
 def test_the_registry_says_what_is_still_missing() -> None:
-    """A gap is declared ✓ — the registry never claims more than it has ✓ ✓."""
+    """A gap is declared - the registry never claims more than it has."""
     sources = _sources()
     chattogram = sources["chattogram-cda-building-rules"]["notes"]
     khulna = sources["khulna-kda-building-rules"]["notes"]
@@ -112,8 +112,8 @@ def test_the_registry_says_what_is_still_missing() -> None:
     assert "rajuk@2008.1" in chattogram
     assert "CANDIDATE" in khulna
     assert "rajuk@2008.1" in khulna
-    assert "not been fetched" in sylhet
     assert "rajuk@2008.1" in sylhet
+    assert "fall back" in sylhet or "falls back" in sylhet
 
 
 def test_the_khulna_entry_points_at_the_authoritys_own_portal() -> None:
@@ -125,9 +125,32 @@ def test_the_khulna_entry_points_at_the_authoritys_own_portal() -> None:
     assert "ajax-building-height-check" in source["fetch"]["recipe"]
 
 
-def test_the_sylhet_entry_carries_no_url_it_cannot_serve() -> None:
-    """The Sylhet document is not pinned ✓ — so the entry says so and carries no URL ✓ ✓."""
+def test_the_sylhet_entry_carries_the_document_it_serves() -> None:
+    """The Sylhet document is fetched and pinned - so the entry says where it is."""
     source = _sources()["sylhet-sda-building-rules-1996"]
-    assert source["kind"] == "manual-entry"
-    assert "url" not in source
-    assert "not pinned" in source["notes"].lower()
+    assert source["kind"] == "pdf-document"
+    assert source["url"].startswith("https://")
+    assert "not pinned" not in source["notes"].lower()
+
+
+def test_the_sylhet_document_is_pinned() -> None:
+    """The Sylhet document is fetched, hashed and measured \u2014 not merely named \u2713."""
+    source = _sources()["sylhet-sda-building-rules-1996"]
+    assert source["kind"] == "pdf-document"
+    assert source["url"].startswith("https://")
+    artifact = source["artifact"]
+    assert artifact["fileName"].endswith(".pdf")
+    assert len(artifact["sha256"]) == 64
+    assert artifact["pages"] == 19
+    # the document is the national rules of 1996, not a city zoning of its own
+    assert "rajuk@2008.1" in source["notes"]
+
+
+def test_the_rajshahi_entry_names_its_rule_books() -> None:
+    """The Rajshahi rules are named, and the file host is said to be silent - honestly."""
+    source = _sources()["rajshahi-rda-building-rules"]
+    assert source["kind"] == "html-index"
+    assert "rdarajshahi.gov.bd" in source["url"]
+    assert "rdarajshahi.gov.bd" in source["notes"]
+    assert "did not answer" in source["notes"]
+    assert "rajuk@2008.1" in source["notes"]

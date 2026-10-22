@@ -47,8 +47,11 @@ CDA's own copy — 87 pages) — whose text layer carries the chart's **numbers*
    reads a chart from the **rendered page** (ADR-0003 ✓ ✓) — which this machine cannot do
    ✓ (the model reads no PDF page images ✓ ✓) — so **nothing** is transcribed from it yet ✓
    ✓, and the city falls back to the national rules (`rajuk@2008.1`) ✓ and says so ✓ ✓.
-5. **The Sylhet entry carries no URL** — the document is named but not pinned ✓ ✓, so the
-   entry says exactly that ✓ ✓ rather than pointing at a link that serves something else ✓.
+5. **Every entry names what it really has** - the Sylhet document is **fetched and pinned**
+   (19 pages, hashed) and the entry says it is the *national* 1996 rules rather than a city
+   zoning - and the Rajshahi entry names the authority's rule books (the earlier "not found"
+   was a wrong host) and says plainly that its file host **did not answer** from the build
+   machine, so nothing is claimed that was not fetched.
 
 ## Consequences
 
