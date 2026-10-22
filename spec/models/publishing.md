@@ -1,13 +1,17 @@
 # Publishing models — W4.4 recipe
 
-Written in W0.8 (this is the "HF org" half of the package); **executed at W4.4**. Owner-gated steps are marked ⛔.
+Written in W0.8 (this is the "where to publish" half of the package); **executed at W4.4**. Owner-gated steps are marked ⛔.
 
-## Org & naming
+## Where the models are published
 
-- ⛔ **Owner:** create the HF org (free) at huggingface.co — proposed name **`archresbd`** (renameable; the string is not a product surface). One fine-grained write token for uploads; `hf auth login` on the build machine. Parked in `docs/work/OWNER-ATTENTION.md`.
-- Repo pattern: `<org>/<member>-<size>` — e.g. `archie-chat-4b`, `archie-repair-3b` (size = the trained base actually used), `archie-embed-0.6b` / `archie-rerank-0.6b` only if a redistribution is hosted.
-- One repo per member; the repo's `README.md` **is** the filled card. Quants live in the same repo (a `-GGUF` sibling repo only if content ever needs separating).
-- Datasets (if published) live under `<org>/…` with licence + provenance per the Source Registry (plan §5.10).
+**The owner's decision (2026-10-22): the models are packaged with the final app** · — the user downloads the app once ·, installs it ·, and the models are there · ·. So there is **no model download** ·, **no model registry** ·, **no Hugging Face account** · and **no token** · · — and the registry already said `distribution: bundled` · ✓ ✓ (the code now follows it ✓: the installer **copies** the GGUFs ✓ ✓ and the **cards** travel with them ✓ ✓).
+
+- **The release is the app** · — one download ·, the installer with the models inside it · ·, and the model cards beside them · (in the install folder's `licenses/model-cards/` ·) · ✓ ✓.
+- **The bundle is big** · — the chat model alone is ~2.4 GB · — and that is the trade the owner chose ✓: the user clicks once · and everything is there · ✓ ✓.
+- **The GGUFs never enter the repository** · — they are gitignored · — the build machine holds them · (`ARCHRES_MODELS` ·, or the repo's own downloads folder ✓) ✓ ✓, and the installer copies from there ✓ ✓.
+- **The model's hash is still pinned** · — the registry keeps it ✓ — and the installer **checks** it after copying ✓ (the plan's law ✓: a number nobody verified is a candidate ✓ ✓) ✓.
+- **A future update** may fetch a newer model · (W5.4 ·) — through the downloader · (W5.2 ·), resumable ✓ and checksummed ✓ ✓ — but the **first install** needs nothing fetched ✓ ✓ ✓.
+- Datasets (if published) live with the app · with licence + provenance per the Source Registry (plan §5.10) ·.
 
 ## Gates — nothing publishes before these
 
@@ -15,13 +19,13 @@ plan §7 eval gates: golden projects (BOQ within ±8 %, CAD execution success >9
 
 ## Steps
 
-1. ⛔ Org + token (once). `hf auth login`.
-2. Quantize locally with llama.cpp `llama-quantize` from the merged fine-tune; record the exact command, training-run id, and sha256 + size of every produced file.
-3. Fill the card: every TBD replaced (data counts, eval tables, quant list, exact base revision); `status: draft` → review → `published`; set `hfRepo`. A published card never contains a TBD (CI-enforced).
-4. Upload repo + card (`README.md`); model card text uses technical/upstream naming (ADR-0004 scope is the product).
-5. **Verify:** fresh download of the uploaded file; sha256 must equal the local artifact; record both in the registry entry notes.
-6. Pin: add a **new** registry entry (`archie-chat-ft1` style) with the verified sha256/size + a new card file; shipped entries are never edited (registry law in `README.md`).
-7. Installer policy: set `distribution` (`bundled` for the next installer vs `downloadable` model pack) in the same change as the installer manifest update (P1 installer consumes the registry).
+1. Quantize locally with llama.cpp `llama-quantize` from the merged fine-tune; record the exact command, training-run id, and sha256 + size of every produced file.
+2. Fill the card: every TBD replaced (data counts, eval tables, quant list, exact base revision); `status: draft` → review → `published`. A published card never contains a TBD (CI-enforced). The card travels with the model (in the install folder's `licenses/model-cards/` ·) ·, so the model's documentation is wherever the model is ·.
+3. **Verify the local artifact:** the sha256 must equal the local file's ·, and it must equal the registry's pin ·; record both in the registry entry notes ·.
+4. Pin: add a **new** registry entry (`archie-chat-ft1` style) with the verified sha256/size + a new card file; shipped entries are never edited (registry law in `README.md`).
+5. **Build the installer** with the models inside · — the installer's plan copies the GGUFs ✓ and the cards ✓ from the build machine's model folder (`ARCHRES_MODELS` ·) ✓, and **verifies each hash after copying** ✓ ✓.
+6. ⛔ **Owner (once):** where the app is **distributed** · — the owner decides ✓ (a private link ·, a store ·, a release ·) ✓. The app needs no account of ours and no token ✓ ✓ — the models are inside it ✓ ✓.
+7. Installer policy: `distribution` stays `bundled` ✓ (the model pack ships with the app ✓) ✓ — and a future *update* may fetch a newer model · through the downloader ✓ (W5.2 ·) ✓.
 
 ## Licence rules
 
@@ -32,4 +36,4 @@ plan §7 eval gates: golden projects (BOQ within ±8 %, CAD execution success >9
 
 - Never publish a card with a TBD left.
 - Never overwrite or delete a published artifact in place — new upload, new entry.
-- Never put engine names in product surfaces; HF cards are technical docs (this does not loosen ADR-0004 anywhere else).
+- Never put engine names in product surfaces; model cards are technical docs (this does not loosen ADR-0004 anywhere else).

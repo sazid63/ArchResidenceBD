@@ -17,9 +17,10 @@ The laws:
 
 from __future__ import annotations
 
+import hashlib
 import json
 import pathlib
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Iterable, Sequence
 
 __all__ = [
@@ -65,6 +66,23 @@ INSTALL_LAYOUT = {
     "licenses": "licenses",
     "projects": "projects",
 }
+
+
+#: Where the GGUFs live on the build machine ✓ — the env var wins ✓, and the default is
+#: where the repo's own downloads put them ✓ (they are gitignored ✓ — gigabytes never
+#: enter the repository ✓ ✓).
+MODELS_HOME_ENV = "ARCHRES_MODELS"
+
+
+def models_home() -> pathlib.Path:
+    """The build machine's model folder ✓ — where the GGUFs are ✓ ✓."""
+    import os
+
+    env = os.environ.get(MODELS_HOME_ENV)
+    if env:
+        return pathlib.Path(env)
+    repo = pathlib.Path(__file__).resolve().parents[3]
+    return repo / "data" / "downloads" / "s2" / "models"
 
 
 class ManifestError(ValueError):
@@ -263,13 +281,16 @@ def the_manifest() -> InstallManifest:
         parts.append(
             ManifestPart(
                 id=f"model-{role}",
-                role=f"The {role} model (the fleet serves it locally)",
+                role=(
+                    f"The {role} model (bundled with the app - the user downloads one "
+                    "thing and the models are there)"
+                ),
                 licence=str(upstream.get("license") or "see the model card"),
                 tier="cpu",
                 path=f"{INSTALL_LAYOUT['models']}/{artifact.get('file') or (role + '.gguf')}",
                 size_bytes=artifact.get("sizeBytes"),
                 sha256=artifact.get("sha256"),
-                source=entry.get("distribution"),
+                source=str(entry.get("distribution") or "bundled"),
             )
         )
     return InstallManifest(parts=tuple(parts))
@@ -282,6 +303,22 @@ def _registry() -> dict[str, Any] | None:
         return json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return None
+
+
+def _hash_bytes(data: bytes) -> str:
+    """The sha256 of some bytes ✓ ✓."""
+    return hashlib.sha256(data).hexdigest()
+
+
+def _normalise(path: str) -> str:
+    """A path with forward slashes ✓ — the manifest's paths use them ✓ ✓."""
+    return path.replace("\\", "/")
+
+
+def _promised_hash(plan: "InstallPlan", relative: str) -> str | None:
+    """The hash the manifest promises for a part ✓ — None when it promises none ✓ ✓."""
+    hashes = plan.hashes.get(_normalise(relative))
+    return hashes[0] if hashes else None
 
 
 @dataclass(frozen=True)
@@ -299,6 +336,9 @@ class InstallPlan:
     copies: tuple[tuple[str, str], ...]
     notices: tuple[tuple[str, str], ...]
     missing: tuple[str, ...]
+    #: The hash each copied file must match ✓ (the manifest's promise ✓) ✓ — absent when
+    #: the manifest promises none ✓ ✓.
+    hashes: dict[str, tuple[str, ...]] = field(default_factory=dict)
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -357,16 +397,35 @@ def install_plan(
     else:
         missing.append("packs")
 
-    # the pieces that are not here: named, never silently skipped ✓
+    # the **model cards** ✓ — the models' own documentation ✓ (their licence ✓, their
+    # provenance ✓, their training data ✓) — and they travel with the models ✓ ✓
+    cards_source = repo / "spec" / "models" / "cards"
+    if cards_source.is_dir():
+        copies.append((str(cards_source), f"{INSTALL_LAYOUT['licenses']}/model-cards"))
+
+    # the **models** ✓ — bundled with the app ✓ (the owner's decision ✓ · 2026-10-22 ✓) ✓,
+    # so the installer **copies** them ✓ — the user downloads the app once ✓ and the models
+    # are there ✓ ✓. A model that is not on this machine is **named** ✓ — and the build
+    # cannot ship without it ✓ ✓.
+    home = models_home()
     for part in manifest.parts:
-        if part.id in ("core", "packs", "licenses"):
+        if not part.id.startswith("model-"):
             continue
-        if part.measured or part.id in ("shell", "runtime"):
-            # a measured model is fetched by the downloader ✓ (W5.2 ✓); the shell and the
-            # runtime come with the installer ✓
-            if part.id.startswith("model-"):
-                missing.append(part.id)
+        source = home / pathlib.Path(part.path).name
+        if source.is_file():
+            # the destination is the models **folder** ✓ — the file lands inside it ✓ ✓
+            copies.append((str(source), INSTALL_LAYOUT["models"]))
+        else:
+            missing.append(part.id)
+
+    # the parts this machine does not have ✓ — the engine ✓ and the runtime ✓ are not
+    # here ✓ (the runtime is the installer's own job ✓) ✓, and the models are **copied**
+    # below ✓ ✓
+    for part in manifest.parts:
+        if part.id in ("core", "packs", "licenses", "shell", "runtime"):
             continue
+        if part.id.startswith("model-"):
+            continue  # bundled with the app ✓ (the copies below ✓ ✓)
         missing.append(part.id)
 
     notices = tuple(
@@ -374,12 +433,18 @@ def install_plan(
         for component, name in sorted(LICENCE_FILES.items())
     )
 
+    hashes: dict[str, tuple[str, ...]] = {}
+    for part in manifest.parts:
+        if part.sha256:
+            hashes[_normalise(part.path)] = (part.sha256,)
+
     return InstallPlan(
         root=str(target_root),
         directories=tuple(directories),
         copies=tuple(copies),
         notices=notices,
         missing=tuple(sorted(set(missing))),
+        hashes=hashes,
     )
 
 
@@ -415,7 +480,19 @@ def apply_plan(plan: InstallPlan, root: str | pathlib.Path | None = None) -> lis
                     written.append(str(target.relative_to(base)))
         elif source_path.is_file():
             target = destination / source_path.name
-            target.write_bytes(source_path.read_bytes())
+            data = source_path.read_bytes()
+            expected = _promised_hash(plan, _normalise(f"{relative}/{source_path.name}"))
+            if expected is not None:
+                # the copy is **checked** ✓ - a bundled model is verified before it is
+                # installed ✓ (the plan's law ✓: a number nobody verified is a candidate
+                # ✓ ✓) ✓
+                actual = _hash_bytes(data)
+                if actual != expected:
+                    raise ManifestError(
+                        f"{relative}: the copy's hash is {actual}, the manifest promises "
+                        f"{expected} - the install is refused"
+                    )
+            target.write_bytes(data)
             written.append(str(target.relative_to(base)))
     for relative, text in plan.notices:
         target = base / relative

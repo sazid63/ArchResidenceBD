@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import pathlib
 
@@ -69,3 +70,48 @@ def base_spec():
         }
 
     return make
+
+
+# --- W5.1: the installer copies the models, and the real GGUFs are gigabytes -------------
+# A test that laid the install folder down with the real models would copy six gigabytes
+# and take minutes, so these fixtures point the installer at a **small stand-in** whose
+# hashes the test's own manifest carries - which is what makes the copy's check meaningful.
+
+
+@pytest.fixture()
+def models_home(tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> pathlib.Path:
+    """A small stand-in for the build machine's model folder."""
+    home = tmp_path / "models"
+    home.mkdir()
+    (home / "archie-chat-v0-Q4_K_M.gguf").write_bytes(b"a small stand-in for the chat model")
+    monkeypatch.setenv("ARCHRES_MODELS", str(home))
+    return home
+
+
+@pytest.fixture()
+def install_manifest(models_home: pathlib.Path) -> "InstallManifest":
+    """The real manifest with the test's small models (and their real hashes)."""
+    from archres_core.install import InstallManifest, ManifestPart, the_manifest
+
+    parts: list[ManifestPart] = []
+    for part in the_manifest().parts:
+        if not part.id.startswith("model-"):
+            parts.append(part)
+            continue
+        source = models_home / pathlib.Path(part.path).name
+        if not source.is_file():
+            continue
+        data = source.read_bytes()
+        parts.append(
+            ManifestPart(
+                id=part.id,
+                role=part.role,
+                licence=part.licence,
+                tier=part.tier,
+                path=part.path,
+                size_bytes=len(data),
+                sha256=hashlib.sha256(data).hexdigest(),
+                source=part.source,
+            )
+        )
+    return InstallManifest(parts=tuple(parts))
