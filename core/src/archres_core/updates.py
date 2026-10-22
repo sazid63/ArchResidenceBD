@@ -262,6 +262,29 @@ def plan_update(
     return UpdatePlan(channels=tuple(channels), pinned=pinned)
 
 
+def _installed_file(base: pathlib.Path, *alternatives: tuple[str, ...]) -> pathlib.Path | None:
+    """A file the installation has ✓ — the install's place ✓ or the dev tree's ✓ ✓.
+
+    The same rule the app's own data follows ✓ ✓ (ADR-0084 ✓ ✓) — the install's
+    place first ✓ ✓, because that is where the app runs ✓ ✓ — and **nothing**
+    when neither has it ✓ ✓ (a missing file is a gap ✓, never a zero ✓ ✓).
+    """
+    for relative in alternatives:
+        candidate = base.joinpath(*relative)
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+def _installed_folder(base: pathlib.Path, *alternatives: tuple[str, ...]) -> pathlib.Path | None:
+    """A folder the installation has ✓ — the install's place ✓ or the dev tree's ✓ ✓."""
+    for relative in alternatives:
+        candidate = base.joinpath(*relative)
+        if candidate.is_dir():
+            return candidate
+    return None
+
+
 def check_updates(
     root: str | pathlib.Path,
     *,
@@ -276,14 +299,22 @@ def check_updates(
     base = pathlib.Path(root)
     installed: dict[str, dict[str, Any]] = {}
 
-    # the app ✓
-    tauri = base / "app" / "src-tauri" / "tauri.conf.json"
-    if tauri.is_file():
-        installed["app"] = {"version": json.loads(tauri.read_text(encoding="utf-8"))["version"]}
+    # the app ✓ — the install records the version it installed ✓ ✓, and the dev
+    # tree keeps the shell's own file ✓ ✓
+    recorded = _installed_file(base, ("version.json",))
+    if recorded is not None:
+        document = json.loads(recorded.read_text(encoding="utf-8"))
+        installed["app"] = {"version": str(document.get("app") or "0.0.0")}
+    else:
+        tauri = _installed_file(base, ("app", "src-tauri", "tauri.conf.json"))
+        if tauri is not None:
+            installed["app"] = {"version": json.loads(tauri.read_text(encoding="utf-8"))["version"]}
 
-    # the models ✓
-    registry_path = base / "spec" / "models" / "registry.json"
-    if registry_path.is_file():
+    # the models ✓ — the registry beside the GGUFs ✓ ✓, or the repo's ✓ ✓
+    registry_path = _installed_file(
+        base, ("models", "registry.json"), ("spec", "models", "registry.json")
+    )
+    if registry_path is not None:
         registry = json.loads(registry_path.read_text(encoding="utf-8"))
         installed["models"] = {
             "version": str(registry.get("schemaVersion") or "0.0.0"),
@@ -292,9 +323,11 @@ def check_updates(
             ),
         }
 
-    # the rules ✓
-    pack_path = base / "spec" / "rules" / "rajuk-2008.yaml"
-    if pack_path.is_file():
+    # the rules ✓ — the install's packs ✓ ✓, or the repo's ✓ ✓
+    pack_path = _installed_file(
+        base, ("packs", "rajuk-2008.yaml"), ("spec", "rules", "rajuk-2008.yaml")
+    )
+    if pack_path is not None:
         import yaml
 
         pack = yaml.safe_load(pack_path.read_text(encoding="utf-8"))
@@ -303,8 +336,11 @@ def check_updates(
             "status": str(pack.get("status") or ""),
         }
 
-    # the prices ✓
-    cards = sorted((base / "data" / "prices" / "cards").glob("*.json"))
+    # the prices ✓ — the install's cards ✓ ✓, or the repo's ✓ ✓
+    folder = _installed_folder(
+        base, ("runtime", "core", "prices", "cards"), ("data", "prices", "cards")
+    )
+    cards = sorted(folder.glob("*.json")) if folder is not None else []
     if cards:
         card = json.loads(cards[0].read_text(encoding="utf-8"))
         installed["prices"] = {

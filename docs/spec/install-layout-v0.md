@@ -150,6 +150,10 @@ not a ping ✓ ✓ — so a hole like this cannot pass again ✓ ✓.
 | the **templates** | `runtime/core/examples/` | `spec/examples/` |
 | the **rate cards** | `runtime/core/prices/cards/` | `data/prices/cards/` |
 | the rule packs | `packs/` | `spec/rules/` |
+| the **model registry** ✓ ✓ | `models/registry.json` ✓ ✓ (beside the GGUFs it names ✓ ✓) | `spec/models/registry.json` |
+| the **app's version** ✓ ✓ | `version.json` ✓ ✓ (written by the installer ✓ ✓) | `app/src-tauri/tauri.conf.json` |
+
+And the **update check** ✓ ✓ — the tool's own help says it reads *"the installation to read"* ✓ ✓ · so it looks in the install's places too ✓ ✓ · and the install records what it installed ✓ ✓ · the exe's version is not a file anyone can read ✓ ✓ ✓.
 
 ## What is deliberately not here
 

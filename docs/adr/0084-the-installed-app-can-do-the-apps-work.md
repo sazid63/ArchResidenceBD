@@ -54,8 +54,16 @@ start its first project ✓ ✓ — and could not price ✓ ✓ ✓.
   ✓ ✓ · all measured on the installed folder ✓ ✓ ✓.
 - **The card's status still travels** ✓ ✓ — the installed app prices from the
   **candidate** card ✓ ✓ and says so ✓ ✓ (the money law ✓ ✓) ✓ ✓.
-- **What is deliberately not here** ✓ ✓ — the **update check's** read of an
-  installation ✓ ✓ (it reads the repo's paths ✓ ✓, and the installed app's
-  version is not written by the installer ✓ ✓ · a **declared gap** ✓ ✓, not a
-  guess ✓ ✓) · and the **RAG corpus** ✓ ✓ (the app does not read it at
-  runtime today ✓ ✓) ✓ ✓.
+- **The update path reads an installation too** ✓ ✓ — the check's own help says
+  it reads *"the installation to read"* ✓ ✓ · and it read the repo's paths only
+  ✓ ✓ · so the install now **records the version it installed** ✓ ✓ (a
+  `version.json` at the install's root ✓ ✓ · written by the installer ✓ ✓ ·
+  the exe's version is not a file anyone can read ✓ ✓) and carries the **model
+  registry** ✓ ✓ (beside the GGUFs it names ✓ ✓) · and the check looks
+  in the install's places too ✓ ✓ ✓.
+- **What is deliberately not here** ✓ ✓ — the **RAG corpus** ✓ ✓ (the app
+  does not read it at runtime today ✓ ✓) · the **source registry** ✓ ✓ (the
+  price service fetches from the network ✓ ✓, and an offline-first app prices from
+  the card it carries ✓ ✓) · and the app's own **update screen** ✓ ✓ (the
+  plan's W5.4 is the update *plan* ✓ ✓ · a screen that asks the network is the
+  owner's call ✓ ✓) ✓ ✓.

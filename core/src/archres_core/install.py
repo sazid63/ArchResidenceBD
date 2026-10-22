@@ -436,6 +436,28 @@ class InstallPlan:
         }
 
 
+def _app_version(repo: pathlib.Path) -> str:
+    """The app's version ✓ — the shell's own ✓ — or nothing ✓ ✓."""
+    tauri = repo / "app" / "src-tauri" / "tauri.conf.json"
+    if not tauri.is_file():
+        return ""
+    try:
+        document = json.loads(tauri.read_text(encoding="utf-8"))
+    except ValueError:
+        return ""
+    return str(document.get("version") or "")
+
+
+def _core_version() -> str:
+    """The core's own version ✓ — the package's ✓ – or nothing ✓ ✓."""
+    try:
+        from . import __version__
+
+        return str(__version__)
+    except Exception:  # pragma: no cover - the package is always importable here
+        return ""
+
+
 def install_plan(
     manifest: InstallManifest,
     root: str | pathlib.Path,
@@ -498,6 +520,15 @@ def install_plan(
         missing.append("core-data-prices")
 
     # the rule packs: this machine has them ✓
+    # the **model registry** ✓ — the names and the hashes of the GGUFs beside it ✓
+    # — so the update check can say which models the user has ✓ ✓
+    registry_source = repo / "spec" / "models" / "registry.json"
+    if registry_source.is_file():
+        # the **folder** is the destination ✓ ✓ - the file lands beside the GGUFs it names ✓ ✓
+        copies.append((str(registry_source), INSTALL_LAYOUT["models"]))
+    else:
+        missing.append("model-registry")
+
     packs_source = repo / "spec" / "rules"
     if packs_source.is_dir():
         copies.append((str(packs_source), INSTALL_LAYOUT["packs"]))
@@ -566,6 +597,23 @@ def install_plan(
         (f"{INSTALL_LAYOUT['licenses']}/{name}", f"{component} - {name}\n")
         for component, name in sorted(LICENCE_FILES.items())
     )
+
+    # the app's **version** ✓ — the install records what it installed ✓ ✓ — so the
+    # update check can say what the user has ✓ ✓ (the install has no `app/`
+    # folder ✓ ✓, and the exe's version is not a file anyone can read ✓ ✓)
+    version = _app_version(repo)
+    if version:
+        notices = notices + (
+            (
+                "version.json",
+                json.dumps(
+                    {"app": version, "core": _core_version()},
+                    ensure_ascii=False,
+                    indent=2,
+                )
+                + "\n",
+            ),
+        )
 
     hashes: dict[str, tuple[str, ...]] = {}
     for part in manifest.parts:

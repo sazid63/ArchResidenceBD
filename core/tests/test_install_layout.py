@@ -224,6 +224,33 @@ def test_the_installed_app_finds_the_manual(
     assert not reply.get("error"), reply
     assert reply["result"]["answers"], "the manual came out empty"
 
+def test_the_update_check_can_read_the_installed_app(
+    tmp_path: pathlib.Path, install_manifest
+) -> None:
+    """The check's own help says it reads an **installation** ✓ ✓ — so it must ✓ ✓.
+
+    The install records the version it installed ✓ ✓ · and carries the model
+    registry ✓ ✓ · the packs ✓ ✓ and the rate cards ✓ ✓ · so
+    every channel can say what the user has ✓ ✓ ✓.
+    """
+    from archres_core.updates import check_updates
+
+    install = _install(tmp_path, install_manifest)
+    offered = {
+        "app": {"version": "0.1.0"},
+        "models": {"version": "0.1.0"},
+        "rules": {"version": "0.1.0"},
+        "prices": {"version": "0.1.0"},
+    }
+    plan = check_updates(install, offered=offered)
+
+    channels = {item.channel: item for item in plan.channels}
+    assert "app" in channels, "the install does not say which version it is"
+    assert channels["app"].current != "0.0.0", "the app's version is not read"
+    assert "rules" in channels, "the installed packs are not read"
+    assert "prices" in channels, "the installed rate cards are not read"
+    assert "models" in channels, "the installed model registry is not read"
+
 def test_the_models_are_bundled_with_the_app(
     tmp_path: pathlib.Path, install_manifest
 ) -> None:
