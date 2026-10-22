@@ -61,7 +61,21 @@ The agent went back to the documents ✓ ✓ — and the record changed ✓ ✓:
   layer, but its **headings** are in a legacy Bangla font encoding and are mangled. The
   repo's own method reads a chart from the **rendered page** (ADR-0003), which this machine
   cannot do (the model reads no PDF page images), so **nothing** is transcribed from it -
-  because a number without its heading is not a rule;
+  because a number without its heading is not a rule.
+- **and then the reader was fixed, and the chart became readable** (2026-10-22 ✓) - the
+  reader **could not read the gazette at all** ✓ ✗ (ADR-0081 ✓ ✓), and the CDA's own copy
+  of the same schedule **was** readable ✓ ✓ - the numbers ✓, and the **class labels** in
+  Latin ✓ (A1-A4 ✓, A5 ✓, B1 ✓, B2 ✓ ✓). So the chart's **rows** can now be read ✓ ✓ -
+  and what they say is that **the CDA's chart is the national schedule** ✓ ✓: its A1-A4 and
+  A5 columns agree with the pack **row for row** ✓ ✓ (34 rows ✓ ✓, checked by script ✓ ✓ -
+  `tools/rules/gazette/check_far.py` ✓ ✓), and the **same 34 rows** are confirmed by the
+  **gazette's own digits** ✓ ✓ — a second, independent copy ✓ ✓ (ADR-0082 ✓ ✓).
+  ⇒ **the Chattogram FAR is the national FAR** ✓ ✓ - the CDA's copy carries the national
+  table ✓ ✓ - so the city needs no pack of its own for it ✓ ✓, and the fallback is not a
+  gap here ✓ ✓ but the **rule itself** ✓ ✓. What the CDA's copy does **not** settle is the
+  chart's **headings** ✓ ✓ (the Bangla words that say which column is which ✓ ✓) - so the
+  **pack's** rows stay as they are ✓ ✓ (a human's read of the rendered pages ✓ ✓), and the
+  numbers are now **machine-checked** against the source ✓ ✓ (ADR-0082 ✓ ✓).
 - **the Khulna authority's own three documents were found** - the site answers under
   `kda.gov.bd` (the `www.` host's certificate does not verify), and its own laws and rules
   pages list them: the **KDA Act 2018** (the authority's own enabling law - 27 pages, fetched
@@ -115,8 +129,10 @@ pack set is discovered ✓ — W4.6 ✓ — so a new pack arrives with its own g
 - **Rajshahi's documents** ✓ — the rules are **named** ✓ – (the titles the authority's page
   carries ✓ ✓) and **not fetched** ✓ – the authority's file host did not answer from the
   build machine ✓ ✓, so nothing is claimed that was not read ✓ ✓;
-- **Chattogram's and the KDA's charts** ✓ — the numbers are in the documents' text ✓ ✓
-  and their headings are not ✓ ✓, so they wait for the rendered page ✓ ✓;
+- **the charts' headings** ✓ — the numbers are now readable ✓ ✓ (and the pack's numbers are
+  machine-checked against them ✓ ✓, ADR-0082 ✓ ✓), but the Bangla words that say which
+  column is which are still mangled ✓ ✓, so the **chart itself** still waits for a
+  rendered page ✓ ✓;
 - **the KDA's FAR, parking and use-class tables** ✓ — the authority's portal does not publish
   them ✓ ✓, and the three documents it does publish hold the *national* rules ✓ ✓, so there
   is nothing to transcribe for this city ✓ ✓ — a gap, declared ✓ ✓.

@@ -18,6 +18,23 @@ for pack revisions, for the BYO-PDF channel (plan §5.6), or for another authori
 - **text-layer** — from the embedded text. Digits and Latin are reliable; **Bangla letters are
   mangled** (legacy pre-Unicode font encoding) and must be converted or eye-checked on a crop.
 
+## The text layer checks the pack (2026-10-22)
+
+The pack's FAR tables were read from **rendered pages** ✓ — the text layer's Bangla letters
+are mangled ✓ ✓. But its **digits are plain** ✓ ✓, and the core's reader now reads the layer
+at all ✓ (ADR-0081 ✓ ✓) — so the pack's numbers can be checked **against the source's own
+digits** ✓ ✓, by script ✓, with no rendering and no human ✓ ✓:
+
+    uv run --directory core python ../tools/rules/gazette/check_far.py
+
+⇒ **the gazette's own text layer confirms 34 of the pack's FAR rows** ✓ ✓ (pdf pages 52-53 ✓
+✓ — the whole of table 3(ka) ✓, the A1-A4 and the A5 columns ✓ ✓), and the **CDA's own copy
+of the same schedule** ✓ ✓ confirms the same 34 ✓ ✓ — **68 checks, none disagreeing** ✓ ✓
+✓.
+
+⇒ **A row no document carries is a gap** ✓ ✓, never a disagreement ✓ ✓ (ADR-0080 ✓ ✓) — the
+check says *not checked* ✓ and does not claim the row agrees ✓ ✓.
+
 ## Tools
 
 Run from the repo root, e.g.:
