@@ -24,6 +24,7 @@ artifacts/
 data/cache/
 data/demo/
 data/downloads/
+data/install/
 data/spikes/
 data/tmp/
 models/checkpoints/

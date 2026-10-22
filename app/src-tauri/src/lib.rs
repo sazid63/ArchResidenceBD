@@ -67,7 +67,7 @@ fn python_for(root: &std::path::Path) -> String {
     if let Ok(python) = std::env::var("ARCHRES_PYTHON") {
         return python;
     }
-    let bundled = root.join("runtime").join("python.exe");
+    let bundled = root.join("runtime").join("python").join("python.exe");
     if bundled.is_file() {
         return bundled.display().to_string();
     }

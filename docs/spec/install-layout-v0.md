@@ -62,6 +62,19 @@ the schemas at runtime ✓ ✓.)
   ships its own GNU toolchain ✓, its own `rust-lld` ✓ and its own self-contained MinGW ✓:
   `uv run --directory core python ../tools/ci/rust_gate.py` ✓ (5 tests ✓ + the formatting ✓) ✓.
 
+## The installer can be run (2026-10-22)
+
+The plan and the apply existed ✓ — and nothing could *run* them ✓ ✓. There is now a CLI ✓:
+
+```powershell
+uv run --directory core python ../tools/install/install_app.py --plan          # the plan, first
+uv run --directory core python ../tools/install/install_app.py --write --root C:\ArchResidenceBD
+uv run --directory core python ../tools/install/install_app.py --check --root C:\ArchResidenceBD
+```
+
+and the **check** is the promise tested ✓ — every part is in the folder ✓, and the
+**installed core starts and answers a ping** ✓ ✓.
+
 ## The whole product in one folder (2026-10-22)
 
 The owner's promise: **the user downloads the app, installs it, and everything is there** ✓ —
@@ -75,6 +88,7 @@ so the install carries ✓:
 | the rule packs | the repo (`spec/rules`) | `packs/` |
 | the **CAD engine** | the build machine's FreeCAD (found by the core's own discovery) | `engine/bin`, `engine/Mod`, `engine/lib`, `engine/data` |
 | the **models** | the build machine's model folder (`ARCHRES_MODELS`) | `models/` |
+| the **Python runtime** | the build machine's interpreter (its base prefix) | `runtime/python/` |
 | the **model cards** | the repo (`spec/models/cards`) | `licenses/model-cards/` |
 | the notices | written by the installer | `licenses/` |
 

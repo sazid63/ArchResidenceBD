@@ -107,9 +107,36 @@ def engine_home(tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> path
     return root
 
 
+
+@pytest.fixture()
+def python_home(
+    tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+) -> pathlib.Path:
+    """A small stand-in for the build machine's Python.
+
+    The real interpreter is fifty megabytes and hundreds of files, and a test that copied
+    it would copy it again and again. The stand-in has the same **shape** - the
+    interpreter at the root and a `Lib/site-packages` beside it - which is what the
+    installer reads.
+
+    The interpreter's *prefix* is pointed at the stand-in too ✓ — the installer looks for
+    the dependencies beside the interpreter ✓ ✓ — so the test copies the stand-in and not
+    the build machine's real Python ✓ ✓.
+    """
+    root = tmp_path / "python"
+    (root / "Lib" / "site-packages").mkdir(parents=True)
+    (root / "python.exe").write_bytes(b"a small stand-in for the interpreter")
+    (root / "Lib" / "site-packages" / "a-package.txt").write_text("stand-in", encoding="utf-8")
+    monkeypatch.setenv("ARCHRES_PYTHON_HOME", str(root))
+    import sys
+
+    monkeypatch.setattr(sys, "prefix", str(root))
+    return root
+
+
 @pytest.fixture()
 def install_manifest(
-    models_home: pathlib.Path, engine_home: pathlib.Path
+    models_home: pathlib.Path, engine_home: pathlib.Path, python_home: pathlib.Path
 ) -> "InstallManifest":
     """The real manifest with the test's small models (and their real hashes)."""
     from archres_core.install import InstallManifest, ManifestPart, the_manifest

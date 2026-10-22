@@ -55,7 +55,7 @@ TIERS = ("cpu", "cuda", "vulkan")
 INSTALL_LAYOUT = {
     "shell": "ArchResidenceBD.exe",
     "runtime": "runtime",
-    "python": "runtime/python.exe",
+    "python": "runtime/python",
     # the core's **package** - the name matters, or the import fails ✓
     "core": "runtime/core/archres_core",
     # the core's **data** - the flow book and the schemas the app reads ✓
@@ -88,6 +88,26 @@ def engine_home() -> pathlib.Path | None:
         return find_engine().path.parent.parent
     except Exception:
         return None
+
+
+#: Where the build machine's Python lives ✓ — the env var wins ✓, and the default is the
+#: interpreter this very core runs on ✓ (its **base prefix** ✓ — a venv holds absolute
+#: paths ✓ and is not relocatable ✓, and the app's runtime must be ✓ ✓).
+PYTHON_HOME_ENV = "ARCHRES_PYTHON_HOME"
+
+
+def python_home() -> pathlib.Path | None:
+    """The build machine's Python prefix ✓ — the one the app will bundle ✓ ✓."""
+    import os
+    import sys
+
+    env = os.environ.get(PYTHON_HOME_ENV)
+    if env:
+        return pathlib.Path(env)
+    base = pathlib.Path(sys.base_prefix)
+    if (base / "python.exe").is_file():
+        return base
+    return None
 
 
 #: Where the GGUFs live on the build machine ✓ — the env var wins ✓, and the default is
@@ -327,6 +347,50 @@ def _registry() -> dict[str, Any] | None:
         return None
 
 
+def _site_packages(home: pathlib.Path) -> pathlib.Path | None:
+    """The core's dependencies ✓ — the site-packages they live in ✓ ✓.
+
+    The **venv's** ✓ (where the core's dependencies are installed ✓ ✓) — and the editable
+    install's ``.pth`` ✓ is left out ✓, because it points at the build machine's repo ✓
+    and that path means nothing on a user's machine ✓ ✓ ✓.
+    """
+    import sys
+
+    candidates = [
+        pathlib.Path(sys.prefix) / "Lib" / "site-packages",
+        home / "Lib" / "site-packages",
+    ]
+    for candidate in candidates:
+        if not candidate.is_dir():
+            continue
+        if not any(
+            item.name.startswith("archres_core") for item in candidate.iterdir()
+        ):
+            continue
+        return candidate
+    return None
+
+
+def _copy_tree(source: pathlib.Path, destination: pathlib.Path) -> list[pathlib.Path]:
+    """Copy a folder's contents ✓ — **recursively** ✓ ✓.
+
+    The engine's folders have folders inside them ✓ (the workbench modules ✓, the Python
+    libraries ✓) ✓, and a copy that stopped one level down would leave the install with a
+    broken engine ✓ ✓ — so the copy goes all the way down ✓ ✓.
+    """
+    written: list[pathlib.Path] = []
+    destination.mkdir(parents=True, exist_ok=True)
+    for item in sorted(source.rglob("*")):
+        if item.is_dir():
+            continue
+        relative = item.relative_to(source)
+        target = destination / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(item.read_bytes())
+        written.append(target)
+    return written
+
+
 def _hash_bytes(data: bytes) -> str:
     """The sha256 of some bytes ✓ ✓."""
     return hashlib.sha256(data).hexdigest()
@@ -433,6 +497,19 @@ def install_plan(
             else:
                 missing.append(f"engine-{folder}")
 
+    # the **Python runtime** ✓ — bundled with the app ✓ (the owner: *the user downloads
+    # one thing and never installs Python* ✓ ✓) ✓ — the build machine's interpreter ✓
+    # (its base prefix ✓ — a venv is not relocatable ✓ ✓) ✓ and the core's dependencies ✓
+    # travel with it ✓ ✓.
+    home = python_home()
+    if home is None:
+        missing.append("runtime")
+    else:
+        copies.append((str(home), INSTALL_LAYOUT["python"]))
+        site = _site_packages(home)
+        if site is not None:
+            copies.append((str(site), f"{INSTALL_LAYOUT['python']}/Lib/site-packages"))
+
     # the **model cards** ✓ — the models' own documentation ✓ (their licence ✓, their
     # provenance ✓, their training data ✓) — and they travel with the models ✓ ✓
     cards_source = repo / "spec" / "models" / "cards"
@@ -501,19 +578,11 @@ def apply_plan(plan: InstallPlan, root: str | pathlib.Path | None = None) -> lis
         destination = base / relative
         destination.mkdir(parents=True, exist_ok=True)
         if source_path.is_dir():
-            for item in sorted(source_path.iterdir()):
-                if item.is_file():
-                    target = destination / item.name
-                    target.write_bytes(item.read_bytes())
-                    written.append(str(target.relative_to(base)))
-                elif item.is_dir():
-                    # a subfolder keeps its name ✓ (a package inside a package ✓ ✓)
-                    target = destination / item.name
-                    target.mkdir(parents=True, exist_ok=True)
-                    for child in sorted(item.iterdir()):
-                        if child.is_file():
-                            (target / child.name).write_bytes(child.read_bytes())
-                    written.append(str(target.relative_to(base)))
+            # **recursive** ✓ - the engine's `Mod` ✓ and `lib` ✓ have folders inside them ✓,
+            # and a copy that stopped one level down would leave the install with a
+            # *broken* engine ✓ ✓
+            for target in _copy_tree(source_path, destination):
+                written.append(str(target.relative_to(base)))
         elif source_path.is_file():
             target = destination / source_path.name
             data = source_path.read_bytes()

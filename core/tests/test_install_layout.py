@@ -1,28 +1,26 @@
-"""The installed folder must actually run the app.
+"""W5.1: the install is complete - the engine, the models, the Python, the core, the law.
 
-This is the question the commercial path depends on: *can the installed folder start the
-core and answer?* — and it is the question the layout and the code that reads it disagreed
-about.
+The owner's promise (2026-10-22): *the user downloads the app, installs it, and
+everything is there*. So the install must carry:
 
-The bugs this test holds against:
+- the **core** ✓ (as a package ✓ - the name matters ✓, or the import fails ✓ ✓);
+- the **core's data** ✓ (the flow book ✓, the schemas ✓) ✓;
+- the **CAD engine** ✓ (the folders the headless engine needs ✓) ✓;
+- the **models** ✓ (bundled ✓ - ADR-0063 ✓) ✓;
+- the **Python runtime** ✓ — so nobody installs Python ✓ ✓;
+- the **rule packs** ✓ and the **notices** ✓ ✓.
 
-1. **the installer copied the core's files, not the package** — so the installed folder held
-   ``bridge.py`` loose in ``runtime/core`` and the core was **not importable as
-   ``archres_core``**, and the shell's sidecar could never have started;
-2. **the bridge looked for the flow book and the packs in ``spec/``** — a folder the install
-   does not have.
-
-And the **models** and the **CAD engine** are **bundled** (the owner's decision · 2026-10-22
-·) — so the installer **copies** them ✓, and a copy whose hash is not the promised one is
-**refused** ✓ ✓.
+And the copy must be **recursive** ✓ — the engine's `Mod` and `lib` have folders inside
+them ✓, and a copy that stopped one level down would leave the install with a *broken*
+engine ✓ ✓.
 """
 
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 import pathlib
+import site
 import subprocess
 import sys
 
@@ -39,8 +37,6 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 
 def _install(tmp_path: pathlib.Path, install_manifest) -> pathlib.Path:
-    """Lay the install folder down ✓ ✓ (the stand-ins ✓ — the real engine and the real
-    models are gigabytes ✓, and a test that copied them would copy eight ✓ ✓)."""
     install = tmp_path / "install"
     plan = install_plan(install_manifest, install, repo_root=ROOT)
     apply_plan(plan, install)
@@ -54,8 +50,6 @@ def _isolated_env(python_path: str) -> dict[str, str]:
     is how the venv's copy of the core sneaks in ✓) ✓, while the site's *packages* stay on
     the path ✓ — the core's dependencies (yaml ✓, jsonschema ✓) live there ✓ ✓.
     """
-    import site
-
     environment = {k: v for k, v in os.environ.items() if k != "PYTHONPATH"}
     paths = [python_path]
     for folder in site.getsitepackages() if hasattr(site, "getsitepackages") else []:
@@ -83,10 +77,10 @@ def test_the_installed_core_imports_in_isolation(
     install = _install(tmp_path, install_manifest)
     result = subprocess.run(
         [sys.executable, "-S", "-c", "import archres_core.bridge"],
-        env=_isolated_env(str(install / INSTALL_LAYOUT["coreData"])),
         capture_output=True,
         text=True,
         timeout=60,
+        env=_isolated_env(str(install / INSTALL_LAYOUT["coreData"])),
     )
     assert result.returncode == 0, result.stderr.strip()[-400:]
 
@@ -96,12 +90,12 @@ def test_the_installed_core_answers(tmp_path: pathlib.Path, install_manifest) ->
     install = _install(tmp_path, install_manifest)
     process = subprocess.Popen(
         [sys.executable, "-S", "-m", "archres_core.bridge", "--root", str(install)],
-        env=_isolated_env(str(install / INSTALL_LAYOUT["coreData"])),
         stdin=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
         encoding="utf-8",
+        env=_isolated_env(str(install / INSTALL_LAYOUT["coreData"])),
     )
     try:
         assert process.stdin is not None and process.stdout is not None
@@ -124,7 +118,6 @@ def test_the_installed_core_finds_its_flow_book_and_its_packs(
     install = _install(tmp_path, install_manifest)
     assert (install / INSTALL_LAYOUT["coreData"] / "flows" / "phase-flow-book.yaml").is_file()
     assert (install / INSTALL_LAYOUT["packs"] / "rajuk-2008.yaml").is_file()
-    # and the bridge finds them from the install root ✓
     from archres_core.bridge import Bridge
 
     bridge = Bridge(root=install)
@@ -153,12 +146,37 @@ def test_the_engine_is_bundled_with_the_app(
         assert (engine / folder).is_dir(), folder
 
 
+def test_the_python_runtime_travels_with_the_app(
+    tmp_path: pathlib.Path, install_manifest, python_home: pathlib.Path
+) -> None:
+    """Nobody installs Python ✓ — the runtime is in the folder ✓ ✓."""
+    install = _install(tmp_path, install_manifest)
+    runtime = install / INSTALL_LAYOUT["python"]
+    assert (runtime / "python.exe").is_file()
+
+
+def test_the_copy_is_recursive(tmp_path: pathlib.Path) -> None:
+    """A copy that stopped one level down would leave a *broken* engine ✓ ✓."""
+    from archres_core.install import _copy_tree
+
+    source = tmp_path / "source"
+    (source / "one" / "two" / "three").mkdir(parents=True)
+    (source / "one" / "two" / "three" / "deep.txt").write_text("deep", encoding="utf-8")
+    (source / "top.txt").write_text("top", encoding="utf-8")
+
+    destination = tmp_path / "destination"
+    written = _copy_tree(source, destination)
+
+    assert (destination / "top.txt").is_file()
+    assert (destination / "one" / "two" / "three" / "deep.txt").is_file()
+    assert len(written) == 2
+
+
 def test_a_model_whose_hash_is_wrong_is_refused(
     tmp_path: pathlib.Path, install_manifest, models_home: pathlib.Path
 ) -> None:
     """A bundled model is verified before it is installed ✓ — a wrong one is refused ✓ ✓."""
     install = tmp_path / "install"
-    # a model that is not the one the manifest promises ✓
     (models_home / "archie-chat-v0-Q4_K_M.gguf").write_bytes(b"a different model entirely")
     plan = install_plan(install_manifest, install, repo_root=ROOT)
     with pytest.raises(ManifestError, match="hash"):
