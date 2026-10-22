@@ -729,6 +729,9 @@ def probe_install(root: str | pathlib.Path) -> list[str]:
     ✓ ✓ — and every entry names what it could not do ✓ ✓ (never a zero —
     never a silent nothing ✓ ✓) ✓ ✓.
     """
+    import tempfile
+    import time
+
     from .bridge import Bridge
 
     problems: list[str] = []
@@ -752,10 +755,18 @@ def probe_install(root: str | pathlib.Path) -> list[str]:
     except Exception as exc:
         problems.append(f"the templates could not be read: {exc}")
 
-    # a project ✓ ✓ and the interview ✓ ✓
+    # a project ✓ ✓ and the interview ✓ ✓ — the probe's own projects go to a
+    # **temporary** folder ✓ ✓ — so the probe leaves nothing in the install ✓ ✓ —
+    # and the names are **unique** ✓ ✓ — so a second probe does not collide with
+    # the first ✓ ✓ –
+    stamp = str(int(time.time() * 1000))
+    workspace = tempfile.mkdtemp(prefix="archres-probe-")
     project = ""
     try:
-        created = ask("project.create", {"name": "Install Probe"})
+        created = ask(
+            "project.create",
+            {"name": f"Install Probe {stamp}", "projects": workspace},
+        )
         project = str(created.get("path") or "")
         if not created.get("prompt", {}).get("ask"):
             problems.append("the interview did not open")
@@ -782,7 +793,11 @@ def probe_install(root: str | pathlib.Path) -> list[str]:
     try:
         filled = ask(
             "project.create",
-            {"name": "Install Money Probe", "template": "two-storey-residential"},
+            {
+                "name": f"Install Money Probe {stamp}",
+                "projects": workspace,
+                "template": "two-storey-residential",
+            },
         )
         boq = ask("boq.build", {"project": filled.get("path")})
         card = (boq.get("boq") or {}).get("rateCard") or {}
@@ -791,6 +806,10 @@ def probe_install(root: str | pathlib.Path) -> list[str]:
     except Exception as exc:
         problems.append(f"the BOQ could not be built: {exc}")
 
+    # the probe's own workspace goes away with it ✓ ✓
+    import shutil
+
+    shutil.rmtree(workspace, ignore_errors=True)
     return problems
 
 

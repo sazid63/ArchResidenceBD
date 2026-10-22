@@ -87,9 +87,10 @@ def _check(root: pathlib.Path) -> int:
     # the installed app must be able to do the app's work ✓ ✓ — the templates ✓ ✓, a
     # project ✓ ✓, the interview ✓ ✓, the manual ✓ ✓ and the money ✓ ✓ — one
     # probe ✓ ✓ (the core's own ✓ ✓ — the same one the repo's test asks ✓ ✓) ✓ ✓
-    for problem in probe_install(root):
+    app_problems = probe_install(root)
+    for problem in app_problems:
         problems.append(f"the installed app: {problem}")
-    if not problems:
+    if not app_problems:
         print("  the installed app can do the app's work")
 
     # the installed core must answer ✓ — the same proof the layout test gives ✓ ✓
