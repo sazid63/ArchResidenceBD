@@ -180,6 +180,23 @@ def _dict_value(raw: bytes, key: bytes) -> str | None:
 # --------------------------------------------------------------------- the fonts
 
 
+#: A ToUnicode CMap's entries. A ``bfchar`` entry is a source and a destination; a
+#: ``bfrange`` entry is a source range and a destination - either one start code (the
+#: destinations then count up) or an **array** of them. The entry is matched whole, so a
+#: range is never read across the next entry's brackets.
+_BFCHAR_ENTRY = re.compile(r"<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>")
+_BFRANGE_ENTRY = re.compile(
+    r"<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>\s*(?:<([0-9A-Fa-f]+)>|\[([^\]]*)\])"
+)
+
+#: The most codes one range may map: a source code is at most four hex digits, so a real
+#: range holds at most this many entries. A bigger one is a misread, not a mapping.
+_MAX_RANGE = 0x10000
+
+#: The highest code point a destination may be.
+_MAX_CODE_POINT = 0x10FFFF
+
+
 def _parse_cmap(payload: bytes) -> dict[int, str]:
     """The ToUnicode CMap: the code points a font's glyphs stand for."""
     mapping: dict[int, str] = {}
@@ -192,16 +209,26 @@ def _parse_cmap(payload: bytes) -> dict[int, str]:
             return ""
 
     for block in re.findall(r"beginbfchar(.*?)endbfchar", text, re.S):
-        for source, target in re.findall(r"<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>", block):
+        for source, target in _BFCHAR_ENTRY.findall(block):
             mapping[int(source, 16)] = decode(target)
     for block in re.findall(r"beginbfrange(.*?)endbfrange", text, re.S):
-        for low, high, target in re.findall(
-            r"<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>\s*<([0-9A-Fa-f]+)>", block
-        ):
-            start, end = int(low, 16), int(high, 16)
-            base = int(target, 16)
-            for offset in range(end - start + 1):
-                mapping[start + offset] = chr(base + offset)
+        for low, high, start, array in _BFRANGE_ENTRY.findall(block):
+            first = int(low, 16)
+            last = int(high, 16)
+            if last < first or last - first + 1 > _MAX_RANGE:
+                # A range this long is a misread of the file, not a mapping.
+                continue
+            if array:
+                # The array form: each destination is its own code.
+                for offset, value in enumerate(re.findall(r"<([0-9A-Fa-f]*)>", array)):
+                    mapping[first + offset] = decode(value)
+                continue
+            base = int(start, 16)
+            for offset in range(last - first + 1):
+                code = base + offset
+                if code > _MAX_CODE_POINT:
+                    break
+                mapping[first + offset] = chr(code)
     return mapping
 
 

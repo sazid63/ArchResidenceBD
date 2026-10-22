@@ -41,6 +41,26 @@ nothing that turned a PDF into rule data.
   opens a provision, and the lines up to the next one are its body ·. A book whose
   provisions are not numbered yields no candidates: a fact, not a failure to be papered
   over ·.
+- **The forms a book numbers its provisions in** (2026-10-22) — the extraction now takes
+  **all three** · ✓, because the books the plan points at use all three · ✓:
+
+  | Form | Written as | Cited by | Why |
+  |---|---|---|---|
+  | a dotted run | `3.15`, `3.15.2`, `৩.১৫` | the number | the number is unique in the book ✓ |
+  | a section number | `1.`, `12A.` | the number | the number is unique in the book ✓ |
+  | a bracketed number or letter | `(1)`, `(a)`, `(ক)` | the number **and the page** | it opens under every section ✓, so the page is what makes it checkable ✓ |
+
+  And **the same number seen twice is the same clause** · ✓ — the **longer** text wins · ✓,
+  because a book's contents list carries a section's *title* ✓ and its body carries the
+  *clause* ✓ — so the body is the one a reviewer must check ✓ ✓ (the RAJUK gazette's own
+  running headers repeat a section's number on every page of it · ✓, and they are shorter ·
+  ✓).
+
+  ⇒ **Measured on the real books** (2026-10-22 ·): the KDA's Act 2018 · — **194** candidates ·
+  ✓ (it was **none** · ✓ — the bracketed form was not read · ✓), the English *Building
+  Construction Act 1952* · — **54** ✓ (it was **none** · ✓), the Chattogram's Act 1952 · —
+  **797** ✓ (it was 127 ✓), and the Sylhet rules · — **178** ✓ (it was 9 ✓) · — and every one
+  of them cites its page · ✓.
 
 ## The measured output (2026-10-21)
 
@@ -95,6 +115,23 @@ and a crash is not a candidate ✓).
 
 The **default is unchanged** ✓ — the price cards are read exactly as before ✓ ✓, and the
 committed candidate price card still passes its own check ✓ ✓.
+
+**And a second defect, the same hunt found** (2026-10-22 ✓) ✓ — the reader **could not read
+the RAJUK gazette at all** ✓ ✓ — and the gazette is the source the repo's own **rule pack**
+is transcribed from ✓ ✓ (199 pages ✓, sha256 `3318b3f4…` ✓). It raised
+`OverflowError: Python int too large to convert to C int` ✓ ✗ ✓, and the cause was the
+reader's own **ToUnicode CMap** parser ✓ ✓: a `bfrange` may carry an **array** of
+destinations ✓ (`<011C> <0120> [<0020> <09CC> <09BF> <09DD> <09DF>]` ✓), and the parser read
+the array's elements as if they were the next range's own numbers ✓ ✗ — which built a range
+of **ten billion** codes ✓ ✗ ✓.
+
+⇒ The parser now reads a range **whole** ✓ (an array is an array ✓, a start code is a start
+code ✓) ✓, and a range that cannot be a mapping (longer than a font's code space ✓, or a
+destination past the last code point ✓) is **dropped** ✓ — a misread of the file, not a
+mapping ✓ ✓. The gazette **reads** now ✓ ✓ — 199 pages ✓, 219,343 characters ✓ — and the
+page count agrees with what the pack itself records ✓ ✓ (`pdfPages: 199` ✓), and the price
+card **rebuilds identically** under the fixed reader ✓ ✓ (its nine lines, their rates and
+their multipliers ✓ — every one the same ✓ ✓).
 
 ## What is deliberately not here
 

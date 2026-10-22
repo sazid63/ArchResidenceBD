@@ -158,6 +158,41 @@ def test_the_reader_reads_a_pdf_whose_font_dictionary_is_an_object(tmp_path: pat
     assert "Cement per bag 520.00" in document.page_text(1)
 
 
+def test_the_cmap_reads_a_range_with_an_array_of_destinations() -> None:
+    """A ``bfrange`` may carry an **array** of destinations (the RAJUK gazette's does).
+
+    Reading the array as a plain range used to read across the next entry's brackets and
+    build a range of ten billion codes - which overflowed the reader and took the
+    gazette (the source of the price pack's own rules) down with it.
+    """
+    guard = _reader()
+    cmap = guard._parse_cmap(
+        b"/CIDInit /ProcSet findresource begin\n"
+        b"1 beginbfrange\n"
+        b"<0000> <0001> [<0041> <0042>]\n"
+        b"<0002> <0003> <0043>\n"
+        b"endbfrange\n"
+    )
+    assert cmap[0] == "A"
+    assert cmap[1] == "B"
+    assert cmap[2] == "C"
+    assert cmap[3] == "D"
+
+
+def test_the_cmap_refuses_a_range_that_cannot_be_a_mapping() -> None:
+    """A range longer than a font's code space is a misread of the file, not a mapping."""
+    guard = _reader()
+    cmap = guard._parse_cmap(b"1 beginbfrange\n<0000> <FFFFFF> <0041>\nendbfrange\n")
+    assert cmap == {}
+
+
+def test_the_cmap_survives_a_destination_beyond_the_code_space() -> None:
+    """A destination past the last code point is dropped, not raised."""
+    guard = _reader()
+    cmap = guard._parse_cmap(b"1 beginbfrange\n<0000> <0002> <10FFFE>\nendbfrange\n")
+    assert cmap == {0: "\U0010fffe", 1: "\U0010ffff"}
+
+
 def test_the_cached_books_read_and_carry_the_rows_this_project_needs() -> None:
     """The real books, when they are cached (they are not committed - 22 MB of PDF)."""
     guard = _reader()

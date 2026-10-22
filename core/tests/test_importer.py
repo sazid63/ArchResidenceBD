@@ -162,6 +162,65 @@ def test_a_book_with_no_numbered_provisions_yields_no_candidates() -> None:
     assert extract_candidates(document) == []
 
 
+def test_a_bracketed_number_opens_a_provision() -> None:
+    """The books the plan points at number their clauses "(1)", "(a)" — those open too."""
+    document = _document(["(1) The first clause\n(2) The second clause"])
+    candidates = extract_candidates(document)
+    assert [candidate.number for candidate in candidates] == ["1", "2"]
+    assert "The second clause" in candidates[1].text
+
+
+def test_a_bracketed_letter_opens_a_provision() -> None:
+    """A lettered sub-clause — "(a)" — is a provision too."""
+    document = _document(["(a) the first limb\n(b) the second limb"])
+    candidates = extract_candidates(document)
+    assert [candidate.number for candidate in candidates] == ["a", "b"]
+
+
+def test_a_section_number_opens_a_provision() -> None:
+    """A section number — "1." — opens a provision too."""
+    document = _document(["1. Short title\n2. Definitions"])
+    candidates = extract_candidates(document)
+    assert [candidate.number for candidate in candidates] == ["1", "2"]
+
+
+def test_a_bracketed_number_is_cited_with_its_page() -> None:
+    """A bracketed number opens under every section, so the page is part of its citation."""
+    document = _document(["(1) on the first page", "(1) on the second page"])
+    candidates = extract_candidates(document)
+    assert len(candidates) == 2
+    assert candidates[0].id != candidates[1].id
+    assert [candidate.page for candidate in candidates] == [1, 2]
+    assert all(candidate.id.endswith("-p1") or candidate.id.endswith("-p2") for candidate in candidates)
+
+
+def test_two_bracketed_numbers_on_one_page_are_counted_apart() -> None:
+    """Two clauses that open with the same number on one page are two clauses."""
+    document = _document(["(1) the first\n(1) the second"])
+    candidates = extract_candidates(document)
+    assert len(candidates) == 2
+    assert candidates[0].id != candidates[1].id
+
+
+def test_the_clause_body_beats_the_contents_list_entry() -> None:
+    """The contents list carries a section's title; the body carries the clause.
+
+    The same number seen twice is the same clause, and the **longer** text is the one a
+    reviewer must check — so the body replaces the contents list's entry.
+    """
+    document = _document(["1. Short title, extent and commencement.", "1. This Act may be called the Building Construction Act, 1952."])
+    candidates = extract_candidates(document)
+    assert len(candidates) == 1
+    assert "This Act may be called" in candidates[0].text
+    assert candidates[0].page == 2
+
+
+def test_a_year_is_not_a_section() -> None:
+    """A printer's imprint — "1985." — is not a section."""
+    document = _document(["PUBLISHED BY THE GOVERNMENT OF BANGLADESH.\n1985."])
+    assert extract_candidates(document) == []
+
+
 def test_the_same_number_twice_is_one_candidate() -> None:
     """The ids must be unique, or the review would count one clause twice."""
     document = _document(["5.1 One\n5.2 Two\n5.1 One again"])

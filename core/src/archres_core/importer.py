@@ -31,11 +31,25 @@ from typing import Any, Iterable, Sequence
 
 from .pdf_text import PdfDocument, PdfError, read_pdf
 
-#: A numbered provision: "3.15", "3.15.2", "১.১৫" — digits, a dot, digits. The number
-#: is the **whole** dotted run (a provision may be numbered 3.15.2 ·), and the trailing dot
-#: is what tells a number from prose.
+#: A numbered provision, in the forms the books actually use:
+#:
+#: - a **dotted run** — "3.15", "3.15.2", "৩.১৫" — the number is the whole dotted run (a
+#:   provision may be numbered 3.15.2 ·), and the trailing dot is what tells a number from
+#:   prose ··;
+#: - a **section number** — "1." (a number and a dot, then the section's title) ··;
+#: - a **bracketed number** — "(1)", "(১)" — a clause under a section ··;
+#: - a **bracketed letter** — "(a)", "(ক)" — a sub-clause under a section ··.
+#:
+#: The dotted and section forms are cited **by their number alone** (the number is unique in
+#: the book), so a repeat of one is the same clause ··. The bracketed forms are cited **under
+#: a section** — "(1)" opens under every section — so their citation carries the page they
+#: are on ✓ ✓, or the review would count one clause twice ✓ ✓.
 _NUMBERED = re.compile(
-    r"^(?P<number>\d{1,4}(?:\.\d{1,4})+|[০-৩]{1,4}(?:[.।][০-৩]{1,4})+)"
+    r"^(?:"
+    r"(?P<dotted>\d{1,4}(?:\.\d{1,4})+|[০-৩]{1,4}(?:[.।][০-৩]{1,4})+)"
+    r"|(?P<section>\d{1,3}[A-Za-z]?[.।]|[০-৩]{1,3}[.।])"
+    r"|\((?P<bracketed>\d{1,4}|[০-৩]{1,4}|[A-Za-z]{1,3}|[ঀ-৿]{1,3})\)"
+    r")"
 )
 
 #: How much of a candidate's text the excerpt carries.
@@ -104,21 +118,59 @@ def _lines(page_text: str) -> list[str]:
     return [line.strip() for line in page_text.splitlines()]
 
 
+def _form_of(match: re.Match[str]) -> tuple[str, str]:
+    """The provision's number and the form it was written in."""
+    if match.group("dotted"):
+        return match.group("dotted"), "dotted"
+    if match.group("section"):
+        # A section's number is the number; the dot is the book's punctuation.
+        return match.group("section").rstrip(".।"), "section"
+    return match.group("bracketed"), "bracketed"
+
+
 def _slug(number: str) -> str:
     """A stable id for a provision number ("3.15" -> "3-15"; Bangla digits are kept)."""
-    cleaned = number.replace(".", "-").replace("।", "-")
+    cleaned = number.rstrip(".।").replace(".", "-").replace("।", "-")
     return f"clause-{cleaned}"
 
 
 def _candidate(
-    number: str, page: int, lines: list[str], seen: set[str]
+    number: str, form: str, page: int, lines: list[str], seen: dict[str, Candidate]
 ) -> Candidate | None:
-    """One candidate, if its number has not been seen before."""
+    """One candidate, and what to do with a number that has been seen before.
+
+    A **dotted** number ("3.15") and a **section** number ("1.") identify their clause in
+    the book on their own ✓ — so the id is the number ✓, and a repeat of it is the **same**
+    clause ✓ (a running header ✓, or the contents list's own entry ✓), not a second one ✓.
+    The **longer** text wins ✓ — the contents list carries a section's title ✓ and the body
+    carries the clause itself ✓, so the longer one is the clause a reviewer must check ✓ ✓.
+
+    A **bracketed** number ("(1)") opens under every section ✓, so it does not identify a
+    clause on its own ✓ — its id carries the page it is on ✓ ✓ (a clause without a page
+    cannot be checked ✓ ✓), and a second one on the same page is counted apart ✓ (the
+    review would otherwise count one clause twice ✓ ✓).
+    """
+    if form == "bracketed":
+        identifier = f"{_slug(number)}-p{page}"
+        suffix = 2
+        while identifier in seen:
+            identifier = f"{_slug(number)}-p{page}-{suffix}"
+            suffix += 1
+        seen[identifier] = Candidate(
+            id=identifier, number=number, page=page, text="\n".join(lines)
+        )
+        return seen[identifier]
     identifier = _slug(number)
-    if identifier in seen:
-        return None
-    seen.add(identifier)
-    return Candidate(id=identifier, number=number, page=page, text="\n".join(lines))
+    candidate = Candidate(id=identifier, number=number, page=page, text="\n".join(lines))
+    existing = seen.get(identifier)
+    if existing is None:
+        seen[identifier] = candidate
+        return candidate
+    if len(candidate.text) > len(existing.text):
+        # The same clause, read better (the body, not the contents list's title).
+        seen[identifier] = candidate
+        return candidate
+    return None
 
 
 def extract_candidates(document: PdfDocument) -> list[Candidate]:
@@ -128,29 +180,29 @@ def extract_candidates(document: PdfDocument) -> list[Candidate]:
     of a provision, and the lines up to the next one are its body ··. A book whose
     provisions are not numbered yields no candidates — and that is a fact, not a failure to
     be papered over ··.
+
+    The **forms** a book numbers its provisions in are the ones the books actually use ✓ —
+    a dotted run ("3.15" ✓), a section number ("1." ✓) and a bracketed number or letter
+    ("(1)" ✓, "(a)" ✓) ✓ ✓ — and each is cited the way it can be checked ✓ ✓.
     """
-    candidates: list[Candidate] = []
-    seen: set[str] = set()
+    seen: dict[str, Candidate] = {}
     for page in document.pages:
         current_number: str | None = None
+        current_form: str = ""
         current_text: list[str] = []
         for line in _lines(page.text):
             match = _NUMBERED.match(line)
             if match:
                 if current_number is not None and current_text:
-                    candidate = _candidate(current_number, page.number, current_text, seen)
-                    if candidate is not None:
-                        candidates.append(candidate)
-                current_number = match.group("number")
+                    _candidate(current_number, current_form, page.number, current_text, seen)
+                current_number, current_form = _form_of(match)
                 current_text = [line]
             elif current_number is not None:
                 if line:
                     current_text.append(line)
         if current_number is not None and current_text:
-            candidate = _candidate(current_number, page.number, current_text, seen)
-            if candidate is not None:
-                candidates.append(candidate)
-    return candidates
+            _candidate(current_number, current_form, page.number, current_text, seen)
+    return sorted(seen.values(), key=lambda candidate: (candidate.page, candidate.id))
 
 
 def candidates_from_pdf(path: str | pathlib.Path) -> list[Candidate]:
