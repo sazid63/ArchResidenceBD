@@ -119,18 +119,26 @@ def _lines(page_text: str) -> list[str]:
 
 
 def _form_of(match: re.Match[str]) -> tuple[str, str]:
-    """The provision's number and the form it was written in."""
+    """The provision's number, as the book writes it ✓, and the form it was written in ✓.
+
+    The number is the book's **own** citation ✓ ✓ — "(1)" ✓, "1." ✓, "3.15" ✓ — because a
+    reviewer looks the clause up in the book ✓ ✓, and a bare "1" would not say whether it is
+    a section 1 ✓ or a clause (1) ✓ ✓.
+    """
     if match.group("dotted"):
         return match.group("dotted"), "dotted"
     if match.group("section"):
-        # A section's number is the number; the dot is the book's punctuation.
-        return match.group("section").rstrip(".।"), "section"
-    return match.group("bracketed"), "bracketed"
+        return match.group("section"), "section"
+    return f"({match.group('bracketed')})", "bracketed"
 
 
 def _slug(number: str) -> str:
-    """A stable id for a provision number ("3.15" -> "3-15"; Bangla digits are kept)."""
-    cleaned = number.rstrip(".।").replace(".", "-").replace("।", "-")
+    """A stable id for a provision number ("3.15" -> "3-15"; Bangla digits are kept).
+
+    The id is a **key** ✓ — the review ledger holds it ✓ — so the book's punctuation (the
+    brackets of "(1)" ✓, the dot of "1." ✓) is not part of it ✓ ✓.
+    """
+    cleaned = number.strip("()").rstrip(".।").replace(".", "-").replace("।", "-")
     return f"clause-{cleaned}"
 
 

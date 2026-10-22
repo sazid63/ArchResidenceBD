@@ -166,7 +166,8 @@ def test_a_bracketed_number_opens_a_provision() -> None:
     """The books the plan points at number their clauses "(1)", "(a)" — those open too."""
     document = _document(["(1) The first clause\n(2) The second clause"])
     candidates = extract_candidates(document)
-    assert [candidate.number for candidate in candidates] == ["1", "2"]
+    # the number is the book's own citation — "(1)" — so a reviewer can look it up ✓ ✓
+    assert [candidate.number for candidate in candidates] == ["(1)", "(2)"]
     assert "The second clause" in candidates[1].text
 
 
@@ -174,14 +175,25 @@ def test_a_bracketed_letter_opens_a_provision() -> None:
     """A lettered sub-clause — "(a)" — is a provision too."""
     document = _document(["(a) the first limb\n(b) the second limb"])
     candidates = extract_candidates(document)
-    assert [candidate.number for candidate in candidates] == ["a", "b"]
+    assert [candidate.number for candidate in candidates] == ["(a)", "(b)"]
 
 
 def test_a_section_number_opens_a_provision() -> None:
     """A section number — "1." — opens a provision too."""
     document = _document(["1. Short title\n2. Definitions"])
     candidates = extract_candidates(document)
-    assert [candidate.number for candidate in candidates] == ["1", "2"]
+    assert [candidate.number for candidate in candidates] == ["1.", "2."]
+
+
+def test_the_number_is_the_books_own_citation() -> None:
+    """A bare "1" would not say whether it is a section 1 or a clause (1) ✓ ✓."""
+    document = _document(["1. A section\n(1) A clause\n3.15 A dotted one"])
+    candidates = extract_candidates(document)
+    numbers = [candidate.number for candidate in candidates]
+    assert "1." in numbers and "(1)" in numbers and "3.15" in numbers
+    # and the ids stay keys — the book's punctuation is not in them ✓ ✓
+    for candidate in candidates:
+        assert "(" not in candidate.id and ")" not in candidate.id
 
 
 def test_a_bracketed_number_is_cited_with_its_page() -> None:

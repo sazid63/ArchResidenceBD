@@ -45,7 +45,11 @@ own copy of a book that cannot be redistributed found **nothing** in the books �
 3. **Each form is cited the way it can be checked** — the dotted and section forms are cited
    by their number ✓ (the number is unique in the book ✓), and a **bracketed** clause is
    cited by its number **and its page** ✓ ✓, because "(1)" opens under every section ✓ and a
-   clause without a page cannot be checked ✓ ✓.
+   clause without a page cannot be checked ✓ ✓. And the number a candidate carries is the
+   book's **own** citation ✓ ✓ — "(1)" ✓, "1." ✓, "3.15" ✓ — because a reviewer looks the
+   clause up in the book ✓ ✓, and a bare "1" would not say whether it is a section 1 ✓ or a
+   clause (1) ✓ ✓ (the id stays a key ✓ — the ledger holds it ✓ — so the book's punctuation
+   is not in it ✓ ✓).
 4. **The same number seen twice is the same clause, and the longer text wins** — a book's
    contents list carries a section's *title* ✓ and its body carries the *clause* ✓, so the
    body is the one a reviewer must check ✓ ✓ — and a running header (shorter ✓) does not

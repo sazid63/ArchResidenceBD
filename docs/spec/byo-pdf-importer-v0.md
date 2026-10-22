@@ -50,6 +50,11 @@ nothing that turned a PDF into rule data.
   | a section number | `1.`, `12A.` | the number | the number is unique in the book ✓ |
   | a bracketed number or letter | `(1)`, `(a)`, `(ক)` | the number **and the page** | it opens under every section ✓, so the page is what makes it checkable ✓ |
 
+  And the **number** a candidate carries is the book's **own** citation ✓ — "(1)" ✓, "1." ✓, "3.15" ✓ —
+  because a reviewer looks the clause up in the book ✓ ✓, and a bare "1" would not say
+  whether it is a section 1 ✓ or a clause (1) ✓ ✓. The **id** is a key ✓ — the review ledger
+  holds it ✓ — so the book's punctuation is not in it ✓ ✓.
+
   And **the same number seen twice is the same clause** · ✓ — the **longer** text wins · ✓,
   because a book's contents list carries a section's *title* ✓ and its body carries the
   *clause* ✓ — so the body is the one a reviewer must check ✓ ✓ (the RAJUK gazette's own
