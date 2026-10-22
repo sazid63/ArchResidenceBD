@@ -65,6 +65,9 @@ INSTALL_LAYOUT = {
     "packs": "packs",
     "licenses": "licenses",
     "projects": "projects",
+    # the app's own **data** ✓ ✓ — the user's own decisions ✓ ✓ (the review
+    # ledger ✓ ✓ — ADR-0083 ✓ ✓) ✓ ✓
+    "data": "data",
 }
 
 
@@ -474,7 +477,7 @@ def install_plan(
     repo = pathlib.Path(repo_root) if repo_root else pathlib.Path(__file__).resolve().parents[3]
 
     directories: list[str] = []
-    for key in ("runtime", "engine", "models", "packs", "licenses", "projects"):
+    for key in ("runtime", "engine", "models", "packs", "licenses", "projects", "data"):
         directories.append(INSTALL_LAYOUT[key])
 
     copies: list[tuple[str, str]] = []

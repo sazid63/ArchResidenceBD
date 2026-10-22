@@ -6,8 +6,9 @@ and its failure is loud. Order:
 
 1. an explicit path from the caller (``--engine``),
 2. ``ARCHRES_FREECADCMD`` (the same override the spikes use),
-3. a small list of known install locations,
-4. ``freecadcmd`` on ``PATH``.
+3. **the install's own engine** — the one the app carries —,
+4. a small list of known install locations,
+5. ``freecadcmd`` on ``PATH``.
 
 Nothing here imports FreeCAD: the engine is a separate process, and the app package must
 stay importable on a machine with no CAD installed (CI's unit job).
@@ -29,6 +30,7 @@ class EngineMissing(CadError):
 
 
 KNOWN_PATHS = (
+    # the **build machine's** engine ✓ ✓ - the install bundles it ✓ ✓ (the spec's table ✓ ✓)
     pathlib.Path(r"C:\1_SAJID\CE tools\FreeCAD\bin\freecadcmd.exe"),
     pathlib.Path(r"C:\Program Files\FreeCAD 1.1\bin\freecadcmd.exe"),
     pathlib.Path(r"C:\Program Files\FreeCAD 1.0\bin\freecadcmd.exe"),
@@ -40,6 +42,24 @@ KNOWN_PATHS = (
 )
 
 ENV_VAR = "ARCHRES_FREECADCMD"
+
+#: The engine's binary names ✓ — the Windows one and the Unix one ✓ ✓.
+BINARIES = ("freecadcmd.exe", "freecadcmd")
+
+
+def _install_engines() -> tuple[pathlib.Path, ...]:
+    """The **install's** own engine ✓ — the one the app carries ✓ ✓.
+
+    The install bundles the engine ✓ ✓ (the geometry is the app's own ✓ ✓) — so the
+    app must be able to find **its own** engine ✓ ✓ — and the place it lands is the
+    layout's ✓ ✓ (`<root>/engine/bin/` ✓ ✓) — which is found from the core's own
+    place ✓ ✓ (the install's layout is fixed ✓ — ADR-0061 ✓ ✓) ✓ ✓.
+    """
+    from ..install import INSTALL_LAYOUT
+
+    root = pathlib.Path(__file__).resolve().parents[4]
+    folder = root / INSTALL_LAYOUT["engine"] / "bin"
+    return tuple(folder / name for name in BINARIES)
 
 
 class EngineInfo:
@@ -81,6 +101,11 @@ def find_engine(explicit: str | pathlib.Path | None = None) -> EngineInfo:
         if found is None:
             raise EngineMissing(f"{ENV_VAR} points at a missing file: {from_env}")
         return EngineInfo(found, ENV_VAR)
+
+    for own in _install_engines():
+        found = _existing(own)
+        if found is not None:
+            return EngineInfo(found, "install")
 
     for known in KNOWN_PATHS:
         found = _existing(known)

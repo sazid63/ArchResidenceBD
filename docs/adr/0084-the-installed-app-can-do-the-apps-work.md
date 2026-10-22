@@ -46,6 +46,11 @@ start its first project ✓ ✓ — and could not price ✓ ✓ ✓.
 3. **The check asks the app's questions** ✓ ✓ — the templates ✓ ✓, a project
    ✓ ✓, the interview ✓ ✓, the manual ✓ ✓ and the money ✓ ✓
    · not a ping ✓ ✓ · so a hole like this cannot pass again ✓ ✓ ✓.
+4. **The app finds the engine it carries** ✓ ✓ — the install bundles the engine
+   ✓ ✓ (the geometry is the app's own ✓ ✓) · and the discovery looked only at
+   the build machine's places ✓ ✓ · so the app could not find the two gigabytes it
+   carries ✓ ✓ · so the discovery looks in **the install's** engine folder ✓ ✓
+   · the one the app ships with ✓ ✓ ✓.
 
 ## Consequences
 
@@ -61,6 +66,9 @@ start its first project ✓ ✓ — and could not price ✓ ✓ ✓.
   the exe's version is not a file anyone can read ✓ ✓) and carries the **model
   registry** ✓ ✓ (beside the GGUFs it names ✓ ✓) · and the check looks
   in the install's places too ✓ ✓ ✓.
+- **The app's own data folder is in the layout** ✓ ✓ — the review ledger lives
+  there ✓ ✓ (ADR-0083 ✓ ✓) · the same way the user's projects do ✓ ✓
+  · and the app never has to invent a place to write ✓ ✓ ✓.
 - **What is deliberately not here** ✓ ✓ — the **RAG corpus** ✓ ✓ (the app
   does not read it at runtime today ✓ ✓) · the **source registry** ✓ ✓ (the
   price service fetches from the network ✓ ✓, and an offline-first app prices from

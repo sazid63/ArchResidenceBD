@@ -155,6 +155,11 @@ not a ping ✓ ✓ — so a hole like this cannot pass again ✓ ✓.
 
 And the **update check** ✓ ✓ — the tool's own help says it reads *"the installation to read"* ✓ ✓ · so it looks in the install's places too ✓ ✓ · and the install records what it installed ✓ ✓ · the exe's version is not a file anyone can read ✓ ✓ ✓.
 
+And the **engine** ✓ ✓ — the install bundles it ✓ ✓ (the geometry is the app's
+own ✓ ✓) · so the app must be able to find **its own** engine ✓ ✓ · and the
+discovery looks in the install's engine folder ✓ ✓ · proved in isolation ✓ ✓ ·
+the installed core answers with the engine **inside its own install** ✓ ✓ ✓.
+
 ## What is deliberately not here
 
 - **The installer itself** — the thing that downloads and lays the layout down ✓, and the

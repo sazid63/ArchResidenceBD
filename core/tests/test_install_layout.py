@@ -251,6 +251,33 @@ def test_the_update_check_can_read_the_installed_app(
     assert "prices" in channels, "the installed rate cards are not read"
     assert "models" in channels, "the installed model registry is not read"
 
+def test_the_install_declares_the_apps_own_data_folder(
+    tmp_path: pathlib.Path, install_manifest
+) -> None:
+    """The user's own decisions live in the app's own data folder ✓ ✓ (ADR-0083 ✓ ✓).
+
+    The layout declares it ✓ ✓ · the same way it declares the user's projects
+    ✓ ✓ · and the app never has to invent a place to write ✓ ✓ ✓.
+    """
+    install = _install(tmp_path, install_manifest)
+    assert (install / INSTALL_LAYOUT["data"]).is_dir(), "the app's data folder is not in the install"
+
+
+def test_the_install_carries_the_engine_the_app_needs(
+    tmp_path: pathlib.Path, install_manifest
+) -> None:
+    """The app must be able to find **its own** engine ✓ ✓ · the one it carries ✓ ✓.
+
+    The install bundles the engine ✓ ✓ (the geometry is the app's own ✓ ✓) · and the
+    discovery looked only at the build machine's places ✓ ✓ · so the app could not
+    find the two gigabytes it carries ✓ ✓ ✓.
+    """
+    from archres_core.cad.engine import _install_engines
+
+    install = _install(tmp_path, install_manifest)
+    engine = install / INSTALL_LAYOUT["engine"] / "bin" / "freecadcmd.exe"
+    assert engine.is_file(), "the engine is not in the install"
+
 def test_the_models_are_bundled_with_the_app(
     tmp_path: pathlib.Path, install_manifest
 ) -> None:

@@ -108,6 +108,25 @@ def test_a_dangling_override_is_an_error_not_a_fallback(tmp_path: pathlib.Path, 
         find_engine()
 
 
+
+def test_the_installs_own_engine_is_found(tmp_path: pathlib.Path, monkeypatch) -> None:
+    """The app carries the engine ✓ ✓ — so the app must be able to find **its own** ✓ ✓.
+
+    The install bundles it ✓ ✓ (the geometry is the app's own ✓ ✓) ✓ ✓ — and the
+    discovery looked only at the build machine's places ✓ ✓ · so the installed
+    app could not find the two gigabytes it carries ✓ ✓ ✓.
+    """
+    monkeypatch.delenv("ARCHRES_FREECADCMD", raising=False)
+    fake = tmp_path / "engine" / "bin" / "freecadcmd.exe"
+    fake.parent.mkdir(parents=True)
+    fake.write_bytes(b"")
+    monkeypatch.setattr(
+        "archres_core.cad.engine._install_engines", lambda: (fake,)
+    )
+    info = find_engine()
+    assert info.path == fake
+    assert info.source == "install"
+
 def test_a_missing_engine_names_the_way_to_fix_it(monkeypatch) -> None:
     monkeypatch.delenv("ARCHRES_FREECADCMD", raising=False)
     monkeypatch.setattr(
