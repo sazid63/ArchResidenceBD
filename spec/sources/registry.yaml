@@ -172,15 +172,130 @@ sources:
     notes: >-
       FOUND 2026-10-22, and the two zoning rules are TRANSCRIBED. The link this entry carried
       (http://www.kda.gov.bd/wp-content/uploads/2018/03/KDA-Law.pdf) did not resolve from the
-      build machine. The authority's plan-approval portal publishes the two rules as its own
-      answers: the setbacks for a residential plot by the plot size (four classes, 2 katha
-      and above) and the building height by the road width (seven classes, 12 ft and above).
-      Both were read on 2026-10-22 and are kept with their provenance in
+      build machine - the authority keeps its law elsewhere (khulna-kda-act-2018), and its
+      own site answers under kda.gov.bd (the www host's certificate does not verify). The
+      authority's plan-approval portal publishes the two rules as its own answers: the
+      setbacks for a residential plot by the plot size (four classes, 2 katha and above) and
+      the building height by the road width (seven classes, 12 ft and above). Both were read
+      on 2026-10-22 and are kept with their provenance in
       data/rules/khulna-kda-zoning-candidate.json - a CANDIDATE, because a fetched rule stays
       a candidate until a human checks it (the plan's money law, applied to law). What is
       still missing is declared there: the FAR schedule, the parking schedule and the use
       classes. Until a full pack exists, the city falls back to the national rules
       (rajuk@2008.1) for everything the candidate does not cover, and says so.
+
+  - id: khulna-kda-act-2018
+    dataTypes:
+    - rule-source
+    status: candidate
+    authority: Khulna Development Authority (KDA)
+    title:
+      bn: খুলনা উন্নয়ন কর্তৃপক্ষ আইন, ২০১৮
+      en: The Khulna Development Authority Act, 2018
+    kind: pdf-document
+    url: https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-kda/2024/12/1edbca478ca24858a2da81e5d0245d4c.pdf
+    language:
+    - bn
+    - en
+    licence: Government publication; confirm the reuse terms before extraction.
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: >-
+        The document is on the authority's own laws page (its file list), and the file is
+        fetched from the URL above. It has a text layer, but its letters are in a legacy
+        Bangla font encoding and are mangled - the numbers are plain, the headings are not -
+        so a clause is read from the rendered page (the RAJUK pack's own method, ADR-0003).
+    cadence: static
+    lastVerified: "2026-10-22"
+    artifact:
+      fileName: "khulna-kda-act-2018.pdf"
+      sizeBytes: 290032
+      sha256: "f5d8b9e568ef5cad4a22036d91c36e80eeea01c9396d22455b80fbba05a79701"
+      pages: 27
+    notes: >-
+      FOUND 2026-10-22 - this is the link the Khulna entry carried before and did not
+      resolve (http://www.kda.gov.bd/wp-content/uploads/2018/03/KDA-Law.pdf): the authority
+      keeps its own act on its laws page instead, and this is it. 27 pages, 290032 bytes,
+      fetched and hashed. It is the authority's own enabling law - the powers, the
+      Building Construction Committee, the land, the finance - and it refers to the national
+      Building Construction Act 1952 for the building rules, so it is NOT a city zoning of
+      its own: the city falls back to the national rules (rajuk@2008.1) and says so. It is
+      kept because it is the authority's own law, and because the earlier "not found" was
+      wrong.
+
+  - id: khulna-building-construction-rules-1996
+    dataTypes:
+    - rule-source
+    status: candidate
+    authority: Khulna Development Authority (KDA)
+    title:
+      bn: ইমারত নির্মাণ বিধিমালা, ১৯৯৬
+      en: The Building Construction Rules, 1996
+    kind: pdf-document
+    url: https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-kda/2024/12/178090385403479d80328618fe57a414.pdf
+    language:
+    - bn
+    licence: Government publication; confirm the reuse terms before extraction.
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: >-
+        The document is on the authority's own rules page (its file list), and the file is
+        fetched from the URL above. It has a text layer whose letters are in a legacy Bangla
+        font encoding and are mangled - the numbers are plain - so a table is read from the
+        rendered page (the RAJUK pack's own method, ADR-0003).
+    cadence: static
+    lastVerified: "2026-10-22"
+    artifact:
+      fileName: "khulna-building-construction-rules-1996.pdf"
+      sizeBytes: 312653
+      sha256: "8ac31c4be6b78ca69441e3ea9136f4ed0f48cb7e15ab5bf7e742e6ab19dc4628"
+      pages: 14
+    notes: >-
+      FOUND 2026-10-22 - the authority's own copy of the national Building Construction Rules
+      1996. 14 pages, 312653 bytes, fetched and hashed; the text layer's letters are mangled
+      (the numbers are plain). What it holds is the national rules - the predecessor of the
+      2008 rules the app applies - with the FAR, the ground coverage and the heights in its
+      schedule. It is therefore NOT a city zoning of its own: the city falls back to the
+      national rules (rajuk@2008.1) and says so, and the document is kept as the authority's
+      own publication of the rules it administers.
+
+  - id: khulna-building-construction-act-1952
+    dataTypes:
+    - rule-source
+    status: candidate
+    authority: Khulna Development Authority (KDA)
+    title:
+      bn: ইমারত নির্মাণ আইন, ১৯৫২
+      en: The Building Construction Act, 1952
+    kind: pdf-document
+    url: https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-kda/2024/12/a174705f84cf432fb3ceff5002bfe86f.pdf
+    language:
+    - en
+    licence: Government publication; confirm the reuse terms before extraction.
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: >-
+        The document is on the authority's own laws page (its file list), and the file is
+        fetched from the URL above. It is the English text of the Act as modified to 1985 and
+        its text layer is clean, so a clause is read from the text.
+    cadence: static
+    lastVerified: "2026-10-22"
+    artifact:
+      fileName: "khulna-building-construction-act-1952.pdf"
+      sizeBytes: 218751
+      sha256: "f12d2ce12130b45dc12364e54e93a686166da033c932a2a81700f91dfa3ca1ec"
+      pages: 9
+    notes: >-
+      FOUND 2026-10-22 - the authority's own copy of the national Building Construction Act
+      1952, and the useful find is that this copy is in ENGLISH with a clean text layer
+      (9 pages, 218751 bytes, fetched and hashed). It is the Act's sections only - it
+      carries no schedule, so the FAR chart is not in it (the chart is in the Bangla copy,
+      chattogram-building-construction-act-1952, whose headings this machine cannot read).
+      It is the national law, not a city zoning: the city falls back to the national rules
+      (rajuk@2008.1) and says so.
 
   - id: sylhet-sda-building-rules-1996
     dataTypes:

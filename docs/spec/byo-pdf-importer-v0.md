@@ -77,6 +77,25 @@ The extraction is the **core's** ✓ (the app never reads a clause itself ✓ �
 carries its **page** ✓ and is a **candidate** ✓, and the decision is **recorded** ✓ — in the
 core's ledger ✓, the same record the CLI writes ✓ ✓ ✓.
 
+## The reader's defect, found on a real document (2026-10-22)
+
+Reading the **KDA's own Act 2018** (a real document, fetched for W4.5) put the reader down:
+it raised `AttributeError: 're.Match' object has no attribute 'find'`. The cause was the
+reader's own code: where a PDF keeps its **font dictionary in an object of its own**
+(`/Font 23 0 R` — which this document does), the reader called `.find` on the **match** rather
+than on the bytes.
+
+⇒ **The reader now reads it** — 27 pages, the text read, and the reader's own test holds it
+(`core/tests/test_pdf_text.py` — a one-page PDF whose font dictionary is an object of its own)
+✓. The three indirect lookups the reader makes (the resources, the content stream, the font)
+are now **tolerant**: a document that points at something it does not carry gives that page an
+empty text instead of taking the whole book down ✓ — because a **page that cannot be read is a
+gap to declare, not a crash to raise** ✓ ✓ (the plan's law: unverified content is a candidate ✓,
+and a crash is not a candidate ✓).
+
+The **default is unchanged** ✓ — the price cards are read exactly as before ✓ ✓, and the
+committed candidate price card still passes its own check ✓ ✓.
+
 ## What is deliberately not here
 
 - **Promoting accepted candidates into a pack** — a pack is written by hand, from reviewed

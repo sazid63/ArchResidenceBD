@@ -117,6 +117,47 @@ def test_the_reader_refuses_a_file_that_is_not_a_pdf(tmp_path: pathlib.Path) -> 
         guard.read_pdf(path)
 
 
+def _tiny_pdf_with_the_font_dictionary_apart() -> bytes:
+    """A one-page PDF whose font dictionary is an object of its own.
+
+    Writers that keep the font dictionary apart (``/Font 5 0 R``) are common - the
+    Khulna KDA Act 2018 is one - and the reader used to fall over on them.
+    """
+    content = b"BT /F1 12 Tf 10 100 Td (Cement per bag 520.00) Tj ET"
+    objects = [
+        b"<< /Type /Catalog /Pages 2 0 R >>",
+        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 200 200] /Contents 4 0 R "
+        b"/Resources << /Font 5 0 R >> >>",
+        b"<< /Length " + str(len(content)).encode() + b" >>\nstream\n" + content + b"\nendstream",
+        b"<< /F1 6 0 R >>",
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+    ]
+    out = bytearray(b"%PDF-1.4\n")
+    offsets = []
+    for number, body in enumerate(objects, start=1):
+        offsets.append(len(out))
+        out += f"{number} 0 obj\n".encode() + body + b"\nendobj\n"
+    start = len(out)
+    out += f"xref\n0 {len(objects) + 1}\n".encode()
+    out += b"0000000000 65535 f \n"
+    for offset in offsets:
+        out += f"{offset:010d} 00000 n \n".encode()
+    out += f"trailer\n<< /Size {len(objects) + 1} /Root 1 0 R >>\nstartxref\n{start}\n%%EOF\n".encode()
+    return bytes(out)
+
+
+def test_the_reader_reads_a_pdf_whose_font_dictionary_is_an_object(tmp_path: pathlib.Path) -> None:
+    """The font dictionary kept apart must not take the reader down (it used to)."""
+    guard = _reader()
+    path = tmp_path / "apart.pdf"
+    path.write_bytes(_tiny_pdf_with_the_font_dictionary_apart())
+
+    document = guard.read_pdf(path)
+    assert len(document.pages) == 1
+    assert "Cement per bag 520.00" in document.page_text(1)
+
+
 def test_the_cached_books_read_and_carry_the_rows_this_project_needs() -> None:
     """The real books, when they are cached (they are not committed - 22 MB of PDF)."""
     guard = _reader()

@@ -4,9 +4,11 @@
 repo's half) · **Plan:** §5.10 (the source registry) · §5.6 (the law system) · Appendix C
 (the exit criteria) · **Related:** ADR-0003 (the rule packs), ADR-0075 (the money is the
 core's — the money law)
-**Code:** `spec/sources/registry.yaml` (the four city entries + one new) ·
+**Code:** `spec/sources/registry.yaml` (the four city entries + four new) ·
 `data/rules/khulna-kda-zoning-candidate.json` (the transcribed rules) ·
-**Tests:** `core/tests/test_city_rules.py` (8) · **Spec:** `docs/spec/city-rules-v0.md`
+`core/src/archres_core/pdf_text.py` (the reader's fix) ·
+**Tests:** `core/tests/test_city_rules.py` (13) · `core/tests/test_pdf_text.py` (7) ·
+**Spec:** `docs/spec/city-rules-v0.md` · `docs/spec/byo-pdf-importer-v0.md`
 
 ## Context
 
@@ -52,6 +54,14 @@ CDA's own copy — 87 pages) — whose text layer carries the chart's **numbers*
    zoning - and the Rajshahi entry names the authority's rule books (the earlier "not found"
    was a wrong host) and says plainly that its file host **did not answer** from the build
    machine, so nothing is claimed that was not fetched.
+6. **The KDA's own three documents are found and pinned** - the authority's site answers
+   under `kda.gov.bd` (the `www.` host's certificate does not verify), and its laws and rules
+   pages list them: the **KDA Act 2018** (its own enabling law, 27 pages), the **Building
+   Construction Rules 1996** (the *national* rules, 14 pages) and the **Building Construction
+   Act 1952** (the *national* law, 9 pages - and in **English**, with a clean text layer, which
+   is the useful find). None of the three is a *city* zoning, so the city still falls back to
+   the national rules - but the earlier "the Khulna law did not resolve" was **wrong**, and a
+   stale link is corrected rather than kept.
 
 ## Consequences
 
@@ -61,7 +71,11 @@ CDA's own copy — 87 pages) — whose text layer carries the chart's **numbers*
   registry now says what each document is ✓ ✓.
 - **What is not here** — a **city rule pack** ✓ (the schema needs the FAR tables ✓ and the
   KDA's FAR is not published ✓ ✓), the **Chattogram chart's values** ✓ (the rendered-page
-  read ✓ — a human's read ✓, or OCR ✓, and the owner's call ✓ ✓), **Sylhet's and Rajshahi's**
-  documents ✓ (named ✓, not pinned ✓ ✓), and the **card's activation** ✓ (a human act ✓ —
+  read ✓ — a human's read ✓, or OCR ✓, and the owner's call ✓ ✓), **Rajshahi's**
+  documents ✓ (named ✓, not fetched ✓ — the file host did not answer ✓ ✓), and the **card's activation** ✓ (a human act ✓ —
   OWNER-ATTENTION #8 ✓ ✓).
 - **The fallback stands** — every city falls back to the national rules ✓ and says so ✓ ✓.
+- **The reader now reads a document it could not read** — the KDA's Act 2018 put the repo's
+  PDF reader down (it called `.find` on a match, not on the bytes), and the three indirect
+  lookups the reader makes are now tolerant ✓ — a page that cannot be read is a **gap to
+  declare** ✓, not a crash to raise ✓ (ADR-0080 ✓ ✓).

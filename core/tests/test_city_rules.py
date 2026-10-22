@@ -154,3 +154,46 @@ def test_the_rajshahi_entry_names_its_rule_books() -> None:
     assert "rdarajshahi.gov.bd" in source["notes"]
     assert "did not answer" in source["notes"]
     assert "rajuk@2008.1" in source["notes"]
+
+
+def test_the_registry_pins_the_khulna_authoritys_own_documents() -> None:
+    """The KDA's own three documents are pinned - fetched, hashed and measured ✓ ✓."""
+    sources = _sources()
+    for entry_id, pages in (
+        ("khulna-kda-act-2018", 27),
+        ("khulna-building-construction-rules-1996", 14),
+        ("khulna-building-construction-act-1952", 9),
+    ):
+        source = sources[entry_id]
+        assert source["kind"] == "pdf-document", entry_id
+        assert source["url"].startswith("https://"), entry_id
+        artifact = source["artifact"]
+        assert artifact["fileName"].endswith(".pdf"), entry_id
+        assert len(artifact["sha256"]) == 64, entry_id
+        assert artifact["pages"] == pages, entry_id
+        assert artifact["sizeBytes"] > 0, entry_id
+
+
+def test_the_khulna_documents_say_they_are_not_a_city_zoning() -> None:
+    """Each of the KDA's own documents says the city falls back to the national rules ✓ ✓."""
+    sources = _sources()
+    for entry_id in (
+        "khulna-kda-act-2018",
+        "khulna-building-construction-rules-1996",
+        "khulna-building-construction-act-1952",
+    ):
+        notes = sources[entry_id]["notes"]
+        assert "rajuk@2008.1" in notes, entry_id
+        assert "fall back" in notes or "falls back" in notes, entry_id
+
+
+def test_the_khulna_candidate_names_the_authoritys_documents() -> None:
+    """The candidate names the documents the authority publishes - and the gaps stay open ✓."""
+    candidate = _candidate()
+    documents = {item["id"] for item in candidate["source"]["authorityDocuments"]}
+    assert "khulna-kda-act-2018" in documents
+    assert "khulna-building-construction-rules-1996" in documents
+    assert "khulna-building-construction-act-1952" in documents
+    gaps = {gap["id"]: gap for gap in candidate["gaps"]}
+    assert gaps["khulna-far"]["status"] == "open"
+    assert "not published" in gaps["khulna-far"]["why"]

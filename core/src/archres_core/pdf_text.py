@@ -423,29 +423,46 @@ def read_pdf(path: str | pathlib.Path, *, lines: bool = False) -> PdfDocument:
         content = b""
         contents = re.search(rb"/Contents\s*(?:(\d+)\s+\d+\s+R|\[(.*?)\])", raw, re.S)
         if contents:
-            if contents.group(1):
-                content = pdf.stream(contents.group(1).decode("ascii"))
-            elif contents.group(2):
-                pieces = []
-                for number in re.findall(rb"(\d+)\s+\d+\s+R", contents.group(2)):
-                    pieces.append(pdf.stream(number.decode("ascii")))
-                content = b"\n".join(pieces)
+            try:
+                if contents.group(1):
+                    content = pdf.stream(contents.group(1).decode("ascii"))
+                elif contents.group(2):
+                    pieces = []
+                    for number in re.findall(rb"(\d+)\s+\d+\s+R", contents.group(2)):
+                        pieces.append(pdf.stream(number.decode("ascii")))
+                    content = b"\n".join(pieces)
+            except PdfError:
+                # A page whose content stream will not decompress: the page reads empty
+                # rather than taking the whole book down.
+                content = b""
         # The page's fonts, and their ToUnicode maps.
         cmaps: dict[str, dict[int, str]] = {}
         resources = re.search(rb"/Resources\s*(?:(\d+)\s+\d+\s+R|<<)", raw)
         resources_raw = raw
         if resources and resources.group(1):
-            resources_raw = pdf.get(int(resources.group(1)))
+            try:
+                resources_raw = pdf.get(int(resources.group(1)))
+            except PdfError:
+                resources_raw = raw
         fonts = re.search(rb"/Font\s*(?:(\d+)\s+\d+\s+R|<<)", resources_raw)
-        fonts_raw = resources_raw
+        block = b""
         if fonts and fonts.group(1):
-            fonts_raw = pdf.get(int(fonts.group(1)))
-        font_map = re.search(rb"/Font\s*<<(.*?)>>", resources_raw, re.S)
-        block = font_map.group(1) if font_map else (
-            fonts_raw[fonts.find(b"<<") :] if fonts and b"<<" in fonts_raw else b""
-        )
+            # The font dictionary is an indirect object (a PDF that keeps it aside): its
+            # body is the name -> font map.
+            try:
+                block = pdf.get(int(fonts.group(1)))
+            except PdfError:
+                block = b""
+        else:
+            font_map = re.search(rb"/Font\s*<<(.*?)>>", resources_raw, re.S)
+            if font_map:
+                block = font_map.group(1)
         for name, number in re.findall(rb"/([^\s/]+)\s+(\d+)\s+\d+\s+R", block):
-            font_raw = pdf.get(int(number))
+            try:
+                font_raw = pdf.get(int(number))
+            except PdfError:
+                # A font the file points at but does not carry: the page still reads.
+                continue
             to_unicode = _dict_value(font_raw, b"/ToUnicode")
             if to_unicode is None:
                 continue

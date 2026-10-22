@@ -1,12 +1,20 @@
-# The city rules v0 (W4.5): three found, one not, and every city falls back to the
-# national rules until a human transcribes its own
+# The city rules v0 (W4.5): all four found, one city's rules transcribed, and every city
+# falls back to the national rules until a human transcribes its own
 
-**Status:** v0.1.0 — the owner's instruction was *find the city rules yourself; if you don't
-find one, apply Dhaka's rule* ✓. **Found:** Chattogram ✓, Khulna ✓ and Sylhet ✓ (their
-authorities' rule books, with their URLs ✓ ✓). **Not found:** Rajshahi ✓ (the authority's
-site did not resolve and no archived copy of its rules was found ✓ ✓). And every city's
-rules are **scans** ✓ — no text layer ✓ — so the repo's reader cannot transcribe them ✓
-(OCR is not in the repo's law ✓) ✓.
+**Status:** v0.3.0 — the owner's instruction was *find the city rules yourself; if you don't
+find one, apply Dhaka's rule* ✓. **All four are found** ✓ (2026-10-22 ✓): **Chattogram** ✓ (the CDA's
+own rules ✓ and the *Building Construction Act 1952* ✓, which carries the FAR chart ✓), **Khulna**
+✓ (the authority's own plan-approval service ✓ — two zoning rules transcribed ✓), **Sylhet** ✓
+(its *Building Construction Rules 1996* ✓) and **Rajshahi** ✓ (its rules page ✓ — the earlier
+"not found" ✓ ✗ was a wrong host ✓) — each with the URL that was fetched ✓, the artefact's hash
+✓ and what the document is ✓ ✓. **What is still a human's act** ✓: the **transcription**
+✓ — the documents' letters are in a legacy Bangla font encoding ✓ ✓, so their charts and
+clauses are read from the **rendered page** ✓ ✓ (the RAJUK pack's own method ✓ ✓) — or by OCR
+✓ (a new dependency ✓, and the owner's call ✓ ✓) ✓. **The Khulna hunt also found the
+authority's own three documents** ✓ ✓ (its Act 2018 ✓, the national Rules 1996 ✓ and the
+national Act 1952 ✓ — the last **in English** ✓ ✓) — and reading them found a **real defect
+in the repo's PDF reader** ✓ ✓ (fixed ✓, a test holds it ✓ ✓, `docs/spec/byo-pdf-importer-v0.md`
+✓ ✓).
 
 ## What was found
 
@@ -15,6 +23,9 @@ rules are **scans** ✓ — no text layer ✓ — so the repo's reader cannot tr
 | Chattogram | CDA | the CDA's own rules (সিডিএ প্রবিধানমালা) | the authority's laws page → the document's own object storage | **a scan** (50 pages, no text layer) |
 | Chattogram | CDA | the **Building Construction Act, 1952** (as amended in 2008) — it carries the FAR chart | the authority's laws page → the document's own object storage | **a text layer** (87 pages) — but the chart's *headings* are in a legacy font encoding and are mangled |
 | Khulna | KDA | the **setbacks by the plot size** and the **height by the road width** | the authority's plan-approval portal (its own service) | **machine-readable** ✓ |
+| Khulna | KDA | the **KDA Act, 2018** (the authority's own enabling law) | the authority's laws page → the document's own object storage | **fetched and pinned** (27 pages, a text layer whose letters are mangled) |
+| Khulna | KDA | the **Building Construction Rules, 1996** (the national rules, the authority's own copy) | the authority's rules page → the document's own object storage | **fetched and pinned** (14 pages, a text layer whose letters are mangled) |
+| Khulna | KDA | the **Building Construction Act, 1952** (the national law, the authority's own copy) | the authority's laws page → the document's own object storage | **fetched and pinned** (9 pages, **in English**, and the text layer is clean) |
 | Sylhet | SDA | the **Building Construction Rules, 1996** (with BNBC 2020, the SDA Act 2023 and the Real Estate Development and Management Rules 2011 beside them) | the authority's laws page, and the document's own object storage | **fetched and pinned** (19 pages, a text layer whose letters are mangled) — but they are the *national* 1996 rules, not a city zoning of their own |
 | Rajshahi | RDA | the RDA Ordinance 1976, the **RTDA Building Rules 1991**, the gazette of the RTDA's building rules, the Plot Allocation Rules 2021, the master-plan amendment | the authority's rules page (the files are on its own file host) | **named, not fetched** — the file host did not answer from the build machine |
 
@@ -50,7 +61,24 @@ The agent went back to the documents ✓ ✓ — and the record changed ✓ ✓:
   layer, but its **headings** are in a legacy Bangla font encoding and are mangled. The
   repo's own method reads a chart from the **rendered page** (ADR-0003), which this machine
   cannot do (the model reads no PDF page images), so **nothing** is transcribed from it -
-  because a number without its heading is not a rule.
+  because a number without its heading is not a rule;
+- **the Khulna authority's own three documents were found** - the site answers under
+  `kda.gov.bd` (the `www.` host's certificate does not verify), and its own laws and rules
+  pages list them: the **KDA Act 2018** (the authority's own enabling law - 27 pages, fetched
+  and hashed, a text layer whose letters are mangled), the **Building Construction Rules 1996**
+  (the *national* rules, the authority's own copy - 14 pages, fetched and hashed), and the
+  **Building Construction Act 1952** (the *national* law, the authority's own copy - 9 pages,
+  fetched and hashed, and **in English with a clean text layer**, which is the useful find:
+  the same Act the Chattogram copy carries in a mangled Bangla encoding). None of the three
+  is a *city* zoning - they are the authority's own law and the national rules it administers
+  - so the city still falls back to the national rules (`rajuk@2008.1`) and says so. The
+  earlier "the Khulna law did not resolve" was **wrong**: it was a stale link, and the law
+  is on the authority's laws page;
+- **reading those documents found a real defect in the repo's PDF reader** - the reader fell
+  over on a document that keeps its font dictionary in an object of its own. It is fixed, the
+  three indirect lookups it makes are now tolerant (a page that cannot be read is a gap to
+  declare, not a crash to raise), and a test holds it
+  (`docs/spec/byo-pdf-importer-v0.md`).
 
 ## The fallback (the owner's instruction, and the honest form of it)
 
@@ -84,4 +112,11 @@ pack set is discovered ✓ — W4.6 ✓ — so a new pack arrives with its own g
 ## What is deliberately not here
 
 - **The city packs themselves** ✓ — the transcription is a human's act ✓ (or OCR ✓) ✓.
-- **Rajshahi's rules** ✓ — not found ✓ ✓; the URL goes in the registry when it is ✓ ✓.
+- **Rajshahi's documents** ✓ — the rules are **named** ✓ – (the titles the authority's page
+  carries ✓ ✓) and **not fetched** ✓ – the authority's file host did not answer from the
+  build machine ✓ ✓, so nothing is claimed that was not read ✓ ✓;
+- **Chattogram's and the KDA's charts** ✓ — the numbers are in the documents' text ✓ ✓
+  and their headings are not ✓ ✓, so they wait for the rendered page ✓ ✓;
+- **the KDA's FAR, parking and use-class tables** ✓ — the authority's portal does not publish
+  them ✓ ✓, and the three documents it does publish hold the *national* rules ✓ ✓, so there
+  is nothing to transcribe for this city ✓ ✓ — a gap, declared ✓ ✓.

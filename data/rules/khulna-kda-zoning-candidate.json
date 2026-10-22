@@ -7,19 +7,19 @@
       "id": "khulna-far",
       "status": "open",
       "what": "the FAR schedule (the floor area ratio by the plot size and the road width)",
-      "why": "the portal's two services do not carry it, and the KDA's rules PDF's pinned URL did not resolve on 2026-10-22"
+      "why": "not published on the portal; the authority's own copy of the national Building Construction Rules 1996 (khulna-building-construction-rules-1996) carries the national FAR schedule, not a Khulna one, and its headings cannot be read from the text layer - so there is nothing to transcribe for this city"
     },
     {
       "id": "khulna-parking",
       "status": "open",
       "what": "the parking schedule and the parking geometry",
-      "why": "not published on the portal"
+      "why": "not published on the portal, and not in the documents the authority publishes"
     },
     {
       "id": "khulna-use-classes",
       "status": "open",
       "what": "the use classes (which land use may take which FAR and which setback)",
-      "why": "not published on the portal; the setbacks above are the residential area's"
+      "why": "not published on the portal, and not in the documents the authority publishes; the setbacks above are the residential area's"
     }
   ],
   "heights": [
@@ -175,6 +175,20 @@
     }
   ],
   "source": {
+    "authorityDocuments": [
+      {
+        "id": "khulna-kda-act-2018",
+        "note": "the authority's own Act 2018 (found 2026-10-22, on its laws page)"
+      },
+      {
+        "id": "khulna-building-construction-rules-1996",
+        "note": "the national Building Construction Rules 1996, the authority's own copy"
+      },
+      {
+        "id": "khulna-building-construction-act-1952",
+        "note": "the national Building Construction Act 1952, the authority's own copy (English)"
+      }
+    ],
     "kind": "html-index",
     "retrievedAt": "2026-10-22",
     "services": [
@@ -199,6 +213,6 @@
     "tiers": [
       "web-service"
     ],
-    "unread": "The portal serves these two tables only. The FAR schedule, the parking schedule and the rest of the KDA's building rules are not on it, so they are not here - a gap is declared, never a guess."
+    "unread": "The portal serves these two tables only. The FAR schedule, the parking schedule and the rest of the KDA's building rules are not on it and are not in the three documents the authority publishes (its own Act 2018, the national Rules 1996 and the national Act 1952), so they are not here - a gap is declared, never a guess."
   }
 }
