@@ -589,6 +589,15 @@ def install_plan(
     else:
         missing.append("fleet-config")
 
+    # the **rendered** router config ✓ ✓ - the fleet's own output ✓ ✓ (generated from
+    # the two above ✓ ✓, never hand-written ✓ ✓) - the router reads it ✓ ✓ and its
+    # paths are install-relative ✓ ✓ (`${env.ARCHRES_ROOT}` ✓ ✓) ✓ ✓
+    rendered_source = repo / "spec" / "models" / "llama-swap.yaml"
+    if rendered_source.is_file():
+        copies.append((str(rendered_source), INSTALL_LAYOUT["models"]))
+    else:
+        missing.append("fleet-rendered")
+
     registry_source = repo / "spec" / "models" / "registry.json"
     if registry_source.is_file():
         # the **folder** is the destination ✓ ✓ - the file lands beside the GGUFs it names ✓ ✓

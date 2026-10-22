@@ -888,6 +888,26 @@ def serve(bridge: Bridge, stdin: TextIO, stdout: TextIO) -> int:
     return 0
 
 
+def _model_client(root: str | None, fleet_url: str | None) -> ModelClient | None:
+    """The model client the sidecar uses ✓ ✓.
+
+    The router the caller names ✓ ✓ wins ✓ ✓ — and otherwise the fleet the
+    **install** carries ✓ ✓ — the app's own AI runners ✓ ✓ — which is not
+    started here ✓ ✓ (the warmup loads gigabytes ✓) — it starts on the first
+    escalation ✓ ✓ — and if the install carries no fleet ✓ ✓, the escalation
+    says so ✓ ✓ (never a guess ✓ ✓) ✓ ✓.
+    """
+    if fleet_url:
+        from .agent.client import LlamaSwapClient
+
+        return LlamaSwapClient(base_url=fleet_url, model="chat")
+    if root:
+        from .agent.client import InstalledFleetClient
+
+        return InstalledFleetClient(root)
+    return None
+
+
 def main(argv: Iterable[str] | None = None) -> int:
     """Run the bridge on stdio ✓ (the shell spawns this ✓)."""
     from .stdio import utf8_stdio
@@ -903,11 +923,7 @@ def main(argv: Iterable[str] | None = None) -> int:
     parser.add_argument("--fleet-url", help="the local model router (the escalation path)")
     args = parser.parse_args(list(argv) if argv is not None else None)
 
-    client: ModelClient | None = None
-    if args.fleet_url:
-        from .agent.client import LlamaSwapClient
-
-        client = LlamaSwapClient(base_url=args.fleet_url, model="chat")
+    client = _model_client(args.root, args.fleet_url)
 
     bridge = Bridge(client=client, root=args.root)
     return serve(bridge, sys.stdin, sys.stdout)

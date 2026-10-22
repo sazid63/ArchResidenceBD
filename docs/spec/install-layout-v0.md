@@ -172,6 +172,11 @@ the fleet's own config names the runner's place ✓ ✓ (`bin/llama/` ✓ ✓) a
 own pattern names the router's ✓ ✓ (`bin/llama-swap/` ✓ ✓) ✓ ✓ · so the
 install puts them there ✓ ✓ ✓.
 
+And the app **uses** them ✓ ✓ — the sidecar is given the install's fleet ✓ ✓ ·
+the fleet is not started when the app starts ✓ ✓ (the warmup loads gigabytes ✓ ✓) ·
+so it starts on the **first escalation** ✓ ✓ · and an install with no fleet says so ✓ ✓
+· never a guess ✓ ✓ ✓.
+
 ## What is deliberately not here
 
 - **The installer itself** — the thing that downloads and lays the layout down ✓, and the

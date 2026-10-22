@@ -18,6 +18,7 @@ never a write.
 from __future__ import annotations
 
 import json
+import pathlib
 import re
 import urllib.error
 import urllib.parse
@@ -195,3 +196,90 @@ def parse_model_value(reply: str) -> tuple[Any, str | None]:
     if isinstance(value, bool) and payload.get("unit") is not None:
         raise ModelValueError("a yes/no value cannot carry a unit")
     return value, unit
+
+
+class InstalledFleetClient:
+    """The fleet the **install** carries ✓ — started on the first call ✓ ✓.
+
+    The app's own AI runners travel with the app ✓ ✓ (the plan's §0: the app contains
+    its own AI runners ✓ ✓) — so the app must be able to **use** them ✓ ✓ — and the
+    fleet is not started when the app starts ✓ ✓ (the warmup loads gigabytes ✓ and
+    the app's start must stay quick ✓ ✓) — so it starts on the **first
+    escalation** ✓ ✓, and only then ✓ ✓.
+
+    An install with no fleet is an **honest error** ✓ ✓ — never a silent fall back to
+    nothing ✓ ✓ (the law: an unverified thing is a candidate ✓ ✓) ✓.
+    """
+
+    name = "chat"
+
+    def __init__(
+        self,
+        root: str | pathlib.Path,
+        *,
+        model: str = "chat",
+        timeout: float = 180.0,
+        launcher: Any | None = None,
+    ) -> None:
+        self.root = pathlib.Path(root)
+        self.model = model
+        self.timeout = timeout
+        self._launcher_factory = launcher
+        self._launcher: Any | None = None
+        self._client: "LlamaSwapClient" | None = None
+
+    # -- the client's seam ---------------------------------------------------
+
+    def complete(
+        self,
+        messages: Sequence[dict[str, str]],
+        *,
+        max_tokens: int = 256,
+        temperature: float = 0.0,
+    ) -> str:
+        """One completion — from the fleet the install carries ✓ ✓."""
+        client = self._ensure()
+        return client.complete(
+            messages, max_tokens=max_tokens, temperature=temperature
+        )
+
+    # -- the fleet -----------------------------------------------------------
+
+    def _ensure(self) -> "LlamaSwapClient":
+        """The fleet — started once ✓ ✓ — or an honest error ✓ ✓."""
+        if self._client is not None:
+            return self._client
+        launcher = self._start()
+        self._launcher = launcher
+        self._client = LlamaSwapClient(
+            base_url=launcher.base_url, model=self.model, timeout=self.timeout
+        )
+        return self._client
+
+    def _start(self) -> Any:
+        """Start the fleet the install carries — or say why it cannot ✓ ✓."""
+        if self._launcher_factory is not None:
+            return self._launcher_factory(self.root)
+
+        from ..install import INSTALL_LAYOUT
+
+        config = self.root / INSTALL_LAYOUT["models"] / "fleet.json"
+        binary = self.root / INSTALL_LAYOUT["llamaSwap"] / "llama-swap.exe"
+        if not config.is_file() or not binary.is_file():
+            raise ModelError(
+                "this install carries no model fleet "
+                f"({config.name} and the router are needed) - the answer is not guessed"
+            )
+        from ..serving import FleetLauncher, load_fleet
+
+        fleet = load_fleet(config)
+        launcher = FleetLauncher(fleet, binary, root=self.root)
+        launcher.start()
+        return launcher
+
+    def stop(self) -> None:
+        """Stop the fleet — if this client started one ✓ ✓."""
+        if self._launcher is not None:
+            stop = getattr(self._launcher, "stop", None)
+            if callable(stop):
+                stop()

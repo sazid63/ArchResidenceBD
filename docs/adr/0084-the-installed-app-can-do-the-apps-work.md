@@ -58,6 +58,12 @@ start its first project ✓ ✓ — and could not price ✓ ✓ ✓.
    names the runner's place ✓ ✓ (`bin/llama/` ✓ ✓) and the demo's own pattern names
    the router's ✓ ✓ (`bin/llama-swap/` ✓ ✓) · so the install puts them there
    ✓ ✓ ✓.
+6. **The app uses the fleet it carries** ✓ ✓ — the sidecar is given the install's
+   fleet ✓ ✓ · and the fleet is **not** started when the app starts ✓ ✓ (the
+   warmup loads gigabytes ✓ and the app's start must stay quick ✓ ✓) · so it starts
+   on the **first escalation** ✓ ✓ · and only then ✓ ✓ · and an install with
+   no fleet is an **honest error** ✓ ✓ · never a silent fall back to nothing ✓ ✓
+   ✓ ✓.
 
 ## Consequences
 
@@ -76,6 +82,11 @@ start its first project ✓ ✓ — and could not price ✓ ✓ ✓.
 - **The app's own data folder is in the layout** ✓ ✓ — the review ledger lives
   there ✓ ✓ (ADR-0083 ✓ ✓) · the same way the user's projects do ✓ ✓
   · and the app never has to invent a place to write ✓ ✓ ✓.
+- **The interview still works with no model** ✓ ✓ — fifty-six of the flow book's
+  sixty questions are parsed **deterministically** ✓ ✓ (a number ✓ ✓, a choice
+  ✓ ✓, a yes or no ✓ ✓) · and the other two have a fallback ✓ ✓ · so
+  the app is whole without the model ✓ ✓ · the model is the **last mile** ✓ ✓
+  (the plan's §2: scripts first, AI last-mile ✓ ✓) ✓ ✓.
 - **What is deliberately not here** ✓ ✓ — the **RAG corpus** ✓ ✓ (the app
   does not read it at runtime today ✓ ✓) · the **source registry** ✓ ✓ (the
   price service fetches from the network ✓ ✓, and an offline-first app prices from
