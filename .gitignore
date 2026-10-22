@@ -25,6 +25,7 @@ data/cache/
 data/demo/
 data/downloads/
 data/install/
+data/import/
 data/spikes/
 data/tmp/
 models/checkpoints/
