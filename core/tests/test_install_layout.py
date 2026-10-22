@@ -125,6 +125,105 @@ def test_the_installed_core_finds_its_flow_book_and_its_packs(
     assert bridge._pack_paths(), "the installed packs are found"
 
 
+def test_the_installed_app_can_start_a_project(
+    tmp_path: pathlib.Path, install_manifest
+) -> None:
+    """The app's **first** job — and the install must carry what it needs ✓ ✓.
+
+    The templates are the app's starting points ✓ ✓ — so an install without them
+    is an app that cannot begin ✓ ✓ ✓.
+    """
+    from archres_core.bridge import Bridge
+
+    install = _install(tmp_path, install_manifest)
+    bridge = Bridge(root=install)
+
+    templates = bridge.handle(
+        {"id": "1", "method": "templates.list", "params": {}}
+    )
+    assert not templates.get("error"), templates
+    assert templates["result"]["count"] > 0, "the installed app has no template to start from"
+
+    created = bridge.handle(
+        {"id": "2", "method": "project.create", "params": {"name": "Installed Probe"}}
+    )
+    assert not created.get("error"), created
+    assert created["result"]["prompt"]["ask"], "the interview did not open"
+
+
+def test_the_installed_app_can_run_the_interview(
+    tmp_path: pathlib.Path, install_manifest
+) -> None:
+    """The flow book is in the **install's** place ✓ — the dev tree's `spec/` is not there ✓.
+
+    The book is found twice in the core ✓ ✓ — once for the manual ✓ and once
+    for the interview ✓ ✓ — and they must agree ✓ ✓ — or the installed
+    app can search the manual ✓ and cannot run the interview ✓ ✓ ✓.
+    """
+    from archres_core.bridge import Bridge
+
+    install = _install(tmp_path, install_manifest)
+    bridge = Bridge(root=install)
+
+    created = bridge.handle(
+        {"id": "1", "method": "project.create", "params": {"name": "Interview Probe"}}
+    )
+    assert not created.get("error"), created
+    project = created["result"]["path"]
+
+    resumed = bridge.handle(
+        {"id": "2", "method": "session.resume", "params": {"root": project, "sessionId": "app"}}
+    )
+    assert not resumed.get("error"), resumed
+    assert resumed["result"]["prompt"]["ask"], "the interview did not open"
+
+
+def test_the_installed_app_can_price_a_boq(
+    tmp_path: pathlib.Path, install_manifest
+) -> None:
+    """The money needs the rate card ✓ ✓ — so the install carries it ✓ ✓.
+
+    And the card's **status** travels with the BOQ ✓ ✓ — a candidate card says
+    so ✓ (the money law ✓ ✓) ✓ ✓.
+    """
+    from archres_core.bridge import Bridge
+
+    install = _install(tmp_path, install_manifest)
+    bridge = Bridge(root=install)
+
+    created = bridge.handle(
+        {
+            "id": "1",
+            "method": "project.create",
+            "params": {"name": "Money Probe", "template": "two-storey-residential"},
+        }
+    )
+    assert not created.get("error"), created
+
+    reply = bridge.handle(
+        {"id": "2", "method": "boq.build", "params": {"project": created["result"]["path"]}}
+    )
+    assert not reply.get("error"), reply
+    card = reply["result"]["boq"]["rateCard"]
+    assert card["cardId"], "the BOQ does not say which card priced it"
+    assert card["status"], "the card's status must travel with the BOQ"
+
+
+def test_the_installed_app_finds_the_manual(
+    tmp_path: pathlib.Path, install_manifest
+) -> None:
+    """The Help screen reads the manual ✓ ✓ — from the packs the install carries ✓."""
+    from archres_core.bridge import Bridge
+
+    install = _install(tmp_path, install_manifest)
+    bridge = Bridge(root=install)
+
+    reply = bridge.handle(
+        {"id": "1", "method": "manual.search", "params": {"query": "setback"}}
+    )
+    assert not reply.get("error"), reply
+    assert reply["result"]["answers"], "the manual came out empty"
+
 def test_the_models_are_bundled_with_the_app(
     tmp_path: pathlib.Path, install_manifest
 ) -> None:

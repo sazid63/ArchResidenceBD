@@ -105,9 +105,14 @@ class Bridge:
 
     # -- the book ------------------------------------------------------------------------
     def book(self) -> FlowBook:
-        """The flow book, loaded once ✓ (it is the same book for every session ✓)."""
+        """The flow book, loaded once ✓ (it is the same book for every session ✓).
+
+        The **install's** place ✓ or the dev tree's ✓ ✓ — the same rule as
+        every other piece of the app's data ✓ ✓ — because the installed app
+        reads the book at runtime ✓ ✓ and the install carries it ✓ ✓.
+        """
         if self._book is None:
-            path = self._root / DEFAULT_BOOK if self._root else DEFAULT_BOOK
+            path = self._book_path()
             if not path.is_file():
                 raise BridgeError(CODE_INTERNAL, f"the flow book is missing: {path}")
             self._book = load_book(path)
@@ -333,6 +338,26 @@ class Bridge:
             "(the install carries it under runtime/core; the dev tree under spec)",
         )
 
+    def _data_folder(self, *alternatives: tuple[str, ...]) -> pathlib.Path:
+        """A data **folder** ✓ — the install's place ✓ or the dev tree's ✓ ✓.
+
+        The same rule as `_data_path` ✓ ✓ — the install's place first ✓ ✓,
+        because that is where the app runs ✓ ✓ — and **loudly** ✓ when
+        neither has it ✓ (the CAD engine's rule ✓: discovery is explicit ✓ and
+        its failure is loud ✓ ✓).
+        """
+        base = self._root or pathlib.Path(".")
+        for relative in alternatives:
+            folder = base.joinpath(*relative)
+            if folder.is_dir():
+                return folder
+        wanted = base.joinpath(*alternatives[0])
+        raise BridgeError(
+            CODE_INTERNAL,
+            f"the core's data is missing: {wanted} is not there "
+            "(the install carries it under runtime/core; the dev tree under spec)",
+        )
+
     def _core_data(self) -> str:
         """The install's core-data folder ✓ — relative to the root ✓ ✓."""
         from .install import INSTALL_LAYOUT
@@ -444,9 +469,14 @@ class Bridge:
         starts from something the repo holds and can be diffed against ✓ ✓.
         """
         base = self._root or pathlib.Path(".")
-        examples = base / "spec" / "examples"
+        try:
+            examples = self._data_folder(
+                (self._core_data(), "examples"), ("spec", "examples")
+            )
+        except BridgeError:
+            examples = None
         rows: list[dict[str, Any]] = []
-        if examples.is_dir():
+        if examples is not None:
             for path in sorted(examples.glob("*.json")):
                 try:
                     document = json.loads(path.read_text(encoding="utf-8"))
@@ -461,7 +491,7 @@ class Bridge:
                     {
                         "id": path.stem,
                         "name": str(project.get("name") or path.stem),
-                        "path": f"spec/examples/{path.name}",
+                        "path": _relative(path, base),
                         "language": str(project.get("language") or "en"),
                         "floors": storeys.get("count"),
                         "occupancy": str(building.get("occupancy") or ""),
@@ -744,7 +774,14 @@ class Bridge:
         money law ✓ ✓) ✓ ✓.
         """
         base = self._root or pathlib.Path(".")
-        cards = sorted((base / "data" / "prices" / "cards").glob("*.json"))
+        cards: list[pathlib.Path] = []
+        try:
+            folder = self._data_folder(
+                (self._core_data(), "prices", "cards"), ("data", "prices", "cards")
+            )
+            cards = sorted(folder.glob("*.json"))
+        except BridgeError:
+            cards = []
         if cards:
             try:
                 document = json.loads(cards[0].read_text(encoding="utf-8"))
@@ -752,15 +789,27 @@ class Bridge:
                 raise BridgeError(CODE_INTERNAL, f"the rate card is not readable: {exc}") from exc
             if isinstance(document, dict):
                 return document
-        example = base / "spec" / "examples" / "interfaces" / "rate-card-dhaka-example.json"
-        if example.is_file():
-            return json.loads(example.read_text(encoding="utf-8"))
+        # the example card ✓ — the last resort ✓ ✓ — and it says so on its
+        # own face ✓ ("never use for a BOQ" ✓) — the place the app reads it
+        # from ✓ ✓
+        try:
+            examples = self._data_folder(
+                (self._core_data(), "examples"), ("spec", "examples")
+            )
+        except BridgeError:
+            examples = None
+        if examples is not None:
+            example = examples / "interfaces" / "rate-card-dhaka-example.json"
+            if example.is_file():
+                return json.loads(example.read_text(encoding="utf-8"))
         raise BridgeError(CODE_INTERNAL, "no rate card is available")
 
     def _template_spec(self, template_id: str | None) -> dict[str, Any]:
         """The spec a template carries ✓ — the repo's own example ✓ ✓."""
         base = self._root or pathlib.Path(".")
-        examples = base / "spec" / "examples"
+        examples = self._data_folder(
+            (self._core_data(), "examples"), ("spec", "examples")
+        )
         wanted = template_id or "new-project"
         path = examples / f"{wanted}.json"
         if not path.is_file():
@@ -800,6 +849,19 @@ class Bridge:
             "done": session.done,
             "pending": session.pending(),
         }
+
+
+def _relative(path: pathlib.Path, base: pathlib.Path) -> str:
+    """A path as the app shows it ✓ — relative to the root ✓ ✓.
+
+    The dev tree's paths are the repo's ✓ ("spec/examples/..." ✓) and the install's
+    are its own ✓ ("runtime/core/examples/..." ✓) ✓ — and the app says
+    where the file really is ✓ ✓.
+    """
+    try:
+        return path.relative_to(base).as_posix()
+    except ValueError:
+        return path.as_posix()
 
 
 def _error(request_id: str, code: str, message: str) -> dict[str, Any]:

@@ -116,6 +116,41 @@ out ✓ (the editable install's `.pth` ✓ — which is how the venv's copy snea
 the site's *packages* stay ✓ (the core's dependencies live there ✓ ✓) ✓ — so the import that
 passes is **the install's own** ✓ ✓.
 
+## The installed app must be able to do the app's work (2026-10-22)
+
+The install was **declared complete** ✓ ✓ — and the check proved it ✓ ✓ by
+asking the installed core for a **ping** ✓ ✓. A ping does not need the app's data
+✓ ✓, so the check could not see what was missing ✓ ✓.
+
+The **installed** app was measured ✓ ✓ by asking it the questions the app asks
+✓ ✓ — and three of them failed ✓ ✓:
+
+1. **the app could not start a project** ✓ ✓ — the **templates** ✓ ✓ (the
+   examples the project setup screen offers ✓ ✓) were not in the install ✓ ✓,
+   so the app said *"no template is available"* ✓ ✓ ✓;
+2. **the app could not run the interview** ✓ ✓ — the flow book was found in **two**
+   ways ✓ ✓ — the manual's way ✓ (the install's place ✓ ✓, then the
+   dev tree's ✓ ✓) and the interview's way ✓ ✓ (the dev tree's place only
+   ✓ ✓) — and the install does not have a `spec/` folder ✓ ✓;
+3. **the app could not price a BOQ** ✓ ✓ — the **rate cards** ✓ ✓ were not
+   in the install ✓ ✓ — and the money law says the prices are *missing* ✓ ✓,
+   not zero ✓ ✓.
+
+⇒ The install now carries the app's data ✓ ✓ — the templates ✓ ✓ and the
+rate cards ✓ ✓ — and the core finds every piece of the app's data in the
+**install's** place or the dev tree's ✓ ✓ — one rule ✓ ✓ — and the check
+asks the app's questions ✓ ✓ (the templates ✓ ✓, a project ✓ ✓, the
+interview ✓ ✓, the manual ✓ ✓ and the money ✓ ✓) ✓ ✓ —
+not a ping ✓ ✓ — so a hole like this cannot pass again ✓ ✓.
+
+| what the app reads | the install's place | the dev tree's place |
+|---|---|---|
+| the flow book | `runtime/core/flows/` | `spec/flows/` |
+| the schemas | `runtime/core/schemas/` | `spec/schemas/` |
+| the **templates** | `runtime/core/examples/` | `spec/examples/` |
+| the **rate cards** | `runtime/core/prices/cards/` | `data/prices/cards/` |
+| the rule packs | `packs/` | `spec/rules/` |
+
 ## What is deliberately not here
 
 - **The installer itself** — the thing that downloads and lays the layout down ✓, and the

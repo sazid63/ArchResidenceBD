@@ -476,6 +476,27 @@ def install_plan(
         else:
             missing.append(f"core-data-{name}")
 
+    # the **templates** ✓ — the app's starting points ✓ (the examples the project
+    # setup screen offers ✓ — and the one a new project starts from ✓ ✓) — the app
+    # reads them at runtime ✓ ✓, so the install carries them ✓ ✓: without them
+    # the installed app **cannot start a project** ✓ — and a project is the app's
+    # first job ✓ ✓ ✓.
+    examples_source = repo / "spec" / "examples"
+    if examples_source.is_dir():
+        copies.append((str(examples_source), f"{INSTALL_LAYOUT['coreData']}/examples"))
+    else:
+        missing.append("core-data-examples")
+
+    # the **rate cards** ✓ — the money's source ✓ ✓ — the app prices a BOQ from
+    # them at runtime ✓ ✓, so the install carries them ✓ ✓: without them the
+    # installed app has **no rates** ✓ — and the money law says the prices are
+    # *missing*, not zero ✓ ✓ ✓.
+    cards_source = repo / "data" / "prices" / "cards"
+    if cards_source.is_dir():
+        copies.append((str(cards_source), f"{INSTALL_LAYOUT['coreData']}/prices/cards"))
+    else:
+        missing.append("core-data-prices")
+
     # the rule packs: this machine has them ✓
     packs_source = repo / "spec" / "rules"
     if packs_source.is_dir():
