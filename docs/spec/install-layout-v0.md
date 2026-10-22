@@ -62,6 +62,25 @@ the schemas at runtime ✓ ✓.)
   ships its own GNU toolchain ✓, its own `rust-lld` ✓ and its own self-contained MinGW ✓:
   `uv run --directory core python ../tools/ci/rust_gate.py` ✓ (5 tests ✓ + the formatting ✓) ✓.
 
+## The whole product in one folder (2026-10-22)
+
+The owner's promise: **the user downloads the app, installs it, and everything is there** ✓ —
+so the install carries ✓:
+
+| what | where it comes from | where it lands |
+|---|---|---|
+| the shell | the build | `ArchResidenceBD.exe` |
+| the core | the repo (`core/src/archres_core`) | `runtime/core/archres_core` |
+| the core's data | the repo (`spec/flows`, `spec/schemas`) | `runtime/core/` |
+| the rule packs | the repo (`spec/rules`) | `packs/` |
+| the **CAD engine** | the build machine's FreeCAD (found by the core's own discovery) | `engine/bin`, `engine/Mod`, `engine/lib`, `engine/data` |
+| the **models** | the build machine's model folder (`ARCHRES_MODELS`) | `models/` |
+| the **model cards** | the repo (`spec/models/cards`) | `licenses/model-cards/` |
+| the notices | written by the installer | `licenses/` |
+
+⇒ With the engine ✓, the models ✓, the core ✓, the packs ✓ and the cards ✓ on the build
+machine, the plan's **missing** list is **empty** ✓ — one download ✓, everything inside ✓ ✓.
+
 ## The two bugs the installed folder found (2026-10-22)
 
 The layout was declared and the installer was written, and **nothing asked the question the

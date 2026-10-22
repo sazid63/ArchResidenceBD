@@ -68,6 +68,28 @@ INSTALL_LAYOUT = {
 }
 
 
+#: The folders of the headless CAD engine the app needs ✓ — the binary ✓, the workbench
+#: modules ✓, the Python libraries ✓ and the resources ✓ ✓. (The engine is bundled ✓ —
+#: LGPL-2.1 ✓ ✓ — and the app's CAD runs headless ✓ ✓.)
+ENGINE_FOLDERS = ("bin", "Mod", "lib", "data")
+
+
+def engine_home() -> pathlib.Path | None:
+    """The build machine's CAD engine ✓ — found by the core's own discovery ✓ ✓.
+
+    ``None`` when there is none ✓ — and then the install says so ✓ (it names what is
+    missing ✓ ✓), rather than shipping a folder without an engine ✓ ✓.
+    """
+    from .cad import find_engine
+
+    try:
+        # the engine's binary sits in ``<root>/bin`` ✓ — so the engine's **root** ✓ is two
+        # levels up ✓ ✓
+        return find_engine().path.parent.parent
+    except Exception:
+        return None
+
+
 #: Where the GGUFs live on the build machine ✓ — the env var wins ✓, and the default is
 #: where the repo's own downloads put them ✓ (they are gitignored ✓ — gigabytes never
 #: enter the repository ✓ ✓).
@@ -397,6 +419,20 @@ def install_plan(
     else:
         missing.append("packs")
 
+    # the **CAD engine** ✓ — bundled with the app ✓ (the owner's promise ✓ · 2026-10-22 ✓) ✓,
+    # so the user installs one thing ✓ and the geometry works ✓ ✓. The engine's home comes
+    # from the core's own discovery ✓ ✓, and an engine that is not here is **named** ✓ ✓.
+    engine = engine_home()
+    if engine is None:
+        missing.append("engine")
+    else:
+        for folder in ENGINE_FOLDERS:
+            source = engine / folder
+            if source.is_dir():
+                copies.append((str(source), f"{INSTALL_LAYOUT['engine']}/{folder}"))
+            else:
+                missing.append(f"engine-{folder}")
+
     # the **model cards** ✓ — the models' own documentation ✓ (their licence ✓, their
     # provenance ✓, their training data ✓) — and they travel with the models ✓ ✓
     cards_source = repo / "spec" / "models" / "cards"
@@ -422,7 +458,7 @@ def install_plan(
     # here ✓ (the runtime is the installer's own job ✓) ✓, and the models are **copied**
     # below ✓ ✓
     for part in manifest.parts:
-        if part.id in ("core", "packs", "licenses", "shell", "runtime"):
+        if part.id in ("core", "packs", "licenses", "shell", "runtime", "engine"):
             continue
         if part.id.startswith("model-"):
             continue  # bundled with the app ✓ (the copies below ✓ ✓)

@@ -150,8 +150,11 @@ def test_the_plan_names_the_folders_the_copies_and_what_is_missing(
     assert INSTALL_LAYOUT["packs"] in copied
     # the **models** are copied too ✓ (bundled with the app ✓ ✓)
     assert INSTALL_LAYOUT["models"] in copied
-    # and what is still missing is named ✓
-    assert "engine" in plan.missing
+    # and the **CAD engine** ✓ (bundled with the app ✓ ✓) ✓
+    assert any(target.startswith(INSTALL_LAYOUT["engine"]) for target in copied)
+    # and with the engine and the models on the machine, **nothing is missing** ✓ — the
+    # user installs one thing and everything is there ✓ ✓
+    assert plan.missing == ()
     assert plan.missing == tuple(sorted(set(plan.missing)))
 
 
@@ -192,6 +195,7 @@ def test_applying_the_plan_never_downloads_and_never_invents(
     """It copies what is here and names what is not - it does not fetch."""
     plan = install_plan(install_manifest, tmp_path, repo_root=ROOT)
     apply_plan(plan, tmp_path)
-    # the pieces that were missing are still missing, and still named
-    assert not (tmp_path / INSTALL_LAYOUT["engine"]).joinpath("freecadcmd.exe").exists()
-    assert "engine" in plan.missing
+    # the engine travels with the app ✓ (bundled ✓ ✓)
+    assert (tmp_path / INSTALL_LAYOUT["engine"] / "bin" / "freecadcmd.exe").is_file()
+    # and nothing was fetched ✓ - the install is a copy ✓ ✓
+    assert plan.missing == ()

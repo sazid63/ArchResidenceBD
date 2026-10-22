@@ -88,8 +88,29 @@ def models_home(tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> path
     return home
 
 
+
 @pytest.fixture()
-def install_manifest(models_home: pathlib.Path) -> "InstallManifest":
+def engine_home(tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> pathlib.Path:
+    """A small stand-in for the build machine's CAD engine.
+
+    The real engine is two gigabytes across four folders, so a test that copied it would
+    copy two gigabytes. The stand-in has the same **shape** - `<root>/bin/freecadcmd.exe`
+    and the `Mod`, `lib` and `data` folders - which is what the installer reads.
+    """
+    root = tmp_path / "engine"
+    (root / "bin").mkdir(parents=True)
+    (root / "bin" / "freecadcmd.exe").write_bytes(b"a small stand-in for the engine binary")
+    for folder in ("Mod", "lib", "data"):
+        (root / folder).mkdir()
+        (root / folder / "a-file.txt").write_text("stand-in", encoding="utf-8")
+    monkeypatch.setenv("ARCHRES_FREECADCMD", str(root / "bin" / "freecadcmd.exe"))
+    return root
+
+
+@pytest.fixture()
+def install_manifest(
+    models_home: pathlib.Path, engine_home: pathlib.Path
+) -> "InstallManifest":
     """The real manifest with the test's small models (and their real hashes)."""
     from archres_core.install import InstallManifest, ManifestPart, the_manifest
 

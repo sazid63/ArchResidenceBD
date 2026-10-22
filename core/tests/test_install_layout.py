@@ -4,7 +4,7 @@ This is the question the commercial path depends on: *can the installed folder s
 core and answer?* — and it is the question the layout and the code that reads it disagreed
 about.
 
-The two bugs this test holds against:
+The bugs this test holds against:
 
 1. **the installer copied the core's files, not the package** — so the installed folder held
    ``bridge.py`` loose in ``runtime/core`` and the core was **not importable as
@@ -12,13 +12,15 @@ The two bugs this test holds against:
 2. **the bridge looked for the flow book and the packs in ``spec/``** — a folder the install
    does not have.
 
-And the **models** are **bundled** (the owner's decision · 2026-10-22 ·) — so the installer
-**copies** them ✓, and a copy whose hash is not the promised one is **refused** ✓.
+And the **models** and the **CAD engine** are **bundled** (the owner's decision · 2026-10-22
+·) — so the installer **copies** them ✓, and a copy whose hash is not the promised one is
+**refused** ✓ ✓.
 """
 
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import pathlib
 import subprocess
@@ -29,72 +31,19 @@ import pytest
 from archres_core.install import (
     INSTALL_LAYOUT,
     ManifestError,
-    ManifestPart,
     apply_plan,
     install_plan,
-    the_manifest,
 )
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 
-def _model_home(tmp_path: pathlib.Path) -> pathlib.Path:
-    """A **small** stand-in for the build machine's model folder ✓ ✓.
-
-    The real GGUFs are gigabytes ✓ — a test that copied them would copy six gigabytes ✗ ✗ —
-    so the test's models are small files ✓, and the manifest's hashes are *theirs* ✓ ✓
-    (which is what makes the check meaningful ✓ ✓).
-    """
-    home = tmp_path / "models"
-    home.mkdir()
-    (home / "archie-chat-v0-Q4_K_M.gguf").write_bytes(b"a small stand-in for the chat model")
-    (home / "archie-repair.gguf").write_bytes(b"a small stand-in for the repair model")
-    return home
-
-
-def _manifest(tmp_path: pathlib.Path) -> tuple:
-    """The manifest under test ✓ — the real one ✓ with the test's models ✓ ✓."""
-    home = _model_home(tmp_path)
-    parts = []
-    for part in the_manifest().parts:
-        if not part.id.startswith("model-"):
-            parts.append(part)
-            continue
-        name = pathlib.Path(part.path).name
-        if not (home / name).is_file():
-            continue
-        data = (home / name).read_bytes()
-        parts.append(
-            ManifestPart(
-                id=part.id,
-                role=part.role,
-                licence=part.licence,
-                tier=part.tier,
-                path=part.path,
-                size_bytes=len(data),
-                sha256=hashlib.sha256(data).hexdigest(),
-                source=part.source,
-            )
-        )
-    from archres_core.install import InstallManifest
-
-    return InstallManifest(parts=tuple(parts)), home
-
-
-def _install(tmp_path: pathlib.Path) -> pathlib.Path:
-    """Lay the install folder down ✓ ✓ (with the test's small models ✓ ✓)."""
+def _install(tmp_path: pathlib.Path, install_manifest) -> pathlib.Path:
+    """Lay the install folder down ✓ ✓ (the stand-ins ✓ — the real engine and the real
+    models are gigabytes ✓, and a test that copied them would copy eight ✓ ✓)."""
     install = tmp_path / "install"
-    manifest, home = _manifest(tmp_path)
-    previous = os.environ.get("ARCHRES_MODELS")
-    os.environ["ARCHRES_MODELS"] = str(home)
-    try:
-        plan = install_plan(manifest, install, repo_root=ROOT)
-        apply_plan(plan, install)
-    finally:
-        if previous is None:
-            os.environ.pop("ARCHRES_MODELS", None)
-        else:
-            os.environ["ARCHRES_MODELS"] = previous
+    plan = install_plan(install_manifest, install, repo_root=ROOT)
+    apply_plan(plan, install)
     return install
 
 
@@ -116,18 +65,22 @@ def _isolated_env(python_path: str) -> dict[str, str]:
     return environment
 
 
-def test_the_installed_core_is_importable_as_the_package(tmp_path: pathlib.Path) -> None:
+def test_the_installed_core_is_importable_as_the_package(
+    tmp_path: pathlib.Path, install_manifest
+) -> None:
     """The package keeps its name ✓ — or the sidecar never starts ✓ ✓."""
-    install = _install(tmp_path)
+    install = _install(tmp_path, install_manifest)
     package = install / INSTALL_LAYOUT["core"]
     assert (package / "__init__.py").is_file(), "the package's files are loose in the folder"
     assert (package / "bridge.py").is_file()
     assert (package / "importer.py").is_file()
 
 
-def test_the_installed_core_imports_in_isolation(tmp_path: pathlib.Path) -> None:
+def test_the_installed_core_imports_in_isolation(
+    tmp_path: pathlib.Path, install_manifest
+) -> None:
     """The import is real ✓ — proven without the venv's installed core ✓ ✓."""
-    install = _install(tmp_path)
+    install = _install(tmp_path, install_manifest)
     result = subprocess.run(
         [sys.executable, "-S", "-c", "import archres_core.bridge"],
         env=_isolated_env(str(install / INSTALL_LAYOUT["coreData"])),
@@ -138,9 +91,9 @@ def test_the_installed_core_imports_in_isolation(tmp_path: pathlib.Path) -> None
     assert result.returncode == 0, result.stderr.strip()[-400:]
 
 
-def test_the_installed_core_answers(tmp_path: pathlib.Path) -> None:
+def test_the_installed_core_answers(tmp_path: pathlib.Path, install_manifest) -> None:
     """The whole thing: the installed core starts ✓ and answers a ping ✓ ✓."""
-    install = _install(tmp_path)
+    install = _install(tmp_path, install_manifest)
     process = subprocess.Popen(
         [sys.executable, "-S", "-m", "archres_core.bridge", "--root", str(install)],
         env=_isolated_env(str(install / INSTALL_LAYOUT["coreData"])),
@@ -156,8 +109,6 @@ def test_the_installed_core_answers(tmp_path: pathlib.Path) -> None:
         process.stdin.flush()
         line = process.stdout.readline()
         assert line, "the installed core did not answer"
-        import json
-
         reply = json.loads(line)
         assert reply["result"]["name"] == "archres-core"
     finally:
@@ -166,9 +117,11 @@ def test_the_installed_core_answers(tmp_path: pathlib.Path) -> None:
         process.wait(timeout=30)
 
 
-def test_the_installed_core_finds_its_flow_book_and_its_packs(tmp_path: pathlib.Path) -> None:
+def test_the_installed_core_finds_its_flow_book_and_its_packs(
+    tmp_path: pathlib.Path, install_manifest
+) -> None:
     """The bridge's data is in the install's places ✓ — not in a ``spec/`` ✗ ✓."""
-    install = _install(tmp_path)
+    install = _install(tmp_path, install_manifest)
     assert (install / INSTALL_LAYOUT["coreData"] / "flows" / "phase-flow-book.yaml").is_file()
     assert (install / INSTALL_LAYOUT["packs"] / "rajuk-2008.yaml").is_file()
     # and the bridge finds them from the install root ✓
@@ -179,28 +132,34 @@ def test_the_installed_core_finds_its_flow_book_and_its_packs(tmp_path: pathlib.
     assert bridge._pack_paths(), "the installed packs are found"
 
 
-def test_the_models_are_bundled_with_the_app(tmp_path: pathlib.Path) -> None:
+def test_the_models_are_bundled_with_the_app(
+    tmp_path: pathlib.Path, install_manifest
+) -> None:
     """The owner decided it ✓: the user downloads the app and the models are there ✓ ✓."""
-    install = _install(tmp_path)
+    install = _install(tmp_path, install_manifest)
     models = install / INSTALL_LAYOUT["models"]
     assert models.is_dir(), "the models folder is in the install"
     assert (models / "archie-chat-v0-Q4_K_M.gguf").is_file()
 
 
-def test_a_model_whose_hash_is_wrong_is_refused(tmp_path: pathlib.Path) -> None:
+def test_the_engine_is_bundled_with_the_app(
+    tmp_path: pathlib.Path, install_manifest
+) -> None:
+    """The geometry has to work after an install ✓ — so the engine travels too ✓ ✓."""
+    install = _install(tmp_path, install_manifest)
+    engine = install / INSTALL_LAYOUT["engine"]
+    assert (engine / "bin" / "freecadcmd.exe").is_file()
+    for folder in ("Mod", "lib", "data"):
+        assert (engine / folder).is_dir(), folder
+
+
+def test_a_model_whose_hash_is_wrong_is_refused(
+    tmp_path: pathlib.Path, install_manifest, models_home: pathlib.Path
+) -> None:
     """A bundled model is verified before it is installed ✓ — a wrong one is refused ✓ ✓."""
     install = tmp_path / "install"
-    manifest, home = _manifest(tmp_path)
     # a model that is not the one the manifest promises ✓
-    (home / "archie-chat-v0-Q4_K_M.gguf").write_bytes(b"a different model entirely")
-    previous = os.environ.get("ARCHRES_MODELS")
-    os.environ["ARCHRES_MODELS"] = str(home)
-    try:
-        plan = install_plan(manifest, install, repo_root=ROOT)
-        with pytest.raises(ManifestError, match="hash"):
-            apply_plan(plan, install)
-    finally:
-        if previous is None:
-            os.environ.pop("ARCHRES_MODELS", None)
-        else:
-            os.environ["ARCHRES_MODELS"] = previous
+    (models_home / "archie-chat-v0-Q4_K_M.gguf").write_bytes(b"a different model entirely")
+    plan = install_plan(install_manifest, install, repo_root=ROOT)
+    with pytest.raises(ManifestError, match="hash"):
+        apply_plan(plan, install)
