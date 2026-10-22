@@ -12,28 +12,37 @@ rules are **scans** ✓ — no text layer ✓ — so the repo's reader cannot tr
 
 | City | Authority | Document | Where it is | Readable? |
 |---|---|---|---|---|
-| Chattogram | CDA | *Imarat Nirman Niyomaboli* (the building construction rules) · and the FAR chart | `cda.gov.bd/download/rulesand regulations/…` · and `cda.gov.bd/download/far.pdf` | **a scan** |
-| Khulna | KDA | the authority's law (the building rules) | `kda.gov.bd/wp-content/uploads/2018/03/KDA-Law.pdf` | **a scan** |
-| Sylhet | SDA | the **Building Construction Rules, 1996** (with BNBC 2020, the SDA Act 2023 and the Real Estate Development and Management Rules 2011 beside them) | `sda.gov.bd/pages/files/…` | **a scan** |
+| Chattogram | CDA | the CDA's own rules (সিডিএ প্রবিধানমালা) | the authority's laws page → the document's own object storage | **a scan** (50 pages, no text layer) |
+| Chattogram | CDA | the **Building Construction Act, 1952** (as amended in 2008) — it carries the FAR chart | the authority's laws page → the document's own object storage | **a text layer** (87 pages) — but the chart's *headings* are in a legacy font encoding and are mangled |
+| Khulna | KDA | the **setbacks by the plot size** and the **height by the road width** | the authority's plan-approval portal (its own service) | **machine-readable** ✓ |
+| Sylhet | SDA | the **Building Construction Rules, 1996** (with BNBC 2020, the SDA Act 2023 and the Real Estate Development and Management Rules 2011 beside them) | the authority's laws page | the document is **named, not pinned** ✓ |
 | Rajshahi | RDA | — | — | **not found** |
 
 All four are in the **Source Registry** now ✓ (candidate ✓ — a candidate until a human
-verifies it ✓ ✓) with their URLs ✓ and the note of what each is ✓ ✓.
+verifies it ✓ ✓) with the URL that was fetched on 2026-10-22 ✓, the artefact's **hash** and
+**page count** ✓ ✓, and the note of what each is ✓ ✓.
 
-## Why the documents could not be transcribed
+## What the re-measurement found (2026-10-22)
 
-The repo's PDF reader reads **text** PDFs ✓ — it does not OCR ✓ (that would be a new
-dependency ✓, and the $0 law is the owner's call ✓ ✓). Measured on the fetched files ✓:
+The agent went back to the documents ✓ ✓ — and the record changed ✓ ✓:
 
-```
-chattogram-building-rules         7,696,189 B    6 pages      0 chars  a scan
-chattogram-far                     8,493,682 B    6 pages      0 chars  a scan
-chattogram-standard-far-chart        282,276 B    1 page       0 chars  a scan
-khulna-kda-law                    3,686,358 B   21 pages      0 chars  a scan
-```
-
-⇒ A city pack **cannot** be built from its own rules by the machine ✓ — the FAR table ✓,
-the setbacks ✓ and the heights ✓ are in those scans ✓ ✓.
+- **the pinned URLs were stale** ✓ — the Chattogram link answers **404** ✓ ✗, the Khulna link
+  did not resolve ✓ ✗, and the Sylhet link serves the site's landing page ✓ ✗ — so "found"
+  was **not true** ✓ ✗ ✗ ✗ ✗ ✗, and the registry now carries the URL that was fetched ✓ ✓
+  and what each document actually is ✓ ✓;
+- **two KDA rules are transcribed** ✓ — the authority's own service answers the setbacks (four
+  plot-size classes ✓ ✓) and the height by the road width (seven classes ✓ ✓) ✓ ✓ — kept in
+  `data/rules/khulna-kda-zoning-candidate.json` ✓ ✓ with the service's own wording beside
+  every number ✓ (Bangla and English ✓ ✓), the metre conversion of the feet-and-inches ✓ ✓,
+  and the **gaps** declared ✓ ✓ (the FAR schedule ✓, the parking schedule ✓, the use classes
+  ✓ — the portal does not publish them ✓ ✓) ✓ ✓ — a **candidate** ✓, because a fetched rule
+  stays one until a human checks it ✓ ✓ (the money law ✓, applied to law ✓ ✓);
+- **the Chattogram FAR chart was found** - in the Building Construction Act 1952 (the
+  CDA's copy - 87 pages, fetched and hashed) - where the chart's **numbers** are in the text
+  layer, but its **headings** are in a legacy Bangla font encoding and are mangled. The
+  repo's own method reads a chart from the **rendered page** (ADR-0003), which this machine
+  cannot do (the model reads no PDF page images), so **nothing** is transcribed from it -
+  because a number without its heading is not a rule.
 
 ## The fallback (the owner's instruction, and the honest form of it)
 

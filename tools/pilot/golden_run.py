@@ -1,33 +1,22 @@
 """The golden full run (W6.1): the app's whole flow, through the channel the app speaks.
 
-The plan's W6.1 is the **golden full run** ✓ and the engineer's sign-off ✓ — and the
-sign-off is a human act ✓ (OWNER-ATTENTION #9 ✓ ✓). The **run** is the repo's ✓ ✓.
+The plan's W6.1 is the **golden full run** and the **engineer's sign-off** — and the
+sign-off is a human act (OWNER-ATTENTION #9). The **run** is the repo's.
 
-And the run goes through the **bridge** ✓ — the same channel the desktop shell speaks ✓ ✓
-— because a golden run that took a different path ✓ than the product takes ✓ would prove
-nothing about the product ✓ ✓ ✓.
+And the run goes through the **bridge** — the same channel the desktop shell speaks —
+because a golden run that took a different path than the product takes would prove nothing
+about the product.
 
 So this script:
 
-1. creates the project ✓ (the bridge's `project.create` ✓ — from the template ✓, the way
-   the app does it ✓ ✓);
-2. asks the interview the golden questions ✓ (the bridge's `session.respond` ✓ and
-   `session.use_default` ✓) ✓;
-3. designs it ✓ (the bridge's `design.run` ✓);
-4. prices it ✓ (the bridge's `boq.build` ✓);
-5. hands it over ✓ (the bridge's `bundle.export` ✓);
+1. creates the project (the bridge's `project.create`, from the template);
+2. asks the interview the golden questions (`session.respond` and `session.use_default`);
+3. designs it (`design.run`);
+4. prices it (`boq.build`);
+5. hands it over (`bundle.export`);
 
-and it **checks** the result ✓ ✓ — five checks, each a law and not a formality ✓ ✓:
-
-- **the interview lands on the golden project** ✓ — the facts the interview owns are the
-  golden example's ✓ ✓ (a run that answered differently is a different project ✓ and the
-  run says so ✓ ✓);
-- **the design carries its assumptions** ✓ — every assumption is visible ✓, and the ones
-  that must be checked on site ✓ say so ✓ ✓;
-- **the money adds up** ✓ — every priced line is quantity × rate ✓, the subtotals add to
-  the total ✓, and the **unpriced lines are named** ✓ (never silently dropped ✓ ✓);
-- **the card says what it is** ✓ — the card's status travels with the money ✓ ✓;
-- **the handover is written** ✓ — the bundle is on disk ✓ and its files are in it ✓ ✓.
+and it **checks** the result — five checks, each a law and not a formality. The run **fails**
+when one of them does not hold.
 
 Usage (from the repo root):
   uv run --directory core python ../tools/pilot/golden_run.py
@@ -47,11 +36,8 @@ from archres_core.stdio import utf8_stdio
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 ANSWERS = ROOT / "tools" / "pilot" / "golden-answers.json"
-GOLDEN_PROJECT = ROOT / "spec" / "examples" / "two-storey-residential.json"
 
-#: The facts the interview owns ✓ — and the golden example's own values ✓ ✓. The run
-#: checks them one by one ✓, because a run that answered differently is a different
-#: project ✓ and the difference must be **visible** ✓ ✓.
+#: The facts the interview owns, and the golden project's own values.
 GOLDEN_FACTS = (
     ("/site/plot/areaSqm", 133.78),
     ("/site/plot/frontageM", 10.0),
@@ -68,7 +54,7 @@ GOLDEN_FACTS = (
 
 
 def _at(spec: dict, pointer: str):
-    """The value at a JSON pointer ✓ — ``None`` when the path is not there ✓ ✓."""
+    """The value at a JSON pointer - None when the path is not there."""
     node = spec
     for part in pointer.strip("/").split("/"):
         if not isinstance(node, dict) or part not in node:
@@ -78,7 +64,7 @@ def _at(spec: dict, pointer: str):
 
 
 def _call(bridge: Bridge, method: str, params: dict, step: str) -> dict:
-    """One call to the core ✓ — and an error is an error ✓ ✓, not a warning ✓ ✓."""
+    """One call to the core - and an error is an error, not a warning."""
     reply = bridge.handle({"id": step, "method": method, "params": params})
     if "error" in reply:
         raise SystemExit(f"  {step} failed: {reply['error']['message']}")
@@ -86,17 +72,17 @@ def _call(bridge: Bridge, method: str, params: dict, step: str) -> dict:
 
 
 def _answers() -> dict:
-    """The golden answers ✓ — the ``$``-prefixed notes are not answers ✓ ✓."""
+    """The golden answers - the $-prefixed notes are not answers."""
     raw = json.loads(ANSWERS.read_text(encoding="utf-8"))
     return {key: value for key, value in raw.items() if not key.startswith("$")}
 
 
 def _interview(bridge: Bridge, session_id: str, prompt: dict, answers: dict) -> dict:
-    """Ask every question the flow book has ✓ ✓.
+    """Ask every question the flow book has.
 
-    The golden answers are used where they are there ✓; the rest take their **authored
-    default** ✓ ✓ — and the run says how many that was ✓, because a default nobody
-    counted is a default nobody checked ✓ ✓ ✓.
+    The golden answers are used where they are there; the rest take their **authored
+    default** - and the run says how many that was, because a default nobody counted is a
+    default nobody checked.
     """
     asked = 0
     defaulted = 0
@@ -132,7 +118,7 @@ def _interview(bridge: Bridge, session_id: str, prompt: dict, answers: dict) -> 
 
 
 def _check_golden_facts(spec: dict) -> tuple[bool, list[str]]:
-    """The interview landed on the golden project ✓ — the facts are the golden ones ✓ ✓."""
+    """The interview landed on the golden project - the facts are the golden ones."""
     problems: list[str] = []
     for pointer, expected in GOLDEN_FACTS:
         actual = _at(spec, pointer)
@@ -146,7 +132,7 @@ def _check_golden_facts(spec: dict) -> tuple[bool, list[str]]:
 
 
 def _check_assumptions(assumptions: list) -> tuple[bool, list[str]]:
-    """Every assumption is visible ✓ — and the ones to check on site say so ✓ ✓."""
+    """Every assumption is visible - and the ones to check on site say so."""
     problems: list[str] = []
     for item in assumptions:
         if not item.get("statement"):
@@ -157,7 +143,7 @@ def _check_assumptions(assumptions: list) -> tuple[bool, list[str]]:
 
 
 def _check_money(boq: dict) -> tuple[bool, list[str]]:
-    """The money adds up ✓ ✓ — every line, every subtotal, every total ✓ ✓."""
+    """The money adds up - every line, every subtotal, every total."""
     problems: list[str] = []
     for line in boq.get("lines") or []:
         if not line.get("priced"):
@@ -167,25 +153,24 @@ def _check_money(boq: dict) -> tuple[bool, list[str]]:
         amount = float(line.get("amountBdt") or 0.0)
         if abs(quantity * rate - amount) > 0.011:
             problems.append(
-                f"{line.get('key')}: {quantity} x {rate} is {quantity * rate:.2f}, not {amount:.2f}"
+                f"{line.get('key')}: {quantity} x {rate} is "
+                f"{quantity * rate:.2f}, not {amount:.2f}"
             )
     totals = boq.get("totals") or {}
     total = float(totals.get("amountBdt") or 0.0)
     by_phase = (boq.get("subtotals") or {}).get("byPhase") or {}
-    if abs(sum(float(value) for value in by_phase.values()) - total) > 0.02:
-        problems.append(
-            f"the phases add to {sum(float(v) for v in by_phase.values()):.2f}, "
-            f"the total says {total:.2f}"
-        )
-    unpriced = totals.get("unpricedLines") or []
+    phases = sum(float(value) for value in by_phase.values())
+    if abs(phases - total) > 0.02:
+        problems.append(f"the phases add to {phases:.2f}, the total says {total:.2f}")
+    unpriced = set(totals.get("unpricedLines") or [])
     named = {line.get("key") for line in boq.get("lines") or [] if not line.get("priced")}
-    if set(unpriced) != named:
-        problems.append(f"the unpriced lines are named {unpriced}, the lines say {sorted(named)}")
+    if unpriced != named:
+        problems.append(f"the unpriced lines are named {sorted(unpriced)}, the lines say {sorted(named)}")
     return (not problems), problems
 
 
 def run(root: pathlib.Path, name: str) -> dict:
-    """The golden run ✓ — every step through the channel ✓ ✓."""
+    """The golden run - every step through the channel."""
     bridge = Bridge(root=ROOT)
     answers = _answers()
     projects = root / "projects"
@@ -210,8 +195,7 @@ def run(root: pathlib.Path, name: str) -> dict:
     print("2. the interview")
     walked = _interview(bridge, session_id, created["prompt"], answers)
     print(f"   {walked['asked']} question(s), {walked['defaulted']} on their default")
-    finished = _call(bridge, "session.finish", {"sessionId": session_id}, "session.finish")
-    print(f"   the interview is closed ({finished['turnCount']} fallback turn(s))")
+    _call(bridge, "session.finish", {"sessionId": session_id}, "session.finish")
 
     from archres_core.spec import SpecStore
 
@@ -247,9 +231,9 @@ def run(root: pathlib.Path, name: str) -> dict:
     print("6. the checks")
     checks: dict[str, dict] = {}
 
-    def record(name: str, ok: bool, problems: list[str]) -> None:
-        checks[name] = {"ok": ok, "problems": problems}
-        print(f"   {'ok  ' if ok else 'FAIL'} {name}")
+    def record(label: str, ok: bool, problems: list[str]) -> None:
+        checks[label] = {"ok": ok, "problems": problems}
+        print(f"   {'ok  ' if ok else 'FAIL'} {label}")
 
     facts_ok, problems = _check_golden_facts(spec)
     record("the interview lands on the golden project", facts_ok, problems)
@@ -260,32 +244,29 @@ def run(root: pathlib.Path, name: str) -> dict:
     money_ok, problems = _check_money(boq)
     record("the money adds up", money_ok, problems)
 
-    card_ok = bool(priced_from.get("status"))
     record(
         "the card says what it is",
-        card_ok,
-        [] if card_ok else ["the card's status did not travel with the money"],
+        bool(priced_from.get("status")),
+        [] if priced_from.get("status") else ["the card's status did not travel with the money"],
     )
 
     target = pathlib.Path(bundle["target"])
-    manifest = bundle["manifest"]
     bundle_ok = target.is_file() and target.stat().st_size > 0
     if bundle_ok:
         from archres_core.bundle import read_bundle
 
-        read = read_bundle(target)
-        bundle_ok = bool(read.files)
+        bundle_ok = bool(read_bundle(target).files)
     record(
         "the handover is written",
         bundle_ok,
         [] if bundle_ok else ["the bundle is not on disk, or it holds nothing"],
     )
 
-    failed = [name for name, item in checks.items() if not item["ok"]]
+    failed = [label for label, item in checks.items() if not item["ok"]]
     if failed:
-        for name in failed:
-            for problem in checks[name]["problems"]:
-                print(f"   - {name}: {problem}")
+        for label in failed:
+            for problem in checks[label]["problems"]:
+                print(f"   - {label}: {problem}")
         raise SystemExit("the golden run failed its checks")
 
     return {
@@ -293,7 +274,7 @@ def run(root: pathlib.Path, name: str) -> dict:
             "name": design["projectName"],
             "id": design["projectId"],
             "storeys": design["storeys"],
-            "revisions": manifest["revisionCount"],
+            "revisions": bundle["manifest"]["revisionCount"],
         },
         "interview": {
             "questions": walked["asked"],
@@ -309,10 +290,10 @@ def run(root: pathlib.Path, name: str) -> dict:
             "pricedFrom": priced_from,
         },
         "bundle": {
-            "files": len(manifest["files"]),
-            "specSha256": manifest["specSha256"],
+            "files": len(bundle["manifest"]["files"]),
+            "specSha256": bundle["manifest"]["specSha256"],
         },
-        "checks": {name: item["ok"] for name, item in checks.items()},
+        "checks": {label: item["ok"] for label, item in checks.items()},
     }
 
 
@@ -345,7 +326,6 @@ def main(argv: list[str] | None = None) -> int:
     if args.record:
         target = pathlib.Path(args.record)
         if not target.is_absolute():
-            # the repo's own root ✓ - the tool is run from anywhere ✓ ✓
             target = ROOT / target
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(
@@ -358,4 +338,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    sys.exit(main())

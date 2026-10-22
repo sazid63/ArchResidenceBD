@@ -1,0 +1,204 @@
+{
+  "asOf": "2026-10-22",
+  "authority": "Khulna Development Authority (KDA)",
+  "candidateId": "khulna-kda-zoning-candidate",
+  "gaps": [
+    {
+      "id": "khulna-far",
+      "status": "open",
+      "what": "the FAR schedule (the floor area ratio by the plot size and the road width)",
+      "why": "the portal's two services do not carry it, and the KDA's rules PDF's pinned URL did not resolve on 2026-10-22"
+    },
+    {
+      "id": "khulna-parking",
+      "status": "open",
+      "what": "the parking schedule and the parking geometry",
+      "why": "not published on the portal"
+    },
+    {
+      "id": "khulna-use-classes",
+      "status": "open",
+      "what": "the use classes (which land use may take which FAR and which setback)",
+      "why": "not published on the portal; the setbacks above are the residential area's"
+    }
+  ],
+  "heights": [
+    {
+      "note": null,
+      "roadWidth": {
+        "bn": "১২ ফুট",
+        "en": "12 ft"
+      },
+      "storeysMax": 5,
+      "storeysMin": 5
+    },
+    {
+      "note": null,
+      "roadWidth": {
+        "bn": "১৫ ফুট",
+        "en": "15 ft"
+      },
+      "storeysMax": 6,
+      "storeysMin": 6
+    },
+    {
+      "note": null,
+      "roadWidth": {
+        "bn": "২০ ফুট",
+        "en": "20 ft"
+      },
+      "storeysMax": 6,
+      "storeysMin": 6
+    },
+    {
+      "note": null,
+      "roadWidth": {
+        "bn": "২৫ ফুট - ৩৫ ফুট",
+        "en": "25 ft to 35 ft"
+      },
+      "storeysMax": 9,
+      "storeysMin": 7
+    },
+    {
+      "note": null,
+      "roadWidth": {
+        "bn": "৩৫ ফুট - ৫০ ফুট",
+        "en": "35 ft to 50 ft"
+      },
+      "storeysMax": 14,
+      "storeysMin": 14
+    },
+    {
+      "note": null,
+      "roadWidth": {
+        "bn": "৫০ ফুট - ৭৫ ফুট",
+        "en": "50 ft to 75 ft"
+      },
+      "storeysMax": 20,
+      "storeysMin": 20
+    },
+    {
+      "note": "ইমারতের উচ্চতার কোন সীমা থাকবে না (no limit on the height)",
+      "roadWidth": {
+        "bn": "৭৫ ফুটের বেশি হলে",
+        "en": "over 75 ft"
+      },
+      "storeysMax": null,
+      "storeysMin": null
+    }
+  ],
+  "langs": [
+    "bn",
+    "en"
+  ],
+  "schemaVersion": "0.1.0",
+  "setbacks": [
+    {
+      "front": {
+        "metres": 1.524,
+        "minimum": true,
+        "original": "5 ft"
+      },
+      "landArea": {
+        "bn": "২ কাঠা পর্যন্ত",
+        "en": "up to 2 katha",
+        "kathaMax": 2.0
+      },
+      "rear": {
+        "metres": 0.9906,
+        "original": "3 ft 3 in"
+      },
+      "sides": {
+        "metres": 0.7874,
+        "original": "2 ft 7 in"
+      }
+    },
+    {
+      "front": {
+        "metres": 1.524,
+        "minimum": true,
+        "original": "5 ft"
+      },
+      "landArea": {
+        "bn": "২.০১ কাঠা থেকে ৩.০০ কাঠা পর্যন্ত",
+        "en": "2.01 to 3.00 katha",
+        "kathaMax": 3.0
+      },
+      "rear": {
+        "metres": 0.9906,
+        "original": "3 ft 3 in"
+      },
+      "sides": {
+        "metres": 0.9906,
+        "original": "3 ft 3 in"
+      }
+    },
+    {
+      "front": {
+        "metres": 1.524,
+        "minimum": true,
+        "original": "5 ft"
+      },
+      "landArea": {
+        "bn": "৩.০১ কাঠা থেকে ৪.০০ কাঠা পর্যন্ত",
+        "en": "3.01 to 4.00 katha",
+        "kathaMax": 4.0
+      },
+      "rear": {
+        "metres": 1.524,
+        "original": "5 ft"
+      },
+      "sides": {
+        "metres": 0.9906,
+        "original": "3 ft 3 in"
+      }
+    },
+    {
+      "front": {
+        "metres": 1.524,
+        "minimum": true,
+        "original": "5 ft"
+      },
+      "landArea": {
+        "bn": "৪.০১ কাঠা হতে তদুর্দ্ধ",
+        "en": "4.01 katha and above",
+        "kathaMax": null
+      },
+      "rear": {
+        "metres": 1.9812,
+        "original": "6 ft 6 in"
+      },
+      "sides": {
+        "metres": 1.2446,
+        "original": "4 ft 1 in"
+      }
+    }
+  ],
+  "source": {
+    "kind": "html-index",
+    "retrievedAt": "2026-10-22",
+    "services": [
+      "https://cp.kda.gov.bd/ajax-land-area-setback",
+      "https://cp.kda.gov.bd/ajax-building-height-check"
+    ],
+    "title": {
+      "bn": "ভবন নির্মাণের জন্য প্রয়োজনীয় সেটব্যাক ও রাস্তার প্রশস্ততা অনুসারে ইমারতের উচ্চতা",
+      "en": "The required setbacks for a building, and the building height by the road width"
+    },
+    "url": "https://cp.kda.gov.bd/building-construction-rules"
+  },
+  "status": "candidate",
+  "units": {
+    "height": "storey",
+    "kathaSqm": 166.25,
+    "landArea": "katha",
+    "setback": "metre"
+  },
+  "verification": {
+    "method": "The values are the authority's own published answers: the portal's setback service, asked for each of its four plot-size classes, and its height service, asked for each of its seven road-width classes (2026-10-22). The service's wording is kept beside every number, in Bangla and in English. A fetched rule stays a candidate until a human checks it against the signed rules (the plan's money law, applied to law).",
+    "tiers": [
+      "web-service"
+    ],
+    "unread": "The portal serves these two tables only. The FAR schedule, the parking schedule and the rest of the KDA's building rules are not on it, so they are not here - a gap is declared, never a guess."
+  }
+}

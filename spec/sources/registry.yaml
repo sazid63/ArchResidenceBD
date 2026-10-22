@@ -67,10 +67,10 @@ sources:
     status: candidate
     authority: Chattogram Development Authority (CDA)
     title:
-      bn: চট্টগ্রাম উন্নয়ন কর্তৃপক্ষের ইমারত নির্মাণ বিধিমালা
-      en: Chattogram Development Authority building rules
+      bn: সিডিএ প্রবিধানমালা (চট্টগ্রাম উন্নয়ন কর্তৃপক্ষ)
+      en: CDA rules (Chattogram Development Authority)
     kind: pdf-document
-    url: http://cda.gov.bd/download/rulesand%20regulations/Imarat%20Nirman%20niyomaboli.pdf
+    url: https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-cda/2024/12/ff265f2104824ae0a9c15ac933f833d7.pdf
     language:
     - bn
     licence: Government publication; confirm the reuse terms before extraction.
@@ -78,17 +78,70 @@ sources:
       method: GET
       parser: manual-review
       recipe: >-
-        Fetch the rule book, hash it, and transcribe it into a new city pack (ADR-0003) - the
-        RAJUK pack (spec/rules/rajuk-2008.yaml) is the template. The document is a scan, so
-        the transcription is a human read (or OCR - a new dependency, and the owner call).
+        The document is fetched from the authority's laws page (the URL above is the
+        document's own object storage). It is a 50-page scan with no text layer, so the
+        repo PDF reader cannot transcribe it - the FAR chart has to be read from the
+        rendered page (the RAJUK pack's own method, ADR-0003) and this machine cannot
+        render a PDF page. A human read, or OCR (a new dependency, and the owner call).
     cadence: static
+    lastVerified: "2026-10-22"
+    artifact:
+      fileName: "chattogram-cda-rules.pdf"
+      sizeBytes: 15054306
+      sha256: "a87703e4d7058055a5ac7ee538878b86b0dea754165669199b04fc768d8df348"
+      pages: 50
     notes: >-
-      Found 2026-10-22 (the owner asked the agent to find the rules for each city and to
-      fall back to the national rules where one is not found). The rule book is a scan with no
-      text layer, so the repo PDF reader cannot transcribe it - a human read, or OCR (a new
-      dependency, and the owner call). Until then the city pack falls back to the national
-      rules (rajuk@2008.1) and says so. The FAR chart is at
-      http://www.cda.gov.bd/download/far.pdf (also a scan).
+      FOUND, and the pinned URL was wrong 2026-10-22: the link this entry carried
+      (http://cda.gov.bd/download/rulesand%20regulations/Imarat%20Nirman%20niyomaboli.pdf)
+      answers 404. The authority's laws page
+      (http://cda.gov.bd/pages/static-pages/6922dead933eb65569e1c8dc) lists the documents
+      that are actually published; the URL above is the CDA's own rules, fetched, hashed and
+      measured on 2026-10-22 (50 pages, 15054306 bytes, no text layer - a CamScanner scan).
+      The FAR chart is not in this book: it is in the Building Construction Act 1952, which
+      the same page lists and which is the next entry. Until the values are transcribed,
+      the city pack falls back to the national rules (rajuk@2008.1) and says so.
+
+  - id: chattogram-building-construction-act-1952
+    dataTypes:
+    - rule-source
+    status: candidate
+    authority: Chattogram Development Authority (CDA)
+    title:
+      bn: বিল্ডিং কন্সট্রাকশন অ্যাক্ট, ১৯৫২ (২০০৮ সালে সংশোধিত)
+      en: The Building Construction Act, 1952 (as amended in 2008)
+    kind: pdf-document
+    url: https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-cda/2024/12/71a4277ec29b459aa66f7c00bf5a4032.pdf
+    language:
+    - bn
+    - en
+    licence: Government publication; confirm the reuse terms before extraction.
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: >-
+        The document is fetched from the authority's laws page. It carries a text layer, and
+        the FAR chart's numbers are in it, but the letters are in a legacy font encoding and
+        the chart's headings are not readable from the text - so the chart is read from the
+        rendered page (the RAJUK pack's own method, ADR-0003), and this machine cannot render
+        a PDF page. Until then the values are not transcribed.
+    cadence: static
+    lastVerified: "2026-10-22"
+    artifact:
+      fileName: "chattogram-building-construction-act-1952.pdf"
+      sizeBytes: 1177337
+      sha256: "dfff66f3c8cc3ae68d2b279aa8bc560579dde54625c67ec531afc843155209b6"
+      pages: 87
+    notes: >-
+      FOUND 2026-10-22 - the CDA's copy, on the authority's laws page (the URL above is the
+      document's own object storage). 87 pages, 1177337 bytes, fetched and hashed. It has a
+      text layer (148572 characters) whose letters are in a legacy Bangla font encoding and
+      are mangled, while its digits are plain - the same shape as the RAJUK gazette, whose
+      values were read from the rendered pages and never from the text layer. It carries the
+      FAR chart for Chattogram (Type A: A1-A4 and A5; Type B: B1 and B2; and the ground
+      coverage and setback schedules). The chart's numbers are in the text layer; its
+      headings are not, and a number without its heading is not a rule - so nothing is
+      transcribed from it yet, and the city pack falls back to the national rules
+      (rajuk@2008.1) and says so.
 
   - id: khulna-kda-building-rules
     dataTypes:
@@ -96,10 +149,10 @@ sources:
     status: candidate
     authority: Khulna Development Authority (KDA)
     title:
-      bn: খুলনা উন্নয়ন কর্তৃপক্ষের ইমারত নির্মাণ বিধিমালা
-      en: Khulna Development Authority building rules
-    kind: pdf-document
-    url: http://www.kda.gov.bd/wp-content/uploads/2018/03/KDA-Law.pdf
+      bn: ভবন নির্মাণের জন্য প্রয়োজনীয় সেটব্যাক ও রাস্তার প্রশস্ততা অনুসারে ইমারতের উচ্চতা (কেডিএ)
+      en: The required setbacks for a building, and the building height by the road width (KDA)
+    kind: html-index
+    url: https://cp.kda.gov.bd/building-construction-rules
     language:
     - bn
     licence: Government publication; confirm the reuse terms before extraction.
@@ -107,16 +160,27 @@ sources:
       method: GET
       parser: manual-review
       recipe: >-
-        Fetch the rule book, hash it, and transcribe it into a new city pack (ADR-0003) - the
-        RAJUK pack (spec/rules/rajuk-2008.yaml) is the template. The document is a scan, so
-        the transcription is a human read (or OCR - a new dependency, and the owner call).
+        The page lists the two rules the authority publishes; its own service answers each
+        one (https://cp.kda.gov.bd/ajax-land-area-setback and
+        https://cp.kda.gov.bd/ajax-building-height-check), and the answers are read and kept
+        with the service's own wording (Bangla and English) in
+        data/rules/khulna-kda-zoning-candidate.json. The rest of the KDA's rules
+        are not on the page: the FAR schedule, the parking schedule and the use classes are
+        declared gaps, not guesses.
     cadence: static
+    lastVerified: "2026-10-22"
     notes: >-
-      Found 2026-10-22 (the owner asked the agent to find the rules for each city and to
-      fall back to the national rules where one is not found). The rule book is a scan with no
-      text layer, so the repo PDF reader cannot transcribe it - a human read, or OCR (a new
-      dependency, and the owner call). Until then the city pack falls back to the national
-      rules (rajuk@2008.1) and says so.
+      FOUND 2026-10-22, and the two zoning rules are TRANSCRIBED. The link this entry carried
+      (http://www.kda.gov.bd/wp-content/uploads/2018/03/KDA-Law.pdf) did not resolve from the
+      build machine. The authority's plan-approval portal publishes the two rules as its own
+      answers: the setbacks for a residential plot by the plot size (four classes, 2 katha
+      and above) and the building height by the road width (seven classes, 12 ft and above).
+      Both were read on 2026-10-22 and are kept with their provenance in
+      data/rules/khulna-kda-zoning-candidate.json - a CANDIDATE, because a fetched rule stays
+      a candidate until a human checks it (the plan's money law, applied to law). What is
+      still missing is declared there: the FAR schedule, the parking schedule and the use
+      classes. Until a full pack exists, the city falls back to the national rules
+      (rajuk@2008.1) for everything the candidate does not cover, and says so.
 
   - id: sylhet-sda-building-rules-1996
     dataTypes:
@@ -126,8 +190,7 @@ sources:
     title:
       bn: সিলেট উন্নয়ন কর্তৃপক্ষের ইমারত নির্মাণ বিধিমালা ১৯৯৬
       en: Sylhet Development Authority Building Construction Rules, 1996
-    kind: pdf-document
-    url: https://sda.gov.bd/pages/files/6aa140ea324bbd742446e281
+    kind: manual-entry
     language:
     - bn
     licence: Government publication; confirm the reuse terms before extraction.
@@ -135,18 +198,21 @@ sources:
       method: GET
       parser: manual-review
       recipe: >-
-        Fetch the rule book, hash it, and transcribe it into a new city pack (ADR-0003) - the
-        RAJUK pack (spec/rules/rajuk-2008.yaml) is the template. The document is a scan, so
-        the transcription is a human read (or OCR - a new dependency, and the owner call).
+        The document is on the authority's laws page (the authority's site is the national
+        portal's); the link this entry carried answers the site's landing page, not the
+        document (checked 2026-10-22), so the document is not pinned yet and this entry
+        carries no URL. Once it is: hash it, and transcribe it into a new city pack
+        (ADR-0003) - the RAJUK pack (spec/rules/rajuk-2008.yaml) is the template.
     cadence: static
+    lastVerified: "2026-10-22"
     notes: >-
-      Found 2026-10-22 (the owner asked the agent to find the rules for each city and to
-      fall back to the national rules where one is not found). The Building Construction Rules
-      1996 are on the authority laws page, with BNBC 2020, the SDA Act 2023 and the Real
-      Estate Development and Management Rules 2011 beside them. The document is a scan with no
-      text layer, so the repo PDF reader cannot transcribe it - a human read, or OCR (a new
-      dependency, and the owner call). Until then the city pack falls back to the national
-      rules (rajuk@2008.1) and says so.
+      THE RULES ARE NAMED, THE DOCUMENT IS NOT PINNED 2026-10-22. The Building Construction
+      Rules 1996 are on the authority's laws page, with BNBC 2020, the SDA Act 2023 and the
+      Real Estate Development and Management Rules 2011 beside them; the link this entry
+      carried serves the site's landing page, so the document itself has not been fetched,
+      hashed or read. Nothing is transcribed from it, and the city pack falls back to the
+      national rules (rajuk@2008.1) and says so. A human read, or OCR (a new dependency, and
+      the owner call), once the document is pinned.
 
   - id: rajshahi-rda-building-rules
     dataTypes:
