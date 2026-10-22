@@ -26,8 +26,9 @@ no human ✓ ✓.
 ## Decisions
 
 1. **The pack's numbers are checked against the source's own digits** — the check reads the
-   gazette's text layer ✓ and compares every row of the pack's FAR tables with the numbers it
-   finds ✓ ✓ (`tools/rules/gazette/check_far.py` ✓).
+   gazette's text layer ✓ and compares every row of the pack's **FAR** tables ✓ and its
+   **setback** table ✓ with the numbers it finds ✓ ✓
+   (`tools/rules/gazette/check_far.py` ✓).
 2. **A second, independent copy checks the same rows** — the Chattogram CDA publishes the
    same schedule in its own copy of the Building Construction Act 1952 ✓ ✓, and the pack was
    transcribed from **neither** ✓ ✓ — so the rows are checked against two copies ✓ ✓.
@@ -42,9 +43,10 @@ no human ✓ ✓.
 
 ## Consequences
 
-- **The pack's FAR tables are now machine-verified against the source** — 34 rows confirmed
-  by the gazette's own digits ✓ ✓ and the same 34 by the CDA's own copy ✓ ✓ — **68 checks,
-  none disagreeing** ✓ ✓, and **no row unchecked** ✓ ✓.
+- **The pack's tables are now machine-verified against the source** — 34 FAR rows confirmed
+  by the gazette's own digits ✓ ✓ and the same 34 by the CDA's own copy ✓ ✓, and the
+  **setback** table's 16 rows confirmed by the gazette ✓ ✓ — **84 checks, none disagreeing**
+  ✓ ✓, and **no row unchecked** ✓ ✓.
 - **The check runs in a second** ✓ ✓ (no rendering ✓, no model ✓, no network ✓) — so it can
   be run whenever the pack is touched ✓ ✓ (and it is a **test** ✓ — `core/tests/test_far_check.py`
   ✓ ✓ — so a change to the pack's numbers that the source does not carry is caught ✓ ✓).

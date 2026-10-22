@@ -1,29 +1,33 @@
-"""Check the rule pack's FAR values against the gazette's own text layer, and against
-the Chattogram CDA's own copy of the same schedule.
+"""Check the rule pack's FAR and setback values against the gazette's own text layer, and
+against the Chattogram CDA's own copy of the same schedule.
 
     uv run --directory core python ../tools/rules/gazette/check_far.py
     uv run --directory core python ../tools/rules/gazette/check_far.py --check
 
-**What this is.** The pack's FAR tables were transcribed by eye from the gazette's
-**rendered pages** (the recipe in ``README.md`` ✓), because the gazette's text layer was
-unreadable ✓ — its Bangla letters are in a legacy font encoding ✓ ✓. But the **digits** in
-that text layer are plain ✓ ✓, and the reader now reads the layer at all ✓ (ADR-0081 ✓ ✓) —
-so the pack's numbers can be checked **against the source's own digits** ✓ ✓, by script ✓,
-with no rendering and no human ✓ ✓.
+**What this is.** The pack's tables were transcribed by eye from the gazette's **rendered
+pages** (the recipe in ``README.md`` ✓), because the gazette's text layer was unreadable ✓
+— its Bangla letters are in a legacy font encoding ✓ ✓. But the **digits** in that text
+layer are plain ✓ ✓, and the reader now reads the layer at all ✓ (ADR-0081 ✓ ✓) — so the
+pack's numbers can be checked **against the source's own digits** ✓ ✓, by script ✓, with
+no rendering and no human ✓ ✓.
 
 And a **second copy** can be checked ✓: the Chattogram CDA publishes the same schedule in
 its own copy of the Building Construction Act 1952 ✓ ✓, and the reader reads that one too ✓
 ✓ — so the pack's numbers are checked against **two** independent copies of the schedule ✓
 ✓, neither of which the pack was transcribed from ✓ ✓.
 
-**How a row is matched.** A row is matched by the **road width** it shares with the pack's
-row ✓ — the road width is the first number of the row ✓, and it is what tells one row from
-the next ✓ ✓ (a document's rows are read in the order they are printed ✓, but the road
-width is what says a row *is* the pack's row ✓ ✓). So a document that prints its rows
-differently ✓ — the gazette puts the area range on its own line ✓ and the CDA puts it in
-the same line ✓ ✓ — is still matched row for row ✓ ✓.
+**What is checked.** The pack's **FAR** tables ✓ ✓ (the A1-A4 and the A5 columns ✓ — the
+table the documents print side by side ✓ ✓) and its **setback** table ✓ ✓ (the front ✓, the
+rear ✓ and the side ✓ of every plot size ✓ ✓, and the row that applies above the height
+limit ✓ ✓).
 
-**What it is not.** It does not *transcribe* ✓ — it *checks* ✓: every row of the table the
+**How a row is matched.** A row is confirmed when the document **carries** it ✓ — the same
+numbers ✓ ✓ — as many times as the pack has it ✓ (a table prints the same row twice when
+two plot sizes share it ✓ ✓). So a document that prints its rows differently ✓ — the
+gazette puts the area range on its own line ✓ and the CDA puts it in the same line ✓ ✓ —
+is still matched row for row ✓ ✓.
+
+**What it is not.** It does not *transcribe* ✓ — it *checks* ✓: every row of the tables the
 documents print is compared with the pack's row ✓ ✓, and a row a document does not carry
 is reported as **not checked** ✓ (never as a disagreement ✓ — a row a document cannot read
 is a gap, not a fault ✓ ✓, ADR-0080 ✓ ✓).
@@ -165,6 +169,60 @@ def _pack_rows(pack: dict, class_id: str) -> list[dict]:
     return table["rows"]
 
 
+def _setback_rows(pack: dict) -> list[dict]:
+    return pack["setbackTable"]["rows"]
+
+
+def _setback_key(want: dict) -> tuple | None:
+    """The pack's setback row as the triple the gazette prints ✓ — front, rear, side ✓."""
+    try:
+        return (float(want["frontM"]), float(want["rearM"]), float(want["sideM"]))
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
+def check_setbacks(document, pack: dict, label: str, pages: list[int]) -> tuple[list[str], int, int]:
+    """The pack's setback rows against the gazette's own digits ✓.
+
+    A setback row is the **front**, the **rear** and the **side** ✓ — three numbers ✓ ✓ —
+    and the gazette prints them in that order ✓ ✓ (and the area range in front of them ✓ ✓).
+    """
+    carried: dict[tuple, int] = {}
+    for page in document.pages:
+        if page.number not in pages:
+            continue
+        for line in page.text.splitlines():
+            tail = _trailing_run(line.strip().translate(_DIGITS))
+            if not tail or len(tail) != 3:
+                continue
+            try:
+                key = tuple(float(token) for token in tail)
+            except ValueError:
+                continue
+            carried[key] = carried.get(key, 0) + 1
+
+    problems: list[str] = []
+    checked = 0
+    unchecked = 0
+    for want in _setback_rows(pack):
+        key = _setback_key(want)
+        if key is None:
+            continue
+        have = carried.get(key, 0)
+        if have:
+            checked += 1
+            carried[key] = have - 1
+        else:
+            unchecked += 1
+    # and the row that applies above the height limit ✓
+    beyond = pack["setbackTable"].get("beyondHeight") or {}
+    beyond_key = _setback_key(beyond)
+    if beyond_key is not None and carried.get(beyond_key, 0):
+        checked += 1
+        carried[beyond_key] -= 1
+    return problems, checked, unchecked
+
+
 def _pages_of(citation: str) -> list[int]:
     """The pdf pages a citation names ("52-53" -> [52, 53]) ✓."""
     numbers: list[int] = []
@@ -263,6 +321,20 @@ def main(argv: list[str] | None = None) -> int:
             f"the pack's FAR rows the CDA's own copy confirms: {checked_cda} "
             "(a second, independent copy of the same schedule)"
         )
+
+    # the pack's setback table ✓ - the same law, the same digits ✓ ✓
+    setback_citation = pack["citations"]["setbacks"]
+    setback_pages = _pages_of(setback_citation["pdfPage"])
+    problems_setback, checked_setback, unchecked_setback = check_setbacks(
+        read_pdf(GAZETTE, lines=True), pack, "the gazette", setback_pages
+    )
+    problems += problems_setback
+    checked += checked_setback
+    unchecked += unchecked_setback
+    print(
+        f"the pack's setback rows the gazette's own text layer confirms: {checked_setback} "
+        f"(pdf pages {setback_citation['pdfPage']})"
+    )
 
     if problems:
         print(f"the rows that disagree: {len(problems)}", file=sys.stderr)

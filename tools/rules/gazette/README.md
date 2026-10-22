@@ -32,6 +32,10 @@ digits** ✓ ✓, by script ✓, with no rendering and no human ✓ ✓:
 of the same schedule** ✓ ✓ confirms the same 34 ✓ ✓ — **68 checks, none disagreeing** ✓ ✓
 ✓.
 
+⇒ **and the pack's setback table too** ✓ ✓ — the front ✓, the rear ✓ and the side ✓ of every
+plot size ✓ ✓ (pdf pages 46-47 ✓ ✓), and the row that applies above the height limit ✓ ✓ —
+**16 more rows** ✓ ✓ ⇒ **84 checks, none disagreeing** ✓ ✓ ✓.
+
 ⇒ **A row no document carries is a gap** ✓ ✓, never a disagreement ✓ ✓ (ADR-0080 ✓ ✓) — the
 check says *not checked* ✓ and does not claim the row agrees ✓ ✓.
 

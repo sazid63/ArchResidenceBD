@@ -88,3 +88,20 @@ def test_the_far_check_runs_against_the_cached_documents() -> None:
     assert problems == []
     assert checked == 34, "the gazette's own text layer carries 34 of the pack's rows"
     assert unchecked == 0
+
+
+def test_the_setback_rows_are_checked_against_the_gazette_too() -> None:
+    """The pack's setback table — the front, the rear and the side of every plot ✓."""
+    guard = _check()
+    if not guard.GAZETTE.is_file():
+        pytest.skip("the gazette is not cached here (fetch it with the source service)")
+    import yaml
+
+    pack = yaml.safe_load(guard.PACK.read_text(encoding="utf-8"))
+    pages = guard._pages_of(pack["citations"]["setbacks"]["pdfPage"])
+    problems, checked, unchecked = guard.check_setbacks(
+        guard.read_pdf(guard.GAZETTE, lines=True), pack, "the gazette", pages
+    )
+    assert problems == []
+    assert checked == 16, "the gazette carries the pack's 15 setback rows and the one above"
+    assert unchecked == 0
