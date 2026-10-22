@@ -67,10 +67,16 @@ def test_the_far_check_agrees_with_the_pack_and_reports_the_gaps() -> None:
     """A row the document carries is checked ✓; a row it does not carry is a gap ✓."""
     guard = _check()
     want = {"roadWidthM": 6.0, "far": 3.15, "mgcPercent": 67.5}
-    assert guard._agrees(want, (6.0, 3.15, 67.5))
-    assert not guard._agrees(want, (6.0, 3.35, 65.0))
-    assert guard._agrees({"roadWidthM": 18.0, "far": "NR", "mgcPercent": 50.0},
-                         (18.0, "NR", 50.0))
+    assert guard._key(want) == (6.0, 3.15, 67.5)
+    # a row the document does not carry has no key of its own to match against ✓
+    assert guard._key({"far": 3.15}) is None
+    # the "NR" the gazette writes is a value of its own ✓
+    assert guard._key({"roadWidthM": 18.0, "far": "NR", "mgcPercent": 50.0}) == (
+        18.0,
+        "NR",
+        50.0,
+    )
+    assert guard._value("NR**") == "NR"
 
 
 def test_the_far_check_runs_against_the_cached_documents() -> None:
@@ -81,13 +87,12 @@ def test_the_far_check_runs_against_the_cached_documents() -> None:
     import yaml
 
     pack = yaml.safe_load(guard.PACK.read_text(encoding="utf-8"))
-    pages = guard._pages_of(pack["citations"]["far-3ka"]["pdfPage"])
-    problems, checked, unchecked = guard.check(
-        guard.read_pdf(guard.GAZETTE, lines=True), pack, "the gazette", pages
+    problems, checked, unchecked = guard.check_far(
+        guard.read_pdf(guard.GAZETTE, lines=True), pack, "the gazette", []
     )
     assert problems == []
-    assert checked == 34, "the gazette's own text layer carries 34 of the pack's rows"
-    assert unchecked == 0
+    assert checked == 152, "the gazette's own text layer carries 152 of the pack's FAR rows"
+    assert unchecked == 2, "two rows the gazette prints one number per line - a gap"
 
 
 def test_the_setback_rows_are_checked_against_the_gazette_too() -> None:
@@ -105,3 +110,23 @@ def test_the_setback_rows_are_checked_against_the_gazette_too() -> None:
     assert problems == []
     assert checked == 16, "the gazette carries the pack's 15 setback rows and the one above"
     assert unchecked == 0
+
+
+def test_the_cdas_copy_is_checked_on_its_own_page_map() -> None:
+    """The CDA's copy prints the schedule on its own pages — read from its class labels ✓."""
+    guard = _check()
+    if not guard.CDA.is_file():
+        pytest.skip("the CDA's copy is not cached here (fetch it with the source service)")
+    import yaml
+
+    pack = yaml.safe_load(guard.PACK.read_text(encoding="utf-8"))
+    cda = guard.read_pdf(guard.CDA, lines=True)
+    pages_by_citation = guard._cda_pages_by_citation(cda)
+    # every table's page is found ✓ - the map is read, not assumed ✓ ✓
+    for cite in guard._CDA_CLASS_LABELS:
+        assert pages_by_citation[cite], f"the CDA's copy has no page for {cite}"
+    problems, checked, unchecked = guard.check_far_on_pages(
+        cda, pack, "the CDA's copy", pages_by_citation
+    )
+    assert problems == []
+    assert checked == 143, "the CDA's own copy carries 143 of the pack's FAR rows"

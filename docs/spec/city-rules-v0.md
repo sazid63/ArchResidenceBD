@@ -72,9 +72,11 @@ The agent went back to the documents ✓ ✓ — and the record changed ✓ ✓:
   **gazette's own digits** ✓ ✓ — a second, independent copy ✓ ✓ (ADR-0082 ✓ ✓).
   ⇒ **the Chattogram FAR is the national FAR** ✓ ✓ - the CDA's copy carries the national
   table ✓ ✓ - so the city needs no pack of its own for it ✓ ✓, and the fallback is not a
-  gap here ✓ ✓ but the **rule itself** ✓ ✓. The pack's **setback** table is checked the
-  same way ✓ ✓ (16 rows ✓ ✓) - so the numbers the app turns on are machine-verified against
-  the source ✓ ✓ ✓. What the CDA's copy does **not** settle is the
+  gap here ✓ ✓ but the **rule itself** ✓ ✓. And the pack's **own** FAR and **setback**
+  tables are now checked against the source's digits ✓ ✓ - **311 checks** ✓ ✓ (the gazette
+  confirms **152** FAR rows ✓ ✓ and the CDA's copy **143** ✓ ✓, and the gazette confirms
+  the **16** setback rows ✓ ✓), **none disagreeing** ✓ ✓ - so the numbers the app turns on
+  are machine-verified against the source ✓ ✓ ✓ (ADR-0082 ✓ ✓). What the CDA's copy does **not** settle is the
   chart's **headings** ✓ ✓ (the Bangla words that say which column is which ✓ ✓) - so the
   **pack's** rows stay as they are ✓ ✓ (a human's read of the rendered pages ✓ ✓), and the
   numbers are now **machine-checked** against the source ✓ ✓ (ADR-0082 ✓ ✓).

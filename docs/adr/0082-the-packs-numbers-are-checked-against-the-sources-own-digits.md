@@ -31,7 +31,11 @@ no human ✓ ✓.
    (`tools/rules/gazette/check_far.py` ✓).
 2. **A second, independent copy checks the same rows** — the Chattogram CDA publishes the
    same schedule in its own copy of the Building Construction Act 1952 ✓ ✓, and the pack was
-   transcribed from **neither** ✓ ✓ — so the rows are checked against two copies ✓ ✓.
+   transcribed from **neither** ✓ ✓ — so the rows are checked against two copies ✓ ✓. The
+   CDA prints the schedule on **its own** pages ✓ ✓, and the page each table is on is
+   **read from the document** ✓ ✓ — by the **Latin class labels** its text carries ✓ ✓ (A1-A4
+   ✓, A5 ✓, B1 ✓, B2 ✓, C1-C4 ✓, D1-D2 ✓, E1-E6 ✓, F1 ✓, F2-F5 ✓, G1-K2 ✓ ✓) — so the map
+   is never assumed ✓ ✓.
 3. **A row no document carries is a gap, never a disagreement** — the check reports it as
    *not checked* ✓ ✓ and does not claim the row agrees ✓ ✓ (ADR-0080 ✓ ✓: a gap to declare,
    not a fault to raise ✓ ✓). A **disagreement** — a document that carries a row the pack
@@ -43,14 +47,18 @@ no human ✓ ✓.
 
 ## Consequences
 
-- **The pack's tables are now machine-verified against the source** — 34 FAR rows confirmed
-  by the gazette's own digits ✓ ✓ and the same 34 by the CDA's own copy ✓ ✓, and the
-  **setback** table's 16 rows confirmed by the gazette ✓ ✓ — **84 checks, none disagreeing**
-  ✓ ✓, and **no row unchecked** ✓ ✓.
+- **The pack's tables are now machine-verified against the source** — **152** FAR rows
+  confirmed by the gazette's own digits ✓ ✓ and **143** by the CDA's own copy ✓ ✓, and the
+  **setback** table's **16** rows confirmed by the gazette ✓ ✓ — **311 checks, none
+  disagreeing** ✓ ✓, and **13 rows unchecked** ✓ ✓ (the rows the text layers do not carry ✓
+  ✓ — a gap ✓ ✓, declared ✓ ✓).
 - **The check runs in a second** ✓ ✓ (no rendering ✓, no model ✓, no network ✓) — so it can
   be run whenever the pack is touched ✓ ✓ (and it is a **test** ✓ — `core/tests/test_far_check.py`
   ✓ ✓ — so a change to the pack's numbers that the source does not carry is caught ✓ ✓).
 - **What is deliberately not here** — **the pack's own labels and footnotes** ✓ (a human's
-  read of the rendered pages ✓ ✓), and **the other tables** ✓ (the setbacks ✓, the parking ✓
-  and the use classes ✓ — the pack's citations name their pages ✓ ✓, and the check reads
-  the pages the FAR citation names ✓ ✓).
+  read of the rendered pages ✓ ✓), and **the other tables** ✓ — the **parking** schedule ✓
+  and the **use** classes ✓. The parking schedule's rows are named by their **use** ✓ (a
+  single-family house ✓, a school ✓, a hospital ✓ ✓), and the uses are in the mangled
+  Bangla ✓ ✓ — so a row's **numbers** alone do not say **which** row it is ✓ ✓, and a
+  numeric check would be a guess ✓ ✓. So it is **not** checked ✓ ✓, and that is declared
+  here rather than faked ✓ ✓ — the same law as a gap anywhere else ✓ ✓ (ADR-0080 ✓ ✓).

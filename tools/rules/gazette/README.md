@@ -27,17 +27,23 @@ digits** ✓ ✓, by script ✓, with no rendering and no human ✓ ✓:
 
     uv run --directory core python ../tools/rules/gazette/check_far.py
 
-⇒ **the gazette's own text layer confirms 34 of the pack's FAR rows** ✓ ✓ (pdf pages 52-53 ✓
-✓ — the whole of table 3(ka) ✓, the A1-A4 and the A5 columns ✓ ✓), and the **CDA's own copy
-of the same schedule** ✓ ✓ confirms the same 34 ✓ ✓ — **68 checks, none disagreeing** ✓ ✓
-✓.
+⇒ **the gazette's own text layer confirms 152 of the pack's FAR rows** ✓ ✓ (every table ✓ —
+3(ka) ✓, 3(kha) ✓, 3(ga) ✓, 3(gha) ✓, 3(nga) ✓, 3(cha) ✓ ✓), and the **CDA's own copy of
+the same schedule** ✓ ✓ confirms **143** ✓ ✓ — **295 checks on the FAR tables, none
+disagreeing** ✓ ✓ ✓.
 
 ⇒ **and the pack's setback table too** ✓ ✓ — the front ✓, the rear ✓ and the side ✓ of every
 plot size ✓ ✓ (pdf pages 46-47 ✓ ✓), and the row that applies above the height limit ✓ ✓ —
-**16 more rows** ✓ ✓ ⇒ **84 checks, none disagreeing** ✓ ✓ ✓.
+**16 more rows** ✓ ✓ ⇒ **311 checks, none disagreeing** ✓ ✓ ✓, and **13 rows unchecked** ✓
+✓ (the rows the text layers do not carry ✓ ✓ — a gap ✓ ✓, declared ✓ ✓).
 
 ⇒ **A row no document carries is a gap** ✓ ✓, never a disagreement ✓ ✓ (ADR-0080 ✓ ✓) — the
 check says *not checked* ✓ and does not claim the row agrees ✓ ✓.
+
+⇒ **The parking schedule is not checked** ✓ ✓ — its rows are named by their **use** ✓ (a
+single-family house ✓, a school ✓ ✓) and the uses are in the mangled Bangla ✓ ✓, so the
+numbers alone do not say which row is which ✓ ✓ — and a numeric check that guessed would
+be worse than none ✓ ✓ ✓.
 
 ## Tools
 
