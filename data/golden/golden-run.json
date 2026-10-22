@@ -1,0 +1,53 @@
+{
+  "boq": {
+    "lines": 11,
+    "pricedFrom": {
+      "cardId": "pwd-sor-2022-civil-works",
+      "effectiveFrom": "2023-02-23",
+      "region": "dhaka",
+      "status": "candidate"
+    },
+    "totals": {
+      "amountBdt": 66374.74,
+      "pricedLines": 8,
+      "unpricedLines": [
+        "excavation",
+        "formwork-foundation",
+        "formwork-floor"
+      ]
+    }
+  },
+  "bundle": {
+    "files": 64,
+    "specSha256": "668858bcca1aa675c4d07c621d53514e436a6435425797ffac47a551d6e9290c"
+  },
+  "checks": {
+    "the card says what it is": true,
+    "the design carries its assumptions": true,
+    "the handover is written": true,
+    "the interview lands on the golden project": true,
+    "the money adds up": true
+  },
+  "design": {
+    "assumptions": [
+      "asm-soil-default",
+      "asm-material-prices",
+      "asm-soil-has-report"
+    ],
+    "counts": {
+      "assumptions": 3,
+      "stages": 9,
+      "typicalFloors": 1
+    }
+  },
+  "interview": {
+    "defaulted": 0,
+    "questions": 62
+  },
+  "project": {
+    "id": "3f2a1b4c-5d6e-4f7a-8b9c-0d1e2f3a4b5c",
+    "name": "Mirpur Golden House",
+    "revisions": 63,
+    "storeys": 2
+  }
+}

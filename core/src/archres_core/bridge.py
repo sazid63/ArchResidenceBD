@@ -157,6 +157,7 @@ class Bridge:
             "templates.list": self._templates_list,
             "project.create": self._project_create,
             "boq.build": self._boq_build,
+            "design.run": self._design_run,
             "import.candidates": self._import_candidates,
             "import.review": self._import_review,
             "documents.list": self._documents_list,
@@ -219,9 +220,14 @@ class Bridge:
         return {"turn": turn.to_dict(), **self._state(session)}
 
     def _session_finish(self, params: dict[str, Any]) -> dict[str, Any]:
+        """Close the interview ✓ — the fallbacks applied ✓, one revision committed ✓ ✓."""
         session = self._session(params)
-        turn = session.finish()
-        return {"turn": turn.to_dict(), **self._state(session)}
+        turns = session.finish()
+        return {
+            "turns": [turn.to_dict() for turn in turns],
+            "turnCount": len(turns),
+            **self._state(session),
+        }
 
     def _session_commit(self, params: dict[str, Any]) -> dict[str, Any]:
         session = self._session(params)
@@ -596,6 +602,58 @@ class Bridge:
             "created": str(document.get("created") or ""),
             "groups": {key: sorted(value) for key, value in sorted(groups.items())},
             "count": len(parts),
+        }
+
+    def _design_run(self, params: dict[str, Any]) -> dict[str, Any]:
+        """The project's design ✓ — every part it covers ✓, in the pipeline's order ✓ ✓.
+
+        The **design** is the core's ✓ (the same call the walking skeleton makes ✓ — one
+        implementation ✓ ✓) ✓, and the answer carries the **assumptions** ✓ the design made ✓
+        — because an assumed number ✓ that is not visible ✓ is a number nobody can check ✓ ✓.
+        """
+        from .design import design_project
+
+        project = params.get("project")
+        if not isinstance(project, str) or not project:
+            raise BridgeError(CODE_INVALID_PARAMS, "design.run needs the project folder")
+        try:
+            store = SpecStore(project)
+            spec = store.load(store.tip().sha256)
+        except Exception as exc:
+            raise BridgeError(CODE_INVALID_PARAMS, f"the project cannot be read: {exc}") from exc
+
+        try:
+            design = design_project(spec)
+        except Exception as exc:
+            raise BridgeError(CODE_INTERNAL, f"the design could not be made: {exc}") from exc
+
+        # the **assumptions** travel with the design ✓ - an assumed number ✓ that is not
+        # visible ✓ is a number nobody can check ✓ ✓ (the spec carries them ✓ ✓)
+        assumptions = []
+        for item in spec.get("assumptions") or []:
+            if isinstance(item, dict):
+                assumptions.append(
+                    {
+                        "id": str(item.get("id") or ""),
+                        "subject": str(item.get("subject") or ""),
+                        "statement": str(item.get("statement") or ""),
+                        "basis": str(item.get("basis") or ""),
+                        "verifyOnSite": bool(item.get("verifyOnSite")),
+                        "relatedPath": str(item.get("relatedPath") or ""),
+                    }
+                )
+        return {
+            "projectId": design.project_id,
+            "projectName": design.project_name,
+            "assumptions": assumptions,
+            "storeys": int(
+                ((spec.get("building") or {}).get("storeys") or {}).get("count") or 0
+            ),
+            "counts": {
+                "assumptions": len(assumptions),
+                "typicalFloors": len(design.floors or ()),
+                "stages": len(design.stages or ()),
+            },
         }
 
     def _import_candidates(self, params: dict[str, Any]) -> dict[str, Any]:
