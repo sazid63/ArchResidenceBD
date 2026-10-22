@@ -61,6 +61,120 @@ sources:
     cacheTtlDays: 180
     notes: "Domain did not resolve from the build machine on 2026-10-18 (transport error) - confirm from a browser before first use. Nothing enters a rule pack until the pinned copy exists."
 
+  - id: chattogram-cda-building-rules
+    dataTypes:
+    - rule-source
+    status: candidate
+    authority: Chattogram Development Authority (CDA)
+    title:
+      bn: চট্টগ্রাম উন্নয়ন কর্তৃপক্ষের ইমারত নির্মাণ বিধিমালা
+      en: Chattogram Development Authority building rules
+    kind: pdf-document
+    url: http://cda.gov.bd/download/rulesand%20regulations/Imarat%20Nirman%20niyomaboli.pdf
+    language:
+    - bn
+    licence: Government publication; confirm the reuse terms before extraction.
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: >-
+        Fetch the rule book, hash it, and transcribe it into a new city pack (ADR-0003) - the
+        RAJUK pack (spec/rules/rajuk-2008.yaml) is the template. The document is a scan, so
+        the transcription is a human read (or OCR - a new dependency, and the owner call).
+    cadence: static
+    notes: >-
+      Found 2026-10-22 (the owner asked the agent to find the rules for each city and to
+      fall back to the national rules where one is not found). The rule book is a scan with no
+      text layer, so the repo PDF reader cannot transcribe it - a human read, or OCR (a new
+      dependency, and the owner call). Until then the city pack falls back to the national
+      rules (rajuk@2008.1) and says so. The FAR chart is at
+      http://www.cda.gov.bd/download/far.pdf (also a scan).
+
+  - id: khulna-kda-building-rules
+    dataTypes:
+    - rule-source
+    status: candidate
+    authority: Khulna Development Authority (KDA)
+    title:
+      bn: খুলনা উন্নয়ন কর্তৃপক্ষের ইমারত নির্মাণ বিধিমালা
+      en: Khulna Development Authority building rules
+    kind: pdf-document
+    url: http://www.kda.gov.bd/wp-content/uploads/2018/03/KDA-Law.pdf
+    language:
+    - bn
+    licence: Government publication; confirm the reuse terms before extraction.
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: >-
+        Fetch the rule book, hash it, and transcribe it into a new city pack (ADR-0003) - the
+        RAJUK pack (spec/rules/rajuk-2008.yaml) is the template. The document is a scan, so
+        the transcription is a human read (or OCR - a new dependency, and the owner call).
+    cadence: static
+    notes: >-
+      Found 2026-10-22 (the owner asked the agent to find the rules for each city and to
+      fall back to the national rules where one is not found). The rule book is a scan with no
+      text layer, so the repo PDF reader cannot transcribe it - a human read, or OCR (a new
+      dependency, and the owner call). Until then the city pack falls back to the national
+      rules (rajuk@2008.1) and says so.
+
+  - id: sylhet-sda-building-rules-1996
+    dataTypes:
+    - rule-source
+    status: candidate
+    authority: Sylhet Development Authority (SDA)
+    title:
+      bn: সিলেট উন্নয়ন কর্তৃপক্ষের ইমারত নির্মাণ বিধিমালা ১৯৯৬
+      en: Sylhet Development Authority Building Construction Rules, 1996
+    kind: pdf-document
+    url: https://sda.gov.bd/pages/files/6aa140ea324bbd742446e281
+    language:
+    - bn
+    licence: Government publication; confirm the reuse terms before extraction.
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: >-
+        Fetch the rule book, hash it, and transcribe it into a new city pack (ADR-0003) - the
+        RAJUK pack (spec/rules/rajuk-2008.yaml) is the template. The document is a scan, so
+        the transcription is a human read (or OCR - a new dependency, and the owner call).
+    cadence: static
+    notes: >-
+      Found 2026-10-22 (the owner asked the agent to find the rules for each city and to
+      fall back to the national rules where one is not found). The Building Construction Rules
+      1996 are on the authority laws page, with BNBC 2020, the SDA Act 2023 and the Real
+      Estate Development and Management Rules 2011 beside them. The document is a scan with no
+      text layer, so the repo PDF reader cannot transcribe it - a human read, or OCR (a new
+      dependency, and the owner call). Until then the city pack falls back to the national
+      rules (rajuk@2008.1) and says so.
+
+  - id: rajshahi-rda-building-rules
+    dataTypes:
+    - rule-source
+    status: candidate
+    authority: Rajshahi Development Authority (RDA)
+    title:
+      bn: রাজশাহী উন্নয়ন কর্তৃপক্ষের ইমারত নির্মাণ বিধিমালা
+      en: Rajshahi Development Authority building rules
+    kind: manual-entry
+    language:
+    - bn
+    licence: Government publication; confirm the reuse terms before extraction.
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: >-
+        Obtain the authority rule book by hand (it is not on the site and no archived copy
+        was found), hash it, and transcribe it into a new city pack (ADR-0003) - the RAJUK
+        pack (spec/rules/rajuk-2008.yaml) is the template.
+    cadence: ad-hoc
+    notes: >-
+      NOT FOUND 2026-10-22 (the owner asked the agent to find the rules for each city and to
+      fall back to the national rules where one is not found). The authority site did not
+      resolve from the build machine and no archived copy of its rules was found, so this
+      city pack falls back to the national rules (rajuk@2008.1) and says so. The URL, when it
+      is found, goes here.
+
   - id: city-authority-rules
     dataTypes: [rule-source]
     status: candidate
