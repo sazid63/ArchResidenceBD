@@ -4,7 +4,11 @@ Status: **v0** (prototype). Source of truth: `app/src/theme/tokens.css` (CSS var
 
 ## Law
 
-- **No sharp edges anywhere.** Every surface, control, image frame and panel is rounded. `border-radius: 0` never appears in our UI. Minimum radius: `--r-sm` (8px).
+- **No sharp edges anywhere.** Every surface, control, image frame and panel is rounded. `border-radius: 0` ne
+  **And it is measured** ✓ ✓ — the UI guard holds it ✓ ✓ — a `border-radius`
+  written outside these tokens is a problem ✓ ✓ · the same way a colour outside them
+  is ✓ ✓ · so the plan's UI review gate (*"soft theme; no sharp edges"*) cannot lapse
+  ✓ ✓ ✓ (ADR-0085 ✓ ✓) ✓ ✓.ver appears in our UI. Minimum radius: `--r-sm` (8px).
 - Soft warm palette — never pure white/black, never harsh shadows.
 - Meaning-coded color: phase kinds, statuses and cost types get one pastel each, used consistently across sidebar, badges, chips, dots and charts.
 - Honest boundaries: exported deliverables (Excel BOQ, CAD drawings) keep professional industry standards — this theme governs the app UI.

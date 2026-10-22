@@ -31,6 +31,7 @@ from archres_core.install import (
     ManifestError,
     apply_plan,
     install_plan,
+    probe_install,
 )
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -299,6 +300,20 @@ def test_the_install_carries_the_model_runner(
     assert (
         install / INSTALL_LAYOUT["models"] / "fleet.json"
     ).is_file(), "the fleet's config is not in the install"
+
+def test_the_install_probe_asks_the_app_questions(
+    tmp_path: pathlib.Path, install_manifest
+) -> None:
+    """One probe ✓ ✓ — the installer's own check asks it ✓ ✓ and this test
+    asks it ✓ ✓ · so the two cannot drift apart ✓ ✓ ✓.
+
+    The probe is the **app's** questions ✓ ✓ — the templates ✓ ✓, a project
+    ✓ ✓, the interview ✓ ✓, the manual ✓ ✓ and the money ✓ ✓ · not
+    a ping ✓ ✓ · for a ping does not need the app's data ✓ ✓ ✓.
+    """
+    install = _install(tmp_path, install_manifest)
+    problems = probe_install(install)
+    assert problems == [], problems
 
 def test_the_models_are_bundled_with_the_app(
     tmp_path: pathlib.Path, install_manifest

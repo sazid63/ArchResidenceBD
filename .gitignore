@@ -27,6 +27,8 @@ data/downloads/
 data/install/
 data/import/
 data/spikes/
+# the app's own projects (the user's data - the dev tree's are transient)
+projects/
 data/tmp/
 models/checkpoints/
 # Teacher output is unverified (candidates); the scripted dataset is committed.

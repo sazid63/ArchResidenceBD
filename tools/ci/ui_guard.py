@@ -11,7 +11,10 @@ measured is a candidate ✓ ✓). So this guard checks three things ✓:
 3. **a label that is still English in the Bangla dictionary** is either a **named
    exception** ✓ (with a reason ✓ — "BOQ" and the product's own name are the same in both
    languages ✓ ✓) or a **gap** ✓ — and the named list is the review record ✓, so it cannot
-   grow silently ✓ ✓.
+   grow silently ✓ ✓;
+4. **the radii** ✓ — every corner is rounded ✓ and by the theme's tokens ✓ ✓ — because
+   the plan's UI review gate says *"soft theme; no sharp edges"* ✓ ✓ and a radius written
+   outside the tokens is a place the theme does not reach ✓ ✓ ✓.
 
 Run from the repo root:  python tools/ci/ui_guard.py
 """
@@ -30,6 +33,9 @@ THEME_DIRS = ("theme",)
 
 #: A colour literal ✓ — hex ✓, rgb ✓ and hsl ✓ ✓.
 COLOUR = re.compile(r"#[0-9a-fA-F]{3,8}\b|\brgba?\s*\(|\bhsla?\s*\(")
+#: A radius written **outside** the theme's tokens ✓ — the plan's UI gate says "no
+#: sharp edges" ✓ — and the tokens hold the soft ones ✓ ✓.
+RADIUS = re.compile(r"border-radius\s*:\s*([^;}]+)")
 
 #: The app's own files ✓ (the theme's excluded ✓) ✓.
 def _app_files() -> list[pathlib.Path]:
@@ -98,6 +104,22 @@ def main() -> int:
                     f"{line.strip()[:80]}"
                 )
 
+    # 1b. the theme's radii: every corner is rounded, and by the tokens ✓ ✓
+    for path in _app_files():
+        if path.suffix != ".css":
+            continue
+        text = path.read_text(encoding="utf-8")
+        for number, line in enumerate(text.splitlines(), start=1):
+            for match in RADIUS.finditer(line):
+                value = match.group(1).strip()
+                if value.startswith("var(--r-"):
+                    continue
+                relative = path.relative_to(ROOT).as_posix()
+                problems.append(
+                    f"{relative}:{number}: a radius is written outside the theme's tokens: "
+                    f"{value[:60]}"
+                )
+
     # 2. and 3. the i18n ✓
     english, bangla = _labels()
     if not english:
@@ -125,7 +147,7 @@ def main() -> int:
         return 1
     print(
         f"ui guard clean - {len(english)} label(s) in both languages, "
-        f"{len(IDENTICAL_LABELS)} named exception(s), no colour outside the theme"
+        f"{len(IDENTICAL_LABELS)} named exception(s), no colour or radius outside the theme"
     )
     return 0
 

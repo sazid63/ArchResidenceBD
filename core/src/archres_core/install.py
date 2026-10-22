@@ -716,6 +716,84 @@ def install_plan(
     )
 
 
+def probe_install(root: str | pathlib.Path) -> list[str]:
+    """The installed app, asked the app's questions ✓ ✓ — and what it could not do ✓ ✓.
+
+    A **ping** does not need the app's data ✓ ✓ — so a ping cannot see a missing
+    template ✓ ✓, a missing rate card ✓ ✓ or a flow book looked for in the dev
+    tree's place ✓ ✓ — so the probe asks what the app asks ✓ ✓: the templates
+    ✓ ✓, a project ✓ ✓, the interview ✓ ✓, the manual ✓ ✓ and the money
+    ✓ ✓ ✓.
+
+    **The empty list is the promise** ✓ ✓ — the installed app can do the app's work
+    ✓ ✓ — and every entry names what it could not do ✓ ✓ (never a zero —
+    never a silent nothing ✓ ✓) ✓ ✓.
+    """
+    from .bridge import Bridge
+
+    problems: list[str] = []
+    try:
+        bridge = Bridge(root=root)
+    except Exception as exc:  # pragma: no cover - the bridge's own failure
+        return [f"the installed core could not be opened: {type(exc).__name__}: {exc}"]
+
+    def ask(method: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
+        reply = bridge.handle({"id": "probe", "method": method, "params": params or {}})
+        error = reply.get("error")
+        if error:
+            raise RuntimeError(str(error.get("message") or error))
+        return reply.get("result") or {}
+
+    # the templates ✓ ✓ — the app's starting points ✓ ✓
+    try:
+        templates = ask("templates.list")
+        if not templates.get("count"):
+            problems.append("the installed app has no template to start a project from")
+    except Exception as exc:
+        problems.append(f"the templates could not be read: {exc}")
+
+    # a project ✓ ✓ and the interview ✓ ✓
+    project = ""
+    try:
+        created = ask("project.create", {"name": "Install Probe"})
+        project = str(created.get("path") or "")
+        if not created.get("prompt", {}).get("ask"):
+            problems.append("the interview did not open")
+    except Exception as exc:
+        problems.append(f"a project could not be started: {exc}")
+
+    if project:
+        try:
+            resumed = ask("session.resume", {"root": project, "sessionId": "probe"})
+            if not resumed.get("prompt", {}).get("ask"):
+                problems.append("the interview could not be resumed")
+        except Exception as exc:
+            problems.append(f"the interview could not be resumed: {exc}")
+
+    # the manual ✓ ✓
+    try:
+        manual = ask("manual.search", {"query": "setback"})
+        if not manual.get("answers"):
+            problems.append("the manual came out empty")
+    except Exception as exc:
+        problems.append(f"the manual could not be searched: {exc}")
+
+    # the money ✓ ✓ — a project that is already filled in ✓ ✓
+    try:
+        filled = ask(
+            "project.create",
+            {"name": "Install Money Probe", "template": "two-storey-residential"},
+        )
+        boq = ask("boq.build", {"project": filled.get("path")})
+        card = (boq.get("boq") or {}).get("rateCard") or {}
+        if not card.get("cardId"):
+            problems.append("the BOQ does not say which card priced it")
+    except Exception as exc:
+        problems.append(f"the BOQ could not be built: {exc}")
+
+    return problems
+
+
 def apply_plan(plan: InstallPlan, root: str | pathlib.Path | None = None) -> list[str]:
     """Do the plan ✓: make the folders ✓, copy what is here ✓, write the notices ✓.
 

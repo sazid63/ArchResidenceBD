@@ -25,6 +25,7 @@ from archres_core.install import (
     INSTALL_LAYOUT,
     apply_plan,
     install_plan,
+    probe_install,
     the_manifest,
 )
 from archres_core.stdio import utf8_stdio
@@ -49,7 +50,15 @@ def _print_plan(plan) -> None:
     if plan.missing:
         print(f"  MISSING: {', '.join(plan.missing)}")
     else:
-        print("  nothing is missing - the install is complete")
+        # the honest wording ✓ ✓ — "every piece this machine carries" ✓ ✓ — and
+        # the shell is named ✓ ✓ — the **build's** ✓ ✓ — because a plan that
+        # claims completeness while the one thing the user clicks is absent ✓ ✓ is a
+        # plan that lies ✓ ✓ ✓
+        print("  nothing is missing - every piece this machine carries is here")
+        print(
+            f"  the shell ({INSTALL_LAYOUT['shell']}) is the **build's** — it is not copied"
+            " here, and the check below asks for it"
+        )
 
 
 def _check(root: pathlib.Path) -> int:
@@ -74,6 +83,14 @@ def _check(root: pathlib.Path) -> int:
             continue
         if not target.exists():
             problems.append(f"{part.id} is missing ({part.path})")
+
+    # the installed app must be able to do the app's work ✓ ✓ — the templates ✓ ✓, a
+    # project ✓ ✓, the interview ✓ ✓, the manual ✓ ✓ and the money ✓ ✓ — one
+    # probe ✓ ✓ (the core's own ✓ ✓ — the same one the repo's test asks ✓ ✓) ✓ ✓
+    for problem in probe_install(root):
+        problems.append(f"the installed app: {problem}")
+    if not problems:
+        print("  the installed app can do the app's work")
 
     # the installed core must answer ✓ — the same proof the layout test gives ✓ ✓
     core_data = root / INSTALL_LAYOUT["coreData"]
