@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import pathlib
 from dataclasses import dataclass, field
 from typing import Any, Iterable, Sequence
@@ -68,6 +69,12 @@ INSTALL_LAYOUT = {
     # the app's own **data** ✓ ✓ — the user's own decisions ✓ ✓ (the review
     # ledger ✓ ✓ — ADR-0083 ✓ ✓) ✓ ✓
     "data": "data",
+    # the **model runner** ✓ ✓ — the app's own AI runtime ✓ ✓ (the plan's
+    # §0: the app contains its own AI runners ✓ ✓) ✓ ✓ — the fleet's own config
+    # names it ✓ ✓ (`bin/llama/llama-server.exe` ✓ ✓) and the demo's own pattern
+    # puts the router beside it ✓ ✓ (`bin/llama-swap/llama-swap.exe` ✓ ✓) ✓ ✓
+    "llama": "bin/llama",
+    "llamaSwap": "bin/llama-swap",
 }
 
 
@@ -315,6 +322,20 @@ def the_manifest() -> InstallManifest:
             tier="cpu",
             path=INSTALL_LAYOUT["packs"],
         ),
+        ManifestPart(
+            id="llama",
+            role="The model runner (llama.cpp - the app's own AI runtime)",
+            licence="MIT",
+            tier="cpu",
+            path=INSTALL_LAYOUT["llama"],
+        ),
+        ManifestPart(
+            id="llama-swap",
+            role="The fleet manager (llama-swap - it swaps the models in and out)",
+            licence="MIT",
+            tier="cpu",
+            path=INSTALL_LAYOUT["llamaSwap"],
+        ),
     ]
     # the model pack: the **registry** already knows each artifact's hash and size ✓, and
     # the base model's licence ✓ (the card and the publish recipe agree ✓)
@@ -461,6 +482,25 @@ def _core_version() -> str:
         return ""
 
 
+#: Where the build machine keeps the model runner ✓ — the env var wins ✓ — and
+#: the default is the download cache ✓ — the same place the models come from ✓ ✓.
+LLAMA_HOME_ENV = "ARCHRES_LLAMA_HOME"
+
+
+def llama_home() -> pathlib.Path | None:
+    """The model runner's folder ✓ — the `bin` folder with `llama/` and `llama-swap/` ✓ ✓.
+
+    `None` when there is none ✓ — and then the install says so ✓ (it names what is
+    missing ✓ ✓), rather than shipping a folder with no runner ✓ ✓.
+    """
+    override = os.environ.get(LLAMA_HOME_ENV)
+    if override:
+        folder = pathlib.Path(override)
+        return folder if folder.is_dir() else None
+    cached = pathlib.Path(__file__).resolve().parents[3] / "data" / "downloads" / "s2" / "bin"
+    return cached if cached.is_dir() else None
+
+
 def install_plan(
     manifest: InstallManifest,
     root: str | pathlib.Path,
@@ -525,6 +565,30 @@ def install_plan(
     # the rule packs: this machine has them ✓
     # the **model registry** ✓ — the names and the hashes of the GGUFs beside it ✓
     # — so the update check can say which models the user has ✓ ✓
+    # the **model runner** ✓ ✓ — the app's own AI runtime ✓ ✓ — so the
+    # installed app can serve the models it carries ✓ ✓ — and the fleet's config
+    # names the place ✓ ✓ (`bin/llama/` ✓ ✓) and the router's ✓ ✓
+    # (`bin/llama-swap/` ✓ ✓) ✓ ✓
+    runner_home = llama_home()
+    if runner_home is None:
+        missing.append("model-runner")
+    else:
+        for name, key in (("llama", "llama"), ("llama-swap", "llamaSwap")):
+            runner_source = runner_home / name
+            if runner_source.is_dir():
+                copies.append((str(runner_source), INSTALL_LAYOUT[key]))
+            else:
+                missing.append(f"bin-{name}")
+
+    # the **fleet's config** ✓ ✓ — the router's policy and its modes ✓ ✓ — it
+    # travels with the models it names ✓ ✓ ✓
+    fleet_source = repo / "spec" / "models" / "fleet.json"
+    if fleet_source.is_file():
+        # the **folder** is the destination ✓ ✓ - the file lands inside it ✓ ✓
+        copies.append((str(fleet_source), INSTALL_LAYOUT["models"]))
+    else:
+        missing.append("fleet-config")
+
     registry_source = repo / "spec" / "models" / "registry.json"
     if registry_source.is_file():
         # the **folder** is the destination ✓ ✓ - the file lands beside the GGUFs it names ✓ ✓
@@ -590,7 +654,17 @@ def install_plan(
     # here ✓ (the runtime is the installer's own job ✓) ✓, and the models are **copied**
     # below ✓ ✓
     for part in manifest.parts:
-        if part.id in ("core", "packs", "licenses", "shell", "runtime", "engine"):
+        if part.id in (
+            "core",
+            "packs",
+            "licenses",
+            "shell",
+            "runtime",
+            "engine",
+            # the model runner ✓ ✓ and the fleet's config ✓ ✓ - the copies above ✓ ✓
+            "llama",
+            "llama-swap",
+        ):
             continue
         if part.id.startswith("model-"):
             continue  # bundled with the app ✓ (the copies below ✓ ✓)

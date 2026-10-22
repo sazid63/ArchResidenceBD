@@ -28,6 +28,7 @@ client — and must not have to know that any of those exist.
       flows/               the flow book (the questions the app asks)
       schemas/             the schemas the app reads at runtime
   engine/                  the bundled CAD engine (FreeCAD, LGPL-2.1 - the notices are legal text)
+  bin/                     the app's own AI runners (llama.cpp and the fleet manager)
   models/                  the model pack (the GGUFs the fleet serves)
   packs/                   the rule packs (the law the app applies)
   licenses/                the licence files the install folder must carry
@@ -152,6 +153,9 @@ not a ping ✓ ✓ — so a hole like this cannot pass again ✓ ✓.
 | the rule packs | `packs/` | `spec/rules/` |
 | the **model registry** ✓ ✓ | `models/registry.json` ✓ ✓ (beside the GGUFs it names ✓ ✓) | `spec/models/registry.json` |
 | the **app's version** ✓ ✓ | `version.json` ✓ ✓ (written by the installer ✓ ✓) | `app/src-tauri/tauri.conf.json` |
+| the **model runner** ✓ ✓ | `bin/llama/llama-server.exe` ✓ ✓ (the fleet's config names it ✓ ✓) | the build machine's `bin/llama/` ✓ ✓ |
+| the **fleet manager** ✓ ✓ | `bin/llama-swap/llama-swap.exe` ✓ ✓ (the demo's pattern names it ✓ ✓) | the build machine's `bin/llama-swap/` ✓ ✓ |
+| the **fleet's config** ✓ ✓ | `models/fleet.json` ✓ ✓ (with the models it names ✓ ✓) | `spec/models/fleet.json` ✓ ✓ |
 
 And the **update check** ✓ ✓ — the tool's own help says it reads *"the installation to read"* ✓ ✓ · so it looks in the install's places too ✓ ✓ · and the install records what it installed ✓ ✓ · the exe's version is not a file anyone can read ✓ ✓ ✓.
 
@@ -159,6 +163,14 @@ And the **engine** ✓ ✓ — the install bundles it ✓ ✓ (the geometry is t
 own ✓ ✓) · so the app must be able to find **its own** engine ✓ ✓ · and the
 discovery looks in the install's engine folder ✓ ✓ · proved in isolation ✓ ✓ ·
 the installed core answers with the engine **inside its own install** ✓ ✓ ✓.
+
+And the **model runner** ✓ ✓ — the plan's §0 says the app contains its own AI
+runners ✓ ✓ · so the runner travels with the models ✓ ✓ · the install
+carried the models ✓ ✓ (the owner's decision ✓ ✓) · and not the runner ✓ ✓
+· so the installed app had six gigabytes of models and no way to serve them ✓ ✓ · and
+the fleet's own config names the runner's place ✓ ✓ (`bin/llama/` ✓ ✓) and the demo's
+own pattern names the router's ✓ ✓ (`bin/llama-swap/` ✓ ✓) ✓ ✓ · so the
+install puts them there ✓ ✓ ✓.
 
 ## What is deliberately not here
 

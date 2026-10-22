@@ -51,6 +51,13 @@ start its first project ✓ ✓ — and could not price ✓ ✓ ✓.
    the build machine's places ✓ ✓ · so the app could not find the two gigabytes it
    carries ✓ ✓ · so the discovery looks in **the install's** engine folder ✓ ✓
    · the one the app ships with ✓ ✓ ✓.
+5. **The model runner travels with the models** ✓ ✓ — the plan's §0 says the app
+   contains its own AI runners ✓ ✓ · the install carried the **models** ✓ ✓ (the
+   owner's decision ✓ ✓) · and not the **runner** ✓ ✓ · so the installed app
+   had six gigabytes of models and no way to serve them ✓ ✓ · and the fleet's own config
+   names the runner's place ✓ ✓ (`bin/llama/` ✓ ✓) and the demo's own pattern names
+   the router's ✓ ✓ (`bin/llama-swap/` ✓ ✓) · so the install puts them there
+   ✓ ✓ ✓.
 
 ## Consequences
 

@@ -136,7 +136,10 @@ def python_home(
 
 @pytest.fixture()
 def install_manifest(
-    models_home: pathlib.Path, engine_home: pathlib.Path, python_home: pathlib.Path
+    models_home: pathlib.Path,
+    engine_home: pathlib.Path,
+    python_home: pathlib.Path,
+    llama_home: pathlib.Path,
 ) -> "InstallManifest":
     """The real manifest with the test's small models (and their real hashes)."""
     from archres_core.install import InstallManifest, ManifestPart, the_manifest
@@ -163,3 +166,21 @@ def install_manifest(
             )
         )
     return InstallManifest(parts=tuple(parts))
+
+
+@pytest.fixture()
+def llama_home(tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> pathlib.Path:
+    """A small stand-in for the build machine's **model runner**.
+
+    The real runner is 1.2 GB (the CUDA libraries with it), so a test that copied it
+    would copy 1.2 GB. The stand-in has the same **shape** - the `llama` folder with
+    `llama-server.exe` and the `llama-swap` folder with the router - which is what the
+    installer reads.
+    """
+    home = tmp_path / "bin"
+    (home / "llama").mkdir(parents=True)
+    (home / "llama" / "llama-server.exe").write_bytes(b"a small stand-in for the model runner")
+    (home / "llama-swap").mkdir()
+    (home / "llama-swap" / "llama-swap.exe").write_bytes(b"a small stand-in for the router")
+    monkeypatch.setenv("ARCHRES_LLAMA_HOME", str(home))
+    return home

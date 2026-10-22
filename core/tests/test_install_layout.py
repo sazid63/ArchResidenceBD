@@ -278,6 +278,28 @@ def test_the_install_carries_the_engine_the_app_needs(
     engine = install / INSTALL_LAYOUT["engine"] / "bin" / "freecadcmd.exe"
     assert engine.is_file(), "the engine is not in the install"
 
+def test_the_install_carries_the_model_runner(
+    tmp_path: pathlib.Path, install_manifest
+) -> None:
+    """The plan's §0: the app contains its own AI runners ✓ ✓ · so the runner travels ✓ ✓.
+
+    The install carried the **models** ✓ ✓ (the owner's decision ✓ ✓ · the user
+    downloads one thing and the models are there ✓ ✓) · and not the **runner** ✓ ✓
+    · so the installed app had six gigabytes of models and no way to serve them
+    ✓ ✓ · and the fleet's own config names the place ✓ ✓ (`bin/llama/` ✓ ✓)
+    and the router's ✓ ✓ (`bin/llama-swap/` ✓ ✓) ✓ ✓.
+    """
+    install = _install(tmp_path, install_manifest)
+    assert (
+        install / INSTALL_LAYOUT["llama"] / "llama-server.exe"
+    ).is_file(), "the model runner is not in the install"
+    assert (
+        install / INSTALL_LAYOUT["llamaSwap"] / "llama-swap.exe"
+    ).is_file(), "the fleet manager is not in the install"
+    assert (
+        install / INSTALL_LAYOUT["models"] / "fleet.json"
+    ).is_file(), "the fleet's config is not in the install"
+
 def test_the_models_are_bundled_with_the_app(
     tmp_path: pathlib.Path, install_manifest
 ) -> None:
