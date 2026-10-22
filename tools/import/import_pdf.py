@@ -21,6 +21,7 @@ from archres_core.importer import (
     candidate_document,
     candidates_from_pdf,
     load_review,
+    review_ledger_path,
     save_review,
 )
 from archres_core.stdio import utf8_stdio
@@ -64,7 +65,9 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     out = pathlib.Path(args.out) if args.out else OUT / f"{pdf.stem}.candidates.json"
-    ledger = out.with_name(out.stem + ".review.json")
+    # the ledger's home is the core's decision (ADR-0081) - so the CLI and the app read
+    # and write the same one, and a decision made in one is visible in the other.
+    ledger = review_ledger_path(pdf, data=ROOT / "data")
     reviews = list(load_review(ledger))
 
     if args.review:

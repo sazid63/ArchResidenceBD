@@ -4,12 +4,21 @@ import { ask, isDesktopShell } from "../ipc/core";
 import { useI18n } from "../i18n";
 import { Badge, Button, Callout, Card, PageHeader } from "../ui/kit";
 
+interface CandidateReview {
+  decision: "accepted" | "rejected";
+  reviewedBy: string;
+  reviewedAt: string;
+  note: string;
+}
+
 interface Candidate {
   id: string;
   number: string;
   page: number;
   excerpt: string;
   status: string;
+  /** The decision recorded on it — null when nobody has looked yet. */
+  review: CandidateReview | null;
 }
 
 /**
@@ -48,7 +57,18 @@ export function ImportReviewScreen() {
         setCandidates(null);
         return;
       }
-      setCandidates((reply.result as { candidates: Candidate[] }).candidates);
+      const rows = (reply.result as { candidates: Candidate[] }).candidates;
+      setCandidates(rows);
+      // the decisions already recorded come with the candidates (the core's ledger is
+      // the evidence) - so a reload does not lose them, and a candidate that was
+      // reviewed shows it rather than "not reviewed".
+      setReviewed(
+        Object.fromEntries(
+          rows
+            .filter((row) => row.review)
+            .map((row) => [row.id, row.review!.decision]),
+        ),
+      );
       setProblem(null);
     } catch (error) {
       setProblem(error instanceof Error ? error.message : String(error));

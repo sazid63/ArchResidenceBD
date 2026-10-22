@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import pathlib
+import tempfile
 import zlib
 
 import pytest
@@ -32,6 +33,13 @@ from archres_core.importer import (
     save_review,
 )
 from archres_core.pdf_text import PdfDocument, PdfError, PdfPage
+
+
+def _importer():
+    """The importer module (the tests below reach into it for the ledger's home)."""
+    from archres_core import importer
+
+    return importer
 
 
 def _pdf(pages: list[str]) -> bytes:
@@ -238,6 +246,64 @@ def test_the_same_number_twice_is_one_candidate() -> None:
     document = _document(["5.1 One\n5.2 Two\n5.1 One again"])
     candidates = extract_candidates(document)
     assert len({candidate.id for candidate in candidates}) == len(candidates)
+
+
+def test_the_ledger_has_one_home_and_it_is_the_apps_own() -> None:
+    """The ledger is the **evidence** \u2014 so where it lives is a decision, not an accident.
+
+    It lives in the app's own **data** folder, named for the PDF's **content** \u2014 so the
+    same book keeps its decisions wherever it is read from, and two books with the same
+    name do not share one ledger.
+    """
+    guard = _importer()
+    with tempfile.TemporaryDirectory() as workdir:
+        data = pathlib.Path(workdir) / "data"
+        books = pathlib.Path(workdir) / "the user's own folder"
+        books.mkdir(parents=True)
+        one = books / "a.pdf"
+        two = books / "b.pdf"
+        one.write_bytes(b"the same book")
+        two.write_bytes(b"a different book")
+        first = guard.review_ledger_path(one, data=data)
+        # the same bytes, wherever they are read from, find the same ledger
+        elsewhere = books / "renamed.pdf"
+        elsewhere.write_bytes(b"the same book")
+        assert guard.review_ledger_path(elsewhere, data=data) == first
+        # and two different books do not share one ledger
+        assert guard.review_ledger_path(two, data=data) != first
+        # and the ledger is in the app's own folder, not in the user's own folder
+        assert first.parent == data / "import"
+        assert first.parent != one.parent
+
+
+def test_the_candidates_carry_the_review_recorded_on_them() -> None:
+    """A candidate with a decision shows it; one without is visibly unreviewed."""
+    guard = _importer()
+    with tempfile.TemporaryDirectory() as workdir:
+        data = pathlib.Path(workdir) / "data"
+        pdf = pathlib.Path(workdir) / "book.pdf"
+        pdf.write_bytes(b"%PDF-1.4 a book")
+        document = _document(["3.15 A clause"])
+        candidates = guard.extract_candidates(document)
+        rows = guard.reviewed_candidates(pdf, candidates, data=data)
+        assert rows[0]["review"] is None, "nobody has looked at it yet"
+
+        ledger = guard.review_ledger_path(pdf, data=data)
+        guard.save_review(
+            ledger,
+            [
+                guard.Review(
+                    candidate_id=candidates[0].id,
+                    decision=guard.DECISION_ACCEPTED,
+                    reviewed_by="an engineer",
+                    reviewed_at="2026-10-22T00:00:00+06:00",
+                    note="matches the gazette",
+                )
+            ],
+        )
+        rows = guard.reviewed_candidates(pdf, candidates, data=data)
+        assert rows[0]["review"]["decision"] == guard.DECISION_ACCEPTED
+        assert rows[0]["review"]["reviewedBy"] == "an engineer"
 
 
 def test_a_human_decides_and_the_ledger_says_so() -> None:

@@ -114,6 +114,7 @@ export interface ImportCandidate {
   page: number;
   excerpt: string;
   status: "candidate";
+  /** The decision recorded on it \u2014 null when nobody has looked yet. */
   review: ImportReview | null;
 }
 

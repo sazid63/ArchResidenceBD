@@ -1,0 +1,12 @@
+{
+  "reviews": [
+    {
+      "candidateId": "clause-3-15",
+      "decision": "accepted",
+      "note": "",
+      "reviewedAt": "",
+      "reviewedBy": ""
+    }
+  ],
+  "schemaVersion": "0.1.0"
+}

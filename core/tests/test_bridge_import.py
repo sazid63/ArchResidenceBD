@@ -87,6 +87,59 @@ def test_a_reviewers_decision_is_recorded(tmp_path: pathlib.Path) -> None:
     assert document["reviews"][0]["reviewedBy"] == "an engineer"
 
 
+def test_the_decision_comes_back_with_the_candidates(tmp_path: pathlib.Path) -> None:
+    """A reload must not lose the decision ✓ — the ledger is the evidence ✓ ✓.
+
+    The app shows the candidates it read ✓, and a candidate that was reviewed shows it ✓
+    — not "not reviewed" ✓ ✓.
+    """
+    book = _book(tmp_path / "rule-book.pdf")
+    bridge = Bridge(root=ROOT)
+    bridge.handle(
+        {
+            "id": "1",
+            "method": "import.review",
+            "params": {
+                "pdf": str(book),
+                "candidateId": "clause-3-15",
+                "decision": "accepted",
+                "reviewedBy": "an engineer",
+                "reviewedAt": "2026-10-22T00:00:00+06:00",
+            },
+        }
+    )
+    reply = bridge.handle(
+        {"id": "2", "method": "import.candidates", "params": {"pdf": str(book)}}
+    )
+    rows = {row["id"]: row for row in reply["result"]["candidates"]}
+    assert rows["clause-3-15"]["review"]["decision"] == "accepted"
+    assert rows["clause-3-15"]["review"]["reviewedBy"] == "an engineer"
+    # and the ones nobody looked at are visibly unreviewed ✓
+    assert rows["clause-3-16"]["review"] is None
+
+
+def test_the_ledger_lives_in_the_apps_own_folder(tmp_path: pathlib.Path) -> None:
+    """The app must not write into the user's own folders ✓ — the ledger is the app's ✓."""
+    book = _book(tmp_path / "rule-book.pdf")
+    bridge = Bridge(root=ROOT)
+    reply = bridge.handle(
+        {
+            "id": "1",
+            "method": "import.review",
+            "params": {
+                "pdf": str(book),
+                "candidateId": "clause-3-15",
+                "decision": "accepted",
+            },
+        }
+    )
+    ledger = pathlib.Path(reply["result"]["ledger"])
+    assert ledger.parent == ROOT / "data" / "import"
+    assert ledger.parent != book.parent
+    # and nothing was written beside the user's own PDF ✓
+    assert not (tmp_path / "rule-book.pdf.review.json").exists()
+
+
 def test_a_bad_decision_is_refused(tmp_path: pathlib.Path) -> None:
     book = _book(tmp_path / "rule-book.pdf")
     reply = Bridge(root=ROOT).handle(

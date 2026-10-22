@@ -23,6 +23,7 @@ a clause means — that is the reviewer's job, with the page in front of them ·
 
 from __future__ import annotations
 
+import hashlib
 import json
 import pathlib
 import re
@@ -255,6 +256,22 @@ def _counts(rows: list[dict[str, Any]]) -> dict[str, int]:
     }
 
 
+def reviewed_candidates(
+    path: str | pathlib.Path,
+    candidates: Sequence[Candidate],
+    *,
+    data: str | pathlib.Path,
+) -> list[dict[str, Any]]:
+    """The candidates, each with the **review** recorded on it \u2014 or `None` \u2713 \u2713.
+
+    A candidate with no decision is **visibly unreviewed** \u2713 \u2713 \u2014 and a candidate
+    with one shows it \u2713 \u2713 \u2014 so the app shows the decisions it recorded \u2713 \u2713
+    (and a reload does not lose them \u2713 \u2713) \u2713.
+    """
+    ledger = review_ledger_path(path, data=data)
+    return _rows(candidates, load_review(ledger))
+
+
 def candidate_document(
     path: str | pathlib.Path,
     candidates: Sequence[Candidate],
@@ -284,6 +301,24 @@ def candidate_document(
         "counts": _counts(rows),
         "candidates": rows,
     }
+
+
+def review_ledger_path(pdf: str | pathlib.Path, *, data: str | pathlib.Path) -> pathlib.Path:
+    """Where the review ledger of a PDF lives \u2014 **one** place \u2713 \u2713.
+
+    The ledger is the **evidence** that a rule entered a pack deliberately \u2713 \u2713, so
+    where it lives is a decision, not an accident \u2713 \u2713. It lives in the core's own
+    **import** folder \u2713 \u2713 \u2014 not beside the user's PDF \u2713 (a PDF may sit in a
+    read-only folder \u2713, on a share \u2713, or anywhere else \u2713 \u2713, and the app must
+    not write into the user's own folders \u2713 \u2713) and not beside the candidate
+    document \u2713 (the CLI's \u2014 and the app's \u2014 must agree \u2713 \u2713, or a decision
+    made in one is invisible in the other \u2713 \u2713) \u2014 and it is named for the PDF's
+    **content** \u2713 (its hash \u2713 \u2713), so two different books with the same name do
+    not share one ledger \u2713 \u2713 and the same book keeps its decisions wherever it is
+    read from \u2713 \u2713.
+    """
+    digest = hashlib.sha256(pathlib.Path(pdf).read_bytes()).hexdigest()[:16]
+    return pathlib.Path(data) / "import" / f"{digest}.review.json"
 
 
 def load_review(path: str | pathlib.Path) -> list[Review]:
@@ -334,5 +369,7 @@ __all__ = [
     "candidates_from_pdf",
     "extract_candidates",
     "load_review",
+    "review_ledger_path",
+    "reviewed_candidates",
     "save_review",
 ]

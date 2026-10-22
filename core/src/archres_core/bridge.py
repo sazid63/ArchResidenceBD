@@ -663,7 +663,7 @@ class Bridge:
         ✓ ✓ — and every candidate carries its **page** ✓ (a clause without a page cannot
         be checked ✓ ✓) ✓ ✓.
         """
-        from .importer import ImporterError, candidates_from_pdf
+        from .importer import ImporterError, candidates_from_pdf, reviewed_candidates
 
         pdf = params.get("pdf")
         if not isinstance(pdf, str) or not pdf:
@@ -672,9 +672,10 @@ class Bridge:
             candidates = candidates_from_pdf(pdf)
         except ImporterError as exc:
             raise BridgeError(CODE_INVALID_PARAMS, str(exc)) from exc
+        data = (self._root or pathlib.Path(".")) / "data"
         return {
             "pdf": pdf,
-            "candidates": [candidate.as_dict() for candidate in candidates],
+            "candidates": reviewed_candidates(pdf, candidates, data=data),
             "count": len(candidates),
         }
 
@@ -691,6 +692,7 @@ class Bridge:
             Review,
             candidates_from_pdf,
             load_review,
+            review_ledger_path,
             save_review,
         )
 
@@ -713,7 +715,8 @@ class Bridge:
         if not any(candidate.id == candidate_id for candidate in candidates):
             raise BridgeError(CODE_INVALID_PARAMS, f"no candidate {candidate_id!r} in this PDF")
 
-        ledger = pathlib.Path(str(pdf) + ".review.json")
+        data = (self._root or pathlib.Path(".")) / "data"
+        ledger = review_ledger_path(pdf, data=data)
         reviews = [
             review for review in load_review(ledger) if review.candidate_id != candidate_id
         ]

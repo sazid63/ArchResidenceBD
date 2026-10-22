@@ -29,7 +29,16 @@ nothing that turned a PDF into rule data.
   without a page cannot be checked ·.
 - **A human decides, and the decision is recorded** — who, when and why. A candidate with
   no decision is visibly unreviewed (`review: null`, and the counts carry `unreviewed`), so
-  a pack cannot be built from candidates nobody looked at ·.
+  a pack cannot be built from candidates nobody looked at ·. And the ledger has **one
+  home** · — the app's own **data** folder ·, named for the PDF's **content** ·: not
+  beside the user's own PDF · (a PDF may sit in a read-only folder · or on a share ·, and
+  the app must not write into the user's folders ··) and not beside the candidate
+  document · (the CLI's and the app's must agree ··, or a decision made in one is
+  invisible in the other ··) — so the same book keeps its decisions wherever it is
+  read from ·· and two books with the same name do not share one ledger ··.
+- **The decision comes back with the candidates** · — the channel carries each
+  candidate's review · (or `null` ··) ··, so the app shows the decisions it
+  recorded ·· and a reload does not lose them ··.
 - **The reader is the core's** (`core/src/archres_core/pdf_text.py`), so the app can read a
   user's own PDF; the price transcriber and the reader's test import it the ordinary way
   now, instead of loading it by path ·.
