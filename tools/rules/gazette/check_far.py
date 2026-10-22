@@ -38,6 +38,7 @@ one when a row disagrees ✓ (a disagreement is a real fault ✓ — the pack or
 from __future__ import annotations
 
 import argparse
+import json
 import pathlib
 import re
 import sys
@@ -52,6 +53,9 @@ from archres_core.pdf_text import read_pdf  # noqa: E402
 GAZETTE = ROOT / "data" / "downloads" / "sources" / "rajuk-bidhimala-2008-gazette.pdf"
 CDA = ROOT / "data" / "downloads" / "sources" / "chattogram-building-construction-act-1952.pdf"
 PACK = ROOT / "spec" / "rules" / "rajuk-2008.yaml"
+#: The record of the check — what it confirmed, and against which documents' hashes ✓ ✓
+#: (the repo's law: the numbers are true, and they are committed ✓ ✓).
+RECORD = ROOT / "data" / "rules" / "far-check.json"
 
 #: The gazette's Bangla digits, and the Latin ones they stand for.
 _DIGITS = str.maketrans("০১২৩৪৫৬৭৮৯", "0123456789")
@@ -355,12 +359,37 @@ def check_setbacks(document, pack: dict, label: str, pages: list[int]) -> tuple[
     return problems, checked, unchecked
 
 
+def _record(checked: int, unchecked: int, gazette: str, cda: str) -> dict:
+    """The record of the check — what it confirmed, and against which bytes ✓ ✓."""
+    return {
+        "schemaVersion": "0.1.0",
+        "what": "the pack's FAR and setback rows, checked against the source's own digits",
+        "documents": {
+            "gazette": {"fileName": GAZETTE.name, "sha256": gazette},
+            "cda": {"fileName": CDA.name, "sha256": cda},
+        },
+        "counts": {"checked": checked, "unchecked": unchecked, "disagreed": 0},
+        "readAt": "2026-10-22",
+    }
+
+
+def _sha256(path: pathlib.Path) -> str:
+    import hashlib
+
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="Check the pack's FAR values against the gazette's own text layer."
     )
     parser.add_argument(
-        "--check", action="store_true", help="fail when a row disagrees (the default too)"
+        "--check",
+        action="store_true",
+        help="verify the committed record against a fresh run (the default checks too)",
+    )
+    parser.add_argument(
+        "--write", action="store_true", help="write the record of what the check confirmed"
     )
     args = parser.parse_args(argv)
 
@@ -387,9 +416,10 @@ def main(argv: list[str] | None = None) -> int:
     unchecked += unchecked_gazette
     print(f"the pack's FAR rows the gazette's own text layer confirms: {checked_gazette}")
 
+    cda_hash = ""
     if CDA.is_file():
-        # the CDA's copy prints the schedule on its own pages ✓ - the map is
-        # read from the document's own class labels ✓ ✓
+        # the CDA's copy prints the schedule on its own pages ✓ - the map is read from
+        # the document's own class labels ✓ ✓
         cda = read_pdf(CDA, lines=True)
         cda_map = _cda_pages_by_citation(cda)
         problems_cda, checked_cda, unchecked_cda = check_far_on_pages(
@@ -398,6 +428,7 @@ def main(argv: list[str] | None = None) -> int:
         problems += problems_cda
         checked += checked_cda
         unchecked += unchecked_cda
+        cda_hash = _sha256(CDA)
         print(
             f"the pack's FAR rows the CDA's own copy confirms: {checked_cda} "
             "(a second, independent copy of the same schedule)"
@@ -424,6 +455,26 @@ def main(argv: list[str] | None = None) -> int:
     if unchecked:
         print(f"the rows no document carries (not checked): {unchecked}")
     print(f"every row the documents' text layers carry agrees with the pack ({checked} rows)")
+
+    record = _record(checked, unchecked, _sha256(GAZETTE), cda_hash)
+    if args.write:
+        RECORD.parent.mkdir(parents=True, exist_ok=True)
+        RECORD.write_text(
+            json.dumps(record, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+            newline="\n",
+        )
+        print(f"wrote {RECORD.relative_to(ROOT).as_posix()}")
+        return 0
+    if args.check and RECORD.is_file():
+        committed = json.loads(RECORD.read_text(encoding="utf-8"))
+        if committed != record:
+            print(
+                f"FAIL {RECORD.relative_to(ROOT).as_posix()} is stale - run it with --write",
+                file=sys.stderr,
+            )
+            return 1
+        print(f"{RECORD.relative_to(ROOT).as_posix()} is fresh")
     return 0
 
 

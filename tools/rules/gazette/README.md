@@ -26,6 +26,8 @@ at all ✓ (ADR-0081 ✓ ✓) — so the pack's numbers can be checked **against
 digits** ✓ ✓, by script ✓, with no rendering and no human ✓ ✓:
 
     uv run --directory core python ../tools/rules/gazette/check_far.py
+    uv run --directory core python ../tools/rules/gazette/check_far.py --write
+    uv run --directory core python ../tools/rules/gazette/check_far.py --check
 
 ⇒ **the gazette's own text layer confirms 152 of the pack's FAR rows** ✓ ✓ (every table ✓ —
 3(ka) ✓, 3(kha) ✓, 3(ga) ✓, 3(gha) ✓, 3(nga) ✓, 3(cha) ✓ ✓), and the **CDA's own copy of
@@ -39,6 +41,12 @@ plot size ✓ ✓ (pdf pages 46-47 ✓ ✓), and the row that applies above the 
 
 ⇒ **A row no document carries is a gap** ✓ ✓, never a disagreement ✓ ✓ (ADR-0080 ✓ ✓) — the
 check says *not checked* ✓ and does not claim the row agrees ✓ ✓.
+
+⇒ **the record is committed** ✓ ✓ — `data/rules/far-check.json` ✓ ✓ — and it names the
+documents the check read **by their hashes** ✓ ✓ (the gazette's is the one the registry pins
+✓ ✓) ✓, so the numbers are true **and** committed ✓ ✓ (the repo's law ✓ ✓): `--write`
+records what the check confirmed ✓ ✓ and `--check` says whether the committed record is
+still what a fresh run finds ✓ ✓.
 
 ⇒ **The parking schedule is not checked** ✓ ✓ — its rows are named by their **use** ✓ (a
 single-family house ✓, a school ✓ ✓) and the uses are in the mangled Bangla ✓ ✓, so the

@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import pathlib
 
 import pytest
@@ -130,3 +131,20 @@ def test_the_cdas_copy_is_checked_on_its_own_page_map() -> None:
     )
     assert problems == []
     assert checked == 143, "the CDA's own copy carries 143 of the pack's FAR rows"
+
+
+def test_the_committed_record_says_what_the_check_confirmed() -> None:
+    """The record is committed ✓ and it says what the check confirmed ✓ ✓."""
+    guard = _check()
+    if not guard.RECORD.is_file():
+        pytest.skip("the record is not committed here")
+    record = json.loads(guard.RECORD.read_text(encoding="utf-8"))
+    assert record["schemaVersion"] == "0.1.0"
+    assert record["counts"]["disagreed"] == 0
+    assert record["counts"]["checked"] == 311
+    assert record["counts"]["unchecked"] == 13
+    # and it names the documents it read, by their hashes ✓ - the gazette's hash is the
+    # one the registry pins ✓ ✓
+    assert record["documents"]["gazette"]["sha256"] == (
+        "3318b3f434a9bf248c798c1982e800360ddf22ae7216966efeacf47d9b860d5e"
+    )

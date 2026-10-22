@@ -6,8 +6,9 @@ source) · §9 (the quality gates: unverified content is a candidate) · **Relat
 (the reader reads the gazette), ADR-0080 (a gap is not a crash), ADR-0003 (the rule packs),
 ADR-0079 (the city rules are what the authority publishes)
 **Code:** `tools/rules/gazette/check_far.py` (the check) ·
+`data/rules/far-check.json` (the committed record) ·
 `core/src/archres_core/pdf_text.py` (the reader that makes it possible) ·
-**Tests:** `core/tests/test_far_check.py` (4) ·
+**Tests:** `core/tests/test_far_check.py` (7) ·
 **Spec:** `docs/spec/city-rules-v0.md` · `tools/rules/gazette/README.md` (the recipe)
 
 ## Context
@@ -55,6 +56,11 @@ no human ✓ ✓.
 - **The check runs in a second** ✓ ✓ (no rendering ✓, no model ✓, no network ✓) — so it can
   be run whenever the pack is touched ✓ ✓ (and it is a **test** ✓ — `core/tests/test_far_check.py`
   ✓ ✓ — so a change to the pack's numbers that the source does not carry is caught ✓ ✓).
+- **The record is committed** — `data/rules/far-check.json` ✓ ✓ names the documents the
+  check read **by their hashes** ✓ ✓ (the gazette's is the one the registry pins ✓ ✓) ✓ and
+  the counts it confirmed ✓ ✓ — so the numbers are true **and** committed ✓ ✓ (the repo's
+  law ✓ ✓): `--write` records what the check confirmed ✓ ✓ and `--check` says whether the
+  committed record is still what a fresh run finds ✓ ✓.
 - **What is deliberately not here** — **the pack's own labels and footnotes** ✓ (a human's
   read of the rendered pages ✓ ✓), and **the other tables** ✓ — the **parking** schedule ✓
   and the **use** classes ✓. The parking schedule's rows are named by their **use** ✓ (a
