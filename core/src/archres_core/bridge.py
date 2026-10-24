@@ -163,6 +163,8 @@ class Bridge:
             "project.create": self._project_create,
             "boq.build": self._boq_build,
             "design.run": self._design_run,
+            "compliance.evaluate": self._compliance_evaluate,
+            "compliance.acknowledge": self._compliance_acknowledge,
             "import.candidates": self._import_candidates,
             "import.review": self._import_review,
             "documents.list": self._documents_list,
@@ -684,6 +686,179 @@ class Bridge:
                 "typicalFloors": len(design.floors or ()),
                 "stages": len(design.stages or ()),
             },
+        }
+
+    def _compliance_evaluate(self, params: dict[str, Any]) -> dict[str, Any]:
+        """The project's compliance ✓ — every verdict ✓ and the register ✓ ✓.
+
+        The plan's §2: the app explains what rule is left behind ✓ — so every verdict
+        carries the rule ✓, the summary in **both** languages ✓, what was measured against
+        the limit ✓, and the nearest compliant alternative ✓ ✓ — and the register
+        carries each deviation's **risk tier** ✓ ✓ (a price override is a cost-risk
+        ✓ — it moves the project's money, never its compliance ✓) ✓ ✓.
+        """
+        from .compliance import apply_register, evaluate_spec, load_pack
+
+        project = params.get("project")
+        if not isinstance(project, str) or not project:
+            raise BridgeError(CODE_INVALID_PARAMS, "compliance.evaluate needs the project folder")
+        try:
+            store = SpecStore(project)
+            spec = store.load(store.tip().sha256)
+        except Exception as exc:
+            raise BridgeError(CODE_INVALID_PARAMS, f"the project cannot be read: {exc}") from exc
+
+        packs = self._pack_paths()
+        if not packs:
+            raise BridgeError(CODE_INVALID_PARAMS, "no rule pack is here to judge the project")
+        pack_path = packs[0]
+        try:
+            pack = load_pack(pack_path)
+            verdict_set = evaluate_spec(spec, pack, pack_path=str(pack_path))
+            # the register ✓ — the engine's own entries ✓ ✓ (in memory ✓ — the
+            # project's own revision is untouched until the user acts ✓ ✓)
+            judged = apply_register(dict(spec), verdict_set)
+        except Exception as exc:
+            raise BridgeError(CODE_INTERNAL, f"the compliance run failed: {exc}") from exc
+
+        register = judged.get("deviations") or []
+        return {
+            "summary": verdict_set.get("summary") or {},
+            "verdicts": [
+                {
+                    "ruleRef": str(verdict.get("ruleRef") or ""),
+                    "status": str(verdict.get("status") or ""),
+                    "title": verdict.get("title") or {},
+                    "summary": verdict.get("summary") or {},
+                    "measured": verdict.get("measured") or {},
+                    "limit": verdict.get("limit") or {},
+                    "alternative": verdict.get("alternative") or {},
+                    "citations": verdict.get("citations") or [],
+                }
+                for verdict in verdict_set.get("verdicts") or []
+            ],
+            "unevaluated": verdict_set.get("unevaluated") or [],
+            "register": [
+                {
+                    "id": str(entry.get("id") or ""),
+                    "ruleRef": str(entry.get("ruleRef") or ""),
+                    "ruleTitle": str(entry.get("ruleTitle") or ""),
+                    "expected": str(entry.get("expected") or ""),
+                    "actual": str(entry.get("actual") or ""),
+                    "riskTier": str(entry.get("riskTier") or ""),
+                    "rationale": str(entry.get("rationale") or ""),
+                    "acknowledged": bool(entry.get("acknowledged")),
+                    "recordedAt": str(entry.get("recordedAt") or ""),
+                    "nearestCompliantAlternative": str(
+                        entry.get("nearestCompliantAlternative") or ""
+                    ),
+                }
+                for entry in register
+            ],
+            "pack": {
+                "id": str(verdict_set.get("pack", {}).get("id") or ""),
+                "status": str(verdict_set.get("pack", {}).get("status") or ""),
+            },
+        }
+
+    def _compliance_acknowledge(self, params: dict[str, Any]) -> dict[str, Any]:
+        """Record the user's override ✓ — the rationale and the acknowledgement ✓ ✓.
+
+        The plan's §2: the user overrides ✓ — the app proceeds ✓ — and the entry
+        is **recorded** ✓ ✓ (who ✓, when ✓, why ✓) — as a revision of the
+        project's own spec ✓ ✓ (the register is the spec's ✓ ✓) ✓ ✓.
+        """
+        project = params.get("project")
+        deviation_id = params.get("deviationId")
+        if not isinstance(project, str) or not project:
+            raise BridgeError(CODE_INVALID_PARAMS, "compliance.acknowledge needs the project folder")
+        if not isinstance(deviation_id, str) or not deviation_id:
+            raise BridgeError(CODE_INVALID_PARAMS, "compliance.acknowledge needs a deviation id")
+        rationale = str(params.get("rationale") or "").strip()
+        if not rationale:
+            raise BridgeError(
+                CODE_INVALID_PARAMS, "the override needs a reason (the register carries it)"
+            )
+        try:
+            store = SpecStore(project)
+            spec = store.load(store.tip().sha256)
+        except Exception as exc:
+            raise BridgeError(CODE_INVALID_PARAMS, f"the project cannot be read: {exc}") from exc
+
+        # the **judged** spec ✓ ✓ — the engine's own entries live there ✓ ✓ (the
+        # register's sync ✓ ✓) — so the entry the user acknowledges is the one
+        # the evaluation produced ✓ ✓ ✓
+        from .compliance import apply_register, evaluate_spec, load_pack
+
+        packs = self._pack_paths()
+        if not packs:
+            raise BridgeError(CODE_INVALID_PARAMS, "no rule pack is here to judge the project")
+        pack_path = packs[0]
+        try:
+            pack = load_pack(pack_path)
+            verdict_set = evaluate_spec(spec, pack, pack_path=str(pack_path))
+            judged = apply_register(dict(spec), verdict_set)
+        except Exception as exc:
+            raise BridgeError(CODE_INTERNAL, f"the compliance run failed: {exc}") from exc
+
+        register = list(judged.get("deviations") or [])
+        index = next(
+            (
+                position
+                for position, entry in enumerate(register)
+                if str(entry.get("id") or "") == deviation_id
+            ),
+            None,
+        )
+        if index is None:
+            raise BridgeError(
+                CODE_INVALID_PARAMS, f"no deviation {deviation_id!r} in this project"
+            )
+
+        entry = dict(register[index])
+        entry["rationale"] = rationale
+        entry["acknowledged"] = True
+        stored = list(spec.get("deviations") or [])
+        stored_ids = [str(item.get("id") or "") for item in stored]
+        if deviation_id in stored_ids:
+            # the entry is already the project's own ✓ ✓ — so the user's words are
+            # written into it ✓ ✓
+            position = stored_ids.index(deviation_id)
+            ops = [
+                {
+                    "op": "replace",
+                    "path": f"/deviations/{position}/rationale",
+                    "value": rationale,
+                },
+                {
+                    "op": "replace",
+                    "path": f"/deviations/{position}/acknowledged",
+                    "value": True,
+                },
+            ]
+        else:
+            # the engine's entry is new to the project ✓ ✓ — so it is added ✓ ✓
+            # (with the user's words ✓ ✓) ✓ ✓ — and a project with no register yet
+            # gets the whole array ✓ ✓
+            if stored:
+                ops = [{"op": "add", "path": f"/deviations/{len(stored)}", "value": entry}]
+            else:
+                ops = [{"op": "add", "path": "/deviations", "value": [entry]}]
+        try:
+            revision = store.commit(
+                store.tip().sha256,
+                ops,
+                provenance={"source": "user", "detail": "the user's override"},
+                note=f"the override of {deviation_id}",
+            )
+        except Exception as exc:
+            raise BridgeError(CODE_INTERNAL, f"the override could not be recorded: {exc}") from exc
+        return {
+            "deviationId": deviation_id,
+            "rationale": rationale,
+            "acknowledged": True,
+            "revision": revision.number,
+            "sha256": revision.sha256,
         }
 
     def _import_candidates(self, params: dict[str, Any]) -> dict[str, Any]:

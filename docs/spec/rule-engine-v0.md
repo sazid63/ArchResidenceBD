@@ -33,7 +33,27 @@ These are exactly the pre-W1.2 demo semantics (`tools/rules/eval_spec.py` docstr
 | `rajuk@2008.1#setback-schedule` | `/site/plot/areaSqm` · `/building/storeys/count` · `/phases/site-excavation/data/setback{Front,Rear,SideLeft,SideRight}M` | one verdict per offered side (min comparator) |
 | `rajuk@2008.1#schedule4-parking` | single-family: `/site/plot/areaSqm`; flats: `/building/unitsPerFloor` × `/building/storeys/count` at `/building/typicalUnitAreaSqm` · `/phases/site-excavation/data/parkingSpaces` | car spaces vs Schedule 4 requirement (row `s4-n-fraction` = ceil; `≥ 1` floor) |
 
-- **Design payload v0 keys** live in `/phases/site-excavation/data/` (the schema-sanctioned extension point). The question engine (W1.4) writes them; the engine only reads. Missing inputs ⇒ `unevaluated[].reason = "missing_input"` naming the exact pointers — never a silent default.
+- **Design payload v0 keys** live in `/phases/site-excavation/data/` (the schema-sanctioned extension point). The engine only reads. Missing inputs ⇒ `unevaluated[].reason = "missing_input"` naming the exact pointers — never a silent default.
+
+  **A declared gap (2026-10-22) — the design payload is not written yet** ✓ ✓ — this spec
+  used to say *"the question engine (W1.4) writes them"* ✓ ✓ — and that was **not true**
+  ✓ ✓ ✓. The flow book asks for the plot ✓ ✓ (the area ✓, the frontage ✓, the road width
+  ✓ ✓) and the storeys ✓ ✓ — and **no question** asks for the setbacks ✓ ✓, the planned
+  total floor area ✓ ✓ or the parking spaces ✓ ✓ — and the **design** writes its own
+  measurements (the excavation depth ✓ ✓, the footing depth ✓ ✓, the rebar ✓ ✓) but not
+  those three ✓ ✓. ⇒ so the engine can only judge a **hand-built** spec ✓ ✓ (the reports'
+  own demo ✓ ✓ and the training generator's ✓ ✓) — and a real project's run comes back
+  with **no verdicts** ✓ ✓ and a row per missing input ✓ ✓ (the gap is explicit ✓ ✓ —
+  the plan's §9's "never a silent coverage gap" ✓ ✓ ✓) ✓ ✓.
+
+  **What would close it** ✓ ✓ — and it is the **design's** job ✓ ✓ — the *planned total
+  floor area* ✓ ✓ (the design knows it ✓ ✓ — the typical floor ✓ ✓ × the storeys ✓ ✓) ✓ ✓
+  and the **setbacks** ✓ ✓ — but the v0 design is a **footing row along the frontage**
+  ✓ ✓ (its own docstring says so ✓ ✓), so it does **not place a building** ✓ ✓ and cannot
+  state a setback ✓ ✓ — and the **parking spaces** ✓ ✓ need a parking layout the v0 design
+  does not have ✓ ✓. ⇒ the FAR check ✓ ✓ can be closed now ✓ ✓; the setback and parking
+  checks ✓ ✓ need the design to grow ✓ ✓ (ADR-0086 ✓ ✓) ✓ ✓.
+
 - **Citations** are always cite keys resolved against the pinned pack (`far-3ka`/`far-3ka-fn`, `setbacks` + `s46-3-4`, `schedule4` + `schedule4-notes`).
 - **Deviation rows always carry `alternative.specPatch`** (1–2 ops on the phase-data key); compliant/impossible rows never do (schema law).
 
