@@ -101,6 +101,7 @@ from .roof import (
     RoofDesign,
     RoofSlab,
     design_roof_boundary,
+    render_roof_macro,
 )
 
 __all__ = [
@@ -181,4 +182,5 @@ __all__ = [
     "RoofDesign",
     "RoofSlab",
     "design_roof_boundary",
+    "render_roof_macro",
 ]
