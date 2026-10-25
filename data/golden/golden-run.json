@@ -19,26 +19,69 @@
   },
   "bundle": {
     "files": 64,
-    "specSha256": "668858bcca1aa675c4d07c621d53514e436a6435425797ffac47a551d6e9290c"
+    "specSha256": "62dbc799587877c55cdd2b5913d9034fa479a6db73ba8d4c289d6e488762965d"
   },
   "checks": {
     "the card says what it is": true,
     "the design carries its assumptions": true,
     "the handover is written": true,
     "the interview lands on the golden project": true,
-    "the money adds up": true
+    "the money adds up": true,
+    "the recorded assumptions are complete": true
   },
   "design": {
     "assumptions": [
+      "/phases/common-services/data/mep.circuitBreakerA",
+      "/phases/common-services/data/mep.circuitCableSqMm",
+      "/phases/common-services/data/mep.drainageBranchDiameterMm",
+      "/phases/common-services/data/mep.drainageFallDenominator",
+      "/phases/common-services/data/mep.drainageStackDiameterMm",
+      "/phases/common-services/data/mep.fanLoadW",
+      "/phases/common-services/data/mep.fansPer100m2",
+      "/phases/common-services/data/mep.fixtureUnitsBasin",
+      "/phases/common-services/data/mep.fixtureUnitsKitchenSink",
+      "/phases/common-services/data/mep.fixtureUnitsShower",
+      "/phases/common-services/data/mep.fixtureUnitsWc",
+      "/phases/common-services/data/mep.gasCookerLoadM3PerH",
+      "/phases/common-services/data/mep.gasMeterOffsetMm",
+      "/phases/common-services/data/mep.gasPipeDiameterMm",
+      "/phases/common-services/data/mep.liftPersons",
+      "/phases/common-services/data/mep.liftPowerKw",
+      "/phases/common-services/data/mep.lightingLoadW",
+      "/phases/common-services/data/mep.lightingPointsPer100m2",
+      "/phases/common-services/data/mep.maxCircuitLoadW",
+      "/phases/common-services/data/mep.outletLoadW",
+      "/phases/common-services/data/mep.pointInsetMm",
+      "/phases/common-services/data/mep.powerOutletsPer100m2",
+      "/phases/common-services/data/mep.supplyVoltageV",
+      "/phases/floor-1/data/beamDepthMm",
+      "/phases/floor-1/data/beamWidthMm",
+      "/phases/floor-1/data/columnSizeMm",
+      "/phases/floor-1/data/slabOverhangMm",
+      "/phases/floor-1/data/slabThicknessMm",
+      "/phases/foundation/data/columnMainDiameterMm",
+      "/phases/foundation/data/footingDepthM",
+      "/phases/foundation/data/footingMeshDiameterMm",
+      "/phases/foundation/data/footingSizeMm",
+      "/phases/foundation/data/footingSpacingMm",
+      "/phases/foundation/data/gradeBeamDepthMm",
+      "/phases/foundation/data/gradeBeamWidthMm",
+      "/phases/foundation/data/linkDiameterMm",
+      "/phases/foundation/data/linkSpacingMm",
+      "/phases/foundation/data/rebarCoverMm",
+      "/phases/site-excavation/data/excavationMarginMm"
+    ],
+    "counts": {
+      "assumptions": 39,
+      "recordedAssumptions": 3,
+      "stages": 9,
+      "typicalFloors": 1
+    },
+    "recordedAssumptions": [
       "asm-soil-default",
       "asm-material-prices",
       "asm-soil-has-report"
-    ],
-    "counts": {
-      "assumptions": 3,
-      "stages": 9,
-      "typicalFloors": 1
-    }
+    ]
   },
   "interview": {
     "defaulted": 0,

@@ -63,6 +63,7 @@ from .project import (
     UNCOVERED_PHASES,
     ProjectDesign,
     design_project,
+    DesignAssumption,
 )
 from .rebar import (
     BBS_SCHEMA_VERSION,
@@ -91,12 +92,23 @@ from .foundation import (
     design_foundation,
     render_macro,
 )
+from .roof import (
+    ASSUMED_BOUNDARY_WALL_HEIGHT_MM,
+    ASSUMED_BOUNDARY_WALL_THICKNESS_MM,
+    ASSUMED_ROOF_THICKNESS_MM,
+    ASSUMED_ROOF_OVERHANG_MM,
+    BoundaryWall,
+    RoofDesign,
+    RoofSlab,
+    design_roof_boundary,
+)
 
 __all__ = [
     "BBS_SCHEMA_VERSION",
     "PIPELINE",
     "UNCOVERED_PHASES",
     "ProjectDesign",
+    "DesignAssumption",
     "COST_TYPES",
     "PHASES",
     "Takeoff",
@@ -161,4 +173,12 @@ __all__ = [
     "render_macro",
     "render_rebar_macro",
     "render_sheet_macro",
+    "ASSUMED_BOUNDARY_WALL_HEIGHT_MM",
+    "ASSUMED_BOUNDARY_WALL_THICKNESS_MM",
+    "ASSUMED_ROOF_THICKNESS_MM",
+    "ASSUMED_ROOF_OVERHANG_MM",
+    "BoundaryWall",
+    "RoofDesign",
+    "RoofSlab",
+    "design_roof_boundary",
 ]

@@ -126,7 +126,13 @@ def test_the_design_run_reports_its_counts_and_its_assumptions(
     assert result["counts"]["typicalFloors"] == 1
     assert result["counts"]["stages"] > 0
     assert result["counts"]["assumptions"] == len(result["assumptions"])
+    # design assumptions have source, pointer, value, unit, reason
     for assumption in result["assumptions"]:
+        assert assumption["source"]
+        assert assumption["pointer"]
+        assert assumption["reason"]
+    # recorded assumptions still have statement and verifyOnSite
+    for assumption in result["recordedAssumptions"]:
         assert assumption["statement"]
         assert assumption["verifyOnSite"] is True
 

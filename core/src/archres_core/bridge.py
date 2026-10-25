@@ -39,7 +39,7 @@ from typing import Any, Callable, Iterable, TextIO
 from .agent import Session
 from .agent.client import ModelClient
 from .interview import FlowBook, load_book
-from .spec import SpecStore
+from .spec import SpecStore, apply_patch
 
 __all__ = [
     "BRIDGE_VERSION",
@@ -163,6 +163,7 @@ class Bridge:
             "project.create": self._project_create,
             "boq.build": self._boq_build,
             "design.run": self._design_run,
+            "design.write_assumptions": self._design_write_assumptions,
             "compliance.evaluate": self._compliance_evaluate,
             "compliance.acknowledge": self._compliance_acknowledge,
             "import.candidates": self._import_candidates,
@@ -659,12 +660,24 @@ class Bridge:
         except Exception as exc:
             raise BridgeError(CODE_INTERNAL, f"the design could not be made: {exc}") from exc
 
-        # the **assumptions** travel with the design ✓ - an assumed number ✓ that is not
-        # visible ✓ is a number nobody can check ✓ ✓ (the spec carries them ✓ ✓)
+        # the **design's assumptions** travel with the design ✓ - an assumed number ✓ that is
+        # not visible ✓ is a number nobody can check ✓ ✓
         assumptions = []
+        for item in design.assumptions:
+            assumptions.append(
+                {
+                    "source": item.source,
+                    "pointer": item.pointer,
+                    "value": item.value,
+                    "unit": item.unit,
+                    "reason": item.reason,
+                }
+            )
+        # also include the spec's recorded assumptions for backward compatibility
+        recorded = []
         for item in spec.get("assumptions") or []:
             if isinstance(item, dict):
-                assumptions.append(
+                recorded.append(
                     {
                         "id": str(item.get("id") or ""),
                         "subject": str(item.get("subject") or ""),
@@ -678,14 +691,107 @@ class Bridge:
             "projectId": design.project_id,
             "projectName": design.project_name,
             "assumptions": assumptions,
+            "recordedAssumptions": recorded,
             "storeys": int(
                 ((spec.get("building") or {}).get("storeys") or {}).get("count") or 0
             ),
             "counts": {
                 "assumptions": len(assumptions),
+                "recordedAssumptions": len(recorded),
                 "typicalFloors": len(design.floors or ()),
                 "stages": len(design.stages or ()),
             },
+        }
+
+    def _design_write_assumptions(self, params: dict[str, Any]) -> dict[str, Any]:
+        """Write accepted design assumptions into the spec.
+
+        The app calls this after the user reviews and accepts the design assumptions.
+        Each accepted assumption is patched into the spec so the rule engine can read it.
+        """
+        from .design import design_project
+        from .design.project import DesignAssumption
+
+        project = params.get("project")
+        if not isinstance(project, str) or not project:
+            raise BridgeError(CODE_INVALID_PARAMS, "design.write_assumptions needs a project path")
+
+        try:
+            store = SpecStore(project)
+            spec = store.load(store.tip().sha256)
+        except Exception as exc:
+            raise BridgeError(CODE_INVALID_PARAMS, f"the project cannot be read: {exc}") from exc
+
+        try:
+            design = design_project(spec)
+        except Exception as exc:
+            raise BridgeError(CODE_INTERNAL, f"the design could not be made: {exc}") from exc
+
+        # Collect assumptions to write
+        assumption_ids = params.get("assumptions", [])
+        if not isinstance(assumption_ids, list):
+            raise BridgeError(CODE_INVALID_PARAMS, "assumptions must be a list of pointers or ids")
+
+        written: list[DesignAssumption] = []
+        for item in assumption_ids:
+            if isinstance(item, str):
+                # Try to match by pointer
+                for a in design.assumptions:
+                    if a.pointer == item:
+                        written.append(a)
+                        break
+            elif isinstance(item, dict):
+                # Assume it's an assumption dict
+                if "pointer" in item:
+                    for a in design.assumptions:
+                        if a.pointer == item["pointer"]:
+                            written.append(a)
+                            break
+
+        if not written:
+            raise BridgeError(CODE_INVALID_PARAMS, "no valid assumptions found to write")
+
+        # Write each assumption into the spec
+        for a in written:
+            # Check if already present
+            current = spec
+            for token in a.pointer.strip("/").split("/"):
+                if not isinstance(current, dict):
+                    current = None
+                    break
+                current = current.get(token)
+            if current is not None:
+                continue  # Already written
+
+            # Generate assumption entry
+            import hashlib
+            assumption_id = f"asm-{hashlib.sha256(a.pointer.encode()).hexdigest()[:8]}"
+            existing = spec.get("assumptions") or []
+            if not any(e.get("id") == assumption_id for e in existing if isinstance(e, dict)):
+                entry = {
+                    "id": assumption_id,
+                    "statement": a.reason,
+                    "basis": "conservative_default",
+                    "verifyOnSite": True,
+                    "relatedPath": a.pointer,
+                }
+                ops = [
+                    {"op": "add", "path": a.pointer, "value": a.value},
+                    {"op": "add", "path": "/assumptions/-", "value": entry},
+                ]
+                provenance = {
+                    "source": "assumption",
+                    "detail": f"design assumption written via write_assumptions",
+                    "confidence": "assumption",
+                }
+                spec = apply_patch(spec, ops, provenance=provenance)
+
+        # Create new revision
+        new_tip = store.commit_snapshot(store.tip().sha256, spec)
+        return {
+            "project": project,
+            "assumptionsWritten": len(written),
+            "newRevision": new_tip.number,
         }
 
     def _compliance_evaluate(self, params: dict[str, Any]) -> dict[str, Any]:

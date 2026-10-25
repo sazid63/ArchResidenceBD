@@ -132,7 +132,20 @@ def _check_golden_facts(spec: dict) -> tuple[bool, list[str]]:
 
 
 def _check_assumptions(assumptions: list) -> tuple[bool, list[str]]:
-    """Every assumption is visible - and the ones to check on site say so."""
+    """Every design assumption is visible - it has a source, pointer, value, unit, reason."""
+    problems: list[str] = []
+    for item in assumptions:
+        if not item.get("reason"):
+            problems.append(f"{item.get('pointer')}: the assumption has no reason")
+        if not item.get("pointer"):
+            problems.append(f"{item.get('source')}: the assumption has no pointer")
+        if not item.get("source"):
+            problems.append(f"{item.get('pointer')}: the assumption has no source")
+    return (not problems), problems
+
+
+def _check_recorded_assumptions(assumptions: list) -> tuple[bool, list[str]]:
+    """Every recorded assumption has a statement and verifyOnSite."""
     problems: list[str] = []
     for item in assumptions:
         if not item.get("statement"):
@@ -238,8 +251,11 @@ def run(root: pathlib.Path, name: str) -> dict:
     facts_ok, problems = _check_golden_facts(spec)
     record("the interview lands on the golden project", facts_ok, problems)
 
-    assumptions_ok, problems = _check_assumptions(design["assumptions"])
-    record("the design carries its assumptions", assumptions_ok, problems)
+    design_assumptions_ok, problems = _check_assumptions(design["assumptions"])
+    record("the design carries its assumptions", design_assumptions_ok, problems)
+
+    recorded_ok, problems = _check_recorded_assumptions(design.get("recordedAssumptions", []))
+    record("the recorded assumptions are complete", recorded_ok, problems)
 
     money_ok, problems = _check_money(boq)
     record("the money adds up", money_ok, problems)
@@ -282,7 +298,8 @@ def run(root: pathlib.Path, name: str) -> dict:
         },
         "design": {
             "counts": design["counts"],
-            "assumptions": [item["id"] for item in design["assumptions"]],
+            "assumptions": [item["pointer"] for item in design["assumptions"]],
+            "recordedAssumptions": [item["id"] for item in design.get("recordedAssumptions", [])],
         },
         "boq": {
             "lines": len(boq["lines"]),

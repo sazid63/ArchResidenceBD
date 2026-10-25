@@ -75,6 +75,17 @@ test** ··.
   phase kinds are fixed (site-excavation · foundation · floor · roof-boundary ·
   common-services ·) and a new kind is a schema change — W4/P5's ··.
 
+## The design's assumptions reach the app (ADR-0087)
+
+The `design.run` channel method now returns the design's merged assumptions under the key
+`assumptions`. Each entry carries:
+- `source`: the part that made the assumption (e.g., "foundation", "floor-1", "mep-1")
+- `pointer`: the JSON pointer into the spec the design read
+- `value`, `unit`, `reason`: the assumed default
+
+The spec's own recorded assumptions remain under `recordedAssumptions`. The golden run's check
+"the design carries its assumptions" validates the design's list.
+
 ## Checks
 
 ```powershell

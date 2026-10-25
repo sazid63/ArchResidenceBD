@@ -50,7 +50,7 @@ The run **fails** when one of them does not hold ✓ ✓:
 ## The recorded run (2026-10-22)
 
 - **62 questions** ✓, **0 on their default** ✓;
-- the **design**: 2 storeys ✓, 1 typical floor ✓, 9 stages ✓, 3 assumptions ✓ ✓;
+- the **design**: 2 storeys ✓, 1 typical floor ✓, 9 stages ✓, **39 design assumptions** ✓ (foundation 6, floor 5, rebar 5, MEP 23);
 - the **money**: 11 lines ✓, **66,374.74 BDT** ✓, priced from `pwd-sor-2022-civil-works` ✓
   (status **candidate** ✓ ✓), 3 lines **named** as unpriced ✓ ✓;
 - the **handover**: 64 files ✓ ✓;
