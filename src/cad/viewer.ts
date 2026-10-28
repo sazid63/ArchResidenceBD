@@ -127,6 +127,7 @@ interface MeshBuffers {
   normal: WebGLBuffer;
   index: WebGLBuffer;
   count: number;
+  indexType: 5125 | 5123; // GL_UNSIGNED_INT (5125) or GL_UNSIGNED_SHORT (5123)
 }
 
 export class MeshViewer {
@@ -284,7 +285,7 @@ export class MeshViewer {
       use32 ? new Uint32Array(object.indices) : new Uint16Array(object.indices),
       gl.STATIC_DRAW,
     );
-    return { position, normal, index, count: object.indices.length };
+    return { position, normal, index, count: object.indices.length, indexType: use32 ? (gl.UNSIGNED_INT as 5125) : (gl.UNSIGNED_SHORT as 5123) };
   }
 
   private buildGround(objects: MeshObject[]): MeshBuffers | null {
@@ -320,7 +321,7 @@ export class MeshViewer {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([0, 1, 2, 3, 4, 5]), gl.STATIC_DRAW);
-    return { position, normal, index, count: 6 };
+    return { position, normal, index, count: 6, indexType: gl.UNSIGNED_SHORT as 5123 };
   }
 
   /** Frame the model (the camera looks at the model's centre). */
@@ -450,7 +451,7 @@ export class MeshViewer {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffers.index);
     gl.uniform3f(this.colorLocation, color[0], color[1], color[2]);
     gl.uniform1f(this.unlitLocation, unlit);
-    gl.drawElements(gl.TRIANGLES, buffers.count, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLES, buffers.count, buffers.indexType, 0);
   }
 
   dispose(): void {

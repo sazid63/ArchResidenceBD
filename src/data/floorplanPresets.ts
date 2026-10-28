@@ -9,8 +9,13 @@ export interface RoomPartition {
   nameBn: string;
   kind: "bedroom" | "living" | "dining" | "kitchen" | "bath" | "balcony" | "corridor" | "stair";
   boundsRel: [number, number, number, number]; // [minXPct, minYPct, maxXPct, maxYPct] 0 to 1
-  doorSide?: "front" | "rear" | "left" | "right";
-  windowSide?: "front" | "rear" | "left" | "right";
+  /** Optional non-rectangular outline (axis-aligned polygon, relative 0-1 coords, closed).
+   *  When present, walls are synthesized from the polygon edges instead of the AABB. */
+  pointsRel?: [number, number][];
+  /** Open space: no walls or fixtures of its own (parking bays, courtyards, airshafts, decks). */
+  open?: boolean;
+  doorSide?: "front" | "rear" | "left" | "right" | "inner";
+  windowSide?: "front" | "rear" | "left" | "right" | "inner";
 }
 
 export interface FloorplanPreset {
@@ -81,11 +86,11 @@ export const FLOORPLAN_PRESETS: FloorplanPreset[] = [
     descriptionEn: "Ground floor parking layout with 6 car bays, driveway ramp, security caretaker office, and driver's restroom.",
     descriptionBn: "নিচতলার বিন্যাস: ৬টি কার পার্কিং বে, চওড়া ড্রাইভওয়ে, সিকিউরিটি গার্ড পোস্ট ও ড্রাইভার্স ওয়াশরুম।",
     rooms: [
-      { id: "g_driveway", nameEn: "Clear Driveway & Ramp", nameBn: "ড্রাইভওয়ে ও প্রবেশ পথ", kind: "corridor", boundsRel: [0.30, 0.05, 0.70, 0.95] },
-      { id: "g_parking_l", nameEn: "West Parking Bays (3 Cars)", nameBn: "পশ্চিম কার পার্কিং বে (৩ কার)", kind: "living", boundsRel: [0.05, 0.20, 0.30, 0.95] },
-      { id: "g_parking_r", nameEn: "East Parking Bays (3 Cars)", nameBn: "পূর্ব কার পার্কিং বে (৩ কার)", kind: "living", boundsRel: [0.70, 0.20, 0.95, 0.95] },
-      { id: "g_guard", nameEn: "Guard Post & Caretaker Suite", nameBn: "গার্ড রুম ও সাব-স্টেশন", kind: "bedroom", boundsRel: [0.05, 0.05, 0.30, 0.20] },
-      { id: "g_bath", nameEn: "Drivers Bath", nameBn: "ড্রাইভার্স টয়লেট", kind: "bath", boundsRel: [0.70, 0.05, 0.95, 0.20] },
+      { id: "g_driveway", nameEn: "Clear Driveway & Ramp", nameBn: "ড্রাইভওয়ে ও প্রবেশ পথ", kind: "corridor", boundsRel: [0.30, 0.05, 0.70, 0.95], doorSide: "front", open: true },
+      { id: "g_parking_l", nameEn: "West Parking Bays (3 Cars)", nameBn: "পশ্চিম কার পার্কিং বে (৩ কার)", kind: "living", boundsRel: [0.05, 0.20, 0.30, 0.95], open: true },
+      { id: "g_parking_r", nameEn: "East Parking Bays (3 Cars)", nameBn: "পূর্ব কার পার্কিং বে (৩ কার)", kind: "living", boundsRel: [0.70, 0.20, 0.95, 0.95], open: true },
+      { id: "g_guard", nameEn: "Guard Post & Caretaker Suite", nameBn: "গার্ড রুম ও সাব-স্টেশন", kind: "bedroom", boundsRel: [0.05, 0.05, 0.30, 0.20], doorSide: "front", windowSide: "left" },
+      { id: "g_bath", nameEn: "Drivers Bath", nameBn: "ড্রাইভার্স টয়লেট", kind: "bath", boundsRel: [0.70, 0.05, 0.95, 0.20], doorSide: "front", windowSide: "right" },
     ],
   },
   {
@@ -118,7 +123,7 @@ export const FLOORPLAN_PRESETS: FloorplanPreset[] = [
     descriptionBn: "সেন্ট্রাল ওপেন কোর্টইয়ার্ড (আঙিনা), ডাবল-হাইট ফ্যামিলি লাউঞ্জ ও আধুনিক ডুপ্লেক্স সিঁড়ি সংবলিত অভিজাত ডুপ্লেক্স প্ল্যান।",
     rooms: [
       { id: "dup_master", nameEn: "Master Suite", nameBn: "মাস্টার সুইট", kind: "bedroom", boundsRel: [0.05, 0.60, 0.45, 0.95], doorSide: "rear", windowSide: "front" },
-      { id: "dup_courtyard", nameEn: "Central Open Courtyard (Aangina)", nameBn: "সেন্ট্রাল খোলা আঙিনা", kind: "corridor", boundsRel: [0.45, 0.35, 0.65, 0.65] },
+      { id: "dup_courtyard", nameEn: "Central Open Courtyard (Aangina)", nameBn: "সেন্ট্রাল খোলা আঙিনা", kind: "corridor", boundsRel: [0.45, 0.35, 0.65, 0.65], open: true },
       { id: "dup_lounge", nameEn: "Double-Height Family Lounge", nameBn: "ডাবল-হাইট ফ্যামিলি লাউঞ্জ", kind: "living", boundsRel: [0.05, 0.15, 0.45, 0.50], doorSide: "right", windowSide: "front" },
       { id: "dup_dining", nameEn: "Formal Dining & Bar", nameBn: "ফরমাল ডাইনিং", kind: "dining", boundsRel: [0.65, 0.15, 0.95, 0.50], doorSide: "left", windowSide: "rear" },
       { id: "dup_kitchen", nameEn: "Island Chef Kitchen", nameBn: "আইল্যান্ড কিচেন", kind: "kitchen", boundsRel: [0.65, 0.55, 0.95, 0.85], doorSide: "left", windowSide: "right" },
@@ -149,7 +154,7 @@ export const FLOORPLAN_PRESETS: FloorplanPreset[] = [
     descriptionEn: "Main road frontage layout: Open-plan commercial display showroom on lower floors, luxury apartments above.",
     descriptionBn: "প্রধান সড়ক সংলগ্ন মিক্সড প্ল্যান: নিচের তলায় শোরুম/ব্যাংক এবং ওপরের তলাগুলোতে ৩ বেডরুমের ফ্যামিলি ফ্ল্যাট।",
     rooms: [
-      { id: "comm_hall", nameEn: "Open Display Showroom Hall", nameBn: "ওপেন ডিসপ্লে শোরুম হল", kind: "living", boundsRel: [0.05, 0.10, 0.95, 0.90], doorSide: "front", windowSide: "front" },
+      { id: "comm_hall", nameEn: "Open Display Showroom Hall", nameBn: "ওপেন ডিসপ্লে শোরুম হল", kind: "living", boundsRel: [0.05, 0.10, 0.95, 1.00], doorSide: "front", windowSide: "front" },
       { id: "comm_stair", nameEn: "Commercial Fire Escape Stair", nameBn: "কমার্শিয়াল সিঁড়ি ও লিফট", kind: "stair", boundsRel: [0.70, 0.10, 0.95, 0.40], doorSide: "left", windowSide: "right" },
     ],
   },
@@ -178,7 +183,7 @@ export const FLOORPLAN_PRESETS: FloorplanPreset[] = [
     descriptionBn: "অভিজাত পেপেন্টহাউস: প্রাইভেট রূফটপ সুইমিং পুল, আউটডোর বারবিকেল প্যাভিলিয়ন ও মাস্টার সুইট উইথ জ্যাকুজি।",
     rooms: [
       { id: "pent_master", nameEn: "Penthouse Master Suite & Jacuzzi", nameBn: "পেপেন্টহাউস মাস্টার সুইট", kind: "bedroom", boundsRel: [0.05, 0.50, 0.50, 0.95], doorSide: "rear", windowSide: "front" },
-      { id: "pent_pool", nameEn: "Private Rooftop Sky Pool Deck", nameBn: "প্রাইভেট স্কাই সুইমিং পুল", kind: "living", boundsRel: [0.55, 0.50, 0.95, 0.95], doorSide: "left", windowSide: "right" },
+      { id: "pent_pool", nameEn: "Private Rooftop Sky Pool Deck", nameBn: "প্রাইভেট স্কাই সুইমিং পুল", kind: "living", boundsRel: [0.55, 0.50, 0.95, 0.95], doorSide: "left", windowSide: "right", open: true },
       { id: "pent_lounge", nameEn: "Panoramic Glass Lounge", nameBn: "প্যানোরামিক গ্লাস লাউঞ্জ", kind: "living", boundsRel: [0.15, 0.05, 0.85, 0.45], doorSide: "front", windowSide: "rear" },
     ],
   },
@@ -192,8 +197,43 @@ export const FLOORPLAN_PRESETS: FloorplanPreset[] = [
     descriptionBn: "পুরান ঢাকা/লালবাগ এর সরু প্লটের (২৫x৮০ ফুট) জন্য উপযোগী বিন্যাস। ১০০% পর্যাপ্ত আলো-বাতাসের জন্য সেন্ট্রাল ডাঙ্কট সহ।",
     rooms: [
       { id: "nar_front", nameEn: "Front Flat Master Bed", nameBn: "সামনের মাস্টার বেড", kind: "bedroom", boundsRel: [0.05, 0.70, 0.95, 0.95], doorSide: "rear", windowSide: "front" },
-      { id: "nar_duct", nameEn: "Central BNBC Airshaft Ventilation Duct", nameBn: "সেন্ট্রাল এয়ারশ্যাফ্ট ডাঙ্কট", kind: "corridor", boundsRel: [0.35, 0.40, 0.65, 0.60] },
+      { id: "nar_duct", nameEn: "Central BNBC Airshaft Ventilation Duct", nameBn: "সেন্ট্রাল এয়ারশ্যাফ্ট ডাঙ্কট", kind: "corridor", boundsRel: [0.35, 0.40, 0.65, 0.60], open: true },
       { id: "nar_rear", nameEn: "Rear Flat Master Bed", nameBn: "পেছনের মাস্টার বেড", kind: "bedroom", boundsRel: [0.05, 0.05, 0.95, 0.30], doorSide: "front", windowSide: "rear" },
+    ],
+  },
+  {
+    id: "preset-architect-villa",
+    nameEn: "Type J: Architect Villa — L-Shaped Living, Stepped Wing & Balcony Notch",
+    nameBn: "টাইপ জে: আর্কিটেক্ট ভিলা — এল-আকৃতি লিভিং, ধাপ-করা ওয়িং ও বারান্দা নোট",
+    unitsCount: 1,
+    suitablePlotKatha: "3.0 – 5.0 Katha",
+    descriptionEn: "v2.3 non-rectangular floorplan: L-shaped living/dining with an open balcony notch, a stepped (stair-step) master wing, and a glass-sliding balcony. Tests the polygon wall synthesis.",
+    descriptionBn: "২৩-বিশিষ্ট অ-আয়তকার প্ল্যান: এল-আকৃতি লিভিং-ডাইনিং, ধাপ-করা মাস্টার ওয়িং ও গ্লাস বারান্দা। পলিগন সিঁড়ি সংক্রান্ত বিন্যাস পরীক্ষা করে।",
+    rooms: [
+      // L-shaped living/dining with a balcony notch cut out of the front-right corner
+      {
+        id: "v_living", nameEn: "L-Shaped Living & Dining", nameBn: "এল-আকৃতি লিভিং-ডাইনিং", kind: "living",
+        boundsRel: [0.45, 0.50, 0.95, 0.95],
+        pointsRel: [[0.45, 0.50], [0.95, 0.50], [0.95, 0.70], [0.75, 0.70], [0.75, 0.95], [0.45, 0.95]],
+        doorSide: "inner", windowSide: "front",
+      },
+      // Balcony notch fills the front-right cut-out
+      {
+        id: "v_balcony", nameEn: "Open Balcony Notch", nameBn: "খোলা বারান্দা নোট", kind: "balcony",
+        boundsRel: [0.75, 0.70, 0.95, 0.95], doorSide: "left", windowSide: "front",
+      },
+      // Stepped master suite wing (stair-step rear edge)
+      {
+        id: "v_master", nameEn: "Stepped Master Suite", nameBn: "ধাপ-করা মাস্টার সুইট", kind: "bedroom",
+        boundsRel: [0.05, 0.60, 0.45, 0.95],
+        pointsRel: [[0.05, 0.60], [0.45, 0.60], [0.45, 0.80], [0.32, 0.80], [0.32, 0.95], [0.05, 0.95]],
+        doorSide: "right", windowSide: "front",
+      },
+      { id: "v_kitchen", nameEn: "Chef Kitchen", nameBn: "রান্নাঘর", kind: "kitchen", boundsRel: [0.05, 0.45, 0.32, 0.60], doorSide: "right", windowSide: "left" },
+      { id: "v_dining", nameEn: "Formal Dining", nameBn: "ফরমাল ডাইনিং", kind: "dining", boundsRel: [0.45, 0.25, 0.95, 0.50], doorSide: "left", windowSide: "right" },
+      { id: "v_bath1", nameEn: "Master Bath", nameBn: "মাস্টার বাথ", kind: "bath", boundsRel: [0.05, 0.25, 0.30, 0.40], doorSide: "right", windowSide: "left" },
+      { id: "v_stair", nameEn: "Stair & Lift Core", nameBn: "সিঁড়ি ও লিফট লবি", kind: "stair", boundsRel: [0.05, 0.05, 0.30, 0.25], doorSide: "right", windowSide: "rear" },
+      { id: "v_study", nameEn: "Study / Guest Room", nameBn: "স্টাডি / অতিথি রুম", kind: "bedroom", boundsRel: [0.30, 0.05, 0.55, 0.25], doorSide: "left", windowSide: "rear" },
     ],
   },
 ];
