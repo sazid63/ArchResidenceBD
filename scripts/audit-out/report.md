@@ -1,10 +1,10 @@
 # ArchResidenceBD parametric generator — mesh audit (baseline)
 
-- Generated: 2026-10-28T13:37:22.306Z
+- Generated: 2026-10-28T14:34:52.216Z
 - Tool: `scripts/mesh-audit.ts` (deterministic, mulberry32 seed `0x4a554449`, no `Math.random`)
 - Cases: 50 (20 preset matrix + 8 column-size sweep + 20 seeded-random)
 - Command: `npx tsx scripts/mesh-audit.ts`
-- Wall time: 6.8 s
+- Wall time: 5.9 s
 - `volumeM3` = structural concrete kinds (slab, beam, column, footing, wall, stair, tank, canopy, parapet)
 - `duplicates` = distinct rounded-bbox (0.1 mm) groups with >= 2 members
 - `overlaps` = box pairs with volume intersection > 1 mm3
