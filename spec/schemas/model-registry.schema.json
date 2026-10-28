@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.archresidencebd.app/model-registry/0.1.0.json",
+  "title": "ModelRegistry",
+  "description": "ArchResidenceBD model registry v0.1.0 (plan §5 fixed model roster; spike S2) - the fleet manifest: which models the product ships, in which role, pinned by artifact sha256. Consumed by the installer/downloader (P1), the W0.8 model cards and the Licences screen. displayName is the only user-facing string; upstream/runtime naming is internal provenance shown (if at all) behind the Licences screen per ADR-0004. Real instance: spec/models/registry.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "fleetId", "models"],
+  "properties": {
+    "schemaVersion": { "const": "0.1.0" },
+    "fleetId": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "description": "Fleet generation id, e.g. 'archie-fleet-v1' (S2 froze fleet v1)."
+    },
+    "models": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/ModelEntry" }
+    },
+    "notes": {
+      "type": "string",
+      "description": "Fleet-level notes (e.g. deliberate exclusions - never silent)."
+    }
+  },
+  "$defs": {
+    "Localized": {
+      "title": "Localized",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bn", "en"],
+      "properties": {
+        "bn": { "type": "string", "minLength": 1 },
+        "en": { "type": "string", "minLength": 1 }
+      }
+    },
+    "ModelEntry": {
+      "title": "ModelEntry",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "role", "displayName", "upstream", "artifact", "runtime", "swapGroup", "distribution"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "description": "Stable registry id, e.g. 'archie-chat'."
+        },
+        "role": {
+          "type": "string",
+          "enum": ["chat", "repair", "embed", "rerank"],
+          "description": "Fleet role v0 (S2 roster). One entry per role in the shipped fleet."
+        },
+        "displayName": {
+          "$ref": "#/$defs/Localized",
+          "description": "The only user-facing string. Never an upstream model name (ADR-0004)."
+        },
+        "upstream": { "$ref": "#/$defs/Upstream" },
+        "artifact": { "$ref": "#/$defs/Artifact" },
+        "runtime": { "$ref": "#/$defs/Runtime" },
+        "swapGroup": {
+          "type": "string",
+          "enum": ["gpu-models", "cpu-services"],
+          "description": "S2 policy groups: gpu-models swap exclusively (one resident in VRAM at a time); cpu-services stay persistent and are pinned to CPU (gpuLayers 0)."
+        },
+        "distribution": {
+          "type": "string",
+          "enum": ["bundled", "downloadable", "candidate", "training"],
+          "description": "bundled = ships inside the one installer (P1 plan); downloadable = fetched from the registry's HF source on demand; candidate = evaluated, not shipped; training = placeholder awaiting a fine-tune."
+        },
+        "notes": { "type": "string" }
+      }
+    },
+    "Upstream": {
+      "title": "Upstream",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repo", "license"],
+      "properties": {
+        "repo": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Upstream repository id, e.g. 'Qwen/Qwen3-4B-Instruct-2507'. Internal provenance."
+        },
+        "license": {
+          "type": "string",
+          "minLength": 1,
+          "description": "SPDX license id of the upstream weights, e.g. 'Apache-2.0'. Feeds the Licences screen notices."
+        },
+        "url": { "type": "string", "format": "uri" },
+        "revision": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Upstream revision/commit the artifact was built from, when known."
+        }
+      }
+    },
+    "Artifact": {
+      "title": "Artifact",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["file", "format", "quantization", "sizeBytes", "sha256"],
+      "properties": {
+        "file": {
+          "type": "string",
+          "minLength": 1,
+          "description": "File name inside the models directory, e.g. 'Qwen3-4B-Instruct-2507-Q4_K_M.gguf'."
+        },
+        "format": { "type": "string", "const": "gguf" },
+        "quantization": { "type": "string", "minLength": 1, "description": "e.g. Q4_K_M, Q8_0." },
+        "sizeBytes": { "type": "integer", "minimum": 1 },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+      }
+    },
+    "Runtime": {
+      "title": "Runtime",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["engine", "device", "gpuLayers", "context"],
+      "properties": {
+        "engine": {
+          "type": "string",
+          "const": "llama.cpp",
+          "description": "In-app runner (no external runtime such as Ollama/LM Studio). Internal provenance; MIT-licensed, listed on the Licences screen."
+        },
+        "device": { "type": "string", "enum": ["gpu", "cpu"] },
+        "gpuLayers": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Layers offloaded to GPU. S2: 99 for GPU rows; CPU rows MUST be pinned to 0 - llama.cpp auto-fit otherwise pulls embed/rerank into VRAM and crowds the chat model out on the 6 GB floor."
+        },
+        "context": { "type": "integer", "minimum": 512 },
+        "flags": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Extra server flags beyond the standard envelope, e.g. ['--no-webui']."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "device": { "const": "cpu" } }, "required": ["device"] },
+          "then": { "properties": { "gpuLayers": { "const": 0 } } }
+        },
+        {
+          "if": { "properties": { "device": { "const": "gpu" } }, "required": ["device"] },
+          "then": { "properties": { "gpuLayers": { "minimum": 1 } } }
+        }
+      ]
+    }
+  }
+}

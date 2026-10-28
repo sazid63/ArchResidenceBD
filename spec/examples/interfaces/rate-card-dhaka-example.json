@@ -1,0 +1,85 @@
+{
+  "schemaVersion": "0.1.0",
+  "cardId": "dhaka-example-2026-10",
+  "region": "dhaka",
+  "currency": "BDT",
+  "status": "candidate",
+  "effectiveFrom": "2026-10-01",
+  "asOf": "2026-10-05",
+  "source": {
+    "kind": "manual",
+    "name": "Illustrative example card (structure demo)",
+    "note": "Placeholder numbers to exercise the schema - never use for a BOQ."
+  },
+  "regionalMultipliers": {
+    "chattogram": 1.06,
+    "khulna": 1.04,
+    "sylhet": 1.08
+  },
+  "lines": [
+    {
+      "key": "cement-opc-43",
+      "label": { "bn": "সিমেন্ট (ওপিসি ৪৩ গ্রেড)", "en": "Cement (OPC 43 grade)" },
+      "costType": "material",
+      "unit": "bag",
+      "rateBdt": 550
+    },
+    {
+      "key": "rod-60g",
+      "label": { "bn": "রড (৬০ গ্রেড)", "en": "Rod (60 grade)" },
+      "costType": "material",
+      "unit": "ton",
+      "rateBdt": 89000
+    },
+    {
+      "key": "sand-fine",
+      "label": { "bn": "বালু (সূক্ষ্ম)", "en": "Sand (fine)" },
+      "costType": "material",
+      "unit": "cft",
+      "rateBdt": 42
+    },
+    {
+      "key": "brick-1st",
+      "label": { "bn": "ইট (প্রথম শ্রেণি)", "en": "Brick (1st class)" },
+      "costType": "material",
+      "unit": "each",
+      "rateBdt": 12
+    },
+    {
+      "key": "mason",
+      "label": { "bn": "রাজমিস্ত্রি (দৈনিক মজুরি)", "en": "Mason (daily wage)" },
+      "costType": "labour",
+      "unit": "day",
+      "rateBdt": 950
+    },
+    {
+      "key": "mixer-diesel",
+      "label": { "bn": "কনক্রিট মিক্সার (ডিজেল)", "en": "Concrete mixer (diesel)" },
+      "costType": "machinery",
+      "unit": "day",
+      "rateBdt": 3500,
+      "operatorIncluded": true,
+      "fuelIncluded": true
+    },
+    {
+      "key": "excavator",
+      "label": { "bn": "এক্সকাভেটর (ঘণ্টা)", "en": "Excavator (hourly)" },
+      "costType": "machinery",
+      "unit": "hour",
+      "rateBdt": 2800,
+      "operatorIncluded": true,
+      "fuelIncluded": false,
+      "minimumChargeHours": 2,
+      "note": "Fuel billed separately; minimum 2 h per mobilization."
+    },
+    {
+      "key": "piling-450",
+      "label": { "bn": "পাইলিং - ৪৫০ মিমি (সাব-কন্ট্রাক্ট)", "en": "Piling - 450 mm (subcontract)" },
+      "costType": "subcontract",
+      "unit": "per_pile",
+      "rateBdt": 42000,
+      "note": "450 mm dia bored pile; mode per plan §6."
+    }
+  ],
+  "notes": "Example only: rates are placeholders, the card is status=candidate, and its source is manual. Real cards come from official lists / surveys / vendor quotes via the Source Registry (W2.7 consumes them)."
+}

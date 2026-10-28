@@ -1,0 +1,48 @@
+{
+  "cases": {
+    "entries": [
+      "commons:two-storey-residential",
+      "floor:two-storey-residential",
+      "foundation:two-storey-residential",
+      "mesh:two-storey-residential",
+      "rebar:two-storey-residential"
+    ]
+  },
+  "files": {
+    "commons-design.json": {
+      "bytes": 2493
+    },
+    "commons-macro.py": {
+      "bytes": 6823
+    },
+    "commons-report.json": {
+      "bytes": 135
+    },
+    "floor-two-storey-residential.design.json": {
+      "bytes": 3935
+    },
+    "floor-two-storey-residential.py": {
+      "bytes": 3757
+    },
+    "foundation-two-storey-residential.design.json": {
+      "bytes": 4645
+    },
+    "foundation-two-storey-residential.py": {
+      "bytes": 3423
+    },
+    "rebar-two-storey-residential.design.json": {
+      "bytes": 7308
+    },
+    "rebar-two-storey-residential.py": {
+      "bytes": 77423
+    },
+    "two-storey-residential.mesh-macro.py": {
+      "bytes": 12267
+    },
+    "two-storey-residential.mesh.json": {
+      "bytes": 26589
+    }
+  },
+  "manifestVersion": "1",
+  "notes": "The generated macros are the exact sources the CAD worker pool runs. They are committed so a reviewer can read what the engine will build; regenerate them with the matching tools/cad/*_probe.py --check."
+}

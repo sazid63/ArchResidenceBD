@@ -1,0 +1,216 @@
+/* UI kit — every corner rounded (corner policy). Tone classes map to theme token pairs. */
+
+.card {
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--s-5);
+  transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: var(--r-pill);
+  font-weight: 600;
+  font-size: var(--fs-md);
+  transition: background var(--dur) var(--ease), transform var(--dur-fast) var(--ease),
+    box-shadow var(--dur) var(--ease);
+}
+.button:active {
+  transform: scale(0.97);
+}
+.button--primary {
+  background: var(--primary);
+  color: var(--on-primary);
+  box-shadow: var(--shadow-sm);
+}
+.button--primary:hover {
+  background: var(--primary-hover);
+}
+.button--soft {
+  background: var(--primary-soft);
+  color: var(--primary-ink);
+}
+.button--soft:hover {
+  background: color-mix(in srgb, var(--primary) 22%, var(--surface));
+}
+.button--ghost {
+  color: var(--ink-soft);
+}
+.button--ghost:hover {
+  background: var(--surface-2);
+}
+
+.chip {
+  padding: 7px 14px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  transition: filter var(--dur) var(--ease), transform var(--dur-fast) var(--ease);
+}
+.chip:hover {
+  filter: brightness(0.96);
+}
+.chip:active {
+  transform: scale(0.97);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.callout {
+  background: var(--surface-2);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.callout-title {
+  font-weight: 700;
+  font-size: var(--fs-sm);
+}
+.callout-body {
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+}
+.stat-value {
+  font-weight: 700;
+  font-size: var(--fs-lg);
+}
+.stat-label {
+  font-size: var(--fs-xs);
+  color: var(--ink-faint);
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--r-pill);
+  flex: none;
+}
+.sdot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--r-pill);
+  flex: none;
+}
+
+/* ---- tones: chips & badges & dots ---- */
+
+.chip--neutral {
+  background: var(--surface-2);
+  color: var(--ink-soft);
+}
+.chip--primary {
+  background: var(--primary-soft);
+  color: var(--primary-ink);
+}
+.chip--sky {
+  background: var(--sky-soft);
+  color: var(--sky-ink);
+}
+.chip--sage {
+  background: var(--sage-soft);
+  color: var(--sage-ink);
+}
+.chip--lavender {
+  background: var(--lavender-soft);
+  color: var(--lavender-ink);
+}
+.chip--amber {
+  background: var(--amber-soft);
+  color: var(--amber-ink);
+}
+.chip--blush {
+  background: var(--blush-soft);
+  color: var(--blush-ink);
+}
+.chip--mint {
+  background: var(--mint-soft);
+  color: var(--mint-ink);
+}
+
+.badge--neutral {
+  background: var(--surface-2);
+  color: var(--ink-soft);
+}
+.badge--primary {
+  background: var(--primary-soft);
+  color: var(--primary-ink);
+}
+.badge--sky {
+  background: var(--sky-soft);
+  color: var(--sky-ink);
+}
+.badge--sage {
+  background: var(--sage-soft);
+  color: var(--sage-ink);
+}
+.badge--lavender {
+  background: var(--lavender-soft);
+  color: var(--lavender-ink);
+}
+.badge--amber {
+  background: var(--amber-soft);
+  color: var(--amber-ink);
+}
+.badge--blush {
+  background: var(--blush-soft);
+  color: var(--blush-ink);
+}
+.badge--mint {
+  background: var(--mint-soft);
+  color: var(--mint-ink);
+}
+.badge--faint {
+  background: var(--surface-2);
+  color: var(--ink-faint);
+}
+
+.dot--neutral,
+.sdot--faint {
+  background: var(--ink-faint);
+}
+.dot--primary {
+  background: var(--primary);
+}
+.dot--sky,
+.sdot--sky {
+  background: var(--sky);
+}
+.dot--sage,
+.sdot--sage {
+  background: var(--sage);
+}
+.dot--lavender,
+.sdot--lavender {
+  background: var(--lavender);
+}
+.dot--amber,
+.sdot--amber {
+  background: var(--amber);
+}
+.dot--blush {
+  background: var(--blush);
+}
+.dot--mint {
+  background: var(--mint);
+}

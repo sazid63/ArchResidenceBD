@@ -1,0 +1,85 @@
+{
+  "schemaVersion": "0.1.0",
+  "revision": 0,
+  "locked": false,
+  "createdAt": "2026-10-17T09:30:00+06:00",
+  "updatedAt": "2026-10-17T09:30:00+06:00",
+  "project": {
+    "id": "3f2a1b4c-5d6e-4f7a-8b9c-0d1e2f3a4b5c",
+    "name": "Project 1",
+    "language": "bn",
+    "displayUnits": {
+      "length": "ft",
+      "area": "katha",
+      "currency": "BDT"
+    }
+  },
+  "site": {
+    "address": {
+      "division": "Dhaka",
+      "district": "Dhaka",
+      "upazilaOrThana": "Dhanmondi",
+      "areaName": "Dhanmondi"
+    },
+    "plot": {
+      "areaSqm": 334.45,
+      "roadWidthM": 6.0,
+      "cornerPlot": false,
+      "existingStructure": false
+    },
+    "soil": {
+      "status": "area_default",
+      "sbcKpa": 65,
+      "note": "Conservative area default for Dhanmondi - no soil report provided."
+    },
+    "jurisdiction": {
+      "authority": "rajuk",
+      "rulePack": "rajuk@2008.1",
+      "seismicZone": 2
+    }
+  },
+  "building": {
+    "occupancy": "residential",
+    "structureType": "rcc_frame",
+    "storeys": {
+      "count": 5
+    },
+    "unitsPerFloor": 2,
+    "groundFloorUsage": "parking"
+  },
+  "phases": [
+    { "id": "site-excavation", "kind": "site_excavation", "label": "সাইট ও খনন", "status": "not_started", "data": {} },
+    { "id": "foundation", "kind": "foundation", "label": "ফাউন্ডেশন", "status": "not_started", "data": {} },
+    { "id": "floor-0", "kind": "floor", "storeyIndex": 0, "label": "নিচতলা", "status": "not_started", "data": {} },
+    { "id": "floor-1", "kind": "floor", "storeyIndex": 1, "label": "১ম তলা", "status": "not_started", "data": {} },
+    { "id": "floor-2", "kind": "floor", "storeyIndex": 2, "label": "২য় তলা", "status": "not_started", "data": {} },
+    { "id": "floor-3", "kind": "floor", "storeyIndex": 3, "label": "৩য় তলা", "status": "not_started", "data": {} },
+    { "id": "floor-4", "kind": "floor", "storeyIndex": 4, "label": "৪র্থ তলা", "status": "not_started", "data": {} },
+    { "id": "roof-boundary", "kind": "roof_boundary", "label": "ছাদ ও সীমানা প্রাচীর", "status": "not_started", "data": {} },
+    { "id": "common-services", "kind": "common_services", "label": "সাধারণ সেবা (সিঁড়ি, লিফট, ইউটিলিটি)", "status": "not_started", "data": {} }
+  ],
+  "assumptions": [
+    {
+      "id": "asm-soil-default",
+      "subject": "Soil bearing capacity",
+      "statement": "No soil test report provided; conservative area default of 65 kPa used. Assumption - verify on site.",
+      "basis": "area_default",
+      "verifyOnSite": true,
+      "relatedPath": "/site/soil/sbcKpa"
+    }
+  ],
+  "provenance": {
+    "/site/plot/areaSqm": {
+      "source": "user",
+      "detail": "Entered as 5 katha via the land-unit module",
+      "at": "2026-10-17T09:30:00+06:00",
+      "confidence": "high"
+    },
+    "/site/soil/sbcKpa": {
+      "source": "assumption",
+      "detail": "Source Registry: area default Dhaka (BNBC seismic zone 2)",
+      "at": "2026-10-17T09:30:00+06:00",
+      "confidence": "assumption"
+    }
+  }
+}

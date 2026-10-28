@@ -1,0 +1,95 @@
+{
+  "schemaVersion": "0.1.0",
+  "pack": {
+    "id": "rajuk@2008.1",
+    "sha256": "ae9738b458113c083cb8f662f6757f45b0741df6afeec55c2dc7b910bf7754eb",
+    "status": "candidate"
+  },
+  "subject": {
+    "specRevision": 3,
+    "specSha256": "1adaf2dbf6b57e5f9320ebe2b63c4f2e3b91bf080cbdc0f73b75de2c7e102e7a"
+  },
+  "evaluatedAt": "2026-10-18T10:02:00+06:00",
+  "evaluator": "compliance-engine@0.1.0",
+  "verdicts": [
+    {
+      "ruleRef": "rajuk@2008.1#far-tables",
+      "status": "compliant",
+      "title": {
+        "bn": "এফএআর ও সর্বোচ্চ ভূমি আচ্ছাদন (সারণি ৩)",
+        "en": "FAR and maximum ground coverage (Tables 3(ka)-(cha))"
+      },
+      "summary": {
+        "bn": "প্রস্তাবিত এফএআর ২.১০ - ১২০ বর্গমিটার প্লট (শ্রেণি এ১-এ৪, ৬ মিটার সড়ক) এর জন্য অনুমোদিত সীমা ৩.১৫ এর মধ্যে আছে।",
+        "en": "Proposed FAR 2.10 is within the limit of 3.15 for this plot (120 m², class A1-A4, 6 m road)."
+      },
+      "measured": { "value": 2.1 },
+      "limit": { "value": 3.15, "comparator": "max" },
+      "citations": ["far-3ka"]
+    },
+    {
+      "ruleRef": "rajuk@2008.1#setback-schedule",
+      "status": "deviation",
+      "title": {
+        "bn": "বাধ্যতামূলক সেটব্যাক (অনুচ্ছেদ ৪৬ তফসিল)",
+        "en": "Mandatory setbacks from boundaries (§46 schedule)"
+      },
+      "summary": {
+        "bn": "সামনের সেটব্যাক ১.২০ মিটার; এই প্লটের জন্য প্রয়োজন কমপক্ষে ১.৫০ মিটার।",
+        "en": "Front setback 1.20 m is below the required minimum of 1.50 m for this plot size."
+      },
+      "measured": {
+        "value": 1.2,
+        "unit": "m",
+        "path": "/phases/site-excavation/data/setbackFrontM"
+      },
+      "limit": { "value": 1.5, "unit": "m", "comparator": "min" },
+      "alternative": {
+        "description": {
+          "bn": "সামনের সেটব্যাক ১.৫০ মিটার হওয়ার মতোভাবে ভবনের সামনের রেখা সরান।",
+          "en": "Move the front building line so the front setback becomes 1.50 m."
+        },
+        "specPatch": [
+          { "op": "replace", "path": "/phases/site-excavation/data/setbackFrontM", "value": 1.5 }
+        ]
+      },
+      "citations": ["setbacks", "s46-3-4"]
+    },
+    {
+      "ruleRef": "rajuk@2008.1#schedule4-parking",
+      "status": "compliant",
+      "title": {
+        "bn": "পার্কিং ব্যবস্থা (তফসিল ৪)",
+        "en": "Parking requirement (Schedule 4)"
+      },
+      "summary": {
+        "bn": "দুটি গাড়ির জায়গা আছে; ২০০ বর্গমিটার পর্যন্ত একক-পরিবার প্লটে কমপক্ষে একটি প্রয়োজন।",
+        "en": "Two car spaces provided; at least one is required for a single-family plot up to 200 m²."
+      },
+      "measured": { "value": 2, "unit": "spaces" },
+      "limit": { "value": 1, "unit": "spaces", "comparator": "min" },
+      "citations": ["schedule4"]
+    },
+    {
+      "ruleRef": "rajuk@2008.1#far-tables",
+      "status": "impossible",
+      "title": {
+        "bn": "এফএআর ও সর্বোচ্চ ভূমি আচ্ছাদন (সারণি ৩)",
+        "en": "FAR and maximum ground coverage (Tables 3(ka)-(cha))"
+      },
+      "summary": {
+        "bn": "৩০০ বর্গমিটার প্লটে বি১ শ্রেণির ব্যবহার নিষিদ্ধ (সারণি ৩(খ)) - কোনো এফএআর মঞ্জুর করা যায় না; এই প্লটে এই ব্যবহারে সম্মতি দেওয়া সম্ভব নয়। অনুমোদিত শ্রেণি (যেমন এ বা ই) বা বড় প্লট বিবেচনা করুন।",
+        "en": "Use class B1 is prohibited on a 300 m² plot (Table 3(kha)): no FAR may be granted, so this use cannot comply on this plot. Consider a permitted class (e.g. A or E) or a larger plot."
+      },
+      "citations": ["far-3kha", "far-3kha-fn"]
+    }
+  ],
+  "unevaluated": [
+    {
+      "ruleRef": "rajuk@2008.1#s46-5-items-2",
+      "reason": "missing_input",
+      "detail": "Needs balcony projections and the ground-level open-space split; those arrive with the design-phase payload schemas (P1)."
+    }
+  ],
+  "summary": { "compliant": 2, "deviation": 1, "impossible": 1 }
+}

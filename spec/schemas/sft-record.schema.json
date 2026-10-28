@@ -1,0 +1,421 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.archresidencebd.app/sft-record/0.3.0.json",
+  "title": "SftRecord",
+  "description": "ArchResidenceBD SFT record schema v0.2.0 (W1.5 + W1.7, plan §7) - one training example for a fleet member. Scripts generate the substrate (structure, numbers, templates); teacher models add natural-language variety. Every record carries machine-checkable labels, the generator/teacher provenance, and a status: verified records are training-eligible, candidate records await deterministic verification (quality law: unverified content is a candidate). v0.2.0 adds the repair family (W1.7): kind=repair, task=repair.fix, lang=code, difficulty=broken, and a failure block whose trace is normalised (candidate frames only). Chat records written by W1.5 remain schemaVersion 0.1.0 and stay valid. v0.3.0 adds the rejection-sampling provenance (W4.1): source.kind=rft marks a record whose answer the model produced itself and whose labels the scripted truth verified (the round's ledger is the record of the check).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "kind",
+    "task",
+    "lang",
+    "messages",
+    "labels",
+    "input",
+    "source",
+    "difficulty",
+    "status"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "enum": [
+        "0.1.0",
+        "0.2.0"
+      ],
+      "description": "Version of this shape the record was written against; chat=0.1.0, repair=0.2.0."
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$",
+      "description": "Stable record id, e.g. chat-parse-plot-area-slp-katha-bn-01."
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "chat",
+        "repair"
+      ],
+      "description": "Dataset family; chat = Archie-Chat-4B (W1.6), repair = Archie-Repair-4B (W1.7)."
+    },
+    "task": {
+      "type": "string",
+      "enum": [
+        "interview.ask",
+        "interview.parse",
+        "rule.explain",
+        "deviation.override",
+        "repair.fix"
+      ],
+      "description": "Narrow task contract of the record."
+    },
+    "lang": {
+      "type": "string",
+      "enum": [
+        "bn",
+        "en",
+        "mixed",
+        "code"
+      ],
+      "description": "Language of the user-side content (assistant follows the user); code = a Python macro."
+    },
+    "messages": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 9,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "role",
+          "content"
+        ],
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "system",
+              "user",
+              "assistant"
+            ]
+          },
+          "content": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "description": "Rendered prompt/completion payload (system first, then alternating user/assistant)."
+    },
+    "labels": {
+      "type": "object",
+      "description": "Machine-checkable ground truth; verification reads only here (and the pack/spec), never the prose.",
+      "properties": {
+        "questionId": {
+          "type": "string"
+        },
+        "phaseId": {
+          "type": "string"
+        },
+        "mapsTo": {
+          "type": "string",
+          "pattern": "^/"
+        },
+        "essential": {
+          "type": "boolean"
+        },
+        "pointer": {
+          "type": "string",
+          "pattern": "^/"
+        },
+        "decision": {
+          "type": "string",
+          "enum": [
+            "accept",
+            "ask_again",
+            "fallback",
+            "escalate"
+          ]
+        },
+        "value": {
+          "type": [
+            "number",
+            "string",
+            "boolean"
+          ]
+        },
+        "unit": {
+          "type": "string"
+        },
+        "fallbackKind": {
+          "type": "string",
+          "enum": [
+            "default",
+            "registry",
+            "area_default",
+            "derive",
+            "omit"
+          ]
+        },
+        "ruleRef": {
+          "type": "string",
+          "pattern": "^[a-z]+@\\d{4}\\.\\d+#[a-z0-9][a-z0-9-]*$"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "compliant",
+            "deviation",
+            "impossible"
+          ]
+        },
+        "citations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "allowedNumbers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "registerEntry": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "ruleRef",
+            "ruleTitle",
+            "expected",
+            "actual",
+            "riskTier"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9-]*$"
+            },
+            "ruleRef": {
+              "type": "string"
+            },
+            "ruleTitle": {
+              "type": "string"
+            },
+            "expected": {
+              "type": "string"
+            },
+            "actual": {
+              "type": "string"
+            },
+            "riskTier": {
+              "type": "string",
+              "enum": [
+                "cosmetic",
+                "approval_risk",
+                "structural_attention"
+              ]
+            }
+          }
+        },
+        "specPatch": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "caseId": {
+          "type": "string"
+        },
+        "errorType": {
+          "type": "string"
+        },
+        "failureCode": {
+          "type": "string",
+          "enum": [
+            "engine_error",
+            "verification"
+          ]
+        },
+        "check": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "generator"
+      ],
+      "description": "What the record was generated from (artifact refs, question/rule/spec ids, the seed inputs).",
+      "properties": {
+        "generator": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]*$"
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "scripted",
+            "teacher",
+            "hand",
+            "rft"
+          ],
+          "description": "Where the record came from: scripted (the generators), teacher (a model, candidate until verified), hand (a person), rft (the model produced the answer itself and the scripted truth verified it)."
+        },
+        "seed": {
+          "type": "integer"
+        },
+        "model": {
+          "type": "string",
+          "description": "Teacher model id (registry-pinned) for kind=teacher."
+        },
+        "modelSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "promptVersion": {
+          "type": "string"
+        },
+        "batch": {
+          "type": "string"
+        }
+      }
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": [
+        "clean",
+        "sloppy",
+        "broken"
+      ],
+      "description": "sloppy = the sloppy-input class (Banglish, typos, unit confusion, 'don't know', off-topic); it must trigger defaults/clarification, never stall. broken = a code repair input (W1.7)."
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "verified",
+        "candidate"
+      ],
+      "description": "verified = passed its deterministic checks and may enter training; candidate = unverified (quality law)."
+    },
+    "verifyChecks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "task": {
+            "const": "interview.ask"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "labels": {
+            "required": [
+              "questionId",
+              "phaseId",
+              "mapsTo"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "task": {
+            "const": "interview.parse"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "labels": {
+            "required": [
+              "questionId",
+              "pointer",
+              "decision"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "task": {
+            "const": "rule.explain"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "labels": {
+            "required": [
+              "ruleRef",
+              "status",
+              "citations",
+              "allowedNumbers"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "task": {
+            "const": "deviation.override"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "labels": {
+            "required": [
+              "ruleRef",
+              "citations",
+              "allowedNumbers",
+              "registerEntry"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "task": {
+            "const": "repair.fix"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "kind": {
+            "const": "repair"
+          },
+          "lang": {
+            "const": "code"
+          },
+          "difficulty": {
+            "const": "broken"
+          },
+          "messages": {
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "labels": {
+            "required": [
+              "caseId",
+              "errorType",
+              "failureCode"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "defaults": {
+    "host": "127.0.0.1",
+    "parallel": 1,
+    "ttl": 0
+  },
+  "generated": "llama-swap.yaml",
+  "groups": {
+    "cpu-services": {
+      "exclusive": false,
+      "persistent": true,
+      "purpose": "embedder/reranker stay loaded on CPU while GPU models swap (S2)",
+      "swap": false
+    },
+    "gpu-models": {
+      "exclusive": true,
+      "persistent": false,
+      "purpose": "interview/design models share one 6 GB card - exactly one resident (S2)",
+      "swap": true
+    }
+  },
+  "installRootEnv": "ARCHRES_ROOT",
+  "macros": {
+    "llama-server": "bin/llama/llama-server.exe",
+    "models": "models"
+  },
+  "modes": {
+    "design": {
+      "description": {
+        "bn": "ডিজাইন: ক্যাড স্ক্রিপ্ট তৈরি ও মেরামত — রিপেয়ার মডেল জিপিইউ নেয়।",
+        "en": "Design: build and repair CAD scripts - the repair model takes the GPU."
+      },
+      "primary": "repair",
+      "warmup": [
+        "repair",
+        "embed"
+      ]
+    },
+    "interview": {
+      "description": {
+        "bn": "ইন্টারভিউ: প্রশ্ন, উত্তর বোঝা ও ব্যাখ্যা — চ্যাট মডেল সক্রিয় থাকে।",
+        "en": "Interview: ask, parse and explain - the chat model stays resident."
+      },
+      "primary": "chat",
+      "warmup": [
+        "chat",
+        "embed"
+      ]
+    }
+  },
+  "notes": "Model fleet config v1. Source of truth for router policy and modes; the llama-swap YAML is generated from this file plus registry.json. Uses sazid63/archresidencebd-models on Hugging Face (archie-chat-v0, archres-repair-v0, archie-embed, and archie-rerank with fixed template).",
+  "router": {
+    "healthCheckTimeout": 500,
+    "listen": "127.0.0.1:8787",
+    "logLevel": "info",
+    "logTimeFormat": "rfc3339",
+    "sendLoadingState": true
+  },
+  "schemaVersion": "0.1.0"
+}

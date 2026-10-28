@@ -1,0 +1,496 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.archresidencebd.app/rule-pack/0.1.0.json",
+  "title": "RulePack",
+  "description": "ArchResidenceBD rule pack v0.1.0 (plan §5.6) - versioned structured law data. One pack = one authority regime edition; id scheme <authority>@<regime>.<revision> (ADR-0003). Every table, rule and footnote cites the gazette page(s) it was read from and the verification tier (page-image | text-layer). Packs ship status=candidate until engineer review; anything not yet resolved lives in the pack's companion candidates file and is listed under gaps, never in the data.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "packVersion", "id", "authority", "regime", "revision", "status", "langs", "title",
+    "source", "verification", "review", "useClasses", "citations", "footnotes",
+    "farTables", "setbackTable", "parkingSchedule", "parkingGeometry",
+    "provisions", "testVectors", "gaps"
+  ],
+  "properties": {
+    "packVersion": {
+      "const": "0.1.0"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z]+@\\d{4}\\.\\d+$",
+      "description": "Stable pack id, e.g. rajuk@2008.1."
+    },
+    "authority": {
+      "type": "string",
+      "enum": ["rajuk", "dncc", "dscc", "ccc", "cda", "kda", "rda", "scc", "paurashava", "other"]
+    },
+    "regime": {
+      "type": "string",
+      "pattern": "^\\d{4}$",
+      "description": "Year of the rule text this pack encodes (2008 = Imarat Nirman Bidhimala 2008 regime)."
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Our extraction revision of that regime, starting at 1."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["candidate", "review", "frozen"],
+      "description": "candidate = extracted, engineer review pending (ADR-0001); frozen = reviewed and locked."
+    },
+    "langs": {
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "items": { "type": "string", "enum": ["bn", "en"] }
+    },
+    "title": { "$ref": "#/$defs/Localized" },
+    "source": { "$ref": "#/$defs/Source" },
+    "verification": { "$ref": "#/$defs/Verification" },
+    "review": { "$ref": "#/$defs/Review" },
+    "useClasses": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/UseClass" }
+    },
+    "citations": {
+      "type": "object",
+      "minProperties": 1,
+      "patternProperties": { "^[a-z0-9-]+$": { "$ref": "#/$defs/Citation" } },
+      "additionalProperties": false,
+      "description": "Citation registry: every rule/table/footnote points at a key here."
+    },
+    "footnotes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Footnote" }
+    },
+    "farTables": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/FarTable" }
+    },
+    "setbackTable": { "$ref": "#/$defs/SetbackTable" },
+    "parkingSchedule": { "$ref": "#/$defs/ParkingSchedule" },
+    "parkingGeometry": { "$ref": "#/$defs/ParkingGeometry" },
+    "provisions": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/Provision" }
+    },
+    "testVectors": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/TestVector" }
+    },
+    "gaps": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Gap" },
+      "description": "Explicit coverage gaps: content that belongs to this pack's scope but is not yet transcribed. Never silent (plan §9)."
+    }
+  },
+  "$defs": {
+    "Localized": {
+      "title": "Localized",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bn", "en"],
+      "properties": {
+        "bn": { "type": "string", "minLength": 1 },
+        "en": { "type": "string", "minLength": 1 }
+      }
+    },
+    "Citation": {
+      "title": "Citation",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["gazettePage", "pdfPage", "tier"],
+      "properties": {
+        "gazettePage": {
+          "type": "string",
+          "pattern": "^\\d{4}(-\\d{4})?$",
+          "description": "Printed gazette page (footer number) or page range."
+        },
+        "pdfPage": {
+          "type": "string",
+          "pattern": "^\\d{1,3}(-\\d{1,3})?$",
+          "description": "Page (or range) in the reference PDF named by source.fileName (gazettePage = pdfPage + 2997 for this gazette)."
+        },
+        "tier": {
+          "type": "string",
+          "enum": ["page-image", "text-layer"],
+          "description": "How the values were read: rendered page image (letters+digits) or text layer (digits only - letters are font-mangled and are never trusted from this tier)."
+        },
+        "note": { "type": "string" }
+      }
+    },
+    "Source": {
+      "title": "Source",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["document", "gazettePages", "fileName", "sha256", "pdfPages", "retrievedAt"],
+      "properties": {
+        "document": { "$ref": "#/$defs/Localized" },
+        "gazettePages": { "type": "string", "pattern": "^\\d{4}-\\d{4}$" },
+        "fileName": {
+          "type": "string",
+          "description": "Reference copy file name (kept outside git; not redistributed)."
+        },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "pdfPages": { "type": "integer", "minimum": 1 },
+        "retrievedAt": { "type": "string", "format": "date" }
+      }
+    },
+    "Verification": {
+      "title": "Verification",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tiers", "method"],
+      "properties": {
+        "tiers": {
+          "type": "array",
+          "minItems": 2,
+          "uniqueItems": true,
+          "items": { "type": "string", "enum": ["page-image", "text-layer"] }
+        },
+        "method": { "type": "string", "minLength": 1 }
+      }
+    },
+    "Review": {
+      "title": "Review",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "openItems", "openItemsFile"],
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "User-facing review status label (ADR-0001 wording)."
+        },
+        "openItems": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of gaps[] entries (must equal len(gaps))."
+        },
+        "openItemsFile": {
+          "type": "string",
+          "description": "Companion candidates file (path relative to repo root)."
+        }
+      }
+    },
+    "UseClass": {
+      "title": "UseClass",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "useBn", "useEn", "memberIds"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[A-K][0-9]+(-[A-K]?[0-9]+)?$" },
+        "useBn": { "type": "string", "minLength": 1 },
+        "useEn": { "type": "string", "minLength": 1 },
+        "memberIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[A-K][0-9]{1,2}$" }
+        }
+      }
+    },
+    "FarValueRow": {
+      "title": "FarValueRow",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["roadWidthM", "far", "mgcPercent"],
+      "oneOf": [
+        { "required": ["anyPlot"], "properties": { "anyPlot": { "const": true } } },
+        {
+          "anyOf": [
+            { "required": ["areaSqmTo"] },
+            { "required": ["areaSqmFrom"] }
+          ]
+        }
+      ],
+      "properties": {
+        "roadWidthM": { "type": "number", "exclusiveMinimum": 0 },
+        "areaSqmFrom": { "type": "number", "minimum": 0, "description": "Exclusive lower bound of the plot-area band (absent on the first band = 0)." },
+        "areaSqmTo": { "type": "number", "minimum": 0, "description": "Inclusive upper bound; absent = open-ended (e.g. above 20 katha)." },
+        "areaKathaFrom": { "type": "integer", "minimum": 0 },
+        "areaKathaTo": { "type": "integer", "minimum": 1 },
+        "anyPlot": { "const": true, "description": "Row applies to any plot size (যে কোন পরিমাণ)." },
+        "far": {
+          "oneOf": [
+            { "type": "number", "exclusiveMinimum": 0 },
+            { "const": "NR" }
+          ]
+        },
+        "mgcPercent": { "type": "number", "minimum": 0, "maximum": 100 },
+        "footnotes": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z0-9-]+$" }
+        }
+      }
+    },
+    "FarProhibitedRow": {
+      "title": "FarProhibitedRow",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["prohibited", "areaSqmFrom", "areaSqmTo", "areaKathaFrom", "areaKathaTo"],
+      "properties": {
+        "prohibited": { "const": true },
+        "areaSqmFrom": { "type": "number", "minimum": 0 },
+        "areaSqmTo": { "type": "number", "minimum": 0 },
+        "areaKathaFrom": { "type": "integer", "minimum": 0 },
+        "areaKathaTo": { "type": "integer", "minimum": 1 },
+        "footnotes": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z0-9-]+$" }
+        }
+      }
+    },
+    "FarRow": {
+      "title": "FarRow",
+      "oneOf": [
+        { "$ref": "#/$defs/FarProhibitedRow" },
+        { "$ref": "#/$defs/FarValueRow" }
+      ]
+    },
+    "FarTable": {
+      "title": "FarTable",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "tableBn", "tableEn", "clause", "cite", "classId", "rows"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "tableBn": { "type": "string", "minLength": 1 },
+        "tableEn": { "type": "string", "minLength": 1 },
+        "clause": { "type": "string", "minLength": 1 },
+        "cite": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "classId": { "type": "string", "pattern": "^[A-K][0-9]+(-[A-K]?[0-9]+)?$" },
+        "note": { "$ref": "#/$defs/Localized" },
+        "rows": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/FarRow" }
+        }
+      }
+    },
+    "Footnote": {
+      "title": "Footnote",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "mark", "text", "cite"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "mark": { "type": "string", "minLength": 1, "description": "Marker as printed (e.g. [১], *, **)." },
+        "appliesTo": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[A-K][0-9]+(-[A-K]?[0-9]+)?$" }
+        },
+        "text": { "$ref": "#/$defs/Localized" },
+        "cite": { "type": "string", "pattern": "^[a-z0-9-]+$" }
+      }
+    },
+    "SetbackRow": {
+      "title": "SetbackRow",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["frontM", "rearM", "sideM"],
+      "properties": {
+        "areaKathaFrom": { "type": "integer", "minimum": 0 },
+        "areaKathaTo": { "type": "integer", "minimum": 1 },
+        "areaSqmFrom": { "type": "number", "minimum": 0, "description": "Exclusive lower bound of the plot-area band (absent on the first band = 0)." },
+        "areaSqmTo": { "type": "number", "minimum": 0, "description": "Inclusive upper bound; absent = open-ended (e.g. above 20 katha)." },
+        "frontM": { "type": "number", "exclusiveMinimum": 0 },
+        "rearM": { "type": "number", "exclusiveMinimum": 0 },
+        "sideM": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "SetbackTable": {
+      "title": "SetbackTable",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "cite", "heightApplicabilityM", "heightApplicabilityStoreys", "rows", "beyondHeight"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "cite": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "heightApplicabilityM": { "type": "number", "exclusiveMinimum": 0, "description": "The banded rows apply up to this height." },
+        "heightApplicabilityStoreys": { "type": "integer", "minimum": 1 },
+        "rows": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/SetbackRow" }
+        },
+        "beyondHeight": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["overHeightM", "overStoreys", "frontM", "rearM", "sideM", "cite"],
+          "properties": {
+            "overHeightM": { "type": "number", "exclusiveMinimum": 0 },
+            "overStoreys": { "type": "integer", "minimum": 1 },
+            "frontM": { "type": "number", "exclusiveMinimum": 0 },
+            "rearM": { "type": "number", "exclusiveMinimum": 0 },
+            "sideM": { "type": "number", "exclusiveMinimum": 0 },
+            "cite": { "type": "string", "pattern": "^[a-z0-9-]+$" }
+          }
+        }
+      }
+    },
+    "ParkingRate": {
+      "title": "ParkingRate",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "useBn", "useEn", "vehicle", "spaces"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "useBn": { "type": "string", "minLength": 1 },
+        "useEn": { "type": "string", "minLength": 1 },
+        "vehicle": { "type": "string", "enum": ["car", "motorcycle", "truck"] },
+        "spaces": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["numerator", "denominator", "basis"],
+          "properties": {
+            "numerator": { "type": "integer", "minimum": 1 },
+            "denominator": { "type": "integer", "minimum": 1 },
+            "basis": {
+              "type": "string",
+              "enum": ["dwelling", "unit", "room", "bed", "seat", "sqm_gross", "site"],
+              "description": "What the denominator counts; sqm_gross = per that many m2 of gross floor area."
+            }
+          }
+        },
+        "additive": { "type": "boolean", "default": false, "description": "Adds on top of the car requirement (motorcycle rows)." },
+        "unitAreaMinExclusiveSqm": { "type": "number", "exclusiveMinimum": 0 },
+        "unitAreaMaxSqm": { "type": "number", "exclusiveMinimum": 0 },
+        "grossAreaMinExclusiveSqm": { "type": "number", "exclusiveMinimum": 0 },
+        "grossAreaMaxSqm": { "type": "number", "exclusiveMinimum": 0 },
+        "siteAreaMinExclusiveSqm": { "type": "number", "exclusiveMinimum": 0 },
+        "siteAreaMaxSqm": { "type": "number", "exclusiveMinimum": 0 },
+        "minSpaces": { "type": "integer", "minimum": 1 },
+        "note": { "$ref": "#/$defs/Localized" }
+      }
+    },
+    "ParkingNote": {
+      "title": "ParkingNote",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "text"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "text": { "$ref": "#/$defs/Localized" },
+        "cite": { "type": "string", "pattern": "^[a-z0-9-]+$" }
+      }
+    },
+    "ParkingSchedule": {
+      "title": "ParkingSchedule",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "cite", "rows", "notes"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "cite": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "rows": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/ParkingRate" }
+        },
+        "notes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ParkingNote" }
+        }
+      }
+    },
+    "Stall": {
+      "title": "Stall",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["vehicle", "widthM", "lengthM"],
+      "properties": {
+        "vehicle": { "type": "string", "enum": ["car", "bus_truck", "multi_axle", "motorcycle"] },
+        "widthM": { "type": "number", "exclusiveMinimum": 0 },
+        "lengthM": { "type": "number", "exclusiveMinimum": 0 },
+        "innerTurnRadiusM": { "type": "number", "exclusiveMinimum": 0 },
+        "outerTurnRadiusM": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "DrivewayWidth": {
+      "title": "DrivewayWidth",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["angleDeg", "singleLoadedM", "doubleLoadedM", "twoWayM"],
+      "properties": {
+        "angleDeg": { "type": "integer", "enum": [0, 45, 90] },
+        "singleLoadedM": { "type": "number", "exclusiveMinimum": 0 },
+        "doubleLoadedM": { "type": "number", "exclusiveMinimum": 0 },
+        "twoWayM": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "ParkingGeometry": {
+      "title": "ParkingGeometry",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "cite", "stalls", "packedBayWidthM", "drivewayWidths", "rules"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "cite": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "stalls": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/Stall" }
+        },
+        "packedBayWidthM": { "type": "number", "exclusiveMinimum": 0 },
+        "drivewayWidths": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/DrivewayWidth" }
+        },
+        "rules": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Provision" }
+        }
+      }
+    },
+    "Provision": {
+      "title": "Provision",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "clause", "cite", "title", "summary"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "clause": { "type": "string", "minLength": 1 },
+        "cite": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "title": { "$ref": "#/$defs/Localized" },
+        "summary": { "$ref": "#/$defs/Localized" },
+        "data": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Optional machine-readable values carried by this provision."
+        }
+      }
+    },
+    "TestVector": {
+      "title": "TestVector",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "given", "expect"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "kind": { "type": "string", "enum": ["far", "setback", "parking"] },
+        "given": { "type": "object", "additionalProperties": true },
+        "expect": { "type": "object", "additionalProperties": true },
+        "note": { "type": "string" }
+      }
+    },
+    "Gap": {
+      "title": "Gap",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "what", "why", "candidateRef"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+        "what": { "type": "string", "minLength": 1 },
+        "why": { "type": "string", "minLength": 1 },
+        "candidateRef": { "type": "string", "pattern": "^C\\d+$" }
+      }
+    }
+  }
+}

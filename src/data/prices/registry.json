@@ -1,0 +1,56 @@
+{
+  "cards": [
+    {
+      "cardId": "dhaka-example-2026-10",
+      "effectiveFrom": "2026-10-01",
+      "effectiveTo": null,
+      "file": "spec/examples/interfaces/rate-card-dhaka-example.json",
+      "lines": 8,
+      "region": "dhaka",
+      "sha256": "83364e9140aa65d8b70bdef69c333fcf272eb7b0c68311799d9b14d536b545c6",
+      "source": {
+        "kind": "manual",
+        "name": "Illustrative example card (structure demo)",
+        "retrievedAt": null,
+        "sha256": null,
+        "url": null
+      },
+      "status": "candidate"
+    },
+    {
+      "cardId": "pwd-sor-2022-civil-works",
+      "effectiveFrom": "2023-02-23",
+      "effectiveTo": null,
+      "file": "data/prices/cards/pwd-sor-2022-civil-works-candidate.json",
+      "lines": 9,
+      "region": "dhaka",
+      "sha256": "5cacaffbbc57fcdbd64d6becb46c1e377e932026b079a6cb67617314833465f5",
+      "source": {
+        "kind": "official_list",
+        "name": "PWD Schedule of Rates 2022 (Revised), Part A: Civil Works (16th edition, revised)",
+        "retrievedAt": "2026-10-21",
+        "sha256": "bf7524a24d20a5b1d9f4b345a9ca6fa3bbeccebf6dabe44d84cb06fc3b82b47f",
+        "url": "https://ss.pwd.gov.bd/document/sor/PWDSoR2022-Revised-2.3.23-Website.pdf"
+      },
+      "status": "candidate"
+    }
+  ],
+  "skipped": [
+    {
+      "file": "spec/examples/interfaces/job-request-geometry.json",
+      "reason": "not a rate card"
+    },
+    {
+      "file": "spec/examples/interfaces/job-result-drawing.json",
+      "reason": "not a rate card"
+    },
+    {
+      "file": "spec/examples/interfaces/job-result-error.json",
+      "reason": "not a rate card"
+    },
+    {
+      "file": "spec/examples/interfaces/verdict-set-example.json",
+      "reason": "not a rate card"
+    }
+  ]
+}

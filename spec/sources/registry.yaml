@@ -1,0 +1,576 @@
+# Source Registry v0 (W0.10) - curated trusted sources per data type (plan §5.10).
+# The AI fetches through this registry instead of blind searching; every fetched value
+# carries provenance. Validated against spec/schemas/source-registry.schema.json in
+# core/tests/test_source_registry.py. Doc: docs/spec/source-registry-v0.md.
+#
+# Verification state 2026-10-18: ffwc-flood and bwdb-schedule-of-rates were fetched and
+# confirmed live from the build machine; bbs / pwd / hbri / srdi / rajuk domains did not
+# resolve from this network and stay `candidate` with a note - never silently assumed.
+
+schemaVersion: "0.1.0"
+registryId: "sources-v0"
+updated: "2026-10-18"
+
+fetchPolicy:
+  - "Consent: fetching requires the user's explicit approval per source (plan §3, §5.10) - nothing fetches at startup or in the background."
+  - "Cache-first: reuse a fresh cache copy (per-source cacheTtlDays); a fresh copy is never re-fetched."
+  - "Provenance: every fetched value carries sourceId + url + retrievedAt + sha256 of the fetched artifact (plan §2.5); the cache manifest is the evidence."
+  - "Candidate-only: fetched numbers enter rate cards as candidate lines until a human marks the card active (plan §9 quality law)."
+  - "No silent gaps: an unavailable source surfaces as 'not fetched - reason', never as zero or a blank."
+
+sources:
+  - id: rajuk-bidhimala-2008
+    dataTypes: [rule-source]
+    status: active
+    authority: "RAJUK (Rajdhani Unnayan Kartripakkha)"
+    title:
+      bn: "ইমারত নির্মাণ বিধিমালা, ২০০৮ (বাংলাদেশ গেজেট, অতিরিক্ত সংখ্যা, ২৯ মে ২০০৮)"
+      en: "Imarat Nirman Bidhimala 2008 (Bangladesh Gazette, extra issue, 29 May 2008)"
+    kind: pdf-document
+    language: [bn]
+    licence: "Government gazette publication; numbers are used as facts with per-rule citations (ADR-0003); no text bundled."
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: "Hold the gazette PDF (any mirror), hash it first (expect the pinned sha256), page-map per tools/rules/gazette/README.md, extract per ADR-0003. Record the download URL in the fetch manifest - it was not recorded at the 2026-10-17 retrieval (process gap)."
+    cadence: static
+    lastVerified: "2026-10-17"
+    artifact:
+      fileName: "rajuk-bidhimala-2008-gazette.pdf"
+      sizeBytes: 1946482
+      sha256: "3318b3f434a9bf248c798c1982e800360ddf22ae7216966efeacf47d9b860d5e"
+      pages: 199
+    notes: "Backs rule pack rajuk@2008.1 (spec/rules/rajuk-2008.yaml). A second independent download (mirror) was byte-identical."
+
+  - id: hbri-bnbc
+    dataTypes: [rule-source, seismic-zone]
+    status: candidate
+    authority: "HBRI (Housing and Building Research Institute), Ministry of Housing and Public Works"
+    title:
+      bn: "বাংলাদেশ জাতীয় ইমারত নির্মাণ বিধিমালা (বিএনবিসি) ২০২০"
+      en: "Bangladesh National Building Code (BNBC) 2020"
+    kind: pdf-document
+    url: "https://hbri.gov.bd/"
+    language: [en]
+    licence: "Government code publication; numbers used as facts with citations once a pack exists; acquisition path to confirm."
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: "Acquire the official BNBC 2020 volumes, hash and pin as an artifact (like the gazette), then extract rule numbers per ADR-0003 into a 'bnbc@2020.x' pack. The seismic zoning map is read from the relevant BNBC part (zones become a rule-pack table, never a guessed polygon)."
+    cadence: ad-hoc
+    cacheTtlDays: 180
+    notes: "Domain did not resolve from the build machine on 2026-10-18 (transport error) - confirm from a browser before first use. Nothing enters a rule pack until the pinned copy exists."
+
+  - id: chattogram-cda-building-rules
+    dataTypes:
+    - rule-source
+    status: candidate
+    authority: Chattogram Development Authority (CDA)
+    title:
+      bn: সিডিএ প্রবিধানমালা (চট্টগ্রাম উন্নয়ন কর্তৃপক্ষ)
+      en: CDA rules (Chattogram Development Authority)
+    kind: pdf-document
+    url: https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-cda/2024/12/ff265f2104824ae0a9c15ac933f833d7.pdf
+    language:
+    - bn
+    licence: Government publication; confirm the reuse terms before extraction.
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: >-
+        The document is fetched from the authority's laws page (the URL above is the
+        document's own object storage). It is a 50-page scan with no text layer, so the
+        repo PDF reader cannot transcribe it - the FAR chart has to be read from the
+        rendered page (the RAJUK pack's own method, ADR-0003) and this machine cannot
+        render a PDF page. A human read, or OCR (a new dependency, and the owner call).
+    cadence: static
+    lastVerified: "2026-10-22"
+    artifact:
+      fileName: "chattogram-cda-rules.pdf"
+      sizeBytes: 15054306
+      sha256: "a87703e4d7058055a5ac7ee538878b86b0dea754165669199b04fc768d8df348"
+      pages: 50
+    notes: >-
+      FOUND, and the pinned URL was wrong 2026-10-22: the link this entry carried
+      (http://cda.gov.bd/download/rulesand%20regulations/Imarat%20Nirman%20niyomaboli.pdf)
+      answers 404. The authority's laws page
+      (http://cda.gov.bd/pages/static-pages/6922dead933eb65569e1c8dc) lists the documents
+      that are actually published; the URL above is the CDA's own rules, fetched, hashed and
+      measured on 2026-10-22 (50 pages, 15054306 bytes, no text layer - a CamScanner scan).
+      The FAR chart is not in this book: it is in the Building Construction Act 1952, which
+      the same page lists and which is the next entry. Until the values are transcribed,
+      the city pack falls back to the national rules (rajuk@2008.1) and says so.
+
+  - id: chattogram-building-construction-act-1952
+    dataTypes:
+    - rule-source
+    status: candidate
+    authority: Chattogram Development Authority (CDA)
+    title:
+      bn: বিল্ডিং কন্সট্রাকশন অ্যাক্ট, ১৯৫২ (২০০৮ সালে সংশোধিত)
+      en: The Building Construction Act, 1952 (as amended in 2008)
+    kind: pdf-document
+    url: https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-cda/2024/12/71a4277ec29b459aa66f7c00bf5a4032.pdf
+    language:
+    - bn
+    - en
+    licence: Government publication; confirm the reuse terms before extraction.
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: >-
+        The document is fetched from the authority's laws page. It carries a text layer, and
+        the FAR chart's numbers are in it, but the letters are in a legacy font encoding and
+        the chart's headings are not readable from the text - so the chart is read from the
+        rendered page (the RAJUK pack's own method, ADR-0003), and this machine cannot render
+        a PDF page. Until then the values are not transcribed.
+    cadence: static
+    lastVerified: "2026-10-22"
+    artifact:
+      fileName: "chattogram-building-construction-act-1952.pdf"
+      sizeBytes: 1177337
+      sha256: "dfff66f3c8cc3ae68d2b279aa8bc560579dde54625c67ec531afc843155209b6"
+      pages: 87
+    notes: >-
+      FOUND 2026-10-22 - the CDA's copy, on the authority's laws page (the URL above is the
+      document's own object storage). 87 pages, 1177337 bytes, fetched and hashed. It has a
+      text layer (148572 characters) whose letters are in a legacy Bangla font encoding and
+      are mangled, while its digits are plain - the same shape as the RAJUK gazette, whose
+      values were read from the rendered pages and never from the text layer. It carries the
+      FAR chart for Chattogram (Type A: A1-A4 and A5; Type B: B1 and B2; and the ground
+      coverage and setback schedules). The chart's numbers are in the text layer; its
+      headings are not, and a number without its heading is not a rule - so nothing is
+      transcribed from it yet, and the city pack falls back to the national rules
+      (rajuk@2008.1) and says so.
+
+  - id: khulna-kda-building-rules
+    dataTypes:
+    - rule-source
+    status: candidate
+    authority: Khulna Development Authority (KDA)
+    title:
+      bn: ভবন নির্মাণের জন্য প্রয়োজনীয় সেটব্যাক ও রাস্তার প্রশস্ততা অনুসারে ইমারতের উচ্চতা (কেডিএ)
+      en: The required setbacks for a building, and the building height by the road width (KDA)
+    kind: html-index
+    url: https://cp.kda.gov.bd/building-construction-rules
+    language:
+    - bn
+    licence: Government publication; confirm the reuse terms before extraction.
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: >-
+        The page lists the two rules the authority publishes; its own service answers each
+        one (https://cp.kda.gov.bd/ajax-land-area-setback and
+        https://cp.kda.gov.bd/ajax-building-height-check), and the answers are read and kept
+        with the service's own wording (Bangla and English) in
+        data/rules/khulna-kda-zoning-candidate.json. The rest of the KDA's rules
+        are not on the page: the FAR schedule, the parking schedule and the use classes are
+        declared gaps, not guesses.
+    cadence: static
+    lastVerified: "2026-10-22"
+    notes: >-
+      FOUND 2026-10-22, and the two zoning rules are TRANSCRIBED. The link this entry carried
+      (http://www.kda.gov.bd/wp-content/uploads/2018/03/KDA-Law.pdf) did not resolve from the
+      build machine - the authority keeps its law elsewhere (khulna-kda-act-2018), and its
+      own site answers under kda.gov.bd (the www host's certificate does not verify). The
+      authority's plan-approval portal publishes the two rules as its own answers: the
+      setbacks for a residential plot by the plot size (four classes, 2 katha and above) and
+      the building height by the road width (seven classes, 12 ft and above). Both were read
+      on 2026-10-22 and are kept with their provenance in
+      data/rules/khulna-kda-zoning-candidate.json - a CANDIDATE, because a fetched rule stays
+      a candidate until a human checks it (the plan's money law, applied to law). What is
+      still missing is declared there: the FAR schedule, the parking schedule and the use
+      classes. Until a full pack exists, the city falls back to the national rules
+      (rajuk@2008.1) for everything the candidate does not cover, and says so.
+
+  - id: khulna-kda-act-2018
+    dataTypes:
+    - rule-source
+    status: candidate
+    authority: Khulna Development Authority (KDA)
+    title:
+      bn: খুলনা উন্নয়ন কর্তৃপক্ষ আইন, ২০১৮
+      en: The Khulna Development Authority Act, 2018
+    kind: pdf-document
+    url: https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-kda/2024/12/1edbca478ca24858a2da81e5d0245d4c.pdf
+    language:
+    - bn
+    - en
+    licence: Government publication; confirm the reuse terms before extraction.
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: >-
+        The document is on the authority's own laws page (its file list), and the file is
+        fetched from the URL above. It has a text layer, but its letters are in a legacy
+        Bangla font encoding and are mangled - the numbers are plain, the headings are not -
+        so a clause is read from the rendered page (the RAJUK pack's own method, ADR-0003).
+    cadence: static
+    lastVerified: "2026-10-22"
+    artifact:
+      fileName: "khulna-kda-act-2018.pdf"
+      sizeBytes: 290032
+      sha256: "f5d8b9e568ef5cad4a22036d91c36e80eeea01c9396d22455b80fbba05a79701"
+      pages: 27
+    notes: >-
+      FOUND 2026-10-22 - this is the link the Khulna entry carried before and did not
+      resolve (http://www.kda.gov.bd/wp-content/uploads/2018/03/KDA-Law.pdf): the authority
+      keeps its own act on its laws page instead, and this is it. 27 pages, 290032 bytes,
+      fetched and hashed. It is the authority's own enabling law - the powers, the
+      Building Construction Committee, the land, the finance - and it refers to the national
+      Building Construction Act 1952 for the building rules, so it is NOT a city zoning of
+      its own: the city falls back to the national rules (rajuk@2008.1) and says so. It is
+      kept because it is the authority's own law, and because the earlier "not found" was
+      wrong.
+
+  - id: khulna-building-construction-rules-1996
+    dataTypes:
+    - rule-source
+    status: candidate
+    authority: Khulna Development Authority (KDA)
+    title:
+      bn: ইমারত নির্মাণ বিধিমালা, ১৯৯৬
+      en: The Building Construction Rules, 1996
+    kind: pdf-document
+    url: https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-kda/2024/12/178090385403479d80328618fe57a414.pdf
+    language:
+    - bn
+    licence: Government publication; confirm the reuse terms before extraction.
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: >-
+        The document is on the authority's own rules page (its file list), and the file is
+        fetched from the URL above. It has a text layer whose letters are in a legacy Bangla
+        font encoding and are mangled - the numbers are plain - so a table is read from the
+        rendered page (the RAJUK pack's own method, ADR-0003).
+    cadence: static
+    lastVerified: "2026-10-22"
+    artifact:
+      fileName: "khulna-building-construction-rules-1996.pdf"
+      sizeBytes: 312653
+      sha256: "8ac31c4be6b78ca69441e3ea9136f4ed0f48cb7e15ab5bf7e742e6ab19dc4628"
+      pages: 14
+    notes: >-
+      FOUND 2026-10-22 - the authority's own copy of the national Building Construction Rules
+      1996. 14 pages, 312653 bytes, fetched and hashed; the text layer's letters are mangled
+      (the numbers are plain). What it holds is the national rules - the predecessor of the
+      2008 rules the app applies - with the FAR, the ground coverage and the heights in its
+      schedule. It is therefore NOT a city zoning of its own: the city falls back to the
+      national rules (rajuk@2008.1) and says so, and the document is kept as the authority's
+      own publication of the rules it administers.
+
+  - id: khulna-building-construction-act-1952
+    dataTypes:
+    - rule-source
+    status: candidate
+    authority: Khulna Development Authority (KDA)
+    title:
+      bn: ইমারত নির্মাণ আইন, ১৯৫২
+      en: The Building Construction Act, 1952
+    kind: pdf-document
+    url: https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-kda/2024/12/a174705f84cf432fb3ceff5002bfe86f.pdf
+    language:
+    - en
+    licence: Government publication; confirm the reuse terms before extraction.
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: >-
+        The document is on the authority's own laws page (its file list), and the file is
+        fetched from the URL above. It is the English text of the Act as modified to 1985 and
+        its text layer is clean, so a clause is read from the text.
+    cadence: static
+    lastVerified: "2026-10-22"
+    artifact:
+      fileName: "khulna-building-construction-act-1952.pdf"
+      sizeBytes: 218751
+      sha256: "f12d2ce12130b45dc12364e54e93a686166da033c932a2a81700f91dfa3ca1ec"
+      pages: 9
+    notes: >-
+      FOUND 2026-10-22 - the authority's own copy of the national Building Construction Act
+      1952, and the useful find is that this copy is in ENGLISH with a clean text layer
+      (9 pages, 218751 bytes, fetched and hashed). It is the Act's sections only - it
+      carries no schedule, so the FAR chart is not in it (the chart is in the Bangla copy,
+      chattogram-building-construction-act-1952, whose headings this machine cannot read).
+      It is the national law, not a city zoning: the city falls back to the national rules
+      (rajuk@2008.1) and says so.
+
+  - id: sylhet-sda-building-rules-1996
+    dataTypes:
+    - rule-source
+    status: candidate
+    authority: Sylhet Development Authority (SDA)
+    title:
+      bn: সিলেট উন্নয়ন কর্তৃপক্ষের ইমারত নির্মাণ বিধিমালা, ১৯৯৬
+      en: Sylhet Development Authority Building Construction Rules, 1996
+    kind: pdf-document
+    url: https://objectstorage.ap-dcc-gazipur-1.oraclecloud15.com/n/axvjbnqprylg/b/V2Ministry/o/office-sda/2026/8/19e74586-b7d8-44ee-8337-ddd731b57a07.pdf
+    language:
+    - bn
+    licence: Government publication; confirm the reuse terms before extraction.
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: >-
+        The document is on the authority's laws page (its file list), and the file itself
+        is fetched from the URL above. It has a text layer, but its letters are in a legacy
+        Bangla font encoding and are mangled - the numbers are plain, the headings are not -
+        so a chart or a clause is read from the rendered page (the RAJUK pack's own method,
+        ADR-0003), not from the text.
+    cadence: static
+    lastVerified: "2026-10-22"
+    artifact:
+      fileName: "sylhet-building-construction-rules-1996.pdf"
+      sizeBytes: 157750
+      sha256: "0ccd24c82a24fb640acaf6c0f31a32e950a1ac14ec0885766d240992afe2ed9f"
+      pages: 19
+    notes: >-
+      FOUND 2026-10-22 - the authority's laws page (the file list) serves the document, and
+      it was fetched, hashed and measured: 19 pages, 157750 bytes, a text layer whose
+      letters are mangled (the numbers are plain). What it holds is the national Building
+      Construction Rules 1996 - the predecessor of the 2008 rules the app applies - with the
+      FAR, the ground coverage and the heights in its schedule. It is therefore NOT a
+      city zoning of its own: the city falls back to the national rules (rajuk@2008.1) and
+      says so, and the document is kept as the authority's own publication of the rules it
+      administers.
+
+  - id: rajshahi-rda-building-rules
+    dataTypes:
+    - rule-source
+    status: candidate
+    authority: Rajshahi Development Authority (RDA)
+    title:
+      bn: রাজশাহী উন্নয়ন কর্তৃপক্ষের আইন, বিধিমালা ও নীতিমালা
+      en: Rajshahi Development Authority's laws, rules and policies
+    kind: html-index
+    url: http://rdarajshahi.gov.bd/pages/static-pages/695e3b0bc4774958d7b72285
+    language:
+    - bn
+    cacheTtlDays: 180
+    licence: Government publication; confirm the reuse terms before extraction.
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: >-
+        The rules page lists the authority's rule books with their titles; each file is served
+        from the authority's own file host. The file host did not answer from the build
+        machine on 2026-10-22, so the documents are named here and not fetched - the titles
+        are what the page carries.
+    cadence: ad-hoc
+    lastVerified: "2026-10-22"
+    notes: >-
+      FOUND 2026-10-22 - the earlier "not found" was a wrong host. The authority's site is
+      rdarajshahi.gov.bd (not rda.gov.bd, which is the Bogra academy), and its rules page
+      lists the rule books with their titles: the RDA Ordinance 1976, the Rajshahi Town
+      Development Authority's Building Rules 1991 (the zoning one), the gazette of the RTDA's
+      building rules, the Plot Allocation Rules 2021, and the master-plan amendment for the
+      RDA's area. The files themselves are served from the authority's file host, which did
+      not answer from the build machine on 2026-10-22, so nothing is fetched, hashed or
+      transcribed from them yet. The city falls back to the national rules (rajuk@2008.1) and
+      says so.
+
+  - id: city-authority-rules
+    dataTypes: [rule-source]
+    status: candidate
+    authority: "City development authorities (CDA / KDA / RDA / Sylhet City Corporation, per city)"
+    title:
+      bn: "নগর উন্নয়ন কর্তৃপক্ষের ইমারত নির্মাণ বিধিমালা (প্রতি শহরে ভিন্ন)"
+      en: "City development authority building rules (per city)"
+    kind: manual-entry
+    language: [bn]
+    licence: "Per-authority government publications; confirm per city before extraction."
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: "Per city: obtain the authority's rule book / bye-laws, hash the scan, and extract into a new pack (ADR-0003). The RAJUK pack structure (spec/rules/rajuk-2008.yaml) is the template; plan §5.6 budgets 1-2 weeks of data work per new city."
+    cadence: ad-hoc
+    notes: "Placeholder family entry: v1 targets RAJUK/Dhaka + Chattogram, Khulna, Rajshahi, Sylhet (plan §3). Each authority becomes its own source id when its scan is obtained."
+
+  - id: bbs-price-wage
+    dataTypes: [material-price, labour-rate]
+    status: candidate
+    authority: "Bangladesh Bureau of Statistics (BBS)"
+    title:
+      bn: "মাসিক মূল্য ও মজুরি হার প্রতিবেদন (বিবিএস)"
+      en: "Monthly Price and Wage Rate report (BBS)"
+    kind: html-index
+    url: "https://bbs.gov.bd/"
+    language: [bn, en]
+    licence: "Government statistics publication; reuse terms to confirm before redistributing any tables."
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: "Open the latest monthly Price and Wage Rate release; read the district / urban tables for the project's district; record the rows into a candidate rate card (material and labour lines) with the report link + retrieval date."
+    cadence: monthly
+    cacheTtlDays: 30
+    notes: "Domain did not resolve from the build machine on 2026-10-18 (transport error) - confirm from a browser before first use. Official statistics; values still enter as candidate lines only."
+
+  - id: pwd-schedule-of-rates
+    dataTypes: [material-price, labour-rate, machinery-rate]
+    status: active
+    authority: "Public Works Department (PWD)"
+    title:
+      bn: "গণপূর্ত অধিদপ্তরের দর তফসিল (সিডিউল অব রেট)"
+      en: "Public Works Department Schedule of Rates"
+    kind: html-index
+    url: "https://ss.pwd.gov.bd/sor"
+    language: [bn, en]
+    licence: "Government schedule publication; confirm the current edition's reuse terms."
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: "Fetch the SoR index page; it links the current edition's PDF (the 2022 revised edition: https://ss.pwd.gov.bd/document/sor/PWDSoR2022-Revised-2.3.23-Website.pdf). Record the index page's and the PDF's URL + sha256 in the fetch manifest; transcribe the building-works chapters into candidate rate-card lines (material / labour / machinery) with the page reference for each line."
+    cadence: yearly
+    cacheTtlDays: 365
+    lastVerified: "2026-10-21"
+    notes: "The SoR used for government building estimates - the strongest official-list candidate for building works. URL confirmed by the owner from a browser on 2026-10-21 (the earlier pwd.gov.bd entry did not resolve from the build machine); the index page and the 2022 revised SoR PDF were fetched from the build machine on 2026-10-21 and hashed. The building-works chapters are still to be transcribed into a candidate card - the values enter as candidate lines until a human verifies them."
+
+  - id: lged-schedule-of-rates
+    dataTypes: [material-price, labour-rate, machinery-rate]
+    status: active
+    authority: "Local Government Engineering Department (LGED)"
+    title:
+      bn: "এলজিইডির দর তফসিল (স্কেডিউল অব রেটস) ২০২২, তৃতীয় প্রকাশ"
+      en: "LGED Schedule of Rates 2022, 3rd edition (August 2025)"
+    kind: pdf-document
+    url: "https://lged.gov.bd/pages/static-pages/6922df17933eb65569e1fcb8"
+    language: [bn, en]
+    licence: "Government schedule publication; confirm the reuse terms before redistributing any tables."
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: "Fetch the index page; it links the edition's documents, the SoR book among them (the 3rd edition, August 2025: the page's 'Schedule of Rates-2022 [3rd Edition August 2025] Full Book'). Fetch that PDF directly, record both URLs + sha256 in the fetch manifest, and transcribe the building-works chapters into candidate rate-card lines with the page reference for each line."
+    cadence: yearly
+    cacheTtlDays: 365
+    lastVerified: "2026-10-21"
+    notes: "URL confirmed by the owner from a browser on 2026-10-21, and the page was fetched from the build machine the same day (the 2026-10-18 domain failure no longer holds). The page's link texts name the documents: the SoR 2022 full book (3rd edition, August 2025), the approval letter, the approved rates of LGED's specialised items, the revised rates and the basic materials (23.02.2023). The full book was fetched and hashed on 2026-10-21 (12.1 MB). Nothing is transcribed yet - the building-works chapters are still to be read, and the lines enter as candidate rates until a human marks the card active."
+  - id: bwdb-schedule-of-rates
+    dataTypes: [material-price, labour-rate, machinery-rate]
+    status: active
+    authority: "Bangladesh Water Development Board (BWDB)"
+    title:
+      bn: "বাপাউবো কাজের মূল্য তালিকা (সিডিউল অফ রেট)"
+      en: "BWDB Schedule of Rates"
+    kind: html-index
+    url: "https://bwdb.gov.bd/"
+    language: [bn]
+    licence: "Government schedule publication; reuse terms to confirm before redistributing tables."
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: "From the site menu (বাজেট ও ক্রয় -> দর তফসিল) open the current SoR; record the exact data URL + sha256 in the fetch manifest; transcribe common building items (cement, rod, earthwork, machinery) as cross-check candidate lines."
+    cadence: yearly
+    cacheTtlDays: 365
+    lastVerified: "2026-10-18"
+    notes: "Site fetched and confirmed live on 2026-10-18 (SoR linked under বাজেট ও ক্রয়). Water-sector SoR - used as a published official cross-check, not as the primary building rate list."
+
+  - id: market-survey-manual
+    dataTypes: [material-price, labour-rate, machinery-rate, subcontract-rate]
+    status: candidate
+    authority: "ArchResidenceBD field process"
+    title:
+      bn: "জেলা বাজার জরিপ (অ্যাপ প্রক্রিয়া)"
+      en: "District market survey (app process)"
+    kind: manual-entry
+    language: [bn, en]
+    licence: "n/a - our own survey process."
+    fetch:
+      method: GET
+      parser: none
+      recipe: "Run the district survey sheet (template lands with the price service, W2.7) with at least two local suppliers per key item; enter medians as candidate lines with source.kind market_survey and the survey date."
+    cadence: ad-hoc
+    notes: "Covers what no official list does (local brick/sand variation, day wages); results are candidate lines until a human activates the card."
+
+  - id: vendor-quotes-manual
+    dataTypes: [material-price, machinery-rate, subcontract-rate]
+    status: candidate
+    authority: "ArchResidenceBD supplier process"
+    title:
+      bn: "বিক্রেতা / সাব-কন্ট্রাক্ট উদ্ধৃতি (অ্যাপ প্রক্রিয়া)"
+      en: "Vendor / subcontract quotations (app process)"
+    kind: manual-entry
+    language: [bn, en]
+    licence: "n/a - quotes held as project documents."
+    fetch:
+      method: GET
+      parser: none
+      recipe: "Request written quotes per item / machine / subcontract lot; store the quote copies as documents; enter as candidate lines with source.kind vendor_quote. Piling follows the plan §6 modes (per-pile / per-ft / machine-hour)."
+    cadence: ad-hoc
+    notes: "Approved-vendor list is empty at v0 - filled by the owner/engineer with the first real projects. No invented vendor names."
+
+  - id: ffwc-flood
+    dataTypes: [flood-reference]
+    status: active
+    authority: "FFWC (Flood Forecasting & Warning Centre), BWDB"
+    title:
+      bn: "বন্যা পূর্বাভাস ও সতর্কীকরণ কেন্দ্র"
+      en: "Flood Forecasting & Warning Centre (FFWC)"
+    kind: html-index
+    url: "https://ffwc.gov.bd/"
+    language: [bn, en]
+    licence: "Government publication; advisory use only."
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: "Read the current flood forecast / early-warning bulletin for the project's upazila; attach as an advisory note with the bulletin URL + date. Advisory only - never a rule-pack number."
+    cadence: daily
+    cacheTtlDays: 1
+    lastVerified: "2026-10-18"
+    notes: "Site fetched and confirmed live on 2026-10-18 ('Flood Forecasting & Warning Centre, BWDB, Bangladesh'). Used to flag flood-prone plots in engineer notes; rule numbers stay in packs."
+
+  - id: bwdb-groundwater
+    dataTypes: [water-table]
+    status: candidate
+    authority: "Bangladesh Water Development Board (BWDB)"
+    title:
+      bn: "ভূগর্ভস্থ পানির স্তর তথ্য (বাপাউবো)"
+      en: "Groundwater level data (BWDB)"
+    kind: html-index
+    url: "https://bwdb.gov.bd/"
+    language: [bn, en]
+    licence: "Government data; reuse terms to confirm."
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: "Access the BWDB GIS / groundwater portal (linked from the site); record monitoring-well levels nearest the plot as reference values in the spec soil section with provenance. Confirm the data path first."
+    cadence: monthly
+    cacheTtlDays: 30
+    notes: "Site confirmed live 2026-10-18, but the groundwater data path is not yet confirmed - stays candidate. Groundwater depth feeds foundation notes as a reference, never as a silent default."
+
+  - id: srdi-soil
+    dataTypes: [soil-reference]
+    status: candidate
+    authority: "SRDI (Soil Resource Development Institute)"
+    title:
+      bn: "মৃত্তিকা সম্পদ উন্নয়ন ইনস্টিটিউট (এসআরডিআই)"
+      en: "Soil Resource Development Institute (SRDI)"
+    kind: html-index
+    url: "https://srdi.gov.bd/"
+    language: [bn]
+    licence: "Government data; reuse terms to confirm."
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: "Read the soil-region reports / maps for the project district; use qualitative facts (texture, drainage, flooding class) to choose conservative area defaults. Never a point-level safe bearing capacity."
+    cadence: yearly
+    cacheTtlDays: 365
+    notes: "Domain did not resolve from the build machine on 2026-10-18 (transport error) - confirm from a browser before first use."
+
+  - id: soil-area-defaults
+    dataTypes: [soil-reference]
+    status: candidate
+    authority: "ArchResidenceBD curated defaults"
+    title:
+      bn: "মৃত্তিকা-সম্পর্কিত সংরক্ষণশীল এলাকা-ডিফল্ট (অ্যাপ ডেটাসেট)"
+      en: "Conservative area-based soil defaults (app dataset)"
+    kind: offline-dataset
+    language: [bn, en]
+    licence: "n/a - our own curated dataset."
+    fetch:
+      method: GET
+      parser: none
+      recipe: "Curated conservative defaults maintained with core (lands in W2.x), improved with engineer-partner data and user-provided soil reports. Every use labels 'assumption - verify on site' (plan §5.10)."
+    cadence: static
+    notes: "The honesty row for plan §5.10: Bangladesh has no authoritative public point-level soil API. This entry documents that absence so it is never silently 'solved' with a guessed API."

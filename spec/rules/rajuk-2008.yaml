@@ -1,0 +1,877 @@
+# RAJUK rule pack v0 - source of truth (plan 5.6, ADR-0003).
+# One pack = one authority regime edition; id scheme <authority>@<regime>.<revision>.
+# Every table/rule/footnote cites the gazette pages it was read from and the verification tier.
+# status: candidate - engineer validation pending (Launch Plan, ADR-0001).
+# Open items live in spec/rules/rajuk-2008-candidates.md and are listed under `gaps` below - never silently dropped.
+# Rendered for reading: docs/rules/rajuk-pack-v0.md (regenerate with tools/rules/render_pack.py).
+
+packVersion: "0.1.0"
+id: "rajuk@2008.1"
+authority: "rajuk"
+regime: "2008"
+revision: 1
+status: "candidate"
+langs: [bn, en]
+title:
+  bn: "রাজউক নিয়ন্ত্রক প্যাক — ইমারত নির্মাণ বিধিমালা ২০০৮ শাসনামল (অবস্থা: candidate)"
+  en: "RAJUK rule pack - Imarat Nirman Bidhimala 2008 regime (status: candidate)"
+
+source:
+  document:
+    bn: "ইমারত নির্মাণ বিধিমালা, ২০০৮ — বাংলাদেশ গেজেট, অতিরিক্ত সংখ্যা, ২৯ মে ২০০৮"
+    en: "Imarat Nirman Bidhimala 2008 - Bangladesh Gazette, extra issue, 29 May 2008"
+  gazettePages: "2998-3196"
+  fileName: "rajuk-bidhimala-2008-gazette.pdf"
+  sha256: "3318b3f434a9bf248c798c1982e800360ddf22ae7216966efeacf47d9b860d5e"
+  pdfPages: 199
+  retrievedAt: "2026-10-17"
+
+verification:
+  tiers: [page-image, text-layer]
+  method: >-
+    Values were read from rendered gazette page images (letters and digits). The embedded PDF text
+    layer was used for page indexing only; its digits matched the images on every spot check and its
+    legacy font letters are mangled and were never trusted. Every citation below records the tier used.
+    Bangla wording in this pack uses modern orthography normalised from the legacy glyphs.
+
+review:
+  label: "engineer validation pending — Launch Plan"
+  openItems: 12
+  openItemsFile: "spec/rules/rajuk-2008-candidates.md"
+
+useClasses:
+  - {id: "A1-A4", useBn: "আবাসিক বাড়ি", useEn: "Residential building", memberIds: [A1, A2, A3, A4]}
+  - {id: "A5", useBn: "আবাসিক হোটেল", useEn: "Residential hotel", memberIds: [A5]}
+  - {id: "B1", useBn: "স্কুল, কলেজ ও বিশ্ববিদ্যালয়", useEn: "School, college and university", memberIds: [B1]}
+  - {id: "B2", useBn: "প্রাথমিক শিক্ষা ও কিন্ডারগার্টেন", useEn: "Primary education and kindergarten", memberIds: [B2]}
+  - {id: "C1-C4", useBn: "প্রতিষ্ঠানিক", useEn: "Institutional", memberIds: [C1, C2, C3, C4]}
+  - {id: "D1-D2", useBn: "স্বাস্থ্যসেবা", useEn: "Health services", memberIds: [D1, D2]}
+  - {id: "E1-E6", useBn: "সমাবেশ ও ধর্মীয় ভবন", useEn: "Assembly and religious buildings", memberIds: [E1, E2, E3, E4, E5, E6]}
+  - {id: "F1", useBn: "অফিস", useEn: "Office", memberIds: [F1]}
+  - {id: "F2-F5", useBn: "দোকান, বাজার ইত্যাদি", useEn: "Shops, bazaars etc.", memberIds: [F2, F3, F4, F5]}
+  - {id: "G1-K2", useBn: "শিল্প কারখানা, গুদাম, বিপজ্জনক ব্যবহারের ভবন ও বিবিধ", useEn: "Industrial factories, warehouses, hazardous-use buildings and miscellaneous", memberIds: [G1, G2, H1, H2, J1, J2, K1, K2]}
+
+citations:
+  far-3ka:     {gazettePage: "3049-3050", pdfPage: "52-53", tier: page-image, note: "Table 3(ka) - Type A: (A1-A4) and (A5) columns"}
+  far-3ka-fn:  {gazettePage: "3050-3051", pdfPage: "53-54", tier: page-image, note: "Footnotes [1]-[2] and the * note"}
+  far-3kha:    {gazettePage: "3052-3053", pdfPage: "55-56", tier: page-image, note: "Table 3(kha) - Type B: (B1) and (B2) columns"}
+  far-3kha-fn: {gazettePage: "3053", pdfPage: "56", tier: page-image, note: "Footnotes [3]-[4] and the ** note"}
+  far-3ga:     {gazettePage: "3054-3055", pdfPage: "57-58", tier: page-image, note: "Table 3(ga) - Type C (C1-C4) and D (D1-D2), two identical columns"}
+  far-3ga-fn:  {gazettePage: "3055", pdfPage: "58", tier: page-image, note: "Footnote [5] and the * / ** notes"}
+  far-3gha:    {gazettePage: "3056-3057", pdfPage: "59-60", tier: page-image, note: "Table 3(gha) - Type E (E1-E6)"}
+  far-3gha-fn: {gazettePage: "3057", pdfPage: "60", tier: page-image, note: "Footnote [6]"}
+  far-3nga:    {gazettePage: "3058-3059", pdfPage: "61-62", tier: page-image, note: "Table 3(nga) - Type F: (F1) and (F2-F5) columns"}
+  far-3nga-fn: {gazettePage: "3059", pdfPage: "62", tier: page-image, note: "Footnote [7] and the * note"}
+  far-3cha:    {gazettePage: "3060-3061", pdfPage: "63-64", tier: page-image, note: "Table 3(cha) - Type G/H/J/K, single shared column"}
+  setbacks:    {gazettePage: "3043-3044", pdfPage: "46-47", tier: page-image, note: "Setback schedule (applies up to 33 m height / 10 storeys)"}
+  s46-3-4:     {gazettePage: "3044", pdfPage: "47", tier: page-image, note: "Section 46(3)-(4) minimum distance"}
+  s46-5-1:     {gazettePage: "3044-3045", pdfPage: "47-48", tier: page-image, note: "Section 46(5)(ka)-(kha)"}
+  s46-5-2:     {gazettePage: "3045", pdfPage: "48", tier: page-image, note: "Section 46(5)(ga)-(gha)"}
+  s46-5-3:     {gazettePage: "3045-3046", pdfPage: "48-49", tier: page-image, note: "Section 46(5)(nga)"}
+  s46-5-4:     {gazettePage: "3046", pdfPage: "49", tier: page-image, note: "Section 46(5)(cha)-(ja)"}
+  s46-5-5:     {gazettePage: "3046", pdfPage: "49", tier: page-image, note: "Section 46(5)(jha)-(tha)"}
+  s46-6-8:     {gazettePage: "3047", pdfPage: "50", tier: page-image, note: "Section 46(6)-(8)"}
+  s47:         {gazettePage: "3047", pdfPage: "50", tier: page-image, note: "Section 47"}
+  s48:         {gazettePage: "3047-3048", pdfPage: "50-51", tier: page-image, note: "Section 48(1)-(9) subdivision and private roads"}
+  s49:         {gazettePage: "3048", pdfPage: "51", tier: page-image, note: "Section 49"}
+  s50:         {gazettePage: "3048-3049", pdfPage: "51-52", tier: page-image, note: "Section 50"}
+  s51-1:       {gazettePage: "3049", pdfPage: "52", tier: page-image, note: "Section 51(1)"}
+  s51-2-5:     {gazettePage: "3061-3062", pdfPage: "64-65", tier: page-image, note: "Section 51(2)-(5)"}
+  s51-6-8:     {gazettePage: "3063", pdfPage: "66", tier: page-image, note: "Section 51(6)-(8)"}
+  s51-9-14:    {gazettePage: "3063-3064", pdfPage: "66-67", tier: page-image, note: "Section 51(9)-(15)"}
+  s52:         {gazettePage: "3064", pdfPage: "67", tier: page-image, note: "Section 52(1)-(4): heights; aviation/microwave limits; rivers and heritage; 45.70 m red light"}
+  s53:         {gazettePage: "3064-3065", pdfPage: "67-68", tier: page-image, note: "Section 53"}
+  s54-1-5:     {gazettePage: "3065", pdfPage: "68", tier: page-image, note: "Section 54(1)-(5)"}
+  s54-6-9:     {gazettePage: "3066", pdfPage: "69", tier: page-image, note: "Section 54(6)-(9)"}
+  s55:         {gazettePage: "3066", pdfPage: "69", tier: page-image, note: "Section 55(2) corner clear zone"}
+  s56-1-3:     {gazettePage: "3066-3067", pdfPage: "69-70", tier: page-image, note: "Section 56(1)-(3): stalls, packed bay, driveway widths"}
+  s56-4-5:     {gazettePage: "3068", pdfPage: "71", tier: page-image, note: "Section 56(4)-(5)"}
+  schedule4:   {gazettePage: "3068-3070", pdfPage: "71-73", tier: page-image, note: "Schedule 4 parking requirements"}
+  schedule4-notes: {gazettePage: "3070", pdfPage: "73", tier: page-image, note: "Notes under Schedule 4"}
+  s56-6:       {gazettePage: "3070", pdfPage: "73", tier: page-image, note: "Section 56(6) on-street parking"}
+  s56-7-15:    {gazettePage: "3071", pdfPage: "74", tier: page-image, note: "Section 56(7)-(15)"}
+  s57:         {gazettePage: "3071", pdfPage: "74", tier: page-image, note: "Section 57 mixed use"}
+
+footnotes:
+  - id: f1
+    mark: "[১]"
+    appliesTo: [A1-A4, A5]
+    cite: far-3ka-fn
+    text:
+      bn: "অপরিকল্পিত আবাসিক এলাকায় ট্রাফিক, পার্কিং এবং অন্যান্য চাহিদা পূরণ সাপেক্ষে নিম্নোক্ত ব্যবহার চালানো যাবে: (ক) ডরমিটরি ও হোস্টেল; (খ) শিশু নিবাস, এতিম খানা এবং বৃদ্ধ নিবাস; (গ) সর্বাধিক ২০ কক্ষবিশিষ্ট হোটেল বা লজ; (ঘ) অনূর্ধ্ব ১০০ বর্গমিটারের রেস্টুরেন্ট; (ঙ) অনূর্ধ্ব ২০০ বর্গমিটারের ধর্মীয় উপাসনার স্থান; (চ) আবাসিক ভবনের নীচতলায় পেশাজীবীদের অফিস, স্টুডিও বা চেম্বার — যা ১০০ বর্গমিটারের বেশি নয় এবং যেখানে মোট জনবল অনূর্ধ্ব ১৫ জন; (ছ) কেবল কর্নার প্লটের জন্য অনূর্ধ্ব ২৫ বর্গমিটারের সেলুন, বিউটি পার্লার, ঔষধের দোকান, মুদি দোকান, দর্জির দোকান।"
+      en: "In unplanned residential areas, subject to traffic, parking and other requirements being met, the following uses may be operated: (ka) dormitory and hostel; (kha) children's home, orphanage and home for the elderly; (ga) hotel or lodge with at most 20 rooms; (gha) restaurant up to 100 sqm; (nga) religious place of worship up to 200 sqm; (cha) on the ground floor of a residential building, professional offices, studios or chambers not exceeding 100 sqm with a total staff of at most 15; (chha) corner plots only: a saloon, beauty parlour, medicine shop, grocery shop or tailor shop up to 25 sqm."
+  - id: f2
+    mark: "[২]"
+    appliesTo: [A5]
+    cite: far-3ka-fn
+    text:
+      bn: "A5 (আবাসিক হোটেল) ইমারতের ক্ষেত্রে ২০ কাঠার ঊর্ধ্ব জমি বা ১৮ মিটার বা তদূর্ধ্ব প্রশস্ত রাস্তার পাশে, যে কোন পরিমাপের জমির বেলায়, নীচতলায় আবশ্যক সেটব্যাক স্পেস ব্যতীত সংলগ্ন রাস্তার উপরিতল হইতে সর্বোচ্চ ১২ মিটার উচ্চতার (প্যারাপেটসহ) পোর্টিয়াম নির্মাণ করা যাবে।"
+      en: "For A5 (residential hotel) buildings: on plots above 20 katha or beside a road 18 m or wider, a portico of at most 12 m height (including parapet) may be built on the lowest floor for any plot size, measured from the adjoining road top level, outside the mandatory setback space."
+  - id: fnr
+    mark: "*"
+    cite: far-3ka-fn
+    text:
+      bn: "NR (Non restricted) — FAR-এর বাধ্যবাধকতা নাই।"
+      en: "NR (Non restricted) - there is no FAR cap."
+  - id: f3
+    mark: "[৩]"
+    appliesTo: [B2]
+    cite: far-3kha-fn
+    text:
+      bn: "B2 শ্রেণীর ইমারতের নীচতলার উন্মুক্ত স্থান FAR-মুক্ত হিসাবে বিবেচিত হবে। এই উন্মুক্ত স্থানের সর্বোচ্চ ২০% উন্মুক্ত ব্যবহারের সহায়ক কক্ষ হিসাবে নির্মাণ করা যাবে এবং এই অংশও FAR-মুক্ত হবে।"
+      en: "The ground-floor open space of a B2 building is counted as FAR-free. Up to 20% of this open space may be built as auxiliary rooms serving the open space, and this portion is also FAR-free."
+  - id: f4
+    mark: "[৪]"
+    appliesTo: [B2]
+    cite: far-3kha-fn
+    text:
+      bn: "B2 শ্রেণীর ইমারতের নীচতলার উন্মুক্ত স্থান FAR-মুক্ত হিসাবে বিবেচিত হবে। এই উন্মুক্ত স্থানের সর্বোচ্চ ৪০% উন্মুক্ত ব্যবহারের সহায়ক কক্ষ হিসাবে নির্মাণ করা যাবে এবং এই অংশও FAR-মুক্ত হবে।"
+      en: "The ground-floor open space of a B2 building is counted as FAR-free. Up to 40% of this open space may be built as auxiliary rooms serving the open space, and this portion is also FAR-free."
+  - id: f-prohib-b
+    mark: "**"
+    appliesTo: [B1, B2]
+    cite: far-3kha-fn
+    text:
+      bn: "৩৩৫ বর্গ মিটার বা ৫ (পাঁচ) কাঠা জমি পর্যন্ত B-1 ও B-2 শ্রেণীর ব্যবহার অনুমোদন করা হবে না।"
+      en: "B-1 and B-2 uses are not approved on plots up to 335 sq m or 5 (five) katha."
+  - id: f5
+    mark: "[৫]"
+    appliesTo: [C1-C4, D1-D2]
+    cite: far-3ga-fn
+    text:
+      bn: "C ও D উভয় প্রকার ইমারতের ক্ষেত্রে ২০ কাঠার ঊর্ধ্ব জমি বা ১৮ মিটার বা তদূর্ধ্ব প্রশস্ত রাস্তার পাশে, যে কোন পরিমাপের জমির বেলায়, আবশ্যক সেটব্যাক স্পেস ব্যতীত সংলগ্ন রাস্তার উপরিতল হইতে সর্বোচ্চ ১২ মিটার উচ্চতার (প্যারাপেটসহ) পোর্টিয়াম নির্মাণ করা যাবে।"
+      en: "For both C and D buildings: on plots above 20 katha or beside a road 18 m or wider, a portico of at most 12 m height (including parapet) may be built for any plot size, measured from the adjoining road top level, outside the mandatory setback space."
+  - id: f-prohib-cd
+    mark: "**"
+    appliesTo: [C1-C4, D1-D2]
+    cite: far-3ga-fn
+    text:
+      bn: "৩৩৫ বর্গ মিটার বা ৫ (পাঁচ) কাঠা জমি পর্যন্ত C ও D শ্রেণীর ব্যবহার অনুমোদন করা হবে না।"
+      en: "C and D uses are not approved on plots up to 335 sq m or 5 (five) katha."
+  - id: f6
+    mark: "[৬]"
+    appliesTo: [E1-E6]
+    cite: far-3gha-fn
+    text:
+      bn: "২৪ মিটার বা তদূর্ধ্ব প্রশস্ত রাস্তার পাশে যে কোন পরিমাপের জমির বেলায়, আবশ্যক সেটব্যাক স্পেস ব্যতীত সংলগ্ন রাস্তার উপরিতল হইতে সর্বোচ্চ ১২ মিটার উচ্চতার (প্যারাপেটসহ) পোর্টিয়াম নির্মাণ করা যাবে।"
+      en: "On the side of a road 24 m or wider, a portico of at most 12 m height (including parapet) may be built on any plot size, measured from the adjoining road top level, excluding the mandatory setback space."
+  - id: f7
+    mark: "[৭]"
+    appliesTo: [F1, F2-F5]
+    cite: far-3nga-fn
+    text:
+      bn: "প্রযোজ্য আবশ্যক সেটব্যাক স্পেস ব্যতীত সংলগ্ন রাস্তার উপরিতল হইতে সর্বোচ্চ ১২ মিটার উচ্চতার (প্যারাপেটসহ) পোর্টিয়াম নির্মাণ করা যাবে।"
+      en: "Excluding the applicable mandatory setback space, a portico of at most 12 m height (including parapet) may be built, measured from the adjoining road top level."
+
+farTables:
+  - id: far-a1a4
+    tableBn: "সারণি-৩(ক) — ইমারতের শ্রেণী: A1-A4 (আবাসিক বাড়ি)"
+    tableEn: "Table 3(ka) - class A1-A4 (residential building)"
+    clause: "সারণি-৩(ক)"
+    cite: far-3ka
+    classId: A1-A4
+    rows:
+      - {roadWidthM: 6.0, areaSqmTo: 134, areaKathaTo: 2, far: 3.15, mgcPercent: 67.5}
+      - {roadWidthM: 6.0, areaSqmFrom: 134, areaSqmTo: 201, areaKathaFrom: 2, areaKathaTo: 3, far: 3.35, mgcPercent: 65.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 201, areaSqmTo: 268, areaKathaFrom: 3, areaKathaTo: 4, far: 3.50, mgcPercent: 62.5}
+      - {roadWidthM: 6.0, areaSqmFrom: 268, areaSqmTo: 335, areaKathaFrom: 4, areaKathaTo: 5, far: 3.50, mgcPercent: 62.5}
+      - {roadWidthM: 6.0, areaSqmFrom: 335, areaSqmTo: 402, areaKathaFrom: 5, areaKathaTo: 6, far: 3.75, mgcPercent: 60.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 402, areaSqmTo: 469, areaKathaFrom: 6, areaKathaTo: 7, far: 3.75, mgcPercent: 60.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 469, areaSqmTo: 536, areaKathaFrom: 7, areaKathaTo: 8, far: 4.00, mgcPercent: 60.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 536, areaSqmTo: 603, areaKathaFrom: 8, areaKathaTo: 9, far: 4.00, mgcPercent: 60.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 603, areaSqmTo: 670, areaKathaFrom: 9, areaKathaTo: 10, far: 4.25, mgcPercent: 57.5}
+      - {roadWidthM: 9.0, areaSqmFrom: 670, areaSqmTo: 804, areaKathaFrom: 10, areaKathaTo: 12, far: 4.50, mgcPercent: 57.5}
+      - {roadWidthM: 9.0, areaSqmFrom: 804, areaSqmTo: 938, areaKathaFrom: 12, areaKathaTo: 14, far: 4.75, mgcPercent: 55.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 938, areaSqmTo: 1072, areaKathaFrom: 14, areaKathaTo: 16, far: 5.00, mgcPercent: 52.5}
+      - {roadWidthM: 9.0, areaSqmFrom: 1072, areaSqmTo: 1206, areaKathaFrom: 16, areaKathaTo: 18, far: 5.25, mgcPercent: 52.5}
+      - {roadWidthM: 9.0, areaSqmFrom: 1206, areaSqmTo: 1340, areaKathaFrom: 18, areaKathaTo: 20, far: 5.25, mgcPercent: 50.0}
+      - {roadWidthM: 12.0, areaSqmFrom: 1340, areaKathaFrom: 20, far: 5.50, mgcPercent: 50.0}
+      - {roadWidthM: 18.0, anyPlot: true, far: 6.00, mgcPercent: 50.0}
+      - {roadWidthM: 24.0, anyPlot: true, far: 6.50, mgcPercent: 50.0}
+  - id: far-a5
+    tableBn: "সারণি-৩(ক) — ইমারতের শ্রেণী: A5 (আবাসিক হোটেল)"
+    tableEn: "Table 3(ka) - class A5 (residential hotel)"
+    clause: "সারণি-৩(ক)"
+    cite: far-3ka
+    classId: A5
+    rows:
+      - {roadWidthM: 6.0, areaSqmTo: 134, areaKathaTo: 2, far: 2.50, mgcPercent: 67.5}
+      - {roadWidthM: 6.0, areaSqmFrom: 134, areaSqmTo: 201, areaKathaFrom: 2, areaKathaTo: 3, far: 2.75, mgcPercent: 65.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 201, areaSqmTo: 268, areaKathaFrom: 3, areaKathaTo: 4, far: 3.00, mgcPercent: 62.5}
+      - {roadWidthM: 6.0, areaSqmFrom: 268, areaSqmTo: 335, areaKathaFrom: 4, areaKathaTo: 5, far: 3.25, mgcPercent: 62.5}
+      - {roadWidthM: 6.0, areaSqmFrom: 335, areaSqmTo: 402, areaKathaFrom: 5, areaKathaTo: 6, far: 3.50, mgcPercent: 60.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 402, areaSqmTo: 469, areaKathaFrom: 6, areaKathaTo: 7, far: 3.75, mgcPercent: 60.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 469, areaSqmTo: 536, areaKathaFrom: 7, areaKathaTo: 8, far: 4.50, mgcPercent: 57.5}
+      - {roadWidthM: 9.0, areaSqmFrom: 536, areaSqmTo: 603, areaKathaFrom: 8, areaKathaTo: 9, far: 5.50, mgcPercent: 57.5}
+      - {roadWidthM: 9.0, areaSqmFrom: 603, areaSqmTo: 670, areaKathaFrom: 9, areaKathaTo: 10, far: 6.00, mgcPercent: 55.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 670, areaSqmTo: 804, areaKathaFrom: 10, areaKathaTo: 12, far: 6.50, mgcPercent: 55.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 804, areaSqmTo: 938, areaKathaFrom: 12, areaKathaTo: 14, far: 7.00, mgcPercent: 52.5}
+      - {roadWidthM: 9.0, areaSqmFrom: 938, areaSqmTo: 1072, areaKathaFrom: 14, areaKathaTo: 16, far: 7.50, mgcPercent: 52.5}
+      - {roadWidthM: 9.0, areaSqmFrom: 1072, areaSqmTo: 1206, areaKathaFrom: 16, areaKathaTo: 18, far: 8.00, mgcPercent: 50.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 1206, areaSqmTo: 1340, areaKathaFrom: 18, areaKathaTo: 20, far: 8.50, mgcPercent: 50.0}
+      - {roadWidthM: 12.0, areaSqmFrom: 1340, areaKathaFrom: 20, far: 9.50, mgcPercent: 50.0, footnotes: [f2]}
+      - {roadWidthM: 18.0, anyPlot: true, far: "NR", mgcPercent: 50.0, footnotes: [f2, fnr]}
+      - {roadWidthM: 24.0, anyPlot: true, far: "NR", mgcPercent: 50.0, footnotes: [f2, fnr]}
+  - id: far-b1
+    tableBn: "সারণি-৩(খ) — ইমারতের শ্রেণী: B1 (স্কুল, কলেজ ও বিশ্ববিদ্যালয়)"
+    tableEn: "Table 3(kha) - class B1 (school, college and university)"
+    clause: "সারণি-৩(খ)"
+    cite: far-3kha
+    classId: B1
+    rows:
+      - {prohibited: true, areaSqmFrom: 0, areaSqmTo: 134, areaKathaFrom: 0, areaKathaTo: 2, footnotes: [f-prohib-b]}
+      - {prohibited: true, areaSqmFrom: 134, areaSqmTo: 201, areaKathaFrom: 2, areaKathaTo: 3, footnotes: [f-prohib-b]}
+      - {prohibited: true, areaSqmFrom: 201, areaSqmTo: 268, areaKathaFrom: 3, areaKathaTo: 4, footnotes: [f-prohib-b]}
+      - {prohibited: true, areaSqmFrom: 268, areaSqmTo: 335, areaKathaFrom: 4, areaKathaTo: 5, footnotes: [f-prohib-b]}
+      - {roadWidthM: 6.0, areaSqmFrom: 335, areaSqmTo: 402, areaKathaFrom: 5, areaKathaTo: 6, far: 2.50, mgcPercent: 60.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 402, areaSqmTo: 469, areaKathaFrom: 6, areaKathaTo: 7, far: 2.50, mgcPercent: 60.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 469, areaSqmTo: 536, areaKathaFrom: 7, areaKathaTo: 8, far: 2.50, mgcPercent: 60.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 536, areaSqmTo: 603, areaKathaFrom: 8, areaKathaTo: 9, far: 2.75, mgcPercent: 60.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 603, areaSqmTo: 670, areaKathaFrom: 9, areaKathaTo: 10, far: 2.75, mgcPercent: 60.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 670, areaSqmTo: 804, areaKathaFrom: 10, areaKathaTo: 12, far: 3.00, mgcPercent: 57.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 804, areaSqmTo: 938, areaKathaFrom: 12, areaKathaTo: 14, far: 3.00, mgcPercent: 55.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 938, areaSqmTo: 1072, areaKathaFrom: 14, areaKathaTo: 16, far: 3.25, mgcPercent: 53.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 1072, areaSqmTo: 1206, areaKathaFrom: 16, areaKathaTo: 18, far: 3.25, mgcPercent: 50.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 1206, areaSqmTo: 1340, areaKathaFrom: 18, areaKathaTo: 20, far: 3.50, mgcPercent: 50.0}
+      - {roadWidthM: 12.0, areaSqmFrom: 1340, areaKathaFrom: 20, far: 4.00, mgcPercent: 50.0}
+      - {roadWidthM: 18.0, anyPlot: true, far: 4.50, mgcPercent: 50.0}
+      - {roadWidthM: 24.0, anyPlot: true, far: 5.50, mgcPercent: 50.0}
+  - id: far-b2
+    tableBn: "সারণি-৩(খ) — ইমারতের শ্রেণী: B2 (প্রাথমিক শিক্ষা ও কিন্ডারগার্টেন)"
+    tableEn: "Table 3(kha) - class B2 (primary education and kindergarten)"
+    clause: "সারণি-৩(খ)"
+    cite: far-3kha
+    classId: B2
+    rows:
+      - {prohibited: true, areaSqmFrom: 0, areaSqmTo: 134, areaKathaFrom: 0, areaKathaTo: 2, footnotes: [f-prohib-b]}
+      - {prohibited: true, areaSqmFrom: 134, areaSqmTo: 201, areaKathaFrom: 2, areaKathaTo: 3, footnotes: [f-prohib-b]}
+      - {prohibited: true, areaSqmFrom: 201, areaSqmTo: 268, areaKathaFrom: 3, areaKathaTo: 4, footnotes: [f-prohib-b]}
+      - {prohibited: true, areaSqmFrom: 268, areaSqmTo: 335, areaKathaFrom: 4, areaKathaTo: 5, footnotes: [f-prohib-b]}
+      - {roadWidthM: 6.0, areaSqmFrom: 335, areaSqmTo: 402, areaKathaFrom: 5, areaKathaTo: 6, far: 2.00, mgcPercent: 50.0, footnotes: [f3]}
+      - {roadWidthM: 6.0, areaSqmFrom: 402, areaSqmTo: 469, areaKathaFrom: 6, areaKathaTo: 7, far: 2.00, mgcPercent: 50.0, footnotes: [f3]}
+      - {roadWidthM: 6.0, areaSqmFrom: 469, areaSqmTo: 536, areaKathaFrom: 7, areaKathaTo: 8, far: 2.00, mgcPercent: 50.0, footnotes: [f3]}
+      - {roadWidthM: 9.0, areaSqmFrom: 536, areaSqmTo: 603, areaKathaFrom: 8, areaKathaTo: 9, far: 2.25, mgcPercent: 50.0, footnotes: [f3]}
+      - {roadWidthM: 9.0, areaSqmFrom: 603, areaSqmTo: 670, areaKathaFrom: 9, areaKathaTo: 10, far: 2.25, mgcPercent: 50.0, footnotes: [f3]}
+      - {roadWidthM: 9.0, areaSqmFrom: 670, areaSqmTo: 804, areaKathaFrom: 10, areaKathaTo: 12, far: 2.50, mgcPercent: 50.0, footnotes: [f3]}
+      - {roadWidthM: 9.0, areaSqmFrom: 804, areaSqmTo: 938, areaKathaFrom: 12, areaKathaTo: 14, far: 2.50, mgcPercent: 50.0, footnotes: [f3]}
+      - {roadWidthM: 9.0, areaSqmFrom: 938, areaSqmTo: 1072, areaKathaFrom: 14, areaKathaTo: 16, far: 2.75, mgcPercent: 50.0, footnotes: [f3]}
+      - {roadWidthM: 9.0, areaSqmFrom: 1072, areaSqmTo: 1206, areaKathaFrom: 16, areaKathaTo: 18, far: 2.75, mgcPercent: 50.0, footnotes: [f3]}
+      - {roadWidthM: 9.0, areaSqmFrom: 1206, areaSqmTo: 1340, areaKathaFrom: 18, areaKathaTo: 20, far: 3.00, mgcPercent: 50.0, footnotes: [f3]}
+      - {roadWidthM: 12.0, areaSqmFrom: 1340, areaKathaFrom: 20, far: 3.50, mgcPercent: 50.0, footnotes: [f4]}
+      - {roadWidthM: 18.0, anyPlot: true, far: 4.00, mgcPercent: 50.0, footnotes: [f4]}
+      - {roadWidthM: 24.0, anyPlot: true, far: 4.50, mgcPercent: 50.0, footnotes: [f4]}
+  - id: far-c1c4
+    tableBn: "সারণি-৩(গ) — ইমারতের শ্রেণী: C1-C4 (প্রতিষ্ঠানিক)"
+    tableEn: "Table 3(ga) - class C1-C4 (institutional)"
+    clause: "সারণি-৩(গ)"
+    cite: far-3ga
+    classId: C1-C4
+    rows:
+      - {prohibited: true, areaSqmFrom: 0, areaSqmTo: 134, areaKathaFrom: 0, areaKathaTo: 2, footnotes: [f-prohib-cd]}
+      - {prohibited: true, areaSqmFrom: 134, areaSqmTo: 201, areaKathaFrom: 2, areaKathaTo: 3, footnotes: [f-prohib-cd]}
+      - {prohibited: true, areaSqmFrom: 201, areaSqmTo: 268, areaKathaFrom: 3, areaKathaTo: 4, footnotes: [f-prohib-cd]}
+      - {prohibited: true, areaSqmFrom: 268, areaSqmTo: 335, areaKathaFrom: 4, areaKathaTo: 5, footnotes: [f-prohib-cd]}
+      - {roadWidthM: 6.0, areaSqmFrom: 335, areaSqmTo: 402, areaKathaFrom: 5, areaKathaTo: 6, far: 3.25, mgcPercent: 60.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 402, areaSqmTo: 469, areaKathaFrom: 6, areaKathaTo: 7, far: 3.25, mgcPercent: 60.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 469, areaSqmTo: 536, areaKathaFrom: 7, areaKathaTo: 8, far: 3.25, mgcPercent: 60.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 536, areaSqmTo: 603, areaKathaFrom: 8, areaKathaTo: 9, far: 3.50, mgcPercent: 57.5}
+      - {roadWidthM: 9.0, areaSqmFrom: 603, areaSqmTo: 670, areaKathaFrom: 9, areaKathaTo: 10, far: 3.50, mgcPercent: 57.5}
+      - {roadWidthM: 9.0, areaSqmFrom: 670, areaSqmTo: 804, areaKathaFrom: 10, areaKathaTo: 12, far: 3.75, mgcPercent: 55.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 804, areaSqmTo: 938, areaKathaFrom: 12, areaKathaTo: 14, far: 4.00, mgcPercent: 55.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 938, areaSqmTo: 1072, areaKathaFrom: 14, areaKathaTo: 16, far: 4.25, mgcPercent: 52.5}
+      - {roadWidthM: 9.0, areaSqmFrom: 1072, areaSqmTo: 1206, areaKathaFrom: 16, areaKathaTo: 18, far: 4.50, mgcPercent: 50.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 1206, areaSqmTo: 1340, areaKathaFrom: 18, areaKathaTo: 20, far: 4.75, mgcPercent: 50.0}
+      - {roadWidthM: 12.0, areaSqmFrom: 1340, areaKathaFrom: 20, far: 5.00, mgcPercent: 50.0, footnotes: [f5]}
+      - {roadWidthM: 18.0, anyPlot: true, far: "NR", mgcPercent: 50.0, footnotes: [f5, fnr, f-prohib-cd]}
+      - {roadWidthM: 24.0, anyPlot: true, far: "NR", mgcPercent: 50.0, footnotes: [f5, fnr, f-prohib-cd]}
+
+  - id: far-d1d2
+    tableBn: "সারণি-৩(গ) — ইমারতের শ্রেণী: D1-D2 (স্বাস্থ্যসেবা)"
+    tableEn: "Table 3(ga) - class D1-D2 (health services)"
+    clause: "সারণি-৩(গ)"
+    cite: far-3ga
+    classId: D1-D2
+    note:
+      bn: "সারণিতে C1-C4 ও D1-D2 কলামের মান অভিন্নভাবে মুদ্রিত।"
+      en: "The C1-C4 and D1-D2 columns are printed with identical values."
+    rows:
+      - {prohibited: true, areaSqmFrom: 0, areaSqmTo: 134, areaKathaFrom: 0, areaKathaTo: 2, footnotes: [f-prohib-cd]}
+      - {prohibited: true, areaSqmFrom: 134, areaSqmTo: 201, areaKathaFrom: 2, areaKathaTo: 3, footnotes: [f-prohib-cd]}
+      - {prohibited: true, areaSqmFrom: 201, areaSqmTo: 268, areaKathaFrom: 3, areaKathaTo: 4, footnotes: [f-prohib-cd]}
+      - {prohibited: true, areaSqmFrom: 268, areaSqmTo: 335, areaKathaFrom: 4, areaKathaTo: 5, footnotes: [f-prohib-cd]}
+      - {roadWidthM: 6.0, areaSqmFrom: 335, areaSqmTo: 402, areaKathaFrom: 5, areaKathaTo: 6, far: 3.25, mgcPercent: 60.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 402, areaSqmTo: 469, areaKathaFrom: 6, areaKathaTo: 7, far: 3.25, mgcPercent: 60.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 469, areaSqmTo: 536, areaKathaFrom: 7, areaKathaTo: 8, far: 3.25, mgcPercent: 60.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 536, areaSqmTo: 603, areaKathaFrom: 8, areaKathaTo: 9, far: 3.50, mgcPercent: 57.5}
+      - {roadWidthM: 9.0, areaSqmFrom: 603, areaSqmTo: 670, areaKathaFrom: 9, areaKathaTo: 10, far: 3.50, mgcPercent: 57.5}
+      - {roadWidthM: 9.0, areaSqmFrom: 670, areaSqmTo: 804, areaKathaFrom: 10, areaKathaTo: 12, far: 3.75, mgcPercent: 55.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 804, areaSqmTo: 938, areaKathaFrom: 12, areaKathaTo: 14, far: 4.00, mgcPercent: 55.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 938, areaSqmTo: 1072, areaKathaFrom: 14, areaKathaTo: 16, far: 4.25, mgcPercent: 52.5}
+      - {roadWidthM: 9.0, areaSqmFrom: 1072, areaSqmTo: 1206, areaKathaFrom: 16, areaKathaTo: 18, far: 4.50, mgcPercent: 50.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 1206, areaSqmTo: 1340, areaKathaFrom: 18, areaKathaTo: 20, far: 4.75, mgcPercent: 50.0}
+      - {roadWidthM: 12.0, areaSqmFrom: 1340, areaKathaFrom: 20, far: 5.00, mgcPercent: 50.0, footnotes: [f5]}
+      - {roadWidthM: 18.0, anyPlot: true, far: "NR", mgcPercent: 50.0, footnotes: [f5, fnr, f-prohib-cd]}
+      - {roadWidthM: 24.0, anyPlot: true, far: "NR", mgcPercent: 50.0, footnotes: [f5, fnr, f-prohib-cd]}
+  - id: far-e1e6
+    tableBn: "সারণি-৩(ঘ) — ইমারতের শ্রেণী: E1-E6 (সমাবেশ ও ধর্মীয় ভবন)"
+    tableEn: "Table 3(gha) - class E1-E6 (assembly and religious buildings)"
+    clause: "সারণি-৩(ঘ)"
+    cite: far-3gha
+    classId: E1-E6
+    rows:
+      - {roadWidthM: 6.0, areaSqmTo: 134, areaKathaTo: 2, far: 2.00, mgcPercent: 65.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 134, areaSqmTo: 201, areaKathaFrom: 2, areaKathaTo: 3, far: 2.00, mgcPercent: 65.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 201, areaSqmTo: 268, areaKathaFrom: 3, areaKathaTo: 4, far: 2.25, mgcPercent: 60.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 268, areaSqmTo: 335, areaKathaFrom: 4, areaKathaTo: 5, far: 2.25, mgcPercent: 60.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 335, areaSqmTo: 402, areaKathaFrom: 5, areaKathaTo: 6, far: 2.50, mgcPercent: 57.5}
+      - {roadWidthM: 9.0, areaSqmFrom: 402, areaSqmTo: 469, areaKathaFrom: 6, areaKathaTo: 7, far: 2.50, mgcPercent: 57.5}
+      - {roadWidthM: 9.0, areaSqmFrom: 469, areaSqmTo: 536, areaKathaFrom: 7, areaKathaTo: 8, far: 2.75, mgcPercent: 55.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 536, areaSqmTo: 603, areaKathaFrom: 8, areaKathaTo: 9, far: 2.75, mgcPercent: 55.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 603, areaSqmTo: 670, areaKathaFrom: 9, areaKathaTo: 10, far: 3.00, mgcPercent: 52.5}
+      - {roadWidthM: 12.0, areaSqmFrom: 670, areaSqmTo: 804, areaKathaFrom: 10, areaKathaTo: 12, far: 3.25, mgcPercent: 50.0}
+      - {roadWidthM: 12.0, areaSqmFrom: 804, areaSqmTo: 938, areaKathaFrom: 12, areaKathaTo: 14, far: 3.50, mgcPercent: 50.0}
+      - {roadWidthM: 12.0, areaSqmFrom: 938, areaSqmTo: 1072, areaKathaFrom: 14, areaKathaTo: 16, far: 3.75, mgcPercent: 50.0}
+      - {roadWidthM: 12.0, areaSqmFrom: 1072, areaSqmTo: 1206, areaKathaFrom: 16, areaKathaTo: 18, far: 4.00, mgcPercent: 50.0}
+      - {roadWidthM: 12.0, areaSqmFrom: 1206, areaSqmTo: 1340, areaKathaFrom: 18, areaKathaTo: 20, far: 4.25, mgcPercent: 50.0}
+      - {roadWidthM: 12.0, areaSqmFrom: 1340, areaKathaFrom: 20, far: 5.50, mgcPercent: 50.0}
+      - {roadWidthM: 18.0, anyPlot: true, far: 6.50, mgcPercent: 50.0}
+      - {roadWidthM: 24.0, anyPlot: true, far: 7.00, mgcPercent: 50.0, footnotes: [f6]}
+  - id: far-f1
+    tableBn: "সারণি-৩(ঙ) — ইমারতের শ্রেণী: F1 (অফিস)"
+    tableEn: "Table 3(nga) - class F1 (office)"
+    clause: "সারণি-৩(ঙ)"
+    cite: far-3nga
+    classId: F1
+    rows:
+      - {roadWidthM: 6.0, areaSqmTo: 134, areaKathaTo: 2, far: 2.50, mgcPercent: 67.5}
+      - {roadWidthM: 6.0, areaSqmFrom: 134, areaSqmTo: 201, areaKathaFrom: 2, areaKathaTo: 3, far: 3.00, mgcPercent: 65.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 201, areaSqmTo: 268, areaKathaFrom: 3, areaKathaTo: 4, far: 3.00, mgcPercent: 65.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 268, areaSqmTo: 335, areaKathaFrom: 4, areaKathaTo: 5, far: 3.50, mgcPercent: 62.5}
+      - {roadWidthM: 6.0, areaSqmFrom: 335, areaSqmTo: 402, areaKathaFrom: 5, areaKathaTo: 6, far: 3.50, mgcPercent: 62.5}
+      - {roadWidthM: 6.0, areaSqmFrom: 402, areaSqmTo: 469, areaKathaFrom: 6, areaKathaTo: 7, far: 3.75, mgcPercent: 60.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 469, areaSqmTo: 536, areaKathaFrom: 7, areaKathaTo: 8, far: 4.50, mgcPercent: 57.5}
+      - {roadWidthM: 9.0, areaSqmFrom: 536, areaSqmTo: 603, areaKathaFrom: 8, areaKathaTo: 9, far: 5.50, mgcPercent: 57.5}
+      - {roadWidthM: 9.0, areaSqmFrom: 603, areaSqmTo: 670, areaKathaFrom: 9, areaKathaTo: 10, far: 6.00, mgcPercent: 55.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 670, areaSqmTo: 804, areaKathaFrom: 10, areaKathaTo: 12, far: 6.50, mgcPercent: 55.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 804, areaSqmTo: 938, areaKathaFrom: 12, areaKathaTo: 14, far: 7.00, mgcPercent: 52.5}
+      - {roadWidthM: 9.0, areaSqmFrom: 938, areaSqmTo: 1072, areaKathaFrom: 14, areaKathaTo: 16, far: 7.50, mgcPercent: 52.5}
+      - {roadWidthM: 9.0, areaSqmFrom: 1072, areaSqmTo: 1206, areaKathaFrom: 16, areaKathaTo: 18, far: 8.00, mgcPercent: 50.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 1206, areaSqmTo: 1340, areaKathaFrom: 18, areaKathaTo: 20, far: 8.50, mgcPercent: 50.0}
+      - {roadWidthM: 12.0, areaSqmFrom: 1340, areaKathaFrom: 20, far: 9.50, mgcPercent: 50.0, footnotes: [f7]}
+      - {roadWidthM: 18.0, anyPlot: true, far: "NR", mgcPercent: 50.0, footnotes: [f7, fnr]}
+      - {roadWidthM: 24.0, anyPlot: true, far: "NR", mgcPercent: 50.0, footnotes: [f7, fnr]}
+  - id: far-f2f5
+    tableBn: "সারণি-৩(ঙ) — ইমারতের শ্রেণী: F2-F5 (দোকান, বাজার ইত্যাদি)"
+    tableEn: "Table 3(nga) - class F2-F5 (shops, bazaars etc.)"
+    clause: "সারণি-৩(ঙ)"
+    cite: far-3nga
+    classId: F2-F5
+    rows:
+      - {roadWidthM: 6.0, areaSqmTo: 134, areaKathaTo: 2, far: 2.25, mgcPercent: 65.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 134, areaSqmTo: 201, areaKathaFrom: 2, areaKathaTo: 3, far: 2.50, mgcPercent: 62.5}
+      - {roadWidthM: 6.0, areaSqmFrom: 201, areaSqmTo: 268, areaKathaFrom: 3, areaKathaTo: 4, far: 2.50, mgcPercent: 62.5}
+      - {roadWidthM: 6.0, areaSqmFrom: 268, areaSqmTo: 335, areaKathaFrom: 4, areaKathaTo: 5, far: 3.00, mgcPercent: 60.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 335, areaSqmTo: 402, areaKathaFrom: 5, areaKathaTo: 6, far: 3.00, mgcPercent: 60.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 402, areaSqmTo: 469, areaKathaFrom: 6, areaKathaTo: 7, far: 3.25, mgcPercent: 57.5}
+      - {roadWidthM: 9.0, areaSqmFrom: 469, areaSqmTo: 536, areaKathaFrom: 7, areaKathaTo: 8, far: 3.25, mgcPercent: 57.5}
+      - {roadWidthM: 9.0, areaSqmFrom: 536, areaSqmTo: 603, areaKathaFrom: 8, areaKathaTo: 9, far: 3.25, mgcPercent: 57.5}
+      - {roadWidthM: 9.0, areaSqmFrom: 603, areaSqmTo: 670, areaKathaFrom: 9, areaKathaTo: 10, far: 3.50, mgcPercent: 55.0}
+      - {roadWidthM: 12.0, areaSqmFrom: 670, areaSqmTo: 804, areaKathaFrom: 10, areaKathaTo: 12, far: 3.75, mgcPercent: 52.5}
+      - {roadWidthM: 12.0, areaSqmFrom: 804, areaSqmTo: 938, areaKathaFrom: 12, areaKathaTo: 14, far: 4.00, mgcPercent: 52.5}
+      - {roadWidthM: 12.0, areaSqmFrom: 938, areaSqmTo: 1072, areaKathaFrom: 14, areaKathaTo: 16, far: 4.25, mgcPercent: 50.0}
+      - {roadWidthM: 12.0, areaSqmFrom: 1072, areaSqmTo: 1206, areaKathaFrom: 16, areaKathaTo: 18, far: 4.50, mgcPercent: 50.0}
+      - {roadWidthM: 12.0, areaSqmFrom: 1206, areaSqmTo: 1340, areaKathaFrom: 18, areaKathaTo: 20, far: 4.75, mgcPercent: 50.0}
+      - {roadWidthM: 12.0, areaSqmFrom: 1340, areaKathaFrom: 20, far: 5.50, mgcPercent: 50.0}
+      - {roadWidthM: 18.0, anyPlot: true, far: 6.50, mgcPercent: 50.0}
+      - {roadWidthM: 24.0, anyPlot: true, far: "NR", mgcPercent: 50.0, footnotes: [f7, fnr]}
+  - id: far-g1k2
+    tableBn: "সারণি-৩(চ) — ইমারতের শ্রেণী: G1-G2, H1-H2, J1-J2, K1-K2 (শিল্প কারখানা, গুদাম, বিপজ্জনক ব্যবহারের ভবন ও বিবিধ)"
+    tableEn: "Table 3(cha) - classes G1-G2, H1-H2, J1-J2, K1-K2 (industrial factories, warehouses, hazardous-use buildings and miscellaneous)"
+    clause: "সারণি-৩(চ)"
+    cite: far-3cha
+    classId: G1-K2
+    note:
+      bn: "G, H, J ও K শ্রেণীর জন্য সারণিতে একটি অভিন্ন কলাম মুদ্রিত। ২৪ মিটার সারির রাস্তার মান মুদ্রিত আছে '২৪.০০'।"
+      en: "One shared column is printed for classes G, H, J and K. The 24 m row's road value is printed as '24.00'."
+    rows:
+      - {roadWidthM: 6.0, areaSqmTo: 134, areaKathaTo: 2, far: 2.00, mgcPercent: 65.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 134, areaSqmTo: 201, areaKathaFrom: 2, areaKathaTo: 3, far: 2.00, mgcPercent: 65.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 201, areaSqmTo: 268, areaKathaFrom: 3, areaKathaTo: 4, far: 2.25, mgcPercent: 65.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 268, areaSqmTo: 335, areaKathaFrom: 4, areaKathaTo: 5, far: 2.25, mgcPercent: 65.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 335, areaSqmTo: 402, areaKathaFrom: 5, areaKathaTo: 6, far: 2.50, mgcPercent: 65.0}
+      - {roadWidthM: 6.0, areaSqmFrom: 402, areaSqmTo: 469, areaKathaFrom: 6, areaKathaTo: 7, far: 2.50, mgcPercent: 65.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 469, areaSqmTo: 536, areaKathaFrom: 7, areaKathaTo: 8, far: 2.75, mgcPercent: 65.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 536, areaSqmTo: 603, areaKathaFrom: 8, areaKathaTo: 9, far: 2.75, mgcPercent: 65.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 603, areaSqmTo: 670, areaKathaFrom: 9, areaKathaTo: 10, far: 2.75, mgcPercent: 65.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 670, areaSqmTo: 804, areaKathaFrom: 10, areaKathaTo: 12, far: 3.00, mgcPercent: 62.5}
+      - {roadWidthM: 9.0, areaSqmFrom: 804, areaSqmTo: 938, areaKathaFrom: 12, areaKathaTo: 14, far: 3.25, mgcPercent: 62.5}
+      - {roadWidthM: 9.0, areaSqmFrom: 938, areaSqmTo: 1072, areaKathaFrom: 14, areaKathaTo: 16, far: 3.50, mgcPercent: 60.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 1072, areaSqmTo: 1206, areaKathaFrom: 16, areaKathaTo: 18, far: 3.75, mgcPercent: 60.0}
+      - {roadWidthM: 9.0, areaSqmFrom: 1206, areaSqmTo: 1340, areaKathaFrom: 18, areaKathaTo: 20, far: 4.00, mgcPercent: 60.0}
+      - {roadWidthM: 12.0, areaSqmFrom: 1340, areaKathaFrom: 20, far: 4.25, mgcPercent: 60.0}
+      - {roadWidthM: 18.0, anyPlot: true, far: 4.50, mgcPercent: 60.0}
+      - {roadWidthM: 24.0, anyPlot: true, far: 5.00, mgcPercent: 60.0}
+
+setbackTable:
+  id: "s46-setbacks"
+  cite: setbacks
+  heightApplicabilityM: 33.0
+  heightApplicabilityStoreys: 10
+  rows:
+    - {areaKathaTo: 2, areaSqmTo: 134, frontM: 1.50, rearM: 1.00, sideM: 0.80}
+    - {areaKathaFrom: 2, areaKathaTo: 3, areaSqmFrom: 134, areaSqmTo: 201, frontM: 1.50, rearM: 1.00, sideM: 1.00}
+    - {areaKathaFrom: 3, areaKathaTo: 4, areaSqmFrom: 201, areaSqmTo: 268, frontM: 1.50, rearM: 1.50, sideM: 1.00}
+    - {areaKathaFrom: 4, areaKathaTo: 5, areaSqmFrom: 268, areaSqmTo: 335, frontM: 1.50, rearM: 2.00, sideM: 1.25}
+    - {areaKathaFrom: 5, areaKathaTo: 6, areaSqmFrom: 335, areaSqmTo: 402, frontM: 1.50, rearM: 2.00, sideM: 1.25}
+    - {areaKathaFrom: 6, areaKathaTo: 7, areaSqmFrom: 402, areaSqmTo: 469, frontM: 1.50, rearM: 2.00, sideM: 1.25}
+    - {areaKathaFrom: 7, areaKathaTo: 8, areaSqmFrom: 469, areaSqmTo: 536, frontM: 1.50, rearM: 2.00, sideM: 1.25}
+    - {areaKathaFrom: 8, areaKathaTo: 9, areaSqmFrom: 536, areaSqmTo: 603, frontM: 1.50, rearM: 2.00, sideM: 1.25}
+    - {areaKathaFrom: 9, areaKathaTo: 10, areaSqmFrom: 603, areaSqmTo: 670, frontM: 1.50, rearM: 2.00, sideM: 1.25}
+    - {areaKathaFrom: 10, areaKathaTo: 12, areaSqmFrom: 670, areaSqmTo: 804, frontM: 1.50, rearM: 2.00, sideM: 1.25}
+    - {areaKathaFrom: 12, areaKathaTo: 14, areaSqmFrom: 804, areaSqmTo: 938, frontM: 1.50, rearM: 2.00, sideM: 1.25}
+    - {areaKathaFrom: 14, areaKathaTo: 16, areaSqmFrom: 938, areaSqmTo: 1072, frontM: 1.50, rearM: 2.00, sideM: 1.25}
+    - {areaKathaFrom: 16, areaKathaTo: 18, areaSqmFrom: 1072, areaSqmTo: 1206, frontM: 1.50, rearM: 2.00, sideM: 1.25}
+    - {areaKathaFrom: 18, areaKathaTo: 20, areaSqmFrom: 1206, areaSqmTo: 1340, frontM: 1.50, rearM: 2.00, sideM: 1.25}
+    - {areaKathaFrom: 20, areaSqmFrom: 1340, frontM: 1.50, rearM: 2.00, sideM: 1.50}
+  beyondHeight:
+    overHeightM: 33.0
+    overStoreys: 10
+    frontM: 1.50
+    rearM: 3.00
+    sideM: 3.00
+    cite: setbacks
+
+parkingSchedule:
+  id: "schedule4-parking"
+  cite: schedule4
+  rows:
+    - {id: park-single-family-up-to-200, useBn: "একক পরিবারভিত্তিক আবাসিক ভবন (২০০ বর্গমিটার পর্যন্ত)", useEn: "Single-family residential building up to 200 sqm", vehicle: car, spaces: {numerator: 1, denominator: 1, basis: site}, grossAreaMaxSqm: 200, minSpaces: 1}
+    - {id: park-single-family-over-200, useBn: "একক পরিবারভিত্তিক আবাসিক ভবন (২০০ বর্গমিটারের বেশি)", useEn: "Single-family residential building above 200 sqm", vehicle: car, spaces: {numerator: 1, denominator: 1, basis: site}, grossAreaMinExclusiveSqm: 200, minSpaces: 2}
+    - {id: park-flat-over-200, useBn: "ফ্ল্যাট — ২০০ বর্গমিটারের বেশি", useEn: "Flat above 200 sqm", vehicle: car, spaces: {numerator: 1, denominator: 1, basis: unit}, unitAreaMinExclusiveSqm: 200}
+    - {id: park-flat-140-to-200, useBn: "ফ্ল্যাট — ১৪০ হইতে ২০০ বর্গমিটার", useEn: "Flat 140 to 200 sqm", vehicle: car, spaces: {numerator: 2, denominator: 3, basis: unit}, unitAreaMinExclusiveSqm: 140, unitAreaMaxSqm: 200}
+    - {id: park-flat-90-to-140, useBn: "ফ্ল্যাট — ৯০ হইতে ১৪০ বর্গমিটার", useEn: "Flat 90 to 140 sqm", vehicle: car, spaces: {numerator: 1, denominator: 2, basis: unit}, unitAreaMinExclusiveSqm: 90, unitAreaMaxSqm: 140}
+    - {id: park-flat-60-to-90, useBn: "ফ্ল্যাট — ৬০ হইতে ৯০ বর্গমিটার", useEn: "Flat 60 to 90 sqm", vehicle: car, spaces: {numerator: 1, denominator: 4, basis: unit}, unitAreaMinExclusiveSqm: 60, unitAreaMaxSqm: 90}
+    - {id: park-flat-up-to-60, useBn: "ফ্ল্যাট — ৬০ বর্গমিটার পর্যন্ত", useEn: "Flat up to 60 sqm", vehicle: car, spaces: {numerator: 1, denominator: 8, basis: unit}, unitAreaMaxSqm: 60}
+    - {id: park-flat-up-to-90-motorcycle, useBn: "ফ্ল্যাট (৯০ বর্গমিটার পর্যন্ত) — অতিরিক্ত মোটরসাইকেল", useEn: "Flats up to 90 sqm - additional motorcycle parking", vehicle: motorcycle, spaces: {numerator: 1, denominator: 5, basis: unit}, unitAreaMaxSqm: 90, additive: true}
+    - {id: park-hotel-star, useBn: "তারকা মানের হোটেল", useEn: "Star-rated hotel", vehicle: car, spaces: {numerator: 1, denominator: 5, basis: room}}
+    - {id: park-hotel-other, useBn: "হোটেল (অন্যান্য)", useEn: "Other hotel", vehicle: car, spaces: {numerator: 1, denominator: 200, basis: sqm_gross}}
+    - {id: park-other-residential, useBn: "অন্যান্য আবাসিক", useEn: "Other residential", vehicle: car, spaces: {numerator: 1, denominator: 300, basis: sqm_gross}}
+    - {id: park-education, useBn: "শিক্ষা প্রতিষ্ঠান", useEn: "Educational institution", vehicle: car, spaces: {numerator: 1, denominator: 200, basis: sqm_gross}, note: {bn: "ড্রপ-অফ বে (৪.২৫ মিটার × ২৫ মিটার) প্রয়োজনীয়; সম্মুখপ্রস্থ ২৫ মিটারের কম হইলে সম্পূর্ণ সম্মুখ জুড়িয়া ড্রপ-অফ বে।", en: "A drop-off bay (4.25 m x 25 m) is required; where the frontage is under 25 m, the whole frontage."}}
+    - {id: park-institutional, useBn: "প্রাতিষ্ঠানিক ভবন", useEn: "Institutional building", vehicle: car, spaces: {numerator: 1, denominator: 200, basis: sqm_gross}}
+    - {id: park-hospital, useBn: "হাসপাতাল", useEn: "Hospital", vehicle: car, spaces: {numerator: 1, denominator: 5, basis: bed}}
+    - {id: park-diagnostic, useBn: "ডায়াগনস্টিক সেন্টার", useEn: "Diagnostic centre", vehicle: car, spaces: {numerator: 1, denominator: 100, basis: sqm_gross}}
+    - {id: park-health-other, useBn: "স্বাস্থ্যসেবা (অন্যান্য)", useEn: "Other health facility", vehicle: car, spaces: {numerator: 1, denominator: 200, basis: sqm_gross}}
+    - {id: park-cinema, useBn: "সিনেমা হল", useEn: "Cinema hall", vehicle: car, spaces: {numerator: 1, denominator: 40, basis: seat}}
+    - {id: park-theatre, useBn: "থিয়েটার", useEn: "Theatre", vehicle: car, spaces: {numerator: 1, denominator: 20, basis: seat}}
+    - {id: park-party-centre, useBn: "পার্টি সেন্টার", useEn: "Party centre", vehicle: car, spaces: {numerator: 1, denominator: 100, basis: sqm_gross}}
+    - {id: park-religious-small, useBn: "ধর্মীয় স্থাপনা (৩০০ বর্গমিটার পর্যন্ত)", useEn: "Religious building up to 300 sqm", vehicle: car, spaces: {numerator: 1, denominator: 1, basis: site}, siteAreaMaxSqm: 300, minSpaces: 1}
+    - {id: park-religious, useBn: "ধর্মীয় স্থাপনা", useEn: "Religious building", vehicle: car, spaces: {numerator: 1, denominator: 100, basis: sqm_gross}}
+    - {id: park-other, useBn: "অন্যান্য ব্যবহার", useEn: "Other uses", vehicle: car, spaces: {numerator: 1, denominator: 200, basis: sqm_gross}}
+    - {id: park-shop, useBn: "দোকান", useEn: "Shop", vehicle: car, spaces: {numerator: 1, denominator: 100, basis: sqm_gross}}
+    - {id: park-office, useBn: "অফিস", useEn: "Office", vehicle: car, spaces: {numerator: 1, denominator: 200, basis: sqm_gross}}
+    - {id: park-industrial-truck, useBn: "শিল্প/গুদাম — ট্রাক", useEn: "Industrial/warehouse - truck", vehicle: truck, spaces: {numerator: 1, denominator: 1, basis: site}, minSpaces: 1}
+    - {id: park-industrial-car, useBn: "শিল্প/গুদাম — কার", useEn: "Industrial/warehouse - car", vehicle: car, spaces: {numerator: 1, denominator: 1, basis: site}, minSpaces: 1}
+    - {id: park-industrial-admin, useBn: "শিল্প/গুদাম — প্রশাসনিক/বিক্রয় অংশ", useEn: "Industrial/warehouse - administrative/sales area", vehicle: car, spaces: {numerator: 1, denominator: 200, basis: sqm_gross}, note: {bn: "প্রশাসনিক/বিক্রয় এলাকার জন্য কার পার্কিং অতিরিক্তভাবে প্রযোজ্য।", en: "Applies additionally to the administrative/sales area."}}
+  notes:
+    - {id: s4-n-per-floor, text: {bn: "প্রতিটি তলার ব্যবহার অনুযায়ী আলাদাভাবে হিসাব করিয়া যোগ করিতে হইবে।", en: "The requirement is computed per floor by use and then summed."}}
+    - {id: s4-n-mixed-flats, text: {bn: "বিভিন্ন আকারের ফ্ল্যাট থাকিলে সবগুলির হিসাব যোগ হইবে।", en: "Flats of mixed sizes: the requirements add up."}}
+    - {id: s4-n-fraction, text: {bn: "হিসাবের শেষে ভগ্নাংশ অবশিষ্ট থাকিলে একটি অতিরিক্ত স্পেস প্রযোজ্য।", en: "A remaining fraction of a space requires one additional space."}}
+    - {id: s4-n-low-income, text: {bn: "নিম্ন আয়ের আবাসনের ক্ষেত্রে কমিটি প্রয়োজনীয়তা হ্রাস করিতে পারিবে।", en: "For low-income housing the committee may reduce the requirement."}}
+    - {id: s4-n-min-one-car, text: {bn: "প্রতিটি সাইটে ন্যূনতম একটি কার পার্কিং থাকিতে হইবে।", en: "Every site must provide at least one car space."}}
+    - {id: s4-n-small-flat-word, text: {bn: "৯০ বর্গমিটার পর্যন্ত ফ্ল্যাটের মোটরসাইকেল/কার শর্তাবলিতে একটি শব্দ নিশ্চিতভাবে পাঠ করা যায় নাই — দেখুন candidates C3।", en: "One word in the motorcycle/car condition for flats up to 90 sqm could not be read with certainty - see candidates C3."}}
+
+parkingGeometry:
+  id: "s56-geometry"
+  cite: s56-1-3
+  stalls:
+    - {vehicle: car, widthM: 2.40, lengthM: 4.60}
+    - {vehicle: bus_truck, widthM: 3.60, lengthM: 10.00, innerTurnRadiusM: 8.70, outerTurnRadiusM: 12.80}
+    - {vehicle: multi_axle, widthM: 3.60, lengthM: 18.00, innerTurnRadiusM: 6.90, outerTurnRadiusM: 13.80}
+    - {vehicle: motorcycle, widthM: 1.00, lengthM: 2.00}
+  packedBayWidthM: 2.30
+  drivewayWidths:
+    - {angleDeg: 0, singleLoadedM: 3.50, doubleLoadedM: 4.00, twoWayM: 4.25}
+    - {angleDeg: 45, singleLoadedM: 4.00, doubleLoadedM: 4.00, twoWayM: 4.25}
+    - {angleDeg: 90, singleLoadedM: 4.25, doubleLoadedM: 4.25, twoWayM: 4.25}
+  rules:
+    - id: s56-4-5-entry-exit
+      clause: "§56(4)-(5)"
+      cite: s56-4-5
+      title:
+        bn: "বাস/ট্রাক পার্কিং — প্রবেশ ও প্রস্থান"
+        en: "Bus/truck parking - entry and exit"
+      summary:
+        bn: "§৫৬(৪): বাস/ট্রাক পার্কিংয়ে পৃথক প্রবেশ ও প্রস্থান প্রতিটি ন্যূনতম ৪.২৫ মিটার, অথবা সম্মিলিত প্রবেশ-প্রস্থান ৬.০০ মিটার; (৫) পার্কিং সূচি-৪ অনুসারে।"
+        en: "Section 56(4): bus/truck parking needs separate entry and exit of at least 4.25 m each, or a combined one of 6.0 m; (5) parking is per Schedule 4."
+    - id: s56-6-on-street
+      clause: "§56(6)"
+      cite: s56-6
+      title:
+        bn: "রাস্তায় কোণাকুণি পার্কিং"
+        en: "On-street angled parking"
+      summary:
+        bn: "রাস্তায় কোণাকুণি পার্কিং সর্বোচ্চ ৪টি কার, কোণ সর্বোচ্চ ৪৫ ডিগ্রি; বাস স্টপ হইতে ১৫ মিটার ও ক্রসিং হইতে ২৫ মিটারের মধ্যে নহে; জাতীয় মহাসড়কে কখনও নহে।"
+        en: "On-street angled parking: at most 4 cars, angle at most 45 degrees, not within 15 m of a bus stop or 25 m of a crossing, never on a national highway."
+    - id: s56-7-15-ramps
+      clause: "§56(7)-(15)"
+      cite: s56-7-15
+      title:
+        bn: "ফুটপাত, র‍্যাম্প, ক্লিয়ারেন্স ও প্রবেশপথ"
+        en: "Footpath, ramps, clearance and access"
+      summary:
+        bn: "§৫৬(৭): ফুটপাত কাটা কেবল কর্তৃপক্ষের অনুমতিতে; (৮) র‍্যাম্পের ঢাল সর্বোচ্চ ১:৮, র‍্যাম্পের পূর্বে ন্যূনতম ৪.২৫ মিটার সোজা অংশ, ০.৭৫ মিটার পর্যন্ত পার্থক্যে র‍্যাম্প লাগিবে না; (৯) র‍্যাম্প সেটব্যাকের ভিতরে গণ্য; (১০) একমুখী র‍্যাম্প ন্যূনতম ৩.০০ মিটার, দুইমুখী ৪.২৫ মিটার (বিশেষ ক্ষেত্রে ৬.০০ মিটার); (১১) আবাসিকে ১০০ ও অন্যথায় ৫০ কার-এর ঊর্ধ্বে পৃথক মার্শালিং লেন; (১২) ন্যূনতম ক্লিয়ারেন্স ২.২৫ মিটার; (১৩) সম্মুখপ্রস্থ ১০ মিটার পর্যন্ত এক প্রবেশ-প্রস্থান, তার ঊর্ধ্বে দুইটি অনুমোদনযোগ্য; (১৪) কার লিফট বিকল্প হিসাবে গ্রহণযোগ্য; (১৫) লুপ-আউট লেন প্রয়োজন হইতে পারে।"
+        en: "Section 56(7): footpath cutting only with authority permission; (8) ramp slope at most 1:8, with at least a 4.25 m straight run before the ramp; no ramp needed for a step up to 0.75 m; (9) ramps count within the setback; (10) one-way ramp at least 3.0 m, two-way 4.25 m (6.0 m in special cases); (11) for 100+ cars (residential) or 50+ (others) a separate marshalling lane; (12) at least 2.25 m clearance; (13) frontage up to 10 m: a single entry+exit; above 10 m: two may be allowed; (14) a car lift is an acceptable alternative; (15) a loop-out lane may be required."
+
+provisions:
+  - id: far-tables
+    clause: "§51(1)"
+    cite: s51-1
+    title:
+      bn: "FAR ও ভূমি আচ্ছাদন সারণি (সারণি-৩(ক)–(চ))"
+      en: "FAR and ground coverage tables, Tables 3(ka)-(cha)"
+    summary:
+      bn: "প্রতিটি ইমারত-শ্রেণীর FAR ও সর্বোচ্চ ভূমি আচ্ছাদন সারণি-৩(ক)–(চ)-এর প্রযোজ্য সারি অনুযায়ী নির্ধারিত হইবে; জমির আকার ও সংলগ্ন রাস্তার প্রস্থ দিয়া সারি নির্বাচন করিতে হইবে এবং সেই সারির পাদটীকাসমূহ প্রযোজ্য। সারণিতে 'NR' মুদ্রিত হইলে FAR-এর বাধ্যবাধকতা নাই।"
+      en: "FAR and maximum ground coverage for each building class follow the applicable row of Tables 3(ka)-(cha); the row is selected by plot size and adjoining road width, and that row's footnotes apply. Where 'NR' is printed there is no FAR cap."
+  - id: setback-schedule
+    clause: "§46(1)-(2)"
+    cite: setbacks
+    title:
+      bn: "সীমানা হইতে আবশ্যক সেটব্যাক"
+      en: "Mandatory setbacks from boundaries"
+    summary:
+      bn: "৩৩ মিটার উচ্চতা বা ১০ তলা পর্যন্ত ইমারতের জন্য জমির আকারভেদে: সামনে সর্বনিম্ন ১.৫০ মিটার; পিছনে ১.০০ হইতে ২.০০ মিটার; পাশে ০.৮০ হইতে ১.২৫ মিটার (২০ কাঠার ঊর্ধ্ব জমিতে পাশে ১.৫০ মিটার)। ৩৩ মিটার বা ১০ তলার ঊর্ধ্বে সামনে ১.৫০ মিটার, পিছনে ৩.০০ মিটার ও পাশে ৩.০০ মিটার প্রযোজ্য।"
+      en: "For buildings up to 33 m or 10 storeys, by plot size: front at least 1.50 m; rear 1.00 to 2.00 m; sides 0.80 to 1.25 m (1.50 m at the sides of plots above 20 katha). Above 33 m or 10 storeys: front 1.50 m, rear 3.00 m and sides 3.00 m."
+  - id: s46-3-4
+    clause: "§46(3)-(4)"
+    cite: s46-3-4
+    title:
+      bn: "রাস্তা ও প্লট-সীমানা হইতে ন্যূনতম দূরত্ব"
+      en: "Minimum distance from road and plot boundary"
+    summary:
+      bn: "কোনো ইমারত রাস্তার কেন্দ্ররেখা হইতে ৪.৫০ মিটারের কম এবং প্লট-সীমানা হইতে ১.৫০ মিটারের কম দূরত্বে নির্মিত হইতে পারিবে না (ভবিষ্যৎ রাস্তা সম্প্রসারণের জন্য প্রয়োজনীয় জমি বাদে)। ড্যাপ নির্দিষ্ট রাস্তার জন্য ইহার চেয়ে বেশি সম্মুখ সেটব্যাক বাধ্যতামূলক করিতে পারিবে।"
+      en: "No building may be built closer than 4.50 m from the road centreline or 1.50 m from the plot boundary (excluding land required for future road widening). The DAP may impose a greater front setback for specific roads."
+  - id: s46-5-items-1
+    clause: "§46(5)(ক)-(খ)"
+    cite: s46-5-1
+    title:
+      bn: "আবশ্যক উন্মুক্ত স্থান — পাকা অংশ ও আবৃত অংশ"
+      en: "Mandatory open space - paved and covered parts"
+    summary:
+      bn: "(ক) আবশ্যক উন্মুক্ত স্থানের (MOS) সর্বোচ্চ ৫০% পাকা করা যাইবে; পাকা অংশের উপর আচ্ছাদন নির্মাণ করিলে ছাদ ভূমি-সমতল হইতে সর্বোচ্চ ৪.০০ মিটার বা প্লিন্থ হইতে ৩.০০ মিটার (যাহা কম) হইবে এবং সেটব্যাক স্পেসের উপর পড়িতে পারিবে না; উহা কেবল পার্কিং ও নিরাপত্তা বুথ হিসাবে ব্যবহৃত হইবে — একটি শব্দ পাঠযোগ্য নহে, দেখুন candidates C1; বাকি ৫০% জমি মাটি রাখিবার শর্ত মানিতে হইবে; সম্মুখ, পাশ ও পিছনের সেটব্যাক পার্কিংয়ের জন্য ব্যবহারযোগ্য; সীমানা প্রাচীরের উপর সর্বোচ্চ ২.৫০ মিটার উচ্চতার ও ৫ বর্গমিটার ক্ষেত্রফলের নিরাপত্তা কক্ষ থাকিতে পারিবে। (খ) নীচতলার আবৃত অংশ জাল বা বেষ্টনী দ্বারা সম্পূর্ণ ঘেরাও থাকিবে না; বায়ু চলাচল নিশ্চিত থাকিতে হইবে; উহার ছাদ কেবল টেরেস বা টেরেস-গার্ডেন হিসাবে ব্যবহৃত হইবে এবং কোনোভাবেই স্থায়ী বা অস্থায়ী কাঠামো দ্বারা আচ্ছাদিত হইতে পারিবে না।"
+      en: "(ka) At most 50% of the mandatory open space may be paved; where the paved part is covered, its roof must stay within 4.00 m of ground level or 3.00 m of the plinth (whichever is less) and must not fall on the setback space; it may serve only as parking and security booth - one word unreadable, see candidates C1; the remaining 50% must be kept as soil; the front, side and rear setbacks may be used for parking; a security room of at most 2.50 m height and 5 sqm may sit on the boundary wall. (kha) The ground-floor covered part must not be fully enclosed by mesh or fence; air circulation must be provided; its roof may be used only as terrace or terrace garden and must never be covered by a permanent or temporary structure."
+  - id: s46-5-items-2
+    clause: "§46(5)(গ)-(ঘ)"
+    cite: s46-5-2
+    title:
+      bn: "ভূমি-সমতলে উন্মুক্ত ৫০% এবং ব্যালকনি ছাড়"
+      en: "Ground-level 50% open space and balcony exemption"
+    summary:
+      bn: "(গ) MOS-এর ন্যূনতম ৫০% সর্বক্ষেত্রে ভূমি-সমতলে উন্মুক্ত রাখিতে হইবে, যাহাতে বৃষ্টির পানি শোষিত হইতে পারে; এই ৫০% অংশে বেসমেন্ট কোনোভাবেই বর্ধিত করা যাইবে না। (ঘ) দ্বিতীয় বা তদূর্ধ্ব তলার সম্মুখের ব্যালকনি সর্বোচ্চ ভূমি আচ্ছাদনের অতিরিক্ত হিসাবে ছাড় পাইবে এই শর্তে — বেষ্টনীর উচ্চতা সর্বোচ্চ ১,২০০ মি.মি.; ব্যালকনির ক্ষেত্রফল সম্মুখপ্রস্থের ৩০% এবং ১ মিটার প্রস্থের হিসাবে যাহা হয় তাহার বেশি নহে; সেটব্যাকের মধ্যে ব্যালকনি বর্ধিত হইবে না; ছাড়ের পরিমাণ তলাসমূহের মধ্যে বিতরণ করা যাইবে।"
+      en: "(ga) At least 50% of the MOS must always remain open at ground level so that rain water can be absorbed; no basement may extend into this 50%. (gha) Front balconies on the second or higher floors are exempted above the maximum ground coverage on these conditions - railing height at most 1,200 mm; balcony area no more than the front width at 30% and 1 m depth gives; the balcony must not extend into the setback; the allowance may be distributed among the floors."
+  - id: s46-5-items-3
+    clause: "§46(5)(ঙ)"
+    cite: s46-5-3
+    title:
+      bn: "কার্নিশ/ছাজ — সেটব্যাকে সর্বোচ্চ ১ মিটার"
+      en: "Cornice - up to 1 m into the setback"
+    summary:
+      bn: "(ঙ) ইমারতের দালান বা কার্নিশ আবশ্যক সেটব্যাকের মধ্যে সর্বোচ্চ ১.০০ মিটার পর্যন্ত বর্ধিত হইতে পারিবে, কেবল সম্মুখ দিকে; তবে কোনো অবস্থাতেই ভূমি-সমতল হইতে ৮.০০ মিটারের নিচে থাকিতে পারিবে না।"
+      en: "(nga) A cornice may project into the mandatory setback by at most 1.00 m, front side only, and must never sit below 8.00 m from ground level."
+  - id: s46-5-items-4
+    clause: "§46(5)(চ)-(ছ)-(জ)"
+    cite: s46-5-4
+    title:
+      bn: "কার্নিশ-বাহিরে নির্মাণ ও সুরক্ষা-ছাতা"
+      en: "Beyond-setback cornice and protection sunshades"
+    summary:
+      bn: "(চ) সেটব্যাকের বাহিরে ইমারত নির্মাণের ক্ষেত্রে কার্নিশ সর্বোচ্চ ২.০০ মিটার পর্যন্ত বর্ধিত হইতে পারিবে; ইহার অতিরিক্ত অংশ ভূমি আচ্ছাদনে গণ্য হইবে। (ছ) সুরক্ষা-ছাতা সেটব্যাকের মধ্যে সর্বোচ্চ ০.৫০ মিটার (পাশ বা পিছনের সেটব্যাক ১.২৫ মিটারের কম হইলে সর্বোচ্চ ০.৩০ মিটার) পর্যন্ত বর্ধিত হইতে পারিবে; এই ছাতায় কোনো বেষ্টনী, ব্যালকনি বা প্রবেশপথ থাকিতে পারিবে না। (জ) ছাতা সর্বোচ্চ ১.৫০ মিটার পর্যন্ত; ইহার অতিরিক্ত অংশ ভূমি আচ্ছাদনে গণ্য হইবে।"
+      en: "(cha) Where a building is built beyond the setback, its cornice may project up to 2.00 m; the excess counts toward ground coverage. (chha) Protection sunshades may extend into the setback by at most 0.50 m (at most 0.30 m where the side or rear setback is under 1.25 m); such a sunshade may carry no enclosure, balcony or access. (ja) Sunshades may project up to 1.50 m; the excess counts toward ground coverage."
+  - id: s46-5-items-5
+    clause: "§46(5)(ঝ)-(ঞ)-(ট)-(ঠ)"
+    cite: s46-5-5
+    title:
+      bn: "নিষিদ্ধ প্রজেকশনসমূহ"
+      en: "Prohibited projections"
+    summary:
+      bn: "(ঝ) স্টোর, এসি বা টয়লেট-ডাক্ট 'সম্বলিত' কোনো প্রজেকশন সেটব্যাকে নির্মাণ করা যাইবে না। (ঞ) উল্লম্ব ফিন সর্বোচ্চ ১০০ মি.মি. এবং বায়ু চলাচল প্রতিবন্ধক হইবে না। (ট) যান্ত্রিক ভেন্টিলেশন, নিষ্কাশন বা ড্রেনেজ সংলগ্ন প্লটের দিকে নিক্ষিপ্ত হইবে না। (ঠ) তলার ক্ষেত্রফল বৃদ্ধির উদ্দেশ্যে কোনো প্রজেকশন অনুমোদিত নহে।"
+      en: "(jha) No projection incorporating a store, AC unit or toilet duct may be built into the setback. (nya) Vertical fins at most 100 mm and must not obstruct air flow. (ta) No mechanical ventilation, exhaust or drainage may be directed toward an adjoining plot. (tha) No projection is allowed for the purpose of increasing floor area."
+  - id: s46-6-8
+    clause: "§46(6)-(8)"
+    cite: s46-6-8
+    title:
+      bn: "একই প্লটে একাধিক ইমারত ও ডেড-এন্ড রাস্তা"
+      en: "Multiple buildings on one plot; dead-end road"
+    summary:
+      bn: "(৬) একই প্লটে পৃথক একাধিক ইমারত থাকিলে ইমারতসমূহের মধ্যবর্তী ব্যবধান সম্মুখ ও পিছনে ন্যূনতম ৪.০০ মিটার এবং পাশে ন্যূনতম ২.৫০ মিটার হইবে। (৭) সংযুক্ত ইমারতের ক্ষেত্রে সংযোগ-অংশ ক্ষুদ্রতর পাশের দৈর্ঘ্যের ন্যূনতম ৩০% হইবে। (৮) কেবল উক্ত প্লটেই শেষ হইয়াছে এরূপ রাস্তা-সংলগ্ন প্লটে প্রস্তাবিত ইমারত সম্মুখ সীমানা হইতে ন্যূনতম ২.০০ মিটার দূরত্বে নির্মিত হইবে।"
+      en: "(6) Where several separate buildings share one plot, the gaps between them must be at least 4.00 m front and rear and 2.50 m at the sides. (7) For connected buildings the joining part must be at least 30% of the shorter side. (8) On a plot where the road ends (dead-end), the proposed building must stand at least 2.00 m from the front boundary."
+  - id: s47-basement
+    clause: "§47"
+    cite: s47
+    title:
+      bn: "বেসমেন্টের সেটব্যাক"
+      en: "Basement setback"
+    summary:
+      bn: "(১) বেসমেন্ট আবশ্যক উন্মুক্ত স্থানের (MOS) ভিতরে বর্ধিত হইলে তাহা MOS-এর সর্বোচ্চ ৫০% পর্যন্ত সীমাবদ্ধ; অবশিষ্ট ৫০% ভূমি-সমতলে উন্মুক্ত থাকিতে হইবে। (২) প্রতিবেশীর সম্পত্তির নিরাপত্তা নিশ্চিত করিয়া বেসমেন্ট সীমানা দেয়াল পর্যন্ত বর্ধিত করা যাইবে, তবে রাস্তার দিকের ন্যূনতম সেটব্যাক মানিতে হইবে। (৩) বেসমেন্টের উপরিতল সংলগ্ন রাস্তার উপরিতল হইতে সর্বোচ্চ ১.৫০ মিটার উঁচু হইতে পারিবে; র‍্যাম্প সেটব্যাকের মধ্যে অনাচ্ছাদিত রাখিতে পারিবে (§56(8)-(9) দ্রষ্টব্য)।"
+      en: "(1) A basement may extend into the mandatory open space (MOS) up to at most 50% of the MOS; the remaining 50% must stay open at ground level. (2) With the neighbour's property safety assured, the basement may extend to the boundary wall while respecting the minimum setback towards the road. (3) The basement top may rise at most 1.50 m above the adjoining road top; ramps may remain uncovered within the setback (see §56(8)-(9))."
+  - id: s48-subdivision
+    clause: "§48"
+    cite: s48
+    title:
+      bn: "উপবিভাজন ও নিজস্ব রাস্তা"
+      en: "Subdivision and private roads"
+    summary:
+      bn: "প্রতিটি উপ-প্লটের স্বতন্ত্র চলাচলের পথ থাকিতে হইবে এবং প্রতিটি উপ-প্লট স্বতন্ত্রভাবে সেটব্যাকসহ বিধি মানিতে হইবে। একক প্লটের নিজস্ব রাস্তা আবাসিক ব্যবহারে ন্যূনতম ৩.৬৫ মিটার এবং অনাবাসিক ব্যবহারে ন্যূনতম ৬.০০ মিটার; নিজস্ব রাস্তার ক্ষেত্রফল FAR-হিসাবের প্লট-আয়তনে গণ্য হইবে না; রাস্তার প্রস্থ ৩৩ মিটারের বেশি হইলে §51(1) প্রযোজ্য। পরিকল্পিত এলাকায় ন্যূনতম ৫ কাঠা মানিতে হইবে; একাধিক প্লটের নিজস্ব রাস্তা ন্যূনতম ৬.০০ মিটার; বেসরকারি উন্নয়ন এলাকার ইমারতের ক্ষেত্রে ইমারত নির্মাণ বিধিমালা ২০০৪ প্রযোজ্য।"
+      en: "Every sub-plot must have its own access path and must independently meet the rules including setbacks. A single plot's private road must be at least 3.65 m for residential use and at least 6.00 m for non-residential use; the road area is not counted in the FAR plot area; where the road is wider than 33 m, §51(1) applies. In planned areas a minimum of 5 katha applies; a private road serving several plots must be at least 6.00 m; buildings in privately developed areas follow the Imarat Nirman Bidhimala 2004."
+  - id: s49-amalgamation
+    clause: "§49"
+    cite: s49
+    title:
+      bn: "প্লট একত্রীকরণ"
+      en: "Plot amalgamation"
+    summary:
+      bn: "একাধিক প্লট একত্রিত করিয়া নির্মাণ করিলে একত্রিত জমি একটি প্লট হিসাবে গণ্য হইবে; FAR ও ভূমি আচ্ছাদন একত্রিত আকার এবং সংলগ্ন রাস্তার প্রস্থ-ভিত্তিক প্রযোজ্য সারি অনুসারে নির্ধারিত হইবে; দুইভাবে প্রাপ্ত মানের নিম্নতরটি প্রযোজ্য।"
+      en: "Where several plots are amalgamated for construction, the combined land counts as one plot; FAR and ground coverage follow the applicable rows for the combined area and the adjoining road width; the lower of the two applies."
+  - id: s50-mgc
+    clause: "§50"
+    cite: s50
+    title:
+      bn: "সর্বোচ্চ ভূমি আচ্ছাদন ও MOS-এর অখণ্ডতা"
+      en: "Maximum ground coverage and MOS indivisibility"
+    summary:
+      bn: "সর্বোচ্চ ভূমি আচ্ছাদন (MGC) প্লটের আকার, ব্যবহার-শ্রেণী ও রাস্তার প্রস্থ অনুযায়ী সারণি-৩-এর প্রযোজ্য সারি অনুসারে নির্ধারিত; §46(5)-এর ব্যতিক্রম ছাড়া MOS-এর মধ্যে MGC ছাড়াইয়া নির্মাণ করা যাইবে না; MOS অবিভাজ্য এবং বিক্রয়যোগ্য নহে।"
+      en: "Maximum ground coverage (MGC) follows the applicable row of Tables 3 by plot size, use class and road width; no building may extend beyond the MGC into the MOS except as allowed by §46(5); the MOS is indivisible and may not be sold."
+  - id: s51-2-3-heights
+    clause: "§51(2)-(3)"
+    cite: s51-2-5
+    title:
+      bn: "কক্ষের উচ্চতা ও ক্ষেত্রফলের হিসাব"
+      en: "Room height and area accounting"
+    summary:
+      bn: "(২) বাসযোগ্য কক্ষের উচ্চতা সর্বোচ্চ ৪.২৫ মিটার। (৩) ৪.২৫ হইতে ৬.০০ মিটার উচ্চতার কক্ষের ক্ষেত্রফলের সহিত অতিরিক্ত ৫০% যোগ করিতে হইবে; এরূপ অতিরিক্ত মোট ক্ষেত্রফল FAR-এর ১০% অতিক্রম করিতে পারিবে না; মোট ১০% ছাড়াইলে বা কোনো কক্ষ ৬.০০ মিটার ছাড়াইলে অতিরিক্ত ১০০% যোগ হইবে; A5, E, F1, F4, G ও H শ্রেণীর নীচতলা এই বিধির ব্যতিক্রম।"
+      en: "(2) A habitable room may be at most 4.25 m high. (3) A room 4.25 to 6.00 m high adds 50% to its area; such extra area together may not exceed 10% of the FAR; where the total exceeds 10% or any room is above 6.00 m, 100% is added; the ground floor of classes A5, E, F1, F4, G and H is exempt."
+  - id: s51-4-5-exclusions
+    clause: "§51(4)-(5)"
+    cite: s51-2-5
+    title:
+      bn: "FAR হিসাবে অগণনীয় উপাদান"
+      en: "Elements excluded from FAR"
+    summary:
+      bn: "নিম্নলিখিত উপাদান FAR-হিসাবে ধরা হইবে না: উপরের সিঁড়ির ফ্লাইট; লিফট-মেশিন কক্ষ; ছাদের পানি ট্যাংক (ছাদের উপরে সর্বোচ্চ ৫ মিটার পর্যন্ত); বৈদ্যুতিক ও যান্ত্রিক কক্ষ; পার্কিং (সূচি-৪ অনুসারে সর্বোচ্চ দ্বিগুণ; ড্রাইভওয়ে, র‍্যাম্প ও লিফটসহ); ড্রাইভার-অপেক্ষা কক্ষ ও শৌচাগার (≤৫%); নিরাপত্তা কক্ষ (≤৫ বর্গমিটার); ক্যান্টিলিভার ব্যালকনি (তলার ক্ষেত্রফলের ≤২.৫%); §46(5)(ঘ) অনুসারে সম্মুখ ব্যালকনির ছাড়কৃত অংশ; শিক্ষা প্রতিষ্ঠানের নীচতলার আবৃত-উন্মুক্ত স্থান; B1-এ ≤২০% এবং B2-এ ≤৪০% নীচতলার উন্মুক্ত স্থান; টেরেস/ছাদ/পার্গোলা; কাড় (Loft), যাহা কক্ষে রূপান্তরযোগ্য নহে; আলো-বাতাসের খাদ, যাহা হ্রাসযোগ্য নহে; নিজস্ব রাস্তা, যাহা প্লট-আয়তনে গণ্য নহে; অগ্নি-নিরাপত্তা সিঁড়ি (তবে একক-সিঁড়ির ইমারত অযোগ্য)।"
+      en: "The following are not counted in FAR: the top stair flight; the lift machine room; roof water tanks (up to 5 m above the roof); electrical and mechanical rooms; parking (up to twice Schedule 4; including driveways, ramps and lifts); driver waiting room and toilet (up to 5%); security post (up to 5 sqm); cantilever balconies (up to 2.5% of the floor area); the front-balcony allowance under §46(5)(gha); educational ground-floor covered-open space; B-1 up to 20% and B-2 up to 40% ground-floor open space; terrace/roof/pergola; the loft (not convertible into a room); light and air wells (not reducible); private roads (not part of the plot area); fire stairs (a single-stair building is not eligible)."
+  - id: s51-6-8
+    clause: "§51(6)-(8)"
+    cite: s51-6-8
+    title:
+      bn: "ঘন এলাকার FAR, নিম্ন-আয় আবাসন ও হিসাবভুক্তি"
+      en: "Dense-area FAR, low-income housing and floor-area accounting"
+    summary:
+      bn: "(৬) ঘনবসতিপূর্ণ/নগর উন্নয়ন এলাকায় FAR-এর সর্বোচ্চ সীমা সারণি-৩-এর সংশ্লিষ্ট সারি অনুযায়ী; ইউডিসি ভিন্ন মান নির্ধারণ করিতে পারিবে। (৭) নিম্ন-আয়ের ও দুস্থ আবাসন প্রকল্পে ইউডিসি পর্যালোচনা-সাপেক্ষে মান পরিবর্তনযোগ্য। (৮) পার্কিং এবং §51(5)-এ ছাড়প্রাপ্ত উপাদানসমূহ তলা-ক্ষেত্রফলে (floor area) যোগ করিয়া হিসাব করিতে হইবে।"
+      en: "(6) The FAR ceiling in dense urban development areas follows the relevant row of Tables 3; the UDC may set different values. (7) For low-income and distressed housing the UDC may vary the values on review. (8) Parking and the elements exempted under §51(5) must be included when computing floor area."
+  - id: s51-9-14-road-width
+    clause: "§51(9)-(15)"
+    cite: s51-9-14
+    title:
+      bn: "সরু রাস্তার FAR এবং রাস্তা-প্রস্থ বোনাস"
+      en: "Narrow-road FAR and road-width bonus"
+    summary:
+      bn: "(৯) ৩.৬৫–৫.৯৯ মিটার রাস্তা: FAR ৩.০০, MGC ৬৫%। (১০) ২.৫০–৩.৬৪ মিটার রাস্তা: FAR ২.০০, MGC ৬৫%। (১১) ৬.০০ হইতে ২৪.০০ মিটার পর্যন্ত রাস্তায় প্রতি অতিরিক্ত ০.৩০ মিটার প্রশস্ততার জন্য FAR ০.০৫ বৃদ্ধি; তবে §54(7) অনুসারে পরবর্তী সারণি-ধাপ ছাড়াইয়া নহে। (১২) ২৪ মিটারের ঊর্ধ্ব রাস্তায় ২৪ মিটার সারি প্রযোজ্য। (১৩) ব্যবহার-পরিবর্তনে দুই ব্যবহারের নিম্নতর FAR প্রযোজ্য। (১৪) ১৮ ও ২৪ মিটার সারিতে 'NR' অর্থ FAR-সীমা নাই; অথবা জমির আকার-ভিত্তিক সারির মানও গ্রহণযোগ্য। (১৫) নিম্নতর সারণি ('নিম্নের ছক') ব্যবহার করিলে §51(11)-এর রাস্তা-বোনাস পরিত্যক্ত হইবে (একটি শব্দ এই সংস্করণে পাঠযোগ্য নহে — দেখুন candidates C6)।"
+      en: "(9) Roads 3.65-5.99 m: FAR 3.00, MGC 65%. (10) Roads 2.50-3.64 m: FAR 2.00, MGC 65%. (11) For roads 6.00 to 24.00 m, FAR rises by 0.05 for each extra 0.30 m of width, not beyond the next table step, per §54(7). (12) Above 24 m the 24 m row applies. (13) On a change of use the lower of the two uses' FAR applies. (14) 'NR' in the 18 m and 24 m rows means no FAR cap; the area-based row may also be used. (15) Using the lower table forfeits the §51(11) road-width bonus (one word unreadable in this edition - see candidates C6)."
+    data:
+      stepFAR: 0.05
+      stepRoadM: 0.30
+      farRoad365to599: 3.00
+      farRoad250to364: 2.00
+      mgcNarrowRoadsPercent: 65.0
+  - id: s52-aviation-light
+    clause: "§52"
+    cite: s52
+    title:
+      bn: "উচ্চতা, বিমান ও টেলিযোগাযোগ সীমা, লাল বাতি"
+      en: "Height, aviation and telecom limits, red light"
+    summary:
+      bn: "(১) ইমারতের উচ্চতা মহাপরিকল্পনার বিধান অনুযায়ী নির্ধারিত। (২) বিমানবন্দর, মাইক্রোওয়েভ ও টেলিযোগাযোগের গুরুত্বপূর্ণ স্থাপনার নিকটে উচ্চতার সীমা সংশ্লিষ্ট কর্তৃপক্ষের সহিত সমন্বয়ে নির্ধারিত হইবে (এই উপ-ধারার একটি শব্দ এই সংস্করণে পাঠযোগ্য নহে — দেখুন candidates C10)। (৩) কর্তৃপক্ষ নদী, জলাশয়, উদ্যান এবং ঐতিহাসিক বা বিশেষ গুরুত্বপূর্ণ এলাকার নিকটে উচ্চতা সীমাবদ্ধ করিতে পারিবে। (৪) ৪৫.৭০ মিটার বা তদূর্ধ্ব উচ্চতার ইমারত বা স্থাপনার শীর্ষে লাল নিরাপত্তা বাতি স্থাপন করিতে হইবে।"
+      en: "(1) Building height follows the Master Plan provisions. (2) Near airports and critical microwave and telecommunication installations the height limit is fixed in coordination with the authority concerned (one word unreadable in this edition - see candidates C10). (3) The authority may restrict heights near rivers, water bodies, gardens and historical or specially important areas. (4) A building or installation 45.70 m or more in height must carry a red safety light at its top."
+    data:
+      redLightThresholdM: 45.70
+  - id: s53-safety
+    clause: "§53"
+    cite: s53
+    title:
+      bn: "তলা ও বেসমেন্ট — নামকরণ ও নিরাপত্তা"
+      en: "Floors and basements - naming and safety"
+    summary:
+      bn: "(১) তলাসমূহের নামকরণ: বেসমেন্ট, সেমি-বেসমেন্ট, নীচতলা (Ground Floor), দ্বিতীয় তলা (First Floor), তৃতীয় তলা (Second Floor), ছাদ ইত্যাদি। (২)(ক) বেসমেন্টে যান্ত্রিক বায়ু চলাচল, আলো ও পরিচ্ছন্নতা নিশ্চিত করিতে হইবে; (খ) বৃষ্টির পানি ও অন্যান্য পানির অনুপ্রবেশ রোধ করিতে হইবে; (গ) ব্যবহারকারীর সংখ্যা ও ভ্রমণ-দূরত্ব বিবেচনায় সিঁড়ির সংখ্যা নির্ধারণ করিতে হইবে; (ঘ) বেসমেন্টের নির্মাণ কাজ শুরু হইবার ৯০ (নব্বই) দিনের মধ্যে সকল নিরাপত্তামূলক ব্যবস্থা সম্পন্ন করিয়া লইতে হইবে, অন্যথায় কর্তৃপক্ষ নির্মাণ বন্ধ করিয়া দিতে পারিবে; (ঙ) প্রতিবেশীর ইমারত ও জনগণের নিরাপত্তা ও সুবিধাদি রক্ষার ব্যবস্থা সহ ক্ষতিপূরণ-বন্ধ (indemnity bond, সংযুক্তি-৩০১) দাখিল করিতে হইবে (একটি শব্দ এই সংস্করণে পাঠযোগ্য নহে — দেখুন candidates C10); (চ) এসি সুবিধাসহ বেসমেন্টে অনাবাসিক ব্যবহার চলিতে পারিবে।"
+      en: "(1) Floors are named: basement, semi-basement, ground floor, first floor, second floor, roof etc. (2)(ka) The basement must have mechanical ventilation, light and cleanliness; (kha) rain and other water ingress must be prevented; (ga) the number of stairs is set by users and travel distance; (gha) all safety measures must be completed within 90 (ninety) days of starting basement construction, failing which the authority may stop the work; (nga) the safety and amenities of neighbouring buildings and the public must be provided for, with an indemnity bond (Sanjukti-301) filed (one word unreadable in this edition - see candidates C10); (cha) a basement with air conditioning may be put to non-residential use."
+    data:
+      basementSafetyDays: 90
+      indemnityBondForm: "সংযুক্তি-৩০১"
+  - id: s54-1-5-approval
+    clause: "§54(1)-(5)"
+    cite: s54-1-5
+    title:
+      bn: "অনুমোদনের ন্যূনতম রাস্তা ও প্রশস্তকরণ"
+      en: "Minimum road for approval and widening"
+    summary:
+      bn: "(১) অনুমোদনের জন্য সংলগ্ন রাস্তা ন্যূনতম ৬.০০ মিটার (ফুটপাতসহ); তবে §48(3)(4)(5) এবং §51(9)(10)-এর অধীন FAR-এর ক্ষেত্রে প্রযোজ্য নহে। (২) ড্যাপ-ভুক্ত রাস্তা ৬.০০ মিটারের কম হইলে অর্ধেক জমি হস্তান্তরের অঙ্গীকারপত্র দাখিল করিয়া রাস্তা ৬.০০ মিটারে উন্নীত করিতে হইবে; আবেদন পূর্বে করিয়া নির্মাণ পরে করিতে হইবে। (৩) হস্তান্তরের পর অবশিষ্ট জমির উপর হিসাব করিতে হইবে। (৪) ৬.০০ মিটারে উন্নীত করিতে ন্যূনতম ০.৩০ মিটার প্রস্থের জমি দিলে FAR ০.০৫ করিয়া বৃদ্ধি পাইবে (সর্বোচ্চ ০.২০)। (৫) ৬.০০ মিটারের বেশি অংশ গণনায় আসিবে না।"
+      en: "(1) Approval requires an adjoining road of at least 6.00 m including footpath; not required for FAR under §48(3)(4)(5) or §51(9)(10). (2) Where a DAP road is under 6.00 m, an undertaking to hand over half the land for widening to 6.00 m must be filed; the application comes first and construction after. (3) The computation is made on the remaining plot. (4) Land strips of at least 0.30 m given for widening to 6.00 m raise FAR by 0.05 each, up to 0.20. (5) The part beyond 6.00 m is not counted."
+    data:
+      minRoadM: 6.0
+      widenStepFAR: 0.05
+      widenStepM: 0.30
+      widenMaxFAR: 0.20
+  - id: s54-6-9
+    clause: "§54(6)-(9)"
+    cite: s54-6-9
+    title:
+      bn: "নিজস্ব রাস্তা, অ-তালিকাভুক্ত ক্ষেত্র, ফুটপাত"
+      en: "Private roads, unlisted cases, footpaths"
+    summary:
+      bn: "(৬) বেসরকারি আবাসন প্রকল্পের অভ্যন্তরীণ রাস্তা ইমারত নির্মাণ বিধিমালা ২০০৪ অনুসারে; ৭.৬২ মিটারের কম প্রস্থের রাস্তা সংশোধন করিতে হইবে। (৭) প্রযোজ্য তালিকায় না থাকা ক্ষেত্রে রাস্তাভিত্তিক ও আকারভিত্তিক হিসাবের মধ্যে নিম্নতর FAR এবং সংশ্লিষ্ট সারণির MGC প্রযোজ্য; §51(11)-এর রাস্তা-বোনাসও প্রয়োগযোগ্য। (৮) নতুন প্রবেশ-রাস্তা নির্মাণে ফুটপাত রহিতে হইবে। (৯) ফুটপাত নির্মাণ ও রক্ষণাবেক্ষণ কর্তৃপক্ষের শর্তের অধীন।"
+      en: "(6) Internal roads of private housing projects follow the Imarat Nirman Bidhimala 2004; roads under 7.62 m must be corrected. (7) For unlisted cases the lower of the road-based and area-based FAR applies, with that table's MGC; the §51(11) road-width bonus also applies. (8) New access roads must carry footpaths. (9) Footpath construction and maintenance are subject to the authority's terms."
+  - id: s55-corner-clear-zone
+    clause: "§55"
+    cite: s55
+    title:
+      bn: "কর্নার ক্লিয়ার জোন"
+      en: "Corner clear zone"
+    summary:
+      bn: "কর্নার প্লটে দুই রাস্তার সংযোগস্থলের কোণে ১.৫০ মিটার × ১.৫০ মিটার অংশ উন্মুক্ত রাখিতে হইবে; এই অংশে কোনো প্রকার নির্মাণ করা যাইবে না।"
+      en: "At the corner of two roads on a corner plot, a 1.50 m x 1.50 m area must stay clear; no construction of any kind may occupy it."
+    data:
+      cornerClearZoneM: 1.5
+  - id: s57-mixed-use
+    clause: "§57"
+    cite: s57
+    title:
+      bn: "মিশ্র ব্যবহার"
+      en: "Mixed use"
+    summary:
+      bn: "(১) মিশ্র ব্যবহারে আবাসিক ব্যবহারের সংশ্লিষ্ট বিধি FAR ও MGC হিসাবে এবং সূচি-৪ পার্কিং হিসেবে প্রযোজ্য। (২) অন্যান্য ক্ষেত্রে শ্রেণীসমূহের মধ্যে সর্বাধিক কঠোর শর্তাবলি (Stringent Requirements) প্রযোজ্য; কোনো এক শ্রেণীর ব্যবহার মোট তলা-ক্ষেত্রফলের (পার্কিং বাদে) ১০% বা তদূর্ধ্ব হইলে সেই শ্রেণীর বিধানাবলিও প্রযোজ্য। (৩) প্রশস্ত রাস্তার সংলগ্ন প্লটে অনাবাসিক ব্যবহারের প্রবেশ কেবল সেই রাস্তা হইতে; কর্নার প্লটে আবাসিক ব্যবহারের জন্য যেকোনো রাস্তা ব্যবহারযোগ্য। (৪) সংলগ্ন আবাসিক জমির দিকে ন্যূনতম ২.৫০ মিটার সেটব্যাক রাখিতে হইবে। (৫) আবাসিক ইমারতের জানালা ও বারান্দা অন্য ব্যবহারের দিকে থাকিতে পারিবে; অনাবাসিক ইমারতের বারান্দা আবাসিক দিকে থাকিতে পারিবে না।"
+      en: "(1) In mixed use, the residential provisions apply for FAR and MGC, and Schedule 4 for parking. (2) Otherwise the most stringent requirements among the classes apply; where any one class occupies 10% or more of the total floor area (excluding parking), that class's provisions also apply. (3) On a plot beside a wide road, non-residential use may be accessed only from that road; on a corner plot residential use may use either road. (4) A minimum 2.50 m setback must be kept towards adjoining residential land. (5) Residential windows and verandas may face the other use; non-residential verandas may not face the residential side."
+    data:
+      adjoiningSetbackM: 2.5
+      dominantClassSharePercent: 10
+testVectors:
+  # FAR: evaluator picks the exact roadWidthM row and the area band (areaSqmFrom < area <= areaSqmTo,
+  # missing from = 0, missing to = open); prohibited rows match by area only (road ignored); NR = no cap.
+  - {id: far-a1a4-100-road6, kind: far, given: {classId: A1-A4, areaSqm: 100, roadWidthM: 6}, expect: {far: 3.15, mgcPercent: 67.5}}
+  - {id: far-a1a4-134-road6-edge, kind: far, given: {classId: A1-A4, areaSqm: 134, roadWidthM: 6}, expect: {far: 3.15, mgcPercent: 67.5}, note: "band edge 134 stays in the up-to-2-katha row (bands are (from, to])"}
+  - {id: far-a1a4-135-road6, kind: far, given: {classId: A1-A4, areaSqm: 135, roadWidthM: 6}, expect: {far: 3.35, mgcPercent: 65.0}}
+  - {id: far-a1a4-1400-road12, kind: far, given: {classId: A1-A4, areaSqm: 1400, roadWidthM: 12}, expect: {far: 5.50, mgcPercent: 50.0}}
+  - {id: far-a1a4-2000-road18, kind: far, given: {classId: A1-A4, areaSqm: 2000, roadWidthM: 18}, expect: {far: 6.00, mgcPercent: 50.0}}
+  - {id: far-a1a4-2000-road24, kind: far, given: {classId: A1-A4, areaSqm: 2000, roadWidthM: 24}, expect: {far: 6.50, mgcPercent: 50.0}}
+  - {id: far-a5-940-road9, kind: far, given: {classId: A5, areaSqm: 940, roadWidthM: 9}, expect: {far: 7.50, mgcPercent: 52.5}}
+  - {id: far-a5-1400-road12, kind: far, given: {classId: A5, areaSqm: 1400, roadWidthM: 12}, expect: {far: 9.50, mgcPercent: 50.0, footnotes: [f2]}}
+  - {id: far-a5-2000-road18, kind: far, given: {classId: A5, areaSqm: 2000, roadWidthM: 18}, expect: {far: "NR", mgcPercent: 50.0, footnotes: [f2, fnr]}}
+  - {id: far-b1-300-road9, kind: far, given: {classId: B1, areaSqm: 300, roadWidthM: 9}, expect: {prohibited: true}}
+  - {id: far-b1-1500-road12, kind: far, given: {classId: B1, areaSqm: 1500, roadWidthM: 12}, expect: {far: 4.00, mgcPercent: 50.0}}
+  - {id: far-b2-500-road6, kind: far, given: {classId: B2, areaSqm: 500, roadWidthM: 6}, expect: {far: 2.00, mgcPercent: 50.0, footnotes: [f3]}}
+  - {id: far-b2-2000-road18, kind: far, given: {classId: B2, areaSqm: 2000, roadWidthM: 18}, expect: {far: 4.00, mgcPercent: 50.0, footnotes: [f4]}}
+  - {id: far-c1c4-890-road9, kind: far, given: {classId: C1-C4, areaSqm: 890, roadWidthM: 9}, expect: {far: 4.00, mgcPercent: 55.0}}
+  - {id: far-c1c4-1400-road12, kind: far, given: {classId: C1-C4, areaSqm: 1400, roadWidthM: 12}, expect: {far: 5.00, mgcPercent: 50.0, footnotes: [f5]}}
+  - {id: far-c1c4-3000-road24, kind: far, given: {classId: C1-C4, areaSqm: 3000, roadWidthM: 24}, expect: {far: "NR", mgcPercent: 50.0, footnotes: [f5, fnr, f-prohib-cd]}}
+  - {id: far-d1d2-500-road6, kind: far, given: {classId: D1-D2, areaSqm: 500, roadWidthM: 6}, expect: {far: 3.25, mgcPercent: 60.0}}
+  - {id: far-e1e6-700-road12, kind: far, given: {classId: E1-E6, areaSqm: 700, roadWidthM: 12}, expect: {far: 3.25, mgcPercent: 50.0}}
+  - {id: far-e1e6-2500-road24, kind: far, given: {classId: E1-E6, areaSqm: 2500, roadWidthM: 24}, expect: {far: 7.00, mgcPercent: 50.0, footnotes: [f6]}}
+  - {id: far-f1-640-road9, kind: far, given: {classId: F1, areaSqm: 640, roadWidthM: 9}, expect: {far: 6.00, mgcPercent: 55.0}}
+  - {id: far-f1-2000-road18, kind: far, given: {classId: F1, areaSqm: 2000, roadWidthM: 18}, expect: {far: "NR", mgcPercent: 50.0, footnotes: [f7, fnr]}}
+  - {id: far-f2f5-700-road12, kind: far, given: {classId: F2-F5, areaSqm: 700, roadWidthM: 12}, expect: {far: 3.75, mgcPercent: 52.5}}
+  - {id: far-f2f5-1500-road24, kind: far, given: {classId: F2-F5, areaSqm: 1500, roadWidthM: 24}, expect: {far: "NR", mgcPercent: 50.0, footnotes: [f7, fnr]}}
+  - {id: far-g1k2-300-road6, kind: far, given: {classId: G1-K2, areaSqm: 300, roadWidthM: 6}, expect: {far: 2.25, mgcPercent: 65.0}}
+  - {id: far-g1k2-1500-road12, kind: far, given: {classId: G1-K2, areaSqm: 1500, roadWidthM: 12}, expect: {far: 4.25, mgcPercent: 60.0}}
+  - {id: far-g1k2-2500-road24, kind: far, given: {classId: G1-K2, areaSqm: 2500, roadWidthM: 24}, expect: {far: 5.00, mgcPercent: 60.0}}
+  # Setback: evaluator picks the area row (same band rule); heightM > 33 or storeys > 10 switches to beyondHeight.
+  - {id: sb-100, kind: setback, given: {areaSqm: 100}, expect: {frontM: 1.5, rearM: 1.0, sideM: 0.8}}
+  - {id: sb-134-edge, kind: setback, given: {areaSqm: 134}, expect: {frontM: 1.5, rearM: 1.0, sideM: 0.8}, note: "band edge stays in the lower row"}
+  - {id: sb-200, kind: setback, given: {areaSqm: 200}, expect: {frontM: 1.5, rearM: 1.0, sideM: 1.0}}
+  - {id: sb-300, kind: setback, given: {areaSqm: 300}, expect: {frontM: 1.5, rearM: 2.0, sideM: 1.25}}
+  - {id: sb-700, kind: setback, given: {areaSqm: 700}, expect: {frontM: 1.5, rearM: 2.0, sideM: 1.25}}
+  - {id: sb-1400, kind: setback, given: {areaSqm: 1400}, expect: {frontM: 1.5, rearM: 2.0, sideM: 1.5}}
+  - {id: sb-height34, kind: setback, given: {areaSqm: 100, heightM: 34}, expect: {frontM: 1.5, rearM: 3.0, sideM: 3.0}}
+  - {id: sb-storeys11, kind: setback, given: {areaSqm: 100, storeys: 11}, expect: {frontM: 1.5, rearM: 3.0, sideM: 3.0}}
+  # Parking: evaluator computes max(minSpaces or 0, ceil(units * numerator / denominator)) from the row.
+  - {id: pk-single-up-to-200, kind: parking, given: {rowId: park-single-family-up-to-200, units: 1}, expect: {spaces: 1}}
+  - {id: pk-single-over-200, kind: parking, given: {rowId: park-single-family-over-200, units: 1}, expect: {spaces: 2}, note: "minSpaces floor applies"}
+  - {id: pk-flat-over-200, kind: parking, given: {rowId: park-flat-over-200, units: 2}, expect: {spaces: 2}}
+  - {id: pk-flat-140-200-a, kind: parking, given: {rowId: park-flat-140-to-200, units: 4}, expect: {spaces: 3}}
+  - {id: pk-flat-140-200-b, kind: parking, given: {rowId: park-flat-140-to-200, units: 6}, expect: {spaces: 4}}
+  - {id: pk-flat-90-140, kind: parking, given: {rowId: park-flat-90-to-140, units: 5}, expect: {spaces: 3}}
+  - {id: pk-flat-60-90-a, kind: parking, given: {rowId: park-flat-60-to-90, units: 4}, expect: {spaces: 1}}
+  - {id: pk-flat-60-90-b, kind: parking, given: {rowId: park-flat-60-to-90, units: 9}, expect: {spaces: 3}}
+  - {id: pk-flat-up-to-60-a, kind: parking, given: {rowId: park-flat-up-to-60, units: 8}, expect: {spaces: 1}}
+  - {id: pk-flat-up-to-60-b, kind: parking, given: {rowId: park-flat-up-to-60, units: 17}, expect: {spaces: 3}}
+  - {id: pk-flat-motorcycle, kind: parking, given: {rowId: park-flat-up-to-90-motorcycle, units: 22}, expect: {spaces: 5}, note: "additive to the car requirement"}
+  - {id: pk-hotel-star, kind: parking, given: {rowId: park-hotel-star, units: 12}, expect: {spaces: 3}}
+  - {id: pk-hospital, kind: parking, given: {rowId: park-hospital, units: 17}, expect: {spaces: 4}}
+  - {id: pk-cinema, kind: parking, given: {rowId: park-cinema, units: 200}, expect: {spaces: 5}}
+  - {id: pk-office, kind: parking, given: {rowId: park-office, units: 500}, expect: {spaces: 3}}
+gaps:
+  - id: gap-c1
+    what: "§46(5)(ক): one word in the sentence on the permitted roofed structure over the paved MOS (the sentence carrying the 50% soil-retention condition) is not readable from this edition."
+    why: "Legacy-font render is unclear; the word is not asserted in the pack to avoid inventing law. See candidates C1."
+    candidateRef: C1
+  - id: gap-c3
+    what: "Schedule 4 notes: one word in the motorcycle/car parking condition for flats up to 90 sqm is not readable with certainty."
+    why: "Unread word not asserted; parking note s4-n-small-flat-word carries the marker. See candidates C3."
+    candidateRef: C3
+  - id: gap-c4
+    what: "Appendix 5 (definitions) is not transcribed."
+    why: "Definitional terms are needed before the rule engine interprets open space, covered area etc.; deferred. See candidates C4."
+    candidateRef: C4
+  - id: gap-c6
+    what: "§51(11): whether a partial 0.30 m step earns a pro-rata FAR bonus is not settled by the text; §51(15): the ম্ন conjunct glyph of 'নিম্নের ছক' is missing in this edition."
+    why: "Working reading (full steps only, capped at the next table step) needs engineer confirmation; the missing glyph makes the (15) word probable, not proven. See candidates C6."
+    candidateRef: C6
+  - id: gap-c8
+    what: "Amendments to the 2008 Bidhimala published after 2008 are not researched."
+    why: "The pack encodes the 2008 text as printed; amendments must be obtained and diffed before the pack can leave candidate status. See candidates C8."
+    candidateRef: C8
+  - id: gap-c9
+    what: "The 2025-12-14 DAP FAR reform is recorded as metadata only; its primary document is not obtained and nothing from it is encoded."
+    why: "Quality law: no unsourced values. The app must keep surfacing that a newer regime may apply. See candidates C9."
+    candidateRef: C9
+  - id: gap-c10
+    what: "Two legacy-font glitch words are not page-image verifiable in this edition: §52(2) (text-layer decodes to স্ব-স্ব, high confidence) and §53(2)(ঙ) (probable স্বার্থ)."
+    why: "The font subset is broken (glyphs render as Λ-shaped marks); the mirror PDF is byte-identical; both words are withheld from provision text until confirmed against another edition. See candidates C10."
+    candidateRef: C10
+  - id: gap-topic-staircase-width
+    what: >-
+      This pack contains no rule for a minimum staircase width (the staircase is mentioned only
+      in passing, in the ramp/landing provisions). এই প্যাকে সিঁড়ির ন্যূনতম প্রস্থের কোনো বিধান নেই।
+    why: >-
+      Scope decision: the pack covers FAR/BCR/setback/height and the key rules; a staircase
+      width belongs to BNBC, which is not ingested (see gap-c4 and the source registry). The
+      answer is therefore "not in this pack", never a neighbouring clause.
+    candidateRef: C12
+  - id: gap-topic-parapet-height
+    what: >-
+      This pack contains no minimum height for a parapet wall; parapets appear only inside
+      portico footnotes. এই প্যাকে পারাপেট/প্যারাপিট দেওয়ালের ন্যূনতম উচ্চতার কোনো বিধান নেই।
+    why: >-
+      Scope decision: the pack covers FAR/BCR/setback/height and the key rules; a parapet height
+      is not among them. The answer is therefore "not in this pack", never a neighbouring
+      clause.
+    candidateRef: C13
+  - id: gap-topic-concrete-grade
+    what: >-
+      This pack contains no concrete grade rule and no structural material rule (those are
+      BNBC provisions). এই প্যাকে কংক্রিট গ্রেড বা কাঠামো বস্তুর কোনো বিধান নেই।
+    why: >-
+      Scope decision: the pack is the RAJUK FAR/BCR edition; structural materials belong to
+      BNBC, which is not ingested (see gap-c4 and the source registry). The answer is therefore
+      "not in this pack", never a neighbouring clause.
+    candidateRef: C14
+  - id: gap-topic-lift-count
+    what: >-
+      This pack contains no rule for the lift count in a building (a lift study, not a
+      gazette rule). এই প্যাকে টাওয়ারে বা অন্য কোনো ভবনে লিফট সংখ্যা নির্ধারণের কোনো বিধান নেই।
+    why: >-
+      Scope decision: the pack covers FAR/BCR/setback/height and the key rules; a lift count
+      comes from the building code and a lift study, neither of which is ingested. The answer is
+      therefore "not in this pack", never a neighbouring clause.
+    candidateRef: C15
+  - id: gap-c11
+    what: "§58 (ইমারতের পরিসরের ন্যূনতম চাহিদা, minimum space requirements for habitable rooms etc.) is not transcribed into the pack."
+    why: "Recorded scope decision: pack v0 covers FAR/BCR/setback/height and the key rules; §58 belongs with the rule engine in W1.2. Listed so coverage is never silently dropped. See candidates C11."
+    candidateRef: C11
+

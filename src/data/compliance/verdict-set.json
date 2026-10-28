@@ -1,0 +1,284 @@
+{
+  "evaluatedAt": "2026-10-21T00:00:00+00:00",
+  "evaluator": "compliance-engine@0.1.0",
+  "pack": {
+    "id": "rajuk@2008.1",
+    "sha256": "ae9738b458113c083cb8f662f6757f45b0741df6afeec55c2dc7b910bf7754eb",
+    "status": "candidate"
+  },
+  "schemaVersion": "0.1.0",
+  "subject": {
+    "projectId": "3f2a1b4c-5d6e-4f7a-8b9c-0d1e2f3a4b5c",
+    "specRevision": 0,
+    "specSha256": "76a17f423bc8d65d9855d5cdd3dda6ff14637810f760fdb171d185953160537e"
+  },
+  "summary": {
+    "compliant": 3,
+    "deviation": 3,
+    "impossible": 0
+  },
+  "unevaluated": [
+    {
+      "detail": "§46(5)(ক): one word in the sentence on the permitted roofed structure over the paved MOS (the sentence carrying the 50% soil-retention condition) is not readable from this edition.",
+      "reason": "pack_gap",
+      "ruleRef": "rajuk@2008.1#gap-c1"
+    },
+    {
+      "detail": "Schedule 4 notes: one word in the motorcycle/car parking condition for flats up to 90 sqm is not readable with certainty.",
+      "reason": "pack_gap",
+      "ruleRef": "rajuk@2008.1#gap-c3"
+    },
+    {
+      "detail": "Appendix 5 (definitions) is not transcribed.",
+      "reason": "pack_gap",
+      "ruleRef": "rajuk@2008.1#gap-c4"
+    },
+    {
+      "detail": "§51(11): whether a partial 0.30 m step earns a pro-rata FAR bonus is not settled by the text; §51(15): the ম্ন conjunct glyph of 'নিম্নের ছক' is missing in this edition.",
+      "reason": "pack_gap",
+      "ruleRef": "rajuk@2008.1#gap-c6"
+    },
+    {
+      "detail": "Amendments to the 2008 Bidhimala published after 2008 are not researched.",
+      "reason": "pack_gap",
+      "ruleRef": "rajuk@2008.1#gap-c8"
+    },
+    {
+      "detail": "The 2025-12-14 DAP FAR reform is recorded as metadata only; its primary document is not obtained and nothing from it is encoded.",
+      "reason": "pack_gap",
+      "ruleRef": "rajuk@2008.1#gap-c9"
+    },
+    {
+      "detail": "Two legacy-font glitch words are not page-image verifiable in this edition: §52(2) (text-layer decodes to স্ব-স্ব, high confidence) and §53(2)(ঙ) (probable স্বার্থ).",
+      "reason": "pack_gap",
+      "ruleRef": "rajuk@2008.1#gap-c10"
+    },
+    {
+      "detail": "This pack contains no rule for a minimum staircase width (the staircase is mentioned only in passing, in the ramp/landing provisions). এই প্যাকে সিঁড়ির ন্যূনতম প্রস্থের কোনো বিধান নেই।",
+      "reason": "pack_gap",
+      "ruleRef": "rajuk@2008.1#gap-topic-staircase-width"
+    },
+    {
+      "detail": "This pack contains no minimum height for a parapet wall; parapets appear only inside portico footnotes. এই প্যাকে পারাপেট/প্যারাপিট দেওয়ালের ন্যূনতম উচ্চতার কোনো বিধান নেই।",
+      "reason": "pack_gap",
+      "ruleRef": "rajuk@2008.1#gap-topic-parapet-height"
+    },
+    {
+      "detail": "This pack contains no concrete grade rule and no structural material rule (those are BNBC provisions). এই প্যাকে কংক্রিট গ্রেড বা কাঠামো বস্তুর কোনো বিধান নেই।",
+      "reason": "pack_gap",
+      "ruleRef": "rajuk@2008.1#gap-topic-concrete-grade"
+    },
+    {
+      "detail": "This pack contains no rule for the lift count in a building (a lift study, not a gazette rule). এই প্যাকে টাওয়ারে বা অন্য কোনো ভবনে লিফট সংখ্যা নির্ধারণের কোনো বিধান নেই।",
+      "reason": "pack_gap",
+      "ruleRef": "rajuk@2008.1#gap-topic-lift-count"
+    },
+    {
+      "detail": "§58 (ইমারতের পরিসরের ন্যূনতম চাহিদা, minimum space requirements for habitable rooms etc.) is not transcribed into the pack.",
+      "reason": "pack_gap",
+      "ruleRef": "rajuk@2008.1#gap-c11"
+    }
+  ],
+  "verdicts": [
+    {
+      "alternative": {
+        "description": {
+          "bn": "পরিকল্পিত মোট তলা-ক্ষেত্রফল ১১৭০.৫৭ বর্গমিটার করিয়া দিন (FAR ৩.৫০ সীমার মধ্যে)।",
+          "en": "Set the planned total floor area to 1170.57 sqm (FAR within the 3.5 limit)."
+        },
+        "specPatch": [
+          {
+            "op": "add",
+            "path": "/phases/site-excavation/data/plannedTotalFloorAreaSqm",
+            "value": 1170.57
+          }
+        ]
+      },
+      "citations": [
+        "far-3ka"
+      ],
+      "limit": {
+        "comparator": "max",
+        "note": "Table row: far-3ka",
+        "unit": "FAR",
+        "value": 3.5
+      },
+      "measured": {
+        "path": "/phases/site-excavation/data/plannedTotalFloorAreaSqm",
+        "unit": "FAR",
+        "value": 4.186
+      },
+      "ruleRef": "rajuk@2008.1#far-tables",
+      "status": "deviation",
+      "summary": {
+        "bn": "প্রস্তাবিত FAR ৪.১৯ — ৩৩৪.৪৫ বর্গমিটার প্লট (A1-A4 শ্রেণি, ৬.০০ মিটার সড়ক) এর অনুমোদিত সীমা ৩.৫০ ছাড়াইয়া গিয়াছে; পরিকল্পিত মোট তলা-ক্ষেত্রফল ১১৭০.৫৭ বর্গমিটার বা তাহার কম করিতে হইবে।",
+        "en": "Proposed FAR 4.19 exceeds the limit 3.5 for this plot (334.45 sqm, class A1-A4, 6 m road); reduce the planned total floor area to 1170.57 sqm or less."
+      },
+      "title": {
+        "bn": "FAR ও ভূমি আচ্ছাদন সারণি (সারণি-৩(ক)–(চ))",
+        "en": "FAR and ground coverage tables, Tables 3(ka)-(cha)"
+      }
+    },
+    {
+      "alternative": {
+        "description": {
+          "bn": "সামনের সেটব্যাক ১.৫০ মিটার করিয়া দিন।",
+          "en": "Set the front setback to 1.5 m."
+        },
+        "specPatch": [
+          {
+            "op": "add",
+            "path": "/phases/site-excavation/data/setbackFrontM",
+            "value": 1.5
+          }
+        ]
+      },
+      "citations": [
+        "setbacks",
+        "s46-3-4"
+      ],
+      "limit": {
+        "comparator": "min",
+        "note": "Banded row up to 33 m / 10 storeys.",
+        "unit": "m",
+        "value": 1.5
+      },
+      "measured": {
+        "path": "/phases/site-excavation/data/setbackFrontM",
+        "unit": "m",
+        "value": 1.2
+      },
+      "ruleRef": "rajuk@2008.1#setback-schedule",
+      "status": "deviation",
+      "summary": {
+        "bn": "সামনের সেটব্যাক ১.২০ মিটার — আবশ্যক ন্যূনতম ১.৫০ মিটার অপেক্ষা কম; ১.৫০ মিটার করিতে হইবে।",
+        "en": "Front setback 1.2 m is below the required minimum 1.5 m; increase it to 1.5 m."
+      },
+      "title": {
+        "bn": "সীমানা হইতে আবশ্যক সেটব্যাক",
+        "en": "Mandatory setbacks from boundaries"
+      }
+    },
+    {
+      "citations": [
+        "setbacks",
+        "s46-3-4"
+      ],
+      "limit": {
+        "comparator": "min",
+        "note": "Banded row up to 33 m / 10 storeys.",
+        "unit": "m",
+        "value": 2.0
+      },
+      "measured": {
+        "path": "/phases/site-excavation/data/setbackRearM",
+        "unit": "m",
+        "value": 2.0
+      },
+      "ruleRef": "rajuk@2008.1#setback-schedule",
+      "status": "compliant",
+      "summary": {
+        "bn": "পিছনের সেটব্যাক ২.০০ মিটার — আবশ্যক ন্যূনতম ২.০০ মিটার পূরণ করিয়াছে।",
+        "en": "Rear setback 2 m meets the required minimum 2 m."
+      },
+      "title": {
+        "bn": "সীমানা হইতে আবশ্যক সেটব্যাক",
+        "en": "Mandatory setbacks from boundaries"
+      }
+    },
+    {
+      "citations": [
+        "setbacks",
+        "s46-3-4"
+      ],
+      "limit": {
+        "comparator": "min",
+        "note": "Banded row up to 33 m / 10 storeys.",
+        "unit": "m",
+        "value": 1.25
+      },
+      "measured": {
+        "path": "/phases/site-excavation/data/setbackSideLeftM",
+        "unit": "m",
+        "value": 1.25
+      },
+      "ruleRef": "rajuk@2008.1#setback-schedule",
+      "status": "compliant",
+      "summary": {
+        "bn": "বাম পাশের সেটব্যাক ১.২৫ মিটার — আবশ্যক ন্যূনতম ১.২৫ মিটার পূরণ করিয়াছে।",
+        "en": "Left-side setback 1.25 m meets the required minimum 1.25 m."
+      },
+      "title": {
+        "bn": "সীমানা হইতে আবশ্যক সেটব্যাক",
+        "en": "Mandatory setbacks from boundaries"
+      }
+    },
+    {
+      "citations": [
+        "setbacks",
+        "s46-3-4"
+      ],
+      "limit": {
+        "comparator": "min",
+        "note": "Banded row up to 33 m / 10 storeys.",
+        "unit": "m",
+        "value": 1.25
+      },
+      "measured": {
+        "path": "/phases/site-excavation/data/setbackSideRightM",
+        "unit": "m",
+        "value": 1.25
+      },
+      "ruleRef": "rajuk@2008.1#setback-schedule",
+      "status": "compliant",
+      "summary": {
+        "bn": "ডান পাশের সেটব্যাক ১.২৫ মিটার — আবশ্যক ন্যূনতম ১.২৫ মিটার পূরণ করিয়াছে।",
+        "en": "Right-side setback 1.25 m meets the required minimum 1.25 m."
+      },
+      "title": {
+        "bn": "সীমানা হইতে আবশ্যক সেটব্যাক",
+        "en": "Mandatory setbacks from boundaries"
+      }
+    },
+    {
+      "alternative": {
+        "description": {
+          "bn": "কার পার্কিং ৭টি করিয়া দিন।",
+          "en": "Provide 7 car space(s)."
+        },
+        "specPatch": [
+          {
+            "op": "add",
+            "path": "/phases/site-excavation/data/parkingSpaces",
+            "value": 7
+          }
+        ]
+      },
+      "citations": [
+        "schedule4",
+        "schedule4-notes"
+      ],
+      "limit": {
+        "comparator": "min",
+        "note": "Schedule 4 row park-flat-140-to-200 (Flat 140 to 200 sqm); units=10",
+        "unit": "spaces",
+        "value": 7
+      },
+      "measured": {
+        "path": "/phases/site-excavation/data/parkingSpaces",
+        "unit": "spaces",
+        "value": 1
+      },
+      "ruleRef": "rajuk@2008.1#schedule4-parking",
+      "status": "deviation",
+      "summary": {
+        "bn": "১টি কার পার্কিং — সূচি-৪ অনুযায়ী আবশ্যক ৭টির কম; ৭টি প্রদান করিতে হইবে। (সাধারণ ফ্ল্যাটের ক্ষেত্রফল ১৫০ বর্গমিটার × ১০ ইউনিট হিসাবে।)",
+        "en": "1 car space(s) are fewer than the required 7 (Schedule 4); provide 7. (typical flat area 150 sqm x 10 units.)"
+      },
+      "title": {
+        "bn": "পার্কিং (সূচি-৪)",
+        "en": "Parking (Schedule 4)"
+      }
+    }
+  ]
+}

@@ -1,0 +1,249 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.archresidencebd.app/flow-book/0.1.0.json",
+  "title": "PhaseFlowBook",
+  "description": "ArchResidenceBD Phase Flow Book v0 (plan 5.5) - the authored BN/EN question sets per phase, kept as versioned data. Source: spec/flows/phase-flow-book.yaml. Validate: uv run --directory core pytest -q (core/tests/test_flow_book.py). Render: uv run --directory core python ../tools/flow/render_book.py",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["bookVersion", "status", "langs", "flows"],
+  "properties": {
+    "bookVersion": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "review", "frozen"],
+      "description": "draft = first pass, engineer review pending (ADR-0001)."
+    },
+    "langs": {
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": ["bn", "en"]
+      }
+    },
+    "flows": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/Flow"
+      }
+    }
+  },
+  "$defs": {
+    "Localized": {
+      "title": "Localized",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bn", "en"],
+      "properties": {
+        "bn": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Hand-authored Bangla - never machine-translated."
+        },
+        "en": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "Unit": {
+      "title": "Unit",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["canonical"],
+      "properties": {
+        "canonical": {
+          "type": "string",
+          "enum": ["m", "m2", "mm", "kPa", "BDT"],
+          "description": "Canonical (storage) unit - SI per the Building Spec."
+        },
+        "display": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["m", "ft", "mm", "in", "sqm", "sqft", "katha", "shotok", "bigha", "gonda"]
+          },
+          "description": "Units this answer may be shown/entered in; conversion at the boundary."
+        }
+      }
+    },
+    "Option": {
+      "title": "Option",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "label"],
+      "properties": {
+        "value": {
+          "type": "string",
+          "minLength": 1
+        },
+        "label": {
+          "$ref": "#/$defs/Localized"
+        }
+      }
+    },
+    "Fallback": {
+      "title": "Fallback",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["default", "registry", "area_default", "derive", "omit"],
+          "description": "What happens when the user does not answer: fixed default / Source Registry fetch or derive / conservative area default / derived from other spec fields / leave the field omitted."
+        },
+        "value": {
+          "type": ["string", "number", "boolean"],
+          "description": "The value applied (or a symbolic marker like '<building.unitsPerFloor>', 'fetched', 'derived-from-location')."
+        },
+        "assumption": {
+          "$ref": "#/$defs/Localized",
+          "description": "Required for registry/area_default fallbacks: the assumption statement shown to the user and recorded in the spec."
+        }
+      }
+    },
+    "Question": {
+      "title": "Question",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "ask", "type", "maps_to"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "description": "Stable slug; unique across the whole book (training data and tests reference it)."
+        },
+        "ask": {
+          "$ref": "#/$defs/Localized"
+        },
+        "why": {
+          "$ref": "#/$defs/Localized",
+          "description": "One-line explanation of why this matters (engineer-not-judge transparency)."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["text", "number", "integer", "yes_no", "choice", "multi_choice", "file"]
+        },
+        "unit": {
+          "$ref": "#/$defs/Unit"
+        },
+        "options": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/Option"
+          },
+          "description": "Choice/multi_choice options render as chat chips."
+        },
+        "maps_to": {
+          "type": "string",
+          "pattern": "^/(project|site|building|phases|pricing|assumptions|deviations|documents|provenance|revision|locked|createdAt|updatedAt|schemaVersion)(/|$)",
+          "description": "JSON Pointer into the Building Spec this answer writes to. Phase payloads use /phases/<flow-id>/data/<key> (floor flow uses /phases/floor-<n>/data/...)."
+        },
+        "source": {
+          "type": "string",
+          "enum": ["user", "registry", "derived"],
+          "description": "Where the best answer normally comes from; user is the default."
+        },
+        "when": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Optional simple condition, e.g. 'soil-has-report == yes', 'storeyIndex > 0'. Operands: question ids in this book, or the variable storeyIndex."
+        },
+        "essential": {
+          "const": true,
+          "description": "Cannot be assumed - the interview keeps it open until answered (never blocks other work)."
+        },
+        "fallback": {
+          "$ref": "#/$defs/Fallback"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "enum": ["choice", "multi_choice"]
+              }
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["options"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "number"
+              }
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["unit"]
+          }
+        },
+        {
+          "oneOf": [
+            {
+              "required": ["essential"],
+              "not": {
+                "required": ["fallback"]
+              }
+            },
+            {
+              "required": ["fallback"],
+              "not": {
+                "required": ["essential"]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "Flow": {
+      "title": "Flow",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "goal", "repeats", "questions"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "enum": ["setup", "site-excavation", "foundation", "floor", "roof-boundary", "common-services"]
+        },
+        "phaseKind": {
+          "type": "string",
+          "enum": ["site_excavation", "foundation", "floor", "roof_boundary", "common_services"],
+          "description": "Corresponding Building Spec Phase.kind; absent for setup (not a phase)."
+        },
+        "repeats": {
+          "type": "string",
+          "enum": ["once", "per_storey"]
+        },
+        "name": {
+          "$ref": "#/$defs/Localized"
+        },
+        "goal": {
+          "$ref": "#/$defs/Localized"
+        },
+        "questions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/Question"
+          }
+        }
+      }
+    }
+  }
+}

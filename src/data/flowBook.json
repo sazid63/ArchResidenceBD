@@ -1,0 +1,1870 @@
+{
+  "bookVersion": "0.1.0",
+  "status": "draft",
+  "langs": [
+    "bn",
+    "en"
+  ],
+  "flows": [
+    {
+      "id": "setup",
+      "name": {
+        "en": "Project Setup",
+        "bn": "প্রকল্প সেটআপ"
+      },
+      "goal": {
+        "en": "The basics every phase builds on: where the plot is, how big it is, how many floors, and the facts we should not guess.",
+        "bn": "জমি কোথায়, কত বড়, কত তলা — আর যে তথ্যগুলো অনুমান করা উচিত নয়, সব একসাথে।"
+      },
+      "repeats": "once",
+      "questions": [
+        {
+          "id": "project-name",
+          "ask": {
+            "en": "What should we call this project?",
+            "bn": "এই প্রকল্পের নাম কী হবে?"
+          },
+          "why": {
+            "en": "Used on drawings, reports and the engineer pack.",
+            "bn": "ড্রয়িং, রিপোর্ট আর ইঞ্জিনিয়ার প্যাকে এই নামেই থাকবে।"
+          },
+          "type": "text",
+          "maps_to": "/project/name",
+          "essential": true
+        },
+        {
+          "id": "display-units",
+          "ask": {
+            "en": "Which units should the app show?",
+            "bn": "পরিমাপ কোন এককে দেখতে চান?"
+          },
+          "why": {
+            "en": "Land stays in katha/shotok; room sizes follow your choice.",
+            "bn": "জমি কাঠা-শতকে দেখানো হবে; ঘরের মাপ আপনার পছন্দের এককে।"
+          },
+          "type": "choice",
+          "options": [
+            {
+              "value": "metric",
+              "label": {
+                "en": "Metric (m, m²)",
+                "bn": "মেট্রিক (মিটার, বর্গমিটার)"
+              }
+            },
+            {
+              "value": "feet-inch",
+              "label": {
+                "en": "Feet–inch (ft, ft²)",
+                "bn": "ফুট–ইঞ্চি (ফুট, বর্গফুট)"
+              }
+            },
+            {
+              "value": "bangla-land",
+              "label": {
+                "en": "Bangla land units (katha, shotok)",
+                "bn": "দেশি একক (কাঠা, শতক)"
+              }
+            }
+          ],
+          "maps_to": "/project/displayUnits/area",
+          "fallback": {
+            "kind": "default",
+            "value": "feet-inch"
+          }
+        },
+        {
+          "id": "division",
+          "ask": {
+            "en": "Which division is the plot in?",
+            "bn": "জমিটি কোন বিভাগে?"
+          },
+          "why": {
+            "en": "This decides the approval authority and the seismic zone.",
+            "bn": "এখান থেকেই অনুমোদনকারী কর্তৃপক্ষ ও ভূমিকম্পের অঞ্চল ঠিক হবে।"
+          },
+          "type": "choice",
+          "options": [
+            {
+              "value": "dhaka",
+              "label": {
+                "en": "Dhaka",
+                "bn": "ঢাকা"
+              }
+            },
+            {
+              "value": "chattogram",
+              "label": {
+                "en": "Chattogram",
+                "bn": "চট্টগ্রাম"
+              }
+            },
+            {
+              "value": "rajshahi",
+              "label": {
+                "en": "Rajshahi",
+                "bn": "রাজশাহী"
+              }
+            },
+            {
+              "value": "khulna",
+              "label": {
+                "en": "Khulna",
+                "bn": "খুলনা"
+              }
+            },
+            {
+              "value": "barishal",
+              "label": {
+                "en": "Barishal",
+                "bn": "বরিশাল"
+              }
+            },
+            {
+              "value": "sylhet",
+              "label": {
+                "en": "Sylhet",
+                "bn": "সিলেট"
+              }
+            },
+            {
+              "value": "rangpur",
+              "label": {
+                "en": "Rangpur",
+                "bn": "রংপুর"
+              }
+            },
+            {
+              "value": "mymensingh",
+              "label": {
+                "en": "Mymensingh",
+                "bn": "ময়মনসিংহ"
+              }
+            }
+          ],
+          "maps_to": "/site/address/division",
+          "essential": true
+        },
+        {
+          "id": "district",
+          "ask": {
+            "en": "Which district?",
+            "bn": "জেলা কোনটি?"
+          },
+          "why": {
+            "en": "Picks the applicable rule pack.",
+            "bn": "জেলা দিয়েই প্রযোজ্য রুল প্যাক বাছা হবে।"
+          },
+          "type": "text",
+          "maps_to": "/site/address/district",
+          "essential": true
+        },
+        {
+          "id": "area-name",
+          "ask": {
+            "en": "Thana or area name (e.g. Mirpur Section 7)?",
+            "bn": "থানা বা এলাকার নাম কী (যেমন: মিরপুর ৭ নম্বর সেকশন)?"
+          },
+          "why": {
+            "en": "Goes on documents; also helps fetch local prices.",
+            "bn": "কাগজপত্রে এলাকার নাম থাকবে; এলাকার দাম আনতেও লাগে।"
+          },
+          "type": "text",
+          "maps_to": "/site/address/areaName",
+          "fallback": {
+            "kind": "omit"
+          }
+        },
+        {
+          "id": "plot-area",
+          "ask": {
+            "en": "How big is the plot?",
+            "bn": "জমির পরিমাণ কত?"
+          },
+          "why": {
+            "en": "FAR, setbacks - everything is calculated from this.",
+            "bn": "এফএআর, সেটব্যাক — বাকি সব হিসাবের ভিত্তি এইটাই।"
+          },
+          "type": "number",
+          "unit": {
+            "canonical": "m2",
+            "display": [
+              "sqm",
+              "katha",
+              "shotok",
+              "bigha"
+            ]
+          },
+          "maps_to": "/site/plot/areaSqm",
+          "essential": true
+        },
+        {
+          "id": "plot-frontage",
+          "ask": {
+            "en": "How long is the road-side edge of the plot (the side facing the access road)?",
+            "bn": "জমির রাস্তার দিকের দৈর্ঘ্য কত (যে পাশে রাস্তা)?"
+          },
+          "why": {
+            "en": "Decides which side faces the road and how setbacks apply.",
+            "bn": "কোন পাশ রাস্তার মুখে থাকবে, আর সেটব্যাক কেমন হবে — সেটা ঠিক করতে দরকার।"
+          },
+          "type": "number",
+          "unit": {
+            "canonical": "m",
+            "display": [
+              "m",
+              "ft"
+            ]
+          },
+          "maps_to": "/site/plot/frontageM",
+          "fallback": {
+            "kind": "omit"
+          }
+        },
+        {
+          "id": "plot-depth",
+          "ask": {
+            "en": "And the depth, front to back?",
+            "bn": "আর সামনের দিক থেকে পিছনের দিকের দৈর্ঘ্য কত?"
+          },
+          "why": {
+            "en": "Used to place the building on the site plan.",
+            "bn": "সাইট প্ল্যানে ভবনের অবস্থান ঠিক করতে লাগে।"
+          },
+          "type": "number",
+          "unit": {
+            "canonical": "m",
+            "display": [
+              "m",
+              "ft"
+            ]
+          },
+          "maps_to": "/site/plot/depthM",
+          "fallback": {
+            "kind": "omit"
+          }
+        },
+        {
+          "id": "road-width",
+          "ask": {
+            "en": "How wide is the road in front of the plot?",
+            "bn": "জমির সামনের রাস্তাটি কত চওড়া?"
+          },
+          "why": {
+            "en": "RAJUK setbacks and height limits depend on the road width.",
+            "bn": "রাজউকের সেটব্যাক ও উচ্চসীমা রাস্তার চওড়ার ওপরই নির্ভর করে।"
+          },
+          "type": "number",
+          "unit": {
+            "canonical": "m",
+            "display": [
+              "m",
+              "ft"
+            ]
+          },
+          "maps_to": "/site/plot/roadWidthM",
+          "essential": true
+        },
+        {
+          "id": "corner-plot",
+          "ask": {
+            "en": "Is it a corner plot (roads on two sides)?",
+            "bn": "প্লটটি কি কোনায় (দুই পাশে রাস্তা)?"
+          },
+          "why": {
+            "en": "Corner plots can use extra FAR and follow different setbacks - we should not miss that.",
+            "bn": "কর্নার প্লটে বাড়তি এফএআর পাওয়া যায়, সেটব্যাকও আলাদা — এটা বাদ পড়া চলবে না।"
+          },
+          "type": "yes_no",
+          "maps_to": "/site/plot/cornerPlot",
+          "fallback": {
+            "kind": "default",
+            "value": false
+          }
+        },
+        {
+          "id": "existing-structure",
+          "ask": {
+            "en": "Is there an old building on the plot?",
+            "bn": "জমিতে পুরনো কোনো ভবন আছে কি?"
+          },
+          "why": {
+            "en": "An old building means demolition steps and extra cost.",
+            "bn": "পুরনো ভবন থাকলে ভাঙার কাজ ও বাড়তি খরচ যুক্ত হবে।"
+          },
+          "type": "yes_no",
+          "maps_to": "/site/plot/existingStructure",
+          "fallback": {
+            "kind": "default",
+            "value": false
+          }
+        },
+        {
+          "id": "authority",
+          "ask": {
+            "en": "Which authority approves building plans here?",
+            "bn": "এখানে বিল্ডিং প্ল্যান কে অনুমোদন করে?"
+          },
+          "why": {
+            "en": "This picks the rule pack for setbacks and FAR.",
+            "bn": "এটাই সেটব্যাক-এফএআরের রুল প্যাক ঠিক করবে।"
+          },
+          "type": "choice",
+          "options": [
+            {
+              "value": "rajuk",
+              "label": {
+                "en": "RAJUK",
+                "bn": "রাজউক (RAJUK)"
+              }
+            },
+            {
+              "value": "dncc",
+              "label": {
+                "en": "DNCC (Dhaka North City)",
+                "bn": "ঢাকা উত্তর সিটি কর্পোরেশন (DNCC)"
+              }
+            },
+            {
+              "value": "dscc",
+              "label": {
+                "en": "DSCC (Dhaka South City)",
+                "bn": "ঢাকা দক্ষিণ সিটি কর্পোরেশন (DSCC)"
+              }
+            },
+            {
+              "value": "ccc",
+              "label": {
+                "en": "CCC (Chattogram City)",
+                "bn": "চট্টগ্রাম সিটি কর্পোরেশন (CCC)"
+              }
+            },
+            {
+              "value": "cda",
+              "label": {
+                "en": "CDA (Chattogram Development)",
+                "bn": "সিডিএ (CDA)"
+              }
+            },
+            {
+              "value": "kda",
+              "label": {
+                "en": "KDA (Khulna Development)",
+                "bn": "খুলনা উন্নয়ন কর্তৃপক্ষ (KDA)"
+              }
+            },
+            {
+              "value": "rda",
+              "label": {
+                "en": "RDA (Rajshahi Development)",
+                "bn": "রাজশাহী উন্নয়ন কর্তৃপক্ষ (RDA)"
+              }
+            },
+            {
+              "value": "scc",
+              "label": {
+                "en": "SCC (Sylhet City)",
+                "bn": "সিলেট সিটি কর্পোরেশন (SCC)"
+              }
+            },
+            {
+              "value": "paurashava",
+              "label": {
+                "en": "Paurashava (municipality)",
+                "bn": "পৌরসভা"
+              }
+            },
+            {
+              "value": "other",
+              "label": {
+                "en": "Other authority",
+                "bn": "অন্য কোনো কর্তৃপক্ষ"
+              }
+            },
+            {
+              "value": "not-sure",
+              "label": {
+                "en": "Not sure - work it out for me",
+                "bn": "জানি না — অ্যাপ মিলিয়ে দেখবে"
+              }
+            }
+          ],
+          "maps_to": "/site/jurisdiction/authority",
+          "source": "registry",
+          "fallback": {
+            "kind": "registry",
+            "value": "derived-from-location",
+            "assumption": {
+              "en": "Authority derived from the location by the rule pack - confirm before submitting for approval.",
+              "bn": "অবস্থান দেখে কর্তৃপক্ষ অনুমান করা হয়েছে — অনুমোদনের আবেদনের আগে নিশ্চিত করে নিন।"
+            }
+          }
+        },
+        {
+          "id": "storeys-count",
+          "ask": {
+            "en": "How many floors in total, including the ground floor?",
+            "bn": "মোট কত তলা হবে (নিচতলাসহ)?"
+          },
+          "why": {
+            "en": "Here G+2 means ground + 2 = 3 floors in total.",
+            "bn": "এখানে G+2 মানে নিচতলা + ২ = মোট ৩ তলা।"
+          },
+          "type": "integer",
+          "maps_to": "/building/storeys/count",
+          "essential": true
+        },
+        {
+          "id": "has-basement",
+          "ask": {
+            "en": "Do you want a basement?",
+            "bn": "বেসমেন্ট রাখবেন কি?"
+          },
+          "why": {
+            "en": "A basement changes excavation, waterproofing and cost a lot.",
+            "bn": "বেসমেন্ট খনন, ওয়াটারপ্রুফিং আর খরচ — সব অনেকখানি বদলে দেয়।"
+          },
+          "type": "yes_no",
+          "maps_to": "/building/storeys/hasBasement",
+          "fallback": {
+            "kind": "default",
+            "value": false
+          }
+        },
+        {
+          "id": "units-per-floor",
+          "ask": {
+            "en": "How many flats or units per floor?",
+            "bn": "প্রতি তলায় কতটি ফ্ল্যাট বা ইউনিট থাকবে?"
+          },
+          "why": {
+            "en": "Family houses are usually one unit per floor; more units change layouts and services.",
+            "bn": "পারিবারিক বাড়িতে সাধারণত প্রতি তলায় এক ইউনিট; একাধিক হলে নকশা ও সেবা বদলায়।"
+          },
+          "type": "integer",
+          "maps_to": "/building/unitsPerFloor",
+          "fallback": {
+            "kind": "default",
+            "value": 1
+          }
+        },
+        {
+          "id": "ground-floor-usage",
+          "ask": {
+            "en": "How will the ground floor be used?",
+            "bn": "নিচতলাটি কীভাবে ব্যবহার হবে?"
+          },
+          "why": {
+            "en": "Parking or mixed use changes the layout and fire rules.",
+            "bn": "পার্কিং বা মিশ্র ব্যবহারে নকশা আর অগ্নিনিরাপত্তার নিয়ম বদলায়।"
+          },
+          "type": "choice",
+          "options": [
+            {
+              "value": "residential",
+              "label": {
+                "en": "Living space",
+                "bn": "থাকার জন্য"
+              }
+            },
+            {
+              "value": "parking",
+              "label": {
+                "en": "Parking",
+                "bn": "পার্কিং"
+              }
+            },
+            {
+              "value": "mixed",
+              "label": {
+                "en": "Mixed (some living, some parking/shops)",
+                "bn": "মিশ্র (কিছু থাকা, কিছু পার্কিং/দোকান)"
+              }
+            }
+          ],
+          "maps_to": "/building/groundFloorUsage",
+          "fallback": {
+            "kind": "default",
+            "value": "residential"
+          }
+        },
+        {
+          "id": "typical-unit-area",
+          "ask": {
+            "en": "Roughly how big should each flat be (e.g. 1200 sq ft)?",
+            "bn": "প্রতি ফ্ল্যাটের আনুমানিক আয়তন কত (যেমন ১২০০ বর্গফুট)?"
+          },
+          "why": {
+            "en": "Helps the layout generation; can be adjusted later.",
+            "bn": "নকশা বানানোর জন্য দরকার; পরে বদলানো যাবে।"
+          },
+          "type": "number",
+          "unit": {
+            "canonical": "m2",
+            "display": [
+              "sqm",
+              "sqft"
+            ]
+          },
+          "maps_to": "/building/typicalUnitAreaSqm",
+          "fallback": {
+            "kind": "omit"
+          }
+        },
+        {
+          "id": "material-prices",
+          "ask": {
+            "en": "Do you already have current material prices (cement, rod, sand, stone)?",
+            "bn": "উপকরণের বর্তমান দাম কি আপনার কাছে আছে (সিমেন্ট, রড, বালি, পাথর)?"
+          },
+          "why": {
+            "en": "If not, we fetch the latest prices for your area and show the date of every price.",
+            "bn": "না থাকলে আপনার এলাকার সর্বশেষ দাম এনে দেব — প্রতিটি দামের তারিখসহ।"
+          },
+          "type": "yes_no",
+          "maps_to": "/pricing/source",
+          "source": "registry",
+          "fallback": {
+            "kind": "registry",
+            "value": "fetched",
+            "assumption": {
+              "en": "Market prices are fetched for your area and dated - review them before ordering.",
+              "bn": "বাজারের দাম আপনার এলাকার জন্য আনা হবে, তারিখসহ — অর্ডার দেওয়ার আগে মিলিয়ে নিন।"
+            }
+          }
+        },
+        {
+          "id": "soil-has-report",
+          "ask": {
+            "en": "Do you have a soil test report?",
+            "bn": "মাটি পরীক্ষার রিপোর্ট আছে কি (সয়েল টেস্ট)?"
+          },
+          "why": {
+            "en": "Bearing capacity decides the foundation - without a report we assume the safe area default and flag it clearly.",
+            "bn": "মাটির বহন ক্ষমতাই ফাউন্ডেশন ঠিক করে — রিপোর্ট না থাকলে এলাকার নিরাপদ ডিফল্ট ধরে নিয়ে সেটা স্পষ্টভাবে জানাব।"
+          },
+          "type": "yes_no",
+          "maps_to": "/site/soil/status",
+          "fallback": {
+            "kind": "area_default",
+            "value": "area_default",
+            "assumption": {
+              "en": "No soil report - using the conservative area default (SBC 65 kPa). This is an assumption - verify on site.",
+              "bn": "মাটি পরীক্ষার রিপোর্ট নেই — এলাকার রক্ষণশীল ডিফল্ট ধরা হচ্ছে (SBC ৬৫ kPa)। এটি একটি অনুমান — সাইটে যাচাই করুন।"
+            }
+          }
+        },
+        {
+          "id": "soil-report-file",
+          "ask": {
+            "en": "Attach the report (photo/PDF) - or tell me the key numbers in the next questions.",
+            "bn": "রিপোর্টটি সংযুক্ত করুন (ছবি/পিডিএফ) — অথবা পরের প্রশ্নগুলোতে মূল সংখ্যাগুলো বলুন।"
+          },
+          "why": {
+            "en": "The report stays with the project for the engineer pack.",
+            "bn": "রিপোর্টটি প্রকল্পের সাথেই থাকবে — ইঞ্জিনিয়ার প্যাকে লাগবে।"
+          },
+          "type": "file",
+          "maps_to": "/site/soil/reportRef",
+          "when": "soil-has-report == yes",
+          "fallback": {
+            "kind": "omit"
+          }
+        },
+        {
+          "id": "soil-sbc",
+          "ask": {
+            "en": "What does the report say for safe bearing capacity (SBC)?",
+            "bn": "রিপোর্টে মাটি বহন ক্ষমতা (SBC) কত লেখা আছে?"
+          },
+          "why": {
+            "en": "Straight from the report - no guessing needed.",
+            "bn": "রিপোর্ট থেকেই নিচ্ছি — অনুমান লাগবে না।"
+          },
+          "type": "number",
+          "unit": {
+            "canonical": "kPa"
+          },
+          "maps_to": "/site/soil/sbcKpa",
+          "when": "soil-has-report == yes",
+          "fallback": {
+            "kind": "omit"
+          }
+        },
+        {
+          "id": "soil-groundwater",
+          "ask": {
+            "en": "And the groundwater depth mentioned in the report?",
+            "bn": "ভূগর্ভস্থ পানির স্তরের গভীরতা কত লেখা আছে রিপোর্টে?"
+          },
+          "why": {
+            "en": "Water close to the surface changes excavation and dewatering.",
+            "bn": "পানি বেশি উপরে থাকলে খনন ও পানি সরানোর ব্যবস্থা বদলায়।"
+          },
+          "type": "number",
+          "unit": {
+            "canonical": "m",
+            "display": [
+              "m",
+              "ft"
+            ]
+          },
+          "maps_to": "/site/soil/groundwaterDepthM",
+          "when": "soil-has-report == yes",
+          "fallback": {
+            "kind": "omit"
+          }
+        }
+      ]
+    },
+    {
+      "id": "site-excavation",
+      "phaseKind": "site_excavation",
+      "name": {
+        "en": "Site & Excavation",
+        "bn": "সাইট ও খনন"
+      },
+      "goal": {
+        "en": "Plan the digging: old structures, neighbours, machinery access, and where the soil goes.",
+        "bn": "খননের পরিকল্পনা: পুরনো কাঠামো, পাশের বাড়ি, মেশিনের যাতায়াত আর মাটির ব্যবস্থাপনা।"
+      },
+      "repeats": "once",
+      "questions": [
+        {
+          "id": "old-building-action",
+          "ask": {
+            "en": "The old building - demolish it all, or keep part of it?",
+            "bn": "পুরনো ভবনটি — সম্পূর্ণ ভাঙবেন, নাকি কিছুটা রেখে দেবেন?"
+          },
+          "why": {
+            "en": "Keeping part can reuse old foundations, but makes excavation more complex.",
+            "bn": "আংশিক রাখলে পুরনো ফাউন্ডেশন কাজে লাগতে পারে, তবে খনন জটিল হয়।"
+          },
+          "type": "choice",
+          "options": [
+            {
+              "value": "demolish-full",
+              "label": {
+                "en": "Demolish everything",
+                "bn": "সম্পূর্ণ ভাঙা হবে"
+              }
+            },
+            {
+              "value": "demolish-partial",
+              "label": {
+                "en": "Keep some of it",
+                "bn": "কিছু অংশ রাখা হবে"
+              }
+            },
+            {
+              "value": "not-sure",
+              "label": {
+                "en": "Not sure - advise me",
+                "bn": "নিশ্চিত নই — পরামর্শ দিন"
+              }
+            }
+          ],
+          "maps_to": "/phases/site-excavation/data/existingStructureAction",
+          "when": "existing-structure == yes",
+          "fallback": {
+            "kind": "default",
+            "value": "demolish-full"
+          }
+        },
+        {
+          "id": "keep-boundary-wall",
+          "ask": {
+            "en": "Is there an old boundary wall worth keeping?",
+            "bn": "রাখার মতো পুরনো সীমানা প্রাচীর আছে কি?"
+          },
+          "why": {
+            "en": "Keeping it saves cost, but it must survive the excavation vibration.",
+            "bn": "রাখলে খরচ বাঁচে, তবে খননের কম্পন সহ্য করতে হবে।"
+          },
+          "type": "yes_no",
+          "maps_to": "/phases/site-excavation/data/keepBoundaryWall",
+          "fallback": {
+            "kind": "default",
+            "value": false
+          }
+        },
+        {
+          "id": "adjacent-close",
+          "ask": {
+            "en": "Are neighbouring buildings very close (within about 1 m)?",
+            "bn": "পাশের বাড়িগুলো কি খুব কাছে (প্রায় ১ মিটারের মধ্যে)?"
+          },
+          "why": {
+            "en": "Close neighbours need shoring and crack checks - unless you say otherwise we stay on the safe side.",
+            "bn": "বাড়ি কাছে থাকলে শোরিং ও ফাটল মনিটরিং লাগে — আপনি না বললে আমরা নিরাপদ দিকেই থাকব।"
+          },
+          "type": "yes_no",
+          "maps_to": "/phases/site-excavation/data/adjacentStructuresClose",
+          "fallback": {
+            "kind": "default",
+            "value": true,
+            "assumption": {
+              "en": "Adjacent buildings assumed within ~1 m - conservative for shoring design.",
+              "bn": "পাশের বাড়ি ১ মিটারের মধ্যে ধরা হচ্ছে — শোরিং নকশায় নিরাপদ অনুমান।"
+            }
+          }
+        },
+        {
+          "id": "excavation-depth-req",
+          "ask": {
+            "en": "Do you already know a required excavation depth (e.g. for a basement or septic tank)?",
+            "bn": "খননের গভীরতা আগেই জানা আছে কি (যেমন বেসমেন্ট বা সেপটিক ট্যাংকের জন্য)?"
+          },
+          "why": {
+            "en": "Otherwise the app derives the depth from the foundation design.",
+            "bn": "না জানা থাকলে অ্যাপ ফাউন্ডেশনের নকশা থেকেই গভীরতা বের করবে।"
+          },
+          "type": "number",
+          "unit": {
+            "canonical": "m",
+            "display": [
+              "m",
+              "ft"
+            ]
+          },
+          "maps_to": "/phases/site-excavation/data/excavationDepthM",
+          "fallback": {
+            "kind": "derive"
+          }
+        },
+        {
+          "id": "machinery-access",
+          "ask": {
+            "en": "Can a mixer truck or pile rig reach the site easily?",
+            "bn": "মিক্সার ট্রাক বা পাইল মেশিন সহজে সাইটে আসতে পারবে?"
+          },
+          "why": {
+            "en": "Access decides whether concrete is machine-mixed on site or carried in.",
+            "bn": "যাতায়াত ঠিক করে দেয় — কংক্রিট সাইটেই মেশিনে হবে, নাকি বাইরে থেকে বানিয়ে আনতে হবে।"
+          },
+          "type": "choice",
+          "options": [
+            {
+              "value": "easy",
+              "label": {
+                "en": "Easily",
+                "bn": "অনায়াসে পারবে"
+              }
+            },
+            {
+              "value": "partial",
+              "label": {
+                "en": "Narrow but passable",
+                "bn": "মোটামুটি — সরু পথ, তবে পারবে"
+              }
+            },
+            {
+              "value": "difficult",
+              "label": {
+                "en": "Difficult - hand carrying",
+                "bn": "কঠিন — হাতে করে আনতে হবে"
+              }
+            }
+          ],
+          "maps_to": "/phases/site-excavation/data/machineryAccess",
+          "fallback": {
+            "kind": "default",
+            "value": "partial"
+          }
+        },
+        {
+          "id": "spoil-disposal",
+          "ask": {
+            "en": "Excavated soil - use it on site, or take it away?",
+            "bn": "খননের মাটি সাইটেই কাজে লাগাবেন, নাকি সরিয়ে নেবেন?"
+          },
+          "why": {
+            "en": "This sets the soil-carriage cost and where the mound goes on site.",
+            "bn": "এটা মাটি সরানোর খরচ আর সাইটে স্তূপের জায়গা — দুইটাই ঠিক করে।"
+          },
+          "type": "choice",
+          "options": [
+            {
+              "value": "keep-on-site",
+              "label": {
+                "en": "Keep and use on site",
+                "bn": "সাইটেই কাজে লাগাব"
+              }
+            },
+            {
+              "value": "remove-off-site",
+              "label": {
+                "en": "Take it away",
+                "bn": "সরিয়ে নিতে হবে"
+              }
+            },
+            {
+              "value": "not-decided",
+              "label": {
+                "en": "Not decided yet",
+                "bn": "এখনও ঠিক করিনি"
+              }
+            }
+          ],
+          "maps_to": "/phases/site-excavation/data/spoilDisposal",
+          "fallback": {
+            "kind": "default",
+            "value": "remove-off-site"
+          }
+        },
+        {
+          "id": "boundary-markers",
+          "ask": {
+            "en": "Are there survey pillars or boundary markers to protect?",
+            "bn": "রাখার মতো জরিপের পিলার বা সীমানা চিহ্ন আছে কি?"
+          },
+          "why": {
+            "en": "Disturbing them starts land disputes - we plan around them.",
+            "bn": "এগুলো নষ্ট হলে জমি নিয়ে ঝামেলা বাধে — আমরা এড়িয়ে পরিকল্পনা করব।"
+          },
+          "type": "yes_no",
+          "maps_to": "/phases/site-excavation/data/protectBoundaryMarkers",
+          "fallback": {
+            "kind": "default",
+            "value": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "foundation",
+      "phaseKind": "foundation",
+      "name": {
+        "en": "Foundation",
+        "bn": "ফাউন্ডেশন"
+      },
+      "goal": {
+        "en": "Settle the foundation: soil capacity, the system choice, and the details that keep it safe.",
+        "bn": "ফাউন্ডেশন ঠিক করা: মাটির ক্ষমতা, ধরন বাছাই আর নিরাপত্তার খুঁটিনাটি।"
+      },
+      "repeats": "once",
+      "questions": [
+        {
+          "id": "foundation-system",
+          "ask": {
+            "en": "Any preference for the foundation type - or should the app decide from the soil?",
+            "bn": "ফাউন্ডেশনের ধরন নিয়ে কোনো পছন্দ আছে — নাকি মাটি দেখে অ্যাপ ঠিক করবে?"
+          },
+          "why": {
+            "en": "The app picks from bearing capacity and load; you can always override later.",
+            "bn": "মাটি ও লোড মিলিয়ে অ্যাপ ঠিক করবে; পরে চাইলে বদলাতে পারবেন।"
+          },
+          "type": "choice",
+          "options": [
+            {
+              "value": "app-decides",
+              "label": {
+                "en": "Let the app decide (recommended)",
+                "bn": "অ্যাপ ঠিক করবে (প্রস্তাবিত)"
+              }
+            },
+            {
+              "value": "pile",
+              "label": {
+                "en": "Pile foundation",
+                "bn": "পাইল ফাউন্ডেশন"
+              }
+            },
+            {
+              "value": "raft",
+              "label": {
+                "en": "Raft (mat) foundation",
+                "bn": "রাফট (ম্যাট) ফাউন্ডেশন"
+              }
+            },
+            {
+              "value": "footing",
+              "label": {
+                "en": "Isolated or combined footing",
+                "bn": "আইসোলেটেড বা কম্বাইন্ড ফুটিং"
+              }
+            }
+          ],
+          "maps_to": "/phases/foundation/data/foundationSystem",
+          "fallback": {
+            "kind": "default",
+            "value": "app-decides"
+          }
+        },
+        {
+          "id": "pile-preference",
+          "ask": {
+            "en": "Which pile type?",
+            "bn": "পাইলের ধরন কোনটি?"
+          },
+          "why": {
+            "en": "Driven piles are cheaper but noisy; bored piles are better near close neighbours.",
+            "bn": "ড্রাইভেন পাইল সস্তা কিন্তু শব্দ বেশি; কাছে বাড়ি থাকলে বোরড পাইল ভালো।"
+          },
+          "type": "choice",
+          "options": [
+            {
+              "value": "no-preference",
+              "label": {
+                "en": "No preference",
+                "bn": "পছন্দ নেই"
+              }
+            },
+            {
+              "value": "driven",
+              "label": {
+                "en": "Driven pile",
+                "bn": "ড্রাইভেন পাইল (ঠুকে বসানো)"
+              }
+            },
+            {
+              "value": "bored",
+              "label": {
+                "en": "Bored pile (cast in hole)",
+                "bn": "বোরড পাইল (কুয়া করে ঢালা)"
+              }
+            }
+          ],
+          "maps_to": "/phases/foundation/data/pileTypePref",
+          "when": "foundation-system == pile",
+          "fallback": {
+            "kind": "default",
+            "value": "no-preference"
+          }
+        },
+        {
+          "id": "rebar-grade",
+          "ask": {
+            "en": "Which rebar grade should we use?",
+            "bn": "রিবারের গ্রেড কোনটি নেব?"
+          },
+          "why": {
+            "en": "60 grade (B500) is the everyday standard; higher grade only if it is easy to source.",
+            "bn": "৬০ গ্রেড (B500) সাধারণ মান; বেশি গ্রেড তখনই, যদি সহজে জোগাড় হয়।"
+          },
+          "type": "choice",
+          "options": [
+            {
+              "value": "app-decides",
+              "label": {
+                "en": "Let the app decide",
+                "bn": "অ্যাপ ঠিক করবে"
+              }
+            },
+            {
+              "value": "grade60",
+              "label": {
+                "en": "60 grade (B500)",
+                "bn": "৬০ গ্রেড (B500)"
+              }
+            },
+            {
+              "value": "grade72",
+              "label": {
+                "en": "72.5 grade (B600), if available",
+                "bn": "৭২.৫ গ্রেড (B600) — এলাকায় পেলে"
+              }
+            }
+          ],
+          "maps_to": "/phases/foundation/data/rebarGradePref",
+          "fallback": {
+            "kind": "default",
+            "value": "app-decides"
+          }
+        },
+        {
+          "id": "water-hit-digging",
+          "ask": {
+            "en": "While digging (or in an old well), did you see water rising?",
+            "bn": "খনন করতে গিয়ে (বা পুরনো কূপে) পানি উঠতে দেখেছেন কি?"
+          },
+          "why": {
+            "en": "Water near the surface changes the foundation approach and the dewatering needs.",
+            "bn": "ভূপৃষ্ঠের কাছে পানি থাকলে ফাউন্ডেশনের পদ্ধতি আর পানি সরানোর ব্যবস্থা বদলায়।"
+          },
+          "type": "yes_no",
+          "maps_to": "/phases/foundation/data/waterHitWhileDigging",
+          "fallback": {
+            "kind": "omit"
+          }
+        },
+        {
+          "id": "anti-termite",
+          "ask": {
+            "en": "Apply anti-termite treatment under the plinth?",
+            "bn": "প্লিন্থের নিচে উইপোকা-প্রতিরোধক (অ্যান্টি-টার্মাইট) দেব?"
+          },
+          "why": {
+            "en": "Small cost now, big cost later - standard practice in Bangladesh.",
+            "bn": "এখন খরচ সামান্য, পরে করলে অনেক বেশি — আমাদের এখানে এটাই প্রচলিত।"
+          },
+          "type": "yes_no",
+          "maps_to": "/phases/foundation/data/antiTermite",
+          "fallback": {
+            "kind": "default",
+            "value": true
+          }
+        },
+        {
+          "id": "depth-constraint",
+          "ask": {
+            "en": "Any limit on how deep we can dig (e.g. a neighbour's foundation depth, or the party wall condition)?",
+            "bn": "গভীরে খোঁড়ার কোনো সীমাবদ্ধতা আছে কি (যেমন পাশের বাড়ির ফাউন্ডেশনের গভীরতা বা পার্টি ওয়ালের অবস্থা)?"
+          },
+          "why": {
+            "en": "Digging deep beside old footings can weaken them.",
+            "bn": "পুরনো ফাউন্ডেশনের পাশে বেশি গভীরে খুঁড়লে সেগুলো দুর্বল হয়ে যেতে পারে।"
+          },
+          "type": "number",
+          "unit": {
+            "canonical": "m",
+            "display": [
+              "m",
+              "ft"
+            ]
+          },
+          "maps_to": "/phases/foundation/data/depthConstraintM",
+          "fallback": {
+            "kind": "omit"
+          }
+        },
+        {
+          "id": "plinth-height",
+          "ask": {
+            "en": "How high should the plinth be above road level?",
+            "bn": "রাস্তার স্তর থেকে প্লিন্থ কত উঁচু হবে?"
+          },
+          "why": {
+            "en": "It keeps flood water out; 2 ft (0.61 m) is the common default.",
+            "bn": "বন্যার পানি থেকে বাঁচায়; সাধারণত ২ ফুট (০.৬১ মিটার) ডিফল্ট ধরা হয়।"
+          },
+          "type": "number",
+          "unit": {
+            "canonical": "m",
+            "display": [
+              "m",
+              "ft"
+            ]
+          },
+          "maps_to": "/phases/foundation/data/plinthHeightM",
+          "fallback": {
+            "kind": "default",
+            "value": 0.61
+          }
+        }
+      ]
+    },
+    {
+      "id": "floor",
+      "phaseKind": "floor",
+      "name": {
+        "en": "Floor",
+        "bn": "তলা"
+      },
+      "goal": {
+        "en": "Shape this floor: heights, units, rooms, balcony, and the services it needs.",
+        "bn": "এই তলার নকশা: উচ্চতা, ইউনিট, ঘর, বারান্দা আর প্রয়োজনীয় সেবা।"
+      },
+      "repeats": "per_storey",
+      "questions": [
+        {
+          "id": "ground-floor-height",
+          "ask": {
+            "en": "How tall should the ground floor be (floor to floor)?",
+            "bn": "নিচতলার উচ্চতা কত হবে (মেঝে থেকে মেঝে)?"
+          },
+          "why": {
+            "en": "Parking or shops need more height; 3 m is the everyday default.",
+            "bn": "পার্কিং বা দোকান হলে বেশি উচ্চতা লাগে; সাধারণত ৩ মিটার ধরা হয়।"
+          },
+          "type": "number",
+          "unit": {
+            "canonical": "m",
+            "display": [
+              "m",
+              "ft"
+            ]
+          },
+          "maps_to": "/building/storeys/groundFloorHeightM",
+          "when": "storeyIndex == 0",
+          "fallback": {
+            "kind": "default",
+            "value": 3
+          }
+        },
+        {
+          "id": "typical-floor-height",
+          "ask": {
+            "en": "How tall is this floor (floor to floor)?",
+            "bn": "এই তলার উচ্চতা কত (মেঝে থেকে মেঝে)?"
+          },
+          "why": {
+            "en": "3 m (about 10 ft) is the common choice - comfortable ceilings without wasted cost.",
+            "bn": "৩ মিটার (প্রায় ১০ ফুট) বেশি প্রচলিত — ছাদ আরামদায়ক থাকে, খরচও বাড়ে না।"
+          },
+          "type": "number",
+          "unit": {
+            "canonical": "m",
+            "display": [
+              "m",
+              "ft"
+            ]
+          },
+          "maps_to": "/building/storeys/typicalFloorHeightM",
+          "when": "storeyIndex > 0",
+          "fallback": {
+            "kind": "default",
+            "value": 3
+          }
+        },
+        {
+          "id": "floor-usage",
+          "ask": {
+            "en": "What will this floor be used for?",
+            "bn": "এই তলাটি কী কাজে ব্যবহার হবে?"
+          },
+          "why": {
+            "en": "Usage changes layouts, fire rules and loads.",
+            "bn": "ব্যবহার অনুযায়ী নকশা, অগ্নিনিয়ম আর লোড বদলায়।"
+          },
+          "type": "choice",
+          "options": [
+            {
+              "value": "residential",
+              "label": {
+                "en": "Living space",
+                "bn": "থাকার জন্য"
+              }
+            },
+            {
+              "value": "parking",
+              "label": {
+                "en": "Parking",
+                "bn": "পার্কিং"
+              }
+            },
+            {
+              "value": "mixed",
+              "label": {
+                "en": "Mixed",
+                "bn": "মিশ্র"
+              }
+            }
+          ],
+          "maps_to": "/phases/floor-<n>/data/usage",
+          "fallback": {
+            "kind": "default",
+            "value": "residential"
+          }
+        },
+        {
+          "id": "units-override",
+          "ask": {
+            "en": "How many units on this floor (if different from the building default)?",
+            "bn": "এই তলায় কতটি ইউনিট (বিল্ডিংয়ের ডিফল্টের চেয়ে আলাদা হলে বলুন)?"
+          },
+          "why": {
+            "en": "Left alone, it follows the building setting.",
+            "bn": "না বললে বিল্ডিংয়ের সেটিংই ধরে নেওয়া হবে।"
+          },
+          "type": "integer",
+          "maps_to": "/phases/floor-<n>/data/unitsPerFloor",
+          "fallback": {
+            "kind": "derive",
+            "value": "<building.unitsPerFloor>"
+          }
+        },
+        {
+          "id": "bedrooms-per-unit",
+          "ask": {
+            "en": "How many bedrooms per unit?",
+            "bn": "প্রতি ইউনিটে কত বেডরুম?"
+          },
+          "why": {
+            "en": "This drives the room layout; 3 bedrooms is the common family flat here.",
+            "bn": "এটা দিয়েই ঘরের বিন্যাস তৈরি হবে; আমাদের এখানে ৩ বেডরুমই বেশি প্রচলিত।"
+          },
+          "type": "integer",
+          "maps_to": "/phases/floor-<n>/data/bedroomsPerUnit",
+          "fallback": {
+            "kind": "default",
+            "value": 3
+          }
+        },
+        {
+          "id": "attached-bath",
+          "ask": {
+            "en": "Attached bathroom with every bedroom?",
+            "bn": "প্রতিটি বেডরুমে অ্যাটাচড বাথরুম থাকবে?"
+          },
+          "why": {
+            "en": "It is the norm now; plumbing costs a little more.",
+            "bn": "এখন এটাই চালু; প্লাম্বিং খরচ একটু বাড়ে।"
+          },
+          "type": "yes_no",
+          "maps_to": "/phases/floor-<n>/data/attachedBathPerBedroom",
+          "fallback": {
+            "kind": "default",
+            "value": true
+          }
+        },
+        {
+          "id": "balcony",
+          "ask": {
+            "en": "Balcony preference?",
+            "bn": "বারান্দা কেমন চান?"
+          },
+          "why": {
+            "en": "Front-only keeps cost down; a back balcony helps the kitchen and drying clothes.",
+            "bn": "শুধু সামনে থাকলে খরচ কম; পিছনেরটা রান্নাঘর আর কাপড় শুকাতে সুবিধা।"
+          },
+          "type": "choice",
+          "options": [
+            {
+              "value": "front-only",
+              "label": {
+                "en": "Front only",
+                "bn": "শুধু সামনে"
+              }
+            },
+            {
+              "value": "front-and-back",
+              "label": {
+                "en": "Front and back",
+                "bn": "সামনে ও পিছনে"
+              }
+            },
+            {
+              "value": "none",
+              "label": {
+                "en": "No balcony",
+                "bn": "বারান্দা লাগবে না"
+              }
+            }
+          ],
+          "maps_to": "/phases/floor-<n>/data/balcony",
+          "fallback": {
+            "kind": "default",
+            "value": "front-only"
+          }
+        },
+        {
+          "id": "kitchen-pref",
+          "ask": {
+            "en": "Any preference for the kitchen side?",
+            "bn": "রান্নাঘর কোন দিকে চান?"
+          },
+          "why": {
+            "en": "You keep your preference as long as gas and ventilation work out.",
+            "bn": "গ্যাস আর বাতাসের ব্যবস্থা ঠিক থাকলে আপনার পছন্দই থাকবে।"
+          },
+          "type": "choice",
+          "options": [
+            {
+              "value": "no-preference",
+              "label": {
+                "en": "No preference",
+                "bn": "পছন্দ নেই"
+              }
+            },
+            {
+              "value": "east",
+              "label": {
+                "en": "East",
+                "bn": "পূর্ব"
+              }
+            },
+            {
+              "value": "west",
+              "label": {
+                "en": "West",
+                "bn": "পশ্চিম"
+              }
+            },
+            {
+              "value": "north",
+              "label": {
+                "en": "North",
+                "bn": "উত্তর"
+              }
+            },
+            {
+              "value": "south",
+              "label": {
+                "en": "South",
+                "bn": "দক্ষিণ"
+              }
+            }
+          ],
+          "maps_to": "/phases/floor-<n>/data/kitchenPref",
+          "fallback": {
+            "kind": "default",
+            "value": "no-preference"
+          }
+        },
+        {
+          "id": "mep-points-note",
+          "ask": {
+            "en": "Anything special for electrical or plumbing on this floor (extra AC points, geyser, water points)?",
+            "bn": "এই তলায় বৈদ্যুতিক বা প্লাম্বিংয়ে বিশেষ কিছু লাগবে (বাড়তি এসি পয়েন্ট, গিজার, পানির পয়েন্ট)?"
+          },
+          "why": {
+            "en": "Points go into the design now - not added after casting.",
+            "bn": "কাস্টিংয়ের পরে নয় — নকশাতেই পয়েন্টগুলো ধরা থাকবে।"
+          },
+          "type": "text",
+          "maps_to": "/phases/floor-<n>/data/mepNotes",
+          "fallback": {
+            "kind": "omit"
+          }
+        }
+      ]
+    },
+    {
+      "id": "roof-boundary",
+      "phaseKind": "roof_boundary",
+      "name": {
+        "en": "Roof & Boundary",
+        "bn": "ছাদ ও সীমানা প্রাচীর"
+      },
+      "goal": {
+        "en": "Finish the top and the edge: roof use, tank, solar, parapet, boundary wall and gate.",
+        "bn": "ছাদ আর চারপাশ গুছিয়ে ফেলা: ছাদের ব্যবহার, ট্যাংক, সোলার, প্যারাপেট, সীমানা প্রাচীর আর ফটক।"
+      },
+      "repeats": "once",
+      "questions": [
+        {
+          "id": "roof-type",
+          "ask": {
+            "en": "What kind of roof do you want?",
+            "bn": "ছাদ কেমন হবে?"
+          },
+          "why": {
+            "en": "A usable roof needs finishes, railings and a stronger slab.",
+            "bn": "ব্যবহারযোগ্য ছাদে ফিনিশ, রেলিং আর মজবুত স্ল্যাব লাগে।"
+          },
+          "type": "choice",
+          "options": [
+            {
+              "value": "flat-accessible",
+              "label": {
+                "en": "Flat, usable (family use)",
+                "bn": "সমান — পরিবার ব্যবহার করবে"
+              }
+            },
+            {
+              "value": "flat-utility",
+              "label": {
+                "en": "Flat, utility only",
+                "bn": "সমান — শুধু কারিগরি কাজে"
+              }
+            },
+            {
+              "value": "sloped",
+              "label": {
+                "en": "Sloped (tin, etc.)",
+                "bn": "ঢালু (টিন ইত্যাদি)"
+              }
+            }
+          ],
+          "maps_to": "/phases/roof-boundary/data/roofType",
+          "fallback": {
+            "kind": "default",
+            "value": "flat-accessible"
+          }
+        },
+        {
+          "id": "overhead-tank",
+          "ask": {
+            "en": "Water tank on the roof?",
+            "bn": "ছাদে পানির ট্যাংক থাকবে?"
+          },
+          "why": {
+            "en": "The slab must be designed for the tank's weight.",
+            "bn": "ট্যাংকের ভার ধরে স্ল্যাবের নকশা করতে হয়।"
+          },
+          "type": "yes_no",
+          "maps_to": "/phases/roof-boundary/data/overheadTankOnRoof",
+          "fallback": {
+            "kind": "default",
+            "value": true
+          }
+        },
+        {
+          "id": "solar-provision",
+          "ask": {
+            "en": "Planning solar panels for later?",
+            "bn": "পরে সোলার প্যানেল বসানোর পরিকল্পনা আছে?"
+          },
+          "why": {
+            "en": "Conduit and base provisions now cost a fraction of retrofitting later.",
+            "bn": "এখনই তার আর বেসের ব্যবস্থা রাখলে পরে খরচ অনেক কম।"
+          },
+          "type": "yes_no",
+          "maps_to": "/phases/roof-boundary/data/solarProvisions",
+          "fallback": {
+            "kind": "default",
+            "value": false
+          }
+        },
+        {
+          "id": "parapet-height",
+          "ask": {
+            "en": "How high should the roof parapet be?",
+            "bn": "ছাদের চারপাশের প্যারাপেট কত উঁচু?"
+          },
+          "why": {
+            "en": "3 ft 6 in (1.07 m) is the common, code-friendly choice.",
+            "bn": "৩ ফুট ৬ ইঞ্চি (১.০৭ মিটার) সাধারণ ও নিয়মসম্মত।"
+          },
+          "type": "number",
+          "unit": {
+            "canonical": "m",
+            "display": [
+              "m",
+              "ft"
+            ]
+          },
+          "maps_to": "/phases/roof-boundary/data/parapetHeightM",
+          "fallback": {
+            "kind": "default",
+            "value": 1.07
+          }
+        },
+        {
+          "id": "boundary-wall-height",
+          "ask": {
+            "en": "How high should the boundary wall be?",
+            "bn": "সীমানা প্রাচীর কত উঁচু হবে?"
+          },
+          "why": {
+            "en": "6 ft is typical; higher walls need a thicker, braced design.",
+            "bn": "সাধারণত ৬ ফুট; বেশি উঁচু হলে বাড়তি ডিজাইন লাগে।"
+          },
+          "type": "number",
+          "unit": {
+            "canonical": "m",
+            "display": [
+              "m",
+              "ft"
+            ]
+          },
+          "maps_to": "/phases/roof-boundary/data/boundaryWallHeightM",
+          "fallback": {
+            "kind": "default",
+            "value": 1.83
+          }
+        },
+        {
+          "id": "boundary-gate",
+          "ask": {
+            "en": "Main gate - one wide gate, or a gate plus a small door?",
+            "bn": "প্রধান ফটক — একটি চওড়া গেট, নাকি গেটের সাথে ছোট দরজা?"
+          },
+          "why": {
+            "en": "The small door is handy every day; the wide gate is for vehicles and materials.",
+            "bn": "ছোট দরজা প্রতিদিনের চলাচলে সুবিধা; চওড়া গেট গাড়ি আর মালামালের জন্য।"
+          },
+          "type": "choice",
+          "options": [
+            {
+              "value": "gate-and-door",
+              "label": {
+                "en": "Gate + small door",
+                "bn": "গেট + ছোট দরজা"
+              }
+            },
+            {
+              "value": "gate-only",
+              "label": {
+                "en": "One wide gate only",
+                "bn": "শুধু চওড়া গেট"
+              }
+            },
+            {
+              "value": "not-sure",
+              "label": {
+                "en": "Decide later",
+                "bn": "পরে ঠিক করব"
+              }
+            }
+          ],
+          "maps_to": "/phases/roof-boundary/data/boundaryGate",
+          "fallback": {
+            "kind": "default",
+            "value": "gate-and-door"
+          }
+        },
+        {
+          "id": "roof-access",
+          "ask": {
+            "en": "Should the stairs reach the roof?",
+            "bn": "সিঁড়ি কি ছাদ পর্যন্ত যাবে?"
+          },
+          "why": {
+            "en": "With only a hatch, tank and solar maintenance gets awkward.",
+            "bn": "শুধু হ্যাচ থাকলে ট্যাংক বা সোলারের কাজে ওঠানামা কষ্টকর হয়।"
+          },
+          "type": "choice",
+          "options": [
+            {
+              "value": "stairs-reach",
+              "label": {
+                "en": "Yes, stairs reach the roof",
+                "bn": "হ্যাঁ — সিঁড়ি ছাদ পর্যন্ত"
+              }
+            },
+            {
+              "value": "hatch-only",
+              "label": {
+                "en": "No, hatch only",
+                "bn": "না — শুধু হ্যাচ থাকবে"
+              }
+            }
+          ],
+          "maps_to": "/phases/roof-boundary/data/roofAccess",
+          "fallback": {
+            "kind": "default",
+            "value": "stairs-reach"
+          }
+        }
+      ]
+    },
+    {
+      "id": "common-services",
+      "phaseKind": "common_services",
+      "name": {
+        "en": "Common Services",
+        "bn": "সাধারণ সেবা"
+      },
+      "goal": {
+        "en": "The shared systems: stairs, lift, water, waste, gas and electricity.",
+        "bn": "সবার জন্য সেবা: সিঁড়ি, লিফট, পানি, বর্জ্য, গ্যাস আর বিদ্যুৎ।"
+      },
+      "repeats": "once",
+      "questions": [
+        {
+          "id": "lift-plan",
+          "ask": {
+            "en": "Lift - build it now, keep the shaft ready, or no lift?",
+            "bn": "লিফট — এখনই বসাবেন, শুধু জায়গা (শ্যাফট) রাখবেন, নাকি লিফট লাগবে না?"
+          },
+          "why": {
+            "en": "Retrofitting a shaft later is very hard; provision now is cheap.",
+            "bn": "পরে শ্যাফট বসানো খুব কষ্টের — এখনই জায়গা রাখলে খরচ সামান্য।"
+          },
+          "type": "choice",
+          "options": [
+            {
+              "value": "provision-only",
+              "label": {
+                "en": "Keep the shaft ready",
+                "bn": "শুধু জায়গা (শ্যাফট) রাখব"
+              }
+            },
+            {
+              "value": "now",
+              "label": {
+                "en": "Install it now",
+                "bn": "এখনই বসাব"
+              }
+            },
+            {
+              "value": "no",
+              "label": {
+                "en": "No lift",
+                "bn": "লিফট লাগবে না"
+              }
+            }
+          ],
+          "maps_to": "/phases/common-services/data/lift",
+          "fallback": {
+            "kind": "default",
+            "value": "provision-only"
+          }
+        },
+        {
+          "id": "stair-type",
+          "ask": {
+            "en": "Which stair type?",
+            "bn": "সিঁড়ির ধরন কোনটি?"
+          },
+          "why": {
+            "en": "Dog-legged (mid-landing, two runs) is the standard here and saves space.",
+            "bn": "ডগ-লেগড (মাঝে ল্যান্ডিং, দুই পাল্লা) এখানে সবচেয়ে প্রচলিত, আর জায়গা বাঁচায়।"
+          },
+          "type": "choice",
+          "options": [
+            {
+              "value": "dog-legged",
+              "label": {
+                "en": "Dog-legged (two runs)",
+                "bn": "ডগ-লেগড (দুই পাল্লা)"
+              }
+            },
+            {
+              "value": "single-flight",
+              "label": {
+                "en": "Straight single flight",
+                "bn": "সোজা এক পাল্লা"
+              }
+            },
+            {
+              "value": "no-preference",
+              "label": {
+                "en": "No preference",
+                "bn": "পছন্দ নেই"
+              }
+            }
+          ],
+          "maps_to": "/phases/common-services/data/stairType",
+          "fallback": {
+            "kind": "default",
+            "value": "dog-legged"
+          }
+        },
+        {
+          "id": "stair-position",
+          "ask": {
+            "en": "Where should the stairs sit?",
+            "bn": "সিঁড়ি কোন দিকে থাকবে?"
+          },
+          "why": {
+            "en": "Side stairs keep the front rooms open and let light in.",
+            "bn": "পাশে থাকলে সামনের ঘর খোলামেলা থাকে, আলো-বাতাস বেশি ঢোকে।"
+          },
+          "type": "choice",
+          "options": [
+            {
+              "value": "front",
+              "label": {
+                "en": "Front",
+                "bn": "সামনে"
+              }
+            },
+            {
+              "value": "side",
+              "label": {
+                "en": "Side",
+                "bn": "পাশে"
+              }
+            },
+            {
+              "value": "back",
+              "label": {
+                "en": "Back",
+                "bn": "পিছনে"
+              }
+            },
+            {
+              "value": "corner",
+              "label": {
+                "en": "Corner",
+                "bn": "কোনায়"
+              }
+            },
+            {
+              "value": "no-preference",
+              "label": {
+                "en": "No preference",
+                "bn": "পছন্দ নেই"
+              }
+            }
+          ],
+          "maps_to": "/phases/common-services/data/stairPosition",
+          "fallback": {
+            "kind": "default",
+            "value": "side"
+          }
+        },
+        {
+          "id": "water-source",
+          "ask": {
+            "en": "Where does water come from - WASA/line, an existing tube well, or a new tube well?",
+            "bn": "পানি কোথা থেকে আসবে — ওয়াসা/লাইন, পুরনো টিউবওয়েল, নাকি নতুন টিউবওয়েল?"
+          },
+          "why": {
+            "en": "The source decides tank sizes and the pump choice.",
+            "bn": "সোর্স ঠিক হলে ট্যাংকের আকার আর পাম্প বাছা হবে।"
+          },
+          "type": "choice",
+          "options": [
+            {
+              "value": "wasa",
+              "label": {
+                "en": "WASA / pipeline supply",
+                "bn": "ওয়াসা / পাইপ লাইন"
+              }
+            },
+            {
+              "value": "tubewell-existing",
+              "label": {
+                "en": "Existing tube well",
+                "bn": "পুরনো টিউবওয়েল আছে"
+              }
+            },
+            {
+              "value": "tubewell-new",
+              "label": {
+                "en": "New tube well needed",
+                "bn": "নতুন টিউবওয়েল বসাতে হবে"
+              }
+            },
+            {
+              "value": "not-sure",
+              "label": {
+                "en": "Not sure",
+                "bn": "জানি না"
+              }
+            }
+          ],
+          "maps_to": "/phases/common-services/data/waterSource",
+          "fallback": {
+            "kind": "default",
+            "value": "tubewell-new",
+            "assumption": {
+              "en": "Assumed the building needs its own supply (tube well). If pipeline water is available, tanks can be smaller.",
+              "bn": "নিজস্ব ব্যবস্থা (টিউবওয়েল) ধরে নেওয়া হচ্ছে — লাইনের পানি থাকলে ট্যাংক ছোট হলেও চলবে।"
+            }
+          }
+        },
+        {
+          "id": "underground-tank",
+          "ask": {
+            "en": "Underground water tank, alongside the overhead tank?",
+            "bn": "ওভারহেড ট্যাংকের সাথে আন্ডারগ্রাউন্ড পানির ট্যাংকও রাখবেন?"
+          },
+          "why": {
+            "en": "Two-stage storage keeps steady pressure when supply is intermittent.",
+            "bn": "দুই ধাপে জমা রাখলে লাইন বন্ধ থাকলেও পানির চাপ ঠিক থাকে।"
+          },
+          "type": "yes_no",
+          "maps_to": "/phases/common-services/data/undergroundTank",
+          "fallback": {
+            "kind": "default",
+            "value": true
+          }
+        },
+        {
+          "id": "sewage",
+          "ask": {
+            "en": "Waste - septic tank + soak well, or the city sewer line?",
+            "bn": "পয়ঃনিষ্কাশন — সেপটিক ট্যাংক + সোক ওয়েল, নাকি শহরের সিউয়ার লাইন?"
+          },
+          "why": {
+            "en": "Where there is no sewer main, septic + soak well is the practical answer.",
+            "bn": "সিউয়ার লাইন না থাকলে সেপটিক + সোক ওয়েলই বাস্তব সমাধান।"
+          },
+          "type": "choice",
+          "options": [
+            {
+              "value": "septic-soak",
+              "label": {
+                "en": "Septic tank + soak well",
+                "bn": "সেপটিক ট্যাংক + সোক ওয়েল"
+              }
+            },
+            {
+              "value": "city-sewer",
+              "label": {
+                "en": "City sewer line",
+                "bn": "শহরের সিউয়ার লাইন"
+              }
+            },
+            {
+              "value": "not-sure",
+              "label": {
+                "en": "Not sure",
+                "bn": "জানি না"
+              }
+            }
+          ],
+          "maps_to": "/phases/common-services/data/sewage",
+          "fallback": {
+            "kind": "default",
+            "value": "septic-soak"
+          }
+        },
+        {
+          "id": "gas-source",
+          "ask": {
+            "en": "Gas - Titas line, cylinder (LPG) only, or provisions for both?",
+            "bn": "গ্যাস — তিতাস লাইন, শুধু সিলিন্ডার (এলপিজি), নাকি দুইয়েরই ব্যবস্থা?"
+          },
+          "why": {
+            "en": "Assuming LPG means the building works even where the gas line does not reach.",
+            "bn": "এলপিজি ধরে নিলে গ্যাস লাইন না থাকলেও বাড়ি চলে।"
+          },
+          "type": "choice",
+          "options": [
+            {
+              "value": "titas",
+              "label": {
+                "en": "Titas gas line",
+                "bn": "তিতাস গ্যাস লাইন"
+              }
+            },
+            {
+              "value": "lpg-only",
+              "label": {
+                "en": "LPG cylinders only",
+                "bn": "শুধু এলপিজি সিলিন্ডার"
+              }
+            },
+            {
+              "value": "both-provision",
+              "label": {
+                "en": "Provisions for both",
+                "bn": "দুইয়েরই ব্যবস্থা"
+              }
+            }
+          ],
+          "maps_to": "/phases/common-services/data/gas",
+          "fallback": {
+            "kind": "default",
+            "value": "lpg-only"
+          }
+        },
+        {
+          "id": "electrical-supply",
+          "ask": {
+            "en": "Electrical supply - single phase, three phase, or should the app decide?",
+            "bn": "বিদ্যুৎ সংযোগ — সিঙ্গেল ফেজ, থ্রি ফেজ, নাকি অ্যাপ ঠিক করবে?"
+          },
+          "why": {
+            "en": "Lifts and heavy AC loads need three phase; the app decides from the design.",
+            "bn": "লিফট বা ভারী এসি লোডে থ্রি ফেজ লাগে; অ্যাপ নকশা দেখে ঠিক করবে।"
+          },
+          "type": "choice",
+          "options": [
+            {
+              "value": "app-decides",
+              "label": {
+                "en": "Let the app decide (recommended)",
+                "bn": "অ্যাপ ঠিক করবে (প্রস্তাবিত)"
+              }
+            },
+            {
+              "value": "single-phase",
+              "label": {
+                "en": "Single phase",
+                "bn": "সিঙ্গেল ফেজ"
+              }
+            },
+            {
+              "value": "three-phase",
+              "label": {
+                "en": "Three phase",
+                "bn": "থ্রি ফেজ"
+              }
+            }
+          ],
+          "maps_to": "/phases/common-services/data/electricalSupply",
+          "fallback": {
+            "kind": "default",
+            "value": "app-decides"
+          }
+        }
+      ]
+    }
+  ]
+}

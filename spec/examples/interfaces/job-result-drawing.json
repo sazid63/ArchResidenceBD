@@ -1,0 +1,28 @@
+{
+  "messageType": "job.result",
+  "protocolVersion": "0.1.0",
+  "jobId": "7c2e9a41-53d8-4e0b-b6f1-9a8c2d4e6f70",
+  "kind": "drawing.sheet",
+  "status": "ok",
+  "artifacts": [
+    {
+      "name": "plan-top.svg",
+      "kind": "svg",
+      "mediaType": "image/svg+xml",
+      "sizeBytes": 42097,
+      "sha256": "8eff0c6ea15a15e6857bc7687511d916afaad296e9dae88b6ef472192cc90dfc",
+      "path": "plan-top.svg"
+    },
+    {
+      "name": "plan-top.dxf",
+      "kind": "dxf",
+      "mediaType": "application/dxf",
+      "sizeBytes": 118342,
+      "sha256": "09e22ffcf3e767f4187f41c8c91cb670ee25bfb33320e5e2bb7f0b21107fd797",
+      "path": "plan-top.dxf"
+    }
+  ],
+  "warnings": [],
+  "metrics": { "durationMs": 905 },
+  "engineVersion": "1.1.4R20260928"
+}

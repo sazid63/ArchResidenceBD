@@ -1,0 +1,142 @@
+# ADR-0017 — Repair SFT v0: mutate the known-good macro, execute the failure, normalise the trace
+
+**Date:** 2026-10-20 · **Status:** accepted · **Work package:** W1.7
+**Spec:** `docs/spec/training-data-v0.md` (repair section) · **Code:** `archres_core.training.repair`
+**Data:** `data/training/repair-v0/` · **Harness:** `docs/spec/cad-verify-v0.md` (W1.8)
+
+## Context
+
+Archie-Repair-4B (plan §6) repairs NativeCAD scripts from execution errors. It is trained
+English-only on code plus traces, and it is the member that makes the CAD loop closed: a
+candidate fails, the verifier names the broken expectation, the repair model returns a corrected
+macro, the harness re-executes it.
+
+W1.8 made the failure real and structured: `result.json` carries `errorCode`, `errorType`,
+`message`, full `traceback`, `frames` (file, line, source), and the verifier adds one failure row
+per broken expectation. W1.7 turns that into training records.
+
+Constraints:
+
+- **$0, offline.** Kaggle's free GPU is the training venue; the corpus is built on the dev
+  machine's FreeCAD. No paid annotation, no model-generated labels.
+- **Scripts first.** A hand-written "here is a bug and its fix" pair is unverified content. The
+  substrate must come from code that was executed.
+- **Never falsify.** A record may only exist if the broken macro actually failed the way the
+  record says, and the fixed macro actually passes the same case.
+- **Portability.** Training data must not embed one machine's temp paths, timings or engine build
+  strings; the same record must mean the same thing on Kaggle.
+- **Declared scope.** Round 1 is a small, honest corpus. Breadth is a later reviewed corpus, not
+  a silent edit.
+
+## Decisions
+
+1. **Bugs are deterministic mutations of the known-good candidate.** Each mutation is one exact
+   text replacement in `tools/cad/candidates/geometry_build.py`, with an expected failure kind.
+   `apply_mutation` refuses a source that no longer contains exactly one occurrence: a drifted
+   candidate is an error, never a silently invented bug. The target of every record is the
+   known-good macro, not something a model wrote.
+2. **A record exists only after execution proves both sides.** The builder runs the mutated macro
+   in FreeCAD and demands the declared failure (exception type, or the named measured check). It
+   then runs the known-good macro on the same case **twice** and demands identical verdict
+   signatures and identical artifact trees. A mutation that stops reproducing fails the build;
+   nothing is dropped quietly.
+3. **Two failure kinds are first-class: exceptions and measured rejections.** Four mutations
+   raise (`NameError`, `ValueError`, `KeyError`, `AttributeError`); two build the wrong geometry
+   and are rejected by the verifier (`objects[Pad_1].volumeM3`, `totals.volumeM3`). A repair model
+   that only learns to fix crashes cannot fix a wrong volume, and the CAD loop needs both.
+4. **Traces are normalised at capture time.** A record carries the exception type, message, the
+   deepest candidate line and source, the candidate frames (basename `candidate.py`, line,
+   source) and a short rendered trace. Machine paths, timings, engine build strings and the raw
+   traceback stay in the workdir as evidence, never in the record. The verifier rejects any
+   record that leaks an absolute path.
+5. **The record shape is additive in the SFT schema.** `kind: repair`, `task: repair.fix`,
+   `lang: code`, `difficulty: broken`, labels `{caseId, errorType, failureCode[, check]}`. The
+   schema goes to v0.2.0 and accepts the v0.1.0 chat records unchanged; chat data is not rebuilt
+   for a W1.7 addition.
+6. **The prompt carries the contract, not just the code.** The user message contains the case id,
+   params, the harness expectations and the trace; the system prompt says to return the complete
+   macro as plain Python and to change only what the failure requires. A repair that fixes the
+   crash by changing the expected geometry is not a repair.
+7. **The corpus is pinned and replayed.** `manifest.json` pins the case file, the target
+   candidate and the schema by sha256, records the FreeCAD version and the counts. `--check`
+   verifies the offline contract (schema, mutation relationship, case facts, canonical bytes,
+   pins) on every push; `--check --engine` re-executes everything and demands a byte-identical
+   dataset, weekly and on demand.
+8. **Repair data is a separate corpus, not part of the chat SFT split.** `data/training/repair-v0/`
+   feeds Archie-Repair only. Mixing a code-repair target into the chat adapter would blur two
+   task contracts the plan keeps separate.
+9. **Round 1 is six mutations and says so.** It proves the pipeline (four exception classes, two
+   measured bugs, deterministic replay), not the breadth of CAD failure space. New mutations are
+   a new reviewed corpus with a recorded build.
+
+## Consequences
+
+- W1.7's training run starts from data that cannot contain a fictional bug: every pair was
+  executed, and the fix passes the same case twice.
+- A change to `geometry_build.py`, the case file or the schema makes the corpus visibly stale
+  (pin/`--check` failure) instead of silently invalidating the training set.
+- Trace normalisation keeps the corpus portable, but it also means the model never sees the full
+  raw traceback. That is deliberate: the raw traceback adds machine paths and library frames, not
+  repair signal. The workdir keeps the full evidence for humans.
+- The corpus is engine-version sensitive where FreeCAD's exception text is; the manifest records
+  the version and the weekly replay makes a drift a red check, not a surprise.
+- Six records are substrate, not a trained model. No claim about repair accuracy exists until the
+  W1.7 run is evaluated against the holdout CAD cases (W1.8's suite plus new cases).
+
+## Amendment (2026-10-20) — the reviewed growth of the corpus
+
+Round 1 was six mutations on purpose: it proved the pipeline, not the failure space. W1.7's
+training run needs more than "four crashes and two wrong volumes", so the corpus was grown
+**under this ADR's rules** (executed, declared failures, pinned manifest) rather than by a new
+agreement:
+
+1. **Sixteen records, ten new mutations.** Nine exception records across nine error types
+   (`NameError`, `ValueError`, `KeyError`, `AttributeError`, `TypeError`, `IndexError`,
+   `ZeroDivisionError`, `RuntimeError`, `FileExistsError`) and seven measured rejections across
+   eight distinct checks (`objects[Pad_1].volumeM3`, `totals.volumeM3`, `totals.objects`,
+   `documentObjects`, `objects[Pad_1].bboxMm[2]`, `artifacts[foundation-summary.json]`, …). The
+   generator is bumped to `build_repair_dataset-0.2.0`; the prompt contract (`repair-prompt-v0`)
+   and the schema are unchanged.
+2. **A mutation that the harness cannot see is not a record.** One candidate mutation (dropping
+   `removeSplitter()`) turned out to leave the measurement unchanged - FreeCAD's `fuse` already
+   returns one solid there - so it was **dropped, not declared**. The corpus only contains bugs
+   the harness can actually catch.
+3. **Machine paths are redacted, not refused.** The `outdir-mkdir-exists` mutation raises
+   `FileExistsError` whose message carries the absolute work directory. Before this amendment the
+   only honest outcome was to refuse the record, which threw that failure class away. The trace
+   normaliser now redacts machine paths to `<path>` at capture time (message and frame source);
+   the raw message stays in the workdir as evidence. The law "machine paths never in the record"
+   is now enforced by construction *and* by the offline check.
+4. **The growth is a recorded build, not a silent edit.** The corpus is rebuilt against the real
+   engine, the manifest pins the case file / candidate / schema by sha256, and the weekly CAD job
+   re-executes the whole corpus and demands a byte-identical dataset.
+
+## Amendment (2026-10-20) — round 1 measured: a tie, so nothing was swapped
+
+The repair SFT round ran on Kaggle (`archresidencebd-repair-sft-v1`, T4, Qwen2.5-Coder-3B-Instruct,
+4-bit QLoRA, 12 training records, 48 steps, loss 0.0024) and was judged by the engine on the
+frozen holdout of four mutations:
+
+| Model | passes own case | no collateral | identical to target |
+|---|---:|---:|---:|
+| stock base model (4-bit, greedy) | 3/4 | 3/4 | 0/4 |
+| repair SFT round 1 | 3/4 | 3/4 | 1/4 |
+
+Decisions that follow from that measurement:
+
+5. **A tie is not a selection.** The fine-tune neither beats nor loses to the stock placeholder,
+   so the `archie-repair` member stays the stock artifact: the adapter is not registered, not
+   converted to GGUF and not shipped. A trained member that measures the same as the placeholder
+   would cost 2.1 GB of fleet artifact for no measurable gain, and shipping it would be a claim
+   the suite cannot support.
+6. **The floor is the stock model, measured on the same prompts** (`data/eval/repair-v0/gates.json`),
+   and it did not move. The suite that judges a repair is the engine: a repair is right only if
+   the macro passes the same case (`tools/training/eval_repair.py`), and the judge has a
+   self-test that proves it separates the known-good macro from a broken one.
+7. **The corpus, not the model, is the limiting factor.** Both models miss the unit-scale slip
+   and both "repair" the hard-coded pad count by editing the parameter *default* to the case's
+   value. Twelve records of one macro cannot teach a repair skill; the next corpus decision is
+   more macros with a holdout of whole scripts, and that is a new reviewed corpus, not a re-run.
+8. **The round's real result is the seam.** A failed macro plus its normalised trace goes into a
+   model, and the model's macro is judged by FreeCAD rather than by a text diff. That pipeline
+   is now measured and repeatable; a trained repair member is the next corpus's job.

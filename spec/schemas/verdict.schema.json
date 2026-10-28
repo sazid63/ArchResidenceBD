@@ -1,0 +1,207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.archresidencebd.app/verdict/0.1.0.json",
+  "title": "VerdictSet",
+  "description": "ArchResidenceBD verdict schema v0.1.0 (plan §5.6) - one compliance-evaluation run of a Building Spec revision against one rule pack. Three statuses only: compliant | deviation | impossible (no hard blocks). Every deviation carries a machine-applicable specPatch - the one-click 'restore to compliant'. Anything not evaluated is listed in unevaluated[] - coverage is never silent (plan §9). The pack is pinned by file sha256, and citations are cite keys resolved against that pack. The summary counts MUST equal the verdicts[] status counts (enforced by tests). See docs/spec/interfaces-v0.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "pack", "subject", "evaluatedAt", "evaluator", "verdicts", "unevaluated", "summary"],
+  "properties": {
+    "schemaVersion": { "const": "0.1.0" },
+    "pack": { "$ref": "#/$defs/PackRef" },
+    "subject": { "$ref": "#/$defs/Subject" },
+    "evaluatedAt": { "type": "string", "format": "date-time" },
+    "evaluator": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Producing component + version, e.g. 'compliance-engine@0.1.0'."
+    },
+    "verdicts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Verdict" }
+    },
+    "unevaluated": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Unevaluated" },
+      "description": "Rules that were in scope but not evaluated, with the reason. Always present (possibly empty) - never silent."
+    },
+    "summary": { "$ref": "#/$defs/Summary" }
+  },
+  "$defs": {
+    "Localized": {
+      "title": "Localized",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bn", "en"],
+      "properties": {
+        "bn": { "type": "string", "minLength": 1 },
+        "en": { "type": "string", "minLength": 1 }
+      }
+    },
+    "PackRef": {
+      "title": "PackRef",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "sha256"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z]+@\\d{4}\\.\\d+$", "description": "Rule pack id, e.g. rajuk@2008.1." },
+        "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$", "description": "Hash of the exact pack file evaluated - verdicts are reproducible only against a pinned pack." },
+        "status": { "type": "string", "enum": ["candidate", "review", "frozen"], "description": "Pack status at evaluation time (candidate = engineer review pending, ADR-0001)." }
+      }
+    },
+    "Subject": {
+      "title": "Subject",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["specRevision", "specSha256"],
+      "properties": {
+        "specRevision": { "type": "integer", "minimum": 0 },
+        "specSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "projectId": { "type": "string", "format": "uuid" }
+      }
+    },
+    "Verdict": {
+      "title": "Verdict",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ruleRef", "status", "title", "summary", "citations"],
+      "properties": {
+        "ruleRef": {
+          "type": "string",
+          "pattern": "^[a-z]+@\\d{4}\\.\\d+#[a-z0-9][a-z0-9-]*$",
+          "description": "Resolvable rule reference: <packId>#<ruleId>, where ruleId is a rule entity id in that pack - a provision, schedule or table id (e.g. rajuk@2008.1#setback-schedule, rajuk@2008.1#schedule4-parking)."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["compliant", "deviation", "impossible"],
+          "description": "The only three statuses (plan §5.6). impossible = the rules make compliance impossible within the current constraints (e.g. a prohibited use class on that plot); it is NOT a data problem."
+        },
+        "title": { "$ref": "#/$defs/Localized", "description": "Provision title snapshot, so a verdict set renders standalone." },
+        "summary": { "$ref": "#/$defs/Localized", "description": "Engine-authored message: what was compared and the outcome." },
+        "measured": { "$ref": "#/$defs/Measured" },
+        "limit": { "$ref": "#/$defs/Limit" },
+        "alternative": {
+          "$ref": "#/$defs/Alternative",
+          "description": "Nearest compliant alternative with a machine-applicable patch (plan §5.6 one-click 'restore to compliant'). Required when status=deviation; must be absent otherwise."
+        },
+        "citations": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "description": "Cite keys resolved against pack.sha256's citations registry (gazette pages stay traceable)."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "enum": ["compliant", "deviation"] } }, "required": ["status"] },
+          "then": { "required": ["measured", "limit"] }
+        },
+        {
+          "if": { "properties": { "status": { "const": "deviation" } }, "required": ["status"] },
+          "then": { "required": ["alternative"] }
+        },
+        {
+          "if": { "properties": { "status": { "enum": ["compliant", "impossible"] } }, "required": ["status"] },
+          "then": { "not": { "required": ["alternative"] } }
+        }
+      ]
+    },
+    "Measured": {
+      "title": "Measured",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value"],
+      "properties": {
+        "value": {
+          "type": ["number", "string"],
+          "description": "The design's value, e.g. 1.20 (m) or 'prohibited'."
+        },
+        "unit": { "type": "string", "minLength": 1, "description": "e.g. m, spaces, percent, katha." },
+        "path": {
+          "type": "string",
+          "pattern": "^/",
+          "description": "JSON Pointer into the subject spec revision when the value lives there (v0 spec: plot/road/storeys exist; design-derived values like FAR/coverage arrive with the phase payload schemas - until then often absent or pointing into phases[].data)."
+        }
+      }
+    },
+    "Limit": {
+      "title": "Limit",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "comparator"],
+      "properties": {
+        "value": { "type": "number", "minimum": 0 },
+        "unit": { "type": "string", "minLength": 1 },
+        "comparator": {
+          "type": "string",
+          "enum": ["max", "min", "exact"],
+          "description": "max = measured must be <= value; min = measured must be >= value; exact = equality."
+        },
+        "note": { "type": "string" }
+      }
+    },
+    "Alternative": {
+      "title": "Alternative",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["description", "specPatch"],
+      "properties": {
+        "description": { "$ref": "#/$defs/Localized" },
+        "specPatch": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/SpecPatchOp" },
+          "description": "Applied to the subject spec revision to reach the nearest compliant state (new revision). Paths must resolve against the spec; the sanctioned open extension point is phases[].data."
+        }
+      }
+    },
+    "SpecPatchOp": {
+      "title": "SpecPatchOp",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["op", "path"],
+      "properties": {
+        "op": { "type": "string", "enum": ["add", "replace", "remove"] },
+        "path": { "type": "string", "pattern": "^/" },
+        "value": {
+          "type": ["number", "string", "boolean", "object", "array"],
+          "description": "Required for add/replace; omitted for remove. Any JSON value."
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "op": { "enum": ["add", "replace"] } }, "required": ["op"] },
+          "then": { "required": ["value"] },
+          "else": { "not": { "required": ["value"] } }
+        }
+      ]
+    },
+    "Unevaluated": {
+      "title": "Unevaluated",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ruleRef", "reason"],
+      "properties": {
+        "ruleRef": { "type": "string", "pattern": "^[a-z]+@\\d{4}\\.\\d+#[a-z0-9][a-z0-9-]*$" },
+        "reason": {
+          "type": "string",
+          "enum": ["missing_input", "not_applicable", "pack_gap"],
+          "description": "missing_input = the spec lacks data the rule needs (list which in detail); not_applicable = rule does not apply to this building; pack_gap = the pack itself declares a coverage gap."
+        },
+        "detail": { "type": "string", "minLength": 1 }
+      }
+    },
+    "Summary": {
+      "title": "Summary",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["compliant", "deviation", "impossible"],
+      "properties": {
+        "compliant": { "type": "integer", "minimum": 0 },
+        "deviation": { "type": "integer", "minimum": 0 },
+        "impossible": { "type": "integer", "minimum": 0 }
+      }
+    }
+  }
+}

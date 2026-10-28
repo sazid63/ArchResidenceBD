@@ -1,0 +1,32 @@
+{
+ "sheets": [
+  {
+   "drawingNumber": "ARRB-P3-001-1",
+   "index": 1,
+   "title": "Floor 0 plan and elevation",
+   "views": [
+    "FLOOR 0 PLAN",
+    "FRONT ELEVATION"
+   ]
+  },
+  {
+   "drawingNumber": "ARRB-P3-001-2",
+   "index": 2,
+   "title": "Floor 1 plan and elevation",
+   "views": [
+    "FLOOR 1 PLAN",
+    "FRONT ELEVATION"
+   ]
+  },
+  {
+   "drawingNumber": "ARRB-P3-001-3",
+   "index": 3,
+   "title": "Elevations",
+   "views": [
+    "FRONT ELEVATION",
+    "SIDE ELEVATION"
+   ]
+  }
+ ],
+ "total": 3
+}

@@ -1,0 +1,47 @@
+{
+  "bootScript": "cad/boot/nativecad_boot.py",
+  "branding": {
+    "actionsTotal": 559,
+    "engineNameOnTitle": false,
+    "hiddenBrandActions": [
+      "Std_About",
+      "Std_FreeCADDonation",
+      "Std_FreeCADForum",
+      "Std_FreeCADWebsite"
+    ],
+    "iconApplied": true,
+    "themeApplied": true,
+    "title": "NativeCAD",
+    "titleApplied": true,
+    "visibleBrandActions": []
+  },
+  "command": [
+    "cad/boot/nativecad_boot.py"
+  ],
+  "elapsedSeconds": 4.16,
+  "engine": "freecad.exe",
+  "evidence": "the engine's own UI facts, before the branding was applied",
+  "facts": {
+    "actions_total": 559,
+    "brand_actions_hidden": [
+      "Std_About",
+      "Std_FreeCADDonation",
+      "Std_FreeCADForum",
+      "Std_FreeCADWebsite"
+    ],
+    "icon_applied": true,
+    "ok": true,
+    "theme_applied": true,
+    "theme_bytes": 2149,
+    "title_after": "NativeCAD",
+    "title_applied": true,
+    "title_before": "FreeCAD 1.1.4",
+    "winid": 3476878
+  },
+  "failures": [],
+  "mode": {
+    "mode": "embedded",
+    "reasons": []
+  },
+  "ok": true
+}

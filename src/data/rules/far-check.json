@@ -1,0 +1,20 @@
+{
+  "counts": {
+    "checked": 311,
+    "disagreed": 0,
+    "unchecked": 13
+  },
+  "documents": {
+    "cda": {
+      "fileName": "chattogram-building-construction-act-1952.pdf",
+      "sha256": "dfff66f3c8cc3ae68d2b279aa8bc560579dde54625c67ec531afc843155209b6"
+    },
+    "gazette": {
+      "fileName": "rajuk-bidhimala-2008-gazette.pdf",
+      "sha256": "3318b3f434a9bf248c798c1982e800360ddf22ae7216966efeacf47d9b860d5e"
+    }
+  },
+  "readAt": "2026-10-22",
+  "schemaVersion": "0.1.0",
+  "what": "the pack's FAR and setback rows, checked against the source's own digits"
+}

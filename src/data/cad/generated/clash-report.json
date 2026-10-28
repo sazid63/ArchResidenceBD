@@ -1,0 +1,816 @@
+{
+ "case": "two-storey-residential.json",
+ "clashes": [
+  {
+   "a": "electrical:light-1",
+   "b": "column-floor-0-C1",
+   "cause": "the-grid-is-a-line",
+   "detail": "the electrical point light-1 sits inside the column column-floor-0-C1",
+   "id": "clash-001",
+   "kind": "point-in-member",
+   "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
+   "severity": "open"
+  },
+  {
+   "a": "electrical:outlet-1",
+   "b": "footing-F1",
+   "cause": "members-at-floor-level",
+   "detail": "the electrical point outlet-1 sits inside the footing footing-F1",
+   "id": "clash-002",
+   "kind": "point-in-member",
+   "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
+   "severity": "declared"
+  },
+  {
+   "a": "electrical:outlet-1",
+   "b": "column-floor-0-C1",
+   "cause": "the-grid-is-a-line",
+   "detail": "the electrical point outlet-1 sits inside the column column-floor-0-C1",
+   "id": "clash-003",
+   "kind": "point-in-member",
+   "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
+   "severity": "open"
+  },
+  {
+   "a": "electrical:outlet-1",
+   "b": "beam-floor-0-B1",
+   "cause": "members-at-floor-level",
+   "detail": "the electrical point outlet-1 sits inside the beam beam-floor-0-B1",
+   "id": "clash-004",
+   "kind": "point-in-member",
+   "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
+   "severity": "declared"
+  },
+  {
+   "a": "electrical:fan-1",
+   "b": "column-floor-0-C1",
+   "cause": "the-grid-is-a-line",
+   "detail": "the electrical point fan-1 sits inside the column column-floor-0-C1",
+   "id": "clash-005",
+   "kind": "point-in-member",
+   "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
+   "severity": "open"
+  },
+  {
+   "a": "drainage:stack-1",
+   "b": "footing-F1",
+   "cause": "members-at-floor-level",
+   "detail": "the drainage point stack-1 sits inside the footing footing-F1",
+   "id": "clash-006",
+   "kind": "point-in-member",
+   "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
+   "severity": "declared"
+  },
+  {
+   "a": "drainage:stack-1",
+   "b": "column-floor-0-C1",
+   "cause": "the-grid-is-a-line",
+   "detail": "the drainage point stack-1 sits inside the column column-floor-0-C1",
+   "id": "clash-007",
+   "kind": "point-in-member",
+   "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
+   "severity": "open"
+  },
+  {
+   "a": "drainage:stack-1",
+   "b": "beam-floor-0-B1",
+   "cause": "members-at-floor-level",
+   "detail": "the drainage point stack-1 sits inside the beam beam-floor-0-B1",
+   "id": "clash-008",
+   "kind": "point-in-member",
+   "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
+   "severity": "declared"
+  },
+  {
+   "a": "drainage:stack-1",
+   "b": "slab-floor-0",
+   "cause": "no-openings",
+   "detail": "the drainage point stack-1 sits inside the slab slab-floor-0",
+   "id": "clash-009",
+   "kind": "point-in-member",
+   "note": "the v0 slabs carry no openings, so nothing can pass through a slab",
+   "severity": "declared"
+  },
+  {
+   "a": "electrical:light-1",
+   "b": "column-floor-1-C1",
+   "cause": "the-grid-is-a-line",
+   "detail": "the electrical point light-1 sits inside the column column-floor-1-C1",
+   "id": "clash-010",
+   "kind": "point-in-member",
+   "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
+   "severity": "open"
+  },
+  {
+   "a": "electrical:light-2",
+   "b": "column-floor-1-C4",
+   "cause": "the-grid-is-a-line",
+   "detail": "the electrical point light-2 sits inside the column column-floor-1-C4",
+   "id": "clash-011",
+   "kind": "point-in-member",
+   "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
+   "severity": "open"
+  },
+  {
+   "a": "electrical:light-3",
+   "b": "column-floor-1-C1",
+   "cause": "the-grid-is-a-line",
+   "detail": "the electrical point light-3 sits inside the column column-floor-1-C1",
+   "id": "clash-012",
+   "kind": "point-in-member",
+   "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
+   "severity": "open"
+  },
+  {
+   "a": "electrical:light-4",
+   "b": "column-floor-1-C4",
+   "cause": "the-grid-is-a-line",
+   "detail": "the electrical point light-4 sits inside the column column-floor-1-C4",
+   "id": "clash-013",
+   "kind": "point-in-member",
+   "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
+   "severity": "open"
+  },
+  {
+   "a": "electrical:outlet-1",
+   "b": "column-floor-1-C1",
+   "cause": "the-grid-is-a-line",
+   "detail": "the electrical point outlet-1 sits inside the column column-floor-1-C1",
+   "id": "clash-014",
+   "kind": "point-in-member",
+   "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
+   "severity": "open"
+  },
+  {
+   "a": "electrical:outlet-1",
+   "b": "beam-floor-1-B1",
+   "cause": "members-at-floor-level",
+   "detail": "the electrical point outlet-1 sits inside the beam beam-floor-1-B1",
+   "id": "clash-015",
+   "kind": "point-in-member",
+   "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
+   "severity": "declared"
+  },
+  {
+   "a": "electrical:outlet-2",
+   "b": "beam-floor-1-B2",
+   "cause": "members-at-floor-level",
+   "detail": "the electrical point outlet-2 sits inside the beam beam-floor-1-B2",
+   "id": "clash-016",
+   "kind": "point-in-member",
+   "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
+   "severity": "declared"
+  },
+  {
+   "a": "electrical:outlet-3",
+   "b": "column-floor-1-C4",
+   "cause": "the-grid-is-a-line",
+   "detail": "the electrical point outlet-3 sits inside the column column-floor-1-C4",
+   "id": "clash-017",
+   "kind": "point-in-member",
+   "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
+   "severity": "open"
+  },
+  {
+   "a": "electrical:outlet-3",
+   "b": "beam-floor-1-B3",
+   "cause": "members-at-floor-level",
+   "detail": "the electrical point outlet-3 sits inside the beam beam-floor-1-B3",
+   "id": "clash-018",
+   "kind": "point-in-member",
+   "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
+   "severity": "declared"
+  },
+  {
+   "a": "electrical:outlet-4",
+   "b": "column-floor-1-C1",
+   "cause": "the-grid-is-a-line",
+   "detail": "the electrical point outlet-4 sits inside the column column-floor-1-C1",
+   "id": "clash-019",
+   "kind": "point-in-member",
+   "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
+   "severity": "open"
+  },
+  {
+   "a": "electrical:outlet-4",
+   "b": "beam-floor-1-B1",
+   "cause": "members-at-floor-level",
+   "detail": "the electrical point outlet-4 sits inside the beam beam-floor-1-B1",
+   "id": "clash-020",
+   "kind": "point-in-member",
+   "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
+   "severity": "declared"
+  },
+  {
+   "a": "electrical:outlet-5",
+   "b": "beam-floor-1-B2",
+   "cause": "members-at-floor-level",
+   "detail": "the electrical point outlet-5 sits inside the beam beam-floor-1-B2",
+   "id": "clash-021",
+   "kind": "point-in-member",
+   "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
+   "severity": "declared"
+  },
+  {
+   "a": "electrical:fan-1",
+   "b": "column-floor-1-C1",
+   "cause": "the-grid-is-a-line",
+   "detail": "the electrical point fan-1 sits inside the column column-floor-1-C1",
+   "id": "clash-022",
+   "kind": "point-in-member",
+   "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
+   "severity": "open"
+  },
+  {
+   "a": "water:basin-1",
+   "b": "column-floor-1-C1",
+   "cause": "the-grid-is-a-line",
+   "detail": "the water point basin-1 sits inside the column column-floor-1-C1",
+   "id": "clash-023",
+   "kind": "point-in-member",
+   "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
+   "severity": "open"
+  },
+  {
+   "a": "water:basin-1",
+   "b": "beam-floor-1-B1",
+   "cause": "members-at-floor-level",
+   "detail": "the water point basin-1 sits inside the beam beam-floor-1-B1",
+   "id": "clash-024",
+   "kind": "point-in-member",
+   "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
+   "severity": "declared"
+  },
+  {
+   "a": "water:basin-2",
+   "b": "column-floor-1-C1",
+   "cause": "the-grid-is-a-line",
+   "detail": "the water point basin-2 sits inside the column column-floor-1-C1",
+   "id": "clash-025",
+   "kind": "point-in-member",
+   "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
+   "severity": "open"
+  },
+  {
+   "a": "water:basin-2",
+   "b": "beam-floor-1-B1",
+   "cause": "members-at-floor-level",
+   "detail": "the water point basin-2 sits inside the beam beam-floor-1-B1",
+   "id": "clash-026",
+   "kind": "point-in-member",
+   "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
+   "severity": "declared"
+  },
+  {
+   "a": "water:wc-1",
+   "b": "column-floor-1-C1",
+   "cause": "the-grid-is-a-line",
+   "detail": "the water point wc-1 sits inside the column column-floor-1-C1",
+   "id": "clash-027",
+   "kind": "point-in-member",
+   "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
+   "severity": "open"
+  },
+  {
+   "a": "water:wc-1",
+   "b": "beam-floor-1-B1",
+   "cause": "members-at-floor-level",
+   "detail": "the water point wc-1 sits inside the beam beam-floor-1-B1",
+   "id": "clash-028",
+   "kind": "point-in-member",
+   "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
+   "severity": "declared"
+  },
+  {
+   "a": "water:wc-2",
+   "b": "column-floor-1-C1",
+   "cause": "the-grid-is-a-line",
+   "detail": "the water point wc-2 sits inside the column column-floor-1-C1",
+   "id": "clash-029",
+   "kind": "point-in-member",
+   "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
+   "severity": "open"
+  },
+  {
+   "a": "water:wc-2",
+   "b": "beam-floor-1-B1",
+   "cause": "members-at-floor-level",
+   "detail": "the water point wc-2 sits inside the beam beam-floor-1-B1",
+   "id": "clash-030",
+   "kind": "point-in-member",
+   "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
+   "severity": "declared"
+  },
+  {
+   "a": "water:shower-1",
+   "b": "column-floor-1-C1",
+   "cause": "the-grid-is-a-line",
+   "detail": "the water point shower-1 sits inside the column column-floor-1-C1",
+   "id": "clash-031",
+   "kind": "point-in-member",
+   "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
+   "severity": "open"
+  },
+  {
+   "a": "water:shower-1",
+   "b": "beam-floor-1-B1",
+   "cause": "members-at-floor-level",
+   "detail": "the water point shower-1 sits inside the beam beam-floor-1-B1",
+   "id": "clash-032",
+   "kind": "point-in-member",
+   "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
+   "severity": "declared"
+  },
+  {
+   "a": "water:shower-2",
+   "b": "column-floor-1-C1",
+   "cause": "the-grid-is-a-line",
+   "detail": "the water point shower-2 sits inside the column column-floor-1-C1",
+   "id": "clash-033",
+   "kind": "point-in-member",
+   "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
+   "severity": "open"
+  },
+  {
+   "a": "water:shower-2",
+   "b": "beam-floor-1-B1",
+   "cause": "members-at-floor-level",
+   "detail": "the water point shower-2 sits inside the beam beam-floor-1-B1",
+   "id": "clash-034",
+   "kind": "point-in-member",
+   "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
+   "severity": "declared"
+  },
+  {
+   "a": "water:kitchenSink-1",
+   "b": "column-floor-1-C1",
+   "cause": "the-grid-is-a-line",
+   "detail": "the water point kitchenSink-1 sits inside the column column-floor-1-C1",
+   "id": "clash-035",
+   "kind": "point-in-member",
+   "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
+   "severity": "open"
+  },
+  {
+   "a": "water:kitchenSink-1",
+   "b": "beam-floor-1-B1",
+   "cause": "members-at-floor-level",
+   "detail": "the water point kitchenSink-1 sits inside the beam beam-floor-1-B1",
+   "id": "clash-036",
+   "kind": "point-in-member",
+   "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
+   "severity": "declared"
+  },
+  {
+   "a": "water:kitchenSink-2",
+   "b": "column-floor-1-C1",
+   "cause": "the-grid-is-a-line",
+   "detail": "the water point kitchenSink-2 sits inside the column column-floor-1-C1",
+   "id": "clash-037",
+   "kind": "point-in-member",
+   "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
+   "severity": "open"
+  },
+  {
+   "a": "water:kitchenSink-2",
+   "b": "beam-floor-1-B1",
+   "cause": "members-at-floor-level",
+   "detail": "the water point kitchenSink-2 sits inside the beam beam-floor-1-B1",
+   "id": "clash-038",
+   "kind": "point-in-member",
+   "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
+   "severity": "declared"
+  },
+  {
+   "a": "drainage:stack-1",
+   "b": "column-floor-0-C1",
+   "cause": "the-grid-is-a-line",
+   "detail": "the drainage point stack-1 sits inside the column column-floor-0-C1",
+   "id": "clash-039",
+   "kind": "point-in-member",
+   "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
+   "severity": "open"
+  },
+  {
+   "a": "drainage:stack-1",
+   "b": "landing-services-0-1",
+   "cause": "the-layout-is-an-even-grid",
+   "detail": "the drainage point stack-1 sits inside the landing landing-services-0-1",
+   "id": "clash-040",
+   "kind": "point-in-member",
+   "note": "the MEP's layout is an even grid over the floor (W3.1), so a point can land on a member; the layout is not coordinated with the structure",
+   "severity": "open"
+  },
+  {
+   "a": "drainage:stack-1",
+   "b": "column-floor-1-C1",
+   "cause": "the-grid-is-a-line",
+   "detail": "the drainage point stack-1 sits inside the column column-floor-1-C1",
+   "id": "clash-041",
+   "kind": "point-in-member",
+   "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
+   "severity": "open"
+  },
+  {
+   "a": "drainage:stack-1",
+   "b": "beam-floor-1-B1",
+   "cause": "members-at-floor-level",
+   "detail": "the drainage point stack-1 sits inside the beam beam-floor-1-B1",
+   "id": "clash-042",
+   "kind": "point-in-member",
+   "note": "the v0 model builds the beams, the grade beams and the footings at the floor's level, so a point near the floor is inside them",
+   "severity": "declared"
+  },
+  {
+   "a": "drainage:stack-1",
+   "b": "slab-floor-1",
+   "cause": "no-openings",
+   "detail": "the drainage point stack-1 sits inside the slab slab-floor-1",
+   "id": "clash-043",
+   "kind": "point-in-member",
+   "note": "the v0 slabs carry no openings, so nothing can pass through a slab",
+   "severity": "declared"
+  },
+  {
+   "a": "gas:cooker-1",
+   "b": "column-floor-1-C4",
+   "cause": "the-grid-is-a-line",
+   "detail": "the gas point cooker-1 sits inside the column column-floor-1-C4",
+   "id": "clash-044",
+   "kind": "point-in-member",
+   "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
+   "severity": "open"
+  },
+  {
+   "a": "gas:meter-1",
+   "b": "column-floor-1-C4",
+   "cause": "the-grid-is-a-line",
+   "detail": "the gas point meter-1 sits inside the column column-floor-1-C4",
+   "id": "clash-045",
+   "kind": "point-in-member",
+   "note": "the v0 structure is a single line of footings along the frontage (W2.2's rule), so the floor is a strip and the MEP's points sit on the columns that stand on it",
+   "severity": "open"
+  },
+  {
+   "a": "landing-services-0-1",
+   "b": "column-floor-1-C1",
+   "cause": "the-layout-is-an-even-grid",
+   "detail": "the landing landing-services-0-1 (services-0) and the column column-floor-1-C1 (floor-1) overlap by 300 x 300 x 150 mm",
+   "id": "clash-046",
+   "kind": "member-over-member",
+   "note": "the MEP's layout is an even grid over the floor (W3.1), so a point can land on a member; the layout is not coordinated with the structure",
+   "severity": "open"
+  },
+  {
+   "a": "landing-services-0-1",
+   "b": "beam-floor-1-B1",
+   "cause": "the-layout-is-an-even-grid",
+   "detail": "the landing landing-services-0-1 (services-0) and the beam beam-floor-1-B1 (floor-1) overlap by 600 x 300 x 150 mm",
+   "id": "clash-047",
+   "kind": "member-over-member",
+   "note": "the MEP's layout is an even grid over the floor (W3.1), so a point can land on a member; the layout is not coordinated with the structure",
+   "severity": "open"
+  },
+  {
+   "a": "landing-services-0-1",
+   "b": "slab-floor-1",
+   "cause": "no-openings",
+   "detail": "the landing landing-services-0-1 (services-0) and the slab slab-floor-1 (floor-1) overlap by 750 x 300 x 125 mm",
+   "id": "clash-048",
+   "kind": "member-over-member",
+   "note": "the v0 slabs carry no openings, so nothing can pass through a slab",
+   "severity": "declared"
+  }
+ ],
+ "declaredAbsent": [
+  "the stair flight: it is a sloped slab, so its box is not the member's shape, and a box that is not the member's shape invents clashes",
+  "the members of one phase against each other: inside a phase the members join (a beam lands on a column), and a box overlap at a junction is not a clash",
+  "the MEP's own runs (the conduit, the water pipe and the gas pipe): the v0 runs are W2.12's assumed sizes, and the MEP sizes the branches that come off them",
+  "the 3D routing between the MEP's points: the plan's §5.7 puts full 3D routing in v2"
+ ],
+ "members": [
+  {
+   "id": "footing-F1",
+   "kind": "footing",
+   "note": "",
+   "phase": "foundation",
+   "sizeXMm": 1200.0,
+   "sizeYMm": 1200.0,
+   "sizeZMm": 1500.0,
+   "xMm": -100.0,
+   "yMm": 6089.0,
+   "zMm": 0.0
+  },
+  {
+   "id": "footing-F2",
+   "kind": "footing",
+   "note": "",
+   "phase": "foundation",
+   "sizeXMm": 1200.0,
+   "sizeYMm": 1200.0,
+   "sizeZMm": 1500.0,
+   "xMm": 2900.0,
+   "yMm": 6089.0,
+   "zMm": 0.0
+  },
+  {
+   "id": "footing-F3",
+   "kind": "footing",
+   "note": "",
+   "phase": "foundation",
+   "sizeXMm": 1200.0,
+   "sizeYMm": 1200.0,
+   "sizeZMm": 1500.0,
+   "xMm": 5900.0,
+   "yMm": 6089.0,
+   "zMm": 0.0
+  },
+  {
+   "id": "footing-F4",
+   "kind": "footing",
+   "note": "",
+   "phase": "foundation",
+   "sizeXMm": 1200.0,
+   "sizeYMm": 1200.0,
+   "sizeZMm": 1500.0,
+   "xMm": 8900.0,
+   "yMm": 6089.0,
+   "zMm": 0.0
+  },
+  {
+   "id": "gradeBeam-GB1",
+   "kind": "gradeBeam",
+   "note": "",
+   "phase": "foundation",
+   "sizeXMm": 3000.0,
+   "sizeYMm": 300.0,
+   "sizeZMm": 400.0,
+   "xMm": 2000.0,
+   "yMm": 6539.0,
+   "zMm": 0.0
+  },
+  {
+   "id": "gradeBeam-GB2",
+   "kind": "gradeBeam",
+   "note": "",
+   "phase": "foundation",
+   "sizeXMm": 3000.0,
+   "sizeYMm": 300.0,
+   "sizeZMm": 400.0,
+   "xMm": 5000.0,
+   "yMm": 6539.0,
+   "zMm": 0.0
+  },
+  {
+   "id": "gradeBeam-GB3",
+   "kind": "gradeBeam",
+   "note": "",
+   "phase": "foundation",
+   "sizeXMm": 3000.0,
+   "sizeYMm": 300.0,
+   "sizeZMm": 400.0,
+   "xMm": 8000.0,
+   "yMm": 6539.0,
+   "zMm": 0.0
+  },
+  {
+   "id": "column-floor-0-C1",
+   "kind": "column",
+   "note": "",
+   "phase": "floor-0",
+   "sizeXMm": 300.0,
+   "sizeYMm": 300.0,
+   "sizeZMm": 3200.0,
+   "xMm": 350.0,
+   "yMm": 6539.0,
+   "zMm": 0.0
+  },
+  {
+   "id": "column-floor-0-C2",
+   "kind": "column",
+   "note": "",
+   "phase": "floor-0",
+   "sizeXMm": 300.0,
+   "sizeYMm": 300.0,
+   "sizeZMm": 3200.0,
+   "xMm": 3350.0,
+   "yMm": 6539.0,
+   "zMm": 0.0
+  },
+  {
+   "id": "column-floor-0-C3",
+   "kind": "column",
+   "note": "",
+   "phase": "floor-0",
+   "sizeXMm": 300.0,
+   "sizeYMm": 300.0,
+   "sizeZMm": 3200.0,
+   "xMm": 6350.0,
+   "yMm": 6539.0,
+   "zMm": 0.0
+  },
+  {
+   "id": "column-floor-0-C4",
+   "kind": "column",
+   "note": "",
+   "phase": "floor-0",
+   "sizeXMm": 300.0,
+   "sizeYMm": 300.0,
+   "sizeZMm": 3200.0,
+   "xMm": 9350.0,
+   "yMm": 6539.0,
+   "zMm": 0.0
+  },
+  {
+   "id": "beam-floor-0-B1",
+   "kind": "beam",
+   "note": "",
+   "phase": "floor-0",
+   "sizeXMm": 3000.0,
+   "sizeYMm": 300.0,
+   "sizeZMm": 450.0,
+   "xMm": 500.0,
+   "yMm": 6539.0,
+   "zMm": 0.0
+  },
+  {
+   "id": "beam-floor-0-B2",
+   "kind": "beam",
+   "note": "",
+   "phase": "floor-0",
+   "sizeXMm": 3000.0,
+   "sizeYMm": 300.0,
+   "sizeZMm": 450.0,
+   "xMm": 3500.0,
+   "yMm": 6539.0,
+   "zMm": 0.0
+  },
+  {
+   "id": "beam-floor-0-B3",
+   "kind": "beam",
+   "note": "",
+   "phase": "floor-0",
+   "sizeXMm": 3000.0,
+   "sizeYMm": 300.0,
+   "sizeZMm": 450.0,
+   "xMm": 6500.0,
+   "yMm": 6539.0,
+   "zMm": 0.0
+  },
+  {
+   "id": "slab-floor-0",
+   "kind": "slab",
+   "note": "",
+   "phase": "floor-0",
+   "sizeXMm": 9300.0,
+   "sizeYMm": 300.0,
+   "sizeZMm": 125.0,
+   "xMm": 350.0,
+   "yMm": 6539.0,
+   "zMm": 0.0
+  },
+  {
+   "id": "landing-services-0-1",
+   "kind": "landing",
+   "note": "",
+   "phase": "services-0",
+   "sizeXMm": 1200.0,
+   "sizeYMm": 1000.0,
+   "sizeZMm": 150.0,
+   "xMm": -100.0,
+   "yMm": 6189.0,
+   "zMm": 3200.0
+  },
+  {
+   "id": "column-floor-1-C1",
+   "kind": "column",
+   "note": "",
+   "phase": "floor-1",
+   "sizeXMm": 300.0,
+   "sizeYMm": 300.0,
+   "sizeZMm": 3000.0,
+   "xMm": 350.0,
+   "yMm": 6539.0,
+   "zMm": 3200.0
+  },
+  {
+   "id": "column-floor-1-C2",
+   "kind": "column",
+   "note": "",
+   "phase": "floor-1",
+   "sizeXMm": 300.0,
+   "sizeYMm": 300.0,
+   "sizeZMm": 3000.0,
+   "xMm": 3350.0,
+   "yMm": 6539.0,
+   "zMm": 3200.0
+  },
+  {
+   "id": "column-floor-1-C3",
+   "kind": "column",
+   "note": "",
+   "phase": "floor-1",
+   "sizeXMm": 300.0,
+   "sizeYMm": 300.0,
+   "sizeZMm": 3000.0,
+   "xMm": 6350.0,
+   "yMm": 6539.0,
+   "zMm": 3200.0
+  },
+  {
+   "id": "column-floor-1-C4",
+   "kind": "column",
+   "note": "",
+   "phase": "floor-1",
+   "sizeXMm": 300.0,
+   "sizeYMm": 300.0,
+   "sizeZMm": 3000.0,
+   "xMm": 9350.0,
+   "yMm": 6539.0,
+   "zMm": 3200.0
+  },
+  {
+   "id": "beam-floor-1-B1",
+   "kind": "beam",
+   "note": "",
+   "phase": "floor-1",
+   "sizeXMm": 3000.0,
+   "sizeYMm": 300.0,
+   "sizeZMm": 450.0,
+   "xMm": 500.0,
+   "yMm": 6539.0,
+   "zMm": 3200.0
+  },
+  {
+   "id": "beam-floor-1-B2",
+   "kind": "beam",
+   "note": "",
+   "phase": "floor-1",
+   "sizeXMm": 3000.0,
+   "sizeYMm": 300.0,
+   "sizeZMm": 450.0,
+   "xMm": 3500.0,
+   "yMm": 6539.0,
+   "zMm": 3200.0
+  },
+  {
+   "id": "beam-floor-1-B3",
+   "kind": "beam",
+   "note": "",
+   "phase": "floor-1",
+   "sizeXMm": 3000.0,
+   "sizeYMm": 300.0,
+   "sizeZMm": 450.0,
+   "xMm": 6500.0,
+   "yMm": 6539.0,
+   "zMm": 3200.0
+  },
+  {
+   "id": "slab-floor-1",
+   "kind": "slab",
+   "note": "",
+   "phase": "floor-1",
+   "sizeXMm": 9300.0,
+   "sizeYMm": 300.0,
+   "sizeZMm": 125.0,
+   "xMm": 350.0,
+   "yMm": 6539.0,
+   "zMm": 3200.0
+  },
+  {
+   "id": "landing-services-1-1",
+   "kind": "landing",
+   "note": "",
+   "phase": "services-1",
+   "sizeXMm": 1200.0,
+   "sizeYMm": 1000.0,
+   "sizeZMm": 150.0,
+   "xMm": -100.0,
+   "yMm": 6189.0,
+   "zMm": 6200.0
+  }
+ ],
+ "schemaVersion": "0.1.0",
+ "summary": {
+  "byCause": {
+   "members-at-floor-level": 18,
+   "no-openings": 3,
+   "the-grid-is-a-line": 24,
+   "the-layout-is-an-even-grid": 3
+  },
+  "bySeverity": {
+   "declared": 21,
+   "open": 27
+  },
+  "clashes": 48,
+  "members": 25,
+  "points": 26
+ },
+ "values": {
+  "clash.clashes": 48,
+  "clash.declared": 21,
+  "clash.members": 25,
+  "clash.open": 27,
+  "clash.points": 26
+ }
+}

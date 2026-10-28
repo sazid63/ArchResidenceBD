@@ -1,0 +1,495 @@
+<?xml version="1.0" ?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:freecad="http://www.freecadweb.org/wiki/index.php?title=Svg_Namespace" version="1.1" width="540.0mm" height="420.0mm" viewBox="0 0 540.0 420.0">
+  <g id="BBS">
+    <g id="BOM_table">
+      <g id="BOM_column_headers">
+        <g id="bom_table_cell_column_1">
+          <rect x="0" y="0" width="60" height="60" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="30" y="30" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve" font-weight="bold">Member</text>
+        </g>
+        <g id="bom_table_cell_column_2">
+          <rect x="60" y="0" width="60" height="60" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="90" y="30" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve" font-weight="bold">Mark</text>
+        </g>
+        <g id="bom_table_cell_column_3">
+          <rect x="120" y="0" width="60" height="60" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="150" y="30" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve" font-weight="bold">No. of Rebars</text>
+        </g>
+        <g id="bom_table_cell_column_4">
+          <rect x="180" y="0" width="60" height="60" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="210" y="30" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve" font-weight="bold">Diameter in mm</text>
+        </g>
+        <g id="bom_table_cell_column_5">
+          <rect x="240" y="0" width="60" height="60" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="270" y="30" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve" font-weight="bold">Length in m/piece</text>
+        </g>
+        <g id="bom_table_cell_column_multi_column">
+          <rect x="300" y="0" width="180" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="390" y="15" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve" font-weight="bold">Total Length in m</text>
+        </g>
+        <g id="BOM_headers_diameter">
+          <g id="bom_table_cell_column_6">
+            <rect x="300" y="30" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+            <text x="330" y="45" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve" font-weight="bold">#8</text>
+          </g>
+          <g id="bom_table_cell_column_7">
+            <rect x="360" y="30" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+            <text x="390" y="45" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve" font-weight="bold">#12</text>
+          </g>
+          <g id="bom_table_cell_column_8">
+            <rect x="420" y="30" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+            <text x="450" y="45" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve" font-weight="bold">#16</text>
+          </g>
+        </g>
+      </g>
+      <g id="BOM_table_row1">
+        <g id="bom_table_cell_column_1">
+          <rect x="0" y="60" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="30" y="75" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">B1</text>
+        </g>
+        <g id="bom_table_cell_column_2">
+          <rect x="60" y="60" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="90" y="75" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">B1-D8-P3</text>
+        </g>
+        <g id="bom_table_cell_column_3">
+          <rect x="120" y="60" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="150" y="75" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">21</text>
+        </g>
+        <g id="bom_table_cell_column_4">
+          <rect x="180" y="60" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="210" y="75" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">8 mm</text>
+        </g>
+        <g id="bom_table_cell_column_5">
+          <rect x="240" y="60" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="270" y="75" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">1 m</text>
+        </g>
+        <g id="bom_table_cell_column_6">
+          <rect x="300" y="60" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="330" y="75" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">30 m</text>
+        </g>
+        <rect x="360" y="60" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;" id="bom_table_cell_column_7"/>
+        <rect x="420" y="60" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;" id="bom_table_cell_column_8"/>
+      </g>
+      <g id="BOM_table_row2">
+        <g id="bom_table_cell_column_1">
+          <rect x="0" y="90" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="30" y="105" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">B1</text>
+        </g>
+        <g id="bom_table_cell_column_2">
+          <rect x="60" y="90" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="90" y="105" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">B1-D12-P5</text>
+        </g>
+        <g id="bom_table_cell_column_3">
+          <rect x="120" y="90" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="150" y="105" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">4</text>
+        </g>
+        <g id="bom_table_cell_column_4">
+          <rect x="180" y="90" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="210" y="105" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">12 mm</text>
+        </g>
+        <g id="bom_table_cell_column_5">
+          <rect x="240" y="90" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="270" y="105" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">3 m</text>
+        </g>
+        <rect x="300" y="90" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;" id="bom_table_cell_column_6"/>
+        <g id="bom_table_cell_column_7">
+          <rect x="360" y="90" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="390" y="105" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">12 m</text>
+        </g>
+        <rect x="420" y="90" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;" id="bom_table_cell_column_8"/>
+      </g>
+      <g id="BOM_table_row3">
+        <g id="bom_table_cell_column_1">
+          <rect x="0" y="120" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="30" y="135" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">B1</text>
+        </g>
+        <g id="bom_table_cell_column_2">
+          <rect x="60" y="120" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="90" y="135" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">B1-D16-P4</text>
+        </g>
+        <g id="bom_table_cell_column_3">
+          <rect x="120" y="120" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="150" y="135" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">4</text>
+        </g>
+        <g id="bom_table_cell_column_4">
+          <rect x="180" y="120" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="210" y="135" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">16 mm</text>
+        </g>
+        <g id="bom_table_cell_column_5">
+          <rect x="240" y="120" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="270" y="135" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">3 m</text>
+        </g>
+        <rect x="300" y="120" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;" id="bom_table_cell_column_6"/>
+        <rect x="360" y="120" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;" id="bom_table_cell_column_7"/>
+        <g id="bom_table_cell_column_8">
+          <rect x="420" y="120" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="450" y="135" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">12 m</text>
+        </g>
+      </g>
+      <g id="BOM_table_row4">
+        <g id="bom_table_cell_column_1">
+          <rect x="0" y="150" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="30" y="165" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">C1</text>
+        </g>
+        <g id="bom_table_cell_column_2">
+          <rect x="60" y="150" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="90" y="165" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">C1-D8-P2</text>
+        </g>
+        <g id="bom_table_cell_column_3">
+          <rect x="120" y="150" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="150" y="165" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">38</text>
+        </g>
+        <g id="bom_table_cell_column_4">
+          <rect x="180" y="150" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="210" y="165" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">8 mm</text>
+        </g>
+        <g id="bom_table_cell_column_5">
+          <rect x="240" y="150" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="270" y="165" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">1 m</text>
+        </g>
+        <g id="bom_table_cell_column_6">
+          <rect x="300" y="150" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="330" y="165" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">31 m</text>
+        </g>
+        <rect x="360" y="150" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;" id="bom_table_cell_column_7"/>
+        <rect x="420" y="150" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;" id="bom_table_cell_column_8"/>
+      </g>
+      <g id="BOM_table_row5">
+        <g id="bom_table_cell_column_1">
+          <rect x="0" y="180" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="30" y="195" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">C1</text>
+        </g>
+        <g id="bom_table_cell_column_2">
+          <rect x="60" y="180" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="90" y="195" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">C1-D16-P1</text>
+        </g>
+        <g id="bom_table_cell_column_3">
+          <rect x="120" y="180" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="150" y="195" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">6</text>
+        </g>
+        <g id="bom_table_cell_column_4">
+          <rect x="180" y="180" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="210" y="195" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">16 mm</text>
+        </g>
+        <g id="bom_table_cell_column_5">
+          <rect x="240" y="180" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="270" y="195" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">3 m</text>
+        </g>
+        <rect x="300" y="180" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;" id="bom_table_cell_column_6"/>
+        <rect x="360" y="180" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;" id="bom_table_cell_column_7"/>
+        <g id="bom_table_cell_column_8">
+          <rect x="420" y="180" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="450" y="195" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">16 m</text>
+        </g>
+      </g>
+      <g id="BOM_table_row6">
+        <g id="bom_table_cell_column_1">
+          <rect x="0" y="210" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="30" y="225" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">F1</text>
+        </g>
+        <g id="bom_table_cell_column_2">
+          <rect x="60" y="210" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="90" y="225" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">F1-D8-P8</text>
+        </g>
+        <g id="bom_table_cell_column_3">
+          <rect x="120" y="210" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="150" y="225" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">5</text>
+        </g>
+        <g id="bom_table_cell_column_4">
+          <rect x="180" y="210" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="210" y="225" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">8 mm</text>
+        </g>
+        <g id="bom_table_cell_column_5">
+          <rect x="240" y="210" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="270" y="225" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">1 m</text>
+        </g>
+        <g id="bom_table_cell_column_6">
+          <rect x="300" y="210" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="330" y="225" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">7 m</text>
+        </g>
+        <rect x="360" y="210" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;" id="bom_table_cell_column_7"/>
+        <rect x="420" y="210" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;" id="bom_table_cell_column_8"/>
+      </g>
+      <g id="BOM_table_row7">
+        <g id="bom_table_cell_column_1">
+          <rect x="0" y="240" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="30" y="255" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">F1</text>
+        </g>
+        <g id="bom_table_cell_column_2">
+          <rect x="60" y="240" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="90" y="255" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">F1-D12-P6</text>
+        </g>
+        <g id="bom_table_cell_column_3">
+          <rect x="120" y="240" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="150" y="255" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">22</text>
+        </g>
+        <g id="bom_table_cell_column_4">
+          <rect x="180" y="240" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="210" y="255" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">12 mm</text>
+        </g>
+        <g id="bom_table_cell_column_5">
+          <rect x="240" y="240" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="270" y="255" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">1 m</text>
+        </g>
+        <rect x="300" y="240" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;" id="bom_table_cell_column_6"/>
+        <g id="bom_table_cell_column_7">
+          <rect x="360" y="240" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="390" y="255" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">31 m</text>
+        </g>
+        <rect x="420" y="240" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;" id="bom_table_cell_column_8"/>
+      </g>
+      <g id="BOM_table_row8">
+        <g id="bom_table_cell_column_1">
+          <rect x="0" y="270" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="30" y="285" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">F1</text>
+        </g>
+        <g id="bom_table_cell_column_2">
+          <rect x="60" y="270" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="90" y="285" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">F1-D16-P7</text>
+        </g>
+        <g id="bom_table_cell_column_3">
+          <rect x="120" y="270" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="150" y="285" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">4</text>
+        </g>
+        <g id="bom_table_cell_column_4">
+          <rect x="180" y="270" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="210" y="285" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">16 mm</text>
+        </g>
+        <g id="bom_table_cell_column_5">
+          <rect x="240" y="270" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="270" y="285" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">0 m</text>
+        </g>
+        <rect x="300" y="270" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;" id="bom_table_cell_column_6"/>
+        <rect x="360" y="270" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;" id="bom_table_cell_column_7"/>
+        <g id="bom_table_cell_column_8">
+          <rect x="420" y="270" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="450" y="285" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">2 m</text>
+        </g>
+      </g>
+      <rect x="0" y="300" width="540.0" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;" id="bom_table_cell_column_separator"/>
+      <g id="BOM_data_total">
+        <g id="bom_table_cell_column_multi_column">
+          <rect x="0" y="330" width="300" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="150" y="345" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve" font-weight="bold">Total length in m/Diameter</text>
+        </g>
+        <g id="bom_table_cell_column_multi_column">
+          <rect x="0" y="360" width="300" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="150" y="375" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve" font-weight="bold">Weight in Kg/m</text>
+        </g>
+        <g id="bom_table_cell_column_multi_column">
+          <rect x="0" y="390" width="300" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="150" y="405" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve" font-weight="bold">Total Weight in Kg/Diameter</text>
+        </g>
+        <g id="bom_table_cell_column_6">
+          <rect x="300" y="330" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="330" y="345" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">68 m</text>
+        </g>
+        <g id="bom_table_cell_column_6">
+          <rect x="300" y="360" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="330" y="375" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">0 kg/m</text>
+        </g>
+        <g id="bom_table_cell_column_6">
+          <rect x="300" y="390" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="330" y="405" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">27 kg</text>
+        </g>
+        <g id="bom_table_cell_column_7">
+          <rect x="360" y="330" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="390" y="345" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">43 m</text>
+        </g>
+        <g id="bom_table_cell_column_7">
+          <rect x="360" y="360" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="390" y="375" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">1 kg/m</text>
+        </g>
+        <g id="bom_table_cell_column_7">
+          <rect x="360" y="390" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="390" y="405" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">38 kg</text>
+        </g>
+        <g id="bom_table_cell_column_8">
+          <rect x="420" y="330" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="450" y="345" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">30 m</text>
+        </g>
+        <g id="bom_table_cell_column_8">
+          <rect x="420" y="360" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="450" y="375" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">2 kg/m</text>
+        </g>
+        <g id="bom_table_cell_column_8">
+          <rect x="420" y="390" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+          <text x="450" y="405" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve">47 kg</text>
+        </g>
+      </g>
+    </g>
+    <g id="">
+      <rect x="480.0" y="0" width="60" height="60" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+      <text x="510" y="30" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="5" text-anchor="middle" dominant-baseline="central" xml:space="preserve" font-weight="bold">Rebar Shape (mm)</text>
+    </g>
+    <g id="RebarShapeCutList" transform="translate(480.0 60)">
+      <g transform="translate(0 0)">
+        <rect x="0" y="0" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;" id="row_1_column_1"/>
+        <g transform="translate(8.0 0.0)">
+          <g id="Rebar005" transform="scale(0.09090909090909091) translate(682 2673)">
+            <g>
+              <line x1="-612" y1="-2430" x2="-634" y2="-2407" style="stroke:black;" stroke-width="3.8499999999999996" stroke="black"/>
+              <path style="stroke:black;fill:none" d="M-634 -2407 A12 12 0 0 0 -626 -2387" stroke-width="3.8499999999999996" stroke="black"/>
+              <line x1="-626" y1="-2387" x2="-258" y2="-2387" style="stroke:black;" stroke-width="3.8499999999999996" stroke="black"/>
+              <path style="stroke:black;fill:none" d="M-258 -2387 A12 12 0 0 0 -246 -2399" stroke-width="3.8499999999999996" stroke="black"/>
+              <line x1="-246" y1="-2399" x2="-246" y2="-2617" style="stroke:black;" stroke-width="3.8499999999999996" stroke="black"/>
+              <path style="stroke:black;fill:none" d="M-246 -2617 A12 12 0 0 0 -258 -2629" stroke-width="3.8499999999999996" stroke="black"/>
+              <line x1="-258" y1="-2629" x2="-626" y2="-2629" style="stroke:black;" stroke-width="3.8499999999999996" stroke="black"/>
+              <path style="stroke:black;fill:none" d="M-626 -2629 A12 12 0 0 0 -638 -2617" stroke-width="3.8499999999999996" stroke="black"/>
+              <line x1="-638" y1="-2617" x2="-638" y2="-2399" style="stroke:black;" stroke-width="3.8499999999999996" stroke="black"/>
+              <path style="stroke:black;fill:none" d="M-638 -2399 A12 12 0 0 0 -617 -2390" stroke-width="3.8499999999999996" stroke="black"/>
+              <line x1="-617" y1="-2390" x2="-595" y2="-2413" style="stroke:black;" stroke-width="3.8499999999999996" stroke="black"/>
+            </g>
+            <g>
+              <text x="-623" y="-2426" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="33.0" text-anchor="middle" dominant-baseline="baseline" xml:space="preserve" transform="rotate(-45.00000000000015 -623 -2418)">61</text>
+              <g/>
+              <text x="-442" y="-2394" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="33.0" text-anchor="middle" dominant-baseline="baseline" xml:space="preserve" transform="rotate(0.0 -442 -2387)">409</text>
+              <g/>
+              <text x="-246" y="-2515" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="33.0" text-anchor="middle" dominant-baseline="baseline" xml:space="preserve" transform="rotate(-90 -246 -2508)">242</text>
+              <g/>
+              <text x="-442" y="-2636" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="33.0" text-anchor="middle" dominant-baseline="baseline" xml:space="preserve" transform="rotate(-0.0 -442 -2629)">392</text>
+              <g/>
+              <text x="-638" y="-2515" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="33.0" text-anchor="middle" dominant-baseline="baseline" xml:space="preserve" transform="rotate(-90 -638 -2508)">259</text>
+              <g/>
+              <text x="-606" y="-2409" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="33.0" text-anchor="middle" dominant-baseline="baseline" xml:space="preserve" transform="rotate(-45.000000000000284 -606 -2401)">61</text>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g transform="translate(0 30)">
+        <rect x="0" y="0" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;" id="row_2_column_1"/>
+        <g transform="translate(0.0 11.0)">
+          <g id="Rebar008" transform="scale(0.017333333333333333) translate(231 -330)">
+            <g>
+              <line x1="0" y1="561" x2="3000" y2="561" style="stroke:black;" stroke-width="20.192307692307693" stroke="black"/>
+            </g>
+            <g>
+              <text x="1500" y="521" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="173.0769230769231" text-anchor="middle" dominant-baseline="baseline" xml:space="preserve" transform="rotate(0.0 1500 561)">3000</text>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g transform="translate(0 60)">
+        <rect x="0" y="0" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;" id="row_3_column_1"/>
+        <g transform="translate(0.0 11.0)">
+          <g id="Rebar006" transform="scale(0.017333333333333333) translate(231 2890)">
+            <g>
+              <line x1="0" y1="-2659" x2="3000" y2="-2659" style="stroke:black;" stroke-width="20.192307692307693" stroke="black"/>
+            </g>
+            <g>
+              <text x="1500" y="-2699" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="173.0769230769231" text-anchor="middle" dominant-baseline="baseline" xml:space="preserve" transform="rotate(8.685034650183042e-15 1500 -2659)">3000</text>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g transform="translate(0 90)">
+        <rect x="0" y="0" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;" id="row_4_column_1"/>
+        <g transform="translate(6.0 0.0)">
+          <g id="Rebar002" transform="scale(0.18644067796610164) translate(15 258)">
+            <g>
+              <line x1="32" y1="-162" x2="9" y2="-139" style="stroke:black;" stroke-width="1.8772727272727276" stroke="black"/>
+              <path style="stroke:black;fill:none" d="M9 -139 A12 12 0 0 0 18 -119" stroke-width="1.8772727272727276" stroke="black"/>
+              <line x1="18" y1="-119" x2="206" y2="-119" style="stroke:black;" stroke-width="1.8772727272727276" stroke="black"/>
+              <path style="stroke:black;fill:none" d="M206 -119 A12 12 0 0 0 218 -131" stroke-width="1.8772727272727276" stroke="black"/>
+              <line x1="218" y1="-131" x2="218" y2="-225" style="stroke:black;" stroke-width="1.8772727272727276" stroke="black"/>
+              <path style="stroke:black;fill:none" d="M218 -225 A12 12 0 0 0 206 -237" stroke-width="1.8772727272727276" stroke="black"/>
+              <line x1="206" y1="-237" x2="18" y2="-237" style="stroke:black;" stroke-width="1.8772727272727276" stroke="black"/>
+              <path style="stroke:black;fill:none" d="M18 -237 A12 12 0 0 0 6 -225" stroke-width="1.8772727272727276" stroke="black"/>
+              <line x1="6" y1="-225" x2="6" y2="-131" style="stroke:black;" stroke-width="1.8772727272727276" stroke="black"/>
+              <path style="stroke:black;fill:none" d="M6 -131 A12 12 0 0 0 26 -122" stroke-width="1.8772727272727276" stroke="black"/>
+              <line x1="26" y1="-122" x2="49" y2="-145" style="stroke:black;" stroke-width="1.8772727272727276" stroke="black"/>
+            </g>
+            <g>
+              <text x="21" y="-155" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="16.090909090909097" text-anchor="middle" dominant-baseline="baseline" xml:space="preserve" transform="rotate(-45.00000000000003 21 -151)">61</text>
+              <g/>
+              <text x="112" y="-123" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="16.090909090909097" text-anchor="middle" dominant-baseline="baseline" xml:space="preserve" transform="rotate(0.0 112 -119)">229</text>
+              <g/>
+              <text x="218" y="-182" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="16.090909090909097" text-anchor="middle" dominant-baseline="baseline" xml:space="preserve" transform="rotate(-90 218 -178)">118</text>
+              <g/>
+              <text x="112" y="-241" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="16.090909090909097" text-anchor="middle" dominant-baseline="baseline" xml:space="preserve" transform="rotate(1.7323310179387604e-14 112 -237)">212</text>
+              <g/>
+              <text x="6" y="-182" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="16.090909090909097" text-anchor="middle" dominant-baseline="baseline" xml:space="preserve" transform="rotate(-90 6 -178)">135</text>
+              <g/>
+              <text x="38" y="-138" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="16.090909090909097" text-anchor="middle" dominant-baseline="baseline" xml:space="preserve" transform="rotate(-45.00000000000002 38 -134)">61</text>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g transform="translate(0 120)">
+        <rect x="0" y="0" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;" id="row_5_column_1"/>
+        <g transform="translate(0.0 11.0)">
+          <g id="Rebar" transform="scale(0.01925925925925926) translate(1408 1558)">
+            <g>
+              <line x1="-1200" y1="-1350" x2="1500" y2="-1350" style="stroke:black;" stroke-width="18.17307692307692" stroke="black"/>
+            </g>
+            <g>
+              <text x="150" y="-1386" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="155.76923076923075" text-anchor="middle" dominant-baseline="baseline" xml:space="preserve" transform="rotate(1.4475057750305072e-14 150 -1350)">2700</text>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g transform="translate(0 150)">
+        <rect x="0" y="0" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;" id="row_6_column_1"/>
+        <g transform="translate(15.0 0.0)">
+          <g id="Rebar014" transform="scale(0.07534246575342464) translate(317 349)">
+            <g>
+              <line x1="-238" y1="-253" x2="-260" y2="-276" style="stroke:black;" stroke-width="4.645454545454546" stroke="black"/>
+              <path style="stroke:black;fill:none" d="M-260 -276 A12 12 0 0 1 -252 -296" stroke-width="4.645454545454546" stroke="black"/>
+              <line x1="-252" y1="-296" x2="16" y2="-296" style="stroke:black;" stroke-width="4.645454545454546" stroke="black"/>
+              <path style="stroke:black;fill:none" d="M16 -296 A12 12 0 0 1 28 -284" stroke-width="4.645454545454546" stroke="black"/>
+              <line x1="28" y1="-284" x2="28" y2="-16" style="stroke:black;" stroke-width="4.645454545454546" stroke="black"/>
+              <path style="stroke:black;fill:none" d="M28 -16 A12 12 0 0 1 16 -4" stroke-width="4.645454545454546" stroke="black"/>
+              <line x1="16" y1="-4" x2="-252" y2="-4" style="stroke:black;" stroke-width="4.645454545454546" stroke="black"/>
+              <path style="stroke:black;fill:none" d="M-252 -4 A12 12 0 0 1 -264 -16" stroke-width="4.645454545454546" stroke="black"/>
+              <line x1="-264" y1="-16" x2="-264" y2="-284" style="stroke:black;" stroke-width="4.645454545454546" stroke="black"/>
+              <path style="stroke:black;fill:none" d="M-264 -284 A12 12 0 0 1 -243 -293" stroke-width="4.645454545454546" stroke="black"/>
+              <line x1="-243" y1="-293" x2="-221" y2="-270" style="stroke:black;" stroke-width="4.645454545454546" stroke="black"/>
+            </g>
+            <g>
+              <text x="-249" y="-274" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="39.81818181818183" text-anchor="middle" dominant-baseline="baseline" xml:space="preserve" transform="rotate(45.000000000000036 -249 -264)">61</text>
+              <g/>
+              <text x="-118" y="-305" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="39.81818181818183" text-anchor="middle" dominant-baseline="baseline" xml:space="preserve" transform="rotate(1.2150713956557065e-14 -118 -296)">309</text>
+              <g/>
+              <text x="28" y="-159" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="39.81818181818183" text-anchor="middle" dominant-baseline="baseline" xml:space="preserve" transform="rotate(-90 28 -150)">292</text>
+              <g/>
+              <text x="-118" y="-13" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="39.81818181818183" text-anchor="middle" dominant-baseline="baseline" xml:space="preserve" transform="rotate(1.0633422603492628e-14 -118 -4)">292</text>
+              <g/>
+              <text x="-264" y="-159" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="39.81818181818183" text-anchor="middle" dominant-baseline="baseline" xml:space="preserve" transform="rotate(-90 -264 -150)">309</text>
+              <g/>
+              <text x="-232" y="-290" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="39.81818181818183" text-anchor="middle" dominant-baseline="baseline" xml:space="preserve" transform="rotate(45.000000000000036 -232 -281)">61</text>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g transform="translate(0 180)">
+        <rect x="0" y="0" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;" id="row_7_column_1"/>
+        <g transform="translate(0.0 11.0)">
+          <g id="Rebar010" transform="scale(0.037142857142857144) translate(58 154)">
+            <g>
+              <line x1="50" y1="-46" x2="1450" y2="-46" style="stroke:black;" stroke-width="9.423076923076922" stroke="black"/>
+            </g>
+            <g>
+              <text x="750" y="-65" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="80.76923076923076" text-anchor="middle" dominant-baseline="baseline" xml:space="preserve" transform="rotate(6.9790457010399455e-15 750 -46)">1400</text>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g transform="translate(0 210)">
+        <rect x="0" y="0" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;" id="row_8_column_1"/>
+        <g transform="translate(0.0 11.0)">
+          <g id="Rebar012" transform="scale(0.11926605504587157) translate(536 316)">
+            <g>
+              <line x1="-502" y1="-282" x2="-66" y2="-282" style="stroke:black;" stroke-width="2.9346153846153844" stroke="black"/>
+            </g>
+            <g>
+              <text x="-284" y="-288" style="white-space:pre;" fill="#000000" font-family="DejaVu Sans" font-size="25.153846153846153" text-anchor="middle" dominant-baseline="baseline" xml:space="preserve" transform="rotate(1.4939853182654317e-14 -284 -282)">436</text>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+    <rect x="480.0" y="330.0" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+    <rect x="480.0" y="360.0" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+    <rect x="480.0" y="390.0" width="60" height="30" style="fill:none;stroke-width:0.35;stroke:#000000;"/>
+  </g>
+</svg>

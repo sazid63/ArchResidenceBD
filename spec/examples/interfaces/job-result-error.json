@@ -1,0 +1,15 @@
+{
+  "messageType": "job.result",
+  "protocolVersion": "0.1.0",
+  "jobId": "0f8a3d2e-6c1b-4f5a-9d7e-2b4c6a8e0f13",
+  "kind": "geometry.build",
+  "status": "error",
+  "artifacts": [],
+  "warnings": [],
+  "error": {
+    "code": "worker_restarted",
+    "message": "Engine worker was restarted mid-job; the job was not completed - resubmit (jobs are stateless).",
+    "detail": "Watchdog detected worker death ~2.0 s after the kill and restarted it in ~0.5 s."
+  },
+  "metrics": { "durationMs": 3021 }
+}

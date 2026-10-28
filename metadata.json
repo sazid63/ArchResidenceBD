@@ -1,0 +1,6 @@
+{
+  "name": "ArchResidenceBD",
+  "description": "Civil engineering software for residential building design in Bangladesh with bilingual AI planning, BNBC/RAJUK compliance, NativeCAD 3D modeling, and PWD BOQ cost estimation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,101 @@
+/* ArchResidenceBD — design tokens v0 (W0.2).
+   Source of truth for the soft theme + no-sharp-edges corner policy.
+   See docs/design/design-tokens-v0.md. Every corner is rounded; radius 0 never appears. */
+
+:root {
+  /* Base palette — warm cream/paper, warm ink (never harsh white/black) */
+  --paper: #fbf6ef; /* app background */
+  --surface: #fffdf9; /* cards, panels */
+  --surface-2: #f4ede2; /* recessed areas, hovers */
+  --surface-3: #ece3d5; /* stronger recess */
+  --ink: #3e3833; /* primary text — warm charcoal, never black */
+  --ink-soft: #6f6459; /* secondary text */
+  --ink-faint: #9d9184; /* hints, disabled */
+  --line: #e9dfd1; /* soft dividers */
+
+  /* Primary — warm coral/terracotta */
+  --primary: #e07856;
+  --primary-hover: #d46a47;
+  --primary-active: #c55e3c;
+  --primary-soft: #fbe9e0;
+  --primary-ink: #a34b2b;
+  --on-primary: #fffaf6;
+
+  /* Meaning-coded pastels (phases, statuses, cost types) */
+  --sky: #7fb3d5;      --sky-soft: #e6f0f7;      --sky-ink: #3f6e8c;
+  --sage: #8fb58a;     --sage-soft: #eaf2e7;     --sage-ink: #4e7a49;
+  --lavender: #a99bd0; --lavender-soft: #efebf8; --lavender-ink: #6b5ca5;
+  --amber: #dfa761;    --amber-soft: #faf0de;    --amber-ink: #a1742c;
+  --blush: #e2a0ab;    --blush-soft: #fae9ec;    --blush-ink: #ad5666;
+  --mint: #7fc4b4;     --mint-soft: #e5f4f0;     --mint-ink: #3f8272;
+
+  /* Radii — no sharp edges: 8 / 12 / 18 / 24 / pill */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 18px;
+  --r-xl: 24px;
+  --r-pill: 999px;
+
+  /* Spacing */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-10: 40px;
+  --s-12: 48px;
+
+  /* Typography */
+  --font-ui: "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system,
+    "Noto Sans Bengali", "Nirmala UI", sans-serif;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-md: 14px;
+  --fs-lg: 16px;
+  --fs-xl: 18px;
+  --fs-2xl: 22px;
+  --fs-3xl: 28px;
+
+  /* Soft diffuse shadows (warm, never harsh) */
+  --shadow-sm: 0 1px 2px rgba(96, 74, 54, 0.05), 0 2px 8px rgba(96, 74, 54, 0.06);
+  --shadow-md: 0 4px 14px rgba(96, 74, 54, 0.1);
+  --shadow-lg: 0 12px 32px rgba(96, 74, 54, 0.16);
+
+  /* Gentle motion 150–200 ms */
+  --dur-fast: 150ms;
+  --dur: 180ms;
+  --dur-slow: 220ms;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* Warm charcoal dark mode */
+:root[data-theme="dark"] {
+  --paper: #262119;
+  --surface: #2e2820;
+  --surface-2: #383129;
+  --surface-3: #423a30;
+  --ink: #f1e9dd;
+  --ink-soft: #c9bcab;
+  --ink-faint: #93887a;
+  --line: #443c32;
+
+  --primary: #e68a66;
+  --primary-hover: #eb9979;
+  --primary-active: #f0a98c;
+  --primary-soft: #4a352a;
+  --primary-ink: #f3c3ab;
+  --on-primary: #2b2118;
+
+  --sky-soft: #2b3944;      --sky-ink: #a8cfe6;
+  --sage-soft: #2f3b2d;     --sage-ink: #b7d5b2;
+  --lavender-soft: #37324a; --lavender-ink: #c9bff0;
+  --amber-soft: #453a28;    --amber-ink: #ecc98f;
+  --blush-soft: #443034;    --blush-ink: #efb6c0;
+  --mint-soft: #2b3f3a;     --mint-ink: #a9dccd;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25), 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.45);
+}

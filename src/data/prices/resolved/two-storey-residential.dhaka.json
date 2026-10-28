@@ -1,0 +1,104 @@
+{
+  "asOf": "2026-10-05",
+  "cardId": "dhaka-example-2026-10",
+  "currency": "BDT",
+  "effectiveFrom": "2026-10-01",
+  "lines": [
+    {
+      "costType": "material",
+      "key": "cement-opc-43",
+      "label": {
+        "bn": "সিমেন্ট (ওপিসি ৪৩ গ্রেড)",
+        "en": "Cement (OPC 43 grade)"
+      },
+      "rateBdt": 550.0,
+      "unit": "bag"
+    },
+    {
+      "costType": "material",
+      "key": "rod-60g",
+      "label": {
+        "bn": "রড (৬০ গ্রেড)",
+        "en": "Rod (60 grade)"
+      },
+      "rateBdt": 89000.0,
+      "unit": "ton"
+    },
+    {
+      "costType": "material",
+      "key": "sand-fine",
+      "label": {
+        "bn": "বালু (সূক্ষ্ম)",
+        "en": "Sand (fine)"
+      },
+      "rateBdt": 42.0,
+      "unit": "cft"
+    },
+    {
+      "costType": "material",
+      "key": "brick-1st",
+      "label": {
+        "bn": "ইট (প্রথম শ্রেণি)",
+        "en": "Brick (1st class)"
+      },
+      "rateBdt": 12.0,
+      "unit": "each"
+    },
+    {
+      "costType": "labour",
+      "key": "mason",
+      "label": {
+        "bn": "রাজমিস্ত্রি (দৈনিক মজুরি)",
+        "en": "Mason (daily wage)"
+      },
+      "rateBdt": 950.0,
+      "unit": "day"
+    },
+    {
+      "costType": "machinery",
+      "fuelIncluded": true,
+      "key": "mixer-diesel",
+      "label": {
+        "bn": "কনক্রিট মিক্সার (ডিজেল)",
+        "en": "Concrete mixer (diesel)"
+      },
+      "operatorIncluded": true,
+      "rateBdt": 3500.0,
+      "unit": "day"
+    },
+    {
+      "costType": "machinery",
+      "fuelIncluded": false,
+      "key": "excavator",
+      "label": {
+        "bn": "এক্সকাভেটর (ঘণ্টা)",
+        "en": "Excavator (hourly)"
+      },
+      "minimumChargeHours": 2.0,
+      "note": "Fuel billed separately; minimum 2 h per mobilization.",
+      "operatorIncluded": true,
+      "rateBdt": 2800.0,
+      "unit": "hour"
+    },
+    {
+      "costType": "subcontract",
+      "key": "piling-450",
+      "label": {
+        "bn": "পাইলিং - ৪৫০ মিমি (সাব-কন্ট্রাক্ট)",
+        "en": "Piling - 450 mm (subcontract)"
+      },
+      "note": "450 mm dia bored pile; mode per plan §6.",
+      "rateBdt": 42000.0,
+      "unit": "per_pile"
+    }
+  ],
+  "notes": "resolved card - the regional multipliers are already applied; do not resolve it again. Example only: rates are placeholders, the card is status=candidate, and its source is manual. Real cards come from official lists / surveys / vendor quotes via the Source Registry (W2.7 consumes them).",
+  "region": "dhaka",
+  "schemaVersion": "0.1.0",
+  "source": {
+    "kind": "manual",
+    "name": "Illustrative example card (structure demo)",
+    "note": "Placeholder numbers to exercise the schema - never use for a BOQ. | resolved for dhaka from card dhaka-example-2026-10 (base region dhaka); cement-opc-43 550 bag (own-region); rod-60g 89000 ton (own-region); sand-fine 42 cft (own-region); brick-1st 12 each (own-region); mason 950 day (own-region); mixer-diesel 3500 day (own-region); excavator 2800 hour (own-region); piling-450 42000 per_pile (own-region)"
+  },
+  "status": "candidate"
+}

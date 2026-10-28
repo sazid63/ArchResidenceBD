@@ -1,0 +1,730 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.archresidencebd.app/building-spec/0.1.0.json",
+  "title": "BuildingSpec",
+  "description": "ArchResidenceBD Building Spec v0.1.0 (plan §5.4) - the single source of truth for one project. Canonical units are SI (m, m2, kPa, kg, BDT); display units are presentation-only. Absence = omitted field; no nulls. Strict by default; the only open objects are phases[].data and the provenance map.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "revision", "project", "site", "building", "phases"],
+  "properties": {
+    "schemaVersion": {
+      "const": "0.1.0"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Spec revision counter. Locked revisions are immutable snapshots managed by the Spec engine (W1.3); history lives outside this JSON."
+    },
+    "locked": {
+      "type": "boolean",
+      "default": false
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "project": {
+      "$ref": "#/$defs/Project"
+    },
+    "site": {
+      "$ref": "#/$defs/Site"
+    },
+    "building": {
+      "$ref": "#/$defs/Building"
+    },
+    "phases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/Phase"
+      },
+      "description": "Standard set generated at Project Setup: site-excavation, foundation, floor-<n> per storey, roof-boundary, common-services."
+    },
+    "pricing": {
+      "$ref": "#/$defs/Pricing"
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Assumption"
+      },
+      "default": []
+    },
+    "deviations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Deviation"
+      },
+      "default": []
+    },
+    "documents": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/DocumentRef"
+      },
+      "default": []
+    },
+    "provenance": {
+      "type": "object",
+      "description": "Field-level provenance map keyed by JSON Pointer (e.g. '/site/soil/sbcKpa'). Every machine-introduced value carries an entry (plan §2.5).",
+      "additionalProperties": {
+        "$ref": "#/$defs/ProvenanceEntry"
+      }
+    }
+  },
+  "$defs": {
+    "DisplayUnits": {
+      "title": "DisplayUnits",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["length", "area", "currency"],
+      "properties": {
+        "length": {
+          "type": "string",
+          "enum": ["m", "ft"],
+          "description": "Display only; storage is SI metres."
+        },
+        "area": {
+          "type": "string",
+          "enum": ["sqm", "sqft", "katha", "shotok"],
+          "description": "Display only; storage is m2. The land-unit module handles katha/shotok conversion."
+        },
+        "currency": {
+          "type": "string",
+          "const": "BDT"
+        }
+      }
+    },
+    "Project": {
+      "title": "Project",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "language", "displayUnits"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Stable project UUID. All element marks derive from stable spec ids, never build order (plan §8)."
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "language": {
+          "type": "string",
+          "enum": ["bn", "en"],
+          "description": "Project language for chat, reports and labels."
+        },
+        "displayUnits": {
+          "$ref": "#/$defs/DisplayUnits"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "Address": {
+      "title": "Address",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["division", "district"],
+      "properties": {
+        "division": {
+          "type": "string",
+          "minLength": 1
+        },
+        "district": {
+          "type": "string",
+          "minLength": 1
+        },
+        "upazilaOrThana": {
+          "type": "string"
+        },
+        "areaName": {
+          "type": "string",
+          "description": "Neighbourhood/area name as commonly used (e.g. Dhanmondi, Mirpur Sector 7)."
+        },
+        "addressLine": {
+          "type": "string"
+        }
+      }
+    },
+    "Plot": {
+      "title": "Plot",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["areaSqm"],
+      "properties": {
+        "areaSqm": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Canonical area in m2. Land-unit input (katha/shotok/bigha/gonda) is converted at the boundary."
+        },
+        "frontageM": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Front boundary length along the access road."
+        },
+        "depthM": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "roadWidthM": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Width of the access road in front of the plot."
+        },
+        "cornerPlot": {
+          "type": "boolean",
+          "default": false
+        },
+        "existingStructure": {
+          "type": "boolean",
+          "default": false,
+          "description": "Existing building to handle in Site & Excavation."
+        }
+      }
+    },
+    "Soil": {
+      "title": "Soil",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["not_provided", "user_report", "area_default"],
+          "description": "area_default = conservative area default from the Source Registry - always labeled 'assumption - verify on site' (plan §5.10)."
+        },
+        "sbcKpa": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Allowable safe bearing capacity (kPa)."
+        },
+        "groundwaterDepthM": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "reportRef": {
+          "type": "string",
+          "description": "Reference to a user-provided soil test report (document id or file name)."
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "Jurisdiction": {
+      "title": "Jurisdiction",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["authority"],
+      "properties": {
+        "authority": {
+          "type": "string",
+          "enum": ["rajuk", "dncc", "dscc", "ccc", "cda", "kda", "rda", "scc", "paurashava", "other"],
+          "description": "Authority governing approval; extended per rule pack."
+        },
+        "rulePack": {
+          "type": "string",
+          "description": "Active rule pack id, e.g. rajuk@2026.1 (plan §5.6)."
+        },
+        "wardOrZone": {
+          "type": "string"
+        },
+        "seismicZone": {
+          "type": "integer",
+          "enum": [1, 2, 3, 4],
+          "description": "BNBC seismic zone, derived from location via the rule pack."
+        }
+      }
+    },
+    "Site": {
+      "title": "Site",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["address", "plot"],
+      "properties": {
+        "address": {
+          "$ref": "#/$defs/Address"
+        },
+        "plot": {
+          "$ref": "#/$defs/Plot"
+        },
+        "soil": {
+          "$ref": "#/$defs/Soil"
+        },
+        "jurisdiction": {
+          "$ref": "#/$defs/Jurisdiction"
+        }
+      }
+    },
+    "Storeys": {
+      "title": "Storeys",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["count"],
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20,
+          "description": "Total floors above plinth including ground floor (BD 'G+5' => count 6). Floor phases use storeyIndex 0 = ground floor."
+        },
+        "groundFloorHeightM": {
+          "type": "number",
+          "exclusiveMinimum": 2,
+          "default": 3.0
+        },
+        "typicalFloorHeightM": {
+          "type": "number",
+          "exclusiveMinimum": 2,
+          "default": 3.0
+        },
+        "hasBasement": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "Building": {
+      "title": "Building",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["occupancy", "structureType", "storeys"],
+      "properties": {
+        "occupancy": {
+          "type": "string",
+          "enum": ["residential"]
+        },
+        "structureType": {
+          "type": "string",
+          "enum": ["rcc_frame"]
+        },
+        "storeys": {
+          "$ref": "#/$defs/Storeys"
+        },
+        "unitsPerFloor": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "typicalUnitAreaSqm": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "groundFloorUsage": {
+          "type": "string",
+          "enum": ["residential", "parking", "mixed"],
+          "default": "residential"
+        }
+      }
+    },
+    "Phase": {
+      "title": "Phase",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "status"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "description": "Stable slug, e.g. 'foundation', 'floor-1', 'common-services'."
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["site_excavation", "foundation", "floor", "roof_boundary", "common_services"]
+        },
+        "storeyIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Required when kind = floor. 0 = ground floor, 1 = '1st floor' in BD convention."
+        },
+        "label": {
+          "type": "string",
+          "description": "Display label (localized); generated by the app."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["not_started", "gathering_info", "drafted", "designed", "stale"],
+          "description": "stale = designed but upstream inputs changed (conservative stale-flagging, plan §5.4)."
+        },
+        "data": {
+          "type": "object",
+          "description": "Phase-specific decision payload (excavation depth, foundation type, member overrides, MEP choices...). Reserved extension point: per-phase payload schemas land with the engines (P1/P2), validated via a kind-to-schema registry.",
+          "additionalProperties": true
+        }
+      }
+    },
+    "MaterialRate": {
+      "title": "MaterialRate",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "unit", "rateBdt", "source"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "label": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string",
+          "description": "Canonical unit: bag, ton, kg, cum, sqm, cft, m, litre, each."
+        },
+        "rateBdt": {
+          "type": "number",
+          "minimum": 0
+        },
+        "source": {
+          "type": "string",
+          "enum": ["user", "fetched", "default", "mixed"]
+        },
+        "supplier": {
+          "type": "string"
+        },
+        "asOf": {
+          "type": "string",
+          "format": "date"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "LabourRate": {
+      "title": "LabourRate",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "unit", "rateBdt", "source"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "label": {
+          "type": "string",
+          "description": "Trade or work item, e.g. Mason, Rod binder."
+        },
+        "unit": {
+          "type": "string",
+          "description": "day, point, sqm, cum, per unit..."
+        },
+        "rateBdt": {
+          "type": "number",
+          "minimum": 0
+        },
+        "source": {
+          "type": "string",
+          "enum": ["user", "fetched", "default", "mixed"]
+        },
+        "asOf": {
+          "type": "string",
+          "format": "date"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "MachineryRate": {
+      "title": "MachineryRate",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "unit", "rateBdt", "source"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "label": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string",
+          "enum": ["hour", "day"]
+        },
+        "rateBdt": {
+          "type": "number",
+          "minimum": 0
+        },
+        "source": {
+          "type": "string",
+          "enum": ["user", "fetched", "default", "mixed"]
+        },
+        "operatorIncluded": {
+          "type": "boolean",
+          "description": "True when the rate includes the operator."
+        },
+        "fuelIncluded": {
+          "type": "boolean",
+          "description": "True when the rate includes fuel."
+        },
+        "minimumChargeHours": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Machinery lines only: the minimum billable time per mobilization, when the source states one (W2.7)."
+        },
+        "asOf": {
+          "type": "string",
+          "format": "date"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "SubcontractRate": {
+      "title": "SubcontractRate",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "unit", "rateBdt", "source"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "label": {
+          "type": "string"
+        },
+        "unit": {
+          "type": "string",
+          "enum": ["per_pile", "per_ft", "machine_hour", "per_sqm", "per_unit", "lump_sum"]
+        },
+        "rateBdt": {
+          "type": "number",
+          "minimum": 0
+        },
+        "source": {
+          "type": "string",
+          "enum": ["user", "fetched", "default", "mixed"]
+        },
+        "asOf": {
+          "type": "string",
+          "format": "date"
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    },
+    "Pricing": {
+      "title": "Pricing",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["currency", "source"],
+      "properties": {
+        "currency": {
+          "type": "string",
+          "const": "BDT"
+        },
+        "source": {
+          "type": "string",
+          "enum": ["user", "fetched", "default", "mixed"],
+          "description": "Overall provenance of this price set; each entry also carries its own source."
+        },
+        "asOf": {
+          "type": "string",
+          "format": "date"
+        },
+        "notes": {
+          "type": "string",
+          "description": "What the price service did: the card it resolved, the multipliers it applied, the rows it could not use. Never a silent gap."
+        },
+        "card": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["cardId", "region", "status", "effectiveFrom", "source"],
+          "description": "The rate card the prices came from (W2.7). The card's identity travels with the prices so a BOQ priced from this block can say which list, which region and which verification state it used.",
+          "properties": {
+            "cardId": {
+              "type": "string",
+              "minLength": 1
+            },
+            "region": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The region these prices are for (the resolved region, after the card's multipliers)."
+            },
+            "status": {
+              "type": "string",
+              "enum": ["candidate", "active", "archived"]
+            },
+            "effectiveFrom": {
+              "type": "string",
+              "format": "date"
+            },
+            "source": {
+              "type": "object",
+              "additionalProperties": true,
+              "description": "The card's source (kind, name, url, retrievedAt, sha256, note)."
+            }
+          }
+        },
+        "materials": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MaterialRate"
+          }
+        },
+        "labour": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/LabourRate"
+          }
+        },
+        "machinery": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MachineryRate"
+          }
+        },
+        "subcontract": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SubcontractRate"
+          }
+        }
+      }
+    },
+    "Assumption": {
+      "title": "Assumption",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "statement", "basis", "verifyOnSite"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "statement": {
+          "type": "string"
+        },
+        "basis": {
+          "type": "string",
+          "enum": ["area_default", "conservative_default", "user_stated", "external_source"]
+        },
+        "verifyOnSite": {
+          "type": "boolean"
+        },
+        "relatedPath": {
+          "type": "string",
+          "description": "JSON Pointer into the spec this assumption covers."
+        }
+      }
+    },
+    "Deviation": {
+      "title": "Deviation",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "ruleRef", "expected", "actual", "riskTier", "acknowledged", "recordedAt"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "phaseId": {
+          "type": "string"
+        },
+        "ruleRef": {
+          "type": "string",
+          "description": "Rule id from the rule pack, e.g. rajuk@2026.1#setback-front."
+        },
+        "ruleTitle": {
+          "type": "string"
+        },
+        "expected": {
+          "type": "string"
+        },
+        "actual": {
+          "type": "string"
+        },
+        "riskTier": {
+          "type": "string",
+          "enum": ["cosmetic", "approval_risk", "structural_attention", "cost_risk"],
+          "description": "How much attention the deviation deserves. cost_risk is a price deviation (a rate the user overrode); it touches the project's money, never its compliance (W2.7)."
+        },
+        "rationale": {
+          "type": "string",
+          "description": "User's reason for the override."
+        },
+        "acknowledged": {
+          "type": "boolean"
+        },
+        "recordedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "nearestCompliantAlternative": {
+          "type": "string",
+          "description": "Nearest compliant option (one-click 'restore to compliant', plan §5.6)."
+        }
+      }
+    },
+    "DocumentRef": {
+      "title": "DocumentRef",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "title", "generatedAt"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["drawing_pdf", "drawing_dxf", "bbs", "boq_xlsx", "boq_pdf", "report_pdf", "engineer_pack", "model_fcstd", "project_bundle"]
+        },
+        "phaseId": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "ProvenanceEntry": {
+      "title": "ProvenanceEntry",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source"],
+      "properties": {
+        "source": {
+          "type": "string",
+          "enum": ["user", "default", "rule_pack", "fetched", "imported", "assumption", "engine"]
+        },
+        "detail": {
+          "type": "string",
+          "description": "e.g. 'user answer in phase chat', 'rajuk@2026.1', 'Source Registry: mill list 2026-09'."
+        },
+        "at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "confidence": {
+          "type": "string",
+          "enum": ["high", "medium", "low", "assumption"]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,67 @@
+/* The NativeCAD workspace (W2.8): the viewport, the model tree, the parameters. */
+
+.cad-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.cad-viewport-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cad-viewport {
+  position: relative;
+  width: 100%;
+  height: 520px;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  /* the theme's own colours (W5.6): the workspace does not carry its own palette */
+  background: linear-gradient(180deg, var(--paper) 0%, var(--surface-2) 100%);
+  box-shadow: inset 0 0 0 1px var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cad-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  cursor: grab;
+}
+
+.cad-canvas:active {
+  cursor: grabbing;
+}
+
+.cad-tree-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  border-radius: var(--r-md);
+}
+
+.cad-tree-row:hover {
+  background: var(--surface-2);
+}
+
+.cad-eye {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--ink-soft);
+  padding: 4px;
+  border-radius: var(--r-sm);
+}
+
+.cad-eye:hover {
+  background: var(--surface-3);
+}
