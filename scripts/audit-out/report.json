@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-10-28T14:34:52.217Z",
+  "generatedAt": "2026-10-28T14:39:11.397Z",
   "tool": "scripts/mesh-audit.ts",
   "version": "1.0.0",
   "seed": 1247102025,
-  "durationMs": 5859,
+  "durationMs": 5739,
   "caseCount": 50,
   "thresholds": {
     "degenerateMinDimMm": 1,
