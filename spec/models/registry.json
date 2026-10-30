@@ -18,7 +18,7 @@
         "format": "gguf",
         "quantization": "Q4_K_M",
         "sizeBytes": 2497278880,
-        "sha256": "bea406a8bafb47c076f4bc2b61ed481cd88c3eff094171af6046a2aad2a54f73"
+        "sha256": "619e09e2b0e3a9bd9fe8e1b0b414383d45c4fbfc82ea571af78883a9f4a13a09"
       },
       "runtime": {
         "engine": "llama.cpp",
@@ -48,8 +48,8 @@
         "file": "archres-repair-v0-Q4_K_M.gguf",
         "format": "gguf",
         "quantization": "Q4_K_M",
-        "sizeBytes": 2104932800,
-        "sha256": "724fb256bec1ff062b2f65e4569e871ad2e95ab2a3989723d1769c54294730b7"
+        "sizeBytes": 1929903360,
+        "sha256": "f406d724f26e7fa7605f64999c681fd00b3e8aa13fc2c1b4b12f12f65f969714"
       },
       "runtime": {
         "engine": "llama.cpp",
@@ -80,7 +80,7 @@
         "format": "gguf",
         "quantization": "Q8_0",
         "sizeBytes": 639150592,
-        "sha256": "06507c7b42688469c4e7298b0a1e16deff06caf291cf0a5b278c308249c3e439"
+        "sha256": "450d91293fcd3efaeb405bbb5425ccb30a22b811c29a4c68adf092f051ba7c8b"
       },
       "runtime": {
         "engine": "llama.cpp",
@@ -113,8 +113,8 @@
         "file": "Qwen3-Reranker-0.6B.Q8_0.gguf",
         "format": "gguf",
         "quantization": "Q8_0",
-        "sizeBytes": 804166240,
-        "sha256": "48c062151f5a3026f74a2066a37011ff9d7c135ddc8b7c22034b0051257908e9"
+        "sizeBytes": 639153408,
+        "sha256": "1cc60019e57d3d5ba173999007c940bc2d8ccc013d235dbf3be02d64e02b1b16"
       },
       "runtime": {
         "engine": "llama.cpp",
