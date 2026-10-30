@@ -1,6 +1,0 @@
-{
-  "summary":  "Final implementation plan for ArchResidenceBD, incorporating the existing GitHub repository (sazid63/ArchResidenceBD) and Hugging Face model fleet (sazid63/archresidencebd-models). Covers finishing and polishing the app, making the Web and Windows app seamlessly functional, resolving the IPC core bridge for browser preview and cloud hosting, enhancing the 4-model AI fleet (incorporating archres-repair-v0 and fixing Qwen3-Reranker templates), connecting NativeCAD 3D visualization, and providing the Windows installer packaging pipeline.",
-  "updatedAt":  "2026-10-28T05:34:57.492044174Z",
-  "requestFeedback":  true,
-  "userFacing":  true
-}

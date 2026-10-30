@@ -17,6 +17,15 @@ src-tauri/target/
 *.deb
 *.AppImage
 *.tar.gz
+dist/
+dist-ssr/
+docs/release-builds/
+docs/test-outputs/
+
+# Development artifacts
+.aistudio/
+.cache/
+.huggingface/
 
 # Test outputs
 user_test_*
