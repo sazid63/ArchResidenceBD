@@ -2,7 +2,7 @@ import express from "express";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
-import { runArchieInference } from "./src/engine/archieCivilAi";
+import { runArchieInference } from "../engine/archieCivilAi";
 
 dotenv.config();
 
