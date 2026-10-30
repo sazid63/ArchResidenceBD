@@ -8,3 +8,27 @@ dist-ssr
 !.env.example
 .git
 .gitignore
+
+# Build artifacts
+src-tauri/target/
+*.exe
+*.msi
+*.dmg
+*.deb
+*.AppImage
+*.tar.gz
+
+# Test outputs
+user_test_*
+user_test_drawings/
+scripts/audit-out/
+models/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+Thumbs.db
+.DS_Store
