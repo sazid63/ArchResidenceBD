@@ -1,4 +1,4 @@
-# ArchResidenceBD v2.2
+# ArchResidenceBD v2.3
 
 ArchResidenceBD is a specialized civil engineering software suite tailored for residential building design in Bangladesh. It bridges the gap between architectural vision and engineering compliance, integrating local regulations (BNBC/RAJUK) with professional-grade modeling and estimation tools.
 
@@ -23,7 +23,7 @@ ArchResidenceBD is a specialized civil engineering software suite tailored for r
 
 - Node.js (v18+)
 - npm or yarn
-- Google Gemini API Key (set as `GOOGLE_GENERATIVE_AI_API_KEY` in environment)
+- Google Gemini API Key (set as `VITE_GOOGLE_GENERATIVE_AI_API_KEY` in environment)
 
 ### Installation
 
@@ -51,11 +51,16 @@ ArchResidenceBD is a specialized civil engineering software suite tailored for r
 
 ## 🏗️ Version History
 
-### v2.2 (Current)
-- Enhanced BNBC setback calculation logic.
-- Improved 3D rendering stability for complex balcony designs.
-- Added Bengali language support for AI structural recommendations.
-- Updated PWD rate schedule database (October 2026).
+### v2.3 (Current) - Major Rework
+- **60 Real Bangladeshi Floor Plans**: Parsed from docx links, 30 actual images downloaded with 2D SVG previews
+- **AUST CE208/CE205 BOQ Generator**: Complete rewrite with proper PWD SOR calculations (electrical wiring, switchgear, fixtures, earthing, generator)
+- **ProjectsScreen Fix**: LocalStorage integration, Open/Delete project buttons working
+- **Accessibility Audit**: ARIA tab patterns, keyboard navigation, SVG accessibility, focus trapping in modals
+- **Code Quality Refactoring**: Shared types module, shared hook, ProjectContext (400+ lines eliminated)
+- **TypeScript Clean**: 0 errors, 0 `any` types, circular dependencies resolved
+- **Build Success**: 712ms, 87 modules, 768 KB JS
+
+### v2.2 (Previous)
 
 ## 📄 License
 
