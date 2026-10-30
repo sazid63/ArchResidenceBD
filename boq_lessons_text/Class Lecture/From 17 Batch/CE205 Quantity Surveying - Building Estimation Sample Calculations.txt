@@ -1,0 +1,478 @@
+
+--- PAGE 1 ---
+No te: D imensions used in calculatio n are in feet
+ 
+ 
+CE 20 8/
+Jan
+20 20
+/ Sec
+-
+A
+ 
+CE 2 08: B ui l di ng  Est i mat i on 
+Sampl e Cal cu
+l
+at i ons
+ 
+ 
+ 
+í~] ] Àı] }v (}„ îñ_Á o o( }µv ˆ ı]}v
+ 
+ 
+ 
+ 
+L ength: 
+((22 +(1 0/1 2 )+( 12 .5/ 12 )+ (3/ 12 ))*4 )
++
+((20 +(10 /12 )
+-
+(25/ 12 )
+-
+ 
+(6 /1 2))*2 )
+ 
+Width: 
+(2 5 + 3  + 3 )/1 2
+ 
+Height:  
+3 + (3/ 12 )
+ 
+ 
+Fo r ex cav atio n dim ensio ns, we  increase  the actual width o f fo undatio n by  3  inch o n all sides (Co m pare 
+the fo undatio n plan and trench plan). If trench plan  is give n, y o u can o btain the dim ensions directly 
+fro m t rench plan. 
+ 
+ 
+The calculatio n sho wn abov e is basedo n t he fo undatio n plan. 
+AB and CD  is take n as co ntinuo us w hereas 
+AD and BC are co nsidered to  be in betwee n. (But yo u can t ake t heo ppo site too )
+ 
+Alo ng AE,L engtho f excav atio n = c /c distance + Half wall w idtho f AD + Ext
+ra e xcav atio n
+ 
+ 
+ 
+ 
+ 
+= 22  + ( 10 /12 ) + ( 12 .5/ 12 )+ ( 3/ 12 )  
+ 
+(From  t rench plan, 22 + (1 0/ 12 ) + ( 31/ 12 ))
+ 
+Alo ng AD
+ 
+L ength = c /c distance 
+t
+ 
+(Half wall width o f AB andD C) 
+-
+ 
+( Extraex cav ated po rtio n o f AB and D C)
+ 
+*D im ensio ns are subtracted as AB andD C hav e alrea
+dy  bee nex cav ated
+ 
+= 22  + ( 10 /12 ) 
+t
+ 
+(12 .5/ 12
+AB
+ 
++ 12 .5/ 12
+DC
+) 
+t
+ 
+(3 /1 2
+AB
+ 
++ 3/ 12
+DC
+)
+ 
+(From  t rench plan, 22 + (1 0/ 12 ) 
+t
+ 
+(31/ 12 ))
+ 
+Therefo retotal length:  
+((2 2+( 10 /1 2 )+(1 2 .5/1 2 )+( 3/1 2 ))*4 )
++
+((20 +(10 /1 2 )
+-
+(25 /1 2 )
+-
+ 
+(6 /1 2 ))* 2)
+ 
+A
+ 
+B
+ 
+C
+ 
+D
+ 
+E
+ 
+
+--- PAGE 2 ---
+No te: D imensions used in calculatio n are in feet
+ 
+ 
+CE 20 8/
+Jan
+20 20
+/ Sec
+-
+A
+ 
+ 
+ 
+ 
+ 
+Width  = 2 + (1 /1 2) +(3/ 12
+Lef t
+) + 
+(3/1 2
+R ight
+) 
+ 
+Height below GL  = 3 + (3 /12 )
+ 
+ 
+ 
+1 (iii )
+ 
+Exc avati on  fo
+r 
+20 in ch w al l f ou n d ati on
+ 
+L ength:
+ 
+((9 
+-
+ 
+2 
+-
+ 
+(3 /1 2 ) 
+-
+ 
+(1 2.5/1 2 ) 
+-
+ 
+(3/1 2 ))* 2)
+ 
++
+ 
+((22 +(1 0/ 12 ) 
+-
+ 
+4 
+-
+ 
+(6/1 2 ))*2)
+ 
+} ı˚Wv ˆ } ( } oµu v (}} ı]vP P„˚ı ˚„ ıZv î ì_ (} µvˆı]} v ıZ (} „u ˚„ ˚ÆÀ ı˚ ˆ
+earlier. 
+ 
+ 
+The black rectangles indicate  the ex cav ated po rtio n if the actual width o f fo undatio n was used and the 
+red lines indicate3  inch portio n ex
+traex cav ated length o n e ach sideo f fo undation. 
+ 
+2.
+ 
+Fo r brick flat so ling (BFS) belo w fo undatio n, we  o nly calculate the area in o rder to  determ ine the 
+num ber o f bricks required fo r cov ering the entire area. Cem ent co ncret e layer abo v e BFS has the same 
+width and length as in BFS.Only  height is inco po rated 
+to  dete rm ine itsv o lum e. 
+ 
+ 
+             
+                      
+ 
+
+--- PAGE 3 ---
+No te: D imensions used in calculatio n are in feet
+ 
+ 
+CE 20 8/
+Jan
+20 20
+/ Sec
+-
+A
+ 
+2(i
+i
+i)
+ 
+Br i ck Fl at S
+ol in g
+ 
+(BFS)
+ 
+In o rder to find the length o f 
+B FS
+, yo u m ay  co nsider the sectio n v iew  to find the relative height o f 
+fo undatio nsand o btainthe lengths fro m t he 
+fo undatio n plan.
+ 
+ 
+õ ]’ ıZ˚ ˚vı ı} ˚vı˚ ˆ]’ıv } ( îì _ Áoo (} µvˆı]} v u˚˚ ı’ ıZ˚ îñ_ (} µvˆı]} v vˆ ıZ˚
+} oµu v (}} ı]vP ˆ˚› } î [ï_ ˚o} X
+ 
+At that depth, w
+]ˆ }  (}} ı]vP íñ_ vˆ } oµuv
+Á]ˆıZ î_}
+ („}u (˚˚ Ç} µ v˚ ı} ’µı„ı Zo( Z Áoo Á]ˆıZ ıZı Xñ_ ~ñ _ } ( ]vv ›} „ı]} v vˆ
+î Xñ_Æı ˚vˆ} „ı]} v vˆ Z } oµu v} ı]vPÁ]ˆò_
+ 
+L ength: 
+((9 
+-
+ 
+0 .5  
+-
+ 
+(5/ 12 )
+-
+ 
+(2.5/1 2 ))
+*2) +((22 + (1 0/ 12 ) 
+-
+ 
+1 )*2 )
+ 
+ 
+Width: (2 0/1 2 )
+ 
+ 
+ñ_
+ 
+î Xñ_
+ 
+
+--- PAGE 4 ---
+No te: D imensions used in calculatio n are in feet
+ 
+ 
+CE 20 8/
+Jan
+20 20
+/ Sec
+-
+A
+ 
+4. 
+Bri ckwor
+k i n Fo un d ation up to GL 
+ 
+( a)
+ 
+The 30  inchwall fo undatio n has a se rieso f steps. At the bo ttom , its width is30  inch and gradually  
+reduces  to 1 0 inch decreasing by 5  inch in eachste p. 
+ 
+The length alo ng AB fo r e ach fo undatio nwidth 
+ho wev er increases by 5 inch as wem ov e upwards.
+ 
+ 
+The green block indicates the lengtho f 20  inchwidthand t he red blo ck fo r 25  inch w idth.  
+ 
+ 
+ìÁ]ˆıZ Z o˚vP˚’˚ñ’]v ıZ˚ ]ˆ}î ñ µvˆı]} v
+co nstant at that depth.The same length as fo r 15  inchwidth applies fo r t he 10  inch w idth. 
+ 
+ 
+(i)
+ 
+2 0 + (1 0/ 12 ) 
+-
+ 
+(25 /12 ) + ( 5/1 2 )
+ 
+(ii)
+ 
+2 0 + (1 0/ 12 ) 
+-
+ 
+(25 /12 ) + ( 10
+/ 12 )
+ 
+(iii)
+ 
+2 0 + (1 0/ 12 ) 
+-
+ 
+(25 /12 ) + 
+(15/ 12 )
+ 
+(iv )
+ 
+2 0 + (1 0/ 12 ) 
+-
+ 
+(25 /12 ) + 
+(15/ 12 )
+ 
+ 
+ 
+ 
+ 
+A
+ 
+B
+ 
+
+--- PAGE 5 ---
+No te: D imensions used in calculatio n are in feet
+ 
+ 
+CE 20 8/
+Jan
+20 20
+/ Sec
+-
+A
+ 
+4(b ) 2 5 in ch w al l f ou n d ati on
+ 
+(i)
+ 
+2 0 i nc hwi dth 
+t
+ 
+ 
+L ength = 
+((22 + (1 0/ 12 )+ (10 /1 2 ))* 4)
+ 
++ 
+((2 0 + (1 0/ 12 ) 
+-
+ 
+(2 5/ 12 )+ (5 /1 2))*2 )
+ 
+ 
+         
+ 
+ 
+The lengtho f 
+BFS fo r2 5 inch w all fo undatio n is as fo llows:
+ 
+((2 2+(1 0/ 12 )+(
+12 .5
+/ 12 ))*4 )
++
+((20 +(1 0/1 2 )
+-
+(25 /1 2 ))* 2)
+ 
+ 
+Fo r t he 20  inchwidth alo ng AE, t here isa 2 .5  inch decrease  in length at po int A due to  a reduced ste p 
+size and hence 
+((22 + (1 0/ 12 ) + ( 10 /12 ))
+. 
+Fo r t he 
+po rtio n alo ng AD , a sidev iew (in t he directio n indicated 
+by  t he arrow abo ve)  isshown below.
+ 
+îì[
+-
+í ì_
+ 
+ 
+ 
+Therefo rethe required length = c/ c distance 
+t
+ 
+(2 *Half w idtho f 25  inchwall fo undatio n) + (2 *2 .5  inch 
+due to re ducedste p size)  and hence 
+((2 0 
++ 
+(10 /1 2 ) 
+-
+ 
+(25 /1 2 ) +  (5/ 12 ))
+ 
+ 
+A
+ 
+B
+ 
+C
+ 
+D
+ 
+E
+ 
+
+--- PAGE 6 ---
+No te: D imensions used in calculatio n are in feet
+ 
+ 
+CE 20 8/
+Jan
+20 20
+/ Sec
+-
+A
+ 
+4 (c) 20 in ch ver an d ah wal l  f ou n d ati on 
+ 
+( i i)
+ 
+1 0 i nc hwi dth
+ 
+-
+ 
+((9  
+-
+ 
+0 .5 
+-
+ 
+(5/ 12 )
+)
+*2 )
+ 
++ 
+((22  + (10 /1 2) 
+-
+ 
+1)* 2 ) 
+ 
+Yo u c an use the fo llowing viewsto  understand t he sam ple calculatio n. P lease keep in m indthe 
+elev atio nwhere the fo undatio ns interce pt each other and c alculate length acco rdingly. 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 7 ---
+No te: D imensions used in calculatio n are in feet
+ 
+ 
+CE 20 8/
+Jan
+20 20
+/ Sec
+-
+A
+ 
+5.  Bri ckwor k i n Fo un d ation fr om GLto  PL
+ 
+( i i) 2 5 i nc hw all  foundati on 
+t
+ 
+ 
+L ength = 
+(22 +(10 /1 2) +22 + (10 /12 ) + ( 10/ 12 ))*2  + 20 +  20
+ 
+Use the plan fo r c alculatio n o f lengths aswall thickness is co nstantat1 0  inch t hro ugho ut. T he 
+dim ensio ns are shown byarro ws.
+ 
+ 
+ 

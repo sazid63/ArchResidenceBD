@@ -1,0 +1,11044 @@
+
+--- PAGE 1 ---
+ 
+ 
+ 
+CE 208
+ 
+Quantity Surveying
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Departm ent of Civil Engineer ing
+ 
+Ahsa null ah Uni ver sity  of Science  and Technology
+ 
+No v emb er
+,20 1
+7
+ 
+ 
+ 
+
+--- PAGE 2 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+ 
+Pr efac e
+ 
+ 
+Quanti t ysurve yin gre fers totheesti mationofmaterial
+s
+ 
+aswell asthefinalcost 
+esti mation
+ 
+for
+ 
+an y
+ 
+project.
+ 
+C ostesti matingisoneofthemost im portantstepsinprojectmanagement. 
+C ost
+ 
+esti mat
+ion
+ 
+establis hes the base li ne of the 
+predicted 
+project  cost at different stages of developm ent of the 
+project
+. 
+Thislabmanuali ntendstoint roducethe 
+student
+swiththe
+ 
+esti mationofthe 
+moderatesiz e
+ 
+structures
+,
+ 
+i.e. residenti al  buil ding, 
+culvert, 
+underground 
+water res ervoir, ret aini ng wall  as well  as 
+esti mation for ex cav ati on.
+ 
+The ex ampl es are  im agin ar y stru ctures
+ 
+but  the basic  proc ess of  the  
+calculati ons wil l pave the
+ 
+wa y to e
+sti mate re al st ru ctures
+. 
+ 
+The authors highl y indeb ted to their coll eagues fo r  their const ant sup port and guidanc e during the 
+course of 
+p repa ring thi s  manual. In addit ion, 
+esti mation
+ 
+concepts wer e taken from 
+Esti matin g 
+Buil ding C osts  for the Re side
+nti al and Li ght C om mercial C onst ructi on P ro fessi onal, b y W a yn e J . 
+el. P ico
+,
+ 
+Esti mating
+ 
+for R esidenti al C onst ructi on b y D avid P ratt
+. Beside s
+, 
+practi cal esti matin g 
+aspectsw ere studi edfro m
+ 
+C onsul tantsEsti matingManual,Divis ionofC ap it alAssetMana gement,
+ 
+C omm onwealt h
+ 
+ofMassachusett s
+ 
+(
+2006)
+ 
+while 
+thepictures
+,wher ere fer ence d,
+ 
+werecoll e ctedfro m  
+the internet.
+ 
+ 
+ 
+ 
+Na fis  Anw a ri ,Lecturer
+ 
+Lecturer
+ 
+Dep art men t  of Civi l En gi neering
+ 
+Ah s anu ll ah  Un iv ersi ty of Sci en ce and  Tech nol og y
+ 
+ 
+ 
+Md.Ho ss ai n Na dim,  Lecturer
+ 
+L
+ecturer
+ 
+Dep art men t  of Civi l En gi neering
+ 
+Ah s anu ll ah  Un iv ersi ty of Sci en ce and  Tech nol og y
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 3 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+ 
+T ab le of  Conten ts
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+                    
+Pag e No.
+ 
+P art  1:  Int roduct ion toQuant it y Surveyi ng
+ 
+................................
+................................
+......................
+1
+ 
+1.1 Study of  Draw ings
+ 
+................................
+................................
+................................
+...................
+1
+ 
+1.2 Bi ll  of  Q uanti ti es (B oQ )
+ 
+................................
+................................
+................................
+...........
+1
+ 
+1.3 What i s Spe
+cif i cat i on?
+ 
+................................
+................................
+................................
+.............
+2
+ 
+1.4 Nec ess it y of  Specif i cati ons
+ 
+................................
+................................
+................................
+.......
+2
+ 
+1.5 Mai n It ems of  Worksof B uil ding:
+ 
+................................
+................................
+...........................
+3
+ 
+1.6 What i s Anal ysi sof  Rat e?
+ 
+................................
+................................
+................................
+........
+4
+ 
+1.7 Purpose of  Rat e Anal ysi s
+ 
+................................
+................................
+................................
+.........
+5
+ 
+1.8 Factors  af f ect i ngt heRat e anal ysi s:
+ 
+................................
+................................
+.........................
+5
+ 
+P art  2:  Rei nf orcem ent  Est im ati on of  a RCC Slab
+ 
+................................
+................................
+.............
+6
+ 
+2.1 Rei nf orcement  use di n t he RCC
+ 
+................................
+................................
+..............................
+6
+ 
+2.2 Cover  and Cl ear Cover i n RCC
+ 
+................................
+................................
+...............................
+6
+ 
+2.3 H ook
+ 
+................................
+................................
+................................
+................................
+........
+7
+ 
+2.4 Type of  Rei nf orce ment  Use di n Sl ab
+ 
+................................
+................................
+........................
+8
+ 
+2.5 Me ani ng of  Legends
+ 
+................................
+................................
+................................
+.................
+8
+ 
+2.6 Lengt hof  a CrankedB ar
+ 
+................................
+................................
+................................
+.........
+9
+ 
+2.7 Number of  Rei nf orcem ent ( Alt er nat el y 
+Cranked Di stri but i on)
+ 
+................................
+.............
+ 
+10
+ 
+2.8 Worked O ut P robl em
+ 
+................................
+................................
+................................
+............
+ 
+12
+ 
+P art  3:  Estim ati on of  a Resi dent i al B uil ding
+ 
+................................
+................................
+...................
+ 
+14
+ 
+3.1 Basic Calcul at i on of  Est im at i onof  Const ructi on Mater ial s
+ 
+................................
+...................
+ 
+14
+ 
+3.2 Unit Wei ght of  Som eIm port antMateri als
+ 
+................................
+................................
+............
+ 
+15
+ 
+3.3 Ass ignment
+ 
+................................
+................................
+................................
+............................
+ 
+15
+ 
+3.4 Worked O ut P robl em
+ 
+................................
+................................
+................................
+............
+ 
+17
+ 
+P art  4:  Estim ati on of  RCC Slab Culvert
+ 
+................................
+................................
+.........................
+ 
+30
+ 
+4.1 Culvert
+ 
+................................
+................................
+................................
+................................
+..
+ 
+30
+ 
+4.2 Use  of  Culver t
+ 
+................................
+................................
+................................
+........................
+ 
+30
+ 
+4.3 Dif f erent  Types  of  Culver t
+ 
+................................
+................................
+................................
+.....
+ 
+31
+ 
+4.4 Slab Cul vert
+ 
+................................
+................................
+................................
+..........................
+ 
+33
+ 
+
+--- PAGE 4 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+4.5 Com ponent sof  at ypi cal  RCC Slab Culvert
+ 
+................................
+................................
+...........
+ 
+33
+ 
+4.6 Worked O ut  probl em
+ 
+................................
+................................
+................................
+............
+ 
+35
+ 
+P art  5:  Estim ati on of  anUnder groundWat er Reservoi r
+ 
+................................
+................................
+ 
+43
+ 
+5.1 Worked O ut P robl em
+ 
+................................
+................................
+................................
+............
+ 
+43
+ 
+P art  6:  Estim ati on of  a Ret ai ni ng Wall
+ 
+................................
+................................
+...........................
+ 
+47
+ 
+6.1 Ret ai ningw all
+ 
+................................
+................................
+................................
+........................
+ 
+47
+ 
+6.2 Types of  Ret ai ni ngw al l
+ 
+................................
+................................
+................................
+.........
+ 
+47
+ 
+6.3 Com ponent sof  at ypi cal  RCC re tai ni ngw all
+ 
+................................
+................................
+.........
+ 
+48
+ 
+6.4 Worked O ut P robl em
+ 
+................................
+................................
+................................
+............
+ 
+49
+ 
+P art  7:  Es
+tim ati on of  a Septi c Tank
+ 
+................................
+................................
+................................
+ 
+53
+ 
+7.1 Def i nit i onof  Sept ic Tank
+ 
+................................
+................................
+................................
+.......
+ 
+53
+ 
+7.2 Com ponent sof  Septi cTank
+ 
+................................
+................................
+................................
+...
+ 
+53
+ 
+7.3 Worked O ut P robl em
+ 
+................................
+................................
+................................
+............
+ 
+54
+ 
+P art  8:  Eart hw ork Excavat i onf or Roadw ay
+ 
+................................
+................................
+...................
+ 
+57
+ 
+8.1 Cal cul ati on of  Vol um e
+ 
+................................
+................................
+................................
+...........
+ 
+57
+ 
+8.2 Me asurem ent f rom Cross  Secti ons
+ 
+................................
+................................
+........................
+ 
+57
+ 
+8.3 Term s and Abbreviations
+ 
+................................
+................................
+................................
+......
+ 
+57
+ 
+8.4 Mid
+-
+sec ti onf orm ulae( Aver age Hei ght Me t hod)
+ 
+................................
+................................
+....
+ 
+58
+ 
+8.5 Trapezoi dal F orm ul a/ Aver age End Area Met hod / Mean
+-
+Sec ti onal  Are aMe t hod
+................
+ 
+58
+ 
+8.6 Prism oi dal f orm ul a
+ 
+................................
+................................
+................................
+................
+ 
+59
+ 
+8.7 Worked O ut P robl em
+ 
+................................
+................................
+................................
+............
+ 
+59
+ 
+P art  9:  Estim ati on of  a Roof  Truss
+ 
+................................
+................................
+................................
+..
+ 
+66
+ 
+9.1 Types of  Truss
+ 
+................................
+................................
+................................
+.......................
+ 
+66
+ 
+9.2 Basic Term i nol ogi es of  a truss
+ 
+................................
+................................
+...............................
+ 
+67
+ 
+9.3 Worked O ut P robl em
+ 
+................................
+................................
+................................
+............
+ 
+69
+ 
+P art  10:  Uses of  Sof tw are i n Construct i on Est im at i on
+ 
+................................
+................................
+....
+ 
+72
+ 
+10.1 Introduct i on
+................................
+................................
+................................
+.........................
+ 
+72
+ 
+10.2 Sof
+tw are  Use d in Quantit y Surveyi ng
+ 
+................................
+................................
+..................
+ 
+72
+ 
+10.3 Q ui ckMe asure
+ 
+OS
+ 
+................................
+................................
+................................
+...............
+ 
+72
+ 
+Ref erence s
+ 
+................................
+................................
+................................
+................................
+......
+ 
+82
+ 
+ 
+
+--- PAGE 5 ---
+CE  208: Quanti ty Surveying
+ 
+Page 
+1
+ 
+of 
+8
+3
+ 
+ 
+Pa rt 
+1
+:
+ 
+I ntro ductio n
+ 
+to  Quanti ty  Surv eying
+ 
+Quanti t y surve yin g 
+is an assessment of the cost based on certain rates of materials and labour.
+ 
+An 
+esti mate shoul d be r eali s ti c assessment shoul d be  made on actual condit ions of mark et.
+ 
+Esti mation 
+isundoubtedl yon eorthe most im port
+antaspectsofaconst ructi on
+ 
+project. 
+A 
+goodesti mationsaves 
+the ex pendit ure to a gr ea t ex tent and ensur es opti mum  use of m aterials.
+ 
+E sti mation is ver y much  
+technical. It requir es goo d knowled ge on stru ctur al design,  prope rl y or en gine erin g mate rials and
+ 
+essentiall y pr acti c al ex perience.
+ 
+ 
+Essenti als in a good Qu a nti t y S urv e yor: W hat are  the essentials in a good
+ 
+Quanti t y S urve yo r?  He 
+must  be able to describe clearl y in proper unambi guous
+ 
+lan gua ge the requi rement of the Archit ect 
+and so arr an ge his  bil l of 
+quanti ti es
+ 
+(Bo Q) that  the Buil der can  quickl y, e asil y a nd accu ratel y ar rive  
+at t he esti mated
+ 
+cost o r t he work.  The  Quanti t y S urve yor must h ave a sou nd knowled ge  or
+ 
+buil din g 
+materials and const ructi o n and or custom s prevail ing in the trade. 
+He
+ 
+must  be accu r
+ate in his work  
+and calcul ati ons.
+ 
+1.1 
+S tud y of  Draw in gs
+ 
+It would be ex tremel y p r emature if an att empt  we re to be
+ 
+made at the taking on: im mediatel y on  
+receipt o fthed rawin gs.Muchhastob e
+ 
+a ccompl ishedbefo rep roce edingt otakeoutquanti ti esf rom 
+the dr
+awings. Man y
+ 
+er ro rs can be avoided if the following steps are taken before ent ertaini n g an y
+ 
+thought of takin g off:
+ 
+ 
+ 
+(1) Look over th e dra wings and att empt  to vi suali ze the work enti tl ed. 
+ 
+(2) S tud y the, are in a gre ement with one another. 
+ 
+(3)C heckdrawin
+gsca ref ull ytoseethatplans,elev ati ons,secti onsand
+ 
+details,ifan ythedim ension s 
+on the drawings to m ake sure that each overall
+ 
+dim ension  agr ees with t he total room di mensions. If  
+serious errors a rc
+ 
+discov ered, the ar chit ect shoul d be informed; but 
+if the
+ 
+d
+iscrepan c y is due to
+ 
+the 
+result  of slight arit hmetic al error, th e dra wings sho uld be corr ected.
+ 
+(4) 
+If the dim ension s do not ex ist in som e places, then it  is alwa ys b ett er to  writ e
+ 
+the
+m
+ 
+in. These 
+mi ssi ng dim ension s shoul d be worked out f rom other
+ 
+d
+im ension s, as fa r as possi ble, scali ng them 
+from t he drawin g b eing t he last
+ 
+resort.
+ 
+1.2 
+B il l of  Qu an tities (B oQ)
+ 
+W hen one wants to bu y a table, he ask the cabinet 
+  
+maker as to what is would cost. The cabinet 
+makerb efor egivi n gthe c ostwould 
+  
+li ketokn
+ow t hedetailed spe cificati onofthet able,i.e., it ssiz e 
+length, bre adth, 
+  
+height, design, t ype of ti mber a nd the finish required. Once the specificati on is 
+  
+known the cabinet mak e r will  give the v alue of t he table b y workin g out cost of 
+  
+materials an
+d 
+labourrequir edand addi nghisove rhe adandp rofi t.S im il arl y, a 
+  
+pr ospecti vebuil dingown erw ants 
+to know before pla cing t he order that wh at 
+  
+the cost or his buil ding would be. In o rder to work out  
+theeastofabuil ding, 
+  
+de tai
+ledquanti ti eshaveto
+ 
+beworkedoutinacco rdan cewiththerequirem ent 
+
+--- PAGE 6 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+2
+ 
+of 
+8
+3
+ 
+ 
+of 
+  
+theS tandardMethodofmeasurementandpric eb
+yth eBuil der.Theseq uanti ti es
+ 
+whencoll ected 
+togethe r into a bil l, form a bill  of quanti ti es. The a dvanta ges of a 
+  
+bil l or quanti ti es are as follows:
+ 
+ 
+(
+1) 
+I
+t  forms a comm on b asis  for competit ive tend ering which  is ne cessa r y to obtain a  r easonable  
+value tor consi der ati on. 
+ 
+(2)Itformsinit selfabasi sofratesfo rmeasur edw orkwhichcanb eusedin
+ 
+t hecontra ctforvalu ati on 
+of variati ons and fin al ac cou
+nt
+.
+ 
+(3) 
+It
+ 
+is us ed in bui ldi ng operati ons 
+for
+ 
+the compl eti on 
+of interim  pa ym ents.
+ 
+ 
+The following point s a r
+e
+ 
+essential in t he producti o n of
+ 
+good bil l of quanti ti es:
+ 
+ 
+(1)
+ 
+A good knowled ge of  b uil ding const ructi on as without  thi s the corr ect
+ 
+int erpretation of
+ 
+the
+ 
+drawin gs would not  be p ossi ble
+.
+ 
+(2)
+ 
+Accur ac y and n eatness in  measurin g and sett in g o ut
+.
+ 
+(3)
+ 
+Athoroughknowled geof writ ingdescriptio nsinconciseandclear
+ 
+lan gua gewhichwill translate 
+the drawin gs int o words.
+ 
+1.3 
+Wh at is S p ecif ication ?
+ 
+A 
+S
+pecificati onisasp
+e cialdescriptio norap articu lar
+ 
+subj ect.An 
+e
+n gine erin gspe cificati oncontains  
+detaileddes criptio nor all
+ 
+wor
+k
+m
+anshi pand materi alswhichar er equired tocompl etean  
+en gine erin g 
+project
+ 
+in accord ance wi th it s drawings and details. The technical drawin gs
+ 
+of a 
+  
+ 
+structure will  
+show, 
+the proportions
+ 
+and relative posi ti ons of the various components of the structure. 
+It is not 
+often
+ 
+possi ble to fu rnish 
+the
+ 
+information on th e dr awings,  re gardin g the  qu al
+it y or  materi als to be  
+used and 
+the  qual
+it y of w orkmansh
+ip to be a chiev ed durin g const ru cti on, d ue to shorta ge  of sp ace.  
+This data re gardin g the materials and wo rkmans hip is conv
+e ye d in a 
+s ep arate contra ct document
+,
+ 
+whichisknownasthe
+ 
+"s pecificati ons "fo rthe wor k. 
+Thusthedr awin gswit hthespe cificati ons 
+
+will  
+compl etel yde finethe str ucture
+
+. The  
+
+spe cificati o n
+
+ 
+isfu rnisheds epar atel yal
+ongwiththe dra wings  
+and is an 
+essential pa rt of  all  engin eerin g cont racts . 
+ 
+1.4 
+Necessi ty of  S p ecif ication s
+ 
+The nec essi ti es
+ 
+of specifi cati ons are as follows
+:
+-
+ 
+ 
+(a)
+ 
+The cost 
+of unit  quanti t y of work is
+ 
+govern ed b y it s specificati on.
+ 
+(b)
+ 
+S pecificati ons of a work are r equired to d escri
+be  the quali t y and quanti t y o r 
+differ ent materi als 
+requiredfo raconst ructi o nworkandis 
+one
+ 
+oftheessentialcontractdocume nts.Thusacontractor 
+can make a pro gr amm e t o procure th e materials r equired 
+fo r
+ 
+a proje ct and the owner can ch eck 
+the quali t y of mat erials c onformi ng to t he spe cific ati on avoidi ng
+ 
+dispu te wi th t he contractor.
+ 
+(c)
+ 
+This also specifies the workmanship and the method of doing the work
+. Th us
+ 
+specificati on of a 
+workserv esasaguidetothesupervisingsta ffofth e
+ 
+c
+ontra ctorasw ell astotheownertoex ecute  
+the work to their sati sfa cti on.
+ 
+(d)
+ 
+A work is carri ed ac cor ding to it s specificati on and the contra ctor is paid for the same. An
+y
+ 
+cha
+n ge in sp e cificati
+on c hanges the tende red r ate.
+ 
+
+--- PAGE 7 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+3
+ 
+of 
+8
+3
+ 
+ 
+(e)
+ 
+As the rate  or a work is based 
+on
+ 
+spe cificati on, a  contractor  can calcul ate  the
+ 
+rates o f various  
+it emsofworksin atend e rwithhispro curement ra tesofmate rialsand labou r.Thustend erp aper  
+without  specif
+icati ons of works i s
+ 
+baseless, incom plet
+e and invalid.
+ 
+(f)
+ 
+S pecificati on is necess ar y to speci f y 
+e
+qu
+ipm ent
+, tool s and plants to be
+ 
+engaged for a work and  
+thus enables to procur e t hem befor ehand.
+ 
+(g)
+ 
+Thenec essi t yo fspecifi c ati onistoverif yandch ec kthestren gt
+hofmate rial sforawo rkinvol ved 
+in a project.
+ 
+(h)
+ 
+S pecificati on is an essent ial contract docum ent an d required fo r arbitr ati on 
+o
+f court c ases
+ 
+1.5 
+Main  
+I
+te ms of  
+W
+ork s
+ 
+of  Bu ild in g
+: 
+ 
+As per 
+ASTM UN IF OR MAT II C lassificati on fo r Buil ding El ements (
+AS TM 
+E1557
+-
+09,
+ 
+2015
+)
+, 
+t
+he main it ems of works 
+of buil ding 
+ar e:
+ 
+1.
+ 
+Earthwork
+:
+ 
+Ea rthwork in  ex cavati on and ea rthwor k
+ 
+taken out 
+ac curatel y
+ 
+un der diffe rent i tems
+ 
+2.
+ 
+C oncrete in Found ati on: Foundati on conc rete con sis ts of li me concrete or weak/l ean cement 
+concret e. The propo rtion 
+of cement con cr ete In fo undati on ma y b e 1:
+ 
+4:
+ 
+8 or 1
+:
+ 
+5: 10
+.
+ 
+3.
+ 
+Brick Fl at S oli ng: W hen the soil  is soil or bad.' one la ye r of dr y b rick or
+ 
+stone soli ng is appli ed 
+below the foundati on co ncrete. This soli n g la yer  is comput ed in square unit s specif yin g the  
+thi
+ckness
+.
+ 
+4.
+ 
+DampP roofC ourse:DPC usuall yof2.5 
+cm
+ 
+(1inch)thi ckrichcementcon crete1:1.5:3or2cm 
+(.75inch) thi ckrich cem e ntmortar1:2, mi x edwithstandard wate rproo fingmaterial,isprovid ed 
+at the pli nth level to full width of pli nth wall  and th
+e
+ 
+quanti ti es are comput ed in square unit s. It  
+is not  provided at verand a openin gs.
+ 
+5.
+ 
+Masonr y:Foundati onan dpli nthmasonr yistakenunderoneit em, 
+and
+ 
+m asonr yinsupe rstructur e  
+is taken unde r a sep arat e it em. In  storied buil di ng, th e masonr y in e ach  store y
+ 
+is tabul ated 
+separat el y. P rop er dedu cti ons arc mad e for op enings as doors, windo ws, li ntels etc. Arch  
+masonr y work is t aken o ut separatel y
+.
+ 
+6.
+ 
+Arch M asonr y W orks: Masonr y work  in a rche s is calculat ed in cubi c  unit s
+ 
+separ atel y b y 
+mul ti pl yin g the mean len gth o
+f the arch b y the thi ckness of the: ar ch and b y the br eadth of the  
+wall .
+ 
+7.
+ 
+L
+int els over Openin gs: Len
+g
+th o f li ntel is equal to the clear sp an plus two i hearin gs. If th e 
+dim ension  of bea ring is n ot given,  the be arin g ma y b e tak en as  1 same  as t he thi ckness o
+f li ntel 
+with a mini mum  of 12 
+cm
+. (4.50 inch
+).
+ 
+8.
+ 
+R C C  & R B W ork: The quanti ti es in roof or floor slab, in beams, lint
+els,
+ 
+colum ns, foundati ons 
+are c alculated in cubic u nit s ex clusi ve of steel
+: 
+reinforcements and it s ben ding but inclusi ve of 
+centerin g and shut
+te ring and
+ 
+fix ing and bindi ng r einforc ement in posi ti on. The reinfo rcement  
+including it s bending is taken up separatel y unde r  steel works. For thi s purpose, 0.6% to 1 % of 
+R C C  b y volum e ma y
+ 
+b e taken for ste el.
+ 
+9.
+ 
+Floorin g and R oofin g
+:
+ 
+(i)
+ 
+Grou n d  Floor :
+ 
+The b as e l
+im e concr ete and floor finishi ng of C C  or sto ne or marble  or 
+mosaic etc
+.
+ 
+ar e usuall y ta ken as one job or one it e m and the quanti t y is 'c al culated in square 
+
+--- PAGE 8 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+4
+ 
+of 
+8
+3
+ 
+ 
+unit s. The length and b re adth are the insi de dim en sions  from wall  to wall  of superstructur e.
+ 
+(ii)
+ 
+l
+st f lo
+or, 2n d f loor etc.:
+ 
+S upporti ng structure is taken separat el y in cubic unit s as RC C  and 
+the nom finishi ng is tak e n separ atel y in sq  unit s a s 2.5 
+cm
+ 
+o r 
+4 cm
+ 
+(1  inc
+h
+)  or 1.5  inch) C C  
+or marble, mos aic etc
+.
+ 
+10.
+ 
+P lastering and P oint ing: P lastering usuall y 0.5 inch 
+thi ck s calculated in square metres. W hil e 
+deducti ng, th e following rules are gene rall y followed:
+ 
+
+ 
+For small openings up to 0.5 sq
+.
+ 
+m
+ 
+(5 sq. 
+f
+t) no deducti on is made and at the same 
+ti me no 
+addit ions are
+ 
+made 
+f
+or ja mbs, soffit s and of sil ls of 
+these openin g
+s.
+ 
+
+ 
+For op enin g ex ceedin g 0
+.
+5 sq
+.
+ 
+m
+ 
+(5  sq. ft)  but not  ex ceedin g 3  sq 
+m
+ 
+(30  sq . 
+f
+t) d educti on is 
+madeforonefa ceonl ya ndtheotherlaceisall owedforjambs, 
+soffi
+tsandsil lswhicharenot 
+taken int o account s ep ar a tel y. 
+ 
+
+ 
+For openin g above 3 sq. 
+m
+ 
+(30 sq
+. It) deducti on is made for both faces of the opening, and  
+the jambs, soffit s and si ll s are tak en int o account a nd added. 
+ 
+P lasteringinc eil ingusual l yof12mm (1/2inch )thi ckandiscomput edinsq.
+ 
+m
+ 
+unit sunderasepa rate  
+head.
+ 
+11.
+ 
+Doors and W indows:  (i) 
+C howkhat or Fr ame
+ 
+     
+(ii) Door and W indow  S hutt ers
+ 
+12.
+ 
+Ir on W ork: Com puted in Kg. o r Quint al
+ 
+13.
+ 
+W hit eW ashing 
+or
+ 
+C olourW ashingorDist emperin g:Thequ anti ti esar
+e
+ 
+c omput edinsquareunit s 
+and are usuall y same as for plasterin g. The insi de is usuall y white
+-
+w ash
+e d and the outsi de is 
+usuall y color
+-
+wash ed. Th e number 
+of
+ 
+coals s hould be menti oned in t he it em.
+ 
+14.
+ 
+P aint ing: P aint ing or  Va rnishing of  doors and w indows are  comput ed in  square  meters, th e 
+dim ension  shoul d be taken for outer dim ension s of the chowkhat i.e. th
+e outer dim ension s of 
+doorsandwindows.P aint ingisusuall ydon eintwo orthre ecoats,usuall yov era co atofp rimi ng.
+ 
+ 
+Electrificati on
+ 
+and S anit ar y and W ater S uppl y W or
+k
+s: For S anit ar y 
+and 
+W ater S uppl y W orks 8% 
+and for  ele ctrificati on 8 % of the  esti mate
+d cost of the buil din g works  is us
+uall y provided in  the  
+esti mate.
+ 
+ 
+R ates
+: R ates or different it ems in the esti mate ar
+e
+ 
+the 
+current
+ 
+rates for the c ompl eti on of the it ems 
+of work which in clude s uppl y of mat erials, trans port, labou
+r, 
+sca ffoldi n g,
+ 
+overhe ads, c
+ontra ctor 's 
+profit ,
+ 
+tax es
+,
+ 
+etc. The rat es ar
+e
+ 
+usu all y tak en from  the PW D Schedule of R ates.
+ 
+1.6 
+Wh at is Anal ysis  of Rate? 
+ 
+T
+he basis  of a rrivi ng at a  corre ct and r easonabl e r ate per unit  work o r supp l y, for a pa rticular it em 
+following it s specific ati on and
+ 
+detailed surve y of materials, labour
+,
+ 
+equip ment,
+ 
+etc. as requir ed for  
+the unit work and their pr evail ing r ates ma y b e call ed as an an al ysis  of rate.
+ 
+ 
+
+--- PAGE 9 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+5
+ 
+of 
+8
+3
+ 
+ 
+1.7 
+Pu rp ose of  Rate An alysi s
+ 
+Main purposes of r ate an al ysis  ar e the foll owin g:
+-
+ 
+ 
+ 
+(a) To det ermine the c u
+rr ent rate pe r unit of an it e m at the locali t y. 
+ 
+(b) To
+ 
+ex ami ne the viabil it y of r ates off ered b y co ntractors. 
+ 
+(c) To c alculate th e quant it y of mate rials and labou r stren gth requir ed 
+for 
+th e project pl annin g. 
+ 
+(
+d) To fix  
+up labour contracts rates.
+ 
+ 
+The pr
+ic e of  an it em o f work is made  up of  the f oll owing compon ents an d a summ ati on of th ese i s 
+the
+ 
+rate pe r unit of an it e m. 
+ 
+ 
+(a)
+ 
+C ost of Materials
+ 
+(b)
+ 
+C ost of Labou r 
+ 
+(c)
+ 
+C ost or Equipm ents or Tools and Pl ants 
+ 
+(d)
+ 
+C ost of Overheads o r Establis hment Charges (incl uding 
+incide
+ntal)
+ 
+(e)
+ 
+P rofit  
+ 
+ 
+1.8 
+Fac tors af f ectin g the Rate an alysi s:
+ 
+The rate o f an it em of wo rk mainl y dep ends on t he  following f actors:
+-
+ 
+ 
+ 
+(1) S pecificati on of the it em which indi cates the quali t y and proportion
+ 
+of materials, the method of 
+const ructi on and prote cti on
+ 
+of work. 
+ 
+(2) The pres ent arte  of materials for t he it em of work up to the worksit e. 
+ 
+(3) Dail y wa ges of diff er ent cate gori es of l
+abour er  at t he locali t y with 
+their respecti ve output s. 
+ 
+; 
+ 
+(4) The r an ge of l ead and  li ft required for d eposi ti on of material
+s to ca rr y 
+o ut
+ 
+the item or work. 
+ 
+(5)P er centa gech ar geo foverheads  
+which
+ 
+includ e sinsurance andthe
+ 
+possi bil it yo fthefto rloss , 
+etc.  
+ 
+(6) The, r an ge of profit  a nd avail abil it y of w ater i n connecti on with t he
+ 
+co nstructi on work. 
+ 
+Besides these the sit e c
+o ndit ion, sit e organiz ati on and cost control during
+ 
+ex ecuti on etc. shoul d be 
+consi dered as these f acto rs aff ect t he cost pe r unit of work done at si te. 
+ 
+ 
+ 
+ 
+
+--- PAGE 10 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+6
+ 
+of 
+8
+3
+ 
+ 
+Pa rt 2
+:
+ 
+Rei nfo rcement Esti ma ti on ofa  RCC Sla b
+ 
+ 
+2.1 Rein f orce men t used  in  the RCC
+ 
+Two t ypes o f ste
+el a re us ed in R C C  work. The y ar e 
+ 
+1. P lain round mi ld st eel bar 
+ 
+2. Deformed b ar
+ 
+ 
+ 
+Figu re
+ 
+2
+.1
+: Typ ical Rein f orcemen t
+ 
+Design ati on and cross
+-
+se cti on area o f 
+ASTM s tan dard reinfo rcin g ba rs ar e given b elow:
+ 
+T ab le 
+2
+.1: Diamete r an d  Nomin al Cross
+-
+S e ctio n  Area o
+f  AST M S tandard  Rein f orcin g B ars
+ 
+B ar No.
+ 
+Diamete r (in )
+ 
+No min al 
+A
+rea (in
+2 
+)
+ 
+#3
+ 
+3/8
+ 
+0.11
+ 
+#4
+ 
+4/8
+ 
+0.20
+ 
+#5
+ 
+5/8
+ 
+0.31
+ 
+#6
+ 
+6/8
+ 
+0.44
+ 
+#7
+ 
+7/8
+ 
+0.60
+ 
+#8
+ 
+8/8
+ 
+0.79
+ 
+#9
+ 
+9/8
+ 
+1.00
+ 
+#10
+ 
+10/8
+ 
+1.27
+ 
+#11
+ 
+11/8
+ 
+1.56
+ 
+ 
+2
+.2 Cover an d  Clear 
+C
+o ver in  RCC
+ 
+Cover: 
+R e fers to d
+ist anc e
+ 
+of outer concr ete surf ac e from C .G. of ste el.
+ 
+Clear cov er:  
+R e fers to d
+ist ance of outer conc rete surfac e from ed ge of ste e l.
+ 
+ 
+Figu re 
+2
+.2 : Cove r an d  Clear cov er in  RCC
+ 
+ 
+
+--- PAGE 11 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+7
+ 
+of 
+8
+3
+ 
+ 
+R einforcement coverin g i s necessa r y for the following r easons
+:
+ 
+1. To protect rein forc e
+me nt/ steel from weathe rin g effe ct i .e. cor rosion 
+ 
+2. To protect from fi re.
+ 
+3. 
+The need for ad equate 
+adhesion
+ 
+betwe en the ste el and conc rete.
+ 
+4. The need to 
+c re ate cab le and pipe ch annels
+ 
+without  harming the reinfor ce ment
+ 
+Accordin g to t he AC I co de mi nim um c
+over should be maintained in all ki nd of R C C  works. AC I 
+code provisi ons ar e give n in t he following table.
+ 
+T ab le 
+2
+.2: ACI Cod e Pr ovisi on sf or Min imu m Cover an d  Clear Cov er
+ 
+ 
+B eam/Colu mn
+ 
+S lab
+ 
+C lear cove r 
+ 
+1.5 inch
+ 
+0.75 inch
+ 
+C over
+ 
+2.5 inch
+ 
+1 inch
+ 
+ 
+2
+.3 
+Rein f
+orce men t 
+Hoo k
+s
+ 
+InR C C work reinfo rcem entsare usedincon cret e totaketension.Toa chie vethe goodp erform ance  
+i.e.strongbondbetweenconcret eandsteel,hooksareprovidedattheendso ftheall reinforcin gbars 
+(especi all y in pl ain bars).  T ypic al len g
+th of  one ho ok is 9d
+b
+ 
+to 12d
+b
+, where d
+b
+ 
+is the diameter of  the  
+hook bar.
+ 
+ 
+Figu re
+ 
+2
+.3
+: Typ ical 
+90
+¹
+ 
+h ook
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 12 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+8
+ 
+of 
+8
+3
+ 
+ 
+2
+.4 T yp e of  
+R
+einf orce men t 
+U
+sed  in  
+S
+lab
+ 
+1. S traight bar [ li es at bot tom ]
+ 
+2. C ranked ba r [ li es top and bott om depending on crankin g]
+ 
+3. Ex tra top [li e
+s at t op]
+ 
+ 
+Figu re
+ 
+2
+.4
+: Typ ical 
+S
+lab  
+R
+ein f orcemen t 
+P
+att er n  (straigh t & cran k ed  b ar).
+ 
+Rul es f or slab  reinf orce men t di strib u tion  
+ 
+1. S tart wit h a straight ba r and end with a str aight bar
+ 
+2. C ranked ba rs ar e in be tween st rai ght bars.
+ 
+3. Ex tra tops are in betw
+e en crank ed ba r.
+ 
+2
+.5 Mean in g of  
+L
+egen d s
+ 
+
+ 
+
+_
+. First 
+bar should be strai ght an d nex t bar shoul d be cran ked.
+ 
+ 
+
+ 
+2#3 ex tra top i n between cranked: 2#3 b ars a re pla ced in betwe en cr an
+ked b ars at t op 
+posi ti on on one side.
+ 
+
+--- PAGE 13 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+9
+ 
+of 
+8
+3
+ 
+ 
+ 
+Figu re
+ 
+2
+.5
+:
+ 
+De mon strat ion  of S
+lab  
+R
+einf orce men t 
+P
+a tte rn .
+ 
+2
+.6 L en gth of  a 
+C
+ran k ed  
+B
+ar
+ 
+ 
+Figu re 
+2
+.6 :
+ 
+L en gth of  a 
+C
+ran k ed  
+B
+ar
+ 
+Len gth o f 
+strai ght
+ 
+reinfo r cement = L 
+ 
+Len gth o f 
+cr anked
+ 
+r einfo rcement = ( L
+
+ 
+d 
+
+ 
+d) + d/cos45
+ 
++d/cos45 
+ 
+                                                       
+= ( L
+
+ 
+d 
+
+ 
+d) + 1 .42d +1.42d 
+ 
+                                                       
+= L + 0.42d +0. 42d
+ 
+ 
+Len gth o f cr anked r einfo rcement = Len gth of strai ght bar + n (0.42d )
+ 
+                 
+                                        
+{W here, n= no . of crank ed porti on}
+ 
+
+ 
+
+ 
+
+ 
+
+
+
+
+vw¹
+ 
+
+ 
+
+--- PAGE 14 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+10
+ 
+of 
+8
+3
+ 
+ 
+2
+.7 N
+u mb e r
+ 
+of  
+R
+ein f orce men t (
+A
+ltern at ely 
+C
+ra n k ed  
+D
+istrib u tion )
+ 
+
+ 
+ 
+Figu re 
+2
+.8 : 
+S traigh t and  Cran k ed  
+Rein f orcemen t Distrib u tion
+ 
+No of strai ght bars = (76
+_
+ 
+-
+ 
+2
+_
+ 
+-
+ 
+2
+_
+) /12 
+
+ 
+No of cr anked ba rs = No of straight b ars 
+-
+ 
+1 = 7 
+-
+ 
+1  = 6 Nos.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 15 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+11
+ 
+of 
+8
+3
+ 
+ 
+2.   2#3 ex tra top i n between cr anked
+ 
+ 
+Figu re 
+2
+.9
+: 
+S traigh t, Cr an k ed  and  E xtra T op  
+Distrib u tion
+ 
+No of ex tra top (one side ) = S pace avail able for e x tr
+a topx  No of ex tra top  
+ 
+ 
+ 
+ 
+     
+= (No of crank ed bar 
+-
+1) x  2 = (6
+-
+1) x  2 = 10 Nos.
+ 
+T ab le 
+2
+.3: 
+Nomin al 
+W
+ei gh t of  the AS T M standard  
+R
+ein f orcin g 
+B
+ar
+ 
+U.S. reb ar size ch art
+ 
+Imp e rial  B ar S ize
+ 
+Metri c S ize ( mm)
+ 
+Mass p er u n it len gth
+ 
+lb /f t
+ 
+(kg/ m)
+ 
+#3
+ 
+10
+ 
+0.376
+ 
+0.561
+ 
+#4
+ 
+13
+ 
+0.668
+ 
+0.996
+ 
+#5
+ 
+16
+ 
+1.043
+ 
+1.556
+ 
+#6
+ 
+19
+ 
+1.502
+ 
+2.24
+ 
+#7
+ 
+22
+ 
+2.044
+ 
+3.049
+ 
+#8
+ 
+25
+ 
+2.670
+ 
+3.982
+ 
+#9
+ 
+29
+ 
+3.400
+ 
+5.071
+ 
+#10
+ 
+32
+ 
+4.303
+ 
+6.418
+ 
+#11
+ 
+36
+ 
+5.313
+ 
+7.924
+ 
+#14
+ 
+43
+ 
+7.650
+ 
+11.41
+ 
+#18
+ 
+57
+ 
+13.60
+ 
+20.284
+ 
+
+--- PAGE 16 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+12
+ 
+of 
+8
+3
+ 
+ 
+2
+.8 Work
+ed  O
+u t Prob le m
+ 
+ 
+ 
+ 
+ 
+ 
+Figu re 
+2
+.
+10
+: Rein f orce men
+t 
+De tailin g
+ 
+f or 
+a 5 in ch  S lab S u pp orted  on Mason ry Wall
+ 
+ 
+ 
+ 
+
+--- PAGE 17 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+13
+ 
+of 
+8
+3
+ 
+ 
+Rein f orce men t 
+E
+sti mati on
+ 
+T ab le 
+2
+.4: Calcul ation  of  
+Rein f orcemen t 
+E
+sti ma tion
+ 
+f or the Work ou t Pr ob lem
+ 
+B ar
+ 
+B ar
+ 
+Design ation
+ 
+No.
+ 
+[rou n d ed  to up p er 1]
+ 
+L en gth
+ 
+(f t)
+ 
+T otal 
+L en gth
+ 
+(f t)
+ 
+L on g Direction
+ 
+#4 S tr
+aight
+ 
+uv
+“
+t
+
+
+F
+t6
+st
+E
+s
+L
+uw
+ 
+wr
+“
+F
+t6
+F
+t6
+L
+v{
+ä
+xy
+“
+ 
+1738.33
+ 
+#4 C ranked
+ 
+uw
+F
+s
+L
+uv
+ 
+v{
+ä
+xy
+“
+E
+v
+T
+r
+ä
+vt
+T
+l
+v
+st
+p
+L
+wr
+ä
+tu
+“
+ 
+1707.70
+ 
+#3 Ex tra top
+ 
+:
+uv
+F
+s
+;
+T
+t
+L
+xx
+ 
+s
+“
+{6
+F
+
+
+E
+tt
+“
+u
+L
+{
+ä
+yw
+“
+ 
+643.50
+ 
+#4 Ex tra top
+ 
+:
+uv
+F
+s
+;
+T
+t
+L
+xx
+ 
+tt
+“
+u
+E
+sr6
+E
+tt
+“
+u
+L
+sw
+ä
+w
+“
+ 
+1023
+ 
+#3 Hook
+ 
+xx
+
+T
+
+t
+L
+sut
+ 
+sr
+
+T
+7
+<
+T
+5
+56
+ 
+= 0.3125
+ 
+55.04
+ 
+#4 Hook
+ 
+:
+uw
+E
+uv
+E
+xx
+;
+T
+t
+L
+tyr
+ 
+sr
+
+T
+8
+<
+T
+5
+56
+L
+ 
+0.417
+ 
+112.59
+ 
+S h ort Direction
+ 
+#3 S traight
+ 
+wr
+“
+F
+
+
+F
+t6
+sz
+E
+s
+L
+yx
+ 
+uv
+“
+t6
+F
+t6
+F
+t6
+L
+uu
+ä
+zu
+“
+ 
+2571.33
+ 
+#3 C ranked
+ 
+yx
+F
+s
+L
+yw
+ 
+uu
+ä
+zu"
+E
+v
+T
+r
+ä
+vt
+T
+l
+u
+st
+p
+L
+uv
+ä
+su"
+ 
+2558.49
+ 
+#3 Ex t
+ra top
+ 
+yw
+F
+s
+L
+yv
+ 
+s
+ñ
+{6
+F
+
+
+E
+tr
+ñ
+u
+L
+{
+ä
+rz"
+ 
+672.16
+ 
+#4 Ex tra top
+ 
+yw
+F
+s
+L
+yv
+ 
+s
+ñ
+{6
+F
+
+
+E
+tr
+ñ
+u
+L
+sz
+ä
+rz"
+ 
+1338.16
+ 
+#3 Hook
+ 
+:
+yx
+E
+yw
+E
+yv
+;
+T
+t
+L
+vwr
+ 
+sr
+
+T
+7
+<
+T
+5
+56
+ 
+= 0.3125
+ 
+140.62
+ 
+#4 Hook
+ 
+yv
+
+T
+
+t
+L
+svz
+ 
+sr
+
+T
+8
+<
+T
+5
+56
+L
+ 
+0.417
+ 
+61.716
+ 
+ 
+T ab le 
+2
+.5: Ca
+lcul ation  of  Weigh t of  Reinf orce men t Bars f or the Work ou t Prob le m
+ 
+B ar Design ation
+ 
+T otal Length
+ 
+(f t)
+ 
+Weigh t per u n it 
+length (lb /f t)
+ 
+Weigh t
+ 
+(lb )
+ 
+#3
+ 
+6642
+ 
+0.376
+ 
+2498
+ 
+#4
+ 
+5982
+ 
+0.668
+ 
+3996
+ 
+ 
+
+--- PAGE 18 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+14
+ 
+of 
+8
+3
+ 
+ 
+Pa rt 3:
+ 
+Es ti ma tio n of a Resi denti al  Bui l di ng
+ 
+ 
+3
+.1 B asic Calcul ation
+ 
+of 
+E stimation  of  Cons tru c tion  Material s
+ 
+
+ 
+Find out the quanti ti es in 100 cft cement concr ete. Mix  rati o (C: FA: C A= 1:2: 4) and 
+shrinkage fa ctor 1.5.
+ 
+
+ 
+Volume of conc rete (b ef ore mi x ing) = 
+srrs
+ä
+w
+L
+swr
+
+
+ 
+R equired materials:
+ 
+C ement= 
+5
+5
+>
+6
+>
+8
+swr
+L
+ts
+ä
+vtz
+
+
+L
+65
+ä
+86
+<
+5
+ä
+69
+
+ 
+L
+sy
+ä
+svt
+
+ 
+N
+sz
+
+ 
+ 
+(1 ba g cem ent= 1.25 c ft=  50 kg)
+ 
+FA= 
+6
+5
+>
+6
+>
+8
+
+
+swr
+L
+vt
+ä
+zwx
+
+
+ 
+C A= 
+8
+;
+sw r
+L
+zw
+ä
+yst
+
+
+ 
+
+ 
+Find out the quanti ti es in 100 cft brick masonr y. Factor of sa fet y= 1.2 for  wastage. Mortar 
+mi x  rati o (cement: s and) = 1:4 and shrinka ge
+ 
+facto r 1.5.
+ 
+
+ 
+Volume of brick masonr y=  
+srrs
+ä
+t
+L
+str
+
+
+ 
+ 
+ 
+No. of B ricks requir ed= 
+564
+-,
+-.
+v
+1
+-.
+v
+/
+-.
+L
+suzt
+ä
+v
+N
+suzu
+ 
+Volume of 1383 no. of br icks wit h mortar= 
+suz u
+54
+56
+
+9
+56
+
+7
+56
+L
+str
+ä
+rwt
+
+
+ 
+Actual si
+ 
+ 
+Volume of 1383 no. of br icks wit hout m ortar= 
+suzu 
+=
+ä
+9
+56
+
+8
+ä
+9
+56
+
+6
+ä
+;9
+56
+L
+{v
+ä
+r{s
+
+
+ 
+Volume of mortar r equir ed= 
+str
+ä
+rwt
+F
+{v
+ä
+r{s
+L
+tw
+ä
+{xs
+
+
+ 
+C alculate quanti t y o f ce ment and sand li ke previ ous problem.
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 19 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+15
+ 
+of 
+8
+3
+ 
+ 
+3
+.2 U
+n it 
+W
+eigh t of  
+S
+ome 
+I
+mp ortant 
+M
+a terial s
+ 
+T ab le 
+3
+.1: 
+Uni t 
+Weigh
+t of  
+S
+ome 
+I
+mp ortant 
+M
+a t erial s
+ 
+Material s
+ 
+Uni t Wt. (lb /cf t)
+ 
+Brick wo rk
+ 
+120
+ 
+C ement
+ 
+90
+ 
+RCC
+ 
+150
+ 
+Mil d st eel
+ 
+490
+ 
+ 
+3
+.3 Assign men t
+ 
+Questi o
+n (1
+): Find out  th e ingredients r equired fo r  making 20
+ 
+ft x  18
+ 
+ft concrete slab (thickness 
+= 
+5 
+inch). Given, mi x  rati o 
+= 
+1: 1.
+5
+:
+ 
+3. 
+ 
+Answer 
+( 1 ):  
+cement 
+= 
+32. 72727273 ba gs; sand (fi ne a ggr e gate ) 
+= 
+61.363 63636 
+c
+ft
+ 
+&
+ 
+b rick/st one 
+chips (coars e a ggr e gate ) 
+= 
+122.7272727 
+c
+ft.
+ 
+ 
+Questi on (2): S uppose, you have 50 b a gs of ceme
+nt. W hat volum e of conc rete
+ 
+you can mak e f rom 
+thi s 50 bags c ement 
+w i t h  
+a mi x  
+ra t i o  
+of 
+1: 1.25:  2.5 0
+. 
+ 
+Answer 
+( 2): 
+197.916666 7 c
+ft dr y con crete. 
+ 
+ 
+Questi on (3): S uppose, you have 5000 Nos. of full si z e brick. You want t o make
+ 
+a brick wall . 
+ 
+W hat wil l be the
+ 
+volum e 
+o f  br i c k w o r k?  
+ 
+Answer (3 ): 434.0277778 
+c
+ft
+. 
+ 
+ 
+Questi on(4):Inquesti on(3),determi nethe 
+numbe r
+ 
+ofcementba g
+s
+ 
+&volu meofsand 
+if 
+mortarmix
+ 
+rati o is 1 :4
+. 
+ 
+Answer (4 ): 22.52604167 bags o f
+ 
+cem ent;  112.6302083 
+c
+ft sand. 
+ 
+Questi on (5): Given a
+ 
+10
+ 
+i
+nch thi ck brick wall  having a len gth of 30 feet an d
+ 
+height of 10 feet. The  
+wall  contains two doors 
+(7  
+fe et hei ght 
+&
+ 
+3.5 feet width)
+ 
+and 
+t w o  
+windows  (4 feet hei ght 
+&
+ 
+6 feet  
+width) and a conti nuous li ntel (25 fe et
+ 
+len gth  
+&
+ 
+6 
+inch h eight ). Usin g a fa ctor of  s
+af et y of  
+1 . 2  
+and 
+cement:sandrati oin
+ 
+mortar 
+=
+ 
+1:
+ 
+4,Esti matetheno.ofbricks,no.ofbagsofcement 
+&
+ 
+sandr equired
+ 
+for the const ru cti on of the wall
+.
+ 
+Answer (5 ): No. ofbrick s = 2195; cement = 9.886 95 bags
+ 
+&
+ 
+sand co: 49.43 475 
+c
+ft
+.
+ 
+ 
+Questi on (6): li me c
+oncr ete (3 inch thickness ) wa s casted over 
+a 
+R C C  roof has
+ 
+a 
+plan a rea o r 50 
+feet x  30 feet. Det ermine it s ingredients (mix  rati o 
+= 
+2:
+ 
+2: 7). 
+ 
+Answer (6 ): Lim e = 
+102.
+2727
+ 
+c
+ft; surkhi = 102.27 27 
+c
+ft
+ 
+&
+ 
+b rick chips
+ 
+= 35 7.9545
+ 
+c
+ft. 
+ 
+Questi on (7): Find out t he i
+ngredients r equired f or the R C C  foundati on up to
+ 
+ground
+ 
+l evel
+ 
+(se e 
+F
+igu re 
+4.1
+). Given, mi x  rati o 
+= 
+1:
+ 
+2:
+ 
+4. 
+ 
+Answer (7 ): cement 
+= 
+2 3.7193
+ 
+bags (=24 ba gs ); sand (fine a ggre gate) 
+= 
+5 9.298 c
+ft
+ 
+&
+ 
+b rick/
+ 
+stone
+ 
+chips (coars e a ggr e gate ) 
+= 
+118.
+59666 c
+ft.
+ 
+ 
+
+--- PAGE 20 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+16
+ 
+of 
+8
+3
+ 
+ 
+ 
+ 
+Fig
+u re 
+3
+.1 : Plan  an d  E levation  of  Fou n d ation for Qu estion  7 of  Assignmen t 
+ 
+ 
+ 
+3
+−
+ 
+CC l ayer
+ 
+3
+−
+ 
+BF S  layer
+ 
+ 
+
+--- PAGE 21 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+17
+ 
+of 
+8
+3
+ 
+ 
+3
+.4 Work
+ed  O
+u t Prob le m
+ 
+ 
+Esti mate the mate rials r e quired fo r the  following residenti al buil ding.  Als o find out the  cost o f all  
+materials.
+ 
+ 
+Figu re 
+3
+.2 : Bu il d in g Plan
+ 
+ 
+Figu re
+ 
+3
+.3
+: Fou
+n d ation Plan
+ 
+
+--- PAGE 22 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+18
+ 
+of 
+8
+3
+ 
+ 
+ 
+Figu re
+ 
+3
+.4
+: Cross S ec tio n s of  Fou n d ations
+ 
+ 
+Figu re
+ 
+3
+.5
+: 
+B u il d in g Plan  w ith S ection  L in es
+ 
+
+--- PAGE 23 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+19
+ 
+of 
+8
+3
+ 
+ 
+ 
+Figu re
+ 
+3
+.6
+: Elevation  at Section  1
+-
+1
+ 
+ 
+Figu re
+ 
+3
+.7
+: Su n sh ad e
+ 
+ 
+Figu re
+ 
+3
+.8
+: 
+Fou n d ation Plan  
+ 
+
+--- PAGE 24 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+20
+ 
+of 
+8
+3
+ 
+ 
+ 
+Figu re
+ 
+3
+.9
+: Elevation  at Section  A
+-
+A
+ 
+ 
+Figu re
+ 
+3
+.10
+: Eleva
+tion  at Section  B
+-
+B
+ 
+ 
+Figu re
+ 
+3
+.11
+: Elevation  at Section  C
+-
+C
+ 
+
+--- PAGE 25 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+21
+ 
+of 
+8
+3
+ 
+ 
+Here,
+ 
+V= Volume
+ 
+L= Len gth alon g c enter li ne
+ 
+B= Thickn ess/  W idt h
+ 
+H= Hei ght
+ 
+ 
+E arthw ork  excavation : (Volu me)
+ 
+ 
+-
+ 
+
+ 
+ 
+
+ 
+
+ 
+Volume= Lx W x H= 1116.65 ft
+3
+ 
+ 
+-
+ 
+
+-
+ 
+ 
+
+ 
+
+ 
+Volume= L
+ 
+x
+ 
+W
+ 
+x
+ 
+H= 177.94 ft
+3
+ 
+C olum n foundati on
+-
+ 
+
+3
+ 
+ 
+-
+ 
+
+-
+
+-
+
+-
+
+ 
+
+ 
+
+ 
+Volume= L
+ 
+x
+ 
+W
+ 
+x
+ 
+H= 231.97 ft
+3
+ 
+Total vol ume= (1116.65 +177.94+258.19+231.97 ) = 1784.75 ft
+3
+ 
+
+--- PAGE 26 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+22
+ 
+of 
+8
+3
+ 
+ 
+ 
+B FS  (one laye
+r b elow  f ou n d ation ): (Area)
+ 
+ 
+-
+ 
+
+ 
+
+ 
+Area = Lx W = 277.08 ft
+2
+ 
+ 
+-
+ 
+
+-
+ 
+ 
+
+ 
+Area = Lx W = 46.875 ft
+2
+ 
+For colum n found ati on
+-
+ 
+
+ 
+W idt h
+
+ 
+
+2
+ 
+ 
+-
+ 
+
+-
+ 
+-
+
+-
+ 
+-
+
+ 
+
+ 
+Area = Lx W = 99.03 ft
+2
+ 
+Total Area o f BFS = (277 .08+46.875+48+99.03 ) =  47
+0.985 ft
+2
+ 
+ 
+Ce men t con cre te in  f oun d ation : (Volu me)
+ 
+ 
+ 
+Total vol ume of C C = 470.985 ft
+2
+
+3
+ 
+ 
+B rickw ork  in f ou n d ation  (up  to GL ): (Volu me )
+ 
+ 
+-
+ 
+
+--- PAGE 27 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+23
+ 
+of 
+8
+3
+ 
+ 
+
+
+3 
+ 
+
+3 
+ 
+
+3 
+ 
+Total= 387.9 ft
+3 
+ 
+ 
+-
+ 
+
+3
+ 
+
+2ft
+3 
+ 
+
+3 
+ 
+
+3 
+ 
+Total= 69.62 ft
+3
+ 
+ 
+-
+ 
+
+3
+ 
+
+3
+ 
+Tot
+al= 99.73 ft
+3
+ 
+ 
+B rickw ork  in f ou n d ation  f rom GL  to PL : (volu me)
+ 
+
+3
+ 
+
+3
+ 
+ 
+-
+
+-
+ 
+-
+
+-
+
+3
+ 
+Total= 355.56 ft
+3
+ 
+ 
+RCC in  f ootin g u
+p  to GL : (Volu me)
+ 
+
+3
+ 
+
+3
+ 
+Total= 56.25 ft
+3
+ 
+ 
+
+--- PAGE 28 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+24
+ 
+of 
+8
+3
+ 
+ 
+RCC in  colu mn  f ro m GL  to PL : ( Volu me)
+ 
+
+3
+ 
+ 
+DPC (Da mp  Proof  Cou rse): (Volu me)
+ 
+
+ 
+2
+
+3
+ 
+
+3
+ 
+
+3
+ 
+ 
+B FS  (one layer ) in  Floo rs: (A rea)
+ 
+
+2
+ 
+ 
+-
+ 
+ 
+
+-
+
+2
+ 
+Total= 1246.1 ft
+2
+ 
+ 
+CC (c e men t con cre te) i n  Floors: ( Volu me)
+ 
+ 
+ 
+Total vol ume= 1246.1 ft
+2
+ 
+
+3
+ 
+ 
+Floor f in ish
+ 
+
+ 
+1. Main room
+
+3
+ 
+
+3
+ 
+
+3
+ 
+
+3
+ 
+
+3
+ 
+Total= 29.87 ft
+3
+ 
+ 
+ 
+
+--- PAGE 29 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+25
+ 
+of 
+8
+3
+ 
+ 
+B rick w all in  sup erstr
+u cture: (Volu me)
+ 
+
+3
+ 
+Deduct:
+ 
+
+3
+ 
+
+3
+ 
+
+3
+ 
+
+3
+ 
+T
+otal= 1060.825 ft
+3
+ 
+ 
+RCC in  colu mn : ( Volu me)
+ 
+
+3
+ 
+ 
+RCC in  li n tel: (Volu me )
+ 
+
+3
+ 
+
+3
+ 
+ 
+RCC in  roof : (Volu me)
+ 
+ 
+
+3
+ 
+ 
+L C (L ime con cr ete ) in  roof : (Volu me )
+ 
+ 
+-
+
+-
+ 
+3
+ 
+ 
+B ricks i n  p arap et: (Volu me )
+ 
+ 
+-
+ 
+-
+
+3
+ 
+ 
+B rick w ork  in stair: (V olu me)
+ 
+
+=9.86 ft
+3
+ 
+
+3
+ 
+
+--- PAGE 30 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+26
+ 
+of 
+8
+3
+ 
+ 
+
+3
+ 
+
+3
+ 
+Total= 98.6 ft
+3
+ 
+ 
+R.C.C. in  d rop  w all : (Volu me)
+ 
+
+-
+ 
+-
+
+ 
+
+ 
+
+ 
+Volume= 62.85 ft
+3
+ 
+ 
+R.C
+.C. in  su n sh ad e: (V olu me)
+ 
+
+3
+ 
+ 
+
+-
+ 
+C:S = 1:6
+ 
+1. 
+Inside wall
+ 
+
+-
+
+3
+ 
+ 
+-
+
+3
+ 
+
+3
+ 
+Total= 27.45 ft
+3
+ 
+
+-
+
+3
+ 
+ 
+-
+
+3
+ 
+ 
+
+3
+ 
+ 
+
+
+3
+ 
+Total= 4.98 ft
+3
+ 
+2. 
+C eil ing
+ 
+
+3
+ 
+
+--- PAGE 31 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+27
+ 
+of 
+8
+3
+ 
+ 
+
+3
+ 
+
+3
+ 
+ 
+
+3
+ 
+Total= 26.48ft
+3
+ 
+3. 
+Edges
+ 
+ 
+
+3
+ 
+
+3
+ 
+Total= 4.01 ft
+3
+ 
+ 
+4. 
+Drop wall  (inside f ace )
+ 
+
+3
+ 
+
+3
+ 
+Total= 3.66 ft
+3
+ 
+Total vol ume of insi d
+e plasterin g= 66.58 ft
+3
+ 
+ 
+
+-
+ 
+C:S = 1:4
+ 
+
+3
+ 
+
+3
+ 
+Total= 10.89 ft
+3
+ 
+
+3
+ 
+De
+
+3
+ 
+ 
+
+3
+ 
+Total= 34.72 ft
+3
+ 
+
+-
+ 
+3
+ 
+
+3
+ 
+
+--- PAGE 32 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+28
+ 
+of 
+8
+3
+ 
+ 
+Total= 3.8 ft
+3
+ 
+4. S tairs
+ 
+
+3
+= 0.035 ft
+3
+, 2nd step= 2x 60 in
+3
+= 0.07 ft
+3
+,
+ 
+3rd step= 3x 60 in
+3
+= 0.1 ft
+3
+, 4th s tep= 4x 60 in
+3
+= 0.14 ft
+3
+ 
+Total= 0.345 ft
+3
+ 
+5. P arapet
+ 
+
+3
+ 
+
+3
+ 
+
+ft
+3
+ 
+Total= 30.68 ft
+3
+ 
+6. S u n sh ad e
+ 
+
+3
+ 
+
+3
+ 
+
+3
+ 
+ 
+3
+ 
+e) Inside f ac e= 4
+
+3
+ 
+Total= 4.83 ft
+3
+ 
+7. Corn ice
+ 
+
+3
+ 
+
+3
+ 
+Total= 14.68 ft
+3
+ 
+ 
+8. Drop  w all
+ 
+
+3
+ 
+Total vol
+ume= 106.23 ft
+3
+ 
+
+--- PAGE 33 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+29
+ 
+of 
+8
+3
+ 
+ 
+ 
+ 
+ 
+
+3
+ 
+
+3
+ 
+
+3
+ 
+
+3
+ 
+ 
+
+3
+ 
+Total vol ume= 5.94 ft
+3
+ 
+Costin g of  a resid en tialb u ild in g
+ 
+Ex ampl e:
+ 
+T ab le 
+3
+.2: Calcul ation  of  Costin g of  a Resid en tial B u ild in g
+ 
+Ite m No.
+ 
+Ite m D escrip tion
+ 
+Qu an tity
+ 
+Pri ce Per 
+Qu an tity
+ 
+T otal Cost
+ 
+01
+ 
+Earthwork Ex cavati on
+ 
+1784.75 cft
+ 
+2.13 tk/ cft
+ 
+3802
+ 
+tk
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Total C ost= X
+1
+ 
+tk
+ 
+Electrificati on= 8 % of to tal cost= X
+2
+ 
+S anit ar y and wate r supply=  8 % of total cost= X
+3
+ 
+Esti mated cost= (X
+1
++X
+2
++X
+3
+) tk
+ 
+ 
+
+--- PAGE 34 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+30
+ 
+of 
+8
+3
+ 
+ 
+Pa rt 4:  Es ti ma tio n of RCC Sla b Cul vert
+ 
+ 
+4
+.1 Cul vert
+ 
+C ulver is a small brid ge  used to c arr y wate r 
+fro m one side to othe r. It shoul d be cove red with  
+embankment and compos ed of structural material  around the enti re perimeter.
+ 
+In gener al culverts 
+are of m ax im um 3 spans. Max im um span is li mi ted to 5~6 meter. But long span culvert ( >40 fe et 
+span) was int rodu
+
+ 
+4
+.2 Use of  
+C
+u lvert
+ 
+1.
+ 
+W here natural st r eams i ntersects t he ro adwa y.
+ 
+2.
+ 
+For passi n g surf ac e drain age.
+ 
+3.
+ 
+Bott om of depressi on wh ere no natu ral wat er cou r se.
+ 
+ 
+ 
+Figu re 
+4
+.1 : Variou s T yp es Cul verts
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 35 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+31
+ 
+of 
+8
+3
+ 
+ 
+4
+.3 Dif f eren t 
+T
+yp es of  
+C
+u lvert
+ 
+1.
+ 
+Arch  
+C
+u lver t
+: 
+An 
+a rch c ulvert is normall y a low profil e culv ert. It 
+can
+ 
+be i nstalled without  
+dist urbing the  caus ewa y as it  will  span ov er  the e nti re drain a ge width. Th e y ar e no rmall y 
+made of metal, stone  ma sonr y o r R C C . The y ar e inst all ed easil y, and you don't ne ed to use 
+ex pensivewaterdive rsionstructurestoinst all it .C omm onshapesinclude semi circular arch,  
+ell ipt ical arch, and con cr ete box  culverts.  Anothe r bene fit of these t yp e of  structure is that  
+the inst all ati on process w il l not  take a lot  of tim e, compared to t
+r adit ional box  culverts.
+ 
+  
+ 
+Figu re 4.2 : Ar ch  Cul verts
+ 
+(
+htt p:/ /www.contech e s.com
+, h
+tt ps:/ /qph.ec.quoracdn.net
+)
+ 
+2.
+ 
+S lab  
+C
+ulvert
+: 
+A slab culvert is made of 
+R C C 
+slab.
+ 
+Masonr y ar ches i n culverts have 
+numerous problems, including difficult y in c enter ing, shut teri
+ng, less li fe, more chanc e of 
+cracks and more de ad loa d. Thus the y hav e been r eplaced b y sim ple RC C  slab const ructi on. 
+S lab in these culverts m a y be R C C  or stone.
+ 
+ 
+ 
+ 
+ 
+Figu re 4.3 : Sl ab  Cul vert
+s (
+htt p:/ /www.lefil tredu monde.com
+)
+ 
+3.
+ 
+Pip e cu lvert
+: 
+P ipes culverts
+ 
+a re avail able  in diff e rent shap es such  as  circu lar, ell ipt ical and  
+pipe 
+arch es
+. Although c ircular pipes a re the mo st comm on, other shape s mi ght be used 
+dependin gonsit econdit ionsandconst raint satthejobsit e.Theirpricesarever ycompetit ive, 
+andth
+e yar eve r yeas yto i nstall.Aswithotherculvertt yp es,thesele cti ono ftheculve rtwill  
+depend on  h ydrauli c  de sign and othe r f actors  that mi ght  af fect  their p erforman ce  an d  
+
+--- PAGE 36 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+32
+ 
+of 
+8
+3
+ 
+ 
+suit abil it y. 
+It
+ 
+is the pr efe rred on e on urb aniz ed ar eas and is th e one usu all y 
+us ed to mana ge  
+storm s ewer s ystems.
+ 
+ 
+ 
+ 
+Figu re 4.3 : Pip e Cul ver t
+s 
+(https: // www.civi lgeo. com)
+ 
+4.
+ 
+B oxcu lvert
+: 
+Box culvertshaveaconcrete(someti mesothermaterialscanbeusedtoo)floor 
+all owing the  wate r to fl ow smoo thl y throu gh it . Box  culverts a re usu a l
+l y made  up of  
+R einforced C oncr ete (RC C ). S ome box culverts can be buil t using compos ite structures and  
+are gre at when wate r nee ds to change dire cti on or when a large flow of w ater is ex pected. 
+Box  culverts can  also be  inst all ed in s uch wa y th at t he top of 
+the  culvert i s a lso t he roadw a y 
+surfac e.
+ 
+    
+ 
+Figu re 4.4 : Box Cul vert s
+ 
+(
+htt p:/ /www.hudsoncivi l.com.au
+)
+ 
+5.
+ 
+S teel girder cu lvert
+: 
+A steel gird er culvert 
+has 
+tw o (
+2
+)
+ 
+steel girde rs running side
+-
+by
+-
+side to  
+supportthe 
+mainrail path
+.
+ 
+Thist yp eofculve rtcanonl
+ybese eninrail wa ys.Twomaingirde rs 
+are laid just  below the r ail s. W ooden sleepers ar e provided betwe en thes e gird ers and the 
+rail s. There fore som eti m es these culve rts are also call ed open d eck culve rts .
+ 
+
+--- PAGE 37 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+33
+ 
+of 
+8
+3
+ 
+ 
+   
+ 
+ 
+Figu re 4.5 : Steel Girder  Cul verts
+ 
+(http: /
+/2.bp.bl ogspot .com)
+ 
+6.
+ 
+S cu p p er
+: 
+A scupp er is a n openin g in t he  side w al ls of an  open
+-
+air stru ctur e, for  purposes  of 
+draini ng w ater. Th e y a re usuall y plac ed at or n ear ground lev el, and all ow r ain or li quids  to 
+flow off the side o f the o pen
+-
+air stru cture, inst
+ead of pooli ng withi n the wal ls.
+ 
+    
+ 
+Figu re 
+4
+.
+6
+: 
+S cu p p ers 
+(http: // www.nz dl.org
+, htt ps:/ /i . yti m g.com
+)
+ 
+4.4 
+S lab  C
+u lvert
+ 
+S lab
+ 
+culvertis 
+one of 
+th emost comm onl yusedcul vertinBan glad esh.Atot alof 
+18257
+ 
+culvertsh ave 
+been const ru cted in Ban glad esh
+ 
+unti
+l 2017
+ 
+out of which 
+3991
+ 
+culverts (
+22
+%) a re box  culverts
+ 
+(
+htt p:/ /www.rthd.gov.bd/ bridge_m aint enanc e.php
+)
+.
+ 
+ 
+ 
+Advan tages of  
+S lab  C
+u lvert
+ 
+a)
+ 
+S im ple in const ructi on
+ 
+b)
+ 
+S uit able for weak sub gra de.
+ 
+c)
+ 
+Uniform load dist ributi on over a wide ar ea. 
+ 
+4
+.
+5
+ 
+Co mp on en ts of  a typi
+cal RCC S lab  Cul vert
+ 
+1.
+ 
+Abu tmen t
+ 
+a)
+ 
+S upport bridge d eck.
+ 
+b)
+ 
+R etain embankment.
+ 
+c)
+ 
+C onnect approa ch road t o bridge deck.
+ 
+ 
+
+--- PAGE 38 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+34
+ 
+of 
+8
+3
+ 
+ 
+2.
+ 
+Win g w all  
+ 
+a)
+ 
+Acts as an an chor.
+ 
+b)
+ 
+P rovide smoo th m ovement of water.
+ 
+c)
+ 
+P revent spi ll ing of e arthe n embankment
+ 
+ 
+3.
+ 
+S lab /d eck
+ 
+a)
+ 
+C arries the load of v ehicl es.
+ 
+ 
+  
+ 
+ 
+ 
+ 
+Figu re 
+4
+.
+7
+: Ab u t men t a n d  Win gw all
+ 
+(oldcastl eprecast
+-
+yut3 re1soj oa.net dna
+-
+ssl .com)
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Wi ngw al l
+ 
+Abut m ent
+ 
+
+--- PAGE 39 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+35
+ 
+of 
+8
+3
+ 
+ 
+4
+.6
+ 
+Work
+ed  O
+u t prob lem
+ 
+C alculate the quanti t y of the materials requi red fo r  the const ructi on of the f oll owing R C C  slab 
+culvert.
+ 
+ 
+Figu re
+ 
+4
+.
+8
+: Plan  of  the Cu l
+vert.
+ 
+
+--- PAGE 40 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+36
+ 
+of 
+8
+3
+ 
+ 
+ 
+ 
+F
+igu re 
+4
+.
+9
+: Section al E levation  throu gh  
+Abu tmen t
+ 
+ 
+ 
+F
+igu re 
+4
+.
+10
+: Section al E levation  throu gh  
+Win gWall
+ 
+ 
+ 
+ 
+
+--- PAGE 41 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+37
+ 
+of 
+8
+3
+ 
+ 
+Concret e E sti mation
+ 
+T ab le 
+4
+.1: Calcul ation  of  E stimation  of  Concret e f or the Work ou t Prob lem of  S lab  Cul vert
+ 
+Ite m D escrip tion
+ 
+No
+ 
+L en gth(
+m)
+ 
+Wid th 
+( m)
+ 
+Heigh t/ 
+thickn ess 
+( m)
+ 
+Area 
+(m
+2
+)
+ 
+Volu me 
+(m
+3
+)
+ 
+Re mark s
+ 
+(1)75mm  brick 
+flat sol ing in 
+foundati on
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Abutment
+ 
+2
+ 
+7.80
+ 
+2.325
+ 
+---
+ 
+36.27
+ 
+---
+ 
+ 
+W ing wall
+ 
+4
+ 
+2.85
+ 
+2.325
+ 
+---
+ 
+26.51
+ 
+---
+ 
+ 
+ 
+ 
+ 
+ 
+Total=
+ 
+62.78
+ 
+ 
+ 
+(2) R einforc ed 
+cement con crete 
+in foundati on 
+(includi ng 
+reinforc ement);
+ 
+1:2: 4
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+abutm ent
+ 
+2
+ 
+7.80
+ 
+2.325
+ 
+0.375
+ 
+---
+ 
+13.60
+ 
+ 
+W ing wall
+ 
+4
+ 
+2.85
+ 
+2.325
+ 
+0.375
+ 
+---
+ 
+9.94
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Total=
+ 
+23.54
+ 
+ 
+(3) R einforc ed 
+cement con crete 
+in sup erstructure 
+(includi ng 
+reinforc ement);
+ 
+1:2: 4
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Abutment 
+ 
+2
+ 
+7.80
+ 
+0.45
+ 
+3.
+825
+ 
+---
+ 
+26.8515
+ 
+ 
+Deducti on due to 
+slab bearin g
+ 
+2
+ 
+7.80
+ 
+0.30
+ 
+0.225
+ 
+---
+ 
+-
+1.053
+ 
+ 
+W ing wall
+ 
+4
+ 
+2.85
+ 
+0.45
+ 
+3.825
+ 
+---
+ 
+19.6223
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Total=
+ 
+45.4208
+ 
+ 
+(4) R C C  in sl ab;
+ 
+1:1.5: 3
+ 
+1
+ 
+7.80
+ 
+3.60
+ 
+0.225
+ 
+---
+ 
+6.318
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Total=
+ 
+6.318
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 42 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+38
+ 
+of 
+8
+3
+ 
+ 
+ 
+1. 75mm B FS  [one lay e r]
+ 
+S iz e of one brick =240 m m x 115mmx  70 mm
+ 
+Area o f one brick =0.24 m x 0.115 m = 0.
+0
+276 sqm
+ 
+No of bricks = 
+:6
+ä
+;<
+4
+ä
+46;:
+L
+ttyw
+ 
+Nos.
+ 
+S and 
+volum e required 
+p e r 10
+ 
+sqm 
+area 
+of BFS  
+= 0 .1 cum
+ 
+Volume of sand = 
+4
+ä
+5
+
+ë
+:6
+ä
+;<
+54
+ 
+= 0.6 2
+8
+ 
+cum
+ 
+2. Rein f orced  ce men t co n cre
+te in  Fou n d ation  (1:2:4)
+ 
+Final volum e (ha rd conc r ete) = 2
+3
+.
+54
+ 
+cum
+ 
+Init ial volum e (b efor e mi x ing) = 2
+3
+.
+54
+ 
+x 1.5 = 3
+5.31
+ 
+cum
+ 
+Mix  rati o = 1:2: 4
+ 
+C ement = 
+79
+ä
+75
+
+ë
+
+5
+;
+ 
+=5.
+044
+ 
+cum = 14
+3
+ 
+bags
+ 
+[ One bag cement = 50 k g = 112lb. = 1.25 cft = 0.0 35423256 cum]
+ 
+S and = 
+79
+ä
+75
+
+ë
+
+6
+;
+ 
+=10.
+1
+ 
+cum
+ 
+Brick chips/  Khoa = 
+79
+ä
+75
+
+ë
+
+8
+;
+ 
+= 2 0.2 
+cum
+ 
+No. of bricks = 20.
+2
+ 
+x  300 = 6
+06
+0 Nos.
+ 
+[ One cum brick chips req uired 300 Nos. of full si z e brick]
+ 
+3. Rein f orced  Ce men t Concret e in  S u p erstru cture (1:2 : 4)
+ 
+Final volum e (ha rd conc r ete) = 
+45.42 cum
+ 
+Init ial volum e (b efor e mi x ing) = 45.42 x  1.5 = 68.13 cum
+ 
+Mix  rati o = 1:2: 4
+ 
+C ement = 
+:<
+ä
+57
+
+ë
+
+5
+;
+ 
+= 9.7 cum = 2 75 bags
+ 
+[ One bag cement = 50 k g = 112lb. = 1.25 cft = 0.0 35423256 cum]
+ 
+
+--- PAGE 43 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+39
+ 
+of 
+8
+3
+ 
+ 
+S and =  
+:<
+ä
+57
+
+ë
+
+6
+;
+ 
+=19.5 cum 
+ 
+Brick chips/  Khoa = 
+:<
+ä
+57
+
+ë
+
+8
+;
+ 
+= 3 8.93 cum
+ 
+No. of bricks = 38.93 x  300 = 11680 Nos.
+ 
+[ One cum brick chips req uired 300 Nos. of full si z e brick]
+ 
+4. RCC in  S lab  (1:1.5:3)
+ 
+Final volum e (ha rd conc r ete) = 6.32 cum
+ 
+Init ial volum e (b efor e mi x ing) = 6.32 x  1.5 = 9.48 cum
+ 
+Mix  rati o = 1:1.5:
+3
+ 
+C ement = 
+=
+ä
+8<
+
+ë
+
+5
+;
+ 
+= 1.7 cum = 4 9 bags
+ 
+[ One bag cement = 50 k g = 112lb. = 1.25 cft = 0.0 35423256 cum]
+ 
+S and =  
+=
+ä
+8<
+
+ë
+
+5
+ä
+9
+;
+ 
+=2.58 cum 
+ 
+Brick chips/  Khoa = 
+=
+ä
+8<
+
+
+ë
+
+7
+;
+ 
+= 5. 17 cum
+ 
+No. of bricks = 5.17 x  300 = 1551 Nos.
+ 
+[ One cum brick chips req uire
+d 300 Nos. of full si z e brick]
+ 
+ 
+Total vol ume of cement = [ 14
+3
++275+49]  = 4
+67
+ 
+bags
+ 
+Total vol ume of sand = [ 0.6
+2
+8 + 10.3 + 19.5 + 2.5 8]  =33 cum
+ 
+Total num ber of bricks =  [ 2
+275
+ 
++6
+06
+0 + 11680 + 1551]  =21
+566
+ 
+Nos.
+ 
+The sum mar y of quanti t y of materials i s provided be
+low:
+ 
+T ab le 
+4
+.2: 
+S u mmary of  Qu an tity of  Material s:
+ 
+Material s
+ 
+Qu an tity
+ 
+C ement
+ 
+4
+67
+ 
+bags
+ 
+S and
+ 
+33 cum
+ 
+Brick
+ 
+21
+566
+ 
+Nos.
+ 
+ 
+
+--- PAGE 44 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+40
+ 
+of 
+8
+3
+ 
+ 
+Rein f orce men t es ti mati on :
+ 
+P lain bar is used; each b a r is hooked in each ends.
+ 
+Hook length = nine tim es bar diamete r = 9d
+b
+ 
+C over = 75mm  = 
+3 inch
+ 
+Rein f orce men t in  on e w in g w all :
+ 
+(1) Ve rtical rod in wall  ( outsi de face )
+ 
+19mm  dia @ 125 mm  C /C
+ 
+= [
+6<94
+?
+;9
+569
+] x [ 3600 +225 
+-
+75 +375 
+-
+75 + (12*25) + (10*1 9*2)]
+ 
+(2) Ve rtical rod in wall  (i nside fac e)
+ 
+12mm  dia @ 150mm  C /C
+ 
+= [
+6<94
+?
+;9
+594
+] x [ 3600 +2
+25 
+-
+75 +375 
+-
+75 + (12*25) + (10*1 2*2)]
+ 
+(3) Horiz ontal rod in wal l (both face )
+ 
+10mm  dia @ 150mm  C /C
+ 
+= [
+7<69
+?
+;9
+594
+E
+s
+] x [ 2850 
+-
+75 + (10*10)]  x  2 (two face)
+ 
+(4) Horiz ontal rod in footi ng (both la ye r)
+ 
+16mm  dia @ 150mm  C /C
+ 
+= [
+6<94
+594
+] x [ 1200 +450 +675 
+-
+7
+5 
+-
+75 + (10*16*2)]  x  2 (two la ye r)
+ 
+(5) Horiz ontal rod in footi ng (both f ace )
+ 
+10 mm  dia @ 150 mm  C /C
+ 
+= [
+5644
+>
+894
+>
+:;9
+
+?
+;9
+?
+;9
+594
+E
+s
+] x [ 2850 
+-
+75 + (10*10)]  x  2 (two face)
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 45 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+41
+ 
+of 
+8
+3
+ 
+ 
+Rein f orce men t in  on e a b u tmen t:
+ 
+(1) Ve rtical rod in wall  ( outsi de face )
+ 
+19 mm  dia @
+ 
+125mm  C /C
+ 
+= [
+;<44
+594
+E
+s
+] x [ 3600 + 225 +375 
+-
+75 
+-
+75 + (12*25 ) + (10* 19*2)]  
+ 
+(2) Ve rtical rod in wall  (i nside fac e)
+ 
+12mm  dia @ 150mm  C /C
+ 
+= [
+;<44
+594
+E
+s
+] x [ 3600 +375 
+-
+75 
+-
+75 + (12*25) + (10*12*2) ]  
+ 
+(3) Horiz ontal rod in wal l (outsi de face )
+ 
+10mm  dia @ 15
+0mm  C /C
+ 
+= [
+7:44
+>
+669
+?
+;9
+594
+E
+s
+] x [ 7800]  
+ 
+(4) Horiz ontal rod in wal l (insi de face )
+ 
+10mm  dia @ 150 mm  C /C
+ 
+= [
+7:44
+?
+;9
+594
+E
+s
+] x [ 7800]  
+ 
+ 
+(5) Horiz ontal rod in foo ti ng (both la ye r)
+ 
+16 mm  dia @150mm  C /C
+ 
+= [
+;<44
+594
+E
+s
+] x [ 1200 + 450 +675 
+-
+75 
+-
+75 + (10*16*2 )]  x  2[ two la
+yer]
+ 
+(6) Horiz ontal rod in footi ng (both f ace )
+ 
+10 mm  dia @150 mm  C /C
+ 
+= [
+5644
+>
+894
+>
+:;9
+
+?
+;9
+?
+;9
+594
+E
+s
+] x [ 7800] x  2 (two face)
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 46 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+42
+ 
+of 
+8
+3
+ 
+ 
+T ab le 
+4
+.3: Calcul ation  of  
+Rein f orcemen t in  
+T
+w o Abu tmen ts
+ 
+Bar
+ 
+No
+ 
+Total Len gth 
+[ For one 
+abutm ent]
+ 
+(m)
+ 
+W eight per 
+meter (k g/m )
+ 
+W eight (k g)
+ 
+19mm
+ 
+2
+ 
+ 
+ 
+ 
+16mm
+ 
+2
+ 
+ 
+ 
+ 
+12mm
+ 
+2
+ 
+ 
+ 
+ 
+10mm
+ 
+2
+ 
+ 
+ 
+ 
+ 
+T ab le 
+4
+.4: Calcul ation  of  Rein f orcemen t in  F
+ou r 
+W
+in g 
+W
+all s
+ 
+Bar
+ 
+No
+ 
+Total Len gth 
+[ For one win g 
+wall ]
+ 
+ 
+(m)
+ 
+W eight per 
+meter (k g/m )
+ 
+W eight (k g)
+ 
+19mm
+ 
+4
+ 
+ 
+ 
+ 
+16mm
+ 
+4
+ 
+ 
+ 
+ 
+12mm
+ 
+4
+ 
+ 
+ 
+ 
+10mm
+ 
+4
+ 
+ 
+ 
+ 
+ 
+T ab le 
+4
+.5: C
+alcul ation  of  Rein f orcemen t in  
+tw o Abu tmen ts and  
+F
+ou r 
+W
+in g 
+W
+all s
+ 
+Bar
+ 
+R einforcement 
+ 
+Total (kg)
+ 
+Two abutm ents (k g)
+ 
+Four win g w all s (kg)
+ 
+19mm
+ 
+ 
+ 
+ 
+16mm
+ 
+ 
+ 
+ 
+12mm
+ 
+ 
+ 
+ 
+10mm
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 47 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+43
+ 
+of 
+8
+3
+ 
+ 
+Pa rt 5:  
+Es ti ma tio n of an Underg ro undWa ter Res ervo i r
+ 
+ 
+ 
+5
+.1 Work
+ed  O
+u t Pro
+b le m
+ 
+ 
+ 
+ 
+ 
+ 
+Figu re 
+5
+.1 : Plan  of  the 
+U
+n d ergrou n d  
+W
+ater 
+R
+e servoir
+ 
+ 
+ 
+ 
+
+--- PAGE 48 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+44
+ 
+of 
+8
+3
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Figu re
+ 
+5
+.2
+: Section  A
+-
+A
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 49 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+45
+ 
+of 
+8
+3
+ 
+ 
+Concret e E sti mation :
+ 
+T ab le 
+5
+.1: Calcul ation  of  Concrete E sti mation  f or the Work ou t Prob le m on  R etain in g Wall
+ 
+Item
+ 
+Len gth (ft)
+ 
+Wi
+dth (ft)
+ 
+Height/  Thickn ess 
+(ft)
+ 
+Area (ft
+2
+)
+ 
+Volume (ft
+3
+)
+ 
+3
+_
+ 
+BFS
+ 
+16
+ 
+11
+ 
+-
+ 
+176
+ 
+-
+ 
+Base S lab
+ 
+16
+ 
+11
+ 
+1
+ 
+-
+ 
+176
+ 
+W all
+ 
+2x (9+14)
+ 
+1
+ 
+10
+-
+(5/12) = 9.583
+ 
+-
+ 
+440.83
+ 
+C over 
+S lab
+ 
+15
+ 
+10
+ 
+5/12= 0.4167
+ 
+-
+ 
+62.5
+ 
+ 
+Qu an tity of  material s:
+ 
+1.
+ 
+BFS
+ 
+S iz e of one brick= 10
+_
+x5
+_
+x3
+_
+ 
+Area o f one b
+rick = 50 in
+2
+ 
+No. of brick r equired = 1 76x 144/50= 507 Nos.
+ 
+S and per 10m
+2
+ 
+= 0.10 m
+3
+ 
+Volume of sand= (0.10x 176x 0.3048
+2
+)/10= 0.1635 m
+3
+= 5.77 ft
+3
+ 
+ 
+2.
+ 
+R C C  (1:2:4)
+ 
+Final volum e (ha rd conc r ete) = 176 + 440.83 + 62. 5= 679.33 ft
+3
+ 
+Init ial volum e (b efor e mi x ing) = 679.33 
+x 1.5= 1018.995 ft
+3
+ 
+C ement= (1018.995 x  1)/7= 145.57 ft
+3
+ 
+= 117 ba gs
+ 
+[ One bag cement = 50k g = 112 lb= 1.25 ft
+3
+]
+ 
+S and= (1018.995 x  2) /7= 291.14 ft
+3
+ 
+Brick chips= (1018.995 x  4)/7= 582.28 ft
+3
+ 
+No. of brick= 582.28 x  0.3048
+3 
+x  300= 4947 Nos.
+ 
+[ 1m
+3
+= 35.315 ft
+3
+ 
+bri
+ck chips required 300 Nos. of full si z e brick]
+ 
+ 
+T ab le 
+5
+.2: 
+S u mmary
+ 
+of  Material s
+ 
+Material
+ 
+Quanti t y
+ 
+C ement
+ 
+117 bags
+ 
+S and
+ 
+297 ft
+3
+ 
+Brick
+ 
+5314 Nos.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 50 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+46
+ 
+of 
+8
+3
+ 
+ 
+ 
+Rein f orce men t es ti mati on :
+ 
+ 
+T ab le 
+5
+.3: Calcul ation  for Rein f orce men t Estima tion
+ 
+Ite m
+ 
+B ar 
+d esign ation
+ 
+No.
+ 
+L en gth (f t)
+ 
+T otal 
+length 
+(f t)
+ 
+Base 
+slab
+ 
+#6@5
+_
+c/c
+ 
+2x[ (16x 12
+-
+2x 3)/5+1] = 
+77
+ 
+(11x 12
+-
+2x 3+2x 10.5x 6/8)/12= 
+11.813
+ 
+909.601
+ 
+#5@6
+_
+c/c
+ 
+2x[ (11x 12
+-
+2x 3)/6+1] = 
+44
+ 
+(16x 12
+-
+2x 3+2x 10.5x 5/8)/12= 
+16.594
+ 
+730.136
+ 
+W all
+ 
+#3@5
+_
+c/c
+ 
+2x[ (11x 12
+-
+5
+-
+2
+-
+3)/5+1] = 
+52
+ 
+46
+ 
+2392
+ 
+#4@5
+_
+c/c
+ 
+(outside)
+ 
+46x 12/5+1= 112
+ 
+(11x 12
+-
+5
+-
+2
+-
+3+4+2x 10.5x 4/8)/12= 11.375
+ 
+1274
+ 
+#4@5
+_
+c/c 
+(inside)
+ 
+46x 12/5+1= 112
+ 
+(11x 12
+-
+5
+-
+2
+-
+3+6+2x 10.5x 4/8)/12= 11.542
+ 
+1292.704
+ 
+C over 
+slab
+ 
+#6@5
+_
+c/c 
+(bottom )
+ 
+(15x 12
+-
+2x 3)/5+1= 36
+ 
+(10x 12
+-
+2x 3+2x 10.5x 6/8)/12= 
+10.813
+ 
+389.268
+ 
+#6@5
+_
+c/c 
+(t
+op)
+ 
+(10x 12
+-
+2x 3)/5+1= 24
+ 
+(15x 12
+-
+2x 3+2x 10.5x 6/8)/12= 
+15.813
+ 
+379.512
+ 
+ 
+T ab le 
+5
+.4: Calcul ation  for Weigh t of  Rein f orcemen t 
+ 
+B ar
+ 
+L en gth (f t)
+ 
+Add ition al 
+(2% )
+ 
+Fin al L en gth 
+(f t)
+ 
+Weigh t/len gth 
+(lb /f t)
+ 
+T otal w eigh t 
+ 
+(lb )
+ 
+#3
+ 
+2392
+ 
+47.84
+ 
+2440
+ 
+0.376
+ 
+918
+ 
+#4
+ 
+2566.704
+ 
+51
+.32
+ 
+1619
+ 
+0.668
+ 
+1082
+ 
+#5
+ 
+730.136
+ 
+14.603
+ 
+745
+ 
+1.043
+ 
+778
+ 
+#6
+ 
+1678.381
+ 
+33.568
+ 
+1712
+ 
+1.502
+ 
+2572
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 51 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+47
+ 
+of 
+8
+3
+ 
+ 
+Pa rt 6:  Es ti ma tio n of a Retai ni ng  Wal l
+ 
+ 
+6
+.1 Retain in g w all
+ 
+A 
+retainin g wall
+ 
+is a stru cture desi gned and const r ucted to resis t t he later al pressure o f soil. 
+Gene
+r all y us ed to protect  embankment of ro ads, hi ll s etc.
+ 
+6
+.2 T yp es of  Retain in gw all
+  
+ 
+1.
+ 
+Gravit y
+ 
+2.
+ 
+C anti lever
+ 
+3.
+ 
+S heet pi li ng
+ 
+4.
+ 
+Anchored
+ 
+5.
+ 
+C ounterfort
+ 
+ 
+ 
+                                            
+Figu re 6
+.1 : Typ ical Retain in g w all
+ 
+ 
+Figu re 6
+.2 : Dif f eren t Typ es of  Reta
+in in g Wall
+ 
+
+--- PAGE 52 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+48
+ 
+of 
+8
+3
+ 
+ 
+Figu re 6
+.
+3
+: Dif f eren t Typ es of  Retain in g Wall
+ 
+6
+.3 Co mp on en ts of  a typi cal RCC retain in g w all
+ 
+ 
+Figu re
+ 
+6
+.4 : 
+Co mp on en t s of  a 
+T
+ypical 
+C
+an tilever 
+R
+etain in g 
+Wall
+ 
+ 
+ 
+ 
+
+--- PAGE 53 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+49
+ 
+of 
+8
+3
+ 
+ 
+6
+.4 Work
+ed  O
+u t Prob le m
+ 
+ 
+C alculate the quanti t y of the materials requi red fo r  the con
+structi on of the f oll owing retainin g w all .
+ 
+ 
+Figu re 
+6
+.5 : Section  of  a 
+R
+etain in g 
+W
+all
+ 
+ 
+
+--- PAGE 54 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+50
+ 
+of 
+8
+3
+ 
+ 
+Len gth o f wall        =300 ft
+ 
+C over for all  sides = 3 in
+ 
+E stimation  of  con cre te ( 1:2:4)
+ 
+Volume of wall  = 
+1
+ 
+2
+ 
+ 
+ “ “
+ 
+ “ “
+ 
+Volume of ke y = 
+1
+ 
+2
+ 
+ 
+ “ “ “
+ 
+Total vol ume of concr ete  =18525 cft 
+ 
+Total vol ume of wet con crete =1.5 x  18525 =27787.5 cft 
+ 
+T ab le 
+6
+.1: Su mmar
+y of  Material s
+ 
+Materials
+ 
+Volume (cft)
+ 
+Quanti t y
+ 
+C ement
+ 
+1 x  27787.5
+ 
+7
+ 
+= 3969.6
+ 
+3176 bags
+ 
+Fine A ggr e gate (sand)
+ 
+2 x  27787.5
+ 
+7
+ 
+= 7939.3
+ 
+7939.3 cft
+ 
+C oarse A ggr e gate
+ 
+( brick chips)
+ 
+4 x  27787.5
+ 
+7
+ 
+ 
+=15875.6
+ 
+450 Nos.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 55 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+51
+ 
+of 
+8
+3
+ 
+ 
+ 
+E stimation  of  Rein f orce men t
+ 
+a)
+ 
+Rein f orce men t in  w all
+ 
+
+ 
+= (
+ “ 
+-
+
+-
+
+ 
+
+ 
+ “ “ 
+-
+
+-
+ 
+6
+ 
+8
+ 
+
+Outsi de vertical 
+ 
+ 
+ 
+From fi gur e
+ 
+ “
+ 
+ “
+ 
+ 
+=  
+Å
+65
+ä
+;9
+ “
+ 
+ 
+ 
+ 
+ 
+ 
+Figu re 
+6
+.6 : Calcul ation  of  In clin ed  L en gth of  Ou tsid e Vertical R ein f orce men t
+ 
+= ( 
+ “ 
+-
+
+-
+
+ 
+
+ 
+ “ 
+-
+ 
+4
+ 
+8
+ 
+
+ 
+
+ 
+= ( 
+ “ 
+-
+
+-
+
+ 
+
+ 
+ “ 
+-
+
+-
+ 
+5
+ 
+8
+ 
+ 
+ 
+
+ 
+= ( 
+ “ 
+-
+
+ 
+
+ 
+ “ 
+-
+
+-
+ 
+4
+ 
+8
+ 
+ 
+ 
+b)
+ 
+Rein f orce men t in  b ase
+ 
+Alon
+
+ 
+= ( 
+ “ 
+-
+
+-
+
+ 
+
+ 
+ “ 
+-
+
+-
+ 
+6
+ 
+8
+ 
+ 
+ 
+
+--- PAGE 56 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+52
+ 
+of 
+8
+3
+ 
+ 
+
+ 
+= ( 
+ “ 
+-
+
+-
+
+ 
+
+ 
+ “ 
+-
+
+-
+ 
+5
+ 
+8
+ 
+
+/12 = 4163. 9 ft
+ 
+
+ 
+= ( 
+ “ 
+-
+
+-
+
+ 
+
+ 
+ “ 
+-
+
+-
+ 
+5
+ 
+8
+ 
+
+ 
+
+ 
+= ( 
+ “ 
+-
+
+-
+
+ 
+
+ 
+ “ 
+-
+
+-
+ 
+ 
+x 
+6
+ 
+8
+ 
+
+ 
+c)
+ 
+Rein f orce men t in  k ey
+ 
+From fi gur e
+ 
+3
+ 
+12
+ 
+ 
+=  
+X
+ 
+15
+ 
+   
+
+ 
+ 
+ 
+Along len gth of wall  (2# 8 bar)
+ 
+ “ 
+-
+
+-
+ 
+8
+ 
+8
+ 
+
+ 
+Figu re 
+6
+.
+7
+: 
+Rein f orce men t in  Key
+ 
+Dowel
+ 
+
+ 
+=2 x  (
+ “ 
+-
+
+-
+
+ 
+
+ 
+
+2
++3.75
+2
+
+-
+ 
+6
+ 
+8
+ 
+
+ 
+T ab le 
+6
+.2: Calcul ation  of  Weigh t of  Reinf orce men t
+ 
+Bar
+ 
+Total l ength
+ 
+( ft)
+ 
+W eight/  length
+ 
+(lb/ft)
+ 
+W eight
+ 
+(lb)
+ 
+#4 bar
+ 
+11493.2 +10007.2 
+= 215 01
+ 
+0.668
+ 
+14363
+ 
+#5 bar
+ 
+13221.5+4163.9+5093.8 =22480
+ 
+1.043
+ 
+23447
+ 
+#6 bar
+ 
+16330.5+4811+4469.1+2 290.2=27901
+ 
+1.502
+ 
+41908
+ 
+#8 bar
+ 
+603
+ 
+2.670
+ 
+1611
+ 
+
+--- PAGE 57 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+53
+ 
+of 
+8
+3
+ 
+ 
+Pa rt 7:
+ 
+Es ti ma tio n of a Septi c Ta nk
+ 
+ 
+7
+.1 Def in ition  of  S ep ticT an k
+ 
+A
+ 
+sep tic tank
+ 
+is a  wate rtight ch amber  made  o
+f co ncrete,  fiber gl ass, P VC o r plastic, throu gh  which  
+domesti c wastewate r (
+s ewa ge
+) flows for
+ 
+prima r y tr eatm ent
+.
+[ 1]
+ 
+S ett li ng and
+ 
+ana erobic
+ 
+pro cesses  
+reduce soli ds and o r gani cs, but the treatm ent is onl y moder ate.
+[ 1 ]
+ 
+S epti c tank s ystems a re a t yp e 
+of
+ 
+onsi te 
+sewa ge f acil it y
+ 
+( OSS F). The y can b e used in areas that are not conne cted to 
+a
+ 
+sewe ra ge
+ 
+s ystem, such as rural a reas. Th e treat e d li quid effluent i s comm onl y dispo sed in a
+ 
+septi c 
+drain field
+ 
+which provid e s further tre atm ent
+.
+ 
+7
+.2 Co mp on en ts of  S ep tic Tan k
+ 
+1.
+ 
+Ins
+p ecti on P it
+: 
+A 
+hole in the groun d, li ned with s it e buil t or manufactur ed 
+s ides that rec eive 
+wastewate r from hous e o r buildi ng. The w astewat er then flows f rom inspec ti on pit  to septi c 
+tank.
+ 
+2.
+ 
+S epti c Tank
+: 
+The 
+septi c  tank is buried, wate rtight
+ 
+container t ypica
+ll y m ade of concr ete,  
+fiber glass,or pol ye th yl en e. Itholds the wastew ater long enou ghtoall owsol idstosett leout, 
+formi ng slud ge, and oil  and gre ase to float to th e 
+surfa ce
+ 
+as scum. It als o all ows partial 
+decompos it ionsofthesoli dmaterials.C ompartm
+entsandaT
+-
+shap edoutl etinthesepti ctank  
+prevent t he slud ge and sc um from l eavin g the tank  and traveli n g int o the 
+so ak pit
+.
+ 
+3.
+ 
+S oak P it
+: 
+A soak pit , also known as a 
+soak awa y
+ 
+o r leach pit , is a cov ered, porous
+-
+wall ed 
+chamber that all ows wate r to slowl y s
+oak int o the ground. P r e
+-
+sett led e fflue nt from a 
+coll ecti on and st ora ge/t re atm ent or (semi
+-
+) centr ali z ed treatm ent t echnolo g y is di schar ged 
+to t he under ground ch am ber from whic h it  infilt rates int o the surrounding s oil .
+ 
+ 
+Figu re 7.1 : Co mp on en t s of  a S ep tic
+ 
+T ank
+ 
+(http:// www.nature clean.com )
+ 
+ 
+ 
+
+--- PAGE 58 ---
+CE  208: Quanti ty Surveying
+ 
+Page 
+54
+ 
+of 
+8
+3
+ 
+ 
+7
+.3 Work
+ed  O
+u t Prob le m
+ 
+The following figu re is r elated to workout proble m.
+ 
+The septi c tank has a t otal height of 9 ft (includ ing 6
+−
+ 
+floor slab and 6
+−
+ 
+c over 
+slab). S oak pit  has a tot al height of 30 ft (including 4
+−
+ 
+cove r slab)
+.
+ 
+ 
+      
+INSPE CTIO N PIT
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+S E PT IC TANK
+ 
+ 
+ 
+ 
+ 
+ 
+         
+S OAK PIT
+ 
+Figu re 
+7
+.
+2
+: Plan  of  S ep tic Tan k
+ 
+ 
+ 
+
+--- PAGE 59 ---
+CE  208: Quanti ty Surveying
+ 
+Page 
+55
+ 
+of 
+8
+3
+ 
+ 
+T ab le 
+7
+.1: 
+E stimation  o f  a S ep tic T ank
+ 
+ 
+ 
+It em  
+No. 
+ 
+No. 
+ 
+It em  D
+escr i pt ion 
+ 
+No.
+ 
+Lengt h (f t)  
+ 
+Wi dth(f t )  
+ 
+H ei ght/
+ 
+Dept h(f t )
+ 
+Q uanti ty 
+ 
+Rem arks 
+ 
+1 
+ 
+Eart hw ork Excavati on 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Septi cT ank 
+ 
+1
+ 
+16.0833 
+ 
+8.67 
+ 
+9.0 
+ 
+1254.54 cf t 
+ 
+ 
+Soak Pit  
+ 
+1
+ 
+12.57 
+ 
+---
+ 
+30.0 
+ 
+376.99 cf t  
+ 
+ 
+ 
+2
+ 
+Cem ent  Concret e( 1: 3: 6) Floor  
+ 
+of  Sept i c Tank
+ 
+1
+ 
+16.0833 
+ 
+8.67 
+ 
+0.5
+ 
+69.72 cf t
+ 
+ 
+ 
+3
+ 
+P rec ast  RC Work 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Roof  Cover  Slab of  Sept i cT ank
+ 
+1
+ 
+15.0833 
+ 
+7.67 
+ 
+0.5 
+ 
+57.84 cf t  
+ 
+ 
+Roof  Cover  Slab of  Soak Pit
+ 
+1
+ 
+12.57 
+ 
+-- -
+ 
+0.33 
+ 
+4.19 cft  
+ 
+ 
+Side Wa ll  of  Soak Pit  
+ 
+-- -
+ 
+2.94 
+ 
+-- -
+ 
+29.67 
+ 
+87.22 ef t  
+ 
+ 
+ 
+ 
+1st  Cla
+ss B ri ckw orkw i t h1 : 4 
+Cem ent  Mort ar i nse pti ctank 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+( a)  Long Wa ll  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+: 
+1st  st ep 
+ 
+2
+ 
+15.0833. 
+ 
+1.25 
+ 
+3.0 
+ 
+113.12 cf t  
+ 
+ 
+:
+ 
+2ndst ep 
+ 
+2
+ 
+15.0833 
+ 
+0.833 
+ 
+5.0 
+ 
+125.69 cf t  
+ 
+ 
+( b)  Short  Wal l 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+:
+ 
+1st  st ep 
+ 
+2
+ 
+5.167 
+ 
+1.25 
+ 
+3.0 
+ 
+38.75cf t  
+ 
+ 
+:
+ 
+2
+ndst ep 
+ 
+2
+ 
+6.0 
+ 
+0.833 
+ 
+5.0 
+ 
+49.98 cf t  
+ 
+ 
+( c)  Part it i on Wall  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+:
+ 
+1st  st ep 
+ 
+1
+ 
+5.167 
+ 
+0.417 
+ 
+3.0 
+ 
+6.46 cft  
+ 
+ 
+:
+ 
+2ndst ep 
+ 
+1
+ 
+6.0 
+ 
+0.417 
+ 
+5.0 
+ 
+12.51 cf t  
+ 
+ 
+ 
+5
+ 
+1/ 2 i nch Cem entP l ast er 1: 3w it h 
+StandardWater P roof i ng 
+Com pound i n Septi c Tank
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+( a)
+ 
+Long Wa ll  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+:
+ 
+1st  st ep 
+ 
+2
+ 
+12.583 
+ 
+-- -
+ 
+3.0 
+ 
+75.498 sf t  
+ 
+ 
+ 
+:
+ 
+2ndst ep 
+ 
+2
+ 
+13.417 
+ 
+-- -
+ 
+5.0 
+ 
+134.17 sf t
+ 
+ 
+ 
+( b)  Short  Wal l 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+: 
+1st  st ep 
+ 
+2
+ 
+5.167 
+ 
+-- -
+ 
+3.0 
+ 
+31.002 sf t  
+ 
+ 
+ 
+:
+ 
+2ndst ep 
+ 
+2
+ 
+6.0 
+ 
+-- -
+ 
+5.0 
+ 
+60.00 sf t
+ 
+ 
+ 
+( c)  Part it i on Wall  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+:
+ 
+1st  s
+t ep 
+ 
+-- -
+ 
+5.167 
+ 
+-- -
+ 
+3.0 
+ 
+31.002 sf t  
+ 
+ 
+ 
+:
+ 
+2ndst ep 
+ 
+-- -
+ 
+6.0 
+ 
+-- -
+ 
+5.0 
+ 
+60.00 sf t
+ 
+ 
+ 
+6
+ 
+3/ 4 i nch Cem entP l ast er 1: 3 
+w it h st andardw at er proof i ng
+ 
+com poundi nf l oor of se pti c tank
+ 
+1
+ 
+12.583
+ 
+5.167
+ 
+-- -
+ 
+65.02 sf t
+ 
+ 
+
+--- PAGE 60 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+56
+ 
+of 
+8
+3
+ 
+ 
+ 
+T ab le 
+7
+.2: 
+Cost E stima t ion  of S ep tic T an k
+ 
+I
+t em 
+No.
+ 
+It em  Descr i pt ion
+ 
+Q uanti ty t im es  pri ce 
+per quanti ty
+ 
+Tot al Pri ce ( Taka)
+ 
+1
+ 
+Ear t hwor k Excavat ion
+ 
+1631.53 cft  @ 1475.00 
+per  cf t
+ 
+2406.50
+ 
+ 
+2
+ 
+Cement  Concr et e( 1 :3: 6)  
+ 
+69.72 cf t  @ 8991.00 per  
+cf t
+ 
+6268.52
+ 
+ 
+3
+ 
+Pre cast  RCWor k
+ 
+149.25 cft  @ 15073.53 
+ 
+per  c
+ft
+ 
+22497.24
+ 
+ 
+4
+ 
+1st  Clas s Br ickwor k wi t h 1: 4 Cement  Mor tar i n 
+se pti ct ank
+ 
+346.51 cf t  @ 5629.40 
+per  cf t  
+ 
+19506.43
+ 
+ 
+5
+ 
+1/ 2 inch Cement  Pl ast er  1 :3 wi t h St andar d Wat er  
+Proofi ng Compound i n Sept i cTank
+ 
+391.67 sf t  @ 882.00 per  
+sf t
+ 
+ 
+3454.53
+ 
+ 
+6
+ 
+3/ 4 i nch Ceme
+nt  Pl ast er  1: 3 wi t h Standar d Wat er 
+Proofi ng Compound Floor of  i nSept i cTank
+ 
+65.02 sf t  @ 1323.00 per  
+sf t
+ 
+860.21
+ 
+ 
+7
+ 
+Aggr egat e a t  Bot t om of  Soak Pit
+ 
+9.62 cft  @ 33.50 per cft  
+ 
+322.27
+ 
+ 
+8
+ 
+Coar se Sandat  Bot t om of  Soak Pit  
+ 
+ 
+14.43cft @33.50percft
+ 
+483.40
+ 
+ 
+9
+ 
+2 i nchdis Venti lati ng Pipe f it t ed posi ti on
+ 
+1 No. @ T k 15.00 eac h
+ 
+15
+ 
+ 
+10
+ 
+6 i nchdi amet er  Pipe
+ 
+5.25 ft  @ T k 30 per f t
+ 
+157.50
+ 
+ 
+11
+ 
+C. I. ( ca st  ir on)  Manhol e Cover  18 i nch di amet er over 
+Septi cT ank
+ 
+2 No. @T k. 300.00ea ch
+ 
+600
+ 
+ 
+12
+ 
+RCC T ees
+ 
+2 No. @T k. 
+150.00ea ch
+ 
+300
+ 
+ 
+ 
+ 
+It em  
+No. 
+ 
+No. 
+ 
+It em  Descr i pt ion 
+ 
+No.
+ 
+Lengt h (f t
+) 
+ 
+Wi dth(f t )  
+ 
+H ei ght/
+ 
+Dept h(f t )
+ 
+Q uanti ty 
+ 
+Rem arks 
+ 
+7
+ 
+2 i nchsi zeB rick Aggregat e at 
+B ott om  of  SoakPit
+ 
+-- -
+ 
+„
+×
+( 3.5)
+2
+/4
+ 
+-- -
+ 
+1.0
+ 
+9.62 sft
+ 
+ 
+ 
+8
+ 
+Coars e Sandat B ot t om  of Soak  
+Pit
+ 
+-- -
+ 
+„
+×
+( 3.5)
+2
+/4
+ 
+-- -
+ 
+1.5
+ 
+14.43 sf t
+ 
+ 
+
+--- PAGE 61 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+57
+ 
+of 
+8
+3
+ 
+ 
+Pa rt 8:
+ 
+Ea rthw o rk 
+E
+x ca va ti on for 
+R
+o adw a y
+ 
+ 
+8
+.1 
+Calcu lation  of  
+V
+olume 
+ 
+There  ar e thr ee m ethods  gen erall y adopted  for  co mput ati on of e arthwork  volum e (a ccordin g to  the 
+formation of the sol id). T he y are:
+ 
+1)
+ 
+From cross s ecti ons:  Me asurement f ro
+m cross se c ti on is a universall y appli cable method.
+ 
+2)
+ 
+From spot l evels:  measur ement from spot l evels ar e appli ed som eti me for la rge ex cavati on.
+ 
+3)
+ 
+From contours: R ough  e sti mates of volum e ma y be made  b y tr eatm ent of  the contour  li ne  
+and not m uch used in pra cti c
+e.
+ 
+ 
+8
+.2 
+Measu re men t f ro m 
+C
+ro
+ss 
+S
+ection s
+ 
+The cross secti onal are a along the li ne is
+ 
+first calculated b y standa rd form ulae and the volum es of 
+the prism oids b etween su ccessi ve cross
+-
+se cti ons ar e then cal culated b y follo wing methods:
+ 
+1)
+ 
+Formulae o f
+ 
+Mid
+-
+secti on  me
+thod/  Avera ge h ei ght m ethod.
+ 
+2)
+ 
+Formulae of Tr apez oidal method/ Avera ge en d 
+area method/ mean
+-
+s ecti onal are a  
+method.
+ 
+3)
+ 
+ 
+-
+thi rd rule.
+ 
+ 
+8
+.3 
+T er ms an d  Abb reviation s
+ 
+EG L (Ex ist ing Ground Level) or G L (Ground Le
+v el): The ex ist ing ea rth surfac e
+ 
+F L ( Formati on Lev el): T he proposed lev el of road wa y.
+ 
+R L (Road Le vel): A lev e l st ated in relation t o a known bench ma rk or datu m.
+ 
+Lon git udinal S lope/ Gr ad ient: Gradient ma y be d ef ined as the rate o f rise  or fall  alon g the le
+n gth  of 
+highwa y.
+ 
+S ideS lope:S ideslope 
+isdefinedastherate ofriseorfall o ftheshoul d ersof thepavement. It 
+dep ends 
+on the soil  chara cterist ics  and geo graphi c locati on of the high wa y.
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 62 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+58
+ 
+of 
+8
+3
+ 
+ 
+8
+.4 
+Mid
+-
+section  f
+or mu lae (Ave rage Heigh t M et h od )
+ 
+ 
+Figu re 
+8
+.1
+: Cross S ec tio n  of  a T rap ezoid alS ection  f or Average Heigh t Method
+ 
+Depth secti on (1) = d
+1
+ 
+(note that d
+1
+ 
+is t he differen ce betw een G L & F L)
+ 
+Depth secti on (2) = d
+2
+ 
+(note that d
+2
+ 
+is t he differen ce betw een G L & F L)
+ 
+Avera ge depth, d
+a vg
+ 
+= (d
+1
+ 
++ d
+2
+)/2
+ 
+W idt h of
+ 
+secti on = b
+ 
+S ide slope = 1: s (vertical : horiz ontal)
+ 
+Area o f 
+mid
+-
+secti on
+, 
+A
+ 
+mi d
+ 
+= bd
+a vg
+ 
++ (
+1/2) sd
+a vg
+2
+ 
++ (1/2) sd
+a vg
+2
+ 
+A
+ 
+mi d
+ 
+= (b+sd
+a vg
+) x  d
+a vg
+ 
+Len gth b etween two con secuti ve secti ons (b etwee n secti on (1) & (2) ) = L
+1
+-
+2
+ 
+Volume of earthwork be tween these t
+wo consecu ti ve secti ons (between se cti on (1) & (2)), V
+1
+-
+2
+ 
+= 
+A
+a vg
+ 
+x L
+ 
+V
+1
+-
+2
+ 
+= (b+sd
+a vg
+) x  d
+a vg
+ 
+x L (m a y be cut or fill)
+ 
+ 
+8
+.5 
+T rap ezoid al For mu l a/ Average E n d  Area M ethod  / Mean
+-
+S ec
+tion al Area M ethod
+ 
+Depth secti on (1) = d
+1
+ 
+(note that d
+1
+ 
+is t he differen ce betw
+een G L & F L)
+ 
+Depth secti on (2) = d
+2
+ 
+(note that d
+2
+ 
+is t he differen ce betw een G L & F L)
+ 
+Area at end 1, 
+A
+1
+ 
+= (b +sd
+1
+) x  d
+1
+ 
+Area at end 2, 
+A
+2
+ 
+= (b +sd
+2
+) x  d
+2
+ 
+Mean secti onal are a, A
+ 
+m ea n
+ 
+= (A
+1
++A
+2
+)/2
+ 
+W idt h of secti on = b
+ 
+S ide slope = 1: s (vertical : horiz ontal)
+ 
+
+
+ 
+
+
+ 
+
+ 
+ 
+
+
+ 
+
+ 
+
+--- PAGE 63 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+59
+ 
+of 
+8
+3
+ 
+ 
+Len
+gth b etween two con secuti ve secti ons (b etwee n secti on (1) & (2) ) = L
+ 
+Volume of earthwork bet ween these two conse cuti ve secti ons (between se ct ion (1) & (2)), V
+1
+-
+2
+ 
+= A
+ 
+mea n
+ 
+x  L
+ 
+V
+1
+-
+2
+ 
+= A
+ 
+mea n
+ 
+x  L (ma y be  cut or fil l)
+ 
+ 
+8
+.6 
+Pris moid al f ormu la
+ 
+Depth secti on (1) 
+= d
+1
+ 
+(note that d
+1
+ 
+is t he differen ce betw een G L & F L)
+ 
+Depth secti on (2) = d
+2
+ 
+(note that d
+2
+ 
+is t he differen ce betw een G L & F L)
+ 
+Area at end 1, 
+A
+1
+ 
+= (b +sd
+1
+) x  d
+1
+ 
+Area at end 2, 
+A
+2
+ 
+= (b +sd
+2
+) x  d
+2
+ 
+Mean secti onal are a, A
+ 
+m
+ea n
+ 
+= (A
+1
++A
+2
+)/2
+ 
+W idt h of secti on = b
+ 
+S id
+e slope = 1: s (vertical : horiz ontal)
+ 
+Len gth b etween two con secuti ve secti ons (b etwee n secti on (1) & (2) ) = L
+ 
+Volume of ea rthwork bet ween these tw o conse cuti ve secti ons (betw een se ct ion (1) & (2)),
+ 
+V
+1
+-
+2
+ 
+= (A
+1
++ 4A
+m 
++ A
+2
+)/6 x  L (m a y be cut or fill)
+ 
+ 
+8
+.7 
+Work
+ed  O
+u t 
+Prob le m
+ 
+A 1 km road is to  be co nstructed in ex ist ing gro und level h aving redu ce d levels 54.1, 53.8,  53.5, 
+53.5, 54.3, 54.6, 54.9, 54.5, 54.7 and 54.3 meters at 100
+ 
+m int ervals. A required redu ced level at  
+station 1 is 55 meter and  the downwa rd gr adi
+ent is 1 in 1000. The width of the ro ad at fo rmati on 
+level is 8 met er. S lopes  to be m aint ained at cut ti ng and  filli ng ar e 1:2 (V: H)  and 1:3  (V
+: H
+) 
+respecti vel y. C alcul ate th e volum e of Earthwo rk.
+ 
+ 
+Figu re 
+8
+.2 : 
+T yp ical 
+Fil l S ection
+ 
+
+--- PAGE 64 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+60
+ 
+of 
+8
+3
+ 
+ 
+ 
+Figu re 
+8
+.
+3
+: 
+T yp ical Cu
+t
+ 
+S ection
+ 
+ 
+Figu re
+ 
+8
+.4
+: Lon g 
+S
+ection  of  the 
+R
+oad
+ 
+*
+From fi gur e
+ 
+ 
+X
+ 
+0.3
+ 
+ 
+=  
+100 
+-
+ 
+X
+ 
+0.1
+ 
+   
+=> X = 75
+[
+ 
+ 
+ 
+ 
+        
+                                                      
+        
+ 
+               
+ 
+                                             
+                      
+ 
+ 
+ 
+Figu re
+ 
+8.5
+: Len gth of  Cut an d  Fil l b etw een  station  5 & 6.
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 65 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+61
+ 
+of 
+8
+3
+ 
+ 
+T ab le 
+8
+.1: 
+E arthw ork  Comp u tation  T ab le
+ 
+(
+Mi
+d
+-
+section  / averag e h eigh t method
+)
+ 
+S tation
+ 
+F L 
+ 
+(m)
+ 
+EG L 
+(m)
+ 
+Depth, 
+d= EG L
+ 
+
+Æ
+ 
+FL
+ 
+(m)
+ 
+Avera ge 
+depth, 
+d
+a vg
+ 
+(m)
+ 
+Area, 
+A=(b+sd
+a v g
+)d
+a vg
+ 
+(m
+2
+)
+ 
+Len gth, 
+L (m)
+ 
+Volume, 
+V = A x  L 
+(m
+3
+)
+ 
+R emark
+ 
+1
+ 
+55.0
+ 
+54.1
+ 
+0.9
+ 
+ 
+ 
+ 
+ 
+ 
+1
+ 
+(8+3
+ 
+X 
+1)
+ 
+X 
+1
+ 
+= 11
+ 
+100
+ 
+1100
+.00
+ 
+Fil l
+ 
+2
+ 
+54.9
+ 
+53.8
+ 
+1.1
+ 
+1.2
+ 
+(8+3
+ 
+X 
+1.2)
+ 
+X 
+1.2 
+ 
+= 13.92
+ 
+100
+ 
+1392
+.00
+ 
+Fil l
+ 
+3
+ 
+54.8
+ 
+53.5
+ 
+1.3
+ 
+1.25
+ 
+(8+3
+ 
+X 
+1.25)
+ 
+X 
+1.25 
+= 14.68
+ 
+100
+ 
+14
+68
+.00
+ 
+Fil l
+ 
+4
+ 
+54.7
+ 
+53.5
+ 
+1.2
+ 
+0.75
+ 
+(8+3
+ 
+X 
+0.75)
+ 
+X 
+0.75 
+= 7.68
+ 
+100
+ 
+768
+.00
+ 
+Fil l
+ 
+5
+ 
+54.6
+ 
+54.3
+ 
+0.3
+ 
+0.15
+ 
+(8+3
+ 
+X 
+0.15)
+ 
+X 
+0.15 
+= 1.26
+ 
+75
+*
+ 
+95.06
+ 
+Fil l
+ 
+0
+ 
+x
+ 
+x
+ 
+0
+ 
+0.05
+ 
+(8+2
+ 
+X 
+0.05)
+ 
+X 
+0.05 
+= 0.40
+ 
+25
+*
+ 
+10.18
+ 
+C ut
+ 
+6
+ 
+54.5
+ 
+54.6
+ 
+0.1
+ 
+0.15
+ 
+(8+2
+ 
+X 
+0.15)
+ 
+X 
+0.15 
+= 1.245
+ 
+100
+ 
+124.5
+0
+ 
+C ut
+ 
+7
+ 
+54.4
+ 
+54.6
+ 
+0.2
+ 
+0.4
+ 
+(8+2
+ 
+X 
+0.4)
+ 
+X 
+0.4 
+ 
+= 3.52
+ 
+100
+ 
+352
+.00
+ 
+C ut
+ 
+8
+ 
+54.3
+ 
+54.9
+ 
+0.6
+ 
+0.45
+ 
+(8+2
+ 
+X 
+0.45)
+ 
+X 
+0.45 
+ 
+= 4.01
+ 
+100
+ 
+400.5
+0
+ 
+C ut
+ 
+9
+ 
+54.2
+ 
+54.5
+ 
+0.3
+ 
+0.45
+ 
+(8+2
+ 
+X 
+0.45)
+ 
+X 
+0.45 
+ 
+= 4.01
+ 
+100
+ 
+4
+00.5
+0
+ 
+C ut
+ 
+10
+ 
+54.1
+ 
+54.7
+ 
+0.6
+ 
+0.45
+ 
+(8+2
+ 
+X 
+0.45)
+ 
+X 
+0.45 
+ 
+= 4.01
+ 
+100
+ 
+400.5
+0
+ 
+C ut
+ 
+11
+ 
+54.0
+ 
+54.3
+ 
+0.3
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Volume of tot al cutti ng =
+
+1688.18 m
+3
+ 
+Volume of tot al fil li ng = 4824.56 m
+3
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 66 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+62
+ 
+of 
+8
+3
+ 
+ 
+Assign men t 1
+: 
+C alcul ate the volum e  of cutt ing and filli n
+g 
+for  
+the 
+pr evi ous 
+worked  out 
+problem  
+using the trap ez oidal method.
+ 
+Hi n ts
+ 
+T ab le 
+8
+.2: 
+E arthw ork  Comp u tation  T ab le (
+T rap ezoid al f ormu la/ Avera ge E n d  Area 
+Method
+)
+ 
+ 
+S tation
+ 
+FL(m)
+ 
+E GL (m)
+ 
+ 
+ 
+ 
+(m)
+ 
+Area , A
+ 
+=
+ 
+(b+sd )d
+ 
+Avg. Area
+ 
+A
+me a n
+ 
+(m
+2 
+)
+ 
+L en gth, L  (
+m)
+ 
+Volu me
+ 
+V=A
+mi d
+xL
+ 
+(m
+3
+)
+ 
+Remark s
+ 
+1
+ 
+55
+ 
+54.1
+ 
+0.9
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+2
+ 
+54.9
+ 
+53.8
+ 
+1.1
+ 
+ 
+ 
+ 
+ 
+ 
+3
+ 
+54.8
+ 
+53.5
+ 
+1.3
+ 
+ 
+ 
+ 
+ 
+ 
+4
+ 
+54.7
+ 
+53.5
+ 
+1.2
+ 
+ 
+ 
+ 
+ 
+ 
+5
+ 
+54.6
+ 
+54.3
+ 
+0.3
+ 
+ 
+ 
+ 
+ 
+ 
+0
+ 
+-
+ 
+-
+ 
+0
+ 
+ 
+ 
+ 
+ 
+ 
+6
+ 
+54.5
+ 
+54.6
+ 
+0.1
+ 
+ 
+ 
+ 
+ 
+ 
+7
+ 
+54.4
+ 
+54
+.6
+ 
+0.2
+ 
+ 
+ 
+ 
+ 
+ 
+8
+ 
+54.3
+ 
+54.9
+ 
+0.6
+ 
+ 
+ 
+ 
+ 
+ 
+9
+ 
+54.2
+ 
+54.5
+ 
+0.3
+ 
+ 
+ 
+ 
+ 
+ 
+10
+ 
+54.1
+ 
+54.7
+ 
+0.6
+ 
+ 
+ 
+ 
+ 
+ 
+11
+ 
+54
+ 
+54.3
+ 
+0.3
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 67 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+63
+ 
+of 
+8
+3
+ 
+ 
+Assign men t 2
+: 
+C alcul ate the volum e  of cutt ing and filli ng for  
+the 
+pr evi ous
+ 
+worked  out
+ 
+problem  
+using
+ 
+the prism oidal
+ 
+met hod.
+ 
+Hi n ts
+ 
+T ab le 
+8
+.3: 
+E arthw ork  Comp u tation  T ab le (
+Pris moid al f or mu la
+)
+ 
+ 
+S tation
+ 
+FL(m)
+ 
+E GL (m)
+ 
+ 
+FL
+ 
+(m)
+ 
+Area ( A)
+ 
+Avg. depth , d
+avg  
+(m)
+ 
+Area
+ 
+A
+mi d
+=(b +sd
+av g
+) d
+av g
+ 
+(m
+2 
+)
+ 
+L en gth, L  (m)
+ 
+Volu me
+ 
+V=(A
+1 
+ 
++4 
+A
+mi d 
+ 
++
+ 
+A
+2 
+ 
+) 
+ 
+x L  /6
+ 
+(m
+3
+)
+ 
+Re
+mark s
+ 
+1
+ 
+55
+ 
+54.1
+ 
+0.9
+ 
+A
+1
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+A
+1
+-
+2
+ 
+ 
+ 
+ 
+2
+ 
+54.9
+ 
+53.8
+ 
+1.1
+ 
+A
+2
+ 
+ 
+A
+2
+-
+3
+ 
+ 
+ 
+ 
+3
+ 
+54.8
+ 
+53.5
+ 
+1.3
+ 
+A
+3
+ 
+ 
+A
+3
+-
+4
+ 
+ 
+ 
+ 
+4
+ 
+54.7
+ 
+53.5
+ 
+1.2
+ 
+A
+4
+ 
+ 
+A
+4
+-
+5
+ 
+ 
+ 
+ 
+5
+ 
+54.6
+ 
+54.3
+ 
+0.3
+ 
+A
+5
+ 
+ 
+A
+5
+-
+0
+ 
+ 
+ 
+ 
+0
+ 
+-
+ 
+-
+ 
+0
+ 
+0
+ 
+ 
+A
+0
+-
+6
+ 
+ 
+ 
+ 
+6
+ 
+54.5
+ 
+54.6
+ 
+0.1
+ 
+A
+6
+ 
+ 
+A
+6
+-
+7
+ 
+ 
+ 
+ 
+7
+ 
+54.4
+ 
+54.6
+ 
+0.2
+ 
+A
+7
+ 
+ 
+A
+7
+-
+8
+ 
+ 
+ 
+ 
+8
+ 
+54.3
+ 
+54.9
+ 
+0.6
+ 
+A
+8
+ 
+ 
+A
+8
+-
+9
+ 
+ 
+ 
+ 
+9
+ 
+54.2
+ 
+54.5
+ 
+0.3
+ 
+A
+9
+ 
+ 
+A
+9
+-
+10
+ 
+ 
+ 
+ 
+10
+ 
+54.1
+ 
+54.7
+ 
+0.6
+ 
+A
+10
+ 
+ 
+A
+10
+-
+11
+ 
+ 
+ 
+ 
+11
+ 
+54
+ 
+54.3
+ 
+0.3
+ 
+A
+11
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 68 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+64
+ 
+of 
+8
+3
+ 
+ 
+Assign men t 3: 
+C alculat e the vol
+ume of earth filli ng for the dit ch. Given, reduced level of filli ng 
+plane is 10 0 m. 
+ 
+ 
+ 
+Figu re
+ 
+8.6
+: 
+S ection  A
+-
+A  of  Ditch  f or Assign men t 3 
+ 
+ 
+ 
+
+--- PAGE 69 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+65
+ 
+of 
+8
+3
+ 
+ 
+R educed levels
+ 
+(R L)
+ 
+of
+ 
+d ifferent st ati ons a re given  as follows
+ 
+T ab le 
+8
+.
+4
+: 
+Red u ced  leve ls (RL) of  
+D
+iff eren t 
+S
+tation
+s
+ 
+f or Assign men t 3
+ 
+S tation
+ 
+R L (m)
+ 
+S tation
+ 
+R L (m)
+ 
+S tation
+ 
+R L (m)
+ 
+S tation
+ 
+R L (m)
+ 
+S tation
+ 
+R L (m)
+ 
+1
+ 
+101.00
+ 
+12
+ 
+103.20
+ 
+23
+ 
+105.25
+ 
+34
+ 
+104.14
+ 
+45
+ 
+101.00
+ 
+2
+ 
+102.00
+ 
+13
+ 
+103.90
+ 
+24
+ 
+107.00
+ 
+35
+ 
+100.00
+ 
+46
+ 
+103.20
+ 
+3
+ 
+101.70
+ 
+14
+ 
+101.30
+ 
+25
+ 
+108.36
+ 
+36
+ 
+101.10
+ 
+47
+ 
+101.10
+ 
+4
+ 
+102.00
+ 
+15
+ 
+100.16
+ 
+26
+ 
+105.90
+ 
+37
+ 
+104.80
+ 
+48
+ 
+102.15
+ 
+5
+ 
+101.00
+ 
+16
+ 
+104.15
+ 
+27
+ 
+103.00
+ 
+38
+ 
+105.60
+ 
+49
+ 
+102.00
+ 
+6
+ 
+100.60
+ 
+17
+ 
+106.85
+ 
+28
+ 
+100.00
+ 
+39
+ 
+103.00
+ 
+ 
+ 
+7
+ 
+100.10
+ 
+18
+ 
+107.65
+ 
+29
+ 
+101.70
+ 
+40
+ 
+107.80
+ 
+ 
+ 
+8
+ 
+100.60
+ 
+19
+ 
+105.90
+ 
+30
+ 
+104.80
+ 
+41
+ 
+104.14
+ 
+ 
+ 
+9
+ 
+106.00
+ 
+20
+ 
+104.00
+ 
+31
+ 
+105.60
+ 
+42
+ 
+101.00
+ 
+ 
+ 
+10
+ 
+107.50
+ 
+21
+ 
+102.00
+ 
+32
+ 
+103.00
+ 
+43
+ 
+100.10
+ 
+ 
+ 
+11
+ 
+105.10
+ 
+22
+ 
+101.70
+ 
+33
+ 
+107.8
+ 
+44
+ 
+102.30
+ 
+ 
+ 
+ 
+Hi n ts:
+ 
+
+ 
+C alculate depth t o be fill ed at ea ch st ati on
+ 
+
+ 
+C alculate volume of e ach  grid to be filled ( i.e. 
+V 
+1
+-
+2
+-
+8
+-
+9
+ 
+= 1/4 x (d
+1 
++ d
+2 
++ d
+8 
++ d
+9
+) x A 
+1
+-
+2
+-
+8
+-
+9
+ 
+)
+ 
+
+ 
+S um up all t o g
+et t otal volum e (
+T otal volu me = V  
+1
+-
+2
+-
+8
+-
+9 
++
+ 
+V 
+2
+-
+3
+-
+9
+-
+1 0 
+
+.)
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 70 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+66
+ 
+of 
+8
+3
+ 
+ 
+ 
+Pa rt 
+9
+:
+ 
+Es ti ma tio n of a
+ 
+Roo f Trus s
+ 
+Atrussisastructurecompos edofslendermember sjoi nedtogetherattheire ndpoint s.Planartrusses 
+li e in a sin gle plan e. T ypicall y, th e joi nt con
+ne c ti ons are fo rmed b y bolt ing or  weldi n g the end 
+members to gether  to a co mm on plate, call ed a gus set plate.
+ 
+The  basic buil d ing block o f a  truss is a 
+triangle.  La r ge  truss a re  const ructed b y att a ching several  trian gles to gether . A n ew tri an gle can b e 
+added
+ 
+truss b y addin g tw o members and a joi nt. A truss const ructed in thi s fashion  is known as a 
+sim ple truss.
+ 
+9.1 
+T yp es of  T ru ss
+ 
+Various t yp es of trusses are used around the worl d. S ome of them are sho wn below:
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- PAGE 71 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+67
+ 
+of 
+8
+3
+ 
+ 
+ 
+ 
+ 
+ 
+Fig
+ure9.1:  Dif f erent  Types  of  Truss
+ 
+ 
+ 
+9.2 
+B asic Ter min ologi es of  a tru ss
+ 
+B ay:  
+Bay i st he di
+st ance bet wee nt wo mai n tr usses .
+ 
+Span:
+ 
+Spani st he dist ance bet ween support s of  at r uss .
+ 
+Ri se :
+ 
+T her i se of a tr uss isver t i cal  di st ance  bet ween apex a ndl inej oi ni ng t hesuppor ts.
+ 
+Pit ch:
+ 
+T her at i o of t her ise t o t he s pan is c all edt he pi tch.
+ 
+TopChord:
+ 
+T he
+ 
+upper most li neof member swhi chextendfr omonesupport t ot heot her t hr ought heapexi s 
+ca ll edt he upper  chor d
+.
+ 
+B ott om Chord:
+ 
+T
+hebot tomchor dcons istsof t hel ower most li neof me mber sextendi ngf romonesupport to 
+ot her
+.
+ 
+Ver t ical:
+ 
+V er ti cal  
+member s
+ 
+conne
+cti ng t op and bott om chor ds.
+ 
+Di agonal :
+ 
+Incl i ned me mber s c onnect ing t op andbott om chor ds.
+ 
+
+--- PAGE 72 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+68
+ 
+of 
+8
+3
+ 
+ 
+ 
+ 
+ 
+Figure 9.2:  
+Di mensi ons of a Truss  System
+ 
+ 
+ 
+ 
+Figu re 
+9.3
+: 
+Co mp on en t s of  a T ru ss
+ 
+
+--- PAGE 73 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+69
+ 
+of 
+8
+3
+ 
+ 
+Fig
+ure2
+: B raci ng Syst emof  t russ
+ 
+ 
+9.3
+ 
+Work
+ed  O
+u t Prob le m
+ 
+A 
+P ratt  t ype roof truss 
+w as design ed 
+from t he following dat a
+:
+ 
+Design  Data:
+ 
+S pan = 40 fe et
+ 
+S pan
+-
+to
+-
+rise r ati o (pitch) = 4:1
+ 
+R ise = 10 feet
+ 
+Ba y dist anc e (truss
+-
+to
+-
+tru ss di stance) = 25 feet.
+ 
+Ex posure cate gor y: Ex posure A
+ 
+Truss i s supported on brick wall  of hei ght = 12 fe et
+.
+ 
+
+--- PAGE 74 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+70
+ 
+of 
+8
+3
+ 
+ 
+ 
+Figu re
+ 
+9.
+4 : Prat t typ e R oof  T ru ss
+ 
+T ab le: Me mb er S p ecif ication s
+ 
+Member t ype
+ 
+Design s ecti on
+ 
+Area (in
+2
+)
+ 
+Top chord
+ 
+ 
+1.56
+ 
+Bott om chord
+ 
+ 
+2.09
+ 
+Verticals
+ 
+ 
+0.9
+ 
+W eb member / Dia gonal s
+ 
+ 
+0.996
+ 
+Vertical br acin g
+ 
+ 
+0.688
+ 
+Top chordbra cin g
+ 
+ 
+0.813
+ 
+Bott om chord st rut
+ 
+ 
+1.15
+ 
+P urlin
+ 
+C  7×9.8
+ 
+2.87
+ 
+S agrod
+ 
+#3 bar
+ 
+0.11
+ 
+ 
+
+--- PAGE 75 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+71
+ 
+of 
+8
+3
+ 
+ 
+S olu tion
+:
+ 
+The various membe rs of the truss network a re desi
+gned as follows:
+ 
+T ab le:
+ 
+Calcu lation  of  total w eigh t of  the tru ssme mb ers
+ 
+Member 
+t ype
+ 
+S hape of 
+S ecti on
+ 
+Design s ecti on
+ 
+Quanti t y
+ 
+Len gth 
+(ft)
+ 
+Unit 
+W eight 
+(lb/ft)
+ 
+Total 
+W eight
+             
+(lb)
+ 
+Top chord
+ 
+Angle
+ 
+ 
+12
+ 
+7.453
+ 
+5.40
+ 
+40.246
+ 
+Bott om
+ 
+chord
+ 
+Angle
+ 
+ 
+12
+ 
+6.667
+ 
+7.20
+ 
+48.002
+ 
+Verticals
+ 
+Angle
+ 
+ 
+4
+ 
+3.333
+ 
+3.10
+ 
+10.332
+ 
+Angle
+ 
+4
+ 
+6.667
+ 
+3.10
+ 
+20.668
+ 
+Angle
+ 
+2
+ 
+10
+ 
+3.10
+ 
+31
+ 
+W eb 
+member / 
+Diagon als
+ 
+Angle
+ 
+ 
+4
+ 
+7.454
+ 
+3.39
+ 
+25.269
+ 
+Angle
+ 
+4
+ 
+9.42
+9
+ 
+3.39
+ 
+31.964
+ 
+Vertical 
+bracin g
+ 
+Angle
+ 
+ 
+2
+ 
+26.926
+ 
+2.34
+ 
+63.007
+ 
+Top chord 
+bracin g
+ 
+Angle
+ 
+ 
+4
+ 
+29.107
+ 
+2.77
+ 
+80.626
+ 
+Bott om 
+chordstrut
+ 
+Angle
+ 
+ 
+7
+ 
+25
+ 
+3.92
+ 
+98
+ 
+P urlin
+ 
+C hannel
+ 
+C  7×9.8
+ 
+5
+ 
+25
+ 
+9.8
+ 
+245
+ 
+S agro
+d
+ 
+C yli nd rical
+ 
+#3 bar
+ 
+2
+ 
+22.361
+ 
+0.38
+ 
+8.497
+ 
+T otal w eigh t 
+=
+ 
+  
+702.611
+ 
+(lb )
+ 
+ 
+Total weight o f steel m e mbers = 702.611 lb
+ 
+Unit P rice = A tk/l b
+ 
+Total C ost= 
+702.611 x  A= 
+X
+1
+ 
+tk
+ 
+Erecti on and W eldi n g C ost
+ 
+= 
+10
+% of total cost= X
+2
+ 
+Esti mated cost=
+X
+1
++X
+2
+ 
+tk
+ 
+ 
+ 
+
+--- PAGE 76 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+72
+ 
+of 
+8
+3
+ 
+ 
+Pa rt 
+10
+:
+ 
+Us es o f Softw are in Co ns tructi on Esti ma ti o n
+ 
+10.1 In trod u ction
+ 
+Measurementsoft war ea ppli cati ons,asausefulIT tool ,canhelpa 
+quanti t ysurve yor
+ 
+tospeedupth e 
+measurementworks. 
+S tudi eshaveshownthat 
+workers(quanti t ysurv e yors) spent 
+upto 
+80%ofth
+eir 
+working ti me on measur ement of quanti ti es to produce bil ls of quanti ti es
+ 
+(Ken g & C hing, 2011)
+. 
+The benefits of using me asurement softwa re in the prepar ati on of B
+il l of Quanti t y
+ 
+( BoQ)
+ 
+a re high  
+accur ac y, e as y to edit  the 
+BoQ
+, speed up measur ement works, 
+high trac ea bil it y, user f riendl y, and  
+reducti on of workfor ce t o do measurement works . These indi cate that the adopti on and the use of 
+measurementso ftwar ec a nbringim provementine dit ing 
+Bo Q
+,a ccur ac y,t ra ceabil it y, andti meliness. 
+B y usin g m easur ement s o
+ftware,  it  c an enhanc e t he servi ce quali t y of qu a nti t y surve yin g firms and 
+enabled them t o meet t he  high ex pectations  of the cli ents.
+ 
+10.2 S of t
+w are Used  in  Qu an tity S u rveyin g
+ 
+A lar ge numbe r of softw are is av ail able to the qu anti t y surve yo rs. The tw o main
+ 
+functi ons of these 
+software  include takin g off measu rement and pr eparin g the BoQ.  A f ew  prominent softwar e a re  
+li sted below:
+ 
+1.
+ 
+QuickMeasur e
+ 
+OS
+ 
+2.
+ 
+P riMus
+-
+To
+ 
+3.
+ 
+P lanSwift
+ 
+4.
+ 
+On Center Tak eoff
+ 
+5.
+ 
+Bluebe am R evu
+ 
+6.
+ 
+Vu360
+ 
+7.
+ 
+Eas y
+-
+P ro Buil de rs Estim ator
+ 
+8.
+ 
+iS cope
+ 
+9.
+ 
+Esti mate
+ 
+10.
+ 
+P lanViewer
+ 
+T
+his m anual di scusses br iefl y on 
+the 
+us a ge of 
+QuickMeasur e
+ 
+OS
+.
+ 
+10.3 Qu ickMeasu re
+ 
+OS
+ 
+QuickMeasur e OS is one of the most  popular s oftware b ec ause of it s u ser
+-
+f riendli ness, stron g 
+support s ystem and most  im portantl y, it s int egra ti on with a widel y
+-
+used  and avai
+lable softwar e  
+Microsoft Ex cel. A brie f discussi on
+ 
+on the use of thi s 
+is provided below us ing the ex ampl e, wher e 
+it  is s hown how to calculate volume of brick m asonr y.
+ 
+S tep  On e:
+ 
+Open Ex cel file. C reate a new li st identif yin g all  the it ems of measurem ent and
+ 
+include 
+the addit ional colum ns re quired for compl et e cal c ulations along with t heir formul ae
+.
+ 
+
+--- PAGE 77 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+73
+ 
+of 
+8
+3
+ 
+ 
+ 
+Figu re 
+10.1
+:
+ 
+L istin g Items
+ 
+In thi s case, fo r each ro om, the colum ns created  are: Len gth, W all  Height , S ingle/ double sided, 
+surfac e ar ea, cost per uni t s
+urface ar ea and tot al.
+ 
+S tep  T w o:
+ 
+The Qui ckMeasure  Onsc reen  ( Quick Measure  OS) lo ads auto maticall y as an add
+-
+in in  
+ex cel. 
+Thisadd
+-
+incanbeusedintheformofOnScreenaswell asDi git iz er,asshown 
+inFigure10.2. 
+In thi s c ase w e ar e usi ng OnScreen v ersio
+n. 
+ 
+S tep  T h ree:
+ 
+ 
+(Figu re 10.3)  
+where you ne ed to enter t he colum n or row numbe r that includes your prim ar y product des criptio n. 
+In thi s c ase, it  is t he Iden ti t y o f the R ooms , so use colum n A.
+ 
+Lis t of  all  it ems of  
+mea sur ement s al ong 
+wi t h cell sr eser ved 
+f or subs equent  
+ca l cul ati ons
+ 
+Qui ckMe asur e 
+T ool bar
+ 
+
+--- PAGE 78 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+74
+ 
+of 
+8
+3
+ 
+ 
+ 
+Figu re 
+10.2
+:
+ 
+Choos in g On S creen  op tion
+ 
+ 
+Figu re 
+10.3
+:
+ 
+S ettin g the  Descrip tion  Colu mn
+ 
+
+--- PAGE 79 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+75
+ 
+of 
+8
+3
+ 
+ 
+S tep  f ou r:
+ 
+C li cking on Mana ge OnScr een Ima ges
+ 
+(Fi gure 10.4)
+ 
+will  open up a window to load 
+im ages  
+( Figu re  10.5) 
+in  t he fo rm of  jpg,  gif, pd f, e tc. 
+As shown  in Fi gure  1 0.6
+ 
+
+ 
+ 
+Figu re 
+10
+.4 :
+ 
+Clicki n g on  Man age On S creen  Images
+ 
+ 
+Figu re 
+10.5
+:
+ 
+Add in g Plan s 
+ 
+
+--- PAGE 80 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+76
+ 
+of 
+8
+3
+ 
+ 
+ 
+Figu re 
+10.6
+:
+ 
+Man agin g Plan s
+ 
+S tep  f ive:
+ 
+In thi s ex ampl e we a re goin g to find th e len g
+th (linear foota ge ) of wall  b y take
+-
+o ff and 
+then the surfa ce are a and  cost of wall  for ea ch roo m mentioned in diffe
+rent  rows. S elect the Line ar  
+Foota ge colum n(Colum nB), be cause thi sisthecol umnthatwewill populatewithvalues from take
+-
+off
+. This i s s
+hown in figu re 10.7.
+ 
+ 
+Figu re 
+10.7
+:
+ 
+S electin g L in ear Foo tage Colu mn
+ 
+
+--- PAGE 81 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+77
+ 
+of 
+8
+3
+ 
+ 
+Sel ecti ng 
+Polyl i neopti on 
+f r om t he 
+Qui ckMe asur e 
+T ool bar
+ 
+In  the custom  tool bar, yo u can  work  with li nea r di stances usin g eit her pol yl ine or s e gments. In  thi s 
+ex
+ampl e, we will  select p ol yli ne, as shown b y t
+he mous e cursor in Fi gu re 1 0.8.
+ 
+ 
+Figu
+re 10.8
+: 
+Sel ec ti ngP ol yli ne opt ionf rom t heQ uickMe asure  Tool bar
+ 
+S electi ng the pol yli ne, th en pressi ng ent er will  open up the QuickMeasure  OnScreen W indow, as 
+shown in Figu re 10.9.
+ 
+ 
+Figu re 
+10.
+9
+:
+ 
+Qu ickMea su re On S creen  Win d ow
+ 
+
+--- PAGE 82 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+78
+ 
+of 
+8
+3
+ 
+ 
+S tep  six:
+ 
+In fi gure 10.9, t he S
+cale Lin e is deselect ed b y de fault . W e now select it  to set the scale of 
+the diagram
+, as shown in Figu re 10.10.
+ 
+ 
+ 
+                                                      
+ 
+Figu re 10.10
+: Ch eck  M ark in g the Scale L in e
+ 
+ 
+Figu re 10.11
+: Scali n g the Pla
+n
+ 
+T he scal el inei s 
+che ck mar ked.
+ 
+        
+Scal e Li ne
+ 
+        
+Room #103
+ 
+ 
+Bl ue 
+li ne used 
+t o 
+draw li ne 
+f or sc al i ng.
+ 
+
+--- PAGE 83 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+79
+ 
+of 
+8
+3
+ 
+ 
+
+D ra g the mouse  
+cursorov er thedist anc ei ntheim a ge file toshow thedist anc etob esc aled, asshownusin gtheli ght  
+blue line in Fi gure  10.11.  The li ne  len gth and  dire
+cti on can  be adjust ed as  necessa r y. W hen you  ar e 
+
+ 
+the
+n opens up, wher e the real
+ 
+dist ance is s pe cifi
+ed.  In thi s cas e, the re al
+ 
+dist ance is 32  fe et 0 i nches, 
+a
+s shown in Fi gure 10.12 .
+ 
+
+ 
+ 
+Figu re 10.12
+:
+ 
+S ettin g th e S cale
+ 
+After sele cti ng th e cor rec t scale, un
+che ck the tick mark of th
+e sc ale
+ 
+li ne. 
+If a new sc ale is requir ed, 
+check the tick ma rk a gain t o adjust  scale.
+ 
+S tep  seven :
+ 
+S el ect the  fi r
+ 
+ 
+
+ethe len gthof the 
+wall softhe room. Inthi scase, blueli ne isused todefineth ew all sofR oom#103asshown inFigu re  
+10.14. Le ft cli ck e ach ti me you w ant to set a poi nt and double cli ck when  you a re finished d rawin g 
+theli ne.Thelengthofthe li nei
+sautom ati call yme a suredasshowinFigu re1 0.15.Youcannavi gate 
+around the im a ge usin g R ight
+-
+cli ck butt on or the mous e scroll butt on. Once you are read y to move  
+
+ti ate 
+from the previous  room. If you want to skip some rooms and jum p ahead to, for ex ampl e R oom 
+#112, jus t select R oom #112 from t he li st on the left side and di git iz e the respecti ve room.
+ 
+ 
+
+--- PAGE 84 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+80
+ 
+of 
+8
+3
+ 
+ 
+ 
+Figu re 10.13
+: Selectin g Roo m
+ 
+#103
+ 
+ 
+Figu re 10.14
+: De marca
+t in g Wall sf or T ak e
+-
+off
+ 
+Bl ue li ne used 
+t o demar cat et he 
+wal l s of  Room 
+#103 andhelp i n 
+t ake
+-
+of f
+ 
+
+--- PAGE 85 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+81
+ 
+of 
+8
+3
+ 
+ 
+ 
+the ex cel file  will  be po pulated with the di git iz ed measur ements. Fil l up  the r emaining colum ns  
+manuall y and finall y get the total 
+cost of
+ 
+materials  for the wall s as shown in  figur e 10.16.
+ 
+ 
+Figu re 10.15
+: Fin ish in gthe T ak e
+-
+of f
+ 
+ 
+Figu re 10.16 : Au to mati c T ran sf er of  Measu re men ts to E xcel
+ 
+
+--- PAGE 86 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+82
+ 
+of 
+8
+3
+ 
+ 
+Referenc es
+ 
+ 
+1.
+ 
+W
+a yne
+.  J . D
+el
+ 
+P ico, 2 012, 
+Esti mating Build ing C osts  for the R eside nti al and L ight 
+C ommercial  
+C onst ructi on Professional
+-
+Second  E dit ion
+, J ohn W il e y & S o ns, IS BN: 978
+-
+1
+-
+118
+-
+09941
+-
+4.
+,  from 
+htt p:/ /engineerin gbooksp df.com/ download/2017/ 11/231117/ Esti mating%20Buil ding%20C
+osts %20for%20the%20R esidenti al%20and%20 Li ght%20Com merci al%20 C onst ructi on%2
+0P rofessi o
+nal%20B y% 2 0W a yne%20J %20Delpi c o.pdf
+, Acc essed on 
+16 N ovember 2016
+ 
+2.
+ 
+C ali nM.P opescu,KanP haobunjong,Nunt apon gOvara rin
+,2003, 
+Esti matingBuild ingC osts
+, 
+C R C  P ress
+, I
+S BN 97808 24740863 
+-
+ 
+C AT# DK28 07
+.
+ 
+3.
+ 
+theconst ructor.or g
+ 
+4.
+ 
+ASTM, 2015, 
+Standar d C lass ifi cati on for
+ 
+Building Elements and Related Sit ew ork
+
+UNIFORMAT  II
+, E1557
+-
+09
+ 
+5.
+ 
+Divis ion of C apit al Asset Mana gement
+, 2 006,
+ 
+C onsul tant s Estimating Manual
+, 
+C omm onwealt h of Massachusett s
+ 
+6.
+ 
+T. C . Keng & Y.K. C hi ng, 2011, A S tud y on t he Use of Me asurem ent S oftware in the  
+P repara
+ti on o f Bil ls of Quanti ti es amon g Mal a ys ian
+ 
+Quanti t y S urve yi ng Firms
+, p aper  
+subm it ted to
+ 
+2011 Ninth Int ernati onal C onfe ren ce on IC T and Knowle dge En gineerin g
+, 
+Kuala Lumpur, Mala ysi a .
+ 
+7.
+ 
+David P ratt , 2011 , 
+Esti mating for Residenti al C onst ructi on
+, from 
+htt p:/ /e
+ngineerin gbooksp df.com/ download/2017/ 11/231117/ Esti mating%20For%20R eside
+nti al%20Const ructi on%20S econd%20Edit ion%20B y%20D avid%20J %20P ratt .pdf
+,  
+Access ed on 14 Novemb er 2016
+ 
+8.
+ 
+htt p:/ /www.hudsoncivi l.com.au/assets/ im ages/box
+-
+culverts/ ._mi ni800x 600/_DSC 0245.jpg
+,
+ 
+Access ed on 12 J anuar y 201
+6
+.
+ 
+9.
+ 
+htt p:/ /www.conteches.co m/ portals/ 0/ Ima ges/P DH %20C redit s/ Insp ecti on, %20Evaluation%
+20and%20 Load %20R ati ng%20o f%20 Installed % 20C ulverts/ photo1.j pg
+, Access ed on 12 
+J anuar y 2016
+ 
+10.
+ 
+htt ps:/ /qph.ec.quoracdn.n et/ main
+-
+qim g
+-
+1587f f336 e1995ee8
+82b8b e58040e1 58
+,
+ 
+Accessedon 
+12 J anuar y 2016
+ 
+11.
+ 
+htt p:/ /www.lefil tredumonde.com/ upload/2017/12/ 13/pi n
+-
+reinforc ed
+-
+con cr ete
+-
+box
+-
+culvert
+-
+design
+-
+on
+-
+pint erest
+-
+conc rete
+-
+box
+-
+culvert
+-
+d esi gn
+-
+l
+-
+dfc6df8014 e0fa7 f.J P G
+, 
+ 
+12.
+ 
+htt ps:/ /www.civi lgeo.co m/ wp
+-
+content/upl oads/s it es/3/ 2
+015/04/x culverts
+-
+f or
+-
+stream
+-
+crossing.jp g.p a gespe ed.ic.Na4R lHcr XK.jp g
+,
+ 
+ 
+13.
+ 
+htt p:/ /2.bp.bl ogspot .com/
+-
+O7 LuiA FYAp g/UiO_ YiUuW P I/AAAAA AAAJ XM/BP adB B9 gdMk/ s1600/ IMG_0026.J P
+G,
+ 
+Acc essed on 12 J anua r y 2016.
+ 
+14.
+ 
+htt p:/ /www.nz dl.org/gsdl /collect/ cdl/ archives/HA S H0159/039aacb
+c.dir/p0 40.jpg
+, 
+Ac cessed  
+on 12 J anuar y 2016.
+ 
+
+--- PAGE 87 ---
+D epartm ent o f Civ il E ngineering
+ 
+ 
+AUST
+ 
+ 
+CE  208: Quanti ty Surveying
+ 
+Page 
+83
+ 
+of 
+8
+3
+ 
+ 
+15.
+ 
+htt ps:/ /i . yti mg.com/ vi/ P A4ZtEc81J 0/m ax resdefaul t.j pg
+, 
+Ac cessed on 12 J an uar y 2016.
+ 
+16.
+ 
+R oads and Hi ghw a ys D epartment, Ban gla desh
+, 
+B
+asic 
+I
+nformat ion on th e RHD  
+B
+ridge  
+N
+etw ork
+, at 
+htt p:// www.rthd.gov.bd/brid ge_m aint en
+anc e.php
+, 
+Acc essed on 1
+1
+ 
+December
+ 
+201
+7.
+ 
+17.
+ 
+htt p:/ /www.natureclean. c om/ picts/ S eppic1.jpg
+, 
+Ac cessed on 
+1
+ 
+D ecemb er
+ 
+20 1
+6
+.
+ 
+18.
+ 
+htt ps:/ /ol dcastl eprecast
+-
+yut3re1soj oa.netdna
+-
+ssl .co m/ wp
+-
+content/upl oads/product
+-
+im age
+-
+media/5193_BG_ LEX_ B ox C ulvert
+-
+Varies_01.j pg
+, 
+Access ed on
+ 
+1
+ 
+De cembe r
+ 
+201
+6.
+ 

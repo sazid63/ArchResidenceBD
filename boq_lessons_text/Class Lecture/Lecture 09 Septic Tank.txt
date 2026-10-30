@@ -1,0 +1,428 @@
+
+--- PAGE 1 ---
+CE 208
+Quantity 
+Sur veying
+Estimation of Septic Tank
+
+--- PAGE 2 ---
+Estimationof a Septic Tank
+A
+septic
+tank
+is
+a
+watertight
+chamber
+made
+of
+concrete,
+fiberglass,
+PVC
+or
+plastic,
+through
+which
+domestic
+wastewater
+(sewage)
+flows
+for
+prima r y
+treatment
+.
+Settling
+and
+anae robic
+proce sses
+reduc e
+solids
+and
+organic s,
+but
+the
+treatment
+is
+only
+moderate
+.
+Septic
+tank
+systems
+are
+a
+type
+of
+onsite
+sewage
+facility
+(OSSF)
+.
+They
+can
+be
+used
+in
+area s
+that
+are
+not
+connected
+to
+a
+sewerage
+system,
+such
+as
+rural
+area s
+.
+Th e
+treated
+liquid
+efflue nt
+is
+commonly
+disposed
+in
+a
+septic
+drain
+field
+which
+provides
+furthe r
+treatment
+
+--- PAGE 3 ---
+Estimationof a Septic Tank
+
+--- PAGE 4 ---
+Components of Septic Tank
+Inspection
+Pit
+:
+A
+hole
+in
+the
+ground,
+lined
+with
+site
+built
+or
+manufactured
+sides
+that
+rec eive
+wastewater
+from
+house
+or
+building
+.
+The
+wastewater
+then
+flows
+from
+inspec tion
+pit
+to
+septic
+tank
+.
+
+--- PAGE 5 ---
+Components of Septic Tank
+Se ptic
+Tank
+:
+Th e
+septi c
+tank
+is
+burie d,
+watertight
+container
+typically
+made
+of
+concrete,
+fiberglass,
+or
+polyethyle ne
+.
+It
+holds
+the
+wastewater
+long
+enough
+to
+allow
+solids
+to
+settle
+out,
+forming
+sludge,
+and
+oil
+and
+grea se
+to
+float
+to
+the
+surface
+as
+scum
+.
+It
+also
+allows
+partial
+decompositions
+of
+the
+solid
+mater ials
+.
+Compartments
+and
+a
+T
+-
+shaped
+outlet
+in
+the
+septic
+tank
+prevent
+the
+sludge
+and
+scum
+from
+leaving
+the
+tank
+and
+traveling
+into
+the
+soak
+pit
+.
+
+--- PAGE 6 ---
+Components of Septic Tank
+
+--- PAGE 7 ---
+Components of Septic Tank
+So ak
+pit
+:
+soak
+pit,
+also
+known
+as
+a
+soak
+away
+or
+lea ch
+pit,
+is
+a
+covered,
+porous
+-
+walle d
+cha mbe r
+that
+allows
+water
+to
+slowly
+soak
+into
+the
+ground
+.
+Pre
+-
+settled
+eff luent
+from
+a
+collection
+and
+storage/treatment
+or
+(sem i
+-
+)
+ce ntralized
+treatment
+tec hnology
+is
+discharged
+to
+the
+underground
+ch amb er
+from
+which
+it
+infiltrates
+into
+the
+surround ing
+soil
+.
+
+--- PAGE 8 ---
+WorkedOutExample
+ ’˚›ıı}ıZ˚]PZ(o}}}À˚„
+ı}ıZ˚]PZ}À 
+ï[
+íì_
+ñ[
+ñ_
+ò_
+íì_
+ñ_
+ò_
+ò_
+
+--- PAGE 10 ---
+1. EarthworkExcavatio n
+Length
+íòXìôïï[
+Width 
+ôXòó[
+He ight
+õ[
+Qua ntity
+1254.54 
+cft
+
+--- PAGE 11 ---
+1. EarthworkExcavatio n
+Area
+12.57 
+sft
+He ight
+30'
+Qua ntity
+376.99 
+cft
+
+--- PAGE 12 ---
+2. Cement Concrete (1:3:6) atFlo or
+Length
+íòXìôïï[
+Width 
+ôXòó[
+He ight
+ìXñ[
+Qua ntity
+69.72 
+cft
+
+--- PAGE 13 ---
+3. PrecastRC Work
+Length
+íñXìôïï[
+Width 
+óXòó[
+He ight
+ìXñ[
+Qua ntity
+57.84 
+cft
+
+--- PAGE 14 ---
+3. PrecastRC Work
+Soak Pit Cover
+Soak Pit Side Wall
+Area
+12.57 
+sft
+He ight
+ìXïï[
+Quantity
+4.19 
+cft
+Area
+2.94 
+sft
+He ight
+îõXòó[
+Quantity
+87.22 
+cft
+
+--- PAGE 15 ---
+4. 1stClass Bric kworkwith1:4 Cement Mortarin septic tank
+Length (ft)
+Width (ft)
+Heig ht (ft)
+Quantity 
+
+--- PAGE 16 ---
+4. 1stClass Bric kworkwith1:4 Cement Mortarin septic tank
+ï[
+íì_
+ñ[
+ñ_
+ò_
+íì_
+ñ_
+ò_
+ò_
+1
+st
+Step
+2
+nd
+Step
+
+--- PAGE 17 ---
+4. 1stClass Bric kworkwith1:4 Cement Mortarin septic tank
+1
+st
+Ste p
+1
+st
+Ste p
+
+--- PAGE 18 ---
+5. 1/2inchCement Plaster1:3 wit hStandardWaterProofing 
+Compoundin Septic Tank
+Len gth(ft)
+Height (ft)
+Width (ft)
+Qua ntity
+
+--- PAGE 19 ---
+5. 1/2inchCement Plaster1:3 wit hStandardWaterProofing 
+Compoundin Septic Tank
+
+--- PAGE 20 ---
+6. 3/4inchCement Plaster1:3 wit hstandardwaterproofing 
+compoundinfloor  of septic tank
+Length
+íîXñôï[
+Width 
+ñXíòó[
+He ight
+----------
+Qua ntity
+65.02 
+sft

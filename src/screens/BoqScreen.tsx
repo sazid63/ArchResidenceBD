@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { fmtBdt, fmtNum, useI18n } from "../i18n";
 import { Badge, Button, Card, PageHeader, Stat, cx } from "../ui/kit";
-import { getActiveProject, BuildingProject } from "../engine/projectState";
+import { useActiveProject } from "../context/ProjectContext";
 import { generateBoqFromProject, exportBOQCSV } from "../cad/boqGenerator";
 import { useAccessibilityReader } from "../hooks/useTextToSpeech";
 
@@ -24,7 +24,7 @@ const CATEGORY_TONE: Record<string, "sky" | "sage" | "amber" | "lavender" | "blu
 
 export function BoqScreen() {
   const { lang } = useI18n();
-  const [project] = useState<BuildingProject | null>(() => getActiveProject());
+  const project = useActiveProject();
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const { readBOQItem, stop: stopReading, speaking } = useAccessibilityReader();
 
@@ -38,7 +38,7 @@ export function BoqScreen() {
       <div className="screen">
         <PageHeader title="Bill of Quantities (BOQ)" subtitle="No active project found" />
         <div className="empty">
-          <span className="empty-icon">📊</span>
+          <span className="empty-icon" aria-hidden="true">📊</span>
           <p className="empty-text">Please complete the phase interviews and design to calculate BOQ.</p>
         </div>
       </div>
@@ -98,14 +98,25 @@ export function BoqScreen() {
 
       {/* Category Filter Tabs */}
       <div className="row-between" style={{ marginBottom: "14px", flexWrap: "wrap", alignItems: "center" }}>
-        <div className="tabs" role="tablist">
+        <div className="tabs" role="tablist" aria-label={lang === "bn" ? "বিওকিউ ক্যাটাগরি" : "BOQ Categories"}>
           {allCategories.map((cat) => (
             <button
               key={cat}
               role="tab"
+              id={`boq-tab-${cat}`}
               aria-selected={activeCategory === cat}
+              aria-controls={`boq-panel-${cat}`}
+              tabIndex={activeCategory === cat ? 0 : -1}
               className={cx("tab", activeCategory === cat && "tab--active")}
               onClick={() => setActiveCategory(cat)}
+              onKeyDown={(e) => {
+                if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+                  e.preventDefault();
+                  const idx = allCategories.indexOf(cat);
+                  const next = e.key === "ArrowRight" ? (idx + 1) % allCategories.length : (idx - 1 + allCategories.length) % allCategories.length;
+                  setActiveCategory(allCategories[next]);
+                }
+              }}
             >
               {cat === "all"
                 ? lang === "bn"
@@ -132,6 +143,9 @@ export function BoqScreen() {
           {speaking ? '🔇' : '🔊'} {speaking ? (lang === 'bn' ? 'বন্ধ' : 'Stop') : (lang === 'bn' ? 'সব পড়ুন' : 'Read All')}
         </Button>
       </div>
+
+      {/* Tab Panels */}
+      <div role="tabpanel" id={`boq-panel-${activeCategory}`} aria-labelledby={`boq-tab-${activeCategory}`} tabIndex={0}>
 
       {/* Category Subtotals */}
       {Object.keys(boqData.totals.totalsByCategory).length > 0 && (
@@ -222,5 +236,6 @@ export function BoqScreen() {
         </table>
       </Card>
     </div>
-  );
+  </div>
+);
 }

@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useI18n, fmtNum } from "../i18n";
 import { Button, Card, PageHeader, Callout } from "../ui/kit";
 import { createNewProject, generateRandomBuildingProject, plotToSqm } from "../engine/projectState";
+import { getFloorPlansByUnits, getRandomFloorPlan, FloorPlanImage } from "../data/bangladeshFloorplans";
+import { FloorplanPreview } from "../components/FloorplanPreview";
 
 interface Props {
   onNavigate: (id: string) => void;
@@ -18,9 +20,19 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
   const [unitsPerFloor, setUnitsPerFloor] = useState<number>(2);
   const [location, setLocation] = useState("Dhaka (RAJUK)");
   const [error, setError] = useState<string | null>(null);
+  const [selectedFloorplan, setSelectedFloorplan] = useState<FloorPlanImage | null>(null);
+  const [showFloorplanGallery, setShowFloorplanGallery] = useState(false);
 
   const calculatedSqm = Math.round(plotToSqm(plotSize, plotUnit) * 100) / 100;
   const calculatedSqft = Math.round(calculatedSqm * 10.7639);
+
+  // Auto-select random floorplan when unitsPerFloor changes
+  useEffect(() => {
+    const plan = getRandomFloorPlan(unitsPerFloor);
+    setSelectedFloorplan(plan);
+  }, [unitsPerFloor]);
+
+  const availableFloorplans = getFloorPlansByUnits(unitsPerFloor);
 
   const handleCreate = () => {
     if (!name.trim()) {
@@ -177,7 +189,7 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
             </span>
           </div>
 
-          {/* Units Per Floor */}
+          {/* Units Per Floor with Floorplan Gallery */}
           <div className="field">
             <label className="field-label">
               {lang === "bn" ? "প্রতি তলায় ফ্ল্যাট / ইউনিট সংখ্যা" : "Units Per Floor"}
@@ -193,6 +205,140 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
                 </Button>
               ))}
             </div>
+          </div>
+
+          {/* Floorplan Gallery - Show 2D floorplan images for the selected unit count */}
+          <div className="field">
+            <label className="field-label">
+              {lang === "bn" ? "ফ্লোরপ্ল্যান বিন্যাস (২D চিত্র সহ)" : "Floorplan Layout (with 2D Preview)"}
+            </label>
+            <div style={{ marginBottom: "8px" }}>
+              <Button
+                variant={showFloorplanGallery ? "primary" : "soft"}
+                onClick={() => setShowFloorplanGallery(!showFloorplanGallery)}
+              >
+                {showFloorplanGallery
+                  ? (lang === "bn" ? "গ্যালারি লুকান" : "Hide Gallery")
+                  : (lang === "bn" ? "ফ্লোরপ্ল্যান গ্যালারি দেখুন" : "Show Floorplan Gallery")}
+              </Button>
+              <span className="faint small" style={{ marginLeft: "8px" }}>
+                {availableFloorplans.length} {lang === "bn" ? "ডিজাইন উপলব্ধ" : "designs available"}
+              </span>
+            </div>
+
+            {/* Selected Floorplan Preview */}
+            {selectedFloorplan && (
+              <div className="card" style={{ marginBottom: "12px", padding: "8px" }}>
+                <div className="row" style={{ gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
+                  <FloorplanPreview plan={selectedFloorplan} size={240} />
+                  <div className="stack" style={{ flex: 1, minWidth: "200px" }}>
+                    <h4 style={{ margin: 0, fontSize: "14px" }}>
+                      {selectedFloorplan?.titleBn || selectedFloorplan?.title || ""}
+                    </h4>
+                    <p style={{ margin: "4px 0", fontSize: "12px", color: "var(--muted)" }}>
+                      {selectedFloorplan?.descriptionBn || selectedFloorplan?.description || ""}
+                    </p>
+                    <div className="row" style={{ gap: "4px", flexWrap: "wrap", marginTop: "4px" }}>
+                      {selectedFloorplan?.features?.slice(0, 5).map((f: string, i: number) => (
+                        <span key={i} className="badge" style={{ fontSize: "10px" }}>
+                          {f}
+                        </span>
+                      ))}
+                    </div>
+                    <p style={{ margin: "4px 0 0", fontSize: "11px", color: "var(--muted)" }}>
+                      {lang === "bn" ? "প্লট সাইজ" : "Plot Size"}: {selectedFloorplan?.plotSizeRange || ""} |
+                      {lang === "bn" ? "উপযোগী" : "Suitable for"}: {selectedFloorplan?.suitableFor || ""}
+                    </p>
+                  </div>
+                  <Button
+                    variant="soft"
+                    onClick={() => {
+                      const plan = getRandomFloorPlan(unitsPerFloor);
+                      setSelectedFloorplan(plan);
+                    }}
+                  >
+                    🎲 {lang === "bn" ? "র‍্যান্ডম বদলান" : "Randomize"}
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Full Gallery Modal */}
+            {showFloorplanGallery && availableFloorplans.length > 0 && (
+              <div
+                className="modal-overlay"
+                onClick={() => setShowFloorplanGallery(false)}
+                style={{
+                  position: "fixed",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: "rgba(0,0,0,0.5)",
+                  zIndex: 1000,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "20px",
+                  overflow: "auto",
+                }}
+              >
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  className="card"
+                  style={{
+                    width: "90%",
+                    maxWidth: "900px",
+                    maxHeight: "80vh",
+                    overflow: "auto",
+                    padding: "16px",
+                  }}
+                >
+                  <div className="row" style={{ justifyContent: "space-between", marginBottom: "12px" }}>
+                    <h3>{lang === "bn" ? "ফ্লোরপ্ল্যান গ্যালারি" : "Floorplan Gallery"}</h3>
+                    <Button variant="ghost" onClick={() => setShowFloorplanGallery(false)}>
+                      ✕ {lang === "bn" ? "বন্ধ" : "Close"}
+                    </Button>
+                  </div>
+                  <p className="faint small" style={{ marginBottom: "12px" }}>
+                    {lang === "bn"
+                      ? `${availableFloorplans.length}টি ডিজাইন। ক্লিক করে বেছে নিন।`
+                      : `${availableFloorplans.length} designs. Click to select.`}
+                  </p>
+                  <div
+                    className="grid-3"
+                    style={{
+                      gap: "12px",
+                      gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+                    }}
+                  >
+                    {availableFloorplans.map((plan) => (
+                      <div
+                        key={plan.id}
+                        className="card"
+                        style={{
+                          cursor: "pointer",
+                          border: selectedFloorplan?.id === plan.id ? "2px solid var(--tone-brand)" : "1px solid var(--border)",
+                          transition: "border 0.2s",
+                        }}
+                        onClick={() => {
+                          setSelectedFloorplan(plan);
+                          setShowFloorplanGallery(false);
+                        }}
+                      >
+                        <FloorplanPreview plan={plan} size={200} />
+                        <h5 style={{ margin: "8px 0 4px", fontSize: "12px", textAlign: "center" }}>
+                          {lang === "bn" ? selectedFloorplan?.titleBn : plan.title}
+                        </h5>
+                        <p style={{ fontSize: "10px", color: "var(--muted)", textAlign: "center" }}>
+                          {selectedFloorplan?.plotSizeRange} · {selectedFloorplan?.features.slice(0, 2).join(", ")}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Location */}

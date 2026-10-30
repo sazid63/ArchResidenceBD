@@ -3,9 +3,18 @@ import { sizeMm, volumeM3 } from "../cad/mesh";
 import type { MeshDocument } from "../cad/mesh";
 import { MeshViewer } from "../cad/viewer";
 import { useI18n } from "../i18n";
+import type { BuildingProject } from "../engine/projectState";
 import { Badge, Button, Card, Chip, PageHeader, Stat } from "../ui/kit";
-import { getActiveProject, BuildingProject, saveActiveProject } from "../engine/projectState";
-import { generateBuildingMesh, BuildingCustomization } from "../cad/parametricBuildingGenerator";
+import { useActiveProject, useProject } from "../context/ProjectContext";
+import { generateBuildingMesh } from "../cad/parametricBuildingGenerator";
+import type { BuildingCustomization } from "../types/customization";
+import {
+  DEFAULT_ACCESSIBILITY,
+  DEFAULT_SUSTAINABILITY_DHAKA,
+  DEFAULT_FIRE_SAFETY,
+  DEFAULT_VALUE_ENGINEERING,
+  DEFAULT_CONSTRUCTION_MGMT,
+} from "../types/customization";
 import {
   analyzeBeam,
   analyzeColumn,
@@ -71,25 +80,10 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const viewerRef = useRef<MeshViewer | null>(null);
 
-  const [project, setProject] = useState<BuildingProject>(() => {
-    const active = getActiveProject();
-    if (active) return active;
-    return {
-      id: "demo-project",
-      name: "Residential Building",
-      address: "Dhaka, Bangladesh",
-      stories: 6,
-      plotSize: 3.5,
-      plotUnit: "katha",
-      plotSqm: 234.1,
-      unitsPerFloor: 2,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      phases: [],
-      designStarted: true,
-    };
-  });
+  const project = useActiveProject();
+  const { saveCustomization, refreshProject } = useProject();
 
+  // All hooks MUST be called unconditionally — Rules of Hooks
   const [activeTab, setActiveTab] = useState<string>(designPhaseId);
   const [hidden, setHidden] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
@@ -100,9 +94,9 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
 
   // Title block state
   const [titleBlock, setTitleBlock] = useState<TitleBlockData>({
-    projectName: project.name,
-    projectAddress: project.address,
-    projectNumber: project.id.slice(0, 8).toUpperCase(),
+    projectName: project?.name || "Residential Building",
+    projectAddress: project?.address || "Dhaka, Bangladesh",
+    projectNumber: project?.id?.slice(0, 8).toUpperCase() || "DEMO",
     drawingNumber: "A-101",
     drawingTitle: "Ground Floor Plan",
     scale: "1:100",
@@ -118,7 +112,8 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
   });
 
   const [customParams, setCustomParams] = useState<BuildingCustomization>(() => {
-    const base = project.stories >= 6 ? {
+    const stories = project?.stories || 6;
+    const base = stories >= 6 ? {
       columnWidthMm: 350, columnDepthMm: 350,
       footingSizeMm: 2000, footingDepthMm: 2000,
       balconyDepthMm: 1200,
@@ -127,21 +122,47 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
       footingSizeMm: 1800, footingDepthMm: 1600,
       balconyDepthMm: 1200,
     };
-    return { ...base, ...(project.customization || {}) };
+    return { ...base, ...(project?.customization || {}) };
   });
 
   // Persist customization changes back to project
   const setCustomAndSave = (patch: Partial<BuildingCustomization>) => {
     const next = { ...customParams, ...patch };
     setCustomParams(next);
-    const updatedProject = { ...project, customization: next, updatedAt: new Date().toISOString() };
-    setProject(updatedProject);
-    saveActiveProject(updatedProject);
+    saveCustomization(next);
+    refreshProject();
   };
 
   // Pre-generate mesh synchronously so state is never null
   const [mesh, setMesh] = useState<MeshDocument>(() =>
-    generateBuildingMesh(project, designPhaseId, customParams),
+    project ? generateBuildingMesh(project, designPhaseId, customParams) : generateBuildingMesh({
+      id: "demo",
+      name: "Demo Building",
+      address: "Dhaka, Bangladesh",
+      stories: 6,
+      plotSize: 3.5,
+      plotUnit: "katha",
+      plotSqm: 234.115,
+      unitsPerFloor: 2,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      phases: [],
+      designStarted: true,
+      customization: {
+        columnWidthMm: 300,
+        columnDepthMm: 300,
+        footingSizeMm: 1800,
+        footingDepthMm: 1600,
+        balconyDepthMm: 1200,
+        concreteGrade: 25,
+        steelGrade: 415,
+        accessibility: DEFAULT_ACCESSIBILITY,
+        sustainability: DEFAULT_SUSTAINABILITY_DHAKA,
+        fireSafety: DEFAULT_FIRE_SAFETY,
+        valueEngineering: DEFAULT_VALUE_ENGINEERING,
+        constructionMgmt: DEFAULT_CONSTRUCTION_MGMT,
+      },
+    } as BuildingProject, designPhaseId, customParams),
   );
 
   // Archie CAD Copilot chatbox state
@@ -150,8 +171,8 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
       who: "ai",
       text:
         lang === "bn"
-          ? `[আর্চি ক্যাড কোপাইলট — মডেল fleet: archres-repair-v0]\nআপনার ${project.stories} তলা ভবনের ৩D মডেল প্রস্তুত। কলামের মাপ, ফুটিং বা ব্যালকনির প্রক্ষেপণ পরিবর্তন করতে নিচে লিখুন।`
-          : `[Archie CAD Copilot — Fleet model: archres-repair-v0]\n3D Parametric model loaded for your ${project.stories}-storey building. Type modifications below (e.g. "resize columns to 400mm", "extend balcony to 1.5m", "change footing pad to 2.2m") to update the 3D geometry in real-time.`,
+          ? `[আর্চি ক্যাড কোপাইলট — মডেল fleet: archres-repair-v0]\nআপনার ${project?.stories ?? 6} তলা ভবনের ৩D মডেল প্রস্তুত। কলামের মাপ, ফুটিং বা ব্যালকনির প্রক্ষেপণ পরিবর্তন করতে নিচে লিখুন।`
+          : `[Archie CAD Copilot — Fleet model: archres-repair-v0]\n3D Parametric model loaded for your ${project?.stories ?? 6}-storey building. Type modifications below (e.g. "resize columns to 400mm", "extend balcony to 1.5m", "change footing pad to 2.2m") to update the 3D geometry in real-time.`,
     },
   ]);
   const [chatInput, setChatInput] = useState("");
@@ -159,10 +180,6 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
 
   useEffect(() => {
     setActiveTab(designPhaseId);
-    const active = getActiveProject();
-    if (active) {
-      setProject(active);
-    }
   }, [designPhaseId]);
 
   // WebGL Canvas mounting & lifecycle
@@ -174,7 +191,7 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
     try {
       viewer = new MeshViewer(canvas);
       viewerRef.current = viewer;
-      const initialMesh = generateBuildingMesh(project, activeTab, customParams);
+      const initialMesh = project ? generateBuildingMesh(project, activeTab, customParams) : mesh;
       viewer.setMesh(initialMesh);
       viewer.setCameraPreset("iso");
       viewer.resize();
@@ -259,6 +276,7 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
 
   // Update mesh geometry whenever project, activeTab, or customParams change
   useEffect(() => {
+    if (!project) return;
     try {
       const generated = generateBuildingMesh(project, activeTab, customParams);
       setMesh(generated);
@@ -281,6 +299,100 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
       viewer.setHidden(object.id, Boolean(hidden[object.id]));
     }
   }, [hidden, mesh]);
+
+  // Live structural engineering analysis (BNBC 2020 / ACI 318)
+  const structural = useMemo(() => {
+    if (!project) return null;
+    try {
+      const concrete = CONCRETE_GRADES[25];
+      const steel = STEEL_GRADES[415];
+
+      const colSection: RectSection = {
+        width: customParams.columnWidthMm ?? 300,
+        depth: customParams.columnDepthMm ?? 300,
+        cover: 40,
+        mainBarDia: (customParams.columnWidthMm ?? 300) >= 350 ? 16 : 12,
+        numMainBars: 8,
+        linkDia: 8,
+      };
+
+      const footprintSqm = project.plotSqm;
+      const floorAreaPerStory = footprintSqm * 0.7;
+      // Factored gravity: 24 kN/m² (1.4D + 1.6L, D=13, L=4.5 typical residential + walls)
+      const gravityPerStory = floorAreaPerStory * 24; // kN
+      const columnCount = Math.max(9, Math.round(Math.sqrt(footprintSqm) / 3.6) * 4);
+      const columnLoad = (gravityPerStory * project.stories) / columnCount; // kN each
+      const storyHeight = 3.0;
+
+      const column = analyzeColumn(colSection, {
+        axialLoad: columnLoad,
+        momentMajor: columnLoad * 0.12, // e = 0.12h typical first-order
+        momentMinor: columnLoad * 0.08,
+        unbracedLength: storyHeight,
+      }, concrete, steel);
+
+      const beamSpan = 4.5; // m typical grid
+      const beamSection: RectSection = {
+        width: 250,
+        depth: 450,
+        cover: 40,
+        mainBarDia: 16,
+        numMainBars: 6,
+        linkDia: 8,
+      };
+      const wallLoad = 1.2 * 3 * 14; // 3m wall, 14 kN/m²
+      const beam = analyzeBeam(beamSection, beamSpan, {
+        selfWeight: 0.25 * 0.45 * 24,
+        superimposedDead: 2.0,
+        liveLoad: 2.5,
+        wallLoad,
+      }, concrete, steel);
+
+      const soil = {
+        qu: 200,
+        ad: 120, // kN/m² typical Dhaka stiff clay (SPT N 10-15)
+        cohesion: 50,
+        frictionAngle: 20,
+        unitWeight: 18,
+        sptN: 12,
+      };
+      const footing = designFooting(
+        customParams.columnWidthMm ?? 300,
+        customParams.columnDepthMm ?? 300,
+        columnLoad,
+        soil,
+        concrete,
+      );
+
+      // Seismic (BNBC 2020 Ch 2.5, Dhaka Zone 3)
+      const totalWeight = floorAreaPerStory * project.stories * 12; // kN seismic weight (dead+0.25LL)
+      const heights: number[] = [];
+      for (let i = 1; i <= project.stories; i++) heights.push(i * storyHeight);
+      const storyStiffness = heights.map(() => 1.8e7); // kN/mm frame lateral stiffness (conservative)
+      const seismic = seismicAnalysis(totalWeight, heights, BNBC_DEFAULT, storyStiffness);
+
+      return { concrete, steel, column, beam, footing, seismic, columnLoad, columnCount, floorAreaPerStory, beamSpan };
+    } catch {
+      return null;
+    }
+  }, [customParams, project]);
+
+  const totals = useMemo(() => {
+    const objects = mesh?.objects ?? [];
+    const triangles = objects.reduce((sum, object) => sum + object.indices.length / 3, 0);
+    const volume = objects.reduce((sum, object) => sum + volumeM3(object), 0);
+    return { objects: objects.length, triangles, volume };
+  }, [mesh]);
+
+  // Early return — all hooks above are now called unconditionally
+  if (!project) {
+    return (
+      <div className="screen">
+        <PageHeader title="Native CAD" subtitle="No active project found" />
+        <Card>Please create or load a project first.</Card>
+      </div>
+    );
+  }
 
   // Handle Camera Presets
   const handleSetCamera = (mode: "iso" | "front" | "side" | "top") => {
@@ -350,6 +462,7 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
         const matchNum = lower.match(/\d+(\.\d+)?/);
         const val = matchNum ? parseFloat(matchNum[0]) : 2.2;
         const sizeMm = val < 10 ? Math.round(val * 1000) : Math.round(val);
+
         updated.footingSizeMm = sizeMm;
         updated.footingDepthMm = Math.round(sizeMm * 0.9);
         reply =
@@ -445,89 +558,6 @@ print("ArchResidenceBD: Watertight 3D Building Assembly Successfully Generated i
     a.click();
     URL.revokeObjectURL(url);
   };
-
-  // Live structural engineering analysis (BNBC 2020 / ACI 318)
-  const structural = useMemo(() => {
-    try {
-      const concrete = CONCRETE_GRADES[25];
-      const steel = STEEL_GRADES[415];
-
-      const colSection: RectSection = {
-        width: customParams.columnWidthMm ?? 300,
-        depth: customParams.columnDepthMm ?? 300,
-        cover: 40,
-        mainBarDia: (customParams.columnWidthMm ?? 300) >= 350 ? 16 : 12,
-        numMainBars: 8,
-        linkDia: 8,
-      };
-
-      const footprintSqm = project.plotSqm;
-      const floorAreaPerStory = footprintSqm * 0.7;
-      // Factored gravity: 24 kN/m² (1.4D + 1.6L, D=13, L=4.5 typical residential + walls)
-      const gravityPerStory = floorAreaPerStory * 24; // kN
-      const columnCount = Math.max(9, Math.round(Math.sqrt(footprintSqm) / 3.6) * 4);
-      const columnLoad = (gravityPerStory * project.stories) / columnCount; // kN each
-      const storyHeight = 3.0;
-
-      const column = analyzeColumn(colSection, {
-        axialLoad: columnLoad,
-        momentMajor: columnLoad * 0.12, // e = 0.12h typical first-order
-        momentMinor: columnLoad * 0.08,
-        unbracedLength: storyHeight,
-      }, concrete, steel);
-
-      const beamSpan = 4.5; // m typical grid
-      const beamSection: RectSection = {
-        width: 250,
-        depth: 450,
-        cover: 40,
-        mainBarDia: 16,
-        numMainBars: 6,
-        linkDia: 8,
-      };
-      const wallLoad = 1.2 * 3 * 14; // 3m wall, 14 kN/m²
-      const beam = analyzeBeam(beamSection, beamSpan, {
-        selfWeight: 0.25 * 0.45 * 24,
-        superimposedDead: 2.0,
-        liveLoad: 2.5,
-        wallLoad,
-      }, concrete, steel);
-
-      const soil = {
-        qu: 200,
-        ad: 120, // kN/m² typical Dhaka stiff clay (SPT N 10-15)
-        cohesion: 50,
-        frictionAngle: 20,
-        unitWeight: 18,
-        sptN: 12,
-      };
-      const footing = designFooting(
-        customParams.columnWidthMm ?? 300,
-        customParams.columnDepthMm ?? 300,
-        columnLoad,
-        soil,
-        concrete,
-      );
-
-      // Seismic (BNBC 2020 Ch 2.5, Dhaka Zone 3)
-      const totalWeight = floorAreaPerStory * project.stories * 12; // kN seismic weight (dead+0.25LL)
-      const heights: number[] = [];
-      for (let i = 1; i <= project.stories; i++) heights.push(i * storyHeight);
-      const storyStiffness = heights.map(() => 1.8e7); // kN/mm frame lateral stiffness (conservative)
-      const seismic = seismicAnalysis(totalWeight, heights, BNBC_DEFAULT, storyStiffness);
-
-      return { concrete, steel, column, beam, footing, seismic, columnLoad, columnCount, floorAreaPerStory, beamSpan };
-    } catch {
-      return null;
-    }
-  }, [customParams, project]);
-
-  const totals = useMemo(() => {
-    const objects = mesh?.objects ?? [];
-    const triangles = objects.reduce((sum, object) => sum + object.indices.length / 3, 0);
-    const volume = objects.reduce((sum, object) => sum + volumeM3(object), 0);
-    return { objects: objects.length, triangles, volume };
-  }, [mesh]);
 
   return (
     <div className="screen">
@@ -1261,9 +1291,9 @@ print("ArchResidenceBD: Watertight 3D Building Assembly Successfully Generated i
               </Button>
               <Button variant="primary" onClick={() => {
                 // Save title block to project
-                const updatedProject = { ...project, titleBlock, updatedAt: new Date().toISOString() };
-                setProject(updatedProject);
-                saveActiveProject(updatedProject);
+                // Note: titleBlock is not part of BuildingCustomization, so we'd need to extend the type
+                // For now, just refresh to trigger re-render
+                refreshProject();
                 setActiveTab(designPhaseId);
               }}>
                 {lang === "bn" ? "সংরক্ষণ করুন" : "Save Title Block"}

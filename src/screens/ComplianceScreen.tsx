@@ -2,34 +2,33 @@ import { useEffect, useMemo, useState } from "react";
 import verdictData from "../data/compliance/verdict-set.json";
 import { useI18n } from "../i18n";
 import { Badge, Button, Callout, Card, PageHeader, Stat } from "../ui/kit";
-import { getActiveProject } from "../engine/projectState";
+import { useActiveProject } from "../context/ProjectContext";
 import { generateBuildingMesh } from "../cad/parametricBuildingGenerator";
 import { runComplianceCheck, buildComplianceContext, type DeviationItem } from "../cad/codeCompliance";
 import { DEFAULT_CONCRETE, DEFAULT_STEEL_EXPORT } from "../cad/structuralEngine";
 import type { MeshDocument } from "../cad/mesh";
-import type { BuildingProject } from "../engine/projectState";
 import { useAccessibilityReader } from "../hooks/useTextToSpeech";
 
 export function ComplianceScreen() {
   const { t, lang } = useI18n();
+  const project = useActiveProject();
   const [filter, setFilter] = useState<"all" | "passed" | "deviation">("all");
-  const [project] = useState<BuildingProject>(() => getActiveProject() || {
-    id: "demo", name: "Demo Building", address: "Mirpur, Dhaka", stories: 6, plotSqm: 234, plotUnit: "katha" as const,
-    unitsPerFloor: 2, plotSize: 3.5, createdAt: "", updatedAt: "", phases: [], designStarted: true,
-  });
   const [mesh, setMesh] = useState<MeshDocument | null>(null);
   const [deviations, setDeviations] = useState<DeviationItem[]>([]);
   const [summary, setSummary] = useState<{ compliant: number; deviation: number; info: number }>({ compliant: 0, deviation: 0, info: 0 });
   const { readComplianceStatus, stop: stopReading, speaking } = useAccessibilityReader();
 
-  // Memoize filtered deviations to avoid re-computing on every render
+  // Memoize filtered deviations — depends on project being present, but hook must run unconditionally
   const filtered = useMemo(() => {
+    if (!project) return [];
     if (filter === "passed") return deviations.filter((v) => v.pass);
     if (filter === "deviation") return deviations.filter((v) => !v.pass);
     return deviations;
-  }, [deviations, filter]);
+  }, [deviations, filter, project]);
 
+  // Load mesh + run compliance checks when project is available
   useEffect(() => {
+    if (!project) return;
     try {
       const doc = generateBuildingMesh(project, "final", project.customization);
       setMesh(doc);
@@ -55,6 +54,16 @@ export function ComplianceScreen() {
       console.error("Compliance check failed:", e);
     }
   }, [project]);
+
+  // Early return — all hooks above are now unconditional
+  if (!project) {
+    return (
+      <div className="screen">
+        <PageHeader title="Compliance Check" subtitle="No active project found" />
+        <Card>Please create or load a project first.</Card>
+      </div>
+    );
+  }
 
   return (
     <div className="screen">
@@ -84,7 +93,7 @@ export function ComplianceScreen() {
                 }
               }}
               style={{ padding: '4px 8px', fontSize: '11px' }}
-              title={speaking ? (lang === 'bn' ? 'পড়া বন্ধ করুন' : 'Stop reading') : (lang === 'bn' ? 'সব পড়ে শোনান' : 'Read all')}
+              title={speaking ? (lang === 'bn' ? 'বন্ধ' : 'Stop') : (lang === 'bn' ? 'সব পড়ুন' : 'Read All')}
             >
               {speaking ? '🔇' : '🔊'} {speaking ? (lang === 'bn' ? 'বন্ধ' : 'Stop') : (lang === 'bn' ? 'সব পড়ুন' : 'Read All')}
             </Button>
@@ -95,7 +104,7 @@ export function ComplianceScreen() {
       <Callout title={`${lang === "bn" ? "প্রযোজ্য আইন" : "Applicable Standards"}: BNBC 2020 & RAJUK DAP 2022`}>
         <span>
           {lang === "bn"
-            ? "বাংলাদেশ জাতীয় নির্মাণ বিধমালা ২০২০ এবং রাজউক ডেভেলপমেন্ট অ্যাপ্রুভাল প্ল্যান ২০২২ এর নিয়মাবলী অনুযাযী পরীক্ষা করা হযেছ।"
+            ? "বাংলাদেশ জাতীয় নির্মাণ বিধমালা ২০২০ এবং রাজউক ডেভেলপমেন্ট অ্যাপ্রুভাল প্ল্যান ২০২২ এর নিয়মাবলী অনুযাযয় পরীক্ষা করা হযেছ।"
             : "Evaluated against Bangladesh National Building Code 2020 and RAJUK Development Approval Plan 2022 for Residential occupancy."}
         </span>
       </Callout>

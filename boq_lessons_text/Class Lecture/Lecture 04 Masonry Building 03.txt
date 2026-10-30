@@ -1,0 +1,448 @@
+
+--- PAGE 1 ---
+CE 208
+Quantity Sur veying
+Estimatio n of a Residential Building
+DEPARTMENT OFCIVIL ENGINEERING
+BANGLADESH UNIVERSITYOF ENGINEERINGAND TECHNOLOGY
+Mr.Ahm ed 
+Farh an
+Ahn af
+Sidd iqu e
+Ms. Suma iya Afrose Suma
+Mr. 
+Mu rshed
+Alam
+
+--- PAGE 2 ---
+2
+19. Inside Plastering
+
+--- PAGE 3 ---
+3
+Main Room: 
+
+Length
+= 
+2*(
+îî[
++
+20
+[
+)
+
+ íì[ó_
+-
+íì_~’l]
+
+ 
+19. Inside Plastering
+
+--- PAGE 4 ---
+4
+Deduct:
+
+ñ
+_
+
+Door 
+=  
+
+~ó[
+-
+íì_’l]„ı]vP
+”ìXîñ_
+19. Inside Plastering
+
+--- PAGE 5 ---
+5
+19. Inside Plastering
+
+ íì[ó_
+-
+íì_’l]„ı]vP
+
+ ìXîñ_
+Verandah:
+
+Length= 
+î”~îî[íì_
+
+--- PAGE 6 ---
+6
+19. Inside Plastering
+
+Á
+
+Á_
+Deduct:
+
+~ó[
+-
+íì_’l]„”ìXîñ_
+
+--- PAGE 7 ---
+7
+Ceiling:
+1.Main Room 
+
+Area= 2*
+îî[
+*
+îì[
+
+ 
+19. Inside Plastering
+
+--- PAGE 8 ---
+8
+Ceiling: 
+1. 
+Verandah
+
+Area= 
+ðò[ò_
+*
+õ[
+
+ ìXîñ_
+19. Inside Plastering
+
+--- PAGE 9 ---
+9
+Deduct: 
+
+Column=3*
+íì_
+*
+íì_
+”ìXîñ_
+
+Dropwall= (
+
+ñ_”ìXîñ_
+19. Inside Plastering
+
+--- PAGE 10 ---
+10
+Edges: 
+
+Door= 4*
+~ò[î_=ï[ð_=
+”íì_”ìXîñ_
+
+Window= 8*
+
+”íì_”ìXîñ_
+19. Inside Plastering
+Dedu ct: Skirting
+
+--- PAGE 11 ---
+11
+19. Inside Plastering
+DropWall: 
+
+Inside= 
+î”~õ[
+-
+
++
+î”~îî[íì[
+-
+íì_ 
+”î[ò_ ”ìXîñ_
+
+--- PAGE 12 ---
+12
+GLtoPL: 
+
+Length
+= 
+2*(
+ðò[ò_[
++
+ïì[ô_
+)
+
+ î[
+
+ 
+20. Outside Plastering
+
+--- PAGE 13 ---
+13
+Deduct: 
+
+Stair= 
+îï[ô_
+”î[”ìXñ_
+20. Outside Plastering
+
+--- PAGE 14 ---
+14
+Outs ide Wall: 
+
+Length
+= 
+ðò[ò_[
++
+2*
+îí[ô_
+
+ íì[ó_
+
+ 
+20. Outside Plastering
+
+--- PAGE 15 ---
+15
+Deduct: 
+
+Window= 
+ð”ò[”ð[ò_”ìXñ_
+
+Sunshade= 
+ð”ó[”ð_”ìXñ_
+20. Outside Plastering
+ð_
+
+--- PAGE 16 ---
+16
+Column: 
+
+Number = 3
+
+
+
+ íì[ó_
+-
+íì_
+
+ ìXñ_
+20. Outside Plastering
+
+--- PAGE 17 ---
+17
+Deduct: 
+
+Á
+20. Outside Plastering
+
+--- PAGE 18 ---
+18
+Stair: 
+
+1
+st
+’ı _”ò_”ìXñ_
+
+2
+nd
+step = 2
+ñ
+
+
+3
+rd
+step = 3* 
+
+
+4
+th
+step = 4* 
+~î”íì_”ò_”ìXñ_
+20. Outside Plastering
+
+--- PAGE 19 ---
+19
+Parapet: 
+20. Outside Plastering
+1.Inside 
+î”~~ïð[î_
+-
+íì_
+-
+
+*
+î[
+”ìXñ_
+2.Outside
+
+*
+î[
+”ìXñ_
+3.Top
+2*(
+ïï[õ_=ðõ[ó
+ñ_
+*0.5
+_
+
+--- PAGE 20 ---
+20
+Sunshade: 
+20. Outside Plastering
+1.
+ı}u
+í[ò_
+”ìXñ_
+2.
+Side= 4*[
+‡~ò_”ï_=
+ìXñ”~ï_
+)}
+”î”ìXñ_†
+3.
+}v
+4.
+‡ó[”~ï_=íñXìð_…
+5.
+
+
+--- PAGE 21 ---
+21
+íì[ó_
+20. Outside Plastering
+Cornice
+
+--- PAGE 22 ---
+22
+20. Outside Plastering
+Cornice:
+
+Side edge= 2* (
+ñì[
++
+ïð[î_
+”ìXñ_
+
+Bottomedge= 2
+* 
+(
+ðô[ï_
++
+ïî[ñ_
+”
+ìXñ_
+í[õ_
+í[õ_
+í[õ_
+í[õ_
+
+--- PAGE 23 ---
+23
+
+Outside= 
+î”~õ[
+-
+
++
+î”~îî[íì[
+-
+íì_ 
+”î[ò_ ”ìXñ_
+20. Outside Plastering
+Dropwall:
+
+Bottom edge= 
+î”~õ[
+-
+
++
+î”~îî[íì[
+-
+10
+
+”ñ_ ”
+ìXñ_
+
+--- PAGE 24 ---
+24
+21. Skirting
+Main Room: 
+
+Length
+= 
+2*(
+îî[
++
+20
+[
+)
+
+ íì_
+
+ ìXóñ_
+
+--- PAGE 25 ---
+25
+21. Skirting
+Deduct: 
+
+óñ_
+
+--- PAGE 26 ---
+26
+
+ íì_
+
+ ìXóñ_
+Verandah:
+
+Length= 
+î”~îî[íì_
+21. Skirting
+
+--- PAGE 27 ---
+27
+Deduct:
+
+íì_”ìXóñ_
+21. Skirting
+
+--- PAGE 28 ---
+28
+21. Skirting
+Column: 
+
+Number = 3
+
+
+
+ íì_
+
+ ìXóñ_
+
+--- PAGE 29 ---
+29
+22. RCC in Drop walls
+
+ î[ò_
+
+
+
+Length= 
+î”~õ[
+-
+
++
+î”~îî[íì[
+-
+
+Dropwall:
+
+--- PAGE 30 ---
+30
+23. RCC in Sunshades
+ıZAó[
+
+--- PAGE 31 ---
+31
+23. RCC in Sunshades
+Volume= 4*(
+~ï_Æò
+
++ 
+
+)x7
+[

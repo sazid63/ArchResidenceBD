@@ -24,6 +24,21 @@
 import { MeshDocument, MeshObject } from "./mesh";
 import { BuildingProject } from "../engine/projectState";
 import { FLOORPLAN_PRESETS, RoomPartition } from "../data/floorplanPresets";
+import type {
+  BuildingCustomization,
+  AccessibilitySettings,
+  SustainabilitySettings,
+  FireSafetySettings,
+  ValueEngineeringSettings,
+  ConstructionMgmtSettings,
+} from "../types/customization";
+import {
+  DEFAULT_ACCESSIBILITY,
+  DEFAULT_SUSTAINABILITY_DHAKA,
+  DEFAULT_FIRE_SAFETY,
+  DEFAULT_VALUE_ENGINEERING,
+  DEFAULT_CONSTRUCTION_MGMT,
+} from "../types/customization";
 
 /**
  * Filter mesh objects by phase. Centralized phase filtering logic.
@@ -1066,132 +1081,6 @@ function roomInsetRect(r: RoomPartition, geo: FloorGeo): [number, number, number
 }
 
 /**
- * Accessibility settings — BNBC 2020 Chapter 8.
- * Defaults are applied by the generator when the `accessibility` key is absent.
- */
-export interface AccessibilitySettings {
-  rampSlope: number;        // ratio (1:N), default 1:12 → 12
-  rampWidthMm: number;      // min clear width, default 1200
-  doorClearWidthMm: number;  // min clear opening, default 900
-  wcClearMm: [number, number]; // min clear plan dimensions, default [1500, 1500]
-  tactilePathWidthMm: number; // min tactile path width, default 300
-  elevatorRequired: boolean; // required when stories >= 4
-  elevatorPitMm: number;      // pit depth below grade, default 1200
-  elevatorWellMm: [number, number, number]; // well interior [W, D, H], default [1400, 1100, 2100]
-  grabRailHeightMm: number;    // default 700
-  brailleSignage: boolean;     // default true
-}
-
-/**
- * Sustainability settings — Dhaka-only climate constants.
- * Per user requirement: hardcoded for Dhaka, no location-awareness.
- */
-export interface SustainabilitySettings {
-  annualRainfallMm: number;   // Dhaka avg: 2000 (default)
-  tankEfficiency: number;      // collection efficiency 0.85 (default)
-  roofUValue: number;          // W/m²·K, 0.8 (default)
-  wallUValue: number;          // 1.2 (default)
-  windowUValue: number;        // 3.5 (default)
-  coolingLoadFactor: number;   // kg CO₂/m²/year, 12 (default)
-  windowToFloorRatioMin: number; // min, 0.15 (default BNBC §4.4)
-  daylightFactorTarget: number;  // min %, 2.0 (default)
-}
-
-/**
- * Fire safety settings — BNBC 2020 Part 4.
- * Optional; when `enabled` is false, all checks are skipped.
- */
-export interface FireSafetySettings {
-  enabled: boolean;
-  stairWidthMm: number;         // min 1000
-  corridorWidthMm: number;      // min 1200
-  travelDistanceMaxM: number;   // max 30
-  fireRatingHours: number;      // structural fire rating, 2 (default)
-  sprinklerSystem: boolean;     // auto-enabled for >= 6 stories
-  smokeDetector: boolean;        // default true when enabled
-}
-
-/**
- * Value engineering suggestions — user-facing only, no auto‑engine yet.
- */
-export interface ValueEngineeringSettings {
-  enabled: boolean;
-  autoApply: boolean;           // if true, apply all "safe" suggestions
-}
-
-/**
- * Construction management settings — optional module.
- */
-export interface ConstructionMgmtSettings {
-  enabled: boolean;
-  // simple Gantt view data, generated in-screen from phases
-  // no extra persistent state needed
-}
-
-export interface BuildingCustomization {
-  columnWidthMm?: number;
-  columnDepthMm?: number;
-  footingSizeMm?: number;
-  footingDepthMm?: number;
-  balconyDepthMm?: number;
-  concreteGrade?: 20 | 25 | 30 | 35 | 40;
-  steelGrade?: 250 | 415 | 500;
-  // ── New optional sub-objects (all default to sensible BNBC/Dhaka values) ──
-  accessibility?: AccessibilitySettings;
-  sustainability?: SustainabilitySettings;
-  fireSafety?: FireSafetySettings;
-  valueEngineering?: ValueEngineeringSettings;
-  constructionMgmt?: ConstructionMgmtSettings;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Inline default objects (single source of truth for the generator)          ─
-// Defined here so the generator never needs a separate constants file.        ─
-// ─────────────────────────────────────────────────────────────────────────────
-export const DEFAULT_ACCESSIBILITY: AccessibilitySettings = {
-  rampSlope: 12,
-  rampWidthMm: 1200,
-  doorClearWidthMm: 900,
-  wcClearMm: [1500, 1500],
-  tactilePathWidthMm: 300,
-  elevatorRequired: true,          // auto-adjusted for stories >= 4
-  elevatorPitMm: 1200,
-  elevatorWellMm: [1400, 1100, 2100],
-  grabRailHeightMm: 700,
-  brailleSignage: true,
-};
-
-export const DEFAULT_SUSTAINABILITY_DHAKA: SustainabilitySettings = {
-  annualRainfallMm: 2000,
-  tankEfficiency: 0.85,
-  roofUValue: 0.8,
-  wallUValue: 1.2,
-  windowUValue: 3.5,
-  coolingLoadFactor: 12,
-  windowToFloorRatioMin: 0.15,
-  daylightFactorTarget: 2.0,
-};
-
-export const DEFAULT_FIRE_SAFETY: FireSafetySettings = {
-  enabled: false,
-  stairWidthMm: 1000,
-  corridorWidthMm: 1200,
-  travelDistanceMaxM: 30,
-  fireRatingHours: 2,
-  sprinklerSystem: false,          // auto-enabled for stories >= 6
-  smokeDetector: true,
-};
-
-export const DEFAULT_VALUE_ENGINEERING: ValueEngineeringSettings = {
-  enabled: false,
-  autoApply: false,
-};
-
-export const DEFAULT_CONSTRUCTION_MGMT: ConstructionMgmtSettings = {
-  enabled: false,
-};
-
-/**
  * Builds the complete 3D parametric building model from project parameters.
  */
 export function generateBuildingMesh(
@@ -2100,3 +1989,22 @@ function colCutsY(bldgMinY: number, spanY: number, colSizeY: number, colsY: numb
   }
   return cuts;
 }
+
+// Re-export types from shared module for backward compatibility
+export type {
+  BuildingCustomization,
+  AccessibilitySettings,
+  SustainabilitySettings,
+  FireSafetySettings,
+  ValueEngineeringSettings,
+  ConstructionMgmtSettings,
+} from "../types/customization";
+
+// Re-export defaults for backward compatibility
+export {
+  DEFAULT_ACCESSIBILITY,
+  DEFAULT_SUSTAINABILITY_DHAKA,
+  DEFAULT_FIRE_SAFETY,
+  DEFAULT_VALUE_ENGINEERING,
+  DEFAULT_CONSTRUCTION_MGMT,
+} from "../types/customization";

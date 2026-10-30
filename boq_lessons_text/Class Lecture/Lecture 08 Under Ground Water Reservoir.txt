@@ -1,0 +1,315 @@
+
+--- PAGE 1 ---
+CE 2 08
+Quantity Surveying
+Esti mati on of an Underground Water R eserv oir
+Su m ai yaAfr o se Su m a
+Lec t urer
+Depa r tmento f Ci vi l En ginee ring
+Ban gl adeshUn i ve r sit yo fEn gine eri ngan dTec hnol ogy
+
+--- PAGE 2 ---
+PlanView
+2
+
+--- PAGE 3 ---
+SectionA
+-
+A
+3
+
+--- PAGE 4 ---
+Segments
+4
+
+
+
+Base Slab
+
+Wall
+
+Cover Slab
+
+--- PAGE 5 ---
+ 
+1.
+ 
+2.
+
+No. of Br icks
+
+Ar ea of one br ick= 50 in2  
+No. of br ick r equ ir ed= 176x144/50
+=507 Nos . 
+Volum e of Sand fill
+Sand p er 10m 2 =0.10 m 3 
+Volum e of s an d =[0.10x176x (0.3 04 8)^2] /1 0
+= 0.1635  m 3
+= 5.77 f t 3 
+5
+
+--- PAGE 6 ---
+6
+Base  Slab
+
+
+
+[
+
+ ]PZí[
+
+Volume=  176ft3
+Wall
+
+ õ[=íððò[
+
+Widt
+h
+= 
+í[
+
+ ]PZíì
+-
+ñ_Aõ[ó_
+
+Volume=  440.83ft3
+Cover S lab
+
+
+
+ì[
+
+ ]PZñ_
+
+Volume= 62.5 ft3
+
+--- PAGE 7 ---
+Concrete(1:2:4)
+7
+1.
+Final volume (hard concrete) = 176 + 440.83 + 62.5= 679.33 ft3
+2.
+Wet 
+volume 
+= 
+679.33 x1.5= 1018.995 ft3
+3.
+Cement= (1018.99 5 x 1)/7= 145.57 ft3 = 117 bags
+4.
+Sand= (1018.99 5 x 2) /7= 291.14 ft3
+5.
+Brick chips= (1018.995 x 4)/7= 582.28 ft3= 4947 Nos. brick
+[1m3= 35.315 ft3 brick chips required 300 Nos. of full
+-
+siz e brick]
+
+--- PAGE 8 ---
+Summary
+8
+Cement
+117 ba gs 
+1
+San d
+297 ft3 
+2
+Brick
+5314 Nos. 
+3
+
+--- PAGE 9 ---
+Reinforcement
+9
+
+--- PAGE 10 ---
+10
+Base Slab
+ 
+
+No. = 2x [(1 6x 12
+-
+2x 3) /5 +1]= 77  
+
+Leng th = (11x 12
+-
+2x 3+2 x1 0. 5x6/ 8) /1 2=11. 81 3f t.
+
+Total lengt h=90 9. 60 1ft.
+#5@6
+_
+c/c 
+
+No. = 2x [(11x 12
+-
+2x 3) /6 +1]= 44  
+
+Leng th = (1 6x 12
+-
+2x 3+2 x1 0. 5x5/ 8)/12 =16 .5 94 ft.
+
+Total lengt h=73 0. 13 6ft.  
+
+--- PAGE 11 ---
+11
+Wall
+#4@5
+_
+c/c(o ut side) 
+
+No
+.= 2 x[(15 x1 2/ 5+1 )+(10 x1 2/ 5
+-
+1) ] = 12 0
+
+Leng th = (11x 12
+-
+5
+-
+2
+-
+3+4 +2x 10 .5 x4 /8)/12
+= 11. 37 5ft.
+
+Tot al leng th = 
+13 65 ft
+.
+#4@5
+_
+c/c(in side) 
+
+No. = 
+2x [(1 3x 12 /5 +1)+(8 x1 2/ 5
+-
+1) ] = 10 8 
+
+Leng th = (11x 12
+-
+5
+-
+2
+-
+3+6 +2x 10 .5 x4 /8)/12
+= 11. 54 2ft.
+
+Tot al leng th = 
+1 2 4 6 .5 3 6 ft
+. 
+
+--- PAGE 12 ---
+12
+Wall
+ 
+
+No. = 2x [(11x 12
+-
+5
+-
+2
+-
+3) /5 +1]= 52
+
+Leng th = 46 ft.
+
+Total lengt h=23 92 ft.
+
+--- PAGE 13 ---
+13
+Cover Slab
+#6@5
+_
+c/c(b ot to m) 
+
+No. = (1 5x 12
+-
+2x 3) /5 +1=36  
+
+Leng th = (1 0x 12
+-
+2x 3+2 x1 0. 5x6/ 8)/12 =10 .8 13 ft.
+
+Total lengt h= 
+38 9. 26 8ft.
+#6@5
+_
+c/c(to p)  
+
+No. = (1 0x 12
+-
+2x 3) /5 +1=24  
+
+Leng th = (1 5x 12
+-
+2x 3+2 x1 0. 5x6/ 8)/12 =15 .8 13 ft.
+
+Total lengt h=37 9. 51 2ft.
+
+--- PAGE 14 ---
+Bar Properties
+14
+
+--- PAGE 15 ---
+Summar y
+15
+Bar
+Lengt h 
+(ft)
+Additional 
+(2 %)
+FinalLengt h 
+(ft)
+Weight /length 
+(
+lb
+/ft)
+Tot alweight  
+(
+lb
+)
+#3
+2392
+47 .8 7
+2440
+0. 37 6
+918
+#4
+26 11. 54
+52 .2 3
+2664
+0. 66 8
+1780
+#5
+73 0. 14
+14 .6 0
+745
+1. 04 3
+778
+#6
+16 78 .38
+33 .5 7
+1712
+1. 50 2
+2572
+
+--- PAGE 16 ---
+Assignment
+16
+
+--- PAGE 17 ---
+PlanView
+17
+X ft.
+Y ft.
+(ıX
+
+ 
+
+--- PAGE 18 ---
+SectionA
+-
+A
+18
+
+·òł l
+· ðł l
+· ïł  l
+· òł l
+·ñł l

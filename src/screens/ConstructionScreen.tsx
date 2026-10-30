@@ -70,6 +70,17 @@ export function ConstructionScreen() {
     }
   };
 
+  const tabs = ["gantt", "materials", "quality"] as const;
+
+  const handleTabKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>, currentTab: string) => {
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+      e.preventDefault();
+      const idx = tabs.indexOf(currentTab as "gantt" | "materials" | "quality");
+      const next = e.key === "ArrowRight" ? (idx + 1) % tabs.length : (idx - 1 + tabs.length) % tabs.length;
+      setActiveTab(tabs[next]);
+    }
+  };
+
   return (
     <div className="screen">
       <PageHeader
@@ -108,12 +119,16 @@ export function ConstructionScreen() {
       {customization.enabled && (
         <>
           {/* Tab Navigation */}
-          <div className="row" style={{ gap: "8px", marginBottom: "14px" }} role="tablist">
+          <div className="row" style={{ gap: "8px", marginBottom: "14px" }} role="tablist" aria-label={lang === "bn" ? "নির্মাণ ট্যাব" : "Construction Tabs"}>
             <Button
               variant={activeTab === "gantt" ? "primary" : "soft"}
               onClick={() => setActiveTab("gantt")}
               role="tab"
+              id="construction-tab-gantt"
               aria-selected={activeTab === "gantt"}
+              aria-controls="construction-panel-gantt"
+              tabIndex={activeTab === "gantt" ? 0 : -1}
+              onKeyDown={(e) => handleTabKeyDown(e, "gantt")}
             >
               {lang === "bn" ? "গ্যান্ট চার্ট" : "Gantt Chart"}
             </Button>
@@ -121,7 +136,11 @@ export function ConstructionScreen() {
               variant={activeTab === "materials" ? "primary" : "soft"}
               onClick={() => setActiveTab("materials")}
               role="tab"
+              id="construction-tab-materials"
               aria-selected={activeTab === "materials"}
+              aria-controls="construction-panel-materials"
+              tabIndex={activeTab === "materials" ? 0 : -1}
+              onKeyDown={(e) => handleTabKeyDown(e, "materials")}
             >
               {lang === "bn" ? "ম্যাটেরিয়াল শিডিউল" : "Material Schedule"}
             </Button>
@@ -129,14 +148,18 @@ export function ConstructionScreen() {
               variant={activeTab === "quality" ? "primary" : "soft"}
               onClick={() => setActiveTab("quality")}
               role="tab"
+              id="construction-tab-quality"
               aria-selected={activeTab === "quality"}
+              aria-controls="construction-panel-quality"
+              tabIndex={activeTab === "quality" ? 0 : -1}
+              onKeyDown={(e) => handleTabKeyDown(e, "quality")}
             >
               {lang === "bn" ? "গুণমান চেকলিস্ট" : "Quality Checklist"}
             </Button>
           </div>
 
-          {/* Gantt Chart Tab */}
-          {activeTab === "gantt" && (
+          {/* Gantt Chart Tab Panel */}
+          <div role="tabpanel" id="construction-panel-gantt" aria-labelledby="construction-tab-gantt" tabIndex={0} hidden={activeTab !== "gantt"}>
             <Card style={{ marginBottom: "16px" }}>
               <h3 style={{ marginBottom: "16px" }}>
                 {lang === "bn" ? "নির্মাণ সময়সূচি" : "Construction Schedule"}
@@ -261,10 +284,10 @@ export function ConstructionScreen() {
                 ))}
               </div>
             </Card>
-          )}
+          </div>
 
-          {/* Material Schedule Tab */}
-          {activeTab === "materials" && (
+          {/* Material Schedule Tab Panel */}
+          <div role="tabpanel" id="construction-panel-materials" aria-labelledby="construction-tab-materials" tabIndex={0} hidden={activeTab !== "materials"}>
             <Card style={{ marginBottom: "16px" }}>
               <h3 style={{ marginBottom: "16px" }}>
                 {lang === "bn" ? "ম্যাটেরিয়াল ডেলিভারি শিডিউল" : "Material Delivery Schedule"}
@@ -312,10 +335,10 @@ export function ConstructionScreen() {
                 </tbody>
               </table>
             </Card>
-          )}
+          </div>
 
-          {/* Quality Checklist Tab */}
-          {activeTab === "quality" && (
+          {/* Quality Checklist Tab Panel */}
+          <div role="tabpanel" id="construction-panel-quality" aria-labelledby="construction-tab-quality" tabIndex={0} hidden={activeTab !== "quality"}>
             <Card style={{ marginBottom: "16px" }}>
               <h3 style={{ marginBottom: "16px" }}>
                 {lang === "bn" ? "গুণমান চেকলিস্ট" : "Quality Control Checklist"}
@@ -365,7 +388,7 @@ export function ConstructionScreen() {
                 ))}
               </div>
             </Card>
-          )}
+          </div>
         </>
       )}
 

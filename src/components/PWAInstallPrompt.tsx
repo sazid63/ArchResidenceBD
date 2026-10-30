@@ -16,7 +16,7 @@ export function PWAInstallPrompt() {
   useEffect(() => {
     // Check if already installed
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
-                         (window.navigator as any).standalone === true;
+                         (window.navigator as unknown as { standalone: boolean }).standalone === true;
     setIsInstalled(isStandalone);
 
     if (isStandalone) return;

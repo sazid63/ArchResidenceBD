@@ -1,12 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { useI18n } from "../i18n";
 import { Button, Card, Chip, PageHeader, Badge } from "../ui/kit";
+import { useActiveProject, useProject } from "../context/ProjectContext";
 import {
-  getActiveProject,
-  saveActiveProject,
   areAllPhasesCompleted,
-  BuildingProject,
-  PhaseItem,
+  type BuildingProject,
+  type PhaseItem,
 } from "../engine/projectState";
 import { getInitialGreeting, processPhaseUserMessage } from "../engine/phaseAiEngine";
 import { FLOORPLAN_PRESETS } from "../data/floorplanPresets";
@@ -19,8 +18,9 @@ interface Props {
 
 export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props) {
   const { lang } = useI18n();
+  const project = useActiveProject();
+  const { saveCustomization, refreshProject, saveProject } = useProject();
 
-  const [project, setProject] = useState<BuildingProject | null>(() => getActiveProject());
   const [inputText, setInputText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [suggestedChips, setSuggestedChips] = useState<string[]>([]);
@@ -64,12 +64,12 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
         messages: updatedMessages,
       };
 
-      const updatedProject = { ...project, phases: updatedPhases };
-      setProject(updatedProject);
-      saveActiveProject(updatedProject);
+      const updatedProject = { ...project, phases: updatedPhases, updatedAt: new Date().toISOString() };
+      saveCustomization({}); // This triggers a refresh
+      refreshProject();
       onProjectUpdated?.();
     }
-  }, [phaseId, project, currentPhase, phaseIndex, lang, onProjectUpdated]);
+  }, [phaseId, project, currentPhase, phaseIndex, lang, onProjectUpdated, saveCustomization, refreshProject]);
 
   // Scroll to bottom on new message
   useEffect(() => {
@@ -111,9 +111,8 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
       messages: newMessages,
     };
 
-    const interimProject = { ...project, phases: interimPhases };
-    setProject(interimProject);
-    saveActiveProject(interimProject);
+    const interimProject = { ...project, phases: interimPhases, updatedAt: new Date().toISOString() };
+    saveProject(interimProject);
     setIsTyping(true);
 
     try {
@@ -159,9 +158,8 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
           messages: [...newMessages, aiMsg],
         };
 
-        const finalProject = { ...project, phases: finalPhases };
-        setProject(finalProject);
-        saveActiveProject(finalProject);
+        const finalProject = { ...project, phases: finalPhases, updatedAt: new Date().toISOString() };
+        saveProject(finalProject);
         setIsTyping(false);
         onProjectUpdated?.();
         return;
@@ -196,9 +194,8 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
         messages: [...newMessages, aiMsg],
       };
 
-      const finalProject = { ...project, phases: finalPhases };
-      setProject(finalProject);
-      saveActiveProject(finalProject);
+      const finalProject = { ...project, phases: finalPhases, updatedAt: new Date().toISOString() };
+      saveProject(finalProject);
       setIsTyping(false);
       onProjectUpdated?.();
     }, 450);
@@ -211,9 +208,8 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
       ...currentPhase,
       status: "completed",
     };
-    const updatedProject = { ...project, phases: updatedPhases };
-    setProject(updatedProject);
-    saveActiveProject(updatedProject);
+    const updatedProject = { ...project, phases: updatedPhases, updatedAt: new Date().toISOString() };
+    saveProject(updatedProject);
     onProjectUpdated?.();
 
     if (nextPhase) {
@@ -225,9 +221,8 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
   };
 
   const handleStartDesign = () => {
-    const updated = { ...project, designStarted: true };
-    setProject(updated);
-    saveActiveProject(updated);
+    const updated = { ...project, designStarted: true, updatedAt: new Date().toISOString() };
+    saveProject(updated);
     onProjectUpdated?.();
     // Navigate directly to design
     onNavigate("design:final");
@@ -370,9 +365,8 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
                           ...currentPhase,
                           data: { ...currentPhase.data, selectedFloorplanPreset: preset.id },
                         };
-                        const updatedProject = { ...project, phases: updatedPhases };
-                        setProject(updatedProject);
-                        saveActiveProject(updatedProject);
+                        const updatedProject = { ...project, phases: updatedPhases, updatedAt: new Date().toISOString() };
+                        saveProject(updatedProject);
 
                         handleSend(selectionText);
                       }}

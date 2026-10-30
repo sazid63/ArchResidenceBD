@@ -1,0 +1,247 @@
+
+--- PAGE 1 ---
+CE 208
+Quantity Sur veying
+Estimation of RCC Beamsand Columns
+DEPARTMENT OF CIVI L ENGIN EERING
+BANG LADESHUNIVERSITYOF ENGIN EERING AND TECHNOLOGY
+
+--- PAGE 2 ---
+
+Slab 
+t
+No. 3, 4, 5 (10mm, 12mm, 16mm)
+
+Beam 
+t
+No. 5, 6, 7, 8 (16mm, 20mm, 22mm, 25mm)
+
+Stirrup/Tie 
+t
+No. 3, 4 (10mm, 12mm)
+
+Column 
+t
+No. 5, 6, 7, 8, 9, 10, 11, 14, 18
+
+Mat 
+t
+No. 4, 5, 6, 8 (12mm, 16mm, 20mm, 25 mm)
+
+Smaller sizes preferred as long as there is no congestion
+A . F. A hnafSiddiqu e
+De p t. of C ivil 
+Engg
+.
+BUET ( Ju ly '21)
+2
+Reinforcement 
+t
+UsualSizes
+
+--- PAGE 3 ---
+
+Reinforce ment 
+ratio 
+t
+0.003 
+to 
+0.02 (Varie swith mater ialpropertie s) 
+(0.3% 
+to 
+2%)
+
+Minimum 
+4 longitu dina l barswhe n rec tan gula r 
+stirrups 
+are used
+
+Longitudinal reinforce mentsare often c ut
+-
+off orcrankedaccordingtorequireme nts
+
+Stirr upspacingvarie s from zone tozone
+
+Be nd length 
+t
+4to10 times 
+d
+b
+(Varie swithbar diam eter ) 
+t
+in gene ral, assume6d
+b
+A . F. A hnafSiddiqu e
+De p t. of C ivil 
+Engg
+.
+BUET ( Ju ly '21)
+3
+Main Reinforcement 
+(Beams
+)
+
+--- PAGE 4 ---
+4
+Cut
+-
+off and Bend pointsin Beams
+A . F. A hnafSiddiqu e
+De p t. of C ivil 
+Engg
+.
+BUET ( Ju ly '21)
+
+--- PAGE 5 ---
+5
+Beam LayoutPlan
+A . F. A hnafSiddiqu e
+De p t. of C ivil 
+Engg
+.
+BUET ( Ju ly '21)
+
+--- PAGE 6 ---
+6
+Beam Sections
+A . F. A hnafSiddiqu e
+De p t. of C ivil 
+Engg
+.
+BUET ( Ju ly '21)
+
+--- PAGE 7 ---
+Estimate the total amo untof materialsrequired for FB5 Beams ofthe six storied 
+building drawing s provide d.
+A . F. A hnafSiddiqu e
+De p t. of C ivil 
+Engg
+.
+BUET ( Ju ly '21)
+7
+Estimation of Beams
+
+--- PAGE 8 ---
+A . F. A hnafSiddiqu e
+De p t. of C ivil 
+Engg
+.
+BUET ( Ju ly '21)
+8
+Estimation of Beams
+
+--- PAGE 9 ---
+
+Reinforce ment 
+ratio 
+t
+0.01to0.08 
+(1%to8%)
+
+Norma lly 
+2
+-
+3 %,preferably  not exce ed4
+%.
+
+Minimum 
+4 longitudina l barswhe n rec tangula ror circu lartiesare use d
+
+Minimum6bars when continuous spiralis 
+used
+
+Bend length 
+t
+4to10 times 
+d
+b
+(Varieswithbar diameter)  
+t
+in general, assume 
+6d
+b
+
+Lap Length 
+t
+Mustbe greater than 300mm(12inche s)
+A . F. A hnafSiddiqu e
+De p t. of C ivil 
+Engg
+.
+BUET ( Ju ly '21)
+9
+Main Reinforcement(Column s)
+
+--- PAGE 10 ---
+10
+Column Lap/ Splices
+A . F. A hnafSiddiqu e
+De p t. of C ivil 
+Engg
+.
+BUET ( Ju ly '21)
+
+Maximum50%of the mainbarscanbe lapped in 
+a sec tion
+
+Lap Length 
+t
+Mustbe greater than 300mm(12 
+inche s)
+
+Lap mustbe awayfromthe joint
+
+Lap locationdepe nds on thelength of 
+reinforce ments
+
+--- PAGE 11 ---
+11
+Column LayoutPlan
+A . F. A hnafSiddiqu e
+De p t. of C ivil 
+Engg
+.
+BUET ( Ju ly '21)
+
+--- PAGE 12 ---
+12
+Column Sections
+A . F. A hnafSiddiqu e
+De p t. of C ivil 
+Engg
+.
+BUET ( Ju ly '21)
+
+--- PAGE 13 ---
+Estimate the total amo untof materialsrequired for C3Columnsof the s ixstoried 
+building drawing s provide d.
+A . F. A hnafSiddiqu e
+De p t. of C ivil 
+Engg
+.
+BUET ( Ju ly '21)
+13
+Estimation of Column s
+
+--- PAGE 14 ---
+A . F. A hnafSiddiqu e
+De p t. of C ivil 
+Engg
+.
+BUET ( Ju ly '21)
+14
+Estimation of Column s
+
+--- PAGE 15 ---
+Estimate the total amo untof materialsrequired for C4Columnsand FB3 Beams of 
+the six storied building drawings provided.
+A . F. A hnafSiddiqu e
+De p t. of C ivil 
+Engg
+.
+BUET ( Ju ly '21)
+15
+Assignment
+
+--- PAGE 16 ---
+ThankYou!

@@ -1,0 +1,929 @@
+
+--- PAGE 1 ---
+CE 208
+Quantity Sur veying
+Earthwork and ConcreteEstimation
+
+--- PAGE 2 ---
+Calculationof EarthworkVolume
+The re are m ainly three  methods  adopted
+-
+1. FromCrossSec tion s
+: Measurement from crossse ction is a u niversally applicable method.
+2. FromSp otLeve ls: 
+Meas ureme nt from s pot levels are a pp lied  som etime for large excavation.
+3. Fromcontours:
+Roug h estimates of volume  may be  mad e by treatment of the  contour line  and  not much us ed  in 
+practice
+
+--- PAGE 3 ---
+MeasurementfromCros s
+-
+Sectio n
+
+The
+total
+volu me
+to
+be
+cal culated
+is
+di vid ed
+i nto
+a
+seri es
+of
+soli ds
+.
+The
+f und amental
+soli ds
+are
+prism,
+wedge
+an d
+prismoid
+.
+
+The
+spacing
+of
+th e
+sections
+depend
+on
+th e
+character
+of
+th e
+ground
+and
+accuracy
+required
+.
+
+The
+area
+of
+c ro ss
+-
+sect i on
+al ong
+t he
+l i ne
+are
+cal culated
+by
+stan da rd
+fo rmu l ae
+an d
+t he
+volu mes
+of
+p ri smoid
+bet we ent
+he
+c ro ss
+-
+sect i ons
+taken
+are
+t hen
+cal culated
+by
+t he
+foll owin g
+met hods
+.
+1
+)
+Formula e
+of
+Mi d
+-
+sect i on
+met hod/
+Average
+heig ht
+met hod
+.
+2
+)
+Formul ae
+of
+Trapezoida l
+meth od/
+Average
+end
+area
+meth od/
+mean
+-
+sectiona l
+area
+meth od
+.
+3
+)
+Formula e
+of
+P
+ri smoida l
+met hod
+accordi ng
+to
+’}v[’
+one
+-
+t hi rd
+rul e
+.
+
+--- PAGE 4 ---
+Terms andAbbreviations
+Statio n:
+A poi nt  where t he level rod i s held  an dnot  where l evel i s set  up. Th e distan cebet ween t wo consecut i ve stat i onsdepends on t
+he
+topograp hy of ground  surface. 20m~50m for 
+for
+pl ai ncount r y an d10m~20m for hi l l ycount r y.
+Ro adway or Fo rmatio n W idth: 
+I t  ist he total wid t h of  th e road i nclu di ng th ecarri ageway an dt he t wo shoul ders on t he sid es. T hat i s, 
+Roadway Widt h= Ca rri ageway Wi dt h+ Shoul der Widt h
+
+--- PAGE 5 ---
+Terms andAbbreviations
+EGL (Existing Gro und Level) o r GL (Gro und Level): 
+Th e ex i st i ng earth surface.
+FL (Fo rmatio n Level): 
+Th e proposed l evel of  roadway.  
+RL(Reduced Level): 
+A level statedin relati on to a known bench mark or datu m.  
+True Level:  
+al evel statedi n relat i on to a M ean 
+S
+ea 
+L
+evel (MSL).
+
+Cutt i ng i s requi red when 
+EGL>FL
+Longitudinal  Slo pe/ Gradient: 
+Grad i ent  may bedef i ned as t he rate of ri se or fal l al ong t he lengt hof hi ghway. I t depends on t he nat ure of 
+t raff i c, nat ure of count r y an d t ype of  surfaci ng materi al . An opt i mum l ong i t udi nal l evel i s where t here i s a ba l an ceof cut  a
+nd 
+f i l l to 
+eli minateroll i ng nat ure of l an d.
+Side Slo pe: 
+Sid e slope i sdef i ned as t he rate of ri se or fal l of t he shoul ders of t he pavement .  I t depends on t he soil  characteri st i csan
+d 
+P˚}P„› Z]ı ] Z] PZÁÇX}„ ] vı˚„’ıı’Ç’ı˚u ˚ ’Z}µo ’ı˚˚›˚„ ı Zî ıX}„ ( ] o ooíì ] v
+he
+i ght t hey are 
+set  at 4 to 1 or f l atter. Al waysmeasu red vert i cal
+:horizontal .  
+Steep 
+sl opes create accident ha zards.
+
+The heig htof banking anddepth  of cutti ngare designed considerin g t he hi ghestfl ood level, rul in ggradi entand to achieve m
+axi
+mum 
+economy on earthwork.  
+
+--- PAGE 6 ---
+Mid Sectio nFormulae/AverageHeightMethod
+Depth se ction (1) = 
+@
+5
+(note that d1 is the  differen ce betwee n GL & FL) 
+Depth se ction (2) =
+@
+6
+(note that d2 is the  differen ce betwee n GL & FL) 
+Averagede pth, 
+@
+ÔéÚ
+= (
+@
+5
++ 
+@
+6
+)/2 
+Width of se ction = b  
+Side slope =  1: s (vertical: horizontal) 
+Area of mid
+-
+se ction, 
+#
+àÜ×
+L
+>
+@
+ÔéÚ
+E
+5
+6
+O
+@
+ÔéÚ
+6
++
+5
+6
+O
+@
+ÔéÚ
+6
+#
+àÜ×
+= (
+b+s
+@
+ÔéÚ
+) x 
+@
+ÔéÚ
+Len gth 
+betwee n two cons ecutive se ctions  (betwee n se ction (1) & (2)) = 
+.
+5
+?
+6
+Volume of earthwork between  these two conse cutive se ctions (between  se ction (1) & (2)), 
+8
+5
+?
+6
+= 
+#
+ÔéÚ
+x L 
+8
+5
+?
+6
+= (
+b+s
+@
+ÔéÚ
+) x 
+@
+ÔéÚ
+x L (may be  cut or fill) 
+
+--- PAGE 7 ---
+Trapezoidal Formulae/AverageEnd Area Method/Mean
+-
+Sectio nalAreaMethod
+Depth se ction (1) = 
+@
+5
+(note that d1 is the difference between  GL & FL) 
+Depth se ction (2) = 
+@
+6
+(note that d2 is the  differen ce betwee n GL & FL) 
+Area at end  1, 
+#
+5
+= (b+ s
+@
+5
+) x 
+@
+5
+Area at end  2, 
+#
+6
+= (b+ s
+@
+6
+) x 
+@
+6
+Mean se ctional area, 
+#
+àØÔ á
+= 
+(
+#
+5
++
+#
+6
+)/2 
+Width of se ction = b  
+Side slope =  1: s (vertical: horizontal) 
+Len gth betwee n two cons ecutive se ctions  (betwee n se ction (1) & (2)) = L 
+Volume  of e arthwork betwee n thes etwo cons ecutive se ctions  (betwee n se ction (1) & (2)), 
+8
+5
+?
+6
+=
+#
+àØ Ôá
+x 
+L 
+‡
+
+Ú
+?
+
+Û
+= 
+#
+à Ø Ôá
+x 
+L (may be  cut or fill) 
+
+--- PAGE 8 ---
+Pris moidalFormulae
+Dept h 
+sect i on (1) = 
+@
+5
+(note t hat  
+@
+5
+i st he di fference bet ween GL & FL) 
+Dept h sect i on (2) = 
+@
+6
+(note t hat  
+@
+6
+i st he di fference bet ween GL & FL) 
+Area at end 1, 
+#
+5
+= (b+s
+@
+5
+) x  
+@
+5
+Area 
+at end 2, 
+#
+6
+= (b+s
+@
+6
+) x  
+@
+6
+Mean  
+sect i onal area, A mean  = (
+#
+5
++
+#
+6
+)/2 
+Widt h of  sect i on = b 
+Sid e slope = 1: s (vert i cal :horizontal ) 
+Lengt h bet ween t wo consecut i ve sect i ons (bet ween sect i on (1) &(2)) = L 
+Volu me of earthwork bet ween t hese t wo consecut i ve sect i ons (bet ween sect i on (1) &(2)), 
+8
+5
+?
+6
+= (
+#
+5
++ 4
+#
+à
++ 
+#
+6
+)/6 x L (may be cut or f i l l ) 
+
+--- PAGE 9 ---
+Workedout problem:
+A 
+1 km road is to be  constructed  in existing  ground  level having red uced levels 54.1, 53.8, 53.5, 53.5, 54.3, 54.6, 
+54.9, 54.5, 54.7 an d 54.3 meters at 100 m inter vals. A req uired  red uced level at station 1 is 55 meter and  the 
+downward gradient is 1 in 1000. The  width of the  road at formation level is 8 meter. Slopes  to be  maintained at 
+cutting  and  filling  are 1:2 (V: H) and  1:3 (V: H) res pe ctively.Calculate the volume  of Earthwork. 
+
+--- PAGE 10 ---
+Cut
+Fill
+
+--- PAGE 11 ---
+As signm ent1: Calculate the volume  of the  earthwork req uired  us ing  
+prism oidal
+method.
+
+--- PAGE 12 ---
+As signm ent2: Calculate the volume  of the  earthwork req uired  us ing  trapezoidal method.
+
+--- PAGE 13 ---
+As signm ent3: Calculate the volume  of the  earth filling  for the  ditch.  Given  RL of filling  plane  is 100m
+.As su meeach sm all 
+sq uare to be  50m x 50m.  So the  total area of the p lan is 300m x 300m.
+
+--- PAGE 14 ---
+Hints:
+8
+5
+?
+6
+?
+<
+?
+=
+L
+@
+5
+E
+@
+6
+E
+@
+<
+E
+@
+=
+v
+T
+#
+5
+?
+6
+?
+<
+?
+=
+@
+5
+L
+srs
+ä
+rrI
+F
+srr
+ä
+rrI
+L
+s
+ä
+rrI
+@
+6
+L
+sr
+t
+ä
+rrI
+F
+srr
+ä
+rrI
+L
+t
+ä
+rrI
+@
+<
+L
+sr
+r
+ä
+x
+rI
+F
+srr
+ä
+rrI
+L
+r
+ä
+x
+rI
+@
+=
+L
+sr
+x
+ä
+rrI
+F
+srr
+ä
+rrI
+L
+x
+ä
+rrI
+#
+5
+?
+6
+?
+<
+?
+=
+L
+s
+E
+t
+E
+r
+ä
+x
+E
+x
+v
+TwrTwr
+L
+xrrr
+?Q>E ?
+IAPAN
+
+--- PAGE 15 ---
+Material Estimation
+Q1. 
+Find out the q uantities  in 100 
+cft
+ceme nt concrete.
+Sol u tion
+-
+Given ,volume  of d r y concrete=  100 
+cft
+(after mixing )
+volum e of wet concrete=  100 *1.5=  150 
+cft
+(before mixing )
+Mix ratio (ceme nt: sa nd : ag gregate) = 1:2:4
+Cem ent= 150 x 
+5
+5
+>
+6
+>
+8
+= 21. 428 
+cft
+= 17.142 bag s (1 bag  cement= 1.25 
+cft
+= 50kg)
+San d=  
+150 x 
+6
+5
+>
+6
+>
+8
+= 42. 856 
+cft
+Ag gregate=  
+150 x 
+8
+5
+>
+6
+>
+8
+=85.712 
+cft
+
+--- PAGE 16 ---
+Material Estimation
+Q2. 
+Find out the q uantities  in 100 
+cft
+lime concrete.
+Sol u tion
+-
+Given ,volume  of d r y concrete=  100 
+cft
+(after mixing )
+volum e of wet concrete=  100 *1.5=  150 
+cft
+(before mixing )
+Mix ratio (ceme nt: sa nd : ag gregate) = 2:2:7
+Cem ent= 150 x 
+6
+6
+>
+6
+>
+;
+= 27. 27 
+cft
+San d=  
+150 x 
+6
+6
+>
+6
+>
+;
+= 27. 27 
+cft
+Ag gregate=  
+150 x 
+;
+6
+>
+6
+>
+;
+=95.45 
+cft
+
+--- PAGE 17 ---
+Material Estimation
+Q3. 
+Find out the q uantities  in 100 
+cft
+brick mas onr y.(use  a factor of safety of 1.2 for wastage)
+Sol u tion
+-
+Volume of b rickwork= 100 
+cft
+ ’]Ì „]] u}„ı
+Actual size 
+of a  brick= 
+
+x 
+4.5
+
+
+(
+without 
+mortar
+)
+Num be r of bricks=  
+544
+ë
+5
+ä
+6
+-,
+-.
+ë
+1
+-.
+ë
+/
+-.
+= 1382.40=  1383 (say)
+Volume of 1383 numbe r of bricks with mortar= 1383 x 
+54
+56
+x 
+9
+56
+x 
+7
+56
+=120.052 
+cft
+Volume  of 1383 nu mbe r of b ricks 
+without 
+mortar= 1383 x 
+=
+ä
+9
+56
+x 
+8
+ä
+9
+56
+x 
+6
+ä
+;9
+56
+=94.091 
+cft
+Volume  of mortar= (
+Volume  of 1383 nu mbe r of bricks with 
+mortar)
+-
+(
+Volume  of 1383 num be r of b ricks without 
+mortar)
+Mortar mix ratio (cement: san d)= 1:4 (say)
+Shrinkage factor= 1.5
+Cem ent= 25.965 x 1. 5 x 
+5
+5
+>
+8
+=7. 7895 
+cft
+=6. 2316 bag s  (1 bag  cement=1. 25 
+cft
+= 50 kg)
+San d=  
+25.965 x 1.5 x 
+8
+5
+>
+8
+= 31.158 
+cft
+
+--- PAGE 18 ---
+So me Important Relations:
+1 ba g ceme nt= 1.25 
+cft
+= 112 
+lbs
+= 50 kg
+100 
+cft
+khoa
+req uires  850 nu mbe rs of bricks
+îììv]o’AP
+1 gallon of p lastics emu lsion paint/ synthetic en ame l paint covers 300 
+sft
+of new su rface.
+1 gallon of 
+distemp er covers 250 
+sft
+of n ew su rface.
+1 
+tin 
+of 
+sn owcem
+covers 
+275 sq uare yards .
+Brick soling:
+Single Brick Flat Soling = 300 nu mbe r pe r % 
+sft
+Double Brick Flat Soling = 600 
+nu mbe r pe r % 
+sft
+
+--- PAGE 19 ---
+Unit Weight of Materials:
+Mate rials
+Un itWe ight
+(
+lb
+/
+cft
+)
+As ph alt
+66
+Ba mboo
+25
+Bitumen
+65
+Brick
+Work
+120
+Brick Chips
+80
+-
+110
+Cem ent
+90
+Coal (loose )
+50
+Earth (compa cted  and  da mp)
+100
+Earth (dry and loose )
+90
+Lime Concrete
+120
+Plain Concrete
+144
+Reinforced  Cem ent Concrete
+150
+Mild Stee l
+490
+Cast Iron
+450
+Mate rials
+Un itWe ight
+(
+lb
+/
+cft
+)
+Wroug ht
+Iron
+480
+Peb bles
+90
+San d
+(dr y to wet)
+100
+-
+120
+Clay
+(dr y to wet)
+115
+-
+130
+Shing les
+90
+Gravel
+90
+Surkhi
+80
+Surkhi
+Mortar
+85
+-
+120
+Tar
+90
+Ga rjan
+Timbe r
+45
+-
+50
+Sal
+Wood
+60
+-
+65
+Sun dari
+Wood
+55
+-
+65
+Teak
+Wood
+45
+-
+55
+Water
+at 
+v
+â
+?
+62.45
+
+--- PAGE 20 ---
+Prac tice Pro blem s:
+ ]vˆ ]vP „˚ˆ ]˚v „˚‰ µ]„˚ˆ (vP îì[ }v„˚ılv˚’ ’A ]À˚v Uı]
+Answer
+-
+cement= 32.72 bag s; san d (fine ag gregate)= 61.36 
+cft
+; brick/ stonechips (coarse  ag gregate0= 122.73 
+cft
+Q2. S up pos e, you h ave50 bag sof ceme nt. What volume  of concrete you can make f rom this 50 bag sceme nt with a mix 
+ratio of 1: 1.25: 2.5.
+An swe r
+-
+197.92 
+cft
+dr y concrete
+Q3. Supp ose you have5000 Nos. of f ull size brick. You want to make a b rick wall. What will be the volume of brick work?
+An swe r
+-
+434.03 
+cft
+Q4. I n q ue stion 3, determine the n umb er of ceme nt bag sand  volume  of s and  if mortar mix ratio is 1:4.
+An swe r
+-
+22.53 ba gs  cement; 112.63 
+cft
+sa nd .
+ „] Áoo Z Z˚]PZ Áoo }vı] ıÁ ~ó[ Á]ˆ˚
+) 
+vˆ ıÁvˆ }Á ~ð[ vˆ ò[ˆ˚ vˆ}vı]vµ }µ’ o]vı ~îñ[ o}vP vˆvP (ı ’(˚ 
+ceme nt: sa nd  ratio in mortar= 1:4, Estimate the  nu mbe r of b ricks, nu mbe r of b ag s of ceme nt an d s and  req uired  for the  
+construction of the wall.
+An swe r
+-
+nu mbe r of b ricks=  2195; ceme nt= 9.89 b ag s; s and = 49. 43 
+cft
+.
+
+--- PAGE 21 ---
+Prac tice Pro blem s:
+ }v„˚ı ~ï ıZ] Á’’À „  „ ñì[ı 
+ing red ients (mix ratio=2:2:7).
+An swe r
+-
+Lime=  102.27 
+cft
+; 
+su rkhi
+= 102. 27 
+cft
+; brick chips=  357.95 
+cft
+Q7. F ind  out the ing red ients req uired  for the  RCC found ation up  to 
+gorund
+level. G iven  mix Ratio= 1:2:4.
+An swe r
+-
+ceme nt= 23.72 ba gs ; san d=  59.298 
+cft
+; brick/ stone  chips=  118.597 
+cft

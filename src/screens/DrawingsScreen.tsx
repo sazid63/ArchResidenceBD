@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useI18n } from "../i18n";
 import { Badge, Button, Callout, Card, PageHeader } from "../ui/kit";
-import { getActiveProject } from "../engine/projectState";
+import { useActiveProject } from "../context/ProjectContext";
 import { generateFloorPlanFromMesh, generateSection, generateElevation, exportDrawingAsSVG } from "../cad/drawingEngine";
 import { generateBuildingMesh } from "../cad/parametricBuildingGenerator";
 import type { MeshDocument } from "../cad/mesh";
@@ -13,9 +13,17 @@ interface DrawingOptions {
   direction?: string;
 }
 
+interface DrawingData {
+  [key: string]: {
+    type: string;
+    title: string;
+    svg: string;
+  };
+}
+
 export function DrawingsScreen() {
   const { t, lang } = useI18n();
-  const [project, setProject] = useState(getActiveProject());
+  const project = useActiveProject();
   const [mesh, setMesh] = useState<MeshDocument | null>(null);
   const [drawings, setDrawings] = useState<Record<string, { type: string; title: string; svg: string }>>({});
   const [loading, setLoading] = useState(true);
@@ -49,7 +57,7 @@ export function DrawingsScreen() {
         const meshDoc = generateBuildingMesh(project, "final", project.customization);
         setMesh(meshDoc);
         
-        const drawingData: Record<string, any> = {};
+        const drawingData: DrawingData = {};
         
         // Floor plans
         for (let i = 0; i < project.stories; i++) {

@@ -1,51 +1,22 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useI18n } from "../i18n";
 import { Badge, Button, Card, PageHeader, Stat } from "../ui/kit";
-import { getActiveProject, saveActiveProject, BuildingProject } from "../engine/projectState";
+import { useProjectCustomization } from "../hooks/useProjectCustomization";
+import { DEFAULT_FIRE_SAFETY } from "../types/customization";
 import { fmtNum, fmtBdt } from "../i18n";
+import type { FireSafetySettings } from "../types/customization";
 
 export function FireSafetyScreen() {
   const { lang } = useI18n();
-  const [project, setProject] = useState<BuildingProject | null>(null);
-  const [customization, setCustomization] = useState<any>(null);
+  const { project, customization, updateCustomization, isLoading } = useProjectCustomization<FireSafetySettings>(
+    "fireSafety",
+    DEFAULT_FIRE_SAFETY,
+  );
 
-  useEffect(() => {
-    const active = getActiveProject();
-    if (active) {
-      setProject(active);
-      setCustomization(active.customization?.fireSafety || {
-        enabled: false,
-        stairWidthMm: 1000,
-        corridorWidthMm: 1200,
-        travelDistanceMaxM: 30,
-        fireRatingHours: 2,
-        sprinklerSystem: false,
-        smokeDetector: true,
-      });
-    }
-  }, []);
-
-  const updateCustomization = (field: string, value: any) => {
-    if (!project || !customization) return;
-    const updated = { ...customization, [field]: value };
-    setCustomization(updated);
-
-    const updatedProject = {
-      ...project,
-      customization: {
-        ...project.customization,
-        fireSafety: updated,
-      },
-      updatedAt: new Date().toISOString(),
-    };
-    setProject(updatedProject);
-    saveActiveProject(updatedProject);
-  };
-
-  if (!project || !customization) {
+  if (isLoading || !project || !customization) {
     return (
       <div className="screen">
-        <PageHeader title={lang === "bn" ? "ফায়ার সেফটি" : "Fire Safety Settings"} subtitle="Loading..." />
+        <PageHeader title={lang === "bn" ? "ফাযায়ার সফটি" : "Fire Safety Settings"} subtitle="Loading..." />
         <Card>Loading project...</Card>
       </div>
     );
@@ -53,7 +24,6 @@ export function FireSafetyScreen() {
 
   const sprinklerArea = customization.sprinklerSystem ? (project.plotSqm || 200) * project.stories : 0;
   const sprinklerCost = customization.sprinklerSystem ? Math.round(sprinklerArea * 450) : 0;
-
   const isCompliant = project.stories <= 3 || 
     (customization.stairWidthMm >= 1000 && 
      customization.corridorWidthMm >= 1200 && 
@@ -62,12 +32,12 @@ export function FireSafetyScreen() {
   return (
     <div className="screen">
       <PageHeader
-        title={lang === "bn" ? "ফায়ার সেফটি সেটিংস" : "Fire Safety Settings"}
+        title={lang === "bn" ? "ফাযায়ার সফটি সটিংস" : "Fire Safety Settings"}
         subtitle={customization.enabled ? lang === "bn" ? "সক্রিয়" : "Enabled" : lang === "bn" ? "অসক্রিয়" : "Optional"}
         actions={
           <div className="row" style={{ gap: "8px" }}>
             <Button variant="primary">
-              {lang === "bn" ? "সংরক্ষণ করা হয়েছে" : "Saved"}
+              {lang === "bn" ? "সংরকষণ করা হযেছে" : "Saved"}
             </Button>
           </div>
         }
@@ -83,12 +53,12 @@ export function FireSafetyScreen() {
               onChange={(e) => updateCustomization("enabled", e.target.checked)}
               style={{ marginRight: "12px", width: "20px", height: "20px" }}
             />
-            {lang === "bn" ? "ফায়ার সেফটি বাধ্যতামূলক মান প্রয়োগ করুন" : "Apply Mandatory Fire Safety Standards"}
+            {lang === "bn" ? "ফাযায়ার সফটি বাধ্যতামূলক মান প্রয়োগ করুন" : "Apply Mandatory Fire Safety Standards"}
           </label>
         </div>
         <p style={{ fontSize: "14px", opacity: 0.8, lineHeight: "1.5" }}>
           {lang === "bn"
-            ? "BNBC 2020 Part 4 অনুযায়ী ৬ তলার বেশি ভবনে ফায়ার সেফটি বাধ্যতামূলক। চালু করলে স্বয়ংক্রিয় স্প্রিংকলার, প্রশস্ত সিঁড়ি ও করিডোর বাধ্যতামূলক হবে।"
+            ? "BNBC 2020 Part 4 অনুযায়ী ৬ তলার বেশি ভবনে ফাযায়ার সফটি বাধ্যতামূলক। চালু করলে স্বয়ংক্রিয় স্প্রিংকলার, প্রশস্ত সিঁড়ি ও করিডোর বাধ্যতামূলক হবে।"
             : "Mandatory for buildings with 6+ stories per BNBC 2020 Part 4. Enables automatic sprinklers, wide stairs, and corridors."}
         </p>
       </Card>
@@ -99,11 +69,11 @@ export function FireSafetyScreen() {
           <div className="row" style={{ gap: "16px", marginBottom: "16px", flexWrap: "wrap" }}>
             <Card style={{ flex: 1, minWidth: "300px" }}>
               <h3 style={{ marginBottom: "12px" }}>
-                {lang === "bn" ? "সিঁড়ি প্রস্থ" : "Stair Width"}
+                {lang === "bn" ? "সিঁড়ি প্রশস্ত" : "Stair Width"}
               </h3>
               <div style={{ marginBottom: "16px" }}>
                 <label style={{ display: "block", marginBottom: "4px", fontSize: "14px" }}>
-                  {lang === "bn" ? "সর্বনিম্ন প্রস্থ (mm):" : "Minimum Width (mm)"}
+                  {lang === "bn" ? "সর্বনিম্ন প্রশস্ত (mm):" : "Minimum Width (mm)"}
                 </label>
                 <input
                   type="number"
@@ -121,11 +91,11 @@ export function FireSafetyScreen() {
 
             <Card style={{ flex: 1, minWidth: "300px" }}>
               <h3 style={{ marginBottom: "12px" }}>
-                {lang === "bn" ? "করিডোর প্রস্থ" : "Corridor Width"}
+                {lang === "bn" ? "করিডোর প্রশস্ত" : "Corridor Width"}
               </h3>
               <div style={{ marginBottom: "16px" }}>
                 <label style={{ display: "block", marginBottom: "4px", fontSize: "14px" }}>
-                  {lang === "bn" ? "সর্বনিম্ন প্রস্থ (mm):" : "Minimum Width (mm)"}
+                  {lang === "bn" ? "সর্বনিম্ন প্রশস্ত (mm):" : "Minimum Width (mm)"}
                 </label>
                 <input
                   type="number"
@@ -204,15 +174,15 @@ export function FireSafetyScreen() {
           {/* Fire Safety Summary */}
           <Card>
             <h3 style={{ marginBottom: "12px" }}>
-              {lang === "bn" ? "ফায়ার সেফটি সারসংক্ষেপ" : "Fire Safety Summary"}
+              {lang === "bn" ? "ফাযায়ার সফটি সারসংক্ষেপ" : "Fire Safety Summary"}
             </h3>
             <div className="row" style={{ gap: "16px", marginBottom: "16px", flexWrap: "wrap" }}>
               <Stat
-                label={lang === "bn" ? "সিঁড়ি প্রস্থ" : "Stair Width"}
+                label={lang === "bn" ? "সিঁড়ি প্রশস্ত" : "Stair Width"}
                 value={customization.stairWidthMm + "mm"}
               />
               <Stat
-                label={lang === "bn" ? "করিডোর প্রস্থ" : "Corridor Width"}
+                label={lang === "bn" ? "করিডোর প্রশস্ত" : "Corridor Width"}
                 value={customization.corridorWidthMm + "mm"}
               />
               <Stat
@@ -235,14 +205,14 @@ export function FireSafetyScreen() {
       {/* Fire Safety Status */}
       <Card>
         <h3 style={{ marginBottom: "12px" }}>
-          {lang === "bn" ? "ফায়ার সেফটি স্ট্যাটাস" : "Fire Safety Status"}
+          {lang === "bn" ? "ফাযায়ার সফটি স্ট্যাটাস" : "Fire Safety Status"}
         </h3>
         <div className="row" style={{ gap: "12px", flexWrap: "wrap" }}>
           <Badge tone={customization.enabled ? "sage" : "neutral"}>
-            {lang === "bn" ? "ফায়ার সেফটি সক্রিয়" : "Fire Safety Active"}
+            {lang === "bn" ? "ফাযায়ার সফটি সক্রিয়" : "Fire Safety Active"}
           </Badge>
           <Badge tone={isCompliant ? "sage" : "blush"}>
-            {lang === "bn" ? "ইগ্রেস সম্মতি" : "Egress Compliance"}
+            {lang === "bn" ? "ইগ্রস সম্মতি" : "Egress Compliance"}
           </Badge>
           <Badge tone={customization.sprinklerSystem ? "sage" : "neutral"}>
             {lang === "bn" ? "স্প্রিংকলার" : "Sprinklers"}

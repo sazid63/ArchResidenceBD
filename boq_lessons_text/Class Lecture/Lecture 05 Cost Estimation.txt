@@ -1,0 +1,473 @@
+
+--- PAGE 1 ---
+CE208
+Qua ntitySur veying
+Bangladesh Univ ersity ofEngineering and T echnology
+
+--- PAGE 2 ---
+Ahmed Farhan Ahnaf Siddique
+Lecturer
+Dept. of Civil Engineering , BUE T
+Bangladesh Univ ersity ofEngineering and T echnology
+Contact:
+Ro o m #647,  CE B uilding
+01715234567
+ahnafrcs201 1@ gmail.co m
+ahnaf@ce.buet.ac.bd
+
+--- PAGE 3 ---
+Cost Estimationfor Different 
+Materialsin Structures
+
+--- PAGE 4 ---
+LectureOutline
+
+Computationof MaterialQuantities
+
+UnitWeightsofDifferent Struc turalMater ials
+
+Sche duleof Rates
+
+CostEstimation
+A . F. A hnafSiddiqu e
+De p t. of C ivil 
+Engg
+.
+BUET ( Ju ly '21)
+4
+
+--- PAGE 5 ---
+Computation of Material Quantities
+A . F. A hnafSiddiqu e
+De p t. of C ivil 
+Engg
+.
+BUET ( Ju ly '21)
+5
+
+Step
+1
+:
+Determine
+numbers
+and
+dimensions
+of
+members
+
+Step
+2
+:
+Ca lculate
+their
+vo lumes
+
+Step
+3
+:
+Apply
+co rrection
+facto rs
+fo r
+as sumptions,
+shrinkage,
+and
+wastage
+
+Step
+4
+:
+Differentiate
+materials
+
+Step
+5
+:
+Co nvert
+the
+co rrected
+vo lumes
+in
+appro priate
+units
+
+--- PAGE 6 ---
+Computation of Material Quantities
+A . F. A hnafSiddiqu e
+De p t. of C ivil 
+Engg
+.
+BUET ( Ju ly '21)
+6
+
+An
+on e
+stori ed
+RCC
+bu il din g
+consists
+of
+6
+_
+th ic k
+10
+
+15
+[
+rec tang ul ar
+f lo or
+slabs
+sup p orted
+by
+be ams
+at
+all
+of
+its
+ed ges
+.
+The
+beams
+are
+10
+_
+wide
+and
+12
+_
+deep
+su p p or te d
+by
+4
+col um ns
+of
+cross
+-
+secti on
+12
+
+12
+_
+at
+the
+corners
+.
+Each
+colu mn
+is
+supp orted
+by
+4
+
+4
+
+1
+[
+6
+_
+footin gs
+at
+a
+de pth
+of
+5
+[
+be lo w
+pl inth
+level
+.
+The re
+are
+par ti ti on
+wal ls
+th roug hou t
+th e
+pe ri meter
+of
+th e
+groun d
+f lo or
+consisti ng
+of
+a
+doo r
+(
+3
+
+7
+
+and
+two
+wind ows
+(
+5
+
+4
+
+.
+The
+parapet
+he ight
+is
+2
+[
+6
+_
+and
+f lo or
+he ig ht
+is
+10
+[
+.
+(As su m e ,
+rei nforce ment
+area
+=
+1
+%
+of
+RCC
+sec ti on
+and
+conc rete
+mix
+rati o
+=
+1
+:
+2
+:
+4
+)
+Determ in e,
+
+The
+numbe r
+of
+bags
+of
+ce me nt
+re quire d
+for
+constr uction
+.
+
+The
+amount
+of
+coarse
+and
+fine
+ag gre gate s
+re quire d
+for
+construction
+.
+
+The
+volume
+of
+ste e l
+re quire d
+for
+constr uction
+.
+
+The
+numbe r
+of
+bricks
+re quire d
+for
+constr uction
+.
+
+--- PAGE 7 ---
+Computation of Material Quantities
+A . F. A hnafSiddiqu e
+De p t. of C ivil 
+Engg
+.
+BUET ( Ju ly '21)
+7
+
+--- PAGE 8 ---
+Computation of Material Quantities
+A . F. A hnafSiddiqu e
+De p t. of C ivil 
+Engg
+.
+BUET ( Ju ly '21)
+8
+
+--- PAGE 9 ---
+Unit Weights of Different Structural Materials
+A . F. A hnafSiddiqu e
+De p t. of C ivil 
+Engg
+.
+BUET ( Ju ly '21)
+9
+
+Concrete
+t
+150
+pcf
+
+Stee l
+t
+490
+pcf
+
+Bric k
+t
+120
+pcf
+
+Water
+t
+62
+.
+4
+pcf
+
+Soil
+t
+110
+~
+140
+pcf
+
+Determinetheweightsofallthe 
+materials in theprevious problem .
+
+--- PAGE 10 ---
+Schedule of Rates
+A . F. A hnafSiddiqu e
+De p t. of C ivil 
+Engg
+.
+BUET ( Ju ly '21)
+10
+
+The
+costs
+associated
+with
+construction
+can
+be
+separated
+into
+t
+
+Mater ial
+costs
+t
+Market
+rates
+
+Labour
+costs
+t
+PWD
+schedule
+of
+rates/Local
+contractor
+rates
+
+There
+will
+be
+additional
+site
+specific
+costs
+and
+non
+-
+eng inee ring
+costs
+for
+specific
+projects
+
+--- PAGE 11 ---
+Cost Estimation
+A . F. A hnafSiddiqu e
+De p t. of C ivil 
+Engg
+.
+BUET ( Ju ly '21)
+11
+
+Ce ment
+t
+450
+~
+550
+tk
+/bag
+
+Sand
+t
+20
+~
+80
+tk
+/
+cft
+
+Bric k
+Chips
+t
+80
+~
+100
+tk
+/
+cft
+
+Stone
+Chips
+t
+120
+~
+180
+tk
+/
+cft
+
+Stee l
+t
+55000
+~
+80000
+tk
+/ton
+
+Bric k
+t
+6000
+~
+9000
+tk
+/thousand
+
+Determinethe totalcostof materials 
+for the constructionof thebu ildingin 
+the previous problem .
+
+Th erates willvary accordin gtothe 
+market.
+
+--- PAGE 12 ---
+A . F. A hnafSiddiqu e
+De p t. of C ivil 
+Engg
+.
+BUET ( Ju ly '21)
+Thank You!
+12

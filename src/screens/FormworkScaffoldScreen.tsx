@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useI18n } from "../i18n";
 import { Badge, Button, Card, PageHeader, Stat } from "../ui/kit";
-import { getActiveProject } from "../engine/projectState";
+import { useActiveProject } from "../context/ProjectContext";
 import { generateBuildingMesh } from "../cad/parametricBuildingGenerator";
 import { generateFormworkQuantities, generateScaffoldQuantities, generateFormworkScaffoldReport, exportFormworkCSV, exportScaffoldCSV } from "../cad/formworkScaffold";
 import type { FormworkSummary, ScaffoldSummary, FormworkItem, ScaffoldItem } from "../cad/formworkScaffold";
@@ -20,7 +20,7 @@ interface ScaffoldTotals {
 
 export function FormworkScaffoldScreen() {
   const { t, lang } = useI18n();
-  const [project] = useState(() => getActiveProject());
+  const project = useActiveProject();
   const [mesh, setMesh] = useState<MeshDocument | null>(null);
   const [formwork, setFormwork] = useState<FormworkSummary | null>(null);
   const [scaffold, setScaffold] = useState<ScaffoldSummary | null>(null);

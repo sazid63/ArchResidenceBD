@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { useI18n } from "../i18n";
 import { Badge, Button, Card, PageHeader, Stat } from "../ui/kit";
-import { getActiveProject, getSavedProjects, BuildingProject } from "../engine/projectState";
+import { type BuildingProject } from "../engine/projectState";
 import { fmtNum, fmtBdt } from "../i18n";
+import { useActiveProject } from "../context/ProjectContext";
 
 export function ComparisonScreen() {
   const { lang } = useI18n();
-  const [project, setProject] = useState<BuildingProject | null>(null);
+  const activeProject = useActiveProject();
+  const [project, setProject] = useState<BuildingProject | null>(activeProject);
   const [allProjects, setAllProjects] = useState<BuildingProject[]>([]);
   const [selectedProject1, setSelectedProject1] = useState<BuildingProject | null>(null);
   const [selectedProject2, setSelectedProject2] = useState<BuildingProject | null>(null);
@@ -14,19 +16,8 @@ export function ComparisonScreen() {
   const [viewerMode, setViewerMode] = useState<"split" | "project1" | "project2">("split");
 
   useEffect(() => {
-    const active = getActiveProject();
-    const saved = getSavedProjects();
-    
-    setProject(active);
-    setAllProjects(saved);
-    
-    if (saved.length > 0) {
-      setSelectedProject1(saved[0]);
-    }
-    if (saved.length > 1) {
-      setSelectedProject2(saved[1]);
-    }
-  }, []);
+    if (activeProject) setProject(activeProject);
+  }, [activeProject]);
 
   const getProjectMetrics = (proj: BuildingProject) => {
     const areaPerUnit = (proj.plotSqm * 0.7) / (proj.unitsPerFloor * proj.stories);

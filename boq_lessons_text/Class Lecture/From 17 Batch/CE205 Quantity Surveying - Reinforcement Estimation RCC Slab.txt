@@ -1,0 +1,887 @@
+
+--- PAGE 1 ---
+ 
+ 
+ 
+Reinforcement 
+Estimation: RCC S lab
+ 
+CE208
+ 
+QuantitySurveying
+ 
+
+--- PAGE 2 ---
+NecessityforReinforcement 
+Estimation
+ 
+ 
+
+For procurement of material
+ 
+
+To submit or to c heck at site the consumption of 
+the material
+ 
+
+For preparation of bill for payment
+ 
+ 
+
+--- PAGE 3 ---
+ReinforcementusedinRCCWork
+ 
+
+Pla inro undmildsteel bar 
+ 
+
+Deformed 
+bar 
+ 
+
+--- PAGE 4 ---
+PropertiesofASTMStandard 
+ReinforcingBars
+ 
+Bar 
+No.  
+ 
+Diameter(in) 
+ 
+Nomin alArea (in
+2
+ 
+) 
+ 
+ 
+
+#3 
+ 
+ 
+ 
+     
+3/ 8 
+ 
+ 
+ 
+0.1 1 
+ 
+ 
+
+#4 
+ 
+ 
+     
+4/ 8 
+ 
+ 
+ 
+0.2 0 
+ 
+ 
+
+#5 
+ 
+ 
+     
+5/ 8 
+ 
+ 
+ 
+0.3 1 
+ 
+ 
+
+#6 
+ 
+ 
+     
+6/ 8 
+ 
+ 
+ 
+0.4 4 
+ 
+ 
+
+#7 
+ 
+ 
+    
+7/ 8 
+ 
+ 
+ 
+0.60  
+ 
+ 
+
+#8 
+ 
+ 
+     
+8/ 8 
+ 
+ 
+ 
+0.7 9 
+ 
+ 
+
+#9 
+ 
+ 
+     
+9/ 8 
+ 
+ 
+ 
+1.0 0 
+ 
+ 
+
+#10 
+ 
+ 
+    
+10 / 8 
+ 
+ 
+ 
+1.2 7 
+ 
+ 
+
+#11 
+ 
+ 
+    
+11 / 8 
+ 
+ 
+ 
+1.5 6 
+ 
+ 
+ 
+Note : Nom in al d ime n sion s of d eforme d  b ar e q u ivalent to p lain 
+b ar; sa me we ig ht p e r fe et as  p lain b ar
+ 
+
+--- PAGE 5 ---
+ReinforcementEstimation
+ 
+1.
+By percentage bas is o f co ncrete
+ 
+2.
+By thumb rule& 
+ 
+3.
+Accurate estimation bas ed o n detailed drawings
+ 
+ 
+(1 &  2 a re crude methods )
+ 
+ 
+Reinfo rcement estimated in units of weight in 
+K
+ilogram, Po und 
+and Quintal( 1 Quintal= 100 Kilogram)
+ 
+
+--- PAGE 6 ---
+PercentageBasisofConcrete
+ 
+
+Fo o ting 
+t
+ 
+0.5% to  1%
+ 
+
+Co lumn 
+t
+ 
+0.8% to 8%
+ 
+
+Bea m 
+t
+ 
+1%
+ 
+
+Slab 
+-
+ 
+1%
+ 
+
+Lintel 
+t
+ 
+0.8%
+ 
+
+Sunsha de 
+t
+ 
+0.5% to  0.8%
+ 
+ 
+
+Deter mine
+ 
+t he
+ 
+a mount
+ 
+of
+ 
+reinfo rcem ent
+ 
+in
+ 
+a
+ 
+RCC
+ 
+sla b
+            
+(
+20
+ 
+ft
+ 
+x
+ 
+15
+ 
+ft
+ 
+x
+ 
+5
+ 
+inch)
+ 
+using
+ 
+percentage
+ 
+basis
+ 
+of
+ 
+concrete
+.
+ 
+ 
+   
+(Unit
+ 
+weight
+ 
+of
+ 
+steel
+ 
+=
+ 
+490
+ 
+pcf
+)
+ 
+ 
+ 
+
+--- PAGE 7 ---
+ThumbRule 
+ 
+ 
+Heightof 
+Bu ilding
+ 
+Qu antity
+ 
+of Re inforce mentin Kg /sq . m.  
+of PlinthAre a
+ 
+Re marks
+ 
+Fou n d ation  
+ 
+Floor Be ams  
+per floor
+ 
+Floor Slab
+s 
+per floor
+ 
+9
+ 
+m to 13.5 m 
+maximum
+ 
+22 to 33
+ 
+18 to 20
+ 
+10
+ 
+to 12
+ 
+13.5 m to 21 m 
+maximum
+ 
+50 to 65
+ 
+do 
+ 
+do
+ 
+21 m to 36 m 
+maximum
+ 
+95 to 110
+ 
+do
+ 
+do
+ 
+Found ation
+ 
+ha s
+ 
+to
+ 
+be
+ 
+raft
+ 
+slab
+.
+ 
+Piling
+ 
+w il l
+ 
+de pe n d
+ 
+on
+ 
+soil
+ 
+condition
+.
+ 
+Above
+ 
+36 m
+ 
+130 to 150
+ 
+do
+ 
+do
+ 
+Concrete
+ 
+pi ling
+ 
+is
+ 
+gen erally
+ 
+req uired
+ 
+
+--- PAGE 8 ---
+ThumbRule
+ 
+
+A
+ 
+three
+ 
+sto ried
+ 
+building
+ 
+( each
+ 
+sto r y
+ 
+b eing
+ 
+10
+ 
+fe et )
+ 
+having
+ 
+a
+ 
+plinth
+ 
+area
+ 
+of
+ 
+60
+ 
+fe et
+ 
+x
+ 
+45
+ 
+fe et
+ 
+&
+ 
+h eight
+ 
+of
+ 
+30
+ 
+fe et
+.
+ 
+Estimate
+ 
+the
+ 
+quantity
+ 
+of
+ 
+reinfo rcement
+ 
+in
+ 
+each
+ 
+flo o r
+ 
+&
+ 
+to tal
+ 
+reinfo rcement
+ 
+in
+ 
+the
+ 
+flo o rs
+ 
+using
+ 
+thumb
+ 
+rule
+.
+ 
+ 
+ 
+
+Plinth
+ 
+Area,
+ 
+Quantity
+ 
+of
+ 
+Reinforcem ent
+ 
+in
+ 
+kg /sq
+.
+ 
+m
+.
+ 
+of
+ 
+plinth
+ 
+area,
+ 
+Number
+ 
+of
+ 
+flo o rs
+ 
+
+--- PAGE 9 ---
+AccurateEstimateBasedonDetailed 
+Drawings
+ 
+
+--- PAGE 10 ---
+AccurateEstimateBasedonDetailed 
+Drawings
+ 
+Total Depth (t) = Face to face distance
+ 
+Effective Depth (d) = Distance from compres sion face of concrete 
+to the center of g ravity (C.G. ) of stee ls
+ 
+Cover = Distance of ou ter fiber from C.G. of stee l
+ 
+Clear Cover = Distance of ou ter fiber from face of stee l 
+ 
+Total Depth (t) = Effective De pth (d) + C over 
+ 
+
+--- PAGE 11 ---
+ReinforcementCovering
+ 
+
+To  pro tect reinfo rcement/steel fro m weathering effect i.e. 
+co rro sio n 
+ 
+
+To  
+pro tect fro m fire. 
+ 
+
+The 
+need fo r adequate a dhesio n between the steel and 
+co ncrete. 
+ 
+ 
+Fo r normal expos ure o f co ncrete acco rdingto  ACI Co de 
+(American Co ncrete Institute)
+ 
+ 
+ 
+Beam/Colu mn
+ 
+Slab
+ 
+Clea r cove r
+ 
+1.5 inch (minimum) 
+ 
+0.75 inch (minimum)
+ 
+Cove r 
+ 
+2.5 inch
+ 
+1 inch
+ 
+
+--- PAGE 12 ---
+ReinforcementinSlab
+ 
+
+Straight ba r : lies at bo tto m
+ 
+
+Cranked bar:lies at top & at bottom (both lo cation, depending 
+upon cracking)
+ 
+
+Extra to p: lies  at to p 
+ 
+These three types o f reinfo rcement o ccurs in both direction 
+(both lo ngand shortdirection). 
+ 
+Each ba ris hoo ked ateach end if plainbar is used.
+ 
+
+--- PAGE 13 ---
+SlabReinforcementDistribution
+ 
+
+Start with a  straight ba rand end with a  straight ba r 
+ 
+
+Cranked 
+barsareinbetween straight bars. 
+ 
+
+Extra 
+to ps are in between cranked ba r. 
+ 
+
+--- PAGE 14 ---
+
+Number o f straight ba r = 
+½ÜæçÔ áÖØ
+
+?
+66
+
+:
+Ùåâà
+
+ØÔÖÛ
+
+æÜ×Ø
+;
+æãÔÖ ÜáÚ
+
+âÙ
+
+æçåÔ ÜÚÛç
+
+ÕÔåæ
+E
+s
+ 
+ 
+ 
+ 
+  
+ 
+  
+ 
+ 
+ 
+     
+= Nex t higher integer
+ 
+ 
+(distance is perpendicularto bar length)
+ 
+
+Between N number o f straight ba rs, there willbe (N
+-
+1) 
+number o f gaps. So, 
+No. of crankedbar = No. of straightbar 
+-
+1
+ 
+
+Between (N
+-
+1) number o f cranked ba rs, there will be (N
+-
+2) 
+number o f gaps. So, 
+No.of ex tra top = No.of crankedbar 
+t
+ 
+1 
+(if o ne ex tra to p in between cranked ba rs) 
+ 
+
+No. o f ex tra to p = 
+n x (No. of cranked bar 
+-
+1) 
+(if n ex tra to ps in 
+between cranked ba rs)
+ 
+SlabReinforcementDistribution
+ 
+
+--- PAGE 15 ---
+ l oı
+ckd
+. 
+ 
+ 
+ı„]PZ ~óò<
+-
+ 
+
+-
+ 
+ X
+ 
+No. of  cranked  bars = N o. of straight bars 
+-
+ 
+1 = 7 
+t
+ 
+1 = 6 Nos.   
+ 
+
+--- PAGE 16 ---
+2#3 extra top in betwee n cranked  
+ 
+ 
+No of extra top (one side) = (No. of cranked  bar 
+t
+ 
+1) x 2 
+ 
+ 
+ 
+            
+= (6 
+t
+ 
+1) x 2
+ 
+ 
+ 
+            
+= 10 
+ 
+
+--- PAGE 17 ---
+Lengthofbar 
+ 
+
+Length o f straight ba r = Length o f sla b(L) 
+t
+ 
+2 inch (fro m each 
+side)
+ 
+
+Length o f cranked ba r = (L 
+t
+ 
+d 
+t
+ 
+d ) + 
+×
+amq
+89
+
+ 
++ 
+×
+amq
+89
+
+ 
+        
+= ( L 
+t
+ 
+d 
+t
+ 
+d) + 1.42 d+1.42 d
+ 
+ 
+  
+=  L+ 0.4 2d + 0.4 2d
+ 
+ 
+ 
+ 
+Len gth of cranked  bar  = Len gth of straight bar + n  (0.42d) 
+ 
+ 
+Whe re n is nu mbe r of be nd s, d is effective d epth of s lab
+ 
+
+--- PAGE 18 ---
+Lengthofhook 
+ 
+
+The standardhoo k length fo r each end o f plain ro dsvar y fro m 
+9 to 12.5times diameter of  the rods  generally used
+ 
+ 
+
+If plainbaris used, each ba r must be hoo ked at bo thends.
+ 
+
+If defo rmed bar is used, no ho o ks required. 
+ 
+ 
+ 
+
+--- PAGE 19 ---
+Procedureforreinforcementestimation 
+inslab
+ 
+
+Step 1 : Determine the n umberofstraight bars
+ 
+
+Step 2 : Determine the n umberofcrankedbar
+ 
+
+Step 3 : Determine the n umberofextra top
+ 
+
+Step 4 : Determine the n umberofhook
+ 
+
+Step 5 : Determine the length ofonestraight bar
+ 
+
+Step 6 : Determine the length ofonecrankedbar
+ 
+
+Step 7: Determine the lengthofextra top(s)
+ 
+
+Step 8 : Determine the length ofhook( s)
+ 
+
+Step 9 : Determine the total length ofstraight b ars
+ 
+
+Step 1 0: Determine thetotal length ofcrankedbars
+ 
+
+Step 1 1: Determine thetotal length ofextra top( s)
+ 
+
+Step 12 :Determine thetotal lengthofhook(s)
+ 
+
+Step 1 3: Repeat step 1 tostep 12 forotherdirection
+ 
+
+Step 1 4: Volumeofbar = A rea ofbarx Lengthofbar 
+ 
+
+Step 1 5: Weightof b ar= Unit weightofsteel (4 90  
+pcf
+) xVolume 
+ 
+
+--- PAGE 20 ---
+Legend s:
+ 
+(1 )
+ l oı
+ckd
+ 
+(2 )
+2#4 extra top in betwee n 
+ckd
+. b ars
+ 
+(3 )
+1#3 extra top in betwee n 
+ckd
+. B ars
+ 
+(4 )
+ l o
+ckd
+ 
+ 
+ 
+ 
+(5) 1#4 extra top in betwee n 
+ckd
+. b ars 
+ 
+(6) 1#3 extra top in betwee n 
+ckd
+. b ars 
+ 

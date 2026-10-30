@@ -1,0 +1,660 @@
+
+--- PAGE 1 ---
+CE 208
+Quantity Sur veying
+Estimation of a Residential Masonry Building
+DEPARTMENT OF CIVI L ENGIN EERING
+BANG LADESHUNIVERSITYOF ENGIN EERING AND TECHNOLOGY
+
+--- PAGE 2 ---
+2
+
+Wall
+footing
+runs
+along
+the
+direc tion
+of
+the
+wall
+.
+
+The
+size
+of
+the
+footing
+and
+the
+thickne ss
+of
+the
+foundation
+wall
+are
+specifie d
+on
+the
+basis
+of
+the
+type
+of
+soil
+at
+the
+site
+.
+
+The
+wall
+footing
+can
+be
+constructed
+from
+stone,
+bric k,
+plain
+concrete,
+or
+reinforce d
+concrete
+.
+
+In
+the
+case
+of
+bric k
+walls,
+the
+footing
+consists
+of
+several
+courses
+of
+bricks,
+the
+lowest
+course
+being
+usually
+twice
+the
+brea dth
+of
+the
+wall
+above
+.
+
+The
+increa s ed
+base
+width
+of
+the
+wall
+footing
+is
+obtained
+through
+the
+provision
+of
+2
+.
+5
+inch
+offsets
+on
+eithe r
+side
+of
+the
+wall
+.
+Brick WallFoundation
+
+--- PAGE 3 ---
+3
+Estimate the materials required for the following residential building 
+(elementar y information is given)
+
+--- PAGE 4 ---
+1.
+ïìÁoo (}µv ˆı]}v
+2.
+îñÁoo (}µv ˆı]}v
+3.
+îìÁoo (}µv ˆı]}v
+4.
+Columnfoun dation(Isolated ColumnFooting)
+The four types of foundation used and their 
+cross
+-
+sections
+
+--- PAGE 5 ---
+Extra width  
+for excavation
+For
+excavation
+dime nsions,
+the
+act ual
+width
+of
+foundation
+is
+offsetted
+by
+3
+inch
+on
+all
+sides
+(compare
+the
+foundation
+plan
+and
+trenc h
+plan)
+.
+If
+trench
+plan
+is
+given,
+you
+can
+obtain
+the
+length
+of
+excavation
+direc tly
+from
+trenc h
+plan
+.
+5
+
+--- PAGE 6 ---
+1.
+Estimationof EarthworkExcavatio n
+ïì(}µvˆı]
+
+He ight= 
+ï[ï_
+
+Width= 
+ 
+
+Length= 
+îì[íì_
+-
+íîXñ_
+-
+ï_
+-
+íîXñ_
+-
+ï_
+6
+
+--- PAGE 7 ---
+1.
+Estimationof EarthworkExcavatio n
+îñ}µvˆı]
+
+He ight= 
+ï[ï_
+
+Width= 
+ 
+
+Length=
+~~ îî[íì_= íîXñ_= 
++
+~~ îì[íì_
+-
+îñ_
+-
+ î
+) 
+7
+
+--- PAGE 8 ---
+1.
+Estimationof EarthworkExcavatio n
+îì}µvˆı]
+
+He ight= 
+2
+[ï_
+
+Width= 
+ 
+
+Length=
+~~ õ[
+-
+î[
+-
+ï_
+-
+íîXñ_
+-
+ 
++ 
+((
+îî[íì_
+-
+ð[
+-
+
+2
+)
+8
+
+--- PAGE 9 ---
+1.
+Estimationof EarthworkExcavatio n
+Co lumnfoundation: 
+
+He ight= 
+ð[ï_
+
+Width= 
+ð[=ï_= 
+
+Length= 
+ð[=ï_=ï_
+9
+
+--- PAGE 10 ---
+2.  Estimationof Brick Fl atSoling(one layer 
+t
+ 
+ïì}µvˆı]
+
+Width= 
+ïì_
+
+Length= 
+îì[íì_
+-
+îñ_
+10
+
+--- PAGE 11 ---
+2.  Estimationof Brick Fl atSoling(one layer)
+îñ}µvˆı]
+
+Width= 
+îñ
+
+Length=
+~~ îî[íì_= íîXñ
+*4)
++
+~~ îì[íì_
+-
+îñ 
+11
+
+--- PAGE 12 ---
+2.  Estimationof Brick Fl atSoling(one layer)
+
+--- PAGE 13 ---
+îì}µvˆı]
+
+Width= 
+îì_
+
+Length=
+~~ õ[
+-
+ò_
+-
+óX 
++ 
+~~ îî[íì_
+-
+íî 
+2.  Estimationof Brick Fl atSoling(one layer)
+13
+
+--- PAGE 14 ---
+2.  Estimationof Brick Fl atSoling(one layer)
+Columnfoundation: 
+
+Width= 
+ð[
+
+Length= 
+ð[
+14
+
+--- PAGE 15 ---
+3
+.  Estimationof Cement Concrete (1:3:6) in Foundation
+
+Length and width 
+same as BFS
+JJJ ˚v}v„˚ııZ]lv˚
+considered for volume calculation
+15
+
+--- PAGE 16 ---
+
+ ïìÁ(}µvˆ’˚„]˚ı˚›’Xıïì
+P„ˆµooÇ„˚ˆµíìˆ˚ „˚’ı o˚vP
+XY
+for 
+˚(}µvˆZ}Á˚À˚„ ]v„˚ÁÀÁ„ˆ’
+X
+Y
+ı]uı}µvˆı]} 
+16
+
+--- PAGE 17 ---
+ı]uı}µvˆı]} 
+ Á]ˆ ıZW
+
+˚]PZ ò_
+
+]ˆıZA îñ_
+
+ P îì[íì_
+-
+îñ_=
+ñ_
+ Á]ˆ ıZW
+
+˚]PZ ò_
+
+]ˆıZA îì_
+
+ P îì[íì_
+-
+îñ_=
+ñ_
++
+ñ_
+ Á]ˆ ıZW
+
+˚]PZ ò_
+
+]ˆıZA íñ_
+
+ îì[íì_
+-
+îñ_=
+ñ_
++
+ñ_
++
+ñ_
+
+wid th:
+
+Height= 
+íñ_
+
+Width=  
+íì_
+
+Length= 
+îì[íì_
+-
+îñ_=
+ñ_
++
+ñ_
++
+ñ_
+17
+
+--- PAGE 18 ---
+ı]u lÁı}µvˆı]} 
+18
+E
+A
+îñ_
+îì_
+íñ_
+íì_
+îî[
+-
+íì_
+ Á]ˆ ıZU˚ v PıZ
+~~îî[ íì_=íîXñ_
+-
+ ~îì[íì_
+-
+
+
+--- PAGE 19 ---
+ı]uı}µvˆı]} 
+ Á]ˆ ıZW
+
+˚]PZ ò_
+
+ˆıZA îì_
+
+ P ~~îî[íì_= íîXñ_
+-
+ 
+~~îì[íì_
+-
+îñ_= 
+ Á]ˆ ıZW
+
+˚]PZ ò_
+
+ˆıZA íñ_
+
+ Pîî[íì_= íîXñ_
+-
+ 
+~~îì[íì_
+-
+
+
+w id th:
+
+Height= 
+îí_
+
+Width=  
+íì_
+
+Length= 
+îî[íì_=íîXñ_
+-
+ 
+~~îì[íì_
+-
+îñ_= 
+Along AE, there is a  
+
+de creas e in 
+o˚v P (oo}Á˚À˚„U
+a
+long  
+AD, there is a 
+ñ_
+increas e.
+19
+
+--- PAGE 20 ---
+ı]uı}µvˆı]} 
+íñ_ Á]ˆ ıZW
+
+˚]PZ ò_
+
+]ˆıZA íñ_
+
+Len gth= = ((9
+-
+ò_
+-
+îî[íì_
+-
+
+íì_
+wid th:
+
+Height= 
+íñ_
+
+Width=  
+íì_
+
+Len gth= 
+= ((9
+-
+ò_
+-
+îî[íì_
+-
+
+20
+
+--- PAGE 21 ---
+5
+.  Estimationof Brickworkfrom GLto PL 
+ïì}µvˆı]
+
+ ]PZî[
+
+_
+
+Length= 
+îì[íì_
+-
+íì_
+21
+
+--- PAGE 22 ---
+5
+.  Estimationof Brickworkfrom GLto PL 
+îñ}µvˆı]
+
+ ]PZî[
+
+_
+
+Length= 
+~îì[íì_
+-
+íì 
++
+~îî[íì_= 
+22
+
+--- PAGE 23 ---
+5
+.  Estimationof Brickworkfrom GLto PL 
+îîÁ}µvˆı]
+
+ ]PZî[
+
+_
+
+Length= 
+~õ[
+-
+íì ”î
++
+~îî[íì_
+-
+íì ”î
+23
+
+--- PAGE 24 ---
+6
+.  RCC in Column(up to GL)
+24
+i)
+BaseSlab
+Volume=  (
+ð[Æð
+[Æ
+í[
+)*3
+i)
+Column
+Volume=  (
+í[Æí[
+x
+í[õ_
+)*3
+
+--- PAGE 25 ---
+7
+.  RCC in Column(GL to PL) 
+
+He ight= 
+î[
+
+Area = 
+íì_Æíì_
+
+Volume=  (
+î[
+x
+íì_Æíì_
+)*3
+25
+
+--- PAGE 26 ---
+8
+.  DampProofCourse (DPC)
+26
+
+--- PAGE 27 ---
+8
+.  DampProofCourse (DPC)
+27
+
+--- PAGE 28 ---
+8
+.  DampProofCourse (DPC)
+28
+ïì(}µvˆı]
+
+_
+
+_
+
+Length= 
+îì[íì_
+
+--- PAGE 29 ---
+8
+.  DampProofCourse (DPC)
+29
+îñ(}µvˆı]
+
+_
+
+_
+
+Length= 
+îì[íì_
+*2+
+~îî[í
+*2+
+~íñ[ð_
+*2
+
+--- PAGE 30 ---
+ThankYou!
+30

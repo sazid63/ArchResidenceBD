@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useI18n } from "../i18n";
 import { Badge, Button, Callout, Card, PageHeader } from "../ui/kit";
-import { getActiveProject, saveActiveProject, BuildingProject } from "../engine/projectState";
+import { useActiveProject, useProject } from "../context/ProjectContext";
 
 interface DocumentsReply {
   pack: string;
@@ -35,13 +35,14 @@ const GROUP_KEY: Record<
  */
 export function DocumentsScreen() {
   const { t, lang } = useI18n();
+  const project = useActiveProject();
   const [pack, setPack] = useState("");
   const [documents, setDocuments] = useState<DocumentsReply | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
-  const [project, setProject] = useState<BuildingProject | null>(null);
   const [generatingPermit, setGeneratingPermit] = useState(false);
 
   const load = async () => {
+    if (!project) return;
     if (!pack.trim()) {
       setProblem(t("documentsNeedsPack"));
       return;
@@ -58,16 +59,15 @@ export function DocumentsScreen() {
 
   const loadPackFromStorage = async (packId: string): Promise<DocumentsReply> => {
     // Mock implementation for web mode
-    const active = getActiveProject();
-    if (!active || active.id !== packId) {
+    if (!project || project.id !== packId) {
       throw new Error(t("documentsFailed"));
     }
     
     // Create mock documents reply
     return {
       pack: packId,
-      projectName: active.name,
-      created: active.createdAt,
+      projectName: project.name,
+      created: project.createdAt,
       groups: {
         spec: ["project-spec.pdf"],
         drawing: ["floor-plans.pdf", "elevations.pdf", "sections.pdf"],
@@ -103,10 +103,6 @@ export function DocumentsScreen() {
       setGeneratingPermit(false);
     }
   };
-
-  // Load active project on mount
-  const active = getActiveProject();
-  if (active) setProject(active);
 
   const groups = documents ? Object.entries(documents.groups) : [];
 

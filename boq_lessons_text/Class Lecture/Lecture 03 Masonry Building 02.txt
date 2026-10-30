@@ -1,0 +1,516 @@
+
+--- PAGE 1 ---
+CE 208
+Quantity Sur veying
+Estimation of a Residential Masonry Building
+DEPARTMENT OF CIVI L ENGIN EERING
+BANG LADESHUNIVERSITYOF ENGIN EERING AND TECHNOLOGY
+
+--- PAGE 2 ---
+5
+.  Estimationof Brickworkfrom GLto PL 
+ïì(}µvˆı]
+
+ ]PZî[
+
+_
+
+Length= 
+îì[íì_
+-
+íì_
+2
+
+--- PAGE 3 ---
+5
+.  Estimationof Brickworkfrom GLto PL 
+îñ(}µvˆı]
+
+ ]PZî[
+
+_
+
+Length= 
+~îì[íì_
+-
+íì 
++
+~îî[íì_= 
+3
+
+--- PAGE 4 ---
+5
+.  Estimationof Brickworkfrom GLto PL 
+îîÁ(}µvˆı]
+
+ ]PZî[
+
+_
+
+Length= 
+~õ[
+-
+íì ”î
++
+~îî[íì_
+-
+íì ”î
+4
+
+--- PAGE 5 ---
+6
+.  RCC 
+in ColumnFooti ng 
+(upto GL)
+5
+
+BaseSlab
+Volume=  (
+ð[Æð
+[Æ
+í[
+)*3
+
+Column
+Volume=  (
+í[Æí[
+x
+í[õ_
+)*3
+
+--- PAGE 6 ---
+7
+.  RCC in Column(GLto PL) 
+
+He ight= 
+î[
+
+Area = 
+íì_Æíì_
+
+Volume=  (
+î[
+x
+íì_Æíì_
+)*3
+6
+
+--- PAGE 7 ---
+8
+.  DampProofCourse (DPC)
+7
+
+--- PAGE 8 ---
+8
+.  DampProofCourse (DPC)
+8
+
+--- PAGE 9 ---
+8
+.  DampProofCourse (DPC)
+9
+ïì(}µvˆı]
+
+Xñ_
+
+_
+
+Length= 
+îì[íì_
+
+--- PAGE 10 ---
+8
+.  DampProofCourse (DPC)
+10
+îñ(}µvˆı]
+
+Xñ_
+
+_
+
+Length= 
+îì[íì_
+*2+
+~îî[í
+*2+
+~íñ[ð_
+*2
+
+--- PAGE 11 ---
+11
+9
+.  BFS (one layer)inFlo ors
+
+--- PAGE 12 ---
+9
+.  BFS (one layer)inFlo ors
+12
+Main Room : 
+
+Length= 
+îî[
+
+Width= 
+îì[
+
+--- PAGE 13 ---
+9
+.  BFS (one layer)inFlo ors
+13
+Verandah: 
+
+Length= 
+~îî[íì ”î
+-
+íì_
+
+Width= 
+õ[
+-
+íì_
+
+--- PAGE 14 ---
+íì ~ï’
+14
+Main Room : 
+
+Length= 
+îî[
+
+Width= 
+îì[
+
+
+
+--- PAGE 15 ---
+íì ~ï’
+15
+Verandah: 
+
+Length= 
+~îî[íì ”î
+-
+íì_
+
+Width= 
+õ[
+-
+íì_
+
+
+
+--- PAGE 16 ---
+16
+ííıZ]l
+
+--- PAGE 17 ---
+ííıZ]l
+17
+Main Floor: 
+
+Length= 
+îî[
+
+Width= 
+îì[
+
+
+
+--- PAGE 18 ---
+18
+Verandah: 
+
+Length= 
+~îî[íì ”î=íì_
+
+Width= 
+õ[
+
+_
+ííıZ]l
+
+--- PAGE 19 ---
+19
+Door: 
+
+Length= 
+ï[ð_
+
+Width= 
+íì_
+
+_
+ííıZ]l
+
+--- PAGE 20 ---
+20
+ííıZ]l
+
+_
+4Steps: 
+
+Length= 
+îï[ô_
+
+Width= 
+íì_= ò_
+íì_
+ò_
+
+--- PAGE 21 ---
+21
+Deduct (Columns): 
+
+Length= 
+íì_
+
+Width= 
+íì_
+ííıZ]l
+
+--- PAGE 22 ---
+22
+12. Bric kwalls in superstructure
+íì[ó_
+
+--- PAGE 23 ---
+23
+12. Bric kwalls in superstructure
+Wall: 
+
+ ]PZíì[ó_
+
+_
+
+Length= 
+~îì[íì_
+-
+íì 
++
+~îî[íì_= 
+
+--- PAGE 24 ---
+24
+12. Bric kwalls in superstructure
+Deduct (4 Doors): 
+
+He ight= 
+7
+[
+
+_
+
+Length= 
+ï[ð_
+
+--- PAGE 25 ---
+25
+12. Bric kwalls in superstructure
+Deduct (8 Windows): 
+
+ ]PZð[ò_
+
+_
+
+Length= 
+ò[
+
+--- PAGE 26 ---
+26
+12. Bric kwalls in superstructure
+Deduct (Lintel overWindows): 
+
+ ]PZò_
+
+_
+
+Length= 
+7
+[
+
+--- PAGE 27 ---
+27
+12. Bric kwalls in superstructure
+Deduct (Lintel overW1+D1): 
+
+ ]PZò_
+
+_
+
+Length= 
+î”îî[=íì_=î”ò_
+
+--- PAGE 28 ---
+28
+3Columns: 
+
+Length= 
+íì_
+
+Width= 
+íì_
+
+Height= 
+íì[ó_
+13. RCC in Columns
+
+--- PAGE 29 ---
+29
+14. RCC in Lintel
+Lintel overWindows: 
+
+ ]PZò_
+
+_
+
+Length= 
+7
+[
+
+--- PAGE 30 ---
+30
+14. RCC in Lintel
+Lintel overW1+D1: 
+
+ ]PZò_
+
+_
+
+Length= 
+î”îî[=íì_=î”ò_
+
+--- PAGE 31 ---
+31
+15. RCC in Roof
+íì[ó_
+í[õ_
+í[õ_
+
+--- PAGE 32 ---
+32
+15. RCC in Roof
+
+Thickness= 
+5
+_
+
+Width= 
+ïì[ô_=
+î”í[õ
+_
+
+Length= 
+ðò[ò_=
+î”í[õ_
+í[õ_
+í[õ_
+í[õ_
+í[õ_
+
+--- PAGE 33 ---
+33
+íì[ó_
+16. Lime Concrete in Roof
+
+--- PAGE 34 ---
+34
+
+Thickness= 
+3
+_
+
+Width= 
+ïð[î_
+-
+íì_
+
+Length= 
+ñì[
+-
+íì_
+16. Lime Concrete in Roof
+ñì[
+ïð[î_
+
+--- PAGE 35 ---
+35
+íì[ó_
+17. Bric ksinParapet
+
+--- PAGE 36 ---
+36
+
+î[
+
+
+
+Length= 
+2*(
+~ñì[
+-
+íì
++
+ïð[î_
+)
+ñì[
+ïð[î_
+17. Bric ksinParapet
+
+--- PAGE 37 ---
+37
+18. Bric kworkin Stairs
+FirstStep: 
+
+ ]PZò_
+
+Width= 
+íì_
+
+Length= 
+îï[ô_
+
+--- PAGE 38 ---
+38
+18. Bric kworkin Stairs
+Se condStep: 
+
+ ]PZò_
+
+Width= 
+2
+ì_
+
+Length= 
+îï[ô_
+
+--- PAGE 39 ---
+39
+18. Bric kworkin Stairs
+ThirdStep: 
+
+ ]PZò_
+
+Width= 
+3
+ì_
+
+Length= 
+îï[ô_
+
+--- PAGE 40 ---
+40
+18. Bric kworkin Stairs
+FourthStep: 
+
+ ]PZò_
+
+Width= 
+4
+ì_
+
+Length= 
+îï[ô_
+
+--- PAGE 41 ---
+ThankYou!
+41

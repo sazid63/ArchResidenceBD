@@ -56,7 +56,11 @@ export const DHAKA_RATES_2025: RateTable = {
 
   // Services (estimated)
   "plumbing-sanitary": { unit: "kp", rateBDT: 285000, description: "Complete sanitary plumbing for 1 bathroom", uom: "each" },
-  "electrical-wiring": { unit: "m²", rateBDT: 850, description: "Electrical wiring and switchgear, concealed", uom: "m²" },
+  "electrical-wiring": { unit: "m", rateBDT: 120, description: "Copper wiring 2.5mm², PVC conduit concealed, per meter", uom: "m" },
+  "electrical-switchgear": { unit: "unit", rateBDT: 3500, description: "Distribution board + MCB switchgear per floor", uom: "unit" },
+  "electrical-fixtures": { unit: "unit", rateBDT: 850, description: "LED light fixture + fan + socket point", uom: "unit" },
+  "electrical-earth": { unit: "unit", rateBDT: 12000, description: "Earthing system, 6m copper rod + GI strip", uom: "unit" },
+  "electrical-generator": { unit: "unit", rateBDT: 150000, description: "Backup generator + ATS panel", uom: "unit" },
   "water-supply": { unit: "m²", rateBDT: 720, description: "Cold water supply system", uom: "m²" },
 
   // Structural steel
@@ -235,21 +239,82 @@ export function generateBOQ(
       assumptions: ["Estimated 1 bathroom per 2 storeys"],
     });
 
-    // Electrical
+    // ── Electrical BOQ (proper method per PWD SOR / IEC 60364) ──
+    // Wiring length: 1.8× floor area per floor (circuits + vertical risers)
+    const wiringLengthPerFloor = Math.round(floorArea * 1.8);
+    const totalWiringLength = wiringLengthPerFloor * project.stories;
     itemNo++;
     servicesItems.push({
       itemNo: `${itemNo.toString().padStart(3, "0")}`,
-      description: "Electrical wiring and switchgear (concealed)",
-      unit: "m²",
-      quantity: Math.round(floorArea * project.stories * 100) / 100,
+      description: `Copper wiring 2.5mm² PVC conduit concealed — ${project.stories} storey`,
+      unit: "m",
+      quantity: totalWiringLength,
       rateBDT: DHAKA_RATES_2025["electrical-wiring"].rateBDT,
-      amountBDT: 0,
+      amountBDT: Math.round(totalWiringLength * DHAKA_RATES_2025["electrical-wiring"].rateBDT),
       category: "Electrical",
       meshKinds: [],
+      assumptions: ["1.8× floor area per floor (circuits + vertical risers)", "2.5mm² copper, PVC conduit"],
     });
-    servicesItems[servicesItems.length - 1].amountBDT = Math.round(
-      servicesItems[servicesItems.length - 1].quantity * DHAKA_RATES_2025["electrical-wiring"].rateBDT
-    );
+
+    // Switchgear / distribution board per floor
+    itemNo++;
+    const switchgearQty = project.stories;
+    servicesItems.push({
+      itemNo: `${itemNo.toString().padStart(3, "0")}`,
+      description: `Distribution board + MCB switchgear — ${project.stories} storey`,
+      unit: "unit",
+      quantity: switchgearQty,
+      rateBDT: DHAKA_RATES_2025["electrical-switchgear"].rateBDT,
+      amountBDT: Math.round(switchgearQty * DHAKA_RATES_2025["electrical-switchgear"].rateBDT),
+      category: "Electrical",
+      meshKinds: [],
+      assumptions: ["One distribution board per floor", "8-way MCB panel"],
+    });
+
+    // Lighting + fan + socket fixtures
+    const fixtureCount = Math.round(floorArea * project.stories * 0.18);
+    itemNo++;
+    servicesItems.push({
+      itemNo: `${itemNo.toString().padStart(3, "0")}`,
+      description: `LED light fixtures + fan + socket points`,
+      unit: "unit",
+      quantity: fixtureCount,
+      rateBDT: DHAKA_RATES_2025["electrical-fixtures"].rateBDT,
+      amountBDT: Math.round(fixtureCount * DHAKA_RATES_2025["electrical-fixtures"].rateBDT),
+      category: "Electrical",
+      meshKinds: [],
+      assumptions: ["0.18 fixtures per m² of floor area", "LED + fan + socket per point"],
+    });
+
+    // Earthing system
+    itemNo++;
+    servicesItems.push({
+      itemNo: `${itemNo.toString().padStart(3, "0")}`,
+      description: "Earthing system — 6m copper rod + GI strip (BNBC Ch.13)",
+      unit: "unit",
+      quantity: 1,
+      rateBDT: DHAKA_RATES_2025["electrical-earth"].rateBDT,
+      amountBDT: DHAKA_RATES_2025["electrical-earth"].rateBDT,
+      category: "Electrical",
+      meshKinds: [],
+      assumptions: ["BNBC 2020 Chapter 13 mandatory", "6m deep copper rod + 25×3mm GI strip"],
+    });
+
+    // Backup generator (for 4+ storeys)
+    if (project.stories >= 4) {
+      itemNo++;
+      servicesItems.push({
+        itemNo: `${itemNo.toString().padStart(3, "0")}`,
+        description: "Backup diesel generator + ATS panel (BNBC 2020)",
+        unit: "unit",
+        quantity: 1,
+        rateBDT: DHAKA_RATES_2025["electrical-generator"].rateBDT,
+        amountBDT: DHAKA_RATES_2025["electrical-generator"].rateBDT,
+        category: "Electrical",
+        meshKinds: [],
+        assumptions: ["Required for buildings ≥ 4 stories per BNBC 2020", "30-50 kVA generator + ATS"],
+      });
+    }
   }
   for (const item of servicesItems) {
     items.push(item);
