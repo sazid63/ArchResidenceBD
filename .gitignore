@@ -21,6 +21,7 @@ dist/
 dist-ssr/
 docs/release-builds/
 docs/test-outputs/
+docs/user_test_drawings/
 
 # Development artifacts
 .aistudio/
@@ -31,6 +32,13 @@ docs/test-outputs/
 user_test_*
 user_test_drawings/
 scripts/audit-out/
+scripts/exporter-out/
+scripts/planning/
+scripts/boq/
+scripts/drawings/
+scripts/col-*/
+scripts/mx-*/
+scripts/rnd-*/
 models/
 
 # IDE
