@@ -1,7 +1,7 @@
 /** Quick smoke test for exporters + generator. */
-import { generateBuildingMesh } from "../src/cad/parametricBuildingGenerator.js";
-import { generateRandomBuildingProject } from "../src/engine/projectState.js";
-import { buildFreeCadMacro, buildIfcStep, validateIfcStep } from "../src/cad/exporters.js";
+import { generateBuildingMesh } from "../../src/cad/parametricBuildingGenerator.js";
+import { generateRandomBuildingProject } from "../../src/engine/projectState.js";
+import { buildFreeCadMacro, buildIfcStep, validateIfcStep } from "../../src/cad/exporters.js";
 import { mkdirSync, writeFileSync, statSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";

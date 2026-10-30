@@ -23,13 +23,13 @@ import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Import project state and generators
-import { getActiveProject, getSavedProjects, BuildingProject } from "../src/engine/projectState.js";
-import { generateBuildingMesh } from "../src/cad/parametricBuildingGenerator.js";
-import { generateBOQ, exportBOQCSV, generateBOQReport, generateBoqFromProject } from "../src/cad/boqGenerator.js";
-import { runComplianceCheck, buildComplianceContext, DeviationItem } from "../src/cad/codeCompliance.js";
-import { generateFloorPlanFromMesh, generateSection, generateElevation, exportDrawingAsSVG, exportDrawingAsDXF } from "../src/cad/drawingEngine.js";
-import { buildIfcStep, buildFreeCadMacro, ExportMeta } from "../src/cad/exporters.js";
-import type { MeshDocument } from "../src/cad/mesh.js";
+import { getActiveProject, getSavedProjects, BuildingProject } from "../../src/engine/projectState.js";
+import { generateBuildingMesh } from "../../src/cad/parametricBuildingGenerator.js";
+import { generateBOQ, exportBOQCSV, generateBOQReport, generateBoqFromProject } from "../../src/cad/boqGenerator.js";
+import { runComplianceCheck, buildComplianceContext, DeviationItem } from "../../src/cad/codeCompliance.js";
+import { generateFloorPlanFromMesh, generateSection, generateElevation, exportDrawingAsSVG, exportDrawingAsDXF } from "../../src/cad/drawingEngine.js";
+import { buildIfcStep, buildFreeCadMacro, ExportMeta } from "../../src/cad/exporters.js";
+import type { MeshDocument } from "../../src/cad/mesh.js";
 
 interface ExportOptions {
   projectId?: string;

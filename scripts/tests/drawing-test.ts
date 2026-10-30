@@ -1,6 +1,6 @@
-import { generateBuildingMesh } from "../src/cad/parametricBuildingGenerator.js";
-import { FLOORPLAN_PRESETS, RoomPartition } from "../src/data/floorplanPresets.js";
-import * as drawingEngine from "../src/cad/drawingEngine.js";
+import { generateBuildingMesh } from "../../src/cad/parametricBuildingGenerator.js";
+import { FLOORPLAN_PRESETS, RoomPartition } from "../../src/data/floorplanPresets.js";
+import * as drawingEngine from "../../src/cad/drawingEngine.js";
 const { exportDrawingAsSVG, generateFloorPlan, generateSection, generateElevation } = drawingEngine;
 import { writeFileSync, mkdirSync } from "node:fs";
 import { join, dirname } from "node:path";

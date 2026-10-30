@@ -1,5 +1,5 @@
-import { createNewProject } from "../src/engine/projectState.js";
-import { generateBuildingMesh } from "../src/cad/parametricBuildingGenerator.js";
+import { createNewProject } from "../../src/engine/projectState.js";
+import { generateBuildingMesh } from "../../src/cad/parametricBuildingGenerator.js";
 
 const p = createNewProject({ name: "Test", stories: 3, plotSize: 5, plotUnit: "katha", unitsPerFloor: 2 });
 p.customization = {

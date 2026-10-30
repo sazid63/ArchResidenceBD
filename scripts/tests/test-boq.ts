@@ -6,8 +6,8 @@
 import { writeFileSync, mkdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { generateBuildingMesh } from "../src/cad/parametricBuildingGenerator.js";
-import { generateBOQ, exportBOQCSV, generateBOQReport } from "../src/cad/boqGenerator.js";
+import { generateBuildingMesh } from "../../src/cad/parametricBuildingGenerator.js";
+import { generateBOQ, exportBOQCSV, generateBOQReport } from "../../src/cad/boqGenerator.js";
 
 const OUT = join(dirname(fileURLToPath(import.meta.url)), "audit-out", "boq");
 mkdirSync(OUT, { recursive: true });

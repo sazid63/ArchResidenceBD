@@ -6,11 +6,11 @@
 import { writeFileSync, mkdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { generateBuildingMesh } from "../src/cad/parametricBuildingGenerator.js";
-import { runComplianceCheck, buildComplianceContext } from "../src/cad/codeCompliance.js";
-import type { BuildingProject } from "../src/engine/projectState.js";
-import type { ComplianceContext } from "../src/cad/codeCompliance.js";
-import type { MeshDocument } from "../src/cad/mesh.js";
+import { generateBuildingMesh } from "../../src/cad/parametricBuildingGenerator.js";
+import { runComplianceCheck, buildComplianceContext } from "../../src/cad/codeCompliance.js";
+import type { BuildingProject } from "../../src/engine/projectState.js";
+import type { ComplianceContext } from "../../src/cad/codeCompliance.js";
+import type { MeshDocument } from "../../src/cad/mesh.js";
 
 const OUT = join(dirname(fileURLToPath(import.meta.url)), "audit-out");
 mkdirSync(OUT, { recursive: true });

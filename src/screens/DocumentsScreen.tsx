@@ -88,7 +88,7 @@ export function DocumentsScreen() {
     
     try {
       // Create permit package using batch export logic
-      const { batchExport } = await import("../../scripts/batch-export");
+      const { batchExport } = await import("../../scripts/tests/batch-export");
       await batchExport({ 
         projectId: project.id,
         formats: ["ifc", "freecad", "svg", "dxf", "csv", "json", "md"],
