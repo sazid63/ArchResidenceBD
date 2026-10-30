@@ -7,6 +7,7 @@ export function AssetsLibraryScreen() {
   const { lang } = useI18n();
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [selectedAsset, setSelectedAsset] = useState<ArchitecturalAsset>(ARCHITECTURAL_ASSETS[0]);
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   const categories = [
     { id: "all", labelEn: "All Assets", labelBn: "সকল অ্যাসেট" },
@@ -19,9 +20,17 @@ export function AssetsLibraryScreen() {
     { id: "bathroom", labelEn: "Bathroom Bases", labelBn: "বাথরুম বেস" },
   ];
 
-  const filteredAssets = activeCategory === "all"
-    ? ARCHITECTURAL_ASSETS
-    : ARCHITECTURAL_ASSETS.filter((a) => a.category === activeCategory);
+  const filteredAssets = ARCHITECTURAL_ASSETS.filter((a) => {
+    const matchesCategory = activeCategory === "all" || a.category === activeCategory;
+    const matchesSearch = searchQuery === "" || 
+      a.nameEn.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.nameBn.includes(searchQuery) ||
+      a.descriptionEn.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.descriptionBn.includes(searchQuery) ||
+      a.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      a.category.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
 
   return (
     <div className="screen">
@@ -35,16 +44,53 @@ export function AssetsLibraryScreen() {
       />
 
       {/* Category Tabs */}
-      <div className="row" style={{ gap: "8px", flexWrap: "wrap", marginBottom: "16px" }}>
-        {categories.map((cat) => (
-          <Button
-            key={cat.id}
-            variant={activeCategory === cat.id ? "primary" : "soft"}
-            onClick={() => setActiveCategory(cat.id)}
-          >
-            {lang === "bn" ? cat.labelBn : cat.labelEn}
-          </Button>
-        ))}
+      <div className="stack" style={{ gap: "12px", marginBottom: "16px" }}>
+        <div className="row-between" style={{ alignItems: "center" }}>
+          <h4 style={{ margin: 0 }}>{lang === "bn" ? "শ্রেণিবিন্যাস" : "Categories"}</h4>
+          <div className="row" style={{ gap: "8px" }}>
+            <label htmlFor="assets-search-input" className="visually-hidden">
+              {lang === "bn" ? "অ্যাসেট খুঁজুন" : "Search assets"}
+            </label>
+            <input
+              type="text"
+               id="assets-search-input"
+              placeholder={lang === "bn" ? "অ্যাসেট খুঁজুন..." : "Search assets..."}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{
+                padding: "8px 12px",
+                borderRadius: "var(--r-md)",
+                border: "1px solid var(--border)",
+                background: "var(--surface)",
+                color: "var(--ink)",
+                fontSize: "13px",
+                width: "240px",
+                outline: "none",
+              }}
+            />
+            {searchQuery && (
+              <Button
+                variant="ghost"
+                onClick={() => setSearchQuery("")}
+                style={{ padding: "4px 8px", fontSize: "11px" }}
+                title={lang === "bn" ? "সাফ করুন" : "Clear"}
+              >
+                ✕
+              </Button>
+            )}
+          </div>
+        </div>
+        <div className="row" style={{ gap: "8px", flexWrap: "wrap" }}>
+          {categories.map((cat) => (
+            <Button
+              key={cat.id}
+              variant={activeCategory === cat.id ? "primary" : "soft"}
+              onClick={() => setActiveCategory(cat.id)}
+            >
+              {lang === "bn" ? cat.labelBn : cat.labelEn}
+            </Button>
+          ))}
+        </div>
       </div>
 
       <div className="grid-2">

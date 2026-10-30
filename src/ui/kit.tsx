@@ -14,14 +14,20 @@ export function Card({
   className,
   onClick,
   style,
+  role,
+  "aria-labelledby": ariaLabelledBy,
+  "aria-describedby": ariaDescribedBy,
 }: {
   children: ReactNode;
   className?: string;
   onClick?: () => void;
   style?: React.CSSProperties;
+  role?: string;
+  "aria-labelledby"?: string;
+  "aria-describedby"?: string;
 }) {
   return (
-    <div className={cx("card", className)} onClick={onClick} style={style}>
+    <div className={cx("card", className)} onClick={onClick} style={style} role={role} aria-labelledby={ariaLabelledBy} aria-describedby={ariaDescribedBy}>
       {children}
     </div>
   );
@@ -35,6 +41,10 @@ export function Button({
   disabled,
   style,
   title,
+  "aria-label": ariaLabel,
+  "aria-describedby": ariaDescribedBy,
+  role,
+  "aria-selected": ariaSelected,
 }: {
   children: ReactNode;
   variant?: "primary" | "soft" | "ghost";
@@ -44,6 +54,10 @@ export function Button({
   disabled?: boolean;
   style?: React.CSSProperties;
   title?: string;
+  "aria-label"?: string;
+  "aria-describedby"?: string;
+  role?: string;
+  "aria-selected"?: boolean;
 }) {
   return (
     <button
@@ -53,6 +67,10 @@ export function Button({
       disabled={disabled}
       style={style}
       title={title}
+      aria-label={ariaLabel}
+      aria-describedby={ariaDescribedBy}
+      role={role}
+      aria-selected={ariaSelected}
     >
       {children}
     </button>
@@ -88,7 +106,14 @@ export function Dot({ tone }: { tone: Tone }) {
 }
 
 export function StatusDot({ status }: { status: PhaseStatus }) {
-  return <span className={cx("sdot", `sdot--${statusTone[status]}`)} title={status} />;
+  return (
+    <span
+      className={cx("sdot", `sdot--${statusTone[status]}`)}
+      title={status}
+      role="status"
+      aria-label={`Status: ${status}`}
+    />
+  );
 }
 
 export function Callout({ title, children }: { title: string; children: ReactNode }) {

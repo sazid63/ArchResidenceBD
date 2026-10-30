@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import verdictData from "../data/compliance/verdict-set.json";
 import { useI18n } from "../i18n";
 import { Badge, Button, Callout, Card, PageHeader, Stat } from "../ui/kit";
@@ -6,27 +6,32 @@ import { getActiveProject } from "../engine/projectState";
 import { generateBuildingMesh } from "../cad/parametricBuildingGenerator";
 import { runComplianceCheck, buildComplianceContext, type DeviationItem } from "../cad/codeCompliance";
 import { DEFAULT_CONCRETE, DEFAULT_STEEL_EXPORT } from "../cad/structuralEngine";
+import type { MeshDocument } from "../cad/mesh";
+import type { BuildingProject } from "../engine/projectState";
+import { useAccessibilityReader } from "../hooks/useTextToSpeech";
 
 export function ComplianceScreen() {
   const { t, lang } = useI18n();
   const [filter, setFilter] = useState<"all" | "passed" | "deviation">("all");
-  const [project] = useState(() => getActiveProject() || {
-    id: "demo", name: "Demo Building", stories: 6, plotSqm: 234, plotUnit: "katha",
-    unitsPerFloor: 2, location: "dhaka" as const, plotSize: 3.5, createdAt: "", updatedAt: "", phases: [], designStarted: true,
+  const [project] = useState<BuildingProject>(() => getActiveProject() || {
+    id: "demo", name: "Demo Building", address: "Mirpur, Dhaka", stories: 6, plotSqm: 234, plotUnit: "katha" as const,
+    unitsPerFloor: 2, plotSize: 3.5, createdAt: "", updatedAt: "", phases: [], designStarted: true,
   });
-  const [mesh, setMesh] = useState<any>(null);
+  const [mesh, setMesh] = useState<MeshDocument | null>(null);
   const [deviations, setDeviations] = useState<DeviationItem[]>([]);
-  const [summary, setSummary] = useState({ compliant: 0, deviation: 0, info: 0 });
+  const [summary, setSummary] = useState<{ compliant: number; deviation: number; info: number }>({ compliant: 0, deviation: 0, info: 0 });
+  const { readComplianceStatus, stop: stopReading, speaking } = useAccessibilityReader();
+
+  // Memoize filtered deviations to avoid re-computing on every render
+  const filtered = useMemo(() => {
+    if (filter === "passed") return deviations.filter((v) => v.pass);
+    if (filter === "deviation") return deviations.filter((v) => !v.pass);
+    return deviations;
+  }, [deviations, filter]);
 
   useEffect(() => {
     try {
-      const doc = generateBuildingMesh(project, "final", {
-        columnWidthMm: project.stories >= 6 ? 350 : 250,
-        columnDepthMm: project.stories >= 6 ? 350 : 250,
-        footingSizeMm: project.stories >= 6 ? 2000 : 1800,
-        footingDepthMm: project.stories >= 6 ? 2000 : 1600,
-        balconyDepthMm: 1200,
-      });
+      const doc = generateBuildingMesh(project, "final", project.customization);
       setMesh(doc);
       const ctx = buildComplianceContext(
         {
@@ -34,7 +39,7 @@ export function ComplianceScreen() {
           plotSqm: project.plotSqm,
           plotUnit: project.plotUnit,
           unitsPerFloor: project.unitsPerFloor,
-          location: project.location || "dhaka",
+          location: "dhaka",
         },
         doc,
         {
@@ -45,17 +50,11 @@ export function ComplianceScreen() {
       );
       const result = runComplianceCheck(ctx);
       setDeviations(result.deviations);
-      setSummary(result.summary);
+      setSummary({ compliant: result.summary.compliant, deviation: result.summary.deviation, info: result.summary.info });
     } catch (e) {
       console.error("Compliance check failed:", e);
     }
   }, [project]);
-
-  const filtered = deviations.filter((v) => {
-    if (filter === "passed") return v.pass;
-    if (filter === "deviation") return !v.pass;
-    return true;
-  });
 
   return (
     <div className="screen">
@@ -73,6 +72,22 @@ export function ComplianceScreen() {
             <Button variant={filter === "passed" ? "primary" : "soft"} onClick={() => setFilter("passed")}>
               ✓ {lang === "bn" ? "সম্মত" : "Compliant"} ({summary.compliant})
             </Button>
+            <Button 
+              variant="ghost" 
+              onClick={() => {
+                if (speaking) {
+                  stopReading();
+                } else {
+                  deviations.forEach(item => {
+                    readComplianceStatus(item.pass ? 'pass' : 'fail', `${item.title}. ${item.message}`);
+                  });
+                }
+              }}
+              style={{ padding: '4px 8px', fontSize: '11px' }}
+              title={speaking ? (lang === 'bn' ? 'পড়া বন্ধ করুন' : 'Stop reading') : (lang === 'bn' ? 'সব পড়ে শোনান' : 'Read all')}
+            >
+              {speaking ? '🔇' : '🔊'} {speaking ? (lang === 'bn' ? 'বন্ধ' : 'Stop') : (lang === 'bn' ? 'সব পড়ুন' : 'Read All')}
+            </Button>
           </div>
         }
       />
@@ -87,8 +102,8 @@ export function ComplianceScreen() {
 
       <div className="row" style={{ gap: "16px", marginBottom: "16px" }}>
         <Stat label={lang === "bn" ? "মোট বিধি" : "Total Rules"} value={String(deviations.length)} />
-        <Stat label={lang === "bn" ? "সম্মত" : "Compliant"} value={String(summary.compliant)} tone="sage" />
-        <Stat label={lang === "bn" ? "অমিল" : "Deviations"} value={String(summary.deviation)} tone={summary.deviation > 0 ? "danger" : "sage"} />
+        <Stat label={lang === "bn" ? "সম্মত" : "Compliant"} value={String(summary.compliant)} />
+        <Stat label={lang === "bn" ? "অমিল" : "Deviations"} value={String(summary.deviation)} />
         <Stat label={lang === "bn" ? "তথ্য" : "Info"} value={String(summary.info)} />
       </div>
 
@@ -101,7 +116,7 @@ export function ComplianceScreen() {
         )}
         {filtered.map((item, idx) => {
           const isPassed = item.pass;
-          const severityColor = item.severity === "critical" ? "danger" : item.severity === "major" ? "amber" : "neutral";
+          const severityColor = item.severity === "critical" ? "blush" : item.severity === "major" ? "amber" : "neutral";
           return (
             <Card key={idx} className="stack">
               <div className="row-between">
@@ -109,9 +124,19 @@ export function ComplianceScreen() {
                   <h4 style={{ margin: "0 0 4px 0" }}>{item.title}</h4>
                   <span className="faint small font-mono">{item.clause} · {item.category}</span>
                 </div>
-                <Badge tone={isPassed ? "sage" : severityColor}>
-                  {isPassed ? "✓ PASS" : "⚠ FAIL"}
-                </Badge>
+                <div className="row" style={{ gap: "8px", alignItems: "center" }}>
+                  <Badge tone={isPassed ? "sage" : severityColor}>
+                    {isPassed ? "✓ PASS" : "⚠ FAIL"}
+                  </Badge>
+                  <Button
+                    variant="ghost"
+                    onClick={() => readComplianceStatus(isPassed ? 'pass' : 'fail', `${item.title}. ${item.message}`)}
+                    title={lang === 'bn' ? 'পড়ে শোনান' : 'Read aloud'}
+                    style={{ padding: '4px 8px', fontSize: '11px', minWidth: 'auto' }}
+                  >
+                    🔊
+                  </Button>
+                </div>
               </div>
               <p style={{ margin: "8px 0", fontSize: "14px", lineHeight: "1.5" }}>{item.message}</p>
               {!isPassed && item.recommendation && (
@@ -148,7 +173,7 @@ export function ComplianceScreen() {
           style={{ marginTop: "8px" }}
           onClick={() => {
             const text = `${lang === "bn" ? "কোড কমপ্লায়েন্স প্রতিবেদন" : "Code Compliance Report"} — ${project.name}\nGenerated: ${new Date().toISOString()}\n\n` +
-              deviations.map(d => `${d.pass ? "✓" : "✗"} [${d.severity.toUpperCase()}] ${d.id}: ${d.message}`).join("\n");
+              deviations.map(d => `${d.pass ? "✓" : "✗"} [${d.severity.toUpperCase()}] ${d.ruleId}: ${d.message}`).join("\n");
             const blob = new Blob([text], { type: "text/plain" });
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");

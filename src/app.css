@@ -8,10 +8,11 @@
   flex: 1;
   min-width: 0;
   overflow-y: auto;
+  background: var(--paper);
 }
 
 .screen {
-  max-width: 1080px;
+  max-width: 1180px;
   margin: 0 auto;
   padding: var(--s-8) var(--s-8) var(--s-12);
   display: flex;
@@ -24,6 +25,9 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--s-4);
+  padding-bottom: var(--s-4);
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
+  margin-bottom: var(--s-2);
 }
 .page-head h1 {
   font-size: var(--fs-3xl);
@@ -31,6 +35,7 @@
 .page-head .sub {
   color: var(--ink-soft);
   margin-top: 2px;
+  font-size: var(--fs-sm);
 }
 
 .row {
@@ -236,11 +241,30 @@
   font-weight: 700;
 }
 
-/* BOQ table */
+/* BOQ table — zebra striping + sticky header + hover row lift */
 .table {
   width: 100%;
   border-collapse: collapse;
   font-size: var(--fs-sm);
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
+}
+.table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--surface-2);
+  color: var(--ink);
+  font-weight: 700;
+  font-size: var(--fs-xs);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  padding: 10px 12px;
+  border-bottom: 2px solid var(--line);
+  white-space: nowrap;
 }
 .table th {
   text-align: left;
@@ -250,14 +274,31 @@
   border-bottom: 1px solid var(--line);
 }
 .table td {
-  padding: 8px 10px;
+  padding: 10px 12px;
   border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+  vertical-align: middle;
 }
-.table tr:last-child td {
+.table tbody tr {
+  transition: background var(--dur) var(--ease);
+}
+.table tbody tr:nth-child(even) {
+  background: color-mix(in srgb, var(--primary) 3%, transparent);
+}
+.table tbody tr:nth-child(odd) {
+  background: var(--surface);
+}
+.table tbody tr:hover {
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+.table tbody tr:last-child td {
   border-bottom: none;
+}
+.table .num {
+  font-variant-numeric: tabular-nums;
 }
 .subtotal td {
   font-weight: 600;
+  background: color-mix(in srgb, var(--primary) 6%, transparent);
 }
 .grand {
   display: flex;
@@ -274,6 +315,58 @@
   font-size: var(--fs-xl);
   font-weight: 700;
   color: var(--primary-ink);
+}
+
+/* ---- Empty & loading states ---- */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-3);
+  padding: var(--s-8) var(--s-6);
+  text-align: center;
+  color: var(--ink-soft);
+  border-radius: var(--r-lg);
+  background: var(--surface-2);
+  border: 1px dashed color-mix(in srgb, var(--line) 45%, transparent);
+}
+.empty-icon {
+  font-size: var(--fs-2xl);
+  opacity: 0.5;
+}
+.empty-text {
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+}
+.empty-action {
+  margin-top: var(--s-2);
+}
+
+/* Loading spinner */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid color-mix(in srgb, var(--primary) 30%, transparent);
+  border-top-color: var(--primary);
+  border-radius: var(--r-pill);
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+  flex: none;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 @media (max-width: 980px) {

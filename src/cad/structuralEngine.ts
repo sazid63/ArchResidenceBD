@@ -167,11 +167,13 @@ export function analyzeBeam(
     linkSpacing = Math.min(Math.max(s, 100), 300); // min 100mm, max 300mm per BNBC
   }
   
-  // Deflection check (simplified: delta = 5wL^4 / 384EI)
-  const E = concrete.es * 1000; // MPa to kN/m² (wrong, should be N/mm²)
-  const I = (section.width * Math.pow(section.depth, 3)) / 12; // mm⁴
-  const w_Nmm = wFactored * 1000 / L; // convert to N/mm (approx)
-  const delta = (5 * w_Nmm * Math.pow(L * 1000, 4)) / (384 * E * 1000 * I / 1e6); // mm
+  // Deflection check (simplified: delta = 5wL^4 / 384EI, result in mm)
+  // E in N/mm² (MPa), I in mm⁴, w in N/mm → δ in mm
+  const E_nmm2 = concrete.es; // N/mm² (MPa)
+  const I_mm4 = (section.width * Math.pow(section.depth, 3)) / 12; // mm⁴
+  const w_Nmm = wFactored; // kN/m → N/mm is same numeric value (×1000/1000)
+  const L_mm = L * 1000; // mm
+  const delta = (5 * w_Nmm * Math.pow(L_mm, 4)) / (384 * E_nmm2 * I_mm4); // mm
   
   // Allowable deflection: L/250 for live load, L/360 for total
   const allowableLive = (L * 1000) / 250;
@@ -262,9 +264,10 @@ export function analyzeColumn(
   const secondOrderEffect = isSlender && utilization > 0.4;
   
   // Lap splice check (developed bars only need splicing if not fully anchored)
-  // Development length: ld = (fy * db) / (4 * sqrt(fc') ) per ACI 318
-  const ld = (DEFAULT_STEEL.fy * section.mainBarDia) / (4 * Math.sqrt(concrete.fck));
-  const lapLength = Math.max(ld, 30 * section.mainBarDia); // min 30 diameters
+  // Development length per ACI 318-19 Eq 25.4.2.3: ld = (fy * db) / (25 * λ * √fc')
+  // For standard deformed bars: λ = 1.0, ψ factors = 1.0
+  const ld = (DEFAULT_STEEL.fy * section.mainBarDia) / (25 * Math.sqrt(concrete.fck));
+  const lapLength = Math.max(ld, 30 * section.mainBarDia); // min 30 diameters per ACI 318-19 §25.4.4
   
   // Lap splice required if column height > lapLength (in mm)
   const lapSpliceRequired = L * 1000 > lapLength;
@@ -314,8 +317,9 @@ export function designFooting(
   const Pu = axialLoad; // factored load
   const qa = soil.ad;    // allowable bearing capacity (kN/m²)
   
-  // Required area
-  const A_req = Pu / qa; // m²
+  // Required area with built-in safety factor (target SF ≥ 2.5)
+  const targetSF = 2.5;
+  const A_req = Pu / qa * targetSF; // m² (sized for SF ≥ 2.5)
   const side = Math.sqrt(A_req); // square footing
   const footingWidth = Math.max(side * 1000, columnWidth + 600); // min 600mm projection each side
   
@@ -346,10 +350,11 @@ export function designFooting(
   const spacing = barArea * 1000 / As_provided;
   
   // Settlement estimate (Terzaghi simplified)
-  const settlement = (Pu / qa) * 0.5; // very rough: 0.5mm per m² of loaded area (conservative for stiff soil)
-  
-  // Bearing capacity utilization
-  const bearingUtil = Pu / (qa * footingWidth * footingWidth);
+  const settlement = Math.min((Pu / qa) * 0.5, 50); // cap at 50mm for stiff soil (mm)
+
+  // Bearing capacity utilization — footingWidth is in mm, convert to m for the area calc
+  const footingWidthM = footingWidth / 1000; // m
+  const bearingUtil = Pu / (qa * footingWidthM * footingWidthM);
   
   return {
     footingWidth: Math.round(footingWidth / 100) / 10,
@@ -359,7 +364,7 @@ export function designFooting(
     matFootingRequired: shearUtil > 1.0,
     settlementEstimate: Math.round(settlement * 10) / 10,
     bearingCapacityUtil: Math.round(bearingUtil * 100) / 100,
-    safetyFactor: Math.round((qa * footingWidth * footingWidth / Pu) * 100) / 100,
+    safetyFactor: Math.round((qa * footingWidthM * footingWidthM / Pu) * 100) / 100,
   };
 }
 
@@ -380,36 +385,54 @@ export function seismicAnalysis(
   totalWeight: number,      // kN (seismic weight)
   heights: number[],        // m above base for each story
   params: BNBCParams,
-  storyStiffness: number[]  // kN/mm per story
+  storyStiffness: number[], // kN/mm per story
+  storyWeights?: number[]   // kN per story (optional, defaults to equal distribution)
 ): SeismicAnalysis {
   const H = heights[heights.length - 1]; // total height
   const W = totalWeight;
   
-  // Fundamental period (UBC/BNBC empirical)
-  // Ta = 0.09 * H / sqrt(D) where D is base dimension (assume square)
-  const D = Math.sqrt(W / 5); // approximate footprint from weight (assume 5 kN/m² dead load)
-  const Ta = 0.09 * H / Math.sqrt(D);
+  // Default: equal weight per story if not provided
+  const wi = storyWeights && storyWeights.length === heights.length
+    ? storyWeights
+    : Array(heights.length).fill(W / heights.length);
+
+  // Fundamental period per BNBC 2020 Eq 2.5.1: Ta = Ct × h^n
+  // For RC moment-resisting frames: Ct = 0.07, n = 0.75
+  const Ct = 0.07;
+  const n = 0.75;
+  const Ta = Ct * Math.pow(H, n);
   
-  // Response spectrum acceleration (BNBC 2020 Fig 2.5.1)
-  // For Zone 3, short period Sa/a_g = 2.5 * z * I * S
-  const Sa_over_ag = 2.5 * params.zFactor * params.impFactor;
-  const V = (Sa_over_ag * W) / params.rFactor; // base shear
+  // Response spectrum acceleration (BNBC 2020 Fig 2.5.1 / Table 2.5.1)
+  // Sa/g = (2.5 * Z * I * S) / R for short periods, but capped by long-period plateau
+  // S = soil factor (1.0 for Type D stiff soil)
+  const S = 1.0; // Type D soil
+  const Sa_over_ag = 2.5 * params.zFactor * params.impFactor * S;
+  const V = (Sa_over_ag * W) / params.rFactor; // base shear per BNBC Eq 2.5.2
   
-  // Distribute lateral force to each story
+  // Distribute lateral force to each story per BNBC 2020 Eq 2.5.4
+  // Fi = V * (wi * hi) / Σ(wj * hj)
+  const whSum = wi.reduce((sum, w, i) => sum + w * heights[i], 0);
+  const storyForces = wi.map((w, i) => V * (w * heights[i]) / whSum);
+  
+  // Story shear (cumulative from top down)
   const storyShear: number[] = [];
   let cumulativeForce = 0;
-  for (let i = 0; i < heights.length; i++) {
-    const Fi = V * (W * heights[i]) / (W * H); // proportional to height
-    cumulativeForce += Fi;
-    storyShear.push(Math.round(cumulativeForce * 100) / 100);
+  for (let i = heights.length - 1; i >= 0; i--) {
+    cumulativeForce += storyForces[i];
+    storyShear.unshift(Math.round(cumulativeForce * 100) / 100);
   }
   
-  // Story drift calculation (simplified: delta = V / (k * n))
-  const maxDrift = storyShear[storyShear.length - 1] / (storyStiffness[storyStiffness.length - 1] * 1000);
-  const allowableDrift = (H * 1000) / 500; // H/500 per BNBC
+  // Story drift calculation: δi = Vi / ki (story shear / story stiffness)
+  const storyDrift = storyShear.map((V_i, i) => 
+    Math.round((V_i / storyStiffness[i] / 1000) * 100) / 100
+  );
   
-  // Total displacement at top
-  const displacement = maxDrift * heights.length;
+  // Max drift is at the top story
+  const maxDrift = storyDrift[storyDrift.length - 1];
+  const allowableDrift = (H * 1000) / 500; // H/500 per BNBC §7.5.1
+  
+  // Total displacement at top (sum of story drifts)
+  const displacement = storyDrift.reduce((sum, d) => sum + d, 0);
   
   return {
     baseShear: Math.round(V * 100) / 100,

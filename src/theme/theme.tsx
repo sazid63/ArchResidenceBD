@@ -1,30 +1,45 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
-type Theme = "light" | "dark";
+type Theme = "light" | "dark" | "high-contrast";
 
 interface ThemeCtx {
   theme: Theme;
   toggle: () => void;
+  setTheme: (t: Theme) => void;
 }
 
 const Ctx = createContext<ThemeCtx | null>(null);
 
 const KEY = "archres-theme";
+const HC_KEY = "archres-high-contrast";
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem(KEY);
+    const saved = localStorage.getItem(KEY) as Theme | null;
+    const hc = localStorage.getItem(HC_KEY) === "true";
+    if (hc) return "high-contrast";
     return saved === "dark" ? "dark" : "light";
   });
 
   useEffect(() => {
-    document.documentElement.dataset.theme = theme;
-    localStorage.setItem(KEY, theme);
+    const isHC = theme === "high-contrast";
+    document.documentElement.dataset.theme = isHC ? "dark" : theme;
+    document.documentElement.dataset.highContrast = isHC ? "true" : "false";
+    localStorage.setItem(KEY, isHC ? "dark" : theme);
+    localStorage.setItem(HC_KEY, isHC ? "true" : "false");
   }, [theme]);
 
+  const toggle = () => {
+    setTheme((t) => {
+      if (t === "light") return "dark";
+      if (t === "dark") return "high-contrast";
+      return "light";
+    });
+  };
+
   const value = useMemo(
-    () => ({ theme, toggle: () => setTheme((t) => (t === "light" ? "dark" : "light")) }),
+    () => ({ theme, toggle, setTheme }),
     [theme],
   );
 

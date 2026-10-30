@@ -198,8 +198,8 @@ export function FleetScreen() {
           <Card className="stack">
             <h3>Test Model: {activeModel.name}</h3>
             <div className="field">
-              <label className="field-label">Test Prompt (Bangla or English)</label>
-              <textarea
+              <label htmlFor="fleet-test-prompt" className="field-label">Test Prompt (Bangla or English)</label>
+              <textarea id="fleet-test-prompt"
                 className="input"
                 rows={3}
                 value={testPrompt}
@@ -270,8 +270,8 @@ export function FleetScreen() {
             </div>
 
             <div className="field">
-              <label className="field-label">API Key</label>
-              <input
+              <label htmlFor="fleet-api-key" className="field-label">API Key</label>
+              <input id="fleet-api-key"
                 type="password"
                 className="input"
                 placeholder={`Enter your ${cloudProvider.toUpperCase()} API key...`}

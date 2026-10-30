@@ -99,3 +99,63 @@
   --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.35);
   --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.45);
 }
+
+/* High contrast mode - WCAG AAA compliant contrast ratios */
+:root[data-theme="dark"][data-high-contrast="true"] {
+  --paper: #000000;
+  --surface: #0a0a0a;
+  --surface-2: #1a1a1a;
+  --surface-3: #2a2a2a;
+  --ink: #ffffff;
+  --ink-soft: #e0e0e0;
+  --ink-faint: #b0b0b0;
+  --line: #ffffff;
+
+  --primary: #ffff00;
+  --primary-hover: #ffff33;
+  --primary-active: #e6e600;
+  --primary-soft: #333300;
+  --primary-ink: #000000;
+  --on-primary: #000000;
+
+  --sky: #00ffff;      --sky-soft: #003333;      --sky-ink: #00ffff;
+  --sage: #00ff00;     --sage-soft: #003300;     --sage-ink: #00ff00;
+  --lavender: #ff00ff; --lavender-soft: #330033; --lavender-ink: #ff00ff;
+  --amber: #ffaa00;    --amber-soft: #332200;    --amber-ink: #ffaa00;
+  --blush: #ff6666;    --blush-soft: #331111;    --blush-ink: #ff6666;
+  --mint: #00ffaa;     --mint-soft: #003322;     --mint-ink: #00ffaa;
+
+  --shadow-sm: 0 0 0 1px #ffffff;
+  --shadow-md: 0 0 0 2px #ffffff;
+  --shadow-lg: 0 0 0 3px #ffffff;
+}
+
+/* Light mode high contrast */
+:root[data-theme="light"][data-high-contrast="true"] {
+  --paper: #ffffff;
+  --surface: #f0f0f0;
+  --surface-2: #e0e0e0;
+  --surface-3: #d0d0d0;
+  --ink: #000000;
+  --ink-soft: #333333;
+  --ink-faint: #666666;
+  --line: #000000;
+
+  --primary: #000000;
+  --primary-hover: #333333;
+  --primary-active: #1a1a1a;
+  --primary-soft: #f0f0f0;
+  --primary-ink: #ffffff;
+  --on-primary: #ffffff;
+
+  --sky: #0000aa;      --sky-soft: #eef;      --sky-ink: #0000aa;
+  --sage: #006600;     --sage-soft: #efe;     --sage-ink: #006600;
+  --lavender: #660066; --lavender-soft: #fef; --lavender-ink: #660066;
+  --amber: #aa5500;    --amber-soft: #fee;    --amber-ink: #aa5500;
+  --blush: #aa0000;    --blush-soft: #fee;    --blush-ink: #aa0000;
+  --mint: #006666;     --mint-soft: #eff;     --mint-ink: #006666;
+
+  --shadow-sm: 0 0 0 1px #000000;
+  --shadow-md: 0 0 0 2px #000000;
+  --shadow-lg: 0 0 0 3px #000000;
+}

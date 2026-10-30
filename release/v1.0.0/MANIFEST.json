@@ -1,0 +1,36 @@
+{
+  "version": "1.0.0",
+  "releaseDate": "2026-10-29",
+  "platform": "windows-x64",
+  "buildTools": {
+    "tauri": "2.12.5",
+    "vite": "8.3.5",
+    "rustc": "1.99.1",
+    "node": "24.19.0"
+  },
+  "artifacts": {
+    "msi": {
+      "filename": "ArchResidenceBD_1.0.0_x64_en-US.msi",
+      "size": 4509696,
+      "sha256": "3DDDDB12410FF4230D4EE99DA1F28FBACAA4352D32442CFB54C87BD54B73451F"
+    },
+    "exe": {
+      "filename": "ArchResidenceBD_1.0.0_x64-setup.exe",
+      "size": 2813269,
+      "sha256": "FDF5D849A3EAABEBE1F0C58C4AC80023864FE9EF533ED1AA589D37B39CDCBA73"
+    }
+  },
+  "checksums": {
+    "algorithm": "SHA256",
+    "source": "Get-FileHash -Algorithm SHA256"
+  },
+  "features": [
+    "phases-1-4-core-flow",
+    "daylight-analysis-bnbc-4.4",
+    "unit-mix-optimizer",
+    "column-grid-optimizer",
+    "bnbc-compliance-audit",
+    "bengali-i18n",
+    "tauri-desktop-packaging"
+  ]
+}

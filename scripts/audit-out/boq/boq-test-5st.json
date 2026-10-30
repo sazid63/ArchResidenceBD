@@ -1,0 +1,315 @@
+{
+  "projectId": "boq-test-5st",
+  "projectName": "5-Storey Residential BOQ Test",
+  "location": "Dhaka, Bangladesh",
+  "generatedAt": "2026-10-28T20:44:19.037Z",
+  "currency": "BDT",
+  "rateTable": "DHAKA_RATES_2025",
+  "items": [
+    {
+      "itemNo": "001",
+      "description": "Footing — RCC footing M25, including formwork and excavation",
+      "unit": "m³",
+      "quantity": 17.496,
+      "rateBDT": 9000,
+      "amountBDT": 157464,
+      "category": "Concrete Works",
+      "meshKinds": [
+        "footing"
+      ],
+      "assumptions": [
+        "Volume: 17.496 m³",
+        "Objects: 12"
+      ]
+    },
+    {
+      "itemNo": "002",
+      "description": "Column — RCC columns and beams, M25, including formwork",
+      "unit": "m³",
+      "quantity": 16.702,
+      "rateBDT": 10500,
+      "amountBDT": 175376,
+      "category": "Concrete Works",
+      "meshKinds": [
+        "column"
+      ],
+      "assumptions": [
+        "Volume: 16.702 m³",
+        "Objects: 72"
+      ]
+    },
+    {
+      "itemNo": "003",
+      "description": "Beam — RCC columns and beams, M25, including formwork",
+      "unit": "m³",
+      "quantity": 64.376,
+      "rateBDT": 10500,
+      "amountBDT": 675952,
+      "category": "Concrete Works",
+      "meshKinds": [
+        "beam"
+      ],
+      "assumptions": [
+        "Volume: 64.376 m³",
+        "Objects: 228"
+      ]
+    },
+    {
+      "itemNo": "004",
+      "description": "Slab — Ready-mix concrete M25 grade, including formwork and placement",
+      "unit": "m³",
+      "quantity": 134.477,
+      "rateBDT": 12500,
+      "amountBDT": 1680964,
+      "category": "Concrete Works",
+      "meshKinds": [
+        "slab"
+      ],
+      "assumptions": [
+        "Volume: 134.477 m³",
+        "Objects: 9"
+      ]
+    },
+    {
+      "itemNo": "005",
+      "description": "Canopy — Ready-mix concrete M25 grade, including formwork and placement",
+      "unit": "m³",
+      "quantity": 1.834,
+      "rateBDT": 12500,
+      "amountBDT": 22928,
+      "category": "Concrete Works",
+      "meshKinds": [
+        "canopy"
+      ],
+      "assumptions": [
+        "Volume: 1.834 m³",
+        "Objects: 6"
+      ]
+    },
+    {
+      "itemNo": "006",
+      "description": "Tank — Ready-mix concrete M25 grade, including formwork and placement",
+      "unit": "m³",
+      "quantity": 65.355,
+      "rateBDT": 12500,
+      "amountBDT": 816940,
+      "category": "Concrete Works",
+      "meshKinds": [
+        "tank"
+      ],
+      "assumptions": [
+        "Volume: 65.355 m³",
+        "Objects: 7"
+      ]
+    },
+    {
+      "itemNo": "007",
+      "description": "Stair — RCC dog-legged staircase, M25, including formwork and railing",
+      "unit": "m³",
+      "quantity": 71.955,
+      "rateBDT": 11500,
+      "amountBDT": 827484,
+      "category": "Concrete Works",
+      "meshKinds": [
+        "stair"
+      ],
+      "assumptions": [
+        "Volume: 71.955 m³",
+        "Objects: 17"
+      ]
+    },
+    {
+      "itemNo": "008",
+      "description": "Wall — Fired clay brick wall 136mm thick, CM 1:6",
+      "unit": "m²",
+      "quantity": 175.428,
+      "rateBDT": 4200,
+      "amountBDT": 736796,
+      "category": "Masonry Works",
+      "meshKinds": [
+        "wall",
+        "parapet_rear",
+        "parapet_front",
+        "parapet_left",
+        "parapet_right"
+      ],
+      "assumptions": [
+        "Volume: 175.428 m²",
+        "Objects: 261"
+      ]
+    },
+    {
+      "itemNo": "009",
+      "description": "Partition — Partition wall, brick 102.5mm, CM 1:6",
+      "unit": "m²",
+      "quantity": 68.139,
+      "rateBDT": 2200,
+      "amountBDT": 149905,
+      "category": "Masonry Works",
+      "meshKinds": [
+        "partition"
+      ],
+      "assumptions": [
+        "Volume: 68.139 m²",
+        "Objects: 245"
+      ]
+    },
+    {
+      "itemNo": "010",
+      "description": "Window — Wooden window 800x1500mm, single shutter",
+      "unit": "m²",
+      "quantity": 9.198,
+      "rateBDT": 3800,
+      "amountBDT": 34954,
+      "category": "Joinery",
+      "meshKinds": [
+        "window"
+      ],
+      "assumptions": [
+        "Volume: 9.198 m²",
+        "Objects: 58"
+      ]
+    },
+    {
+      "itemNo": "011",
+      "description": "Louver — Frosted louver window 600x1600mm",
+      "unit": "m²",
+      "quantity": 0.014,
+      "rateBDT": 3200,
+      "amountBDT": 44,
+      "category": "Joinery",
+      "meshKinds": [
+        "louver"
+      ],
+      "assumptions": [
+        "Volume: 0.014 m²",
+        "Objects: 3"
+      ]
+    },
+    {
+      "itemNo": "012",
+      "description": "Door — Interior door, flush shutter, timber frame",
+      "unit": "m²",
+      "quantity": 6.151,
+      "rateBDT": 3200,
+      "amountBDT": 19682,
+      "category": "Joinery",
+      "meshKinds": [
+        "door"
+      ],
+      "assumptions": [
+        "Volume: 6.151 m²",
+        "Objects: 46"
+      ]
+    },
+    {
+      "itemNo": "013",
+      "description": "Bath — Vitrified floor tiles 600x600mm for wet areas",
+      "unit": "m²",
+      "quantity": 1.408,
+      "rateBDT": 1850,
+      "amountBDT": 2604,
+      "category": "Finishes",
+      "meshKinds": [
+        "bath"
+      ],
+      "assumptions": [
+        "Volume: 1.408 m²",
+        "Objects: 13"
+      ]
+    },
+    {
+      "itemNo": "014",
+      "description": "Kitchen — Ceramic floor tiles 300x300mm, white cement grout",
+      "unit": "m²",
+      "quantity": 0.968,
+      "rateBDT": 1200,
+      "amountBDT": 1162,
+      "category": "Finishes",
+      "meshKinds": [
+        "kitchen"
+      ],
+      "assumptions": [
+        "Volume: 0.968 m²",
+        "Objects: 16"
+      ]
+    },
+    {
+      "itemNo": "015",
+      "description": "Sanitary plumbing — 5 storey(s), 3 bathrooms",
+      "unit": "kp",
+      "quantity": 3,
+      "rateBDT": 285000,
+      "amountBDT": 855000,
+      "category": "Plumbing & Sanitary",
+      "meshKinds": [],
+      "assumptions": [
+        "Estimated 1 bathroom per 2 storeys"
+      ]
+    },
+    {
+      "itemNo": "016",
+      "description": "Electrical wiring and switchgear (concealed)",
+      "unit": "m²",
+      "quantity": 819.35,
+      "rateBDT": 850,
+      "amountBDT": 696448,
+      "category": "Electrical",
+      "meshKinds": []
+    },
+    {
+      "itemNo": "017",
+      "description": "Railing — TMT reinforcement bars Fe415, 16mm diameter",
+      "unit": "ton",
+      "quantity": 2.555,
+      "rateBDT": 95000,
+      "amountBDT": 242723,
+      "category": "Metal Works",
+      "meshKinds": [
+        "railing",
+        "balcony"
+      ],
+      "assumptions": [
+        "Volume: 2.555 ton",
+        "Objects: 59"
+      ]
+    }
+  ],
+  "totals": {
+    "totalItems": 17,
+    "subtotalBDT": 7096426,
+    "taxRate": 0.05,
+    "taxBDT": 354821,
+    "totalBDT": 7451247,
+    "totalsByCategory": {
+      "Concrete Works": {
+        "quantity": 372.1966701,
+        "amount": 4357109.39325
+      },
+      "Masonry Works": {
+        "quantity": 243.56627300000008,
+        "amount": 886701.0466000004
+      },
+      "Joinery": {
+        "quantity": 15.362819500000002,
+        "amount": 54680.08160000001
+      },
+      "Finishes": {
+        "quantity": 2.3758456,
+        "amount": 3765.97136
+      },
+      "Metal Works": {
+        "quantity": 2.554979999999999,
+        "amount": 242723.09999999992
+      },
+      "Plumbing & Sanitary": {
+        "quantity": 3,
+        "amount": 855000
+      },
+      "Electrical": {
+        "quantity": 819.35,
+        "amount": 696448
+      }
+    }
+  }
+}

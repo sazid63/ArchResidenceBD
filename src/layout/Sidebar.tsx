@@ -1,33 +1,28 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useI18n } from "../i18n";
 import { useTheme } from "../theme/theme";
-import { cx, Badge } from "../ui/kit";
+import { cx, Badge, Dot } from "../ui/kit";
 import {
   BuildingProject,
-  getActiveProject,
   areAllPhasesCompleted,
   clearAllProjects,
 } from "../engine/projectState";
+import { useActiveProject, useProject } from "../context/ProjectContext";
 import "./sidebar.css";
 
 interface Props {
   active: string;
   onNavigate: (id: string) => void;
-  projectVersion?: number;
 }
 
-export function Sidebar({ active, onNavigate, projectVersion }: Props) {
+export function Sidebar({ active, onNavigate }: Props) {
   const { t, lang, setLang } = useI18n();
   const { theme, toggle } = useTheme();
+  const project = useActiveProject();
+  const { refreshProject } = useProject();
 
-  const [project, setProject] = useState<BuildingProject | null>(() => getActiveProject());
   const [openPhases, setOpenPhases] = useState(true);
   const [openDesign, setOpenDesign] = useState(true);
-
-  // Sync project state on version changes or storage updates
-  useEffect(() => {
-    setProject(getActiveProject());
-  }, [projectVersion, active]);
 
   const allPhasesDone = project ? areAllPhasesCompleted(project) : false;
   const designUnlocked = project ? (project.designStarted || allPhasesDone) : false;
@@ -39,7 +34,7 @@ export function Sidebar({ active, onNavigate, projectVersion }: Props) {
   const handleReset = () => {
     if (window.confirm("Are you sure you want to clear the project and start fresh?")) {
       clearAllProjects();
-      setProject(null);
+      refreshProject();
       onNavigate("setup");
     }
   };
@@ -63,7 +58,7 @@ export function Sidebar({ active, onNavigate, projectVersion }: Props) {
 
         {/* Active Project Card */}
         {project ? (
-          <div className="proj-head" style={{ marginBottom: "12px" }}>
+          <div className="proj-head">
             <span className="proj-badge">
               {project.name.slice(0, 2).toUpperCase() || "BD"}
             </span>
@@ -76,24 +71,15 @@ export function Sidebar({ active, onNavigate, projectVersion }: Props) {
             </div>
             <button
               type="button"
-              className="button button--ghost small"
+              className="button button--ghost small nav-reset"
               onClick={handleReset}
               title="Reset & Delete Project"
-              style={{ padding: "2px 6px", fontSize: "11px", opacity: 0.7 }}
             >
               ✕
             </button>
           </div>
         ) : (
-          <div
-            style={{
-              padding: "12px",
-              background: "var(--surface-sunken)",
-              borderRadius: "8px",
-              marginBottom: "12px",
-              textAlign: "center",
-            }}
-          >
+          <div className="no-project-placeholder">
             <div className="small muted">
               {lang === "bn" ? "কোনো প্রকল্প তৈরি করা হয়নি" : "No active project"}
             </div>
@@ -101,7 +87,6 @@ export function Sidebar({ active, onNavigate, projectVersion }: Props) {
               type="button"
               className="button button--primary small"
               onClick={handleNewProject}
-              style={{ marginTop: "8px", width: "100%" }}
             >
               {lang === "bn" ? "নতুন প্রকল্প শুরু করুন" : "Start New Project"}
             </button>
@@ -140,26 +125,12 @@ export function Sidebar({ active, onNavigate, projectVersion }: Props) {
                       className={cx("nav-item", "child", isActive && "active")}
                       onClick={() => onNavigate(`phase:${phase.id}`)}
                     >
-                      <span
-                        style={{
-                          width: "8px",
-                          height: "8px",
-                          borderRadius: "50%",
-                          marginRight: "6px",
-                          background: isDone
-                            ? "var(--tone-sage, #10b981)"
-                            : isInProgress
-                              ? "var(--tone-amber, #f59e0b)"
-                              : "var(--border, #cbd5e1)",
-                        }}
-                      />
+                      <Dot tone={isDone ? "sage" : isInProgress ? "amber" : "neutral"} />
                       <span className="grow ellipsis">
                         {lang === "bn" ? phase.nameBn : phase.nameEn}
                       </span>
                       {isDone ? (
-                        <span style={{ color: "var(--tone-sage, #10b981)", fontSize: "12px" }}>
-                          ✓
-                        </span>
+                        <span className="phase-check">✓</span>
                       ) : null}
                     </button>
                   );
@@ -222,19 +193,10 @@ export function Sidebar({ active, onNavigate, projectVersion }: Props) {
                     {/* Combined Master Federated 3D Model */}
                     <button
                       type="button"
-                      className={cx("nav-item", "child", active === "design:final" && "active")}
+                      className={cx("nav-item", "child", "nav-master", active === "design:final" && "active")}
                       onClick={() => onNavigate("design:final")}
-                      style={{ fontWeight: 600 }}
                     >
-                      <span
-                        style={{
-                          width: "8px",
-                          height: "8px",
-                          borderRadius: "50%",
-                          marginRight: "6px",
-                          background: "var(--primary, #3b82f6)",
-                        }}
-                      />
+                      <Dot tone="primary" />
                       <span className="grow ellipsis">
                         {lang === "bn" ? "সম্পূর্ণ ৩D মডেল (মাস্টার)" : "Combined Master 3D"}
                       </span>
@@ -278,7 +240,69 @@ export function Sidebar({ active, onNavigate, projectVersion }: Props) {
           <span className="grow">{t("compliance")}</span>
         </button>
 
-        {/* 5. DOCUMENTS & EXPORTS */}
+        {/* 5. FORMWORK & SCAFFOLD */}
+        <button
+          type="button"
+          className={cx("nav-item", active === "formwork" && "active")}
+          onClick={() => onNavigate("formwork")}
+        >
+          <span className="grow">{t("formwork")}</span>
+        </button>
+
+        {/* 6. POUR SEQUENCE */}
+        <button
+          type="button"
+          className={cx("nav-item", active === "pour" && "active")}
+          onClick={() => onNavigate("pour")}
+        >
+          <span className="grow">{t("pourSequence")}</span>
+        </button>
+
+        {/* 7. REBAR SCHEDULE */}
+        <button
+          type="button"
+          className={cx("nav-item", active === "rebar" && "active")}
+          onClick={() => onNavigate("rebar")}
+        >
+          <span className="grow">{t("rebar")}</span>
+        </button>
+
+        {/* 8. CONNECTION DETAILING */}
+        <button
+          type="button"
+          className={cx("nav-item", active === "connections" && "active")}
+          onClick={() => onNavigate("connections")}
+        >
+          <span className="grow">{t("connections")}</span>
+        </button>
+
+        {/* 9. DAYLIGHT ANALYSIS */}
+        <button
+          type="button"
+          className={cx("nav-item", active === "daylight" && "active")}
+          onClick={() => onNavigate("daylight")}
+        >
+          <span className="grow">{t("daylightNav")}</span>
+        </button>
+
+        {/* 10. UNIT MIX OPTIMIZER */}
+        <button
+          type="button"
+          className={cx("nav-item", active === "unit-mix" && "active")}
+          onClick={() => onNavigate("unit-mix")}
+        >
+          <span className="grow">{t("unitMixNav")}</span>
+        </button>
+
+        {/* 11. COLUMN GRID OPTIMIZER */}
+        <button
+          type="button"
+          className={cx("nav-item", active === "column-grid" && "active")}
+          onClick={() => onNavigate("column-grid")}
+        >
+          <span className="grow">{t("columnGridNav")}</span>
+        </button>
+        {/* 12. DOCUMENTS & EXPORTS */}
         <button
           type="button"
           className={cx("nav-item", active === "docs:drawings" && "active")}
@@ -287,7 +311,7 @@ export function Sidebar({ active, onNavigate, projectVersion }: Props) {
           <span className="grow">{t("documents")}</span>
         </button>
 
-        {/* 6. AI FLEET HUB */}
+        {/* 13. AI FLEET HUB */}
         <button
           type="button"
           className={cx("nav-item", active === "fleet" && "active")}
@@ -296,7 +320,7 @@ export function Sidebar({ active, onNavigate, projectVersion }: Props) {
           <span className="grow">{t("fleet")}</span>
         </button>
 
-        {/* 7. WINDOWS INSTALLER (.exe) */}
+        {/* 14. WINDOWS INSTALLER (.exe) */}
         <button
           type="button"
           className={cx("nav-item", active === "windows" && "active")}
@@ -305,7 +329,7 @@ export function Sidebar({ active, onNavigate, projectVersion }: Props) {
           <span className="grow">{t("windows")}</span>
         </button>
 
-        {/* 8. LAND UNIT CONVERTER */}
+        {/* 15. LAND UNIT CONVERTER */}
         <button
           type="button"
           className={cx("nav-item", active === "units" && "active")}
@@ -337,9 +361,9 @@ export function Sidebar({ active, onNavigate, projectVersion }: Props) {
           type="button"
           className="theme-toggle"
           onClick={toggle}
-          title="Toggle Light/Dark Theme"
+          title={theme === "light" ? "Switch to Dark" : theme === "dark" ? "Switch to High Contrast" : "Switch to Light"}
         >
-          {theme === "light" ? "☾" : "☀"}
+          {theme === "light" ? "☾" : theme === "dark" ? "⬤" : "☀"}
         </button>
         <span className="faint small">ArchResidenceBD v1.0</span>
       </div>

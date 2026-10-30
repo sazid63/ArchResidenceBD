@@ -32,6 +32,7 @@ export interface ComplianceContext {
     columnSpacing: number[];
     stairWidthMm: number;
     corridorWidthMm: number;
+    hasParking: boolean;
   };
   materials: {
     concreteGrade: number;
@@ -106,7 +107,7 @@ export const BNBC_RULES: BNBCRule[] = [
           severity: "major",
           message: issues.join(". "),
           messageBn: issues.map(i => i.replace("minimum", "ন্যূনতম")).join(". "),
-          recommended: "Increase corridor to ≥1200mm, stair to ≥1050mm",
+          recommendation: "Increase corridor to ≥1200mm, stair to ≥1050mm",
         };
       }
       return {
@@ -154,15 +155,38 @@ export const BNBC_RULES: BNBCRule[] = [
       const stories = ctx.project.stories;
       if (stories <= 3) return { pass: true, severity: "info", message: `Building has ${stories} storeys — single exit acceptable.` };
       // Count columns at perimeter (proxy for staircase locations)
-      const perimeterCols = ctx.mesh.objects.filter(o => o.kind === "column").length;
-      if (perimeterCols >= 8) {
-        return { pass: true, severity: "info", message: `Adequate column grid (${perimeterCols} cols) suggests multiple stair cores for fire egress.` };
+      // A perimeter column is one whose center lies on the building envelope
+      const allCols = ctx.mesh.objects.filter(o => o.kind === "column");
+      if (allCols.length === 0) {
+        return {
+          pass: false,
+          severity: "major",
+          message: `Building > 3 storeys with no columns — verify at least 2 separate fire exits per BNBC §8.3.1.`,
+          recommendation: "Provide 2 separate enclosed staircases, min 1050mm width each",
+        };
+      }
+      // Compute building envelope from all objects
+      let envMinX = Infinity, envMinY = Infinity, envMaxX = -Infinity, envMaxY = -Infinity;
+      for (const obj of ctx.mesh.objects) {
+        envMinX = Math.min(envMinX, obj.bboxMinMm[0]);
+        envMinY = Math.min(envMinY, obj.bboxMinMm[1]);
+        envMaxX = Math.max(envMaxX, obj.bboxMaxMm[0]);
+        envMaxY = Math.max(envMaxY, obj.bboxMaxMm[1]);
+      }
+      const tol = 50; // 50mm tolerance for envelope detection
+      const perimeterCols = allCols.filter(o => {
+        const cx = (o.bboxMinMm[0] + o.bboxMaxMm[0]) / 2;
+        const cy = (o.bboxMinMm[1] + o.bboxMaxMm[1]) / 2;
+        return cx <= envMinX + tol || cx >= envMaxX - tol || cy <= envMinY + tol || cy >= envMaxY - tol;
+      });
+      if (perimeterCols.length >= 4) {
+        return { pass: true, severity: "info", message: `Adequate perimeter column grid (${perimeterCols} of ${allCols.length} total cols on envelope) suggests multiple stair cores for fire egress.` };
       }
       return {
         pass: false,
         severity: "major",
-        message: `Building > 3 storeys with only ${perimeterCols} columns — verify at least 2 separate fire exits per BNBC §8.3.1.`,
-        messageBn: `${perimeterCols}টি কলম — BNBC §8.3.1 অনুযায়ী অন্তত ২টি আলাদা আগুন মোকাবিলা প্রবেশপথ নিশ্চিত করুন।`,
+        message: `Building > 3 storeys with only ${perimeterCols.length} perimeter columns (of ${allCols.length} total) — verify at least 2 separate fire exits per BNBC §8.3.1.`,
+        messageBn: `${perimeterCols.length}টি পরিধি কলম (মোট ${allCols.length}টির মধ্যে) — BNBC §8.3.1 অনুযায়ী অন্তত ২টি আলাদা আগুন মোকাবিলা প্রবেশপথ নিশ্চিত করুন।`,
         recommendation: "Provide 2 separate enclosed staircases, min 1050mm width each",
       };
     },
@@ -307,7 +331,7 @@ export const BNBC_RULES: BNBCRule[] = [
       const units = ctx.project.unitsPerFloor * ctx.project.stories;
       // RAJUK: 1 car parking per 2 residential units, min 1 motorcycle slot per floor
       const carParks = Math.ceil(units / 2);
-      const hasParking = ctx.mesh.objects.some(o => o.kind === "parking" || o.label.includes("Parking"));
+      const hasParking = ctx.dimensions.hasParking ?? false;
       if (!hasParking && units > 0) {
         return {
           pass: false,
@@ -383,21 +407,30 @@ export function buildComplianceContext(
   mesh: MeshDocument,
   materials: { concreteGrade: number; steelGrade: number; brickStrength: number },
 ): ComplianceContext {
-  // Compute bounding box
-  let minX = Infinity, minY = Infinity, minZ = Infinity;
-  let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
-  for (const obj of mesh.objects) {
-    for (let i = 0; i < 3; i++) {
-      minX = Math.min(minX, obj.bboxMinMm[i]);
-      minY = Math.min(minY, obj.bboxMinMm[i]);
-      minZ = Math.min(minZ, obj.bboxMinMm[i]);
-      maxX = Math.max(maxX, obj.bboxMaxMm[i]);
-      maxY = Math.max(maxY, obj.bboxMaxMm[i]);
-      maxZ = Math.max(maxZ, obj.bboxMaxMm[i]);
-    }
+  // Compute footprint from slabs (actual building footprint, not column projections)
+  const slabs = mesh.objects.filter(o => o.kind === "slab");
+  let minX = Infinity, minY = Infinity;
+  let maxX = -Infinity, maxY = -Infinity;
+  for (const slab of slabs) {
+    minX = Math.min(minX, slab.bboxMinMm[0]);
+    minY = Math.min(minY, slab.bboxMinMm[1]);
+    maxX = Math.max(maxX, slab.bboxMaxMm[0]);
+    maxY = Math.max(maxY, slab.bboxMaxMm[1]);
   }
   const footprintMm: [number, number] = [maxX - minX, maxY - minY];
-  const totalHeightMm = maxZ - minZ;
+
+  // Building height: top of highest roof slab (exclude parapets, tanks)
+  const roofSlabs = mesh.objects.filter(o => o.kind === "slab" && o.phase === "roof");
+  const roofTopZ = roofSlabs.length > 0
+    ? Math.max(...roofSlabs.map(s => s.bboxMaxMm[2]))
+    : (maxY > 0 ? maxY * 0.3 : 0); // fallback: estimate from footprint
+  
+  // For height base, find the ground floor slab bottom
+  const groundSlabs = mesh.objects.filter(o => o.kind === "slab" && o.phase === "ground_floor");
+  const groundBotZ = groundSlabs.length > 0
+    ? Math.min(...groundSlabs.map(s => s.bboxMinMm[2]))
+    : 0;
+  const totalHeightMm = roofTopZ - groundBotZ;
 
   // Column spacing (grid analysis)
   const columns = mesh.objects.filter(o => o.kind === "column");
@@ -420,11 +453,58 @@ export function buildComplianceContext(
     ...colSpacingY.slice(1).map((v, i) => v - colSpacingY[i]),
   ])].filter(v => v > 0).sort((a, b) => a - b);
 
-  // Stair width estimation from mesh
-  const stairs = mesh.objects.filter(o => o.kind === "stair");
-  const stairWidth = stairs.length > 0
-    ? Math.max(...stairs.map(s => s.bboxMaxMm[0] - s.bboxMinMm[0], s.bboxMaxMm[1] - s.bboxMinMm[1]))
+  // Stair width: use clear tread width (max X or Y dimension of individual treads)
+  // Filter out stair cores (which have large footprint) - use smallest tread width
+  const stairTreads = mesh.objects.filter(o => 
+    o.kind === "stair" && 
+    (o.id.includes("tread") || o.id.includes("flight") || o.id.includes("step") || o.id.includes("step"))
+  );
+  const stairWidth = stairTreads.length > 0
+    ? Math.max(...stairTreads.map(s => Math.max(s.bboxMaxMm[0] - s.bboxMinMm[0], s.bboxMaxMm[1] - s.bboxMinMm[1])))
     : 1050;
+
+  // Corridor width: derive from wall partitions between columns
+  // Find the minimum clear span between parallel partition walls
+  const partitions = mesh.objects.filter(o =>
+    o.kind === "partition" || (o.kind === "wall" && o.label.toLowerCase().includes("partition"))
+  );
+  let corridorWidthMm = 1200; // BNBC minimum
+  if (partitions.length >= 2) {
+    // Group partitions by axis and find min gap between parallel walls
+    const xPartitions = partitions.filter(o =>
+      (o.bboxMaxMm[0] - o.bboxMinMm[0]) < (o.bboxMaxMm[1] - o.bboxMinMm[1])
+    );
+    const yPartitions = partitions.filter(o =>
+      (o.bboxMaxMm[1] - o.bboxMinMm[1]) <= (o.bboxMaxMm[0] - o.bboxMinMm[0])
+    );
+
+    let minGap = Infinity;
+    for (let i = 0; i < xPartitions.length; i++) {
+      for (let j = i + 1; j < xPartitions.length; j++) {
+        const gap = xPartitions[j].bboxMinMm[1] - xPartitions[i].bboxMaxMm[1];
+        // Only consider gaps wide enough to be a real corridor (>= 500 mm).
+        // Sub-500 mm gaps are adjacent wall stubs / column faces, not corridors.
+        if (gap >= 500 && gap < minGap) minGap = gap;
+      }
+    }
+    for (let i = 0; i < yPartitions.length; i++) {
+      for (let j = i + 1; j < yPartitions.length; j++) {
+        const gap = yPartitions[j].bboxMinMm[0] - yPartitions[i].bboxMaxMm[0];
+        if (gap >= 500 && gap < minGap) minGap = gap;
+      }
+    }
+    if (isFinite(minGap) && minGap > 0) {
+      corridorWidthMm = Math.round(minGap);
+    }
+  }
+
+  // Parking detection: check for ground_floor objects with parking-related labels
+  const hasParking = mesh.objects.some(o => 
+    o.kind === "parking" || 
+    o.id.toLowerCase().includes("parking") ||
+    o.label.toLowerCase().includes("parking") ||
+    (o.phase === "ground_floor" && o.id.includes("canopy")) // entrance canopy often marks parking
+  );
 
   return {
     project,
@@ -434,7 +514,8 @@ export function buildComplianceContext(
       totalHeightMm,
       columnSpacing: spacings,
       stairWidthMm: stairWidth,
-      corridorWidthMm: 1200, // default corridor
+      corridorWidthMm,
+      hasParking,
     },
     materials,
   };

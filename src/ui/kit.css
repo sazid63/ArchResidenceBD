@@ -1,4 +1,6 @@
-/* UI kit — every corner rounded (corner policy). Tone classes map to theme token pairs. */
+/* UI kit — every corner rounded (corner policy). Tone classes map to theme token pairs.
+   Overhaul focus: polished focus/hover/active states for buttons, chips, stat cards,
+   consistent input focus rings, and a slider control style. */
 
 .card {
   background: var(--surface);
@@ -6,23 +8,53 @@
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-sm);
   padding: var(--s-5);
-  transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+  transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease),
+    border-color var(--dur) var(--ease);
+}
+.card--interactive {
+  cursor: pointer;
+}
+.card--interactive:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+.card--interactive:active {
+  transform: translateY(0);
+}
+.card:focus-within {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 35%, transparent);
+  border-color: var(--primary);
 }
 
+/* ---- Buttons ---- */
 .button {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   padding: 9px 16px;
   border-radius: var(--r-pill);
   font-weight: 600;
   font-size: var(--fs-md);
-  transition: background var(--dur) var(--ease), transform var(--dur-fast) var(--ease),
-    box-shadow var(--dur) var(--ease);
+  transition: background var(--dur) var(--ease),
+    border-color var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease),
+    transform var(--dur-fast) var(--ease);
+  position: relative;
+  overflow: hidden;
 }
-.button:active {
+.button:enabled:active {
   transform: scale(0.97);
 }
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+.button:disabled:hover {
+  background: inherit;
+}
+
 .button--primary {
   background: var(--primary);
   color: var(--on-primary);
@@ -30,7 +62,13 @@
 }
 .button--primary:hover {
   background: var(--primary-hover);
+  box-shadow: var(--shadow-md);
 }
+.button--primary:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 3px;
+}
+
 .button--soft {
   background: var(--primary-soft);
   color: var(--primary-ink);
@@ -38,19 +76,36 @@
 .button--soft:hover {
   background: color-mix(in srgb, var(--primary) 22%, var(--surface));
 }
+.button--soft:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 45%, transparent);
+  outline-offset: 3px;
+}
+
 .button--ghost {
   color: var(--ink-soft);
 }
 .button--ghost:hover {
   background: var(--surface-2);
 }
+.button--ghost:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 45%, transparent);
+  outline-offset: 3px;
+}
 
+/* ---- Chips ---- */
 .chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 7px 14px;
   border-radius: var(--r-pill);
   font-size: var(--fs-sm);
   font-weight: 600;
-  transition: filter var(--dur) var(--ease), transform var(--dur-fast) var(--ease);
+  transition: filter var(--dur) var(--ease),
+    transform var(--dur-fast) var(--ease),
+    box-shadow var(--dur) var(--ease);
+  cursor: pointer;
+  border: 1px solid transparent;
 }
 .chip:hover {
   filter: brightness(0.96);
@@ -58,7 +113,12 @@
 .chip:active {
   transform: scale(0.97);
 }
+.chip:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 45%, transparent);
+  outline-offset: 2px;
+}
 
+/* ---- Badges ---- */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -68,8 +128,10 @@
   font-weight: 700;
   letter-spacing: 0.01em;
   white-space: nowrap;
+  transition: filter var(--dur) var(--ease);
 }
 
+/* ---- Callout ---- */
 .callout {
   background: var(--surface-2);
   border-radius: var(--r-md);
@@ -77,29 +139,53 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  border: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
 }
 .callout-title {
   font-weight: 700;
   font-size: var(--fs-sm);
+  color: var(--ink);
 }
 .callout-body {
   font-size: var(--fs-sm);
   color: var(--ink-soft);
+  line-height: 1.5;
 }
 
+/* ---- Stat cards — elevated to read as data ---- */
 .stat {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: color-mix(in srgb, var(--primary) 4%, transparent);
+  border: 1px solid color-mix(in srgb, var(--line) 45%, transparent);
+  border-radius: var(--r-md);
+  padding: var(--s-3) var(--s-4);
+  min-width: 96px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.stat:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 .stat-value {
   font-weight: 700;
-  font-size: var(--fs-lg);
+  font-size: var(--fs-xl);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
 }
 .stat-label {
   font-size: var(--fs-xs);
   color: var(--ink-faint);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin-top: 2px;
 }
 
+/* ---- Status dots ---- */
 .dot {
   width: 10px;
   height: 10px;
@@ -211,6 +297,180 @@
 .dot--blush {
   background: var(--blush);
 }
-.dot--mint {
+.dot--mint,
+.sdot--mint {
   background: var(--mint);
+}
+
+/* ---- Tab control ---- */
+.tabs {
+  display: flex;
+  gap: var(--s-1);
+  flex-wrap: wrap;
+  background: var(--surface-2);
+  border-radius: var(--r-pill);
+  padding: 2px;
+  padding-inline: 2px;
+}
+.tab {
+  padding: 7px 14px;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease),
+    transform var(--dur-fast) var(--ease);
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.tab:hover {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+.tab--active {
+  background: var(--surface);
+  color: var(--primary-ink);
+  border-color: color-mix(in srgb, var(--primary) 30%, transparent);
+  box-shadow: var(--shadow-sm);
+}
+.tab:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 45%, transparent);
+  outline-offset: 2px;
+}
+
+/* ---- Slider / range input ---- */
+.slider-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+}
+.slider {
+  flex: 1;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--surface-2);
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line);
+  outline: none;
+  background: linear-gradient(var(--primary), var(--primary)) 0 / 50% 100% no-repeat, var(--surface-2);
+  background-size: var(--s-2) 100%;
+  transition: background var(--dur) var(--ease);
+}
+.slider:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--primary) 45%, transparent);
+  outline-offset: 2px;
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  border: 2px solid var(--primary);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: background var(--dur) var(--ease), transform var(--dur-fast) var(--ease);
+}
+.slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--r-pill);
+  background: var(--surface);
+  border: 2px solid var(--primary);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+.slider::-webkit-slider-thumb:hover,
+.slider::-moz-range-thumb:hover {
+  border-color: var(--primary-hover);
+}
+.slider::-webkit-slider-thumb:active,
+.slider::-moz-range-thumb:active {
+  transform: scale(1.1);
+}
+
+/* ---- Empty & loading states ---- */
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-3);
+  padding: var(--s-6);
+  text-align: center;
+  color: var(--ink-soft);
+  border-radius: var(--r-lg);
+  background: var(--surface-2);
+  border: 1px dashed color-mix(in srgb, var(--line) 45%, transparent);
+}
+.placeholder-icon {
+  font-size: var(--fs-2xl);
+  opacity: 0.5;
+}
+.placeholder-text {
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+}
+
+/* ---- Modal (reusable, themed via inline style overrides allowed) ---- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--paper) 15%, transparent);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-4);
+  z-index: 1000;
+}
+.modal {
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-lg);
+  max-width: 640px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: auto;
+  padding: var(--s-5);
+}
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+  margin-bottom: var(--s-4);
+}
+.modal-title {
+  font-size: var(--fs-2xl);
+  font-weight: 700;
+  color: var(--ink);
+}
+.modal-close {
+  padding: 4px 8px;
+  font-size: var(--fs-md);
+  color: var(--ink-faint);
+  cursor: pointer;
+  border-radius: var(--r-sm);
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.modal-close:hover {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-3);
+}
+.modal-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--s-2);
+  margin-top: var(--s-4);
 }

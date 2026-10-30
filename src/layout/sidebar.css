@@ -1,24 +1,33 @@
+/* Sidebar — navigation panel for ArchResidenceBD.
+   Improvements: polished focus states, consistent padding gaps,
+   better child indent, hover lift on project card,
+   and accessible focus-visible rings. */
+
+/* ---- Shell ---- */
 .sidebar {
-  width: 282px;
+  width: 290px;
   flex: none;
   background: var(--surface);
   border-right: 1px solid var(--line);
   display: flex;
   flex-direction: column;
   transition: background var(--dur) var(--ease);
+  overflow: hidden;
 }
 
+/* ---- Brand header ---- */
 .sidebar-head {
   display: flex;
   gap: var(--s-3);
   align-items: center;
-  padding: var(--s-5) var(--s-5) var(--s-3);
+  padding: var(--s-5) var(--s-4) var(--s-3);
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
 }
 
 .logo-dot {
-  width: 22px;
-  height: 22px;
-  border-radius: var(--r-pill);
+  width: 24px;
+  height: 24px;
+  border-radius: var(--r-sm);
   background: linear-gradient(135deg, var(--primary), var(--amber));
   box-shadow: var(--shadow-sm);
   flex: none;
@@ -31,39 +40,64 @@
 }
 .app-tagline {
   font-size: var(--fs-xs);
+  color: var(--ink-faint);
+  margin-top: 1px;
 }
 
+/* ---- Navigation area ---- */
 .sidebar-nav {
   flex: 1;
   overflow-y: auto;
-  padding: var(--s-2) var(--s-3) var(--s-4);
+  padding: var(--s-3) var(--s-3) var(--s-5);
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
+/* Scrollable nav gets its own rounded scrollbar */
+.sidebar-nav::-webkit-scrollbar {
+  width: 6px;
+}
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--ink-faint) 30%, transparent);
+  border-radius: var(--r-pill);
+  border: none;
+}
+
+/* ---- Nav items ---- */
 .nav-item {
   display: flex;
   align-items: center;
   gap: var(--s-2);
   width: 100%;
   text-align: left;
-  padding: 8px 12px;
+  padding: 9px 12px;
   border-radius: var(--r-md);
   color: var(--ink);
   font-size: var(--fs-md);
-  transition: background var(--dur) var(--ease);
+  font-weight: 500;
+  transition: background var(--dur) var(--ease),
+    border-color var(--dur) var(--ease),
+    color var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease);
+  position: relative;
 }
 .nav-item:hover {
-  background: var(--surface-2);
+  background: color-mix(in srgb, var(--primary) 6%, var(--surface-2));
+}
+.nav-item:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
 }
 .nav-item.active {
   background: var(--primary-soft);
   color: var(--primary-ink);
   font-weight: 600;
+  box-shadow: inset 3px 0 0 var(--primary);
 }
 .nav-item.child {
-  padding-left: 16px;
+  padding-left: var(--s-5);
+  font-size: var(--fs-sm);
 }
 
 .ellipsis {
@@ -72,31 +106,48 @@
   text-overflow: ellipsis;
 }
 
+/* ---- New project button ---- */
 .nav-new {
-  margin: var(--s-2) 0;
-  padding: 9px 14px;
+  margin: var(--s-2) var(--s-1) var(--s-3);
+  padding: 10px 14px;
   border-radius: var(--r-pill);
   background: var(--primary-soft);
   color: var(--primary-ink);
   font-weight: 600;
+  font-size: var(--fs-sm);
   text-align: left;
-  transition: background var(--dur) var(--ease);
+  transition: background var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease),
+    transform var(--dur-fast) var(--ease);
 }
 .nav-new:hover {
   background: color-mix(in srgb, var(--primary) 22%, var(--surface));
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+}
+.nav-new:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
+/* ---- Active project card ---- */
 .proj-head {
   display: flex;
   align-items: center;
   gap: var(--s-3);
   padding: var(--s-3) 12px var(--s-2);
   margin-top: var(--s-2);
+  margin-bottom: var(--s-2);
   border-top: 1px solid var(--line);
+  transition: background var(--dur) var(--ease);
 }
+.proj-head:hover {
+  background: color-mix(in srgb, var(--primary) 3%, transparent);
+}
+
 .proj-badge {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: var(--r-sm);
   background: var(--sky-soft);
   color: var(--sky-ink);
@@ -106,28 +157,35 @@
   font-weight: 700;
   font-size: var(--fs-xs);
   flex: none;
+  box-shadow: var(--shadow-sm);
 }
 .proj-name {
   font-weight: 600;
   font-size: var(--fs-md);
 }
 
+/* ---- Collapsible group header ---- */
 .nav-group-head {
   display: flex;
   align-items: center;
   gap: 6px;
   width: 100%;
-  padding: 8px 12px;
+  padding: 9px 12px;
   border-radius: var(--r-md);
   color: var(--ink-soft);
   font-weight: 600;
-  font-size: var(--fs-sm);
+  font-size: var(--fs-xs);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  transition: background var(--dur) var(--ease);
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
 }
 .nav-group-head:hover {
   background: var(--surface-2);
+  color: var(--ink);
+}
+.nav-group-head:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
 }
 
 .chev {
@@ -144,7 +202,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 2px 0 6px;
+  padding: 3px 0 7px;
 }
 
 .dot-spacer {
@@ -152,45 +210,82 @@
   flex: none;
 }
 
+/* Master 3D nav item */
+.nav-master {
+  font-weight: 600;
+}
+
+/* Phase check mark */
+.phase-check {
+  font-size: 12px;
+  color: var(--sage);
+}
+
+/* ---- No-project placeholder ---- */
+.no-project-placeholder {
+  padding: var(--s-3);
+  background: var(--surface-2);
+  border-radius: var(--r-md);
+  margin-bottom: var(--s-3);
+  text-align: center;
+}
+
+/* ---- Footer ---- */
 .sidebar-foot {
   display: flex;
   align-items: center;
   gap: var(--s-2);
   padding: var(--s-3) var(--s-4) var(--s-4);
   border-top: 1px solid var(--line);
+  background: var(--surface-2);
 }
 
 .lang-toggle {
   display: flex;
-  background: var(--surface-2);
+  background: var(--surface);
   border-radius: var(--r-pill);
-  padding: 3px;
+  padding: 2px;
+  border: 1px solid var(--line);
 }
 .lang-pill {
-  padding: 4px 12px;
+  padding: 5px 12px;
   border-radius: var(--r-pill);
   font-size: var(--fs-xs);
   font-weight: 700;
   color: var(--ink-soft);
-  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease),
+    box-shadow var(--dur) var(--ease);
+}
+.lang-pill:hover {
+  color: var(--ink);
 }
 .lang-pill.active {
-  background: var(--surface);
+  background: var(--primary-soft);
   color: var(--primary-ink);
   box-shadow: var(--shadow-sm);
+}
+.lang-pill:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
 }
 
 .theme-toggle {
   width: 34px;
   height: 34px;
   border-radius: var(--r-pill);
-  background: var(--surface-2);
+  background: var(--surface);
+  border: 1px solid var(--line);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 15px;
-  transition: background var(--dur) var(--ease);
+  transition: background var(--dur) var(--ease), transform var(--dur-fast) var(--ease);
 }
 .theme-toggle:hover {
   background: var(--surface-3);
+  transform: scale(1.05);
+}
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }

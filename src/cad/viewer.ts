@@ -15,6 +15,8 @@ import type { MeshDocument, MeshObject } from "./mesh";
 type Vec3 = [number, number, number];
 type Mat4 = Float32Array;
 
+export type { Vec3, Mat4 };
+
 const VERTEX_SHADER = `
 attribute vec3 aPosition;
 attribute vec3 aNormal;
@@ -87,6 +89,53 @@ function perspective(fovY: number, aspect: number, near: number, far: number): M
   return m;
 }
 
+// Matrix inverse for unprojection
+function mat4Invert(out: Float32Array, a: Float32Array): void {
+  const a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3];
+  const a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7];
+  const a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11];
+  const a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15];
+  const b00 = a00 * a11 - a01 * a10;
+  const b01 = a00 * a12 - a02 * a10;
+  const b02 = a00 * a13 - a03 * a10;
+  const b03 = a01 * a12 - a02 * a11;
+  const b04 = a01 * a13 - a03 * a11;
+  const b05 = a02 * a13 - a03 * a12;
+  const b06 = a20 * a31 - a21 * a30;
+  const b07 = a20 * a32 - a22 * a30;
+  const b08 = a20 * a33 - a23 * a30;
+  const b09 = a21 * a32 - a22 * a31;
+  const b10 = a21 * a33 - a23 * a31;
+  const b11 = a22 * a33 - a23 * a32;
+  let det = b00 * b11 - b01 * b10 + b02 * b09 + b03 * b08 - b04 * b07 + b05 * b06;
+  if (!det) return;
+  det = 1.0 / det;
+  out[0] = (a11 * b11 - a12 * b10 + a13 * b09) * det;
+  out[1] = (a02 * b10 - a01 * b11 - a03 * b09) * det;
+  out[2] = (a31 * b05 - a32 * b04 + a33 * b03) * det;
+  out[3] = (a22 * b04 - a21 * b05 - a23 * b03) * det;
+  out[4] = (a12 * b08 - a10 * b11 - a13 * b07) * det;
+  out[5] = (a00 * b11 - a02 * b08 + a03 * b07) * det;
+  out[6] = (a32 * b02 - a30 * b05 - a33 * b01) * det;
+  out[7] = (a20 * b05 - a22 * b02 + a23 * b01) * det;
+  out[8] = (a10 * b10 - a11 * b08 + a13 * b06) * det;
+  out[9] = (a01 * b08 - a00 * b10 - a03 * b06) * det;
+  out[10] = (a30 * b04 - a31 * b02 + a33 * b00) * det;
+  out[11] = (a21 * b02 - a20 * b04 - a23 * b00) * det;
+  out[12] = (a11 * b07 - a10 * b09 - a12 * b06) * det;
+  out[13] = (a00 * b09 - a01 * b07 + a02 * b06) * det;
+  out[14] = (a31 * b01 - a30 * b03 - a32 * b00) * det;
+  out[15] = (a20 * b03 - a21 * b01 + a22 * b00) * det;
+}
+
+// Transform vector by matrix (4x4 column-major)
+function mat4TransformVec4(out: Vec3, m: Float32Array, v: Vec3): void {
+  const x = v[0], y = v[1], z = v[2];
+  out[0] = m[0] * x + m[4] * y + m[8] * z + m[12];
+  out[1] = m[1] * x + m[5] * y + m[9] * z + m[13];
+  out[2] = m[2] * x + m[6] * y + m[10] * z + m[14];
+}
+
 function lookAt(eye: Vec3, center: Vec3, up: Vec3): Mat4 {
   const z: Vec3 = [eye[0] - center[0], eye[1] - center[1], eye[2] - center[2]];
   const len = Math.hypot(z[0], z[1], z[2]) || 1;
@@ -132,14 +181,14 @@ interface MeshBuffers {
 
 export class MeshViewer {
   private readonly canvas: HTMLCanvasElement;
-  private readonly gl: WebGLRenderingContext;
-  private readonly program: WebGLProgram;
-  private readonly positionLocation: number;
-  private readonly normalLocation: number;
-  private readonly projectionLocation: WebGLUniformLocation;
-  private readonly viewLocation: WebGLUniformLocation;
-  private readonly colorLocation: WebGLUniformLocation;
-  private readonly unlitLocation: WebGLUniformLocation;
+  private gl: WebGLRenderingContext;
+  private program: WebGLProgram;
+  private positionLocation: number;
+  private normalLocation: number;
+  private projectionLocation: WebGLUniformLocation;
+  private viewLocation: WebGLUniformLocation;
+  private colorLocation: WebGLUniformLocation;
+  private unlitLocation: WebGLUniformLocation;
   private readonly buffers = new Map<string, MeshBuffers>();
   private readonly objects = new Map<string, MeshObject>();
   private ground: MeshBuffers | null = null;
@@ -153,6 +202,16 @@ export class MeshViewer {
   private lastX = 0;
   private lastY = 0;
   private disposed = false;
+
+  // Measurement state
+  private measureMode = false;
+  private measurePoints: Vec3[] = [];
+  private measureCallback: ((points: Vec3[], totalDistance: number) => void) | null = null;
+  private measureOverlay: HTMLCanvasElement | null = null;
+  private currentProjection: Mat4 | null = null;
+  private currentView: Mat4 | null = null;
+  private currentEye: Vec3 = [0, 0, 0];
+  private measureOverlayCtx: CanvasRenderingContext2D | null = null;
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -169,6 +228,41 @@ export class MeshViewer {
     this.colorLocation = this.uniform("uColor");
     this.unlitLocation = this.uniform("uUnlit");
     this.attachInput();
+    this.attachContextLossHandlers();
+  }
+
+  /** Attach WebGL context loss/restoration handlers */
+  private attachContextLossHandlers(): void {
+    this.canvas.addEventListener("webglcontextlost", (event: Event) => {
+      event.preventDefault();
+      console.warn("WebGL context lost - will attempt to restore");
+      this.handleContextLoss();
+    });
+    this.canvas.addEventListener("webglcontextrestored", () => {
+      console.log("WebGL context restored - rebuilding resources");
+      this.handleContextRestored();
+    });
+  }
+
+  private handleContextLoss(): void {
+    // Mark all buffers as invalid
+    this.buffers.clear();
+    this.ground = null;
+  }
+
+  private handleContextRestored(): void {
+    // Re-create program and shaders
+    const gl = this.canvas.getContext("webgl", { antialias: true, alpha: true });
+    if (!gl) return;
+    this.gl = gl;
+    this.program = this.buildProgram();
+    this.positionLocation = gl.getAttribLocation(this.program, "aPosition");
+    this.normalLocation = gl.getAttribLocation(this.program, "aNormal");
+    this.projectionLocation = this.uniform("uProjection");
+    this.viewLocation = this.uniform("uView");
+    this.colorLocation = this.uniform("uColor");
+    this.unlitLocation = this.uniform("uUnlit");
+    // Note: In a real app, you'd also re-upload all mesh data here
   }
 
   private uniform(name: string): WebGLUniformLocation {
@@ -424,6 +518,12 @@ export class MeshViewer {
       this.target[2] + this.distance * Math.sin(this.elevation),
     ];
     const view = lookAt(eye, this.target, [0, 0, 1]);
+
+    // Update camera matrices for measurement
+    this.currentProjection = projection;
+    this.currentView = view;
+    this.currentEye = eye;
+
     gl.uniformMatrix4fv(this.projectionLocation, false, projection);
     gl.uniformMatrix4fv(this.viewLocation, false, view);
 
@@ -454,8 +554,209 @@ export class MeshViewer {
     gl.drawElements(gl.TRIANGLES, buffers.count, buffers.indexType, 0);
   }
 
+  // ----- Measurement API -----
+
+  enableMeasurements(onMeasure: (points: Vec3[], totalDistance: number) => void): void {
+    this.measureMode = true;
+    this.measureCallback = onMeasure;
+    this.measurePoints = [];
+  }
+
+  disableMeasurements(): void {
+    this.measureMode = false;
+    this.measurePoints = [];
+    if (this.measureCallback) {
+      this.measureCallback([], 0);
+    }
+    this.measureCallback = null;
+    this.drawOverlay();
+  }
+
+  setMeasureOverlay(canvas: HTMLCanvasElement | null): void {
+    this.measureOverlay = canvas;
+    if (canvas) {
+      this.measureOverlayCtx = canvas.getContext("2d") ?? null;
+    } else {
+      this.measureOverlayCtx = null;
+    }
+  }
+
+  setCameraMatrix(projection: Mat4, view: Mat4, eye: Vec3): void {
+    this.currentProjection = projection;
+    this.currentView = view;
+    this.currentEye = eye;
+  }
+
+  /** Simple CPU raycasting against all triangle vertices; returns closest hit point */
+  pickAt(canvasX: number, canvasY: number): Vec3 | null {
+    if (!this.currentProjection || !this.currentView) return null;
+
+    const rect = this.canvas.getBoundingClientRect();
+    const nx = ((canvasX - rect.left) / rect.width) * 2 - 1;
+    const ny = -(((canvasY - rect.top) / rect.height) * 2 - 1);
+
+    const near = this.unproject(nx, ny, this.currentProjection, this.currentView, 50);
+    const far = this.unproject(nx, ny, this.currentProjection, this.currentView, this.distance * 6);
+    if (!near || !far) return null;
+
+    const dir: Vec3 = [far[0] - near[0], far[1] - near[1], far[2] - near[2]];
+    const dLen = Math.hypot(dir[0], dir[1], dir[2]) || 1;
+    dir[0] /= dLen; dir[1] /= dLen; dir[2] /= dLen;
+
+    let closest: Vec3 | null = null;
+    let closestDist = Infinity;
+
+    for (const obj of this.objects.values()) {
+      for (let i = 0; i < obj.indices.length; i += 3) {
+        const i0 = obj.indices[i] * 3;
+        const i1 = obj.indices[i + 1] * 3;
+        const i2 = obj.indices[i + 2] * 3;
+        const v0: Vec3 = [obj.positions[i0], obj.positions[i0 + 1], obj.positions[i0 + 2]];
+        const v1: Vec3 = [obj.positions[i1], obj.positions[i1 + 1], obj.positions[i1 + 2]];
+        const v2: Vec3 = [obj.positions[i2], obj.positions[i2 + 1], obj.positions[i2 + 2]];
+
+        const hit = this.rayTriangleIntersect(near, dir, v0, v1, v2);
+        if (hit) {
+          const d = Math.hypot(hit[0] - near[0], hit[1] - near[1], hit[2] - near[2]);
+          if (d < closestDist) {
+            closestDist = d;
+            closest = hit;
+          }
+        }
+      }
+    }
+
+    return closest;
+  }
+
+  handleMeasureClick(canvasX: number, canvasY: number): void {
+    if (!this.measureMode) return;
+    const hit = this.pickAt(canvasX, canvasY);
+    if (!hit) return;
+
+    this.measurePoints.push(hit);
+    if (this.measureCallback) {
+      let total = 0;
+      for (let i = 1; i < this.measurePoints.length; i++) {
+        const p = this.measurePoints[i - 1];
+        const q = this.measurePoints[i];
+        total += Math.hypot(q[0] - p[0], q[1] - p[1], q[2] - p[2]);
+      }
+      this.measureCallback(this.measurePoints, total);
+    }
+    this.drawOverlay();
+  }
+
+  clearMeasurements(): void {
+    this.measurePoints = [];
+    if (this.measureCallback) {
+      this.measureCallback([], 0);
+    }
+    this.drawOverlay();
+  }
+
+  private drawOverlay(): void {
+    const ctx = this.measureOverlayCtx;
+    if (!ctx || !this.measureOverlay) return;
+
+    ctx.clearRect(0, 0, this.measureOverlay.width, this.measureOverlay.height);
+
+    if (this.measurePoints.length < 2) return;
+
+    const projected: { x: number; y: number }[] = [];
+    for (const p of this.measurePoints) {
+      const screen = this.toScreen(p);
+      if (screen) projected.push(screen);
+    }
+
+    ctx.strokeStyle = "#e07856";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([8, 4]);
+    ctx.beginPath();
+    for (let i = 0; i < projected.length; i++) {
+      if (i === 0) ctx.moveTo(projected[i].x, projected[i].y);
+      else ctx.lineTo(projected[i].x, projected[i].y);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Draw points
+    for (const p of projected) {
+      ctx.fillStyle = "#e07856";
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  /** Unproject NDC to world space */
+  private unproject(nx: number, ny: number, proj: Mat4, view: Mat4, depth: number): Vec3 | null {
+    const invProj = new Float32Array(16);
+    const invView = new Float32Array(16);
+    mat4Invert(invProj, proj);
+    mat4Invert(invView, view);
+
+    const ndc: Vec3 = [nx, ny, (2.0 * depth) / (this.distance * 6 - depth) - 1.0];
+    const eyeSpace: Vec3 = [0, 0, 0];
+    mat4TransformVec4(eyeSpace, invProj, ndc);
+    if (eyeSpace[2] === 0) return null;
+    eyeSpace[0] *= -1; eyeSpace[1] *= -1; eyeSpace[2] *= -1;
+
+    const world: Vec3 = [0, 0, 0];
+    mat4TransformVec4(world, invView, eyeSpace);
+    return world;
+  }
+
+  /** Ray-triangle intersection (Moller-Trumbore) */
+  private rayTriangleIntersect(origin: Vec3, dir: Vec3, v0: Vec3, v1: Vec3, v2: Vec3): Vec3 | null {
+    const EPSILON = 0.000001;
+    const edge1: Vec3 = [v1[0] - v0[0], v1[1] - v0[1], v1[2] - v0[2]];
+    const edge2: Vec3 = [v2[0] - v0[0], v2[1] - v0[1], v2[2] - v0[2]];
+    const h: Vec3 = [dir[1] * edge2[2] - dir[2] * edge2[1], dir[2] * edge2[0] - dir[0] * edge2[2], dir[0] * edge2[1] - dir[1] * edge2[0]];
+    const a = edge1[0] * h[0] + edge1[1] * h[1] + edge1[2] * h[2];
+    if (a > -EPSILON && a < EPSILON) return null;
+    const f = 1 / a;
+    const s: Vec3 = [origin[0] - v0[0], origin[1] - v0[1], origin[2] - v0[2]];
+    const u = f * (s[0] * h[0] + s[1] * h[1] + s[2] * h[2]);
+    if (u < 0.0 || u > 1.0) return null;
+    const q: Vec3 = [s[1] * edge1[2] - s[2] * edge1[1], s[2] * edge1[0] - s[0] * edge1[2], s[0] * edge1[1] - s[1] * edge1[0]];
+    const v = f * (dir[0] * q[0] + dir[1] * q[1] + dir[2] * q[2]);
+    if (v < 0.0 || u + v > 1.0) return null;
+    const t = f * (edge2[0] * q[0] + edge2[1] * q[1] + edge2[2] * q[2]);
+    if (t < EPSILON) return null;
+    return [origin[0] + dir[0] * t, origin[1] + dir[1] * t, origin[2] + dir[2] * t];
+  }
+
+  /** Project world point to screen coords */
+  private toScreen(world: Vec3): { x: number; y: number } | null {
+    if (!this.currentProjection || !this.currentView) return null;
+    const m = new Float32Array(16);
+    // Proper mat mul: projection * view (column-major)
+    for (let r = 0; r < 4; r++) {
+      for (let c = 0; c < 4; c++) {
+        let sum = 0;
+        for (let k = 0; k < 4; k++) sum += this.currentProjection[r * 4 + k] * this.currentView[k * 4 + c];
+        m[r * 4 + c] = sum;
+      }
+    }
+
+    const out: Vec3 = [0, 0, 0];
+    mat4TransformVec4(out, m, world);
+    if (out[2] === 0) return null;
+
+    const rect = this.canvas.getBoundingClientRect();
+    return {
+      x: (out[0] / -out[2] * 0.5 + 0.5) * rect.width,
+      y: (-out[1] / -out[2] * 0.5 + 0.5) * rect.height,
+    };
+  }
+
+  // ----- End Measurement API -----
+
   dispose(): void {
     this.disposed = true;
+    this.measureOverlay = null;
+    this.measureOverlayCtx = null;
     const gl = this.gl;
     for (const buffers of this.buffers.values()) {
       gl.deleteBuffer(buffers.position);

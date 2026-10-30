@@ -23,8 +23,35 @@
 
 import { MeshDocument, MeshObject } from "./mesh";
 import { BuildingProject } from "../engine/projectState";
-import { ARCHITECTURAL_ASSETS } from "./assetsLibrary";
 import { FLOORPLAN_PRESETS, RoomPartition } from "../data/floorplanPresets";
+
+/**
+ * Filter mesh objects by phase. Centralized phase filtering logic.
+ * Returns all objects when phaseFilter is null, "final", or unrecognized.
+ */
+export function filterMeshByPhase(objects: MeshObject[], phaseFilter?: string): MeshObject[] {
+  if (!phaseFilter || phaseFilter === "final") {
+    return objects;
+  }
+
+  if (phaseFilter.includes("foundation") || phaseFilter.includes("site")) {
+    return objects.filter((o) => o.phase === "foundation");
+  }
+  if (phaseFilter.includes("ground")) {
+    return objects.filter((o) => o.phase === "ground_floor");
+  }
+  if (phaseFilter.includes("roof")) {
+    return objects.filter((o) => o.phase === "roof");
+  }
+  if (phaseFilter.includes("floor-") || phaseFilter.includes("floor_")) {
+    const match = phaseFilter.match(/\d+/);
+    const floorNum = match ? Number(match[0]) : 1;
+    return objects.filter((o) => o.phase === `floor_${floorNum}`);
+  }
+
+  // Unknown filter - return empty array, caller handles fallback
+  return [];
+}
 
 /**
  * Generates vertices, normals, and indices for an axis-aligned 3D box solid.
@@ -216,8 +243,9 @@ export function createWindow3DMesh(
   const frameThick = 40;
 
   if (orientation === "X") {
-    // Concrete Sill Slab
-    objects.push(createBoxMesh(`${baseId}_sill`, "RCC Window Sill", "slab", phase, x - 30, y - 20, z - 60, x + width + 30, y + depth + 20, z));
+    // Concrete Sill Slab — inset 25mm from wall faces to avoid Z-fighting
+    const sillInset = 25;
+    objects.push(createBoxMesh(`${baseId}_sill`, "RCC Window Sill", "beam", phase, x - sillInset, y - sillInset, z - 60, x + width + sillInset, y + depth + sillInset, z));
     // Frame Left
     objects.push(createBoxMesh(`${baseId}_frm_l`, "Window Channel Left", "wall", phase, x, y, z, x + frameThick, y + depth, z + height));
     // Frame Right
@@ -228,7 +256,7 @@ export function createWindow3DMesh(
     if (isLouvre) {
       // 3 Louver blades
       for (let i = 0; i < 3; i++) {
-        objects.push(createBoxMesh(`${baseId}_blade_${i + 1}`, `Frosted Louver Blade ${i + 1}`, "window", phase, x + frameThick, y + 15, z + 60 + i * 160, x + width - frameThick, y + depth - 15, z + 100 + i * 160));
+        objects.push(createBoxMesh(`${baseId}_blade_${i + 1}`, `Frosted Louver Blade ${i + 1}`, "louver", phase, x + frameThick, y + 15, z + 60 + i * 160, x + width - frameThick, y + depth - 15, z + 100 + i * 160));
       }
     } else {
       // 2 Sliding Glass Panes
@@ -237,8 +265,9 @@ export function createWindow3DMesh(
     }
   } else {
     // Orientation Y
-    // Concrete Sill Slab
-    objects.push(createBoxMesh(`${baseId}_sill`, "RCC Window Sill", "slab", phase, x - 20, y - 30, z - 60, x + depth + 20, y + width + 30, z));
+    // Concrete Sill Slab — inset 25mm from wall faces to avoid Z-fighting
+    const sillInset = 25;
+    objects.push(createBoxMesh(`${baseId}_sill`, "RCC Window Sill", "beam", phase, x - sillInset, y - sillInset, z - 60, x + depth + sillInset, y + width + sillInset, z));
     // Frame Front
     objects.push(createBoxMesh(`${baseId}_frm_f`, "Window Channel Front", "wall", phase, x, y, z, x + depth, y + frameThick, z + height));
     // Frame Rear
@@ -249,7 +278,7 @@ export function createWindow3DMesh(
     if (isLouvre) {
       // 3 Louver blades
       for (let i = 0; i < 3; i++) {
-        objects.push(createBoxMesh(`${baseId}_blade_${i + 1}`, `Frosted Louver Blade ${i + 1}`, "window", phase, x + 15, y + frameThick, z + 60 + i * 160, x + depth - 15, y + width - frameThick, z + 100 + i * 160));
+        objects.push(createBoxMesh(`${baseId}_blade_${i + 1}`, `Frosted Louver Blade ${i + 1}`, "louver", phase, x + 15, y + frameThick, z + 60 + i * 160, x + depth - 15, y + width - frameThick, z + 100 + i * 160));
       }
     } else {
       // 2 Sliding Glass Panes
@@ -867,7 +896,7 @@ function createFittedStair(
   phase: string,
 ): MeshObject[] {
   const objects: MeshObject[] = [];
-  if (w < 1500 || d < 2200) return objects;
+  if (w < 1000 || d < 1800) return objects;
   const gap = 200;
   const flightW = Math.max(600, (w - gap) / 2);
   let landing = Math.max(900, Math.min(flightW, Math.round(d * 0.3)));
@@ -902,7 +931,7 @@ function createFittedStair(
       ),
     );
   }
-  // Mid landing slab
+  // Mid landing slab — sits 5mm BELOW the flight treads to avoid Z-fighting
   objects.push(
     createBoxMesh(
       `${baseId}_landing`,
@@ -911,10 +940,10 @@ function createFittedStair(
       phase,
       x,
       y + going1,
-      z + n1 * riserH - 125,
+      z + n1 * riserH - 130,
       x + flightW * 2 + gap,
       y + going1 + landing,
-      z + n1 * riserH,
+      z + n1 * riserH - 5,
     ),
   );
   // Flight 2 (returning)
@@ -934,7 +963,7 @@ function createFittedStair(
       ),
     );
   }
-  // Top landing slab (flush with the upper floor level)
+  // Top landing slab (flush with the upper floor level) — sits 5mm BELOW flight top to avoid Z-fight
   objects.push(
     createBoxMesh(
       `${baseId}_top`,
@@ -943,10 +972,10 @@ function createFittedStair(
       phase,
       x + flightW + gap,
       y,
-      z + riseH - 125,
+      z + riseH - 130,
       x + flightW * 2 + gap,
       y + landing,
-      z + riseH,
+      z + riseH - 5,
     ),
   );
   // Handrail along flight 1 outer edge (stops under the beam line)
@@ -978,8 +1007,9 @@ function createFittedBath(
 ): MeshObject[] {
   const objects: MeshObject[] = [];
   if (w < 900 || d < 700) return objects;
+  // Basin sits at slab level (z), not below — sunken floor is achieved by lower slab Z in structural design
   objects.push(
-    createBoxMesh(`${baseId}_basin`, "Bathroom Sunken Floor Basin", "slab", phase, x + 60, y + 60, z - 150, x + w - 60, y + d - 60, z),
+    createBoxMesh(`${baseId}_basin`, "Bathroom Sunken Floor Basin", "bath", phase, x + 60, y + 60, z, x + w - 60, y + d - 60, z + 50),
   );
   objects.push(
     createBoxMesh(`${baseId}_curb`, "Bathroom Threshold Water Stop Curb", "wall", phase, x + 10, y + 10, z, x + w - 10, y + 110, z + 100),
@@ -1035,13 +1065,131 @@ function roomInsetRect(r: RoomPartition, geo: FloorGeo): [number, number, number
   return [rx1 + t(isLeftExt), ry1 + t(isRearExt), rx2 - t(isRightExt), ry2 - t(isFrontExt)];
 }
 
+/**
+ * Accessibility settings — BNBC 2020 Chapter 8.
+ * Defaults are applied by the generator when the `accessibility` key is absent.
+ */
+export interface AccessibilitySettings {
+  rampSlope: number;        // ratio (1:N), default 1:12 → 12
+  rampWidthMm: number;      // min clear width, default 1200
+  doorClearWidthMm: number;  // min clear opening, default 900
+  wcClearMm: [number, number]; // min clear plan dimensions, default [1500, 1500]
+  tactilePathWidthMm: number; // min tactile path width, default 300
+  elevatorRequired: boolean; // required when stories >= 4
+  elevatorPitMm: number;      // pit depth below grade, default 1200
+  elevatorWellMm: [number, number, number]; // well interior [W, D, H], default [1400, 1100, 2100]
+  grabRailHeightMm: number;    // default 700
+  brailleSignage: boolean;     // default true
+}
+
+/**
+ * Sustainability settings — Dhaka-only climate constants.
+ * Per user requirement: hardcoded for Dhaka, no location-awareness.
+ */
+export interface SustainabilitySettings {
+  annualRainfallMm: number;   // Dhaka avg: 2000 (default)
+  tankEfficiency: number;      // collection efficiency 0.85 (default)
+  roofUValue: number;          // W/m²·K, 0.8 (default)
+  wallUValue: number;          // 1.2 (default)
+  windowUValue: number;        // 3.5 (default)
+  coolingLoadFactor: number;   // kg CO₂/m²/year, 12 (default)
+  windowToFloorRatioMin: number; // min, 0.15 (default BNBC §4.4)
+  daylightFactorTarget: number;  // min %, 2.0 (default)
+}
+
+/**
+ * Fire safety settings — BNBC 2020 Part 4.
+ * Optional; when `enabled` is false, all checks are skipped.
+ */
+export interface FireSafetySettings {
+  enabled: boolean;
+  stairWidthMm: number;         // min 1000
+  corridorWidthMm: number;      // min 1200
+  travelDistanceMaxM: number;   // max 30
+  fireRatingHours: number;      // structural fire rating, 2 (default)
+  sprinklerSystem: boolean;     // auto-enabled for >= 6 stories
+  smokeDetector: boolean;        // default true when enabled
+}
+
+/**
+ * Value engineering suggestions — user-facing only, no auto‑engine yet.
+ */
+export interface ValueEngineeringSettings {
+  enabled: boolean;
+  autoApply: boolean;           // if true, apply all "safe" suggestions
+}
+
+/**
+ * Construction management settings — optional module.
+ */
+export interface ConstructionMgmtSettings {
+  enabled: boolean;
+  // simple Gantt view data, generated in-screen from phases
+  // no extra persistent state needed
+}
+
 export interface BuildingCustomization {
   columnWidthMm?: number;
   columnDepthMm?: number;
   footingSizeMm?: number;
   footingDepthMm?: number;
   balconyDepthMm?: number;
+  concreteGrade?: 20 | 25 | 30 | 35 | 40;
+  steelGrade?: 250 | 415 | 500;
+  // ── New optional sub-objects (all default to sensible BNBC/Dhaka values) ──
+  accessibility?: AccessibilitySettings;
+  sustainability?: SustainabilitySettings;
+  fireSafety?: FireSafetySettings;
+  valueEngineering?: ValueEngineeringSettings;
+  constructionMgmt?: ConstructionMgmtSettings;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Inline default objects (single source of truth for the generator)          ─
+// Defined here so the generator never needs a separate constants file.        ─
+// ─────────────────────────────────────────────────────────────────────────────
+export const DEFAULT_ACCESSIBILITY: AccessibilitySettings = {
+  rampSlope: 12,
+  rampWidthMm: 1200,
+  doorClearWidthMm: 900,
+  wcClearMm: [1500, 1500],
+  tactilePathWidthMm: 300,
+  elevatorRequired: true,          // auto-adjusted for stories >= 4
+  elevatorPitMm: 1200,
+  elevatorWellMm: [1400, 1100, 2100],
+  grabRailHeightMm: 700,
+  brailleSignage: true,
+};
+
+export const DEFAULT_SUSTAINABILITY_DHAKA: SustainabilitySettings = {
+  annualRainfallMm: 2000,
+  tankEfficiency: 0.85,
+  roofUValue: 0.8,
+  wallUValue: 1.2,
+  windowUValue: 3.5,
+  coolingLoadFactor: 12,
+  windowToFloorRatioMin: 0.15,
+  daylightFactorTarget: 2.0,
+};
+
+export const DEFAULT_FIRE_SAFETY: FireSafetySettings = {
+  enabled: false,
+  stairWidthMm: 1000,
+  corridorWidthMm: 1200,
+  travelDistanceMaxM: 30,
+  fireRatingHours: 2,
+  sprinklerSystem: false,          // auto-enabled for stories >= 6
+  smokeDetector: true,
+};
+
+export const DEFAULT_VALUE_ENGINEERING: ValueEngineeringSettings = {
+  enabled: false,
+  autoApply: false,
+};
+
+export const DEFAULT_CONSTRUCTION_MGMT: ConstructionMgmtSettings = {
+  enabled: false,
+};
 
 /**
  * Builds the complete 3D parametric building model from project parameters.
@@ -1053,6 +1201,20 @@ export function generateBuildingMesh(
 ): MeshDocument {
   const stories = Math.max(1, project.stories || 2);
   const plotSqm = project.plotSqm || 200; // e.g. 200 m2 (3 katha)
+
+  // ── Merge user customization with defaults (single source of truth) ──
+  const acc = custom?.accessibility ?? DEFAULT_ACCESSIBILITY;
+  const accResolved: AccessibilitySettings = {
+    ...DEFAULT_ACCESSIBILITY,
+    ...acc,
+    elevatorRequired: acc.elevatorRequired ?? stories >= 4,
+    wcClearMm: acc.wcClearMm ?? DEFAULT_ACCESSIBILITY.wcClearMm,
+    elevatorWellMm: acc.elevatorWellMm ?? DEFAULT_ACCESSIBILITY.elevatorWellMm,
+  };
+  const sust = custom?.sustainability ?? DEFAULT_SUSTAINABILITY_DHAKA;
+  const fire = custom?.fireSafety ?? { ...DEFAULT_FIRE_SAFETY, sprinklerSystem: stories >= 6 };
+  const ve = custom?.valueEngineering ?? DEFAULT_VALUE_ENGINEERING;
+  const cm = custom?.constructionMgmt ?? DEFAULT_CONSTRUCTION_MGMT;
 
   // Derive plot dimensions in mm (assume standard ~1:1.2 aspect ratio in Dhaka/Chittagong)
   const plotSide = Math.sqrt(plotSqm);
@@ -1079,13 +1241,24 @@ export function generateBuildingMesh(
   const spanX = bldgWidthMm / (colsX - 1);
   const spanY = bldgLengthMm / (colsY - 1);
 
-  const colSizeX = custom?.columnWidthMm || (stories >= 6 ? 350 : 250);
-  const colSizeY = custom?.columnDepthMm || (stories >= 6 ? 350 : 250);
-  const footingPadSize = custom?.footingSizeMm || (stories >= 6 ? 2000 : 1800);
-  const footingDepth = custom?.footingDepthMm || (stories >= 6 ? 2000 : 1600);
+  // Auto column sizing — validated by scripts/structural-sweep.ts (BNBC 2020, M25/Fe415,
+  // 12-column 4x3 grid, target column utilization ≤ 0.80 and beam ≤ 0.85):
+  //   Stories 2-3: 300mm all plots | 5: 300/300/350 | 7: 350/350/400 (by plot area)
+  const plotArea = project.plotSqm || 200;
+  const autoCol = (s: number, area: number): number => {
+    if (s <= 3) return 300;
+    if (s <= 6) return area > 300 ? 350 : 300;
+    return area > 300 ? 400 : 350;
+  };
+  const defaultCol = Math.max(300, autoCol(stories, plotArea));
+  const colSizeX = custom?.columnWidthMm || defaultCol;
+  const colSizeY = custom?.columnDepthMm || defaultCol;
+  const footingPadSize = custom?.footingSizeMm || Math.max(1800, stories >= 5 ? 2000 : 1800);
+  const footingDepth = custom?.footingDepthMm || Math.max(1600, stories >= 5 ? 1800 : 1600);
   const storyHeightMm = 3000;
   const slabThickMm = 125;
-  const beamDepthMm = 450;
+  // Beam depth scales with column size (spanX/Y ~ 4-6m) — 500mm for 300mm+ columns
+  const beamDepthMm = colSizeX >= 300 ? 500 : 450;
   const beamWidthMm = 250;
   const balconyDepth = custom?.balconyDepthMm || 1200;
 
@@ -1243,19 +1416,19 @@ export function generateBuildingMesh(
     ),
   );
 
-  // Plinth Wall (450mm elevated finish level above road driveway)
+  // Plinth Wall (450mm elevated finish level above road driveway) — Z starts at ground floor level
   allObjects.push(
     createBoxMesh(
       "plinth_wall",
       "Elevated Plinth Wall (450mm above driveway)",
-      "wall",
+      "plinth",
       "ground_floor",
       frameMinX - 50,
       frameMinY - 50,
-      150,
+      600,
       frameMaxX + 50,
       frameMaxY + 50,
-      600,
+      1050,
     ),
   );
 
@@ -1266,7 +1439,7 @@ export function generateBuildingMesh(
       createBoxMesh(
         `plinth_step_${s + 1}`,
         `Entrance Step ${s + 1}`,
-        "stair",
+        "canopy",
         "ground_floor",
         bldgMinX + spanX * 1.5,
         plinthEdgeY + s * 250,
@@ -1332,7 +1505,9 @@ export function generateBuildingMesh(
     }
   }
 
-  // Ground Entrance Canopy (Porch Roof over main entry, underside flush with beam line)
+  // Ground Entrance Canopy (Porch Roof over main entry) —
+// underside sits 10mm ABOVE the ground-floor beam top to eliminate beam overlap
+  const beamTopG = storyHeightMm; // beam top = storyHeightMm (beams span storyHeightMm - beamDepthMm → storyHeightMm)
   allObjects.push(
     createBoxMesh(
       "entrance_canopy",
@@ -1341,23 +1516,23 @@ export function generateBuildingMesh(
       "ground_floor",
       bldgMinX + spanX * 1.2,
       bldgMaxY,
-      2550,
+      beamTopG + 10,
       bldgMinX + spanX * 2.8,
       bldgMaxY + 1500,
-      2675,
+      beamTopG + 135,
     ),
   );
-  // Canopy Support Pillars
+  // Canopy Support Pillars (reclassified as "canopy" to avoid skewing structural column analysis)
   allObjects.push(
     createBoxMesh(
       "canopy_pillar_1",
       "Canopy Left Pillar",
-      "column",
+      "canopy",
       "ground_floor",
       bldgMinX + spanX * 1.3,
       bldgMaxY + 1350,
       150,
-      bldgMinX + spanX * 1.3 + 200,
+      bldgMinX + spanX * 1.3 + colSizeX,
       bldgMaxY + 1500,
       2550,
     ),
@@ -1366,9 +1541,9 @@ export function generateBuildingMesh(
     createBoxMesh(
       "canopy_pillar_2",
       "Canopy Right Pillar",
-      "column",
+      "canopy",
       "ground_floor",
-      bldgMinX + spanX * 2.7 - 200,
+      bldgMinX + spanX * 2.7 - colSizeX,
       bldgMaxY + 1350,
       150,
       bldgMinX + spanX * 2.7,
@@ -1661,8 +1836,23 @@ export function generateBuildingMesh(
         allObjects.push(...createFittedKitchen(`f${s}_${room.id}_kit`, x0, y0, geo.wallBotZ, x1 - x0, y1 - y0, phaseKey));
       } else if (room.kind === "bath") {
         allObjects.push(...createFittedBath(`f${s}_${room.id}_bath`, x0, y0, geo.wallBotZ, x1 - x0, y1 - y0, phaseKey));
-      } else if (room.kind === "stair") {
-        allObjects.push(...createFittedStair(`f${s}_${room.id}_stair`, x0, y0, geo.wallBotZ, x1 - x0, y1 - y0, geo.wallTopZ - geo.wallBotZ, phaseKey));
+    } else if (room.kind === "stair") {
+        const stairResult = createFittedStair(`f${s}_${room.id}_stair`, x0, y0, geo.wallBotZ, x1 - x0, y1 - y0, geo.wallTopZ - geo.wallBotZ, phaseKey);
+        if (stairResult.length === 0) {
+          // Stairwell too narrow for dog-leg — emit a simple open-riser stair void marker
+          allObjects.push(
+            createBoxMesh(
+              `f${s}_stair_void`,
+              `Floor ${s} Stair Core (open riser)`,
+              "stair",
+              phaseKey,
+              x0, y0, geo.wallBotZ,
+              x1, y1, geo.wallTopZ,
+            ),
+          );
+        } else {
+          allObjects.push(...stairResult);
+        }
       }
     }
   }
@@ -1778,7 +1968,7 @@ export function generateBuildingMesh(
     ),
   );
 
-  // Elevated Overhead RCC Water Reservoir Tank with Support Piers
+  // Overhead Water Reservoir Tank with Support Piers (kind="tank" to avoid skewing column analysis)
   const tankCapacity = stories * 2500;
   // 4 Support Concrete Piers elevating tank above penthouse
   const pierZ = roofZ + slabThickMm + 2525;
@@ -1786,13 +1976,13 @@ export function generateBuildingMesh(
     createBoxMesh(
       "tank_pier_1",
       "Water Tank Support Pier 1",
-      "column",
+      "tank",
       "roof",
       bldgMinX + spanX * 1.1,
       bldgMinY + spanY * 0.6,
       pierZ,
-      bldgMinX + spanX * 1.1 + 250,
-      bldgMinY + spanY * 0.6 + 250,
+      bldgMinX + spanX * 1.1 + colSizeX,
+      bldgMinY + spanY * 0.6 + colSizeY,
       pierZ + 800,
     ),
   );
@@ -1800,13 +1990,13 @@ export function generateBuildingMesh(
     createBoxMesh(
       "tank_pier_2",
       "Water Tank Support Pier 2",
-      "column",
+      "tank",
       "roof",
-      bldgMinX + spanX * 2.0 - 250,
+      bldgMinX + spanX * 2.0 - colSizeX,
       bldgMinY + spanY * 0.6,
       pierZ,
       bldgMinX + spanX * 2.0,
-      bldgMinY + spanY * 0.6 + 250,
+      bldgMinY + spanY * 0.6 + colSizeY,
       pierZ + 800,
     ),
   );
@@ -1814,12 +2004,12 @@ export function generateBuildingMesh(
     createBoxMesh(
       "tank_pier_3",
       "Water Tank Support Pier 3",
-      "column",
+      "tank",
       "roof",
       bldgMinX + spanX * 1.1,
-      bldgMinY + spanY * 1.4 - 250,
+      bldgMinY + spanY * 1.4 - colSizeY,
       pierZ,
-      bldgMinX + spanX * 1.1 + 250,
+      bldgMinX + spanX * 1.1 + colSizeX,
       bldgMinY + spanY * 1.4,
       pierZ + 800,
     ),
@@ -1828,10 +2018,10 @@ export function generateBuildingMesh(
     createBoxMesh(
       "tank_pier_4",
       "Water Tank Support Pier 4",
-      "column",
+      "tank",
       "roof",
-      bldgMinX + spanX * 2.0 - 250,
-      bldgMinY + spanY * 1.4 - 250,
+      bldgMinX + spanX * 2.0 - colSizeX,
+      bldgMinY + spanY * 1.4 - colSizeY,
       pierZ,
       bldgMinX + spanX * 2.0,
       bldgMinY + spanY * 1.4,
@@ -1856,30 +2046,23 @@ export function generateBuildingMesh(
   );
 
   // ==========================================
-  // PHASE FILTERING
+  // PHASE FILTERING (extracted to filterMeshByPhase helper)
   // ==========================================
-  let filtered = allObjects;
-  if (phaseFilter && phaseFilter !== "final") {
-    if (phaseFilter.includes("foundation") || phaseFilter.includes("site")) {
-      filtered = allObjects.filter((o) => o.phase === "foundation");
-    } else if (phaseFilter.includes("ground")) {
-      filtered = allObjects.filter((o) => o.phase === "ground_floor");
-    } else if (phaseFilter.includes("roof")) {
-      filtered = allObjects.filter((o) => o.phase === "roof");
-    } else if (phaseFilter.includes("floor-") || phaseFilter.includes("floor_")) {
-      const match = phaseFilter.match(/\d+/);
-      const floorNum = match ? Number(match[0]) : 1;
-      filtered = allObjects.filter((o) => o.phase === `floor_${floorNum}`);
-    }
-  }
+  let filtered = filterMeshByPhase(allObjects, phaseFilter);
 
   // Fallback to allObjects if filter yields empty
-  if (filtered.length === 0) filtered = allObjects;
+  if (filtered.length === 0) {
+    console.warn(`Phase filter "${phaseFilter}" yielded no objects; returning full mesh`);
+    filtered = allObjects;
+  }
+
+  // Filter out any null entries (degenerate boxes from createBoxMesh)
+  const cleanObjects = filtered.filter((o): o is MeshObject => o != null);
 
   return {
     schemaVersion: "0.1.0",
     units: "mm",
-    objects: filtered,
+    objects: cleanObjects,
     ...(notes.length > 0 ? { notes } : {}),
   };
 }

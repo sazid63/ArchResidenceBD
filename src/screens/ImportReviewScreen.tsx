@@ -100,8 +100,12 @@ export function ImportReviewScreen() {
     <div className="screen">
       <PageHeader title={t("importReview")} subtitle={t("importReviewSubtitle")} />
       <div className="row">
+        <label htmlFor="import-pdf-input" className="visually-hidden">
+          {t("importPdfPlaceholder")}
+        </label>
         <input
           className="input grow"
+           id="import-pdf-input"
           value={pdf}
           placeholder={t("importPdfPlaceholder")}
           onChange={(event) => setPdf(event.target.value)}

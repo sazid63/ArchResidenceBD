@@ -68,9 +68,13 @@ const STEEL_GRADES = {
 };
 
 // Development length per ACI 318-19 Eq 25.4.2.3
-function developmentLength(db: number, f_y: number, f'_c: number, lambda: number = 1.0): number {
-  // ld = (fy * db) / (20 * lambda * sqrt(f'c)) per ACI simplified
-  return (f_y * db) / (20 * lambda * Math.sqrt(f'_c));
+// ld = (fy * ψt * ψe * ψs * λ * db) / (25 * √fc') for deformed bars in tension
+// Simplified: assume ψt=1.0, ψe=1.0, ψs=1.0 (uncoated, normal spacing)
+function developmentLength(db: number, f_y: number, fc_: number, lambda: number = 1.0): number {
+  // ACI 318-19 Eq 25.4.2.3: ld = (fy * db) / (25 * λ * √fc') * ψt * ψe * ψs
+  // For standard deformed bars: ψt=1.0, ψe=1.0, ψs=1.0
+  // Unit conversion: fy in MPa, db in mm, fc' in MPa -> ld in mm
+  return (f_y * db) / (25 * lambda * Math.sqrt(fc_));
 }
 
 // Lap splice length per ACI 318-19 §25.4.4
@@ -82,11 +86,12 @@ function lapSpliceLength(ld: number, class_A_or_B: "A" | "B"): number {
 }
 
 // Hook development length per ACI 318-19 §25.3.1
-function hookDevelopmentLength(db: number, f_y: number, f'_c: number): number {
-  // 90° hook: ldh = 8 * db * sqrt(f_y / f'_c)
-  // 180° hook: ldh = 6 * db * sqrt(f_y / f'_c)
-  // For seismic (135°), use 90° hook values
-  return 8 * db * Math.sqrt(f_y / f'_c);
+// 90° hook: ldh = 8 * db * √(fy / fc')
+// 180° hook: ldh = 6 * db * √(fy / fc')
+// For seismic (135°), use 90° hook values
+function hookDevelopmentLength(db: number, f_y: number, fc_: number, angle: number = 90): number {
+  const multiplier = angle === 180 ? 6 : 8; // 90° or 135° uses 8, 180° uses 6
+  return multiplier * db * Math.sqrt(f_y / fc_);
 }
 
 export function generateRebarDetails(
@@ -98,6 +103,16 @@ export function generateRebarDetails(
   steelGrade: 250 | 415 | 500,
   coverMm: number
 ): BarBendingSchedule {
+  // Edge case handling: validate dimensions
+  if (dimensions.width <= 0 || dimensions.depth <= 0 || dimensions.length <= 0) {
+    throw new Error(`Invalid dimensions for ${memberType}: all dimensions must be > 0`);
+  }
+  // Check for extreme aspect ratios (e.g., very thin walls)
+  const maxDim = Math.max(dimensions.width, dimensions.depth, dimensions.length);
+  const minDim = Math.min(dimensions.width, dimensions.depth, dimensions.length);
+  if (maxDim / minDim > 100) {
+    console.warn(`Extreme aspect ratio (${maxDim / minDim}:1) for ${memberType} - results may be inaccurate`);
+  }
   const fck = CONCRETE_GRADES[concreteGrade].fck;
   const fy = STEEL_GRADES[steelGrade].fy;
   const fyd = STEEL_GRADES[steelGrade].fyd;
@@ -192,7 +207,7 @@ export function generateRebarDetails(
     items.push({
       mark: `C-LINK`,
       member: memberType.toUpperCase(),
-      role: "links",
+      role: "link",
       shape: "link",
       diameterMm: linkDia,
       cutLengthMm: 2 * (d - 2 * coverMm - 2 * linkDia) + 2 * 11.9 * linkDia, // perimeter + hooks
@@ -207,7 +222,8 @@ export function generateRebarDetails(
       placement: {
         position: "full-height",
         coverMm: coverMm + linkDia,
-        spacingMm: linkSpacing
+        spacingMm: linkSpacing,
+        zones: [{ startMm: 0, lengthMm: 600, count: Math.ceil(600 / linkSpacing) }]
       },
       codeReferences: ["BNBC 2020 §7.10.5", "ACI 318-19 §25.7.1"]
     });
@@ -216,6 +232,10 @@ export function generateRebarDetails(
     const b = dimensions.width;
     const h = dimensions.depth;
     const L = dimensions.length;
+    
+    // Shear links - declared first to avoid hoisting issues
+    const linkDia = 8;
+    const linkSpacing = 150;
     
     // Top and bottom main bars
     const mainBarDia = Math.max(12, Math.min(20, Math.ceil(h / 12))); // heuristic
@@ -248,8 +268,9 @@ export function generateRebarDetails(
       weightKg: 0,
       placement: {
         position: "top",
-        coverMm: coverMm + linkDia || 12,
-        spacingMm: Math.round((b - 2 * coverMm) / (numTopBars - 1))
+        coverMm: coverMm + linkDia,
+        spacingMm: Math.round((b - 2 * coverMm) / (numTopBars - 1)),
+        zones: [{ startMm: 0, lengthMm: 2 * h, count: Math.ceil(2 * h / linkSpacing) }]
       },
       codeReferences: ["BNBC 2020 §5.5.2", "ACI 318-19 §9.3.1"]
     });
@@ -269,20 +290,18 @@ export function generateRebarDetails(
       weightKg: 0,
       placement: {
         position: "bottom",
-        coverMm: coverMm + linkDia || 12,
-        spacingMm: Math.round((b - 2 * coverMm) / (numBottomBars - 1))
+        coverMm: coverMm + linkDia,
+        spacingMm: Math.round((b - 2 * coverMm) / (numBottomBars - 1)),
+        zones: [{ startMm: L / 2 - h, lengthMm: 2 * h, count: Math.ceil(2 * h / linkSpacing) }]
       },
       codeReferences: ["BNBC 2020 §5.5.2"]
     });
     
     // Shear links
-    const linkDia = 8;
-    const linkSpacing = 150; // typical for non-seismic zones
-    
     items.push({
       mark: `B-LINK`,
       member: memberType.toUpperCase(),
-      role: "links",
+      role: "link",
       shape: "link",
       diameterMm: linkDia,
       cutLengthMm: 2 * (b + h) - 8 * coverMm + 2 * 11.9 * linkDia,
@@ -337,7 +356,8 @@ export function generateRebarDetails(
       placement: {
         position: "bottom",
         coverMm: coverMm,
-        spacingMm: meshSpacing
+        spacingMm: meshSpacing,
+        zones: [{ startMm: 0, lengthMm: L, count: numLongBars }]
       },
       codeReferences: ["BNBC 2020 §5.5.2"]
     });
@@ -359,7 +379,8 @@ export function generateRebarDetails(
       placement: {
         position: "bottom",
         coverMm: coverMm + meshBarDia,
-        spacingMm: meshSpacing
+        spacingMm: meshSpacing,
+        zones: [{ startMm: 0, lengthMm: b, count: numTransBars }]
       },
       codeReferences: ["BNBC 2020 §5.5.2"]
     });

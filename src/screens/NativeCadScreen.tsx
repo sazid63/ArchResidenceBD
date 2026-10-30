@@ -4,7 +4,7 @@ import type { MeshDocument } from "../cad/mesh";
 import { MeshViewer } from "../cad/viewer";
 import { useI18n } from "../i18n";
 import { Badge, Button, Card, Chip, PageHeader, Stat } from "../ui/kit";
-import { getActiveProject, BuildingProject } from "../engine/projectState";
+import { getActiveProject, BuildingProject, saveActiveProject } from "../engine/projectState";
 import { generateBuildingMesh, BuildingCustomization } from "../cad/parametricBuildingGenerator";
 import {
   analyzeBeam,
@@ -16,7 +16,50 @@ import {
   BNBC_DEFAULT,
   type RectSection,
 } from "../cad/structuralEngine";
+import { buildIfcStep, buildFreeCadMacro, orderedPhases } from "../cad/exporters";
+import type { Vec3 } from "../cad/viewer";
 import "../cad/workspace.css";
+
+interface TitleBlockData {
+  projectName: string;
+  projectAddress: string;
+  projectNumber: string;
+  drawingNumber: string;
+  drawingTitle: string;
+  scale: string;
+  drawnBy: string;
+  checkedBy: string;
+  approvedBy: string;
+  date: string;
+  revision: string;
+  revisionDate: string;
+  revisionNote: string;
+  northArrow: boolean;
+  logoPath: string;
+}
+
+function generateTitleBlockSVG(tb: TitleBlockData) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 594" style="background:white;font-family:Arial,sans-serif">
+    <rect x="0" y="0" width="840" height="594" fill="white" stroke="#333" stroke-width="2"/>
+    <rect x="10" y="10" width="820" height="80" fill="none" stroke="#333" stroke-width="1"/>
+    <text x="20" y="35" font-size="16" font-weight="bold">${tb.projectName}</text>
+    <text x="20" y="55" font-size="10">${tb.projectAddress}</text>
+    <text x="20" y="75" font-size="10">Project No: ${tb.projectNumber}</text>
+    <rect x="650" y="10" width="180" height="80" fill="none" stroke="#333" stroke-width="1"/>
+    <text x="660" y="30" font-size="10">${tb.drawingNumber}</text>
+    <text x="660" y="45" font-size="10">${tb.drawingTitle}</text>
+    <text x="660" y="60" font-size="10">Scale: ${tb.scale}</text>
+    <text x="660" y="75" font-size="10">Date: ${tb.date}</text>
+    <rect x="10" y="100" width="400" height="50" fill="none" stroke="#333" stroke-width="1"/>
+    <text x="20" y="120" font-size="10">Drawn: ${tb.drawnBy}</text>
+    <text x="20" y="135" font-size="10">Checked: ${tb.checkedBy}</text>
+    <text x="20" y="115" font-size="10">Approved: ${tb.approvedBy}</text>
+    <rect x="420" y="100" width="410" height="50" fill="none" stroke="#333" stroke-width="1"/>
+    <text x="430" y="120" font-size="10">Rev: ${tb.revision}</text>
+    <text x="430" y="135" font-size="10">Date: ${tb.revisionDate}</text>
+    <text x="430" y="150" font-size="10">${tb.revisionNote}</text>
+  </svg>`;
+}
 
 interface Props {
   designPhaseId?: string;
@@ -51,24 +94,54 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
   const [hidden, setHidden] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
   const [cameraMode, setCameraMode] = useState<"iso" | "front" | "side" | "top">("iso");
+  const [measureMode, setMeasureMode] = useState(false);
+  const [measurePoints, setMeasurePoints] = useState<{ x: number; y: number; z: number }[]>([]);
+  const [measureDistance, setMeasureDistance] = useState(0);
 
-  const [customParams, setCustomParams] = useState<BuildingCustomization>({
-    columnWidthMm: project.stories >= 6 ? 350 : 250,
-    columnDepthMm: project.stories >= 6 ? 350 : 250,
-    footingSizeMm: project.stories >= 6 ? 2000 : 1800,
-    footingDepthMm: project.stories >= 6 ? 2000 : 1600,
-    balconyDepthMm: 1200,
+  // Title block state
+  const [titleBlock, setTitleBlock] = useState<TitleBlockData>({
+    projectName: project.name,
+    projectAddress: project.address,
+    projectNumber: project.id.slice(0, 8).toUpperCase(),
+    drawingNumber: "A-101",
+    drawingTitle: "Ground Floor Plan",
+    scale: "1:100",
+    drawnBy: "ArchResidenceBD AI",
+    checkedBy: "",
+    approvedBy: "",
+    date: new Date().toLocaleDateString("en-GB"),
+    revision: "0",
+    revisionDate: "",
+    revisionNote: "",
+    northArrow: true,
+    logoPath: "",
   });
+
+  const [customParams, setCustomParams] = useState<BuildingCustomization>(() => {
+    const base = project.stories >= 6 ? {
+      columnWidthMm: 350, columnDepthMm: 350,
+      footingSizeMm: 2000, footingDepthMm: 2000,
+      balconyDepthMm: 1200,
+    } : {
+      columnWidthMm: 300, columnDepthMm: 300,
+      footingSizeMm: 1800, footingDepthMm: 1600,
+      balconyDepthMm: 1200,
+    };
+    return { ...base, ...(project.customization || {}) };
+  });
+
+  // Persist customization changes back to project
+  const setCustomAndSave = (patch: Partial<BuildingCustomization>) => {
+    const next = { ...customParams, ...patch };
+    setCustomParams(next);
+    const updatedProject = { ...project, customization: next, updatedAt: new Date().toISOString() };
+    setProject(updatedProject);
+    saveActiveProject(updatedProject);
+  };
 
   // Pre-generate mesh synchronously so state is never null
   const [mesh, setMesh] = useState<MeshDocument>(() =>
-    generateBuildingMesh(project, designPhaseId, {
-      columnWidthMm: project.stories >= 6 ? 350 : 250,
-      columnDepthMm: project.stories >= 6 ? 350 : 250,
-      footingSizeMm: project.stories >= 6 ? 2000 : 1800,
-      footingDepthMm: project.stories >= 6 ? 2000 : 1600,
-      balconyDepthMm: 1200,
-    }),
+    generateBuildingMesh(project, designPhaseId, customParams),
   );
 
   // Archie CAD Copilot chatbox state
@@ -126,6 +199,63 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
       viewerRef.current = null;
     };
   }, []);
+
+  // Handle measurement clicks
+  useEffect(() => {
+    if (!measureMode) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const handleClick = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      viewerRef.current?.handleMeasureClick(x, y);
+    };
+
+    canvas.addEventListener("click", handleClick);
+    return () => canvas.removeEventListener("click", handleClick);
+  }, [measureMode]);
+
+  // Measurement callback
+  const handleMeasure = (points: Vec3[], totalDistance: number) => {
+    setMeasurePoints(points.map(p => ({ x: p[0], y: p[1], z: p[2] })));
+    setMeasureDistance(totalDistance);
+  };
+
+  // Enable/disable measurement mode
+  const toggleMeasure = () => {
+    const viewer = viewerRef.current;
+    if (!viewer) return;
+    const next = !measureMode;
+    setMeasureMode(next);
+    if (next) {
+      viewer.enableMeasurements(handleMeasure);
+      const canvas = canvasRef.current;
+      if (canvas) {
+        // Create overlay canvas for measurement lines
+        let overlay = canvas.parentElement?.querySelector(".measure-overlay") as HTMLCanvasElement | null;
+        if (!overlay) {
+          overlay = document.createElement("canvas");
+          overlay.className = "measure-overlay";
+          overlay.style.position = "absolute";
+          overlay.style.top = "0";
+          overlay.style.left = "0";
+          overlay.style.pointerEvents = "none";
+          overlay.style.zIndex = "10";
+          canvas.parentElement?.appendChild(overlay);
+        }
+        overlay.width = canvas.width;
+        overlay.height = canvas.height;
+        viewer.setMeasureOverlay(overlay);
+      }
+    } else {
+      viewer.disableMeasurements();
+      viewer.setMeasureOverlay(null);
+      setMeasurePoints([]);
+      setMeasureDistance(0);
+    }
+  };
 
   // Update mesh geometry whenever project, activeTab, or customParams change
   useEffect(() => {
@@ -193,10 +323,7 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
           setDesignChat((prev) => [...prev, { who: "ai", text: data.reply }]);
         }
         if (data.params && Object.keys(data.params).length > 0) {
-          setCustomParams((prev) => ({
-            ...prev,
-            ...data.params,
-          }));
+          setCustomAndSave(data.params);
         }
         setAiTyping(false);
         return;
@@ -245,7 +372,7 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
             : `[Archie CAD Copilot] Applied parameter modification: "${prompt}". Recomputed 3D solids.`;
       }
 
-      setCustomParams(updated);
+      setCustomAndSave(updated);
       setDesignChat((prev) => [...prev, { who: "ai", text: reply }]);
       setAiTyping(false);
     }, 400);
@@ -326,10 +453,10 @@ print("ArchResidenceBD: Watertight 3D Building Assembly Successfully Generated i
       const steel = STEEL_GRADES[415];
 
       const colSection: RectSection = {
-        width: customParams.columnWidthMm,
-        depth: customParams.columnDepthMm,
+        width: customParams.columnWidthMm ?? 300,
+        depth: customParams.columnDepthMm ?? 300,
         cover: 40,
-        mainBarDia: customParams.columnWidthMm >= 350 ? 16 : 12,
+        mainBarDia: (customParams.columnWidthMm ?? 300) >= 350 ? 16 : 12,
         numMainBars: 8,
         linkDia: 8,
       };
@@ -375,8 +502,8 @@ print("ArchResidenceBD: Watertight 3D Building Assembly Successfully Generated i
         sptN: 12,
       };
       const footing = designFooting(
-        customParams.columnWidthMm,
-        customParams.columnDepthMm,
+        customParams.columnWidthMm ?? 300,
+        customParams.columnDepthMm ?? 300,
         columnLoad,
         soil,
         concrete,
@@ -411,6 +538,22 @@ print("ArchResidenceBD: Watertight 3D Building Assembly Successfully Generated i
           <div className="row" style={{ gap: "8px" }}>
             <Button variant="soft" onClick={exportFreeCadMacro}>
               {lang === "bn" ? "ফ্রিক্যাড ম্যাক্রো (.py)" : "Export FreeCAD (.py)"}
+            </Button>
+            <Button variant="soft" onClick={() => setActiveTab("title-block")}>
+              {lang === "bn" ? "টাইটেল ব্লক ✏️" : "Title Block ✏️"}
+            </Button>
+            <Button variant="soft" onClick={() => {
+              const phases = orderedPhases(mesh);
+              const ifc = buildIfcStep(mesh, { projectName: project.name, stories: project.stories, plotSize: project.plotSize, plotUnit: project.plotUnit });
+              const macro = buildFreeCadMacro(mesh, { projectName: project.name, stories: project.stories, plotSize: project.plotSize, plotUnit: project.plotUnit });
+              const summary = JSON.stringify({ project, phases, meshSummary: { objects: mesh.objects.length } }, null, 2);
+              const blob = new Blob([ifc, "---PEER-REVIEW-MARKER---\n", macro, "---PEER-REVIEW-MARKER---\n", summary], { type: "text/plain" });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url; a.download = `${project.id}_peer-review.txt`; a.click();
+              URL.revokeObjectURL(url);
+            }}>
+              {lang === "bn" ? "সম্পাদক প্যাক 📋" : "Peer Review 📋"}
             </Button>
             <Button
               variant="primary"
@@ -552,13 +695,38 @@ print("ArchResidenceBD: Watertight 3D Building Assembly Successfully Generated i
                 <Button variant="ghost" onClick={handleResetCamera} style={{ padding: "4px 8px", fontSize: "11px" }} title="Reset Camera">
                   ⟲
                 </Button>
+                <Button
+                  variant={measureMode ? "primary" : "ghost"}
+                  onClick={toggleMeasure}
+                  style={{ padding: "4px 8px", fontSize: "11px" }}
+                  title={measureMode ? "Exit measurement mode" : "Enter measurement mode — click on model to measure distances"}
+                >
+                  📏 {measureMode ? (lang === "bn" ? "মাপ বন্ধ" : "Stop") : (lang === "bn" ? "মাপুন" : "Measure")}
+                </Button>
               </div>
             </div>
 
-            <div className="cad-viewport">
+            <div className="cad-viewport" style={{ position: "relative" }}>
               <canvas ref={canvasRef} className="cad-canvas" />
               {!mesh && !error ? <span className="muted small">{t("cadLoading")}</span> : null}
             </div>
+
+            {measureMode && measurePoints.length > 0 && (
+              <div style={{ marginTop: "8px", padding: "8px 12px", background: "var(--surface-2)", borderRadius: "var(--r-md)", fontSize: "13px", fontFamily: "monospace" }}>
+                <div className="row-between" style={{ marginBottom: "4px" }}>
+                  <span>{lang === "bn" ? "মাপন" : "Measurement"}</span>
+                  <Button variant="ghost" onClick={() => viewerRef.current?.clearMeasurements()} style={{ padding: "2px 8px", fontSize: "11px" }}>
+                    {lang === "bn" ? "সাফ করুন" : "Clear"}
+                  </Button>
+                </div>
+                {measurePoints.length > 0 && (
+                  <div className="row" style={{ gap: "16px", flexWrap: "wrap" }}>
+                    <span>Points: {measurePoints.length}</span>
+                    <span>Distance: {measureDistance.toFixed(0)} mm ({measureDistance / 1000} m)</span>
+                  </div>
+                )}
+              </div>
+            )}
 
             <div className="row-between">
               <span className="faint small">
@@ -733,7 +901,11 @@ print("ArchResidenceBD: Watertight 3D Building Assembly Successfully Generated i
 
             {/* Input & Send */}
             <div className="row" style={{ gap: "6px" }}>
+              <label htmlFor="cad-chat-input" className="visually-hidden">
+                {lang === "bn" ? "৩D ফ্রেম পরিবর্তন লিখুন" : "Describe 3D frame modification"}
+              </label>
               <input
+                id="cad-chat-input"
                 type="text"
                 className="input grow"
                 placeholder={
@@ -806,7 +978,7 @@ print("ArchResidenceBD: Watertight 3D Building Assembly Successfully Generated i
                     BNBC 2020 · M25 · Fe415 · {lang === "bn" ? "সম্মিলিত ধ্বস নকশা" : "Strength Design (LRFD)"}
                   </span>
                 </div>
-                <Badge tone="success">{lang === "bn" ? "লাইভ" : "LIVE"}</Badge>
+                <Badge tone="sage">{lang === "bn" ? "লাইভ" : "LIVE"}</Badge>
               </div>
 
               {/* Column */}
@@ -957,6 +1129,161 @@ print("ArchResidenceBD: Watertight 3D Building Assembly Successfully Generated i
           )}
         </div>
       </div>
+
+      {/* Title Block Editor Modal */}
+      {activeTab === "title-block" && (
+        <div className="modal-overlay" style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+          display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000
+        }} onClick={() => setActiveTab(designPhaseId)}>
+        <div className="modal" style={{
+          background: "var(--surface)", padding: "24px", borderRadius: "var(--r-lg)",
+          width: "90%", maxWidth: "600px", maxHeight: "90vh", overflow: "auto",
+          boxShadow: "var(--shadow-xl)"
+        }} onClick={e => e.stopPropagation()}>
+          <h2 style={{ marginBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            {lang === "bn" ? "টাইটেল ব্লক এডিটর" : "Title Block Editor"}
+            <Button variant="ghost" onClick={() => setActiveTab(designPhaseId)} style={{ padding: "4px 8px", fontSize: "12px" }}>✕</Button>
+          </h2>
+
+          <div className="stack" style={{ gap: "12px" }}>
+            <div className="row" style={{ gap: "12px" }}>
+              <div style={{ flex: 1 }}>
+                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-project-name">
+                  {lang === "bn" ? "প্রকল্পের নাম" : "Project Name"}
+                </label>
+                <input className="input" id="title-project-name" value={titleBlock.projectName} onChange={e => setTitleBlock({ ...titleBlock, projectName: e.target.value })} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-project-number">
+                  {lang === "bn" ? "প্রকল্প নম্বর" : "Project No."}
+                </label>
+                <input className="input" id="title-project-number" value={titleBlock.projectNumber} onChange={e => setTitleBlock({ ...titleBlock, projectNumber: e.target.value })} />
+              </div>
+            </div>
+
+            <div className="row" style={{ gap: "12px" }}>
+              <div style={{ flex: 1 }}>
+                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-drawing-number">
+                  {lang === "bn" ? "ড্রয়িং নম্বর" : "Drawing No."}
+                </label>
+                <input className="input" id="title-drawing-number" value={titleBlock.drawingNumber} onChange={e => setTitleBlock({ ...titleBlock, drawingNumber: e.target.value })} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-drawing-title">
+                  {lang === "bn" ? "ড্রয়িং শিরোনাম" : "Drawing Title"}
+                </label>
+                <input className="input" id="title-drawing-title" value={titleBlock.drawingTitle} onChange={e => setTitleBlock({ ...titleBlock, drawingTitle: e.target.value })} />
+              </div>
+            </div>
+
+            <div className="row" style={{ gap: "12px" }}>
+              <div style={{ flex: 1 }}>
+                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-scale">
+                  {lang === "bn" ? "স্কেল" : "Scale"}
+                </label>
+                <input className="input" id="title-scale" value={titleBlock.scale} onChange={e => setTitleBlock({ ...titleBlock, scale: e.target.value })} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-date">
+                  {lang === "bn" ? "তারিখ" : "Date"}
+                </label>
+                <input className="input" type="date" id="title-date" value={titleBlock.date} onChange={e => setTitleBlock({ ...titleBlock, date: e.target.value })} />
+              </div>
+            </div>
+
+            <div className="row" style={{ gap: "12px" }}>
+              <div style={{ flex: 1 }}>
+                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-drawn-by">
+                  {lang === "bn" ? "ড্রাফটসম্যান" : "Drawn By"}
+                </label>
+                <input className="input" id="title-drawn-by" value={titleBlock.drawnBy} onChange={e => setTitleBlock({ ...titleBlock, drawnBy: e.target.value })} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-checked-by">
+                  {lang === "bn" ? "চেক করা" : "Checked By"}
+                </label>
+                <input className="input" id="title-checked-by" value={titleBlock.checkedBy} onChange={e => setTitleBlock({ ...titleBlock, checkedBy: e.target.value })} />
+              </div>
+            </div>
+
+            <div className="row" style={{ gap: "12px" }}>
+              <div style={{ flex: 1 }}>
+                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-approved-by">
+                  {lang === "bn" ? "অনুমোদিত" : "Approved By"}
+                </label>
+                <input className="input" id="title-approved-by" value={titleBlock.approvedBy} onChange={e => setTitleBlock({ ...titleBlock, approvedBy: e.target.value })} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-revision">
+                  {lang === "bn" ? "রিভিশন" : "Revision"}
+                </label>
+                <input className="input" id="title-revision" value={titleBlock.revision} onChange={e => setTitleBlock({ ...titleBlock, revision: e.target.value })} />
+              </div>
+            </div>
+
+            <div className="row" style={{ gap: "12px" }}>
+              <div style={{ flex: 1 }}>
+                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-revision-date">
+                  {lang === "bn" ? "রিভিশন তারিখ" : "Revision Date"}
+                </label>
+                <input className="input" type="date" id="title-revision-date" value={titleBlock.revisionDate} onChange={e => setTitleBlock({ ...titleBlock, revisionDate: e.target.value })} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-revision-note">
+                  {lang === "bn" ? "রিভিশন নোট" : "Revision Note"}
+                </label>
+                <input className="input" id="title-revision-note" value={titleBlock.revisionNote} onChange={e => setTitleBlock({ ...titleBlock, revisionNote: e.target.value })} />
+              </div>
+            </div>
+
+            <div className="row" style={{ gap: "12px", alignItems: "flex-end" }}>
+              <div style={{ flex: 1 }}>
+                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-north-arrow">
+                  {lang === "bn" ? "উত্তর বাণ" : "North Arrow"}
+                </label>
+                <select className="input" id="title-north-arrow" value={String(titleBlock.northArrow)} onChange={e => setTitleBlock({ ...titleBlock, northArrow: e.target.value === "true" })}>
+                  <option value="true">{lang === "bn" ? "হ্যাঁ" : "Yes"}</option>
+                  <option value="false">{lang === "bn" ? "না" : "No"}</option>
+                </select>
+              </div>
+              <div style={{ flex: 1 }}>
+                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-project-address">
+                  {lang === "bn" ? "প্রকল্প ঠিকানা" : "Project Address"}
+                </label>
+                <input className="input" id="title-project-address" value={titleBlock.projectAddress} onChange={e => setTitleBlock({ ...titleBlock, projectAddress: e.target.value })} />
+              </div>
+            </div>
+
+            <div style={{ marginTop: "16px", display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+              <Button variant="soft" onClick={() => setActiveTab(designPhaseId)}>
+                {lang === "bn" ? "বাতিল" : "Cancel"}
+              </Button>
+              <Button variant="primary" onClick={() => {
+                // Save title block to project
+                const updatedProject = { ...project, titleBlock, updatedAt: new Date().toISOString() };
+                setProject(updatedProject);
+                saveActiveProject(updatedProject);
+                setActiveTab(designPhaseId);
+              }}>
+                {lang === "bn" ? "সংরক্ষণ করুন" : "Save Title Block"}
+              </Button>
+              <Button variant="soft" onClick={() => {
+                // Export title block as SVG
+                const svg = generateTitleBlockSVG(titleBlock);
+                const blob = new Blob([svg], { type: "image/svg+xml" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url; a.download = `${titleBlock.drawingNumber}_title-block.svg`; a.click();
+                URL.revokeObjectURL(url);
+              }}>
+                {lang === "bn" ? "SVG এক্সপোর্ট" : "Export SVG"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+      )}
     </div>
   );
 }

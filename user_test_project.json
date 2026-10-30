@@ -1,0 +1,286 @@
+{
+  "id": "project-1793378742626",
+  "name": "Dhanmondi 3-Story Residence",
+  "address": "Road 11, Dhanmondi, Dhaka",
+  "stories": 3,
+  "plotSize": 5,
+  "plotUnit": "katha",
+  "plotSqm": 334.45,
+  "unitsPerFloor": 2,
+  "createdAt": "2026-10-30T16:45:42.626Z",
+  "updatedAt": "2026-10-30T16:45:42.626Z",
+  "phases": [
+    {
+      "id": "phase-site",
+      "nameEn": "Site & Excavation",
+      "nameBn": "সাইট ও মাটি খনন",
+      "kind": "site",
+      "status": "completed",
+      "data": {
+        "Plot Area": "5 Katha (334.45 m²)",
+        "Excavation Volume": "736 m³",
+        "Front Road Width": "20 ft (RAJUK DAP Compliant)",
+        "Soil Bearing Capacity": "140 kN/m² (Stiff Clay)",
+        "selectedFloorplanPreset": "preset-dual-3bed"
+      },
+      "messages": [
+        {
+          "who": "user",
+          "text": "Proceed with standard dual-unit layout.",
+          "timestamp": "10:45 PM"
+        },
+        {
+          "who": "ai",
+          "text": "Site surveyed. Plot 5 katha, 20 ft front road. SBC 140 kN/m² — suitable for isolated footings.",
+          "metrics": {
+            "Plot Area": "5 Katha (334.45 m²)",
+            "Excavation Volume": "736 m³",
+            "Front Road Width": "20 ft (RAJUK DAP Compliant)",
+            "Soil Bearing Capacity": "140 kN/m² (Stiff Clay)"
+          },
+          "timestamp": "10:45 PM"
+        }
+      ]
+    },
+    {
+      "id": "phase-foundation",
+      "nameEn": "Foundation & Footings",
+      "nameBn": "ফাউন্ডেশন ও ফুটিং",
+      "kind": "foundation",
+      "status": "completed",
+      "data": {
+        "Foundation Type": "Isolated RCC Spread Footings",
+        "Total Footing Count": "12 Footings",
+        "Footing Depth": "1.8 meters (6 ft)",
+        "Grade Beam Sizing": "250mm × 450mm",
+        "Concrete Mix": "C25 (f'c = 25 MPa)",
+        "selectedFloorplanPreset": "preset-dual-3bed"
+      },
+      "messages": [
+        {
+          "who": "user",
+          "text": "Proceed with standard dual-unit layout.",
+          "timestamp": "10:45 PM"
+        },
+        {
+          "who": "ai",
+          "text": "12 isolated footings at 1.8 m depth, 250×450 mm grade beams.",
+          "metrics": {
+            "Foundation Type": "Isolated RCC Spread Footings",
+            "Total Footing Count": "12 Footings",
+            "Footing Depth": "1.8 meters (6 ft)",
+            "Grade Beam Sizing": "250mm × 450mm",
+            "Concrete Mix": "C25 (f'c = 25 MPa)"
+          },
+          "timestamp": "10:45 PM"
+        }
+      ]
+    },
+    {
+      "id": "phase-ground-floor",
+      "nameEn": "Ground Floor (Parking & Entry)",
+      "nameBn": "নিচতলা (পার্কিং ও প্রবেশদ্বার)",
+      "kind": "ground_floor",
+      "storeyIndex": 0,
+      "status": "completed",
+      "data": {
+        "Covered Parking Bays": "4 Car Slots",
+        "Clear Driveway Width": "3.6 meters (12 ft)",
+        "Ground Pavement Slab": "150 mm RCC",
+        "selectedFloorplanPreset": "preset-ground-parking"
+      },
+      "messages": [
+        {
+          "who": "user",
+          "text": "Proceed with standard dual-unit layout.",
+          "timestamp": "10:45 PM"
+        },
+        {
+          "who": "ai",
+          "text": "Ground floor: 4 car parking + lobby + stair core.",
+          "metrics": {
+            "Covered Parking Bays": "4 Car Slots",
+            "Clear Driveway Width": "3.6 meters (12 ft)",
+            "Ground Pavement Slab": "150 mm RCC"
+          },
+          "timestamp": "10:45 PM"
+        }
+      ]
+    },
+    {
+      "id": "phase-floor-1",
+      "nameEn": "1st Floor (Residential Unit)",
+      "nameBn": "১ম তলা (আবাসিক ইউনিট)",
+      "kind": "floor",
+      "storeyIndex": 1,
+      "status": "completed",
+      "data": {
+        "Selected Layout": "preset-dual-3bed",
+        "Units Per Floor": "2 Flats",
+        "RCC Slab Thickness": "125 mm (5 in)",
+        "Column Grid Sizing": "300mm × 300mm RCC Columns",
+        "selectedFloorplanPreset": "preset-dual-3bed"
+      },
+      "messages": [
+        {
+          "who": "user",
+          "text": "Proceed with standard dual-unit layout.",
+          "timestamp": "10:45 PM"
+        },
+        {
+          "who": "ai",
+          "text": "1st floor: dual 3-bed flats, 125 mm slabs.",
+          "metrics": {
+            "Selected Layout": "preset-dual-3bed",
+            "Units Per Floor": "2 Flats",
+            "RCC Slab Thickness": "125 mm (5 in)",
+            "Column Grid Sizing": "300mm × 300mm RCC Columns"
+          },
+          "timestamp": "10:45 PM"
+        }
+      ]
+    },
+    {
+      "id": "phase-floor-2",
+      "nameEn": "2nd Floor (Residential Unit)",
+      "nameBn": "২য় তলা (আবাসিক ইউনিট)",
+      "kind": "floor",
+      "storeyIndex": 2,
+      "status": "completed",
+      "data": {
+        "Selected Layout": "preset-dual-3bed",
+        "Units Per Floor": "2 Flats",
+        "RCC Slab Thickness": "125 mm (5 in)",
+        "Column Grid Sizing": "300mm × 300mm RCC Columns",
+        "selectedFloorplanPreset": "preset-dual-3bed"
+      },
+      "messages": [
+        {
+          "who": "user",
+          "text": "Proceed with standard dual-unit layout.",
+          "timestamp": "10:45 PM"
+        },
+        {
+          "who": "ai",
+          "text": "2nd floor: dual 3-bed flats, 125 mm slabs.",
+          "metrics": {
+            "Selected Layout": "preset-dual-3bed",
+            "Units Per Floor": "2 Flats",
+            "RCC Slab Thickness": "125 mm (5 in)",
+            "Column Grid Sizing": "300mm × 300mm RCC Columns"
+          },
+          "timestamp": "10:45 PM"
+        }
+      ]
+    },
+    {
+      "id": "phase-rooftop",
+      "nameEn": "Rooftop & Boundary Wall",
+      "nameBn": "ছাদ ও সীমানা প্রাচীর",
+      "kind": "roof",
+      "status": "completed",
+      "data": {
+        "Roof Terrace Slab": "125 mm RCC",
+        "Overhead Water Reservoir": "7,500 Liters RCC Tank",
+        "Parapet Height": "900 mm",
+        "selectedFloorplanPreset": "preset-dual-3bed"
+      },
+      "messages": [
+        {
+          "who": "user",
+          "text": "Proceed with standard dual-unit layout.",
+          "timestamp": "10:45 PM"
+        },
+        {
+          "who": "ai",
+          "text": "Rooftop terrace with 7,500 L overhead tank and 900 mm parapet.",
+          "metrics": {
+            "Roof Terrace Slab": "125 mm RCC",
+            "Overhead Water Reservoir": "7,500 Liters RCC Tank",
+            "Parapet Height": "900 mm"
+          },
+          "timestamp": "10:45 PM"
+        }
+      ]
+    },
+    {
+      "id": "phase-utilities",
+      "nameEn": "Utilities (Water, Sewage, Gas, Power)",
+      "nameBn": "ইউটিলিটি (পানি, স্যায়ারেজ, গ্যাস, বিদ্যুৎ)",
+      "kind": "utility",
+      "status": "completed",
+      "data": {
+        "Underground Septic Tank": "15 m³ Two-Chamber Tank",
+        "Underground Reservoir": "15,000 Liters Capacity",
+        "selectedFloorplanPreset": "preset-dual-3bed"
+      },
+      "messages": [
+        {
+          "who": "user",
+          "text": "Proceed with standard dual-unit layout.",
+          "timestamp": "10:45 PM"
+        },
+        {
+          "who": "ai",
+          "text": "Underground 15 m³ septic tank + 15,000 L reservoir.",
+          "metrics": {
+            "Underground Septic Tank": "15 m³ Two-Chamber Tank",
+            "Underground Reservoir": "15,000 Liters Capacity"
+          },
+          "timestamp": "10:45 PM"
+        }
+      ]
+    }
+  ],
+  "designStarted": true,
+  "activePhaseId": "final",
+  "customization": {
+    "concreteGrade": 25,
+    "steelGrade": 415,
+    "accessibility": {
+      "rampSlope": 12,
+      "rampWidthMm": 1200,
+      "doorClearWidthMm": 900,
+      "wcClearMm": [
+        1500,
+        1500
+      ],
+      "tactilePathWidthMm": 300,
+      "elevatorRequired": true,
+      "elevatorPitMm": 1200,
+      "elevatorWellMm": [
+        1400,
+        1100,
+        2100
+      ],
+      "grabRailHeightMm": 700,
+      "brailleSignage": true
+    },
+    "sustainability": {
+      "annualRainfallMm": 2000,
+      "tankEfficiency": 0.85,
+      "roofUValue": 0.8,
+      "wallUValue": 1.2,
+      "windowUValue": 3.5,
+      "coolingLoadFactor": 12,
+      "windowToFloorRatioMin": 0.15,
+      "daylightFactorTarget": 2
+    },
+    "fireSafety": {
+      "enabled": false,
+      "stairWidthMm": 1000,
+      "corridorWidthMm": 1200,
+      "travelDistanceMaxM": 30,
+      "fireRatingHours": 2,
+      "sprinklerSystem": false,
+      "smokeDetector": true
+    },
+    "valueEngineering": {
+      "enabled": false,
+      "autoApply": false
+    },
+    "constructionMgmt": {
+      "enabled": false
+    }
+  }
+}

@@ -51,12 +51,17 @@ export function UnitsScreen() {
     <div className="screen">
       <PageHeader title={t("unitsTitle")} subtitle={t("unitsSubtitle")} />
       <div className="row">
+        <label htmlFor="units-value-input" className="visually-hidden">
+          {t("unitsValueLabel")}
+        </label>
         <input
           className="input"
+          id="units-value-input"
           value={value}
           onChange={(event) => setValue(event.target.value)}
         />
-        <select className="input" value={from} onChange={(event) => setFrom(event.target.value)}>
+        <label htmlFor="units-from-select" className="visually-hidden">{t("unitsFromLabel")}</label>
+        <select id="units-from-select" className="input" value={from} onChange={(event) => setFrom(event.target.value)}>
           {units.map((unit) => (
             <option key={unit} value={unit}>
               {unit}
@@ -64,7 +69,8 @@ export function UnitsScreen() {
           ))}
         </select>
         <span className="faint">→</span>
-        <select className="input" value={to} onChange={(event) => setTo(event.target.value)}>
+        <label htmlFor="units-to-select" className="visually-hidden">{t("unitsToLabel")}</label>
+        <select id="units-to-select" className="input" value={to} onChange={(event) => setTo(event.target.value)}>
           {units.map((unit) => (
             <option key={unit} value={unit}>
               {unit}

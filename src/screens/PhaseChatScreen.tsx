@@ -270,7 +270,7 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
       <div className="chat-layout">
         {/* Chat Feed */}
         <Card className="chat">
-          <div className="chat-messages" style={{ overflowY: "auto", maxHeight: "500px" }}>
+          <div className="chat-messages" style={{ overflowY: "auto", maxHeight: "500px" }} role="log" aria-live="polite" aria-label={lang === "bn" ? "চ্যাট বার্তা" : "Chat messages"}>
             {(currentPhase.messages || []).map((msg, idx) => (
               <div key={idx} className={`bubble bubble--${msg.who}`}>
                 <div style={{ whiteSpace: "pre-wrap", lineHeight: 1.5 }}>{msg.text}</div>
@@ -417,8 +417,12 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
 
           {/* Input Row */}
           <div className="chat-input-row" style={{ marginTop: "12px" }}>
+            <label htmlFor="chat-input" className="visually-hidden">
+              {lang === "bn" ? "চ্যাট বার্তা লিখুন" : "Type your message"}
+            </label>
             <input
               className="input"
+               id="chat-input"
               placeholder={
                 lang === "bn"
                   ? "আপনার প্রয়োজনীয়তা লিখুন (যেমন: ফুটিং কেমন হবে, ড্রাইভওয়ে মাপ...)"
@@ -433,7 +437,12 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
                 }
               }}
             />
-            <Button variant="primary" onClick={() => handleSend()} disabled={isTyping || !inputText.trim()}>
+            <Button
+              variant="primary"
+              onClick={() => handleSend()}
+              disabled={isTyping || !inputText.trim()}
+              aria-label={lang === "bn" ? "বার্তা পাঠান" : "Send message"}
+            >
               {lang === "bn" ? "পাঠান" : "Send"}
             </Button>
           </div>

@@ -83,22 +83,27 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
 
           {/* Project Name */}
           <div className="field">
-            <label className="field-label">{t("setupNameLabel")}</label>
+            <label className="field-label" htmlFor="project-name-input">
+              {t("setupNameLabel")}
+            </label>
             <input
+              id="project-name-input"
               className="input"
               value={name}
               placeholder="e.g. Uttara Sector 3 Residence"
               onChange={(e) => setName(e.target.value)}
+              aria-required="true"
             />
           </div>
 
           {/* Number of Stories */}
           <div className="field">
-            <label className="field-label">
+            <label className="field-label" htmlFor="project-stories-input">
               {lang === "bn" ? "তলা সংখ্যা (Stories / Floors)" : "Number of Stories"}
             </label>
             <div className="row" style={{ gap: "8px" }}>
               <input
+                id="project-stories-input"
                 type="number"
                 min={1}
                 max={30}
@@ -106,6 +111,7 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
                 style={{ width: "120px" }}
                 value={stories}
                 onChange={(e) => setStories(Number(e.target.value) || 1)}
+                aria-required="true"
               />
               <div className="row" style={{ gap: "6px" }}>
                 {[2, 4, 6, 8].map((s) => (
@@ -123,11 +129,12 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
 
           {/* Plot Size & Unit */}
           <div className="field">
-            <label className="field-label">
+            <label className="field-label" htmlFor="project-plot-size-input">
               {lang === "bn" ? "জমির পরিমাণ ও একক" : "Plot Size & Unit"}
             </label>
             <div className="row" style={{ gap: "8px" }}>
               <input
+                id="project-plot-size-input"
                 type="number"
                 step="0.1"
                 min={0.1}
@@ -135,12 +142,15 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
                 style={{ width: "120px" }}
                 value={plotSize}
                 onChange={(e) => setPlotSize(Number(e.target.value) || 1)}
+                aria-required="true"
               />
               <select
+                id="project-plot-unit-select"
                 className="input"
                 style={{ width: "140px" }}
                 value={plotUnit}
                 onChange={(e) => setPlotUnit(e.target.value as "katha" | "decimal" | "sqft" | "sqm")}
+                aria-label={lang === "bn" ? "জমির একক" : "Plot unit"}
               >
                 <option value="katha">কাঠা (Katha)</option>
                 <option value="decimal">শতক / ডেসিমাল (Decimal)</option>
@@ -187,10 +197,11 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
 
           {/* Location */}
           <div className="field">
-            <label className="field-label">
+            <label className="field-label" htmlFor="project-location-select">
               {lang === "bn" ? "অবস্থান ও অনুমোদনকারী কর্তৃপক্ষ" : "Location & Authority"}
             </label>
             <select
+              id="project-location-select"
               className="input"
               value={location}
               onChange={(e) => setLocation(e.target.value)}

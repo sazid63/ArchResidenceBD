@@ -56,8 +56,12 @@ export function HelpScreen() {
     <div className="screen">
       <PageHeader title={t("helpTitle")} subtitle={t("helpSubtitle")} />
       <div className="row">
+        <label htmlFor="help-search-input" className="visually-hidden">
+          {t("helpPlaceholder")}
+        </label>
         <input
           className="input grow"
+           id="help-search-input"
           value={query}
           placeholder={t("helpPlaceholder")}
           onChange={(event) => setQuery(event.target.value)}

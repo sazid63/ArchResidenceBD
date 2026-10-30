@@ -6,6 +6,113 @@
   box-sizing: border-box;
 }
 
+/* ---- Local font faces with font-display: swap ----
+   Tokens.css ships Inter/system-ui as --font-ui, but the HTML loads
+   Plus Jakarta Sans (Latin) + Hind Siliguri (Bengali) + JetBrains Mono.
+   Re-map the stack here so the loaded fonts are used, with system fallbacks.
+   font-display: swap ensures text renders immediately from fallback, then
+   swaps to the webfont once downloaded — no invisible text while loading. */
+@font-face {
+  font-family: "ArchResUI";
+  src: url("https://fonts.gstatic.com/s/plusjakartasans/v8/pxiDyp8Pywk8kXKLrPRnsbFm6zMmSg.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "ArchResUI";
+  src: url("https://fonts.gstatic.com/s/plusjakartasans/v8/pxiDyp8Pywk8kXKLrPRnsbFm6zMmSg.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: "ArchResUI";
+  src: url("https://fonts.gstatic.com/s/plusjakartasans/v8/pxiDyp8Pywk8kXKLrPRnsbFm6zMmSg.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: "ArchResUI";
+  src: url("https://fonts.gstatic.com/s/plusjakartasans/v8/pxiDyp8Pywk8kXKLrPRnsbFm6zMmSg.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "ArchResBengali";
+  src: url("https://fonts.gstatic.com/s/hindsiliguri/v11/yUMdMIlzdpvBhQQL_Jq66Yf0.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+  unicode-range: U+0980-09FF;
+}
+@font-face {
+  font-family: "ArchResBengali";
+  src: url("https://fonts.gstatic.com/s/hindsiliguri/v11/yUMdMIlzdpvBhQQL_Jq66Yf0.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+  unicode-range: U+0980-09FF;
+}
+@font-face {
+  font-family: "ArchResBengali";
+  src: url("https://fonts.gstatic.com/s/hindsiliguri/v11/yUMdMIlzdpvBhQQL_Jq66Yf0.woff2") format("woff2");
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+0980-09FF;
+}
+@font-face {
+  font-family: "ArchResBengali";
+  src: url("https://fonts.gstatic.com/s/hindsiliguri/v11/yUMdMIlzdpvBhQQL_Jq66Yf0.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+  unicode-range: U+0980-09FF;
+}
+@font-face {
+  font-family: "ArchResMono";
+  src: url("https://fonts.gstatic.com/s/jetbrainsmono/v13/tDepLQkAJx1m4L7uXzYvM6r9.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "ArchResMono";
+  src: url("https://fonts.gstatic.com/s/jetbrainsmono/v13/tDepLQkAJx1m4L7uXzYvM6r9.woff2") format("woff2");
+  font-weight: 500;
+  font-display: swap;
+}
+
+:root {
+  --font-ui: "ArchResUI", "ArchResBengali", "Plus Jakarta Sans", "Hind Siliguri", system-ui, -apple-system, "Segoe UI", "Noto Sans Bengali", "Nirmala UI", sans-serif;
+  --font-mono: "ArchResMono", "JetBrains Mono", "Fira Code", ui-monospace, "SFMono-Regular", "Menlo", "Consolas", monospace;
+}
+
+/* Skip link — visible on focus only */
+.skip-link {
+  position: absolute;
+  top: -3rem;
+  left: 0;
+  background: var(--primary);
+  color: var(--on-primary);
+  padding: 0.5rem 1rem;
+  border-radius: var(--r-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  z-index: 10000;
+  transition: top 0.2s ease;
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+.skip-link:focus {
+  top: 0;
+}
+
+/* Reduced motion preference — disable non-essential transitions */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 html,
 body,
 #root {
@@ -23,13 +130,40 @@ body {
   transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
 }
 
+/* ---- Standardized heading hierarchy ---- */
+h1 {
+  font-size: var(--fs-3xl);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+h2 {
+  font-size: var(--fs-2xl);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+h3 {
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  line-height: 1.3;
+}
+h4 {
+  font-size: var(--fs-md);
+  font-weight: 600;
+  line-height: 1.35;
+}
+h5 {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  line-height: 1.4;
+}
 h1,
 h2,
 h3,
-h4 {
+h4,
+h5 {
   margin: 0;
-  font-weight: 600;
-  letter-spacing: -0.01em;
 }
 
 p {
@@ -53,6 +187,15 @@ textarea {
   border-radius: var(--r-md);
 }
 
+/* Monospace + weight helper classes used across screens */
+.mono,
+.font-mono {
+  font-family: var(--font-mono);
+}
+.bold {
+  font-weight: 700;
+}
+
 a {
   color: var(--primary-ink);
   text-decoration: none;
@@ -60,9 +203,36 @@ a {
 }
 
 :focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--primary) 45%, transparent);
+  outline: 3px solid var(--primary);
   outline-offset: 2px;
   border-radius: var(--r-md);
+}
+
+/* Ensure inputs also have a focus indicator beyond their border-color */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Ensure buttons have a focus-within indicator for disabled states */
+button:focus-visible:not(:disabled) {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Modal overlays should trap focus — ensure they capture focus */
+.modal-focus-trap {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
 
 ::selection {
@@ -85,4 +255,17 @@ a {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--ink-faint);
+}
+
+/* Visually hidden but accessible to screen readers */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }

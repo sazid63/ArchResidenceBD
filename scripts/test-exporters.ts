@@ -15,7 +15,7 @@ const doc = generateBuildingMesh(project);
 console.log(`[exporter-test] objects=${doc.objects.length} notes=${(doc as any).notes?.length ?? 0}`);
 
 const meta = {
-  projectName: project.projectName,
+  projectName: project.name,
   stories: project.stories ?? 2,
   plotSize: project.plotSqm,
   plotUnit: "sqm",
