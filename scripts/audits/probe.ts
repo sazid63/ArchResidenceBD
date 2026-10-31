@@ -1,6 +1,6 @@
 // Temporary probe: verify tsx can load the generator import chain.
-import { generateBuildingMesh } from "../src/cad/parametricBuildingGenerator";
-import { FLOORPLAN_PRESETS } from "../src/data/floorplanPresets";
+import { generateBuildingMesh } from "../../src/cad/parametricBuildingGenerator";
+import { FLOORPLAN_PRESETS } from "../../src/data/floorplanPresets";
 
 const preset = FLOORPLAN_PRESETS[0];
 const project = {

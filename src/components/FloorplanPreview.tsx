@@ -36,7 +36,7 @@ export function FloorplanPreview({ plan, size = 280 }: Props) {
           style={{
             width: "100%",
             height: "100%",
-            objectFit: "cover",
+            objectFit: "contain", // whole drawing, aspect ratio preserved (cover cropped rooms off)
             display: "block",
           }}
           loading="lazy"

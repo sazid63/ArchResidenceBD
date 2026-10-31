@@ -173,3 +173,17 @@ git checkout develop
 git merge --no-ff main
 git push origin develop
 ```
+## v2.4.1 — floor-plan chain + solid integrity (2026-10-31)
+- **Chosen floor plan now drives the floors.** `createNewProject` stores `floorplanId` and a `typicalPresetId`
+  (mapping in `src/data/floorplanMapping.ts`); the generator resolves each storey as own selection → typical plan →
+  preset implied by units/floor. Before, a new project had empty floor data, so every floor silently used the
+  2-unit default regardless of the plan picked.
+- Setup screen: gallery cards showed the *selected* plan's title/plot/features instead of their own; preview text ignored
+  the language; the plan was re-randomised whenever unit count changed; previews were cropped (`cover`) — fixed.
+- Generator: final `resolveSolids` pass (src/cad/solidKernel.ts) makes all solids interior-disjoint (upstream audit:
+  11,812 overlaps / 8,278 z-fighting pairs → 0); ±Y faces were wound inward on every box (non-closed meshes) — fixed;
+  door handles floated 5 mm off the leaf; entry steps rose away from the building; canopy sat 460 mm above its pillars,
+  which stood on no slab — fixed.
+- Repo: `npm run dev/start` pointed at the moved `server.ts`; `scripts/audits` and `scripts/render` imports had the wrong depth.
+- New: `scripts/audits/solid-audit.ts` (strict validator, 66 configs) and `scripts/tests/floorplan-chain.ts`.
+- Known gap: catalogue plans are images without geometry, so 3D follows the nearest parametric preset by unit count.

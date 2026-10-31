@@ -339,7 +339,10 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
 
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "8px" }}>
                 {FLOORPLAN_PRESETS.map((preset) => {
-                  const isSelected = currentPhase.data?.selectedFloorplanPreset === preset.id;
+                  const effectivePresetId =
+                    (currentPhase.data?.selectedFloorplanPreset as string | undefined) ??
+                    (currentPhase.kind === "floor" ? project.typicalPresetId : undefined);
+                  const isSelected = effectivePresetId === preset.id;
                   return (
                     <div
                       key={preset.id}
@@ -365,7 +368,14 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
                           ...currentPhase,
                           data: { ...currentPhase.data, selectedFloorplanPreset: preset.id },
                         };
-                        const updatedProject = { ...project, phases: updatedPhases, updatedAt: new Date().toISOString() };
+                        // Picking a layout on a residential floor makes it the typical plan for every floor
+                        // that has no selection of its own (ground floor keeps its parking layout).
+                        const updatedProject = {
+                          ...project,
+                          phases: updatedPhases,
+                          ...(currentPhase.kind === "floor" ? { typicalPresetId: preset.id } : {}),
+                          updatedAt: new Date().toISOString(),
+                        };
                         saveProject(updatedProject);
 
                         handleSend(selectionText);

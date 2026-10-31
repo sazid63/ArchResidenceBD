@@ -49,3 +49,6 @@ models/
 # OS
 Thumbs.db
 .DS_Store
+# generated audit/test output
+scripts/audits/audit-out/
+scripts/tests/exporter-out/

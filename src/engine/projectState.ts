@@ -7,6 +7,8 @@
  */
 
 import type { BuildingCustomization } from "../types/customization";
+import { presetForFloorPlan } from "../data/floorplanMapping";
+import { getFloorPlansByUnits } from "../data/bangladeshFloorplans";
 import {
   DEFAULT_ACCESSIBILITY,
   DEFAULT_SUSTAINABILITY_DHAKA,
@@ -45,6 +47,10 @@ export interface BuildingProject {
   phases: PhaseItem[];
   designStarted: boolean;
   activePhaseId?: string;
+  /** Catalogue plan (bangladeshFloorplans.ts id) the user picked as the typical floor. */
+  floorplanId?: string;
+  /** Parametric preset built for every floor that has no selection of its own. */
+  typicalPresetId?: string;
   /**
    * Full customization bundle — drives mesh generation, BOQ, and all optional
    * features (accessibility, sustainability, fire safety, value engineering,
@@ -165,6 +171,7 @@ export function createNewProject(params: {
   plotUnit: "katha" | "decimal" | "sqft" | "sqm";
   unitsPerFloor: number;
   address?: string;
+  floorplanId?: string;
 }): BuildingProject {
   const id = `project-${Date.now()}`;
   const plotSqm = plotToSqm(params.plotSize, params.plotUnit);
@@ -185,6 +192,11 @@ export function createNewProject(params: {
     designStarted: false,
     activePhaseId: phases[0].id,
     customization: createDefaultCustomization(),
+    floorplanId: params.floorplanId,
+    typicalPresetId: presetForFloorPlan(
+      params.floorplanId ? getFloorPlansByUnits(params.unitsPerFloor).find((f) => f.id === params.floorplanId) : null,
+      params.unitsPerFloor || 2,
+    ),
   };
 
   saveActiveProject(project);

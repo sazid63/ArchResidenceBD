@@ -23,6 +23,8 @@
 
 import { MeshDocument, MeshObject } from "./mesh";
 import { BuildingProject } from "../engine/projectState";
+import { resolveSolids, DEFAULT_PRIORITY } from "./solidKernel";
+import { resolveFloorPresetId } from "../data/floorplanMapping";
 import { FLOORPLAN_PRESETS, RoomPartition } from "../data/floorplanPresets";
 import type {
   BuildingCustomization,
@@ -116,16 +118,16 @@ export function createBoxMesh(
 
   // 6 faces * 4 vertices = 24 vertices
   const positions: number[] = [
-    // Front (+Y)
-    bMinX, bMaxY, bMinZ,
+    // Front (+Y) - counter-clockwise seen from outside (v2.4.1: was inward-wound)
     bMaxX, bMaxY, bMinZ,
-    bMaxX, bMaxY, bMaxZ,
+    bMinX, bMaxY, bMinZ,
     bMinX, bMaxY, bMaxZ,
-    // Back (-Y)
-    bMaxX, bMinY, bMinZ,
+    bMaxX, bMaxY, bMaxZ,
+    // Back (-Y) - counter-clockwise seen from outside (v2.4.1: was inward-wound)
     bMinX, bMinY, bMinZ,
-    bMinX, bMinY, bMaxZ,
+    bMaxX, bMinY, bMinZ,
     bMaxX, bMinY, bMaxZ,
+    bMinX, bMinY, bMaxZ,
     // Top (+Z)
     bMinX, bMinY, bMaxZ,
     bMaxX, bMinY, bMaxZ,
@@ -216,7 +218,7 @@ export function createDoor3DMesh(
     } else {
       objects.push(createBoxMesh(`${baseId}_leaf`, "Teak Solid Door Panel", "door", phase, x + frameThick, y + 20, z, x + width - frameThick, y + depth - 20, z + height - frameThick));
       // Brass Handle
-      objects.push(createBoxMesh(`${baseId}_handle`, "Brass Door Handle", "railing", phase, x + width - 120, y + depth + 5, z + 950, x + width - 90, y + depth + 35, z + 1070));
+      objects.push(createBoxMesh(`${baseId}_handle`, "Brass Door Handle", "railing", phase, x + width - 120, y + depth - 20, z + 950, x + width - 90, y + depth - 5, z + 1070));
     }
   } else {
     // Orientation Y
@@ -233,7 +235,7 @@ export function createDoor3DMesh(
     } else {
       objects.push(createBoxMesh(`${baseId}_leaf`, "Teak Solid Door Panel", "door", phase, x + 20, y + frameThick, z, x + depth - 20, y + width - frameThick, z + height - frameThick));
       // Brass Handle
-      objects.push(createBoxMesh(`${baseId}_handle`, "Brass Door Handle", "railing", phase, x + depth + 5, y + width - 120, z + 950, x + depth + 35, y + width - 90, z + 1070));
+      objects.push(createBoxMesh(`${baseId}_handle`, "Brass Door Handle", "railing", phase, x + depth - 20, y + width - 120, z + 950, x + depth - 5, y + width - 90, z + 1070));
     }
   }
   return objects;
@@ -1300,7 +1302,7 @@ export function generateBuildingMesh(
       frameMinY - 300,
       0,
       frameMaxX + 300,
-      frameMaxY + 300,
+      frameMaxY + 1600, // front apron carries the entry steps and canopy pillars
       150,
     ),
   );
@@ -1324,18 +1326,19 @@ export function generateBuildingMesh(
   // Main Entry Steps (3 steps rising from driveway to plinth level)
   const plinthEdgeY = frameMaxY + 50;
   for (let s = 0; s < 3; s++) {
+    // s = 0 is the step against the building (top = plinth level 600); each step out is 150 lower.
     allObjects.push(
       createBoxMesh(
         `plinth_step_${s + 1}`,
-        `Entrance Step ${s + 1}`,
+        `Entrance Step ${3 - s}`,
         "canopy",
         "ground_floor",
         bldgMinX + spanX * 1.5,
         plinthEdgeY + s * 250,
-        150 + s * 150,
+        150,
         bldgMinX + spanX * 2.5,
         plinthEdgeY + (s + 1) * 250,
-        150 + (s + 1) * 150,
+        600 - s * 150,
       ),
     );
   }
@@ -1405,10 +1408,10 @@ export function generateBuildingMesh(
       "ground_floor",
       bldgMinX + spanX * 1.2,
       bldgMaxY,
-      beamTopG + 10,
+      2400,
       bldgMinX + spanX * 2.8,
       bldgMaxY + 1500,
-      beamTopG + 135,
+      2525,
     ),
   );
   // Canopy Support Pillars (reclassified as "canopy" to avoid skewing structural column analysis)
@@ -1423,7 +1426,7 @@ export function generateBuildingMesh(
       150,
       bldgMinX + spanX * 1.3 + colSizeX,
       bldgMaxY + 1500,
-      2550,
+      2400,
     ),
   );
   allObjects.push(
@@ -1437,7 +1440,7 @@ export function generateBuildingMesh(
       150,
       bldgMinX + spanX * 2.7,
       bldgMaxY + 1500,
-      2550,
+      2400,
     ),
   );
 
@@ -1687,8 +1690,8 @@ export function generateBuildingMesh(
     }
 
     // Interior Room Partition Walls from the active floor-plan layout
-    const floorPhase = project.phases?.find((p) => p.kind === "floor" && p.storeyIndex === s);
-    const presetId = (floorPhase?.data?.selectedFloorplanPreset as string) || "preset-dual-3bed";
+    // Floor's own selection -> project typical plan -> preset implied by units/floor (never a blind default)
+    const presetId = resolveFloorPresetId(project, s);
     const activePreset = FLOORPLAN_PRESETS.find((p) => p.id === presetId) || FLOORPLAN_PRESETS[0];
 
     const geo: FloorGeo = {
@@ -1937,12 +1940,20 @@ export function generateBuildingMesh(
   // ==========================================
   // PHASE FILTERING (extracted to filterMeshByPhase helper)
   // ==========================================
-  let filtered = filterMeshByPhase(allObjects, phaseFilter);
+  // v2.4.1: make every solid interior-disjoint (columns > beams > lintels > slabs > stairs > ... > walls
+  // > plinth fill). Walls therefore wrap columns and stop at beam soffits by carving, duplicated
+  // door/window assemblies on shared walls collapse, and nothing shares volume => no z-fighting.
+  const resolved = resolveSolids(
+    allObjects.filter((o): o is MeshObject => o != null),
+    [],
+    { ...DEFAULT_PRIORITY, plinth: 30, bath: 45, kitchen: 45 },
+  ).objects;
+  let filtered = filterMeshByPhase(resolved, phaseFilter);
 
-  // Fallback to allObjects if filter yields empty
+  // Fallback to the full mesh if filter yields empty
   if (filtered.length === 0) {
     console.warn(`Phase filter "${phaseFilter}" yielded no objects; returning full mesh`);
-    filtered = allObjects;
+    filtered = resolved;
   }
 
   // Filter out any null entries (degenerate boxes from createBoxMesh)
