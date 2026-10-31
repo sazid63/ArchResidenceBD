@@ -59,6 +59,9 @@ export function getColorForObject(object?: MeshObject): Vec3 {
   // Specific architectural object kinds
   if (object.kind === "door") return [0.55, 0.27, 0.08]; // Warm Teak Wood
   if (object.kind === "door_frame") return [0.38, 0.18, 0.05]; // Dark Teak Frame
+  if (object.kind === "window_frame") return [0.55, 0.58, 0.62]; // Aluminium channel
+  if (object.kind === "hardware") return [0.80, 0.62, 0.18]; // Brass hardware
+  if (object.kind === "lintel") return [0.34, 0.52, 0.86]; // RCC lintel / sill band
   if (object.kind === "window") return [0.20, 0.72, 0.95]; // Crystal Glass Window
   if (object.kind === "glass" || object.kind === "railing") return [0.12, 0.68, 0.88]; // Glass Safety Railing
   if (object.kind === "partition" || (object.kind === "wall" && object.label.includes("Partition"))) return [0.76, 0.38, 0.12]; // Terracotta Brick Wall

@@ -252,3 +252,34 @@ export function snapRoomsToEnvelope(rooms: RoomPartition[], tol = 0.06): RoomPar
     ...(r.pointsRel ? { pointsRel: r.pointsRel.map(([x, y]) => [snap(x), snap(y)] as [number, number]) } : {}),
   }));
 }
+
+const GROW_KINDS = new Set(["bedroom", "living", "kitchen", "dining"]);
+
+/**
+ * A habitable room that stops short of the facade with nothing in between (an unassigned strip
+ * no deeper than `maxStrip` of the plan) claims that strip, so it can have an exterior wall and
+ * a window. Only the room's `windowSide` edge is grown, and only rectangular rooms. Genuine
+ * circulation (strips that another room touches) is left alone.
+ */
+export function growRoomsToEnvelope(rooms: RoomPartition[], maxStrip = 0.25): RoomPartition[] {
+  const out = rooms.map((r) => ({ ...r, boundsRel: [...r.boundsRel] as RoomPartition["boundsRel"] }));
+  const overlaps = (a: [number, number, number, number], b: [number, number, number, number]) =>
+    a[0] < b[2] - 1e-6 && b[0] < a[2] - 1e-6 && a[1] < b[3] - 1e-6 && b[1] < a[3] - 1e-6;
+  for (const r of out) {
+    if (!GROW_KINDS.has(r.kind) || !r.windowSide || r.pointsRel) continue;
+    const [x1, y1, x2, y2] = r.boundsRel;
+    let strip: [number, number, number, number] | null = null;
+    let apply: (() => void) | null = null;
+    if (r.windowSide === "front" && y2 < 1 && 1 - y2 <= maxStrip) { strip = [x1, y2, x2, 1]; apply = () => (r.boundsRel[3] = 1); }
+    if (r.windowSide === "rear" && y1 > 0 && y1 <= maxStrip) { strip = [x1, 0, x2, y1]; apply = () => (r.boundsRel[1] = 0); }
+    if (r.windowSide === "left" && x1 > 0 && x1 <= maxStrip) { strip = [0, y1, x1, y2]; apply = () => (r.boundsRel[0] = 0); }
+    if (r.windowSide === "right" && x2 < 1 && 1 - x2 <= maxStrip) { strip = [x2, y1, 1, y2]; apply = () => (r.boundsRel[2] = 1); }
+    if (strip && apply && !out.some((o) => o !== r && overlaps(strip!, o.boundsRel))) apply();
+  }
+  return out;
+}
+
+/** Snap near-edge bounds onto the envelope, then let windowed rooms claim empty facade strips. */
+export function prepareRooms(rooms: RoomPartition[]): RoomPartition[] {
+  return growRoomsToEnvelope(snapRoomsToEnvelope(rooms));
+}

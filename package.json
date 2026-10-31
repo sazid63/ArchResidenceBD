@@ -17,7 +17,9 @@
     "audit:full": "tsx scripts/audits/full-audit.ts",
     "test:floorplan": "tsx scripts/tests/floorplan-chain.ts",
     "test:exporters": "tsx scripts/tests/test-exporters.ts",
-    "verify": "tsc --noEmit && npm run test:floorplan && npm run audit:solid && npm run audit:presets"
+    "verify": "tsc --noEmit && npm run test:floorplan && npm run test:quality && npm run audit:sizing && npm run audit:solid && npm run audit:presets",
+    "audit:sizing": "tsx scripts/audits/sizing-audit.ts",
+    "test:quality": "tsx scripts/tests/model-quality.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

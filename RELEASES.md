@@ -193,3 +193,26 @@ git push origin develop
 - `snapRoomsToEnvelope`: room bounds within 6 % of the facade snap onto the envelope (they stopped 0.5 m short, so edge windows were dropped as "interior").
 - Openings slide along the wall to clear columns; windows narrow to 80 %/60 % before being skipped (dual-3bed 33 → 51 windows, triple-rental 27 → 51).
 - New `scripts/audits/preset-audit.ts`: overlaps, footprint coverage, rooms without door/window. Open item: presets assign only 44–81 % of the footprint to rooms (some gaps are deliberate courtyards/voids; they need a design decision, not auto-fill).
+
+### v2.4.3 — structure, stairs, BOQ take-off (2026-11-01)
+- **Section sizing** (`src/cad/sectionSizing.ts`): grid, column and beam sizes now come from the repo's own structural checks
+  for the building actually drawn. The old sweep divided load by up to 20 columns on big plots while the model had 12. Grids grow
+  past 4 x 3 on large plots so beams stay <= 600 mm; `npm run audit:sizing` (all 63 combinations adequate). Overriding a column
+  below the screening minimum now produces a warning note. Screening level only: not a structural design.
+- **Stairs** (`src/cad/stairBuilder.ts`): v2.4.2 emitted a solid 3 x 3 x 2.4 m "stair void" block (23 m3 of concrete per floor) when
+  the dog-leg did not fit, had no stair at all for the 7 presets without a stair room, stopped at the beam soffit and cut no slab
+  opening. Now: one footprint for the whole stack, exact floor-to-floor arrival, supported steps, an opening in every slab above,
+  enclosure walls when the preset has no stair room, hollow roof head-room with a door, flights kept 1000 mm wide.
+- **Overhead tank** sized from its capacity (1.2 m usable depth) on four piers clear of the head-room.
+- **BOQ take-off** (`src/cad/quantityTakeoff.ts`, `boqGenerator.ts`): v2.4.2 multiplied volumes by per-m2 rates (brickwork, partitions,
+  doors, windows), priced tanks as solid concrete, mapped railings to a steel-per-ton rate and had no reinforcement. Now: m3 for
+  concrete (rates include formwork), net face area for masonry with the rate scaled by thickness, exposed-face areas for plaster /
+  lime wash / screed / tiles, opening areas per door/window assembly, tank shells, a reinforcement line (ASSUMED kg/m3 factors listed
+  on the item), bathrooms counted from the model, railings measured but unpriced (no rate in the table).
+- Window frames, sills and handles were tagged `wall` / `beam` / `railing`, inflating masonry and beam quantities; now `window_frame`,
+  `lintel`, `hardware`.
+- Entry steps/canopy/pillars centred on the building. Windowed rooms claim empty facade strips (`growRoomsToEnvelope`):
+  single-luxury 15 -> 27 windows. Kernel rounds to whole mm (sub-mm overlaps flagged by the upstream audit).
+- Gates: `npm run test:quality` (stairs, sizing, BOQ units; mutation-tested), `npm run verify`.
+- Not done: the 60 catalogue plans are cropped third-party screenshots (watermarked, partial) and cannot be traced reliably;
+  presets still leave 44-81 % of the footprint unassigned (circulation vs courtyard needs a design decision).

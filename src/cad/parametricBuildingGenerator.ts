@@ -24,8 +24,11 @@
 import { MeshDocument, MeshObject } from "./mesh";
 import { BuildingProject } from "../engine/projectState";
 import { resolveSolids, DEFAULT_PRIORITY } from "./solidKernel";
+import { recommendSections } from "./sectionSizing";
+import { buildDogLegStair, planStair, stairFootprint, DEFAULT_STAIR, type StairParams, type StairPlacement } from "./stairBuilder";
+import type { Void } from "./solidKernel";
 import { resolveFloorPresetId } from "../data/floorplanMapping";
-import { FLOORPLAN_PRESETS, RoomPartition, snapRoomsToEnvelope } from "../data/floorplanPresets";
+import { FLOORPLAN_PRESETS, RoomPartition, prepareRooms } from "../data/floorplanPresets";
 import type {
   BuildingCustomization,
   AccessibilitySettings,
@@ -218,7 +221,7 @@ export function createDoor3DMesh(
     } else {
       objects.push(createBoxMesh(`${baseId}_leaf`, "Teak Solid Door Panel", "door", phase, x + frameThick, y + 20, z, x + width - frameThick, y + depth - 20, z + height - frameThick));
       // Brass Handle
-      objects.push(createBoxMesh(`${baseId}_handle`, "Brass Door Handle", "railing", phase, x + width - 120, y + depth - 20, z + 950, x + width - 90, y + depth - 5, z + 1070));
+      objects.push(createBoxMesh(`${baseId}_handle`, "Brass Door Handle", "hardware", phase, x + width - 120, y + depth - 20, z + 950, x + width - 90, y + depth - 5, z + 1070));
     }
   } else {
     // Orientation Y
@@ -235,7 +238,7 @@ export function createDoor3DMesh(
     } else {
       objects.push(createBoxMesh(`${baseId}_leaf`, "Teak Solid Door Panel", "door", phase, x + 20, y + frameThick, z, x + depth - 20, y + width - frameThick, z + height - frameThick));
       // Brass Handle
-      objects.push(createBoxMesh(`${baseId}_handle`, "Brass Door Handle", "railing", phase, x + depth - 20, y + width - 120, z + 950, x + depth - 5, y + width - 90, z + 1070));
+      objects.push(createBoxMesh(`${baseId}_handle`, "Brass Door Handle", "hardware", phase, x + depth - 20, y + width - 120, z + 950, x + depth - 5, y + width - 90, z + 1070));
     }
   }
   return objects;
@@ -262,13 +265,13 @@ export function createWindow3DMesh(
   if (orientation === "X") {
     // Concrete Sill Slab — inset 25mm from wall faces to avoid Z-fighting
     const sillInset = 25;
-    objects.push(createBoxMesh(`${baseId}_sill`, "RCC Window Sill", "beam", phase, x - sillInset, y - sillInset, z - 60, x + width + sillInset, y + depth + sillInset, z));
+    objects.push(createBoxMesh(`${baseId}_sill`, "RCC Window Sill", "lintel", phase, x - sillInset, y - sillInset, z - 60, x + width + sillInset, y + depth + sillInset, z));
     // Frame Left
-    objects.push(createBoxMesh(`${baseId}_frm_l`, "Window Channel Left", "wall", phase, x, y, z, x + frameThick, y + depth, z + height));
+    objects.push(createBoxMesh(`${baseId}_frm_l`, "Window Channel Left", "window_frame", phase, x, y, z, x + frameThick, y + depth, z + height));
     // Frame Right
-    objects.push(createBoxMesh(`${baseId}_frm_r`, "Window Channel Right", "wall", phase, x + width - frameThick, y, z, x + width, y + depth, z + height));
+    objects.push(createBoxMesh(`${baseId}_frm_r`, "Window Channel Right", "window_frame", phase, x + width - frameThick, y, z, x + width, y + depth, z + height));
     // Frame Top
-    objects.push(createBoxMesh(`${baseId}_frm_t`, "Window Channel Top", "wall", phase, x, y, z + height - frameThick, x + width, y + depth, z + height));
+    objects.push(createBoxMesh(`${baseId}_frm_t`, "Window Channel Top", "window_frame", phase, x, y, z + height - frameThick, x + width, y + depth, z + height));
 
     if (isLouvre) {
       // 3 Louver blades
@@ -284,13 +287,13 @@ export function createWindow3DMesh(
     // Orientation Y
     // Concrete Sill Slab — inset 25mm from wall faces to avoid Z-fighting
     const sillInset = 25;
-    objects.push(createBoxMesh(`${baseId}_sill`, "RCC Window Sill", "beam", phase, x - sillInset, y - sillInset, z - 60, x + depth + sillInset, y + width + sillInset, z));
+    objects.push(createBoxMesh(`${baseId}_sill`, "RCC Window Sill", "lintel", phase, x - sillInset, y - sillInset, z - 60, x + depth + sillInset, y + width + sillInset, z));
     // Frame Front
-    objects.push(createBoxMesh(`${baseId}_frm_f`, "Window Channel Front", "wall", phase, x, y, z, x + depth, y + frameThick, z + height));
+    objects.push(createBoxMesh(`${baseId}_frm_f`, "Window Channel Front", "window_frame", phase, x, y, z, x + depth, y + frameThick, z + height));
     // Frame Rear
-    objects.push(createBoxMesh(`${baseId}_frm_r`, "Window Channel Rear", "wall", phase, x, y + width - frameThick, z, x + depth, y + width, z + height));
+    objects.push(createBoxMesh(`${baseId}_frm_r`, "Window Channel Rear", "window_frame", phase, x, y + width - frameThick, z, x + depth, y + width, z + height));
     // Frame Top
-    objects.push(createBoxMesh(`${baseId}_frm_t`, "Window Channel Top", "wall", phase, x, y, z + height - frameThick, x + depth, y + width, z + height));
+    objects.push(createBoxMesh(`${baseId}_frm_t`, "Window Channel Top", "window_frame", phase, x, y, z + height - frameThick, x + depth, y + width, z + height));
 
     if (isLouvre) {
       // 3 Louver blades
@@ -915,117 +918,6 @@ function synthesizeFloorWalls(
 // beam line so nothing clips through slabs or beams.
 // ======================================================================
 
-function createFittedStair(
-  baseId: string,
-  x: number,
-  y: number,
-  z: number,
-  w: number,
-  d: number,
-  riseH: number,
-  phase: string,
-): MeshObject[] {
-  const objects: MeshObject[] = [];
-  if (w < 1000 || d < 1800) return objects;
-  const gap = 200;
-  const flightW = Math.max(600, (w - gap) / 2);
-  let landing = Math.max(900, Math.min(flightW, Math.round(d * 0.3)));
-  const n = Math.max(8, Math.min(22, Math.round(riseH / 150)));
-  const riserH = riseH / n;
-  const n1 = Math.ceil(n / 2);
-  const n2 = n - n1;
-  let tread = 250;
-  let going1 = (n1 - 1) * tread;
-  let going2 = (n2 - 1) * tread;
-  while (tread > 180 && going1 + landing + going2 > d - 60) {
-    tread -= 5;
-    going1 = (n1 - 1) * tread;
-    going2 = (n2 - 1) * tread;
-  }
-  if (going1 + landing + going2 > d - 40) return objects; // stairwell too shallow — skip
-
-  // Flight 1 (up to mid landing)
-  for (let i = 0; i < n1; i++) {
-    objects.push(
-      createBoxMesh(
-        `${baseId}_f1_${i + 1}`,
-        `Flight 1 Step ${i + 1}`,
-        "stair",
-        phase,
-        x,
-        y + i * tread,
-        z + i * riserH,
-        x + flightW,
-        y + (i + 1) * tread,
-        z + (i + 1) * riserH,
-      ),
-    );
-  }
-  // Mid landing slab — sits 5mm BELOW the flight treads to avoid Z-fighting
-  objects.push(
-    createBoxMesh(
-      `${baseId}_landing`,
-      "Mid-Landing RCC Slab",
-      "slab",
-      phase,
-      x,
-      y + going1,
-      z + n1 * riserH - 130,
-      x + flightW * 2 + gap,
-      y + going1 + landing,
-      z + n1 * riserH - 5,
-    ),
-  );
-  // Flight 2 (returning)
-  for (let i = 0; i < n2; i++) {
-    objects.push(
-      createBoxMesh(
-        `${baseId}_f2_${i + 1}`,
-        `Flight 2 Step ${i + 1}`,
-        "stair",
-        phase,
-        x + flightW + gap,
-        y + going1 + landing - (i + 1) * tread,
-        z + n1 * riserH + i * riserH,
-        x + flightW * 2 + gap,
-        y + going1 + landing - i * tread,
-        z + n1 * riserH + (i + 1) * riserH,
-      ),
-    );
-  }
-  // Top landing slab (flush with the upper floor level) — sits 5mm BELOW flight top to avoid Z-fight
-  objects.push(
-    createBoxMesh(
-      `${baseId}_top`,
-      "Top Landing RCC Slab",
-      "slab",
-      phase,
-      x + flightW + gap,
-      y,
-      z + riseH - 130,
-      x + flightW * 2 + gap,
-      y + landing,
-      z + riseH - 5,
-    ),
-  );
-  // Handrail along flight 1 outer edge (stops under the beam line)
-  objects.push(
-    createBoxMesh(
-      `${baseId}_rail`,
-      "Flight Handrail",
-      "railing",
-      phase,
-      x + flightW,
-      y,
-      z + 900,
-      x + flightW + 40,
-      y + going1 + landing,
-      z + n1 * riserH + 900,
-    ),
-  );
-  return objects;
-}
-
 function createFittedBath(
   baseId: string,
   x: number,
@@ -1139,34 +1031,33 @@ export function generateBuildingMesh(
   const bldgWidthMm = bldgMaxX - bldgMinX;
   const bldgLengthMm = bldgMaxY - bldgMinY;
 
-  // Structural Column Grid (4 columns in X, 3 columns in Y = 12 columns)
-  const colsX = 4;
-  const colsY = 3;
+  // Structural sections: grid, column size and beam section come from the repo's own structural
+  // checks (src/cad/sectionSizing.ts: M25/Fe415, column util <= 0.80, beam util <= 0.85, L/360).
+  // The grid grows beyond 4 x 3 on large plots so beams stay <= 600 mm deep (wall height under them).
+  const plotArea = project.plotSqm || 200;
+  const sizing = recommendSections(stories, plotArea);
+  const colsX = sizing.colsX;
+  const colsY = sizing.colsY;
   const spanX = bldgWidthMm / (colsX - 1);
   const spanY = bldgLengthMm / (colsY - 1);
-
-  // Auto column sizing — validated by scripts/audits/structural-sweep.ts (BNBC 2020, M25/Fe415,
-  // 12-column 4x3 grid, target column utilization ≤ 0.80 and beam ≤ 0.85):
-  //   Stories 2-3: 300mm all plots | 5: 300/300/350 | 7: 350/350/400 (by plot area)
-  const plotArea = project.plotSqm || 200;
-  const autoCol = (s: number, area: number): number => {
-    if (s <= 3) return 300;
-    if (s <= 6) return area > 300 ? 350 : 300;
-    return area > 300 ? 400 : 350;
-  };
-  const defaultCol = Math.max(300, autoCol(stories, plotArea));
+  const defaultCol = Math.max(300, sizing.colSizeMm);
   const colSizeX = custom?.columnWidthMm || defaultCol;
   const colSizeY = custom?.columnDepthMm || defaultCol;
   const footingPadSize = custom?.footingSizeMm || Math.max(1800, stories >= 5 ? 2000 : 1800);
   const footingDepth = custom?.footingDepthMm || Math.max(1600, stories >= 5 ? 1800 : 1600);
   const storyHeightMm = 3000;
   const slabThickMm = 125;
-  // Beam depth scales with column size (spanX/Y ~ 4-6m) — 500mm for 300mm+ columns
-  const beamDepthMm = colSizeX >= 300 ? 500 : 450;
-  const beamWidthMm = 250;
+  const beamDepthMm = sizing.beamDepthMm;
+  const beamWidthMm = sizing.beamWidthMm;
   const balconyDepth = custom?.balconyDepthMm || 1200;
 
   // Frame Boundaries (Outer faces of columns/beams)
+  // Warn when a user override is below the screening minimum for this building (never silently accept it).
+  const notesPreflight: string[] = [];
+  if (custom?.columnWidthMm && custom.columnWidthMm < sizing.colSizeMm)
+    notesPreflight.push(`Column ${custom.columnWidthMm} mm is below the ${sizing.colSizeMm} mm screening minimum for ${stories} storeys on ${Math.round(plotArea)} m2 (utilisation would exceed 0.80). Have the structural engineer confirm.`);
+  if (custom?.columnDepthMm && custom.columnDepthMm < sizing.colSizeMm)
+    notesPreflight.push(`Column depth ${custom.columnDepthMm} mm is below the ${sizing.colSizeMm} mm screening minimum.`);
   const frameMinX = bldgMinX - colSizeX / 2;
   const frameMaxX = bldgMaxX + colSizeX / 2;
   const frameMinY = bldgMinY - colSizeY / 2;
@@ -1177,7 +1068,7 @@ export function generateBuildingMesh(
   const INT_WALL_THICK = 125; // 5 inch partition walls
 
   const allObjects: MeshObject[] = [];
-  const notes: string[] = [];
+  const notes: string[] = [...notesPreflight];
   const isFoundationView = phaseFilter?.includes("foundation") || phaseFilter?.includes("site");
 
   // ==========================================
@@ -1337,6 +1228,9 @@ export function generateBuildingMesh(
   );
 
   // Main Entry Steps (3 steps rising from driveway to plinth level)
+  // Entry assembly is centred on the building (the old spanX * 2.0 axis sat on a column line, off-centre).
+  const entryCx = bldgMinX + bldgWidthMm / 2;
+  const entryHalf = Math.min(spanX * 0.5, 1300);
   const plinthEdgeY = frameMaxY + 50;
   for (let s = 0; s < 3; s++) {
     // s = 0 is the step against the building (top = plinth level 600); each step out is 150 lower.
@@ -1346,10 +1240,10 @@ export function generateBuildingMesh(
         `Entrance Step ${3 - s}`,
         "canopy",
         "ground_floor",
-        bldgMinX + spanX * 1.5,
+        entryCx - entryHalf,
         plinthEdgeY + s * 250,
         150,
-        bldgMinX + spanX * 2.5,
+        entryCx + entryHalf,
         plinthEdgeY + (s + 1) * 250,
         600 - s * 150,
       ),
@@ -1419,10 +1313,10 @@ export function generateBuildingMesh(
       "Main Entrance Portico & Canopy",
       "canopy",
       "ground_floor",
-      bldgMinX + spanX * 1.2,
+      entryCx - entryHalf - 300,
       bldgMaxY,
       2400,
-      bldgMinX + spanX * 2.8,
+      entryCx + entryHalf + 300,
       bldgMaxY + 1500,
       2525,
     ),
@@ -1434,10 +1328,10 @@ export function generateBuildingMesh(
       "Canopy Left Pillar",
       "canopy",
       "ground_floor",
-      bldgMinX + spanX * 1.3,
+      entryCx - entryHalf - 200,
       bldgMaxY + 1350,
       150,
-      bldgMinX + spanX * 1.3 + colSizeX,
+      entryCx - entryHalf - 200 + colSizeX,
       bldgMaxY + 1500,
       2400,
     ),
@@ -1448,10 +1342,10 @@ export function generateBuildingMesh(
       "Canopy Right Pillar",
       "canopy",
       "ground_floor",
-      bldgMinX + spanX * 2.7 - colSizeX,
+      entryCx + entryHalf + 200 - colSizeX,
       bldgMaxY + 1350,
       150,
-      bldgMinX + spanX * 2.7,
+      entryCx + entryHalf + 200,
       bldgMaxY + 1500,
       2400,
     ),
@@ -1531,10 +1425,10 @@ export function generateBuildingMesh(
       phaseKey: "ground_floor",
     };
     const placed = columnCutterBoxes(geo, 600, storyHeightMm);
-    synthesizeFloorWalls(geo, snapRoomsToEnvelope(activePreset.rooms), placed, allObjects, notes, "g", true);
+    synthesizeFloorWalls(geo, prepareRooms(activePreset.rooms), placed, allObjects, notes, "g", true);
 
     // Fixtures for enclosed ground rooms
-    for (const room of snapRoomsToEnvelope(activePreset.rooms)) {
+    for (const room of prepareRooms(activePreset.rooms)) {
       if (roomIsOpen(room, true)) continue;
       if (room.kind === "bath") {
         const [x0, y0, x1, y1] = roomInsetRect(room, geo);
@@ -1542,12 +1436,6 @@ export function generateBuildingMesh(
       }
     }
 
-    // Standalone dog-legged stair to the first floor, placed in the open driveway area
-    const stairX = bldgMinX + bldgWidthMm * 0.5 - 1100;
-    const stairY = bldgMinY + bldgLengthMm * 0.1;
-    allObjects.push(
-      ...createFittedStair("g_staircase", stairX, stairY, 600, 2200, 4200, storyHeightMm - beamDepthMm - 600, "ground_floor"),
-    );
   }
 
   // ==========================================
@@ -1731,35 +1619,140 @@ export function generateBuildingMesh(
       phaseKey,
     };
     const placed = columnCutterBoxes(geo, floorZ + slabThickMm, nextZ);
-    synthesizeFloorWalls(geo, snapRoomsToEnvelope(activePreset.rooms), placed, allObjects, notes, `f${s}`, false);
+    synthesizeFloorWalls(geo, prepareRooms(activePreset.rooms), placed, allObjects, notes, `f${s}`, false);
 
     // Fitted fixtures per room
-    for (const room of snapRoomsToEnvelope(activePreset.rooms)) {
+    for (const room of prepareRooms(activePreset.rooms)) {
       if (roomIsOpen(room, false)) continue;
       const [x0, y0, x1, y1] = roomInsetRect(room, geo);
       if (room.kind === "kitchen") {
         allObjects.push(...createFittedKitchen(`f${s}_${room.id}_kit`, x0, y0, geo.wallBotZ, x1 - x0, y1 - y0, phaseKey));
       } else if (room.kind === "bath") {
         allObjects.push(...createFittedBath(`f${s}_${room.id}_bath`, x0, y0, geo.wallBotZ, x1 - x0, y1 - y0, phaseKey));
-    } else if (room.kind === "stair") {
-        const stairResult = createFittedStair(`f${s}_${room.id}_stair`, x0, y0, geo.wallBotZ, x1 - x0, y1 - y0, geo.wallTopZ - geo.wallBotZ, phaseKey);
-        if (stairResult.length === 0) {
-          // Stairwell too narrow for dog-leg — emit a simple open-riser stair void marker
-          allObjects.push(
-            createBoxMesh(
-              `f${s}_stair_void`,
-              `Floor ${s} Stair Core (open riser)`,
-              "stair",
-              phaseKey,
-              x0, y0, geo.wallBotZ,
-              x1, y1, geo.wallTopZ,
-            ),
-          );
-        } else {
-          allObjects.push(...stairResult);
-        }
       }
     }
+  }
+
+
+  // ==========================================
+  // STAIR CORE (v2.4.3): one placement for the whole stack
+  // ==========================================
+  // v2.4.2 emitted a SOLID 3 x 3 x 2.4 m block per floor whenever the dog-leg did not fit its room
+  // (23 m3 of "stair" concrete each), had no stair at all for the 7 presets without a stair room,
+  // stopped the flight at the beam soffit instead of the next floor, and cut no opening in the slab.
+  // Now: exact floor-to-floor rise, supported steps, an opening in every slab above, the same
+  // footprint on every floor, and 3-sided enclosure walls when the preset has no stair room.
+  const voids: Void[] = [];
+  type R4 = { x1: number; y1: number; x2: number; y2: number };
+  const mkGeo = (wallBotZ: number, wallTopZ: number, phaseKey: string): FloorGeo => ({
+    bldgMinX, bldgMaxX, bldgMinY, bldgMaxY, bldgWidthMm, bldgLengthMm, frameMinX, frameMaxX, frameMinY, frameMaxY,
+    colSizeX, colSizeY, spanX, spanY, colsX, colsY, extThick: EXT_WALL_THICK, intThick: INT_WALL_THICK, wallBotZ, wallTopZ, phaseKey,
+  });
+  const overlapArea = (a: R4, b: R4) =>
+    Math.max(0, Math.min(a.x2, b.x2) - Math.max(a.x1, b.x1)) * Math.max(0, Math.min(a.y2, b.y2) - Math.max(a.y1, b.y1));
+  const leadPreset = FLOORPLAN_PRESETS.find((p) => p.id === resolveFloorPresetId(project, Math.min(1, stories - 1))) ?? FLOORPLAN_PRESETS[0];
+  const leadRooms = stories > 1 ? prepareRooms(leadPreset.rooms) : [];
+  const roomRects: R4[] = leadRooms
+    .filter((r) => !roomIsOpen(r, false))
+    .map((r) => ({ x1: bldgMinX + r.boundsRel[0] * bldgWidthMm, y1: bldgMinY + r.boundsRel[1] * bldgLengthMm, x2: bldgMinX + r.boundsRel[2] * bldgWidthMm, y2: bldgMinY + r.boundsRel[3] * bldgLengthMm }));
+  const colRects: R4[] = [];
+  for (let ix = 0; ix < colsX; ix++)
+    for (let iy = 0; iy < colsY; iy++)
+      colRects.push({ x1: bldgMinX + ix * spanX - colSizeX / 2, x2: bldgMinX + ix * spanX + colSizeX / 2, y1: bldgMinY + iy * spanY - colSizeY / 2, y2: bldgMinY + iy * spanY + colSizeY / 2 });
+
+  const STAIR_PARAM_SETS: StairParams[] = [
+    DEFAULT_STAIR,
+    { ...DEFAULT_STAIR, maxRiserMm: 190 },
+    { ...DEFAULT_STAIR, maxRiserMm: 190, treadMm: 230 },
+  ];
+  const stairRoom = leadRooms.find((r) => r.kind === "stair");
+  let stairTarget: R4;
+  let stairHasRoom = false;
+  if (stairRoom) {
+    const [x1, y1, x2, y2] = roomInsetRect(stairRoom, mkGeo(0, 0, ""));
+    stairTarget = { x1, y1, x2, y2 };
+    stairHasRoom = true;
+  } else {
+    // No stair room in this preset: choose the column-bay slot that crosses the least room area.
+    const L0 = planStair(3000, DEFAULT_STAIR);
+    let best: { r: R4; hit: number } | null = null;
+    for (const axis of ["X", "Y"] as const) {
+      const w = axis === "X" ? L0.lengthMm : L0.widthMm;
+      const h = axis === "X" ? L0.widthMm : L0.lengthMm;
+      for (let ix = 0; ix < colsX - 1; ix++)
+        for (let iy = 0; iy < colsY - 1; iy++) {
+          const r: R4 = { x1: bldgMinX + ix * spanX + colSizeX / 2 + 200, y1: bldgMinY + iy * spanY + colSizeY / 2 + 200, x2: 0, y2: 0 };
+          r.x2 = r.x1 + w;
+          r.y2 = r.y1 + h;
+          if (r.x2 > frameMaxX - EXT_WALL_THICK || r.y2 > frameMaxY - EXT_WALL_THICK) continue;
+          if (colRects.some((c) => overlapArea(c, r) > 0)) continue;
+          const hit = roomRects.reduce((t, rr) => t + overlapArea(rr, r), 0);
+          if (!best || hit < best.hit) best = { r, hit };
+        }
+    }
+    stairTarget = best?.r ?? { x1: bldgMinX + spanX * 0.5, y1: bldgMinY + spanY * 0.5, x2: bldgMinX + spanX * 0.5 + L0.lengthMm, y2: bldgMinY + spanY * 0.5 + L0.widthMm };
+    if (stories > 1)
+      notes.push(`Preset "${leadPreset.nameEn}" has no stair room: stair core placed in the least-occupied column bay${best && best.hit > 0 ? ` (crosses ${(best.hit / 1e6).toFixed(1)} m2 of rooms)` : ""}.`);
+  }
+  const tw = stairTarget.x2 - stairTarget.x1;
+  const th = stairTarget.y2 - stairTarget.y1;
+  let stairParams = STAIR_PARAM_SETS[STAIR_PARAM_SETS.length - 1];
+  let stairAxis: "X" | "Y" | null = null;
+  for (const ps of STAIR_PARAM_SETS) {
+    const L = planStair(3000, ps);
+    if (tw >= L.lengthMm && th >= L.widthMm) { stairParams = ps; stairAxis = "X"; break; }
+    if (th >= L.lengthMm && tw >= L.widthMm) { stairParams = ps; stairAxis = "Y"; break; }
+  }
+  const stairRef = planStair(3000, stairParams);
+  if (!stairAxis) {
+    const ox = Math.max(0, stairRef.lengthMm - tw) + Math.max(0, stairRef.widthMm - th);
+    const oy = Math.max(0, stairRef.lengthMm - th) + Math.max(0, stairRef.widthMm - tw);
+    stairAxis = ox <= oy ? "X" : "Y";
+    notes.push(`Stair core ${Math.round(tw)} x ${Math.round(th)} mm is smaller than the ${stairRef.lengthMm} x ${stairRef.widthMm} mm dog-leg needs even with relaxed proportions (flights are kept 1000 mm wide); the stair overlaps neighbouring walls - enlarge the stair room.`);
+  } else if (stairParams !== DEFAULT_STAIR) {
+    notes.push("Stair proportions relaxed (riser up to 190 mm / tread 230 mm; flights stay 1000 mm wide) to fit the stair room - confirm against BNBC 2020 Part 3.");
+  }
+  const stairPlacement: StairPlacement =
+    stairAxis === "X"
+      ? { axis: "X", originX: stairTarget.x1 + stairRef.lengthMm, originY: stairTarget.y1, uDir: -1, vDir: 1 }
+      : { axis: "Y", originX: stairTarget.x1, originY: stairTarget.y1 + stairRef.lengthMm, uDir: -1, vDir: 1 };
+  const stairRect = stairFootprint(stairRef, stairPlacement);
+  const stairRisers = stairRef.risersPerFlight * 2;
+
+  for (let s = 0; s < stories; s++) {
+    const z0 = s === 0 ? 600 : s * storyHeightMm + slabThickMm;
+    const upper = (s + 1) * storyHeightMm + slabThickMm;
+    const key = s === 0 ? "ground_floor" : `floor_${s}`;
+    allObjects.push(...buildDogLegStair(`stair_s${s}`, z0, upper - z0, stairPlacement, key, stairParams, stairRisers).objects);
+    const slabAbove = s + 1 < stories ? `slab_f${s + 1}` : "roof_slab";
+    const nextZ = (s + 1) * storyHeightMm;
+    voids.push({
+      id: `stairwell_${s}`,
+      box: { min: [stairRect.x1, stairRect.y1, nextZ - 5], max: [stairRect.x2, stairRect.y2, nextZ + slabThickMm + 5] },
+      appliesTo: (o) => o.id === slabAbove,
+    });
+    // Enclosure on three sides when the preset gives the stair no room of its own (arrival side stays open).
+    if (!stairHasRoom && s >= 1) {
+      const t = INT_WALL_THICK, zb = z0, zt = nextZ - beamDepthMm;
+      const r = stairRect;
+      const openPlusX = stairPlacement.axis === "X"; // arrival (u = 0) is the +X face for X stairs, +Y for Y stairs
+      const walls: Array<[string, number, number, number, number]> = [
+        ["w", r.x1 - t, r.y1 - t, r.x1, r.y2 + t],
+        ["e", r.x2, r.y1 - t, r.x2 + t, r.y2 + t],
+        ["s", r.x1 - t, r.y1 - t, r.x2 + t, r.y1],
+        ["n", r.x1 - t, r.y2, r.x2 + t, r.y2 + t],
+      ];
+      for (const [side, x1, y1, x2, y2] of walls) {
+        if ((openPlusX && side === "e") || (!openPlusX && side === "n")) continue;
+        allObjects.push(createBoxMesh(`f${s}_stair_enc_${side}`, `Stair Core Wall (${side})`, "partition", key, x1, y1, zb, x2, y2, zt));
+      }
+    }
+  }
+  if ([0, ...Array.from({ length: Math.max(0, colsX - 1) }, (_, i) => i + 1)].some((ix) => {
+    const cx = bldgMinX + ix * spanX;
+    return cx + beamWidthMm / 2 > stairRect.x1 && cx - beamWidthMm / 2 < stairRect.x2;
+  }) || Array.from({ length: colsY }, (_, iy) => bldgMinY + iy * spanY).some((cy) => cy + beamWidthMm / 2 > stairRect.y1 && cy - beamWidthMm / 2 < stairRect.y2)) {
+    notes.push("The stair core crosses a column-grid beam line: head-room under that beam is below the stair rise. Shift the core or add a trimmer beam.");
   }
 
   // ==========================================
@@ -1842,113 +1835,53 @@ export function generateBuildingMesh(
     ),
   );
 
-  // Staircase Head Room & Lift Machine Room Tower
+  // Stair head-room: hollow 125 mm enclosure around the stairwell opening, door on the arrival side.
+  const roofTop = roofZ + slabThickMm;
+  const HR = 2400;
+  const hrT = INT_WALL_THICK;
+  const sr = stairRect;
+  const hx1 = sr.x1 - hrT, hx2 = sr.x2 + hrT, hy1 = sr.y1 - hrT, hy2 = sr.y2 + hrT;
   allObjects.push(
-    createBoxMesh(
-      "stair_headroom",
-      "Stair Headroom & Lift Penthouse",
-      "wall",
-      "roof",
-      bldgMinX + spanX,
-      bldgMinY + spanY * 0.5,
-      roofZ + slabThickMm,
-      bldgMinX + spanX * 2.2,
-      bldgMinY + spanY * 1.5,
-      roofZ + slabThickMm + 2400,
-    ),
+    createBoxMesh("hr_rear", "Stair Head-room Wall (rear)", "wall", "roof", hx1, hy1, roofTop, hx2, sr.y1, roofTop + HR),
+    createBoxMesh("hr_front", "Stair Head-room Wall (front)", "wall", "roof", hx1, sr.y2, roofTop, hx2, hy2, roofTop + HR),
+    createBoxMesh("hr_left", "Stair Head-room Wall (west)", "wall", "roof", hx1, sr.y1, roofTop, sr.x1, sr.y2, roofTop + HR),
+    createBoxMesh("hr_right", "Stair Head-room Wall (east)", "wall", "roof", sr.x2, sr.y1, roofTop, hx2, sr.y2, roofTop + HR),
+    createBoxMesh("penthouse_slab", "Stair Tower Roof Slab", "slab", "roof", hx1 - 100, hy1 - 100, roofTop + HR, hx2 + 100, hy2 + 100, roofTop + HR + 125),
   );
-  // Penthouse Roof Slab
-  allObjects.push(
-    createBoxMesh(
-      "penthouse_slab",
-      "Stair Tower Roof Slab",
-      "slab",
-      "roof",
-      bldgMinX + spanX - 100,
-      bldgMinY + spanY * 0.5 - 100,
-      roofZ + slabThickMm + 2400,
-      bldgMinX + spanX * 2.2 + 100,
-      bldgMinY + spanY * 1.5 + 100,
-      roofZ + slabThickMm + 2525,
-    ),
-  );
+  if (stairPlacement.axis === "X") {
+    const cy = (sr.y1 + sr.y2) / 2;
+    voids.push({ id: "hr_door_void", box: { min: [sr.x2, cy - 450, roofTop], max: [hx2, cy + 450, roofTop + 2100] }, appliesTo: (o) => o.kind === "wall" && o.id.startsWith("hr_") });
+    allObjects.push(...createDoor3DMesh("hr_door", sr.x2, cy - 450, roofTop, 900, hrT, 2100, "Y", "living", "roof"));
+  } else {
+    const cx = (sr.x1 + sr.x2) / 2;
+    voids.push({ id: "hr_door_void", box: { min: [cx - 450, sr.y2, roofTop], max: [cx + 450, hy2, roofTop + 2100] }, appliesTo: (o) => o.kind === "wall" && o.id.startsWith("hr_") });
+    allObjects.push(...createDoor3DMesh("hr_door", cx - 450, sr.y2, roofTop, 900, hrT, 2100, "X", "living", "roof"));
+  }
 
-  // Overhead Water Reservoir Tank with Support Piers (kind="tank" to avoid skewing column analysis)
+  // Overhead RCC tank sized from its capacity (1.2 m usable depth), on four corner piers, clear of the head-room.
   const tankCapacity = stories * 2500;
-  // 4 Support Concrete Piers elevating tank above penthouse
-  const pierZ = roofZ + slabThickMm + 2525;
-  allObjects.push(
-    createBoxMesh(
-      "tank_pier_1",
-      "Water Tank Support Pier 1",
-      "tank",
-      "roof",
-      bldgMinX + spanX * 1.1,
-      bldgMinY + spanY * 0.6,
-      pierZ,
-      bldgMinX + spanX * 1.1 + colSizeX,
-      bldgMinY + spanY * 0.6 + colSizeY,
-      pierZ + 800,
-    ),
-  );
-  allObjects.push(
-    createBoxMesh(
-      "tank_pier_2",
-      "Water Tank Support Pier 2",
-      "tank",
-      "roof",
-      bldgMinX + spanX * 2.0 - colSizeX,
-      bldgMinY + spanY * 0.6,
-      pierZ,
-      bldgMinX + spanX * 2.0,
-      bldgMinY + spanY * 0.6 + colSizeY,
-      pierZ + 800,
-    ),
-  );
-  allObjects.push(
-    createBoxMesh(
-      "tank_pier_3",
-      "Water Tank Support Pier 3",
-      "tank",
-      "roof",
-      bldgMinX + spanX * 1.1,
-      bldgMinY + spanY * 1.4 - colSizeY,
-      pierZ,
-      bldgMinX + spanX * 1.1 + colSizeX,
-      bldgMinY + spanY * 1.4,
-      pierZ + 800,
-    ),
-  );
-  allObjects.push(
-    createBoxMesh(
-      "tank_pier_4",
-      "Water Tank Support Pier 4",
-      "tank",
-      "roof",
-      bldgMinX + spanX * 2.0 - colSizeX,
-      bldgMinY + spanY * 1.4 - colSizeY,
-      pierZ,
-      bldgMinX + spanX * 2.0,
-      bldgMinY + spanY * 1.4,
-      pierZ + 800,
-    ),
-  );
-
-  // Overhead Water Reservoir Tank Body
-  allObjects.push(
-    createBoxMesh(
-      "overhead_tank",
-      `Overhead RCC Water Reservoir (${tankCapacity} Liters)`,
-      "tank",
-      "roof",
-      bldgMinX + spanX * 1.05,
-      bldgMinY + spanY * 0.55,
-      pierZ + 800,
-      bldgMinX + spanX * 2.05,
-      bldgMinY + spanY * 1.45,
-      pierZ + 2200,
-    ),
-  );
+  const tankSide = Math.max(1500, Math.ceil((Math.sqrt(tankCapacity / 1000 / 1.2) * 1000) / 50) * 50);
+  const tankBody = 1500, pierH = 900, pierS = 300, edge = 700;
+  const hrKeepOut: R4 = { x1: hx1 - 700, y1: hy1 - 700, x2: hx2 + 700, y2: hy2 + 700 };
+  const tankSlots: R4[] = [
+    { x1: frameMaxX - edge - tankSide, y1: frameMinY + edge, x2: frameMaxX - edge, y2: frameMinY + edge + tankSide },
+    { x1: frameMinX + edge, y1: frameMinY + edge, x2: frameMinX + edge + tankSide, y2: frameMinY + edge + tankSide },
+    { x1: frameMaxX - edge - tankSide, y1: frameMaxY - edge - tankSide, x2: frameMaxX - edge, y2: frameMaxY - edge },
+    { x1: frameMinX + edge, y1: frameMaxY - edge - tankSide, x2: frameMinX + edge + tankSide, y2: frameMaxY - edge },
+  ];
+  const tankRect = tankSlots.find((c) => overlapArea(c, hrKeepOut) === 0);
+  if (tankRect) {
+    const pz = roofTop;
+    const corners: Array<[number, number]> = [
+      [tankRect.x1 + 150, tankRect.y1 + 150], [tankRect.x2 - 150 - pierS, tankRect.y1 + 150],
+      [tankRect.x1 + 150, tankRect.y2 - 150 - pierS], [tankRect.x2 - 150 - pierS, tankRect.y2 - 150 - pierS],
+    ];
+    corners.forEach(([px, py], i) => allObjects.push(createBoxMesh(`tank_pier_${i + 1}`, `Water Tank Support Pier ${i + 1}`, "pier", "roof", px, py, pz, px + pierS, py + pierS, pz + pierH)));
+    allObjects.push(createBoxMesh("overhead_tank", `Overhead RCC Water Reservoir (${tankCapacity} Liters)`, "tank", "roof", tankRect.x1, tankRect.y1, pz + pierH, tankRect.x2, tankRect.y2, pz + pierH + tankBody));
+    notes.push("Overhead tank piers sit on the roof slab at the tank corners; align them with the column grid in the structural design.");
+  } else {
+    notes.push(`No ${tankSide} mm square roof area clear of the stair head-room for a ${tankCapacity} L tank; tank omitted.`);
+  }
 
   // ==========================================
   // PHASE FILTERING (extracted to filterMeshByPhase helper)
@@ -1958,7 +1891,7 @@ export function generateBuildingMesh(
   // door/window assemblies on shared walls collapse, and nothing shares volume => no z-fighting.
   const resolved = resolveSolids(
     allObjects.filter((o): o is MeshObject => o != null),
-    [],
+    voids,
     { ...DEFAULT_PRIORITY, plinth: 30, bath: 45, kitchen: 45 },
   ).objects;
   let filtered = filterMeshByPhase(resolved, phaseFilter);

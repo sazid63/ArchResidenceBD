@@ -15,8 +15,8 @@ let failures = 0;
 const rows: string[] = [];
 
 for (const preset of FLOORPLAN_PRESETS) {
-  for (const stories of [2, 4, 6]) {
-    for (const plotSqm of [200, 335]) {
+  for (const stories of [2, 4, 6, 8, 10]) {
+    for (const plotSqm of [100, 200, 335, 450]) {
       // Real phases (one per storey), the chosen preset on every floor phase.
       const phases = generatePhasesForStories(stories).map((p) =>
         p.kind === "floor" ? { ...p, data: { selectedFloorplanPreset: preset.id } } : p);

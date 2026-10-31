@@ -36,12 +36,14 @@ export function createBoxMesh(
   y2: number,
   z2: number,
 ): MeshObject {
-  const minX = Math.min(x1, x2);
-  const maxX = Math.max(x1, x2);
-  const minY = Math.min(y1, y2);
-  const maxY = Math.max(y1, y2);
-  const minZ = Math.min(z1, z2);
-  const maxZ = Math.max(z1, z2);
+  // Whole millimetres, like the generator's own builder: fractional offsets (riser divisions, room
+  // fractions) otherwise leave sub-mm overlaps that the carving tolerance ignores but audits count.
+  const minX = Math.round(Math.min(x1, x2));
+  const maxX = Math.round(Math.max(x1, x2));
+  const minY = Math.round(Math.min(y1, y2));
+  const maxY = Math.round(Math.max(y1, y2));
+  const minZ = Math.round(Math.min(z1, z2));
+  const maxZ = Math.round(Math.max(z1, z2));
   const volumeMm3 = (maxX - minX) * (maxY - minY) * (maxZ - minZ);
 
   // Each face: 4 corners in counter-clockwise order seen from OUTSIDE the solid.
@@ -162,6 +164,7 @@ export interface Void {
 /** Structural priority: higher wins the shared volume. Ties keep emission order. */
 export const DEFAULT_PRIORITY: Record<string, number> = {
   column: 100,
+  pier: 95,
   beam: 90,
   lintel: 85,
   slab: 80,
@@ -172,6 +175,8 @@ export const DEFAULT_PRIORITY: Record<string, number> = {
   door_frame: 60,
   door: 60,
   window: 60,
+  window_frame: 60,
+  hardware: 55,
   railing: 55,
   wall: 50,
   partition: 50,
