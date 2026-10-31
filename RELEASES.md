@@ -187,3 +187,9 @@ git push origin develop
 - Repo: `npm run dev/start` pointed at the moved `server.ts`; `scripts/audits` and `scripts/render` imports had the wrong depth.
 - New: `scripts/audits/solid-audit.ts` (strict validator, 66 configs) and `scripts/tests/floorplan-chain.ts`.
 - Known gap: catalogue plans are images without geometry, so 3D follows the nearest parametric preset by unit count.
+
+### v2.4.2 — preset layouts + openings (2026-10-31)
+- Presets: fixed overlapping rooms (dual-3bed bed2/unit-B bath, single-luxury living/bath2, commercial hall wraps its stair via `pointsRel`).
+- `snapRoomsToEnvelope`: room bounds within 6 % of the facade snap onto the envelope (they stopped 0.5 m short, so edge windows were dropped as "interior").
+- Openings slide along the wall to clear columns; windows narrow to 80 %/60 % before being skipped (dual-3bed 33 → 51 windows, triple-rental 27 → 51).
+- New `scripts/audits/preset-audit.ts`: overlaps, footprint coverage, rooms without door/window. Open item: presets assign only 44–81 % of the footprint to rooms (some gaps are deliberate courtyards/voids; they need a design decision, not auto-fill).

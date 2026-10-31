@@ -25,7 +25,7 @@ import { MeshDocument, MeshObject } from "./mesh";
 import { BuildingProject } from "../engine/projectState";
 import { resolveSolids, DEFAULT_PRIORITY } from "./solidKernel";
 import { resolveFloorPresetId } from "../data/floorplanMapping";
-import { FLOORPLAN_PRESETS, RoomPartition } from "../data/floorplanPresets";
+import { FLOORPLAN_PRESETS, RoomPartition, snapRoomsToEnvelope } from "../data/floorplanPresets";
 import type {
   BuildingCustomization,
   AccessibilitySettings,
@@ -817,15 +817,27 @@ function synthesizeFloorWalls(
       const oZ = req.type === "window" ? sizes?.wZ ?? 0 : geo.wallBotZ;
       const [s0, s1] = req.span;
       const clampedSpan: [number, number] = [Math.max(a0, s0), Math.min(a1, s1)];
-      if (clampedSpan[1] - clampedSpan[0] < (oW ?? 900) + 2 * margin) {
-        notes.push(`skipped ${req.type} for ${seg.label} (wall too short or span mismatch)`);
-        continue;
+      // v2.4.1: slide the opening along its wall to clear columns, and let windows (not doors)
+      // narrow to 80 % / 60 % before giving up, instead of silently dropping the window.
+      const widths = req.type === "window" ? [oW, Math.round(oW * 0.8), Math.round(oW * 0.6)] : [oW];
+      let placedSpan: [number, number] | null = null;
+      let lastReason = "wall too short or span mismatch";
+      for (const w of widths) {
+        const lo = clampedSpan[0] + margin;
+        const hi = clampedSpan[1] - margin - w;
+        if (hi < lo || w < 500) continue;
+        const centre = (clampedSpan[0] + clampedSpan[1]) / 2 - w / 2;
+        for (let off = 0; off <= hi - lo + 1 && !placedSpan; off += 50) {
+          for (const sign of off === 0 ? [1] : [1, -1]) {
+            const o0 = Math.min(hi, Math.max(lo, centre + sign * off));
+            if (!openingHitsColumn(geo, seg, o0, o0 + w)) { placedSpan = [o0, o0 + w]; break; }
+            lastReason = "column at opening position";
+          }
+        }
+        if (placedSpan) break;
       }
-      const mid = (clampedSpan[0] + clampedSpan[1]) / 2;
-      const o0 = mid - (oW ?? 900) / 2;
-      const o1 = mid + (oW ?? 900) / 2;
-      const oClamped: [number, number] = [Math.max(a0, o0), Math.min(a1, o1)];
-      if (!openingHitsColumn(geo, seg, oClamped[0], oClamped[1])) {
+      if (placedSpan) {
+        const oClamped = placedSpan;
         openings.push({
           a0: oClamped[0],
           a1: oClamped[1],
@@ -836,9 +848,10 @@ function synthesizeFloorWalls(
           wZ: req.type === "window" ? sizes?.wZ : undefined,
         });
       } else {
-        notes.push(`skipped ${req.type} for ${seg.label} (column at opening position)`);
+        notes.push(`skipped ${req.type} for ${seg.label} (${lastReason})`);
       }
     }
+
     openings.sort((p, q) => p.a0 - q.a0);
 
     let cursor = a0;
@@ -1518,10 +1531,10 @@ export function generateBuildingMesh(
       phaseKey: "ground_floor",
     };
     const placed = columnCutterBoxes(geo, 600, storyHeightMm);
-    synthesizeFloorWalls(geo, activePreset.rooms, placed, allObjects, notes, "g", true);
+    synthesizeFloorWalls(geo, snapRoomsToEnvelope(activePreset.rooms), placed, allObjects, notes, "g", true);
 
     // Fixtures for enclosed ground rooms
-    for (const room of activePreset.rooms) {
+    for (const room of snapRoomsToEnvelope(activePreset.rooms)) {
       if (roomIsOpen(room, true)) continue;
       if (room.kind === "bath") {
         const [x0, y0, x1, y1] = roomInsetRect(room, geo);
@@ -1718,10 +1731,10 @@ export function generateBuildingMesh(
       phaseKey,
     };
     const placed = columnCutterBoxes(geo, floorZ + slabThickMm, nextZ);
-    synthesizeFloorWalls(geo, activePreset.rooms, placed, allObjects, notes, `f${s}`, false);
+    synthesizeFloorWalls(geo, snapRoomsToEnvelope(activePreset.rooms), placed, allObjects, notes, `f${s}`, false);
 
     // Fitted fixtures per room
-    for (const room of activePreset.rooms) {
+    for (const room of snapRoomsToEnvelope(activePreset.rooms)) {
       if (roomIsOpen(room, false)) continue;
       const [x0, y0, x1, y1] = roomInsetRect(room, geo);
       if (room.kind === "kitchen") {
