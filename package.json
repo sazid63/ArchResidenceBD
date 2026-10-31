@@ -9,7 +9,15 @@
     "build": "vite build --configLoader=native",
     "preview": "vite preview --configLoader=native",
     "clean": "rm -rf dist",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "audit:mesh": "tsx scripts/audits/mesh-audit.ts",
+    "audit:solid": "tsx scripts/audits/solid-audit.ts",
+    "audit:presets": "tsx scripts/audits/preset-audit.ts",
+    "audit:structural": "tsx scripts/audits/structural-sweep.ts",
+    "audit:full": "tsx scripts/audits/full-audit.ts",
+    "test:floorplan": "tsx scripts/tests/floorplan-chain.ts",
+    "test:exporters": "tsx scripts/tests/test-exporters.ts",
+    "verify": "tsc --noEmit && npm run test:floorplan && npm run audit:solid && npm run audit:presets"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

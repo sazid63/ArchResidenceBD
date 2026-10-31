@@ -8,16 +8,14 @@ Organized utility scripts for development, testing, and auditing.
 
 ```
 scripts/
-├── tests/          # Unit & integration tests
-├── audits/         # Code & architecture audits
-├── render/         # 3D rendering & visualization
-├── audit-out/      # Audit outputs (gitignored)
-├── exporter-out/   # Export test outputs (gitignored)
-├── planning/       # Planning images (gitignored)
-├── structural-sweep.ts   # Structural analysis CLI
+├── tests/        # Regression + smoke tests (exit non-zero on failure)
+├── audits/       # Geometry, preset, structural and code audits
+├── render/       # Software 3D renderer (PNG output)
+└── extraction/   # One-off data extraction (floor-plan links/images, PDFs)
 ```
 
----
+Generated output goes to `audits/audit-out/` and `tests/exporter-out/` (both gitignored).
+`npm run verify` runs typecheck + floor-plan chain test + solid audit + preset audit.
 
 ## 🧪 Tests (`tests/`)
 
@@ -27,25 +25,26 @@ scripts/
 | `test-exporters.ts` | IFC/STEP/FreeCAD macro export validation |
 | `test-drawings.ts` | Floor plan/section/elevation generation |
 | `test-boq.ts` | BOQ generation & CSV export |
-| `test-drawings.ts` | Drawing engine smoke test |
-| `test-exporters.ts` | Exporter smoke test |
 | `check-corridor.ts` | Corridor width measurement verification |
 | `check-mesh.ts` | Mesh quality (duplicate IDs, zero volume) |
 | `check-png.ts` / `check-png2.ts` / `quick-png-check.ts` | PNG render validation |
 | `verify-pngs.mjs` | PNG batch verification |
 | `compliance-test.ts` | BNBC/RAJUK compliance check |
 | `batch-export.ts` | Batch export CLI |
-| `user-test-3story.ts` | **Rafiq's full workflow** |
+| `floorplan-chain.ts` | **Chosen floor plan reaches every floor** (`npm run test:floorplan`) |
 
 ---
 
 ## 🔍 Audits (`audits/`)
 
-| Script | Purpose |
-|--------|---------|
-| `full-audit.ts` | Complete line-by-line code audit |
-| `mesh-audit.ts` | Mesh quality & watertightness |
-| `probe.ts` | Quick diagnostic probe |
+| Script | npm script | Purpose |
+|--------|-----------|---------|
+| `solid-audit.ts` | `audit:solid` | **Strict solid validator**: overlaps, z-fighting, closed/outward faces, floating solids; 11 presets x 3 heights x 2 plots |
+| `mesh-audit.ts` | `audit:mesh` | Deterministic overlap/z-fight audit + software renders (writes PNG + report) |
+| `preset-audit.ts` | `audit:presets` | Floor-plan preset data: room overlaps, footprint coverage, rooms without door/window |
+| `structural-sweep.ts` | `audit:structural` | Column/beam sizing sweep across stories |
+| `full-audit.ts` | `audit:full` | Structural + compliance audit over generated buildings |
+| `probe.ts` | | Quick import-chain diagnostic |
 
 ---
 
@@ -59,21 +58,12 @@ scripts/
 
 ---
 
-## 🏗️ Structural
-
-| Script | Purpose |
-|--------|---------|
-| `structural-sweep.ts` | Column/beam sizing sweep across stories |
-
----
-
 ## 📤 Outputs (gitignored)
 
 | Folder | Contents |
 |--------|----------|
-| `audit-out/` | Audit JSON/MD reports |
-| `exporter-out/` | Test export files (.fcmacro, .step) |
-| `planning/` | Planning images (JPG/PNG) |
+| `audits/audit-out/` | Audit JSON/MD reports and renders |
+| `tests/exporter-out/` | Test export files (.fcmacro, .step) |
 
 ---
 

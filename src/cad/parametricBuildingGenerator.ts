@@ -1145,7 +1145,7 @@ export function generateBuildingMesh(
   const spanX = bldgWidthMm / (colsX - 1);
   const spanY = bldgLengthMm / (colsY - 1);
 
-  // Auto column sizing — validated by scripts/structural-sweep.ts (BNBC 2020, M25/Fe415,
+  // Auto column sizing — validated by scripts/audits/structural-sweep.ts (BNBC 2020, M25/Fe415,
   // 12-column 4x3 grid, target column utilization ≤ 0.80 and beam ≤ 0.85):
   //   Stories 2-3: 300mm all plots | 5: 300/300/350 | 7: 350/350/400 (by plot area)
   const plotArea = project.plotSqm || 200;

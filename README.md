@@ -1,4 +1,4 @@
-# ArchResidenceBD v2.3
+# ArchResidenceBD v2.4.2
 
 ArchResidenceBD is a specialized civil engineering software suite tailored for residential building design in Bangladesh. It bridges the gap between architectural vision and engineering compliance, integrating local regulations (BNBC/RAJUK) with professional-grade modeling and estimation tools.
 
@@ -49,7 +49,27 @@ ArchResidenceBD is a specialized civil engineering software suite tailored for r
    npm run dev
    ```
 
+## 🗂️ Repository Layout
+
+| Path | Contents |
+|------|----------|
+| `src/cad/` | Parametric generator, `solidKernel.ts` (disjoint/closed solids + validator), exporters (IFC/FreeCAD), structural, BOQ, drawings |
+| `src/data/` | Floor-plan presets (`floorplanPresets.ts`), 60-plan catalogue + `floorplanMapping.ts` (plan → preset), generated CAD/BOQ data |
+| `src/screens`, `src/components`, `src/engine` | UI, project state, Archie chat engine |
+| `src/server/` | Express server (Gemini proxy); `npm run dev` |
+| `scripts/` | `audits/`, `tests/`, `render/`, `extraction/` (see `scripts/README.md`); `npm run verify` |
+| `docs/` | ADRs, specs, release notes, knowledge base |
+| `spec/` | Rule packs, flows, models, RAG sources |
+| `tools/` | BOQ lecture sources and extracted text |
+| `public/assets/floorplans/` | Floor-plan drawings |
+
+Package manager: **npm** (`package-lock.json`). See `RELEASES.md` for release notes.
+
 ## 🏗️ Version History
+
+### v2.4.2 (Current)
+- Chosen typical floor plan now drives every floor; solid-resolution pass (0 overlaps / 0 z-fighting); preset room overlaps fixed; windows slide clear of columns; `npm run verify`.
+
 
 ### v2.3 (Current) - Major Rework
 - **60 Real Bangladeshi Floor Plans**: Parsed from docx links, 30 actual images downloaded with 2D SVG previews

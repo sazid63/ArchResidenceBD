@@ -3,7 +3,7 @@
  * Parametric validation of beam, column, footing, and seismic analysis
  * across story count, plot size, and column size combinations.
  * 
- * Run: npx tsx scripts/structural-sweep.ts
+ * Run: npx tsx scripts/audits/structural-sweep.ts
  */
 
 import { 
@@ -17,8 +17,8 @@ import {
   DEFAULT_STEEL_EXPORT,
   BNBC_DEFAULT,
   type RectSection 
-} from "../src/cad/structuralEngine.js";
-import type { BuildingProject } from "../src/engine/projectState.js";
+} from "../../src/cad/structuralEngine.js";
+import type { BuildingProject } from "../../src/engine/projectState.js";
 import { writeFileSync, mkdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
