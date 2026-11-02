@@ -8,6 +8,7 @@
     "start": "tsx src/server/server.ts",
     "build": "vite build --configLoader=native",
     "preview": "vite preview --configLoader=native",
+    "lint": "tsc --noEmit",
     "clean": "rm -rf dist",
     "audit:mesh": "tsx scripts/audits/mesh-audit.ts",
     "audit:solid": "tsx scripts/audits/solid-audit.ts",
