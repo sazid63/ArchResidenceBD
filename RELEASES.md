@@ -216,3 +216,31 @@ git push origin develop
 - Gates: `npm run test:quality` (stairs, sizing, BOQ units; mutation-tested), `npm run verify`.
 - Not done: the 60 catalogue plans are cropped third-party screenshots (watermarked, partial) and cannot be traced reliably;
   presets still leave 44-81 % of the footprint unassigned (circulation vs courtyard needs a design decision).
+
+### v2.4.4 — UI/UX pass (2026-11-01)
+Found by driving the app in a real headless browser (desktop 1366 px and phone 390 px) and by auditing the source.
+- **Crashes:** Formwork and Documents/Drawings threw "Rendered more hooks than during the previous render" and went blank
+  (`useMemo` after early returns). Fixed; new `npm run audit:hooks` (works without ESLint, which cannot be installed with TypeScript 7)
+  catches this class and immediately found the same mistake in new code. `ErrorBoundary` existed but was never used: every screen is
+  now wrapped (resets on navigation, honest wording, "Back to start").
+- **Phone layout:** the sidebar took ~75 % of a phone screen. Now a drawer with a menu button, backdrop, Esc to close, closes on navigation,
+  sticky title bar, tab bars scroll sideways instead of wrapping into a blob, 44 px touch targets on touch devices.
+- **URLs:** the screen lived only in React state. Hash routing (`#/boq`, `#/phase/<id>`, ...) gives Back/Forward, refresh and deep links;
+  page titles update; focus moves to the new screen; skip link works.
+- **Unreachable screens:** Help, About, Templates and Licences had no menu link; My Projects was imported but never routed. Added "My Projects"
+  and a "More" section.
+- **Destructive action:** a bare "✕" (no label) next to the project name deleted the project behind a blocking `window.confirm`. Now a labelled
+  "Delete" button with an accessible in-app dialog (focus trap, Esc, focus restore); same dialog in My Projects.
+- **Invisible styling:** 13 CSS variables were used ~110 times but never defined (`--border` 57x), so borders and tinted backgrounds vanished.
+  Defined as theme-aware aliases (light and dark).
+- **3D screen:** WebGL failure was stored but never shown (blank canvas) - now an explanation with next steps; header said "solids" and called all
+  volume "concrete" - now elements and RCC only; the model tree was ~1,300 flat identical rows - now grouped by type, collapsible, filterable,
+  with named eye buttons; FreeCAD export wrote a hard-coded 4x3 template unrelated to the model - now exports the model on screen; IFC export added.
+- **Help:** the engine returned a different shape than the screen read (nothing could ever display) and filler text for any query. Rewritten as a real
+  bilingual offline manual with sources and starter questions; nonsense now returns "no answer" (`npm run test:manual`).
+- **Content:** Bangla "balcony" label ended in stray English letters (5 places) and another label contained "precated"; Unit Mix opened with all zeros,
+  presented assumed room minimums as BNBC, and offered a report with nothing in it - now starts from the project, labelled as assumptions.
+- Bangla font fallbacks extended (Hind Siliguri, Kalpurush, SolaimanLipi, Siyam Rupali, Vrinda) for devices without Noto Sans Bengali.
+- Browser checks saved in `scripts/tests/ui/` (`npm run test:ui`).
+- Not done: external Google Fonts are still loaded from the network (the app falls back to system fonts offline); many strings in older screens are
+  still inline English/Bangla ternaries rather than dictionary entries; Pour Sequence and Daylight render very large DOMs (100k / 59k characters).

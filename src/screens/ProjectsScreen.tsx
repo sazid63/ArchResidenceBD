@@ -3,6 +3,7 @@ import { fmtNum, useI18n } from "../i18n";
 import { Badge, Button, Card, PageHeader } from "../ui/kit";
 import { getSavedProjects, deleteSavedProject } from "../engine/projectState";
 import type { BuildingProject } from "../engine/projectState";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 
 /**
  * Projects dashboard — shows all saved projects from localStorage with create/delete actions.
@@ -15,16 +16,17 @@ export function ProjectsScreen({ onNavigate }: { onNavigate: (id: string) => voi
     setProjects(getSavedProjects());
   }, []);
 
+  const [pendingDelete, setPendingDelete] = useState<BuildingProject | null>(null);
   const handleDelete = (e: React.MouseEvent<HTMLButtonElement>, project: BuildingProject) => {
     e.stopPropagation();
-    if (window.confirm(
-      lang === "bn" 
-        ? `আপনি কি "${project.name}" প্রকল্পটি মুছে ফেলতে চান?` 
-        : `Are you sure you want to delete "${project.name}"?`
-    )) {
-      deleteSavedProject(project.id);
+    setPendingDelete(project);
+  };
+  const confirmDelete = () => {
+    if (pendingDelete) {
+      deleteSavedProject(pendingDelete.id);
       setProjects(getSavedProjects());
     }
+    setPendingDelete(null);
   };
 
   const handleOpen = (project: BuildingProject) => {
@@ -128,6 +130,19 @@ export function ProjectsScreen({ onNavigate }: { onNavigate: (id: string) => voi
           </Card>
         </div>
       )}
+    <ConfirmDialog
+      open={pendingDelete !== null}
+      title={lang === "bn" ? "প্রকল্প মুছবেন?" : "Delete this project?"}
+      message={
+        lang === "bn"
+          ? `"${pendingDelete?.name ?? ""}" এই ডিভাইস থেকে মুছে যাবে। এটি ফেরানো যাবে না।`
+          : `"${pendingDelete?.name ?? ""}" will be removed from this device. This cannot be undone.`
+      }
+      confirmLabel={lang === "bn" ? "মুছুন" : "Delete project"}
+      cancelLabel={lang === "bn" ? "বাতিল" : "Cancel"}
+      onConfirm={confirmDelete}
+      onCancel={() => setPendingDelete(null)}
+    />
     </div>
   );
 }

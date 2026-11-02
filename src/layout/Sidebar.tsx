@@ -8,14 +8,17 @@ import {
   clearAllProjects,
 } from "../engine/projectState";
 import { useActiveProject, useProject } from "../context/ProjectContext";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 import "./sidebar.css";
 
 interface Props {
   active: string;
   onNavigate: (id: string) => void;
+  /** Mobile drawer state (ignored on wide screens). */
+  open?: boolean;
 }
 
-export function Sidebar({ active, onNavigate }: Props) {
+export function Sidebar({ active, onNavigate, open = false }: Props) {
   const { t, lang, setLang } = useI18n();
   const { theme, toggle } = useTheme();
   const project = useActiveProject();
@@ -31,16 +34,17 @@ export function Sidebar({ active, onNavigate }: Props) {
     onNavigate("setup");
   };
 
-  const handleReset = () => {
-    if (window.confirm("Are you sure you want to clear the project and start fresh?")) {
-      clearAllProjects();
-      refreshProject();
-      onNavigate("setup");
-    }
+  const [confirmReset, setConfirmReset] = useState(false);
+  const handleReset = () => setConfirmReset(true);
+  const doReset = () => {
+    setConfirmReset(false);
+    clearAllProjects();
+    refreshProject();
+    onNavigate("setup");
   };
 
   return (
-    <aside className="sidebar">
+    <aside id="app-sidebar" className={cx("sidebar", open && "open")} aria-label={lang === "bn" ? "প্রধান নেভিগেশন" : "Main navigation"}>
       {/* Brand Header */}
       <div className="sidebar-head">
         <span className="logo-dot" />
@@ -54,6 +58,14 @@ export function Sidebar({ active, onNavigate }: Props) {
         {/* + New Project Button */}
         <button type="button" className="nav-new" onClick={handleNewProject}>
           + {t("newProject")}
+        </button>
+        <button
+          type="button"
+          className={cx("nav-item", active === "projects" && "active")}
+          aria-current={active === "projects" ? "page" : undefined}
+          onClick={() => onNavigate("projects")}
+        >
+          <span className="grow ellipsis">{lang === "bn" ? "আমার প্রকল্পসমূহ" : "My Projects"}</span>
         </button>
 
         {/* Active Project Card */}
@@ -73,9 +85,10 @@ export function Sidebar({ active, onNavigate }: Props) {
               type="button"
               className="button button--ghost small nav-reset"
               onClick={handleReset}
-              title="Reset & Delete Project"
+              aria-label={lang === "bn" ? "প্রকল্প মুছুন" : "Delete project"}
+              title={lang === "bn" ? "প্রকল্প মুছুন" : "Delete project"}
             >
-              ✕
+              {lang === "bn" ? "মুছুন" : "Delete"}
             </button>
           </div>
         ) : (
@@ -99,6 +112,7 @@ export function Sidebar({ active, onNavigate }: Props) {
             <button
               type="button"
               className="nav-group-head"
+              aria-expanded={openPhases}
               onClick={() => setOpenPhases(!openPhases)}
             >
               <span className={cx("chev", openPhases && "open")}>▾</span>
@@ -123,6 +137,7 @@ export function Sidebar({ active, onNavigate }: Props) {
                       key={phase.id}
                       type="button"
                       className={cx("nav-item", "child", isActive && "active")}
+                      aria-current={isActive ? "page" : undefined}
                       onClick={() => onNavigate(`phase:${phase.id}`)}
                     >
                       <Dot tone={isDone ? "sage" : isInProgress ? "amber" : "neutral"} />
@@ -146,6 +161,7 @@ export function Sidebar({ active, onNavigate }: Props) {
             <button
               type="button"
               className="nav-group-head"
+              aria-expanded={openDesign}
               onClick={() => setOpenDesign(!openDesign)}
             >
               <span className={cx("chev", openDesign && "open")}>▾</span>
@@ -180,6 +196,7 @@ export function Sidebar({ active, onNavigate }: Props) {
                           key={phase.id}
                           type="button"
                           className={cx("nav-item", "child", isActive && "active")}
+                      aria-current={isActive ? "page" : undefined}
                           onClick={() => onNavigate(`design:${phase.id}`)}
                         >
                           <span className="dot-spacer" />
@@ -194,6 +211,7 @@ export function Sidebar({ active, onNavigate }: Props) {
                     <button
                       type="button"
                       className={cx("nav-item", "child", "nav-master", active === "design:final" && "active")}
+          aria-current={active === "design:final" ? "page" : undefined}
                       onClick={() => onNavigate("design:final")}
                     >
                       <Dot tone="primary" />
@@ -212,6 +230,7 @@ export function Sidebar({ active, onNavigate }: Props) {
         <button
           type="button"
           className={cx("nav-item", active === "boq" && "active")}
+          aria-current={active === "boq" ? "page" : undefined}
           onClick={() => {
             if (!project) onNavigate("setup");
             else onNavigate("boq");
@@ -225,6 +244,7 @@ export function Sidebar({ active, onNavigate }: Props) {
         <button
           type="button"
           className={cx("nav-item", active === "assets" && "active")}
+          aria-current={active === "assets" ? "page" : undefined}
           onClick={() => onNavigate("assets")}
         >
           <span className="grow">{lang === "bn" ? "আর্কিটেকচারাল অ্যাসেট লাইব্রেরি" : "Architectural Assets"}</span>
@@ -235,6 +255,7 @@ export function Sidebar({ active, onNavigate }: Props) {
         <button
           type="button"
           className={cx("nav-item", active === "compliance" && "active")}
+          aria-current={active === "compliance" ? "page" : undefined}
           onClick={() => onNavigate("compliance")}
         >
           <span className="grow">{t("compliance")}</span>
@@ -244,6 +265,7 @@ export function Sidebar({ active, onNavigate }: Props) {
         <button
           type="button"
           className={cx("nav-item", active === "formwork" && "active")}
+          aria-current={active === "formwork" ? "page" : undefined}
           onClick={() => onNavigate("formwork")}
         >
           <span className="grow">{t("formwork")}</span>
@@ -253,6 +275,7 @@ export function Sidebar({ active, onNavigate }: Props) {
         <button
           type="button"
           className={cx("nav-item", active === "pour" && "active")}
+          aria-current={active === "pour" ? "page" : undefined}
           onClick={() => onNavigate("pour")}
         >
           <span className="grow">{t("pourSequence")}</span>
@@ -262,6 +285,7 @@ export function Sidebar({ active, onNavigate }: Props) {
         <button
           type="button"
           className={cx("nav-item", active === "rebar" && "active")}
+          aria-current={active === "rebar" ? "page" : undefined}
           onClick={() => onNavigate("rebar")}
         >
           <span className="grow">{t("rebar")}</span>
@@ -271,6 +295,7 @@ export function Sidebar({ active, onNavigate }: Props) {
         <button
           type="button"
           className={cx("nav-item", active === "connections" && "active")}
+          aria-current={active === "connections" ? "page" : undefined}
           onClick={() => onNavigate("connections")}
         >
           <span className="grow">{t("connections")}</span>
@@ -280,6 +305,7 @@ export function Sidebar({ active, onNavigate }: Props) {
         <button
           type="button"
           className={cx("nav-item", active === "daylight" && "active")}
+          aria-current={active === "daylight" ? "page" : undefined}
           onClick={() => onNavigate("daylight")}
         >
           <span className="grow">{t("daylightNav")}</span>
@@ -289,6 +315,7 @@ export function Sidebar({ active, onNavigate }: Props) {
         <button
           type="button"
           className={cx("nav-item", active === "unit-mix" && "active")}
+          aria-current={active === "unit-mix" ? "page" : undefined}
           onClick={() => onNavigate("unit-mix")}
         >
           <span className="grow">{t("unitMixNav")}</span>
@@ -298,6 +325,7 @@ export function Sidebar({ active, onNavigate }: Props) {
         <button
           type="button"
           className={cx("nav-item", active === "column-grid" && "active")}
+          aria-current={active === "column-grid" ? "page" : undefined}
           onClick={() => onNavigate("column-grid")}
         >
           <span className="grow">{t("columnGridNav")}</span>
@@ -306,6 +334,7 @@ export function Sidebar({ active, onNavigate }: Props) {
         <button
           type="button"
           className={cx("nav-item", active === "docs:drawings" && "active")}
+          aria-current={active === "docs:drawings" ? "page" : undefined}
           onClick={() => onNavigate("docs:drawings")}
         >
           <span className="grow">{t("documents")}</span>
@@ -315,6 +344,7 @@ export function Sidebar({ active, onNavigate }: Props) {
         <button
           type="button"
           className={cx("nav-item", active === "fleet" && "active")}
+          aria-current={active === "fleet" ? "page" : undefined}
           onClick={() => onNavigate("fleet")}
         >
           <span className="grow">{t("fleet")}</span>
@@ -324,6 +354,7 @@ export function Sidebar({ active, onNavigate }: Props) {
         <button
           type="button"
           className={cx("nav-item", active === "windows" && "active")}
+          aria-current={active === "windows" ? "page" : undefined}
           onClick={() => onNavigate("windows")}
         >
           <span className="grow">{t("windows")}</span>
@@ -333,10 +364,31 @@ export function Sidebar({ active, onNavigate }: Props) {
         <button
           type="button"
           className={cx("nav-item", active === "units" && "active")}
+          aria-current={active === "units" ? "page" : undefined}
           onClick={() => onNavigate("units")}
         >
           <span className="grow">{t("unitsTitle")}</span>
         </button>
+            <div className="nav-group" >
+        <div className="nav-group-head" role="presentation" style={{ cursor: "default" }}>
+          <span className="grow">{lang === "bn" ? "আরও" : "MORE"}</span>
+        </div>
+        {([
+          ["templates", "Templates", "টেমপ্লেট"],
+          ["help", "Help", "সহায়তা"],
+          ["about", "About & licences", "সম্পর্কে ও লাইসেন্স"],
+        ] as const).map(([id, en, bn]) => (
+          <button
+            key={id}
+            type="button"
+            className={cx("nav-item", (active === id || (id === "about" && active === "licences")) && "active")}
+            aria-current={active === id ? "page" : undefined}
+            onClick={() => onNavigate(id)}
+          >
+            <span className="grow ellipsis">{lang === "bn" ? bn : en}</span>
+          </button>
+        ))}
+      </div>
       </nav>
 
       {/* Sidebar Footer */}
@@ -345,6 +397,8 @@ export function Sidebar({ active, onNavigate }: Props) {
           <button
             type="button"
             className={cx("lang-pill", lang === "bn" && "active")}
+            aria-pressed={lang === "bn"}
+            aria-label="বাংলা"
             onClick={() => setLang("bn")}
           >
             বাং
@@ -352,6 +406,8 @@ export function Sidebar({ active, onNavigate }: Props) {
           <button
             type="button"
             className={cx("lang-pill", lang === "en" && "active")}
+            aria-pressed={lang === "en"}
+            aria-label="English"
             onClick={() => setLang("en")}
           >
             EN
@@ -367,6 +423,19 @@ export function Sidebar({ active, onNavigate }: Props) {
         </button>
         <span className="faint small">ArchResidenceBD v1.0</span>
       </div>
+      <ConfirmDialog
+        open={confirmReset}
+        title={lang === "bn" ? "প্রকল্প মুছবেন?" : "Delete this project?"}
+        message={
+          lang === "bn"
+            ? `"${project?.name ?? ""}" এই ডিভাইস থেকে মুছে যাবে। এটি ফেরানো যাবে না।`
+            : `"${project?.name ?? ""}" will be removed from this device. This cannot be undone.`
+        }
+        confirmLabel={lang === "bn" ? "মুছুন" : "Delete project"}
+        cancelLabel={lang === "bn" ? "বাতিল" : "Cancel"}
+        onConfirm={doReset}
+        onCancel={() => setConfirmReset(false)}
+      />
     </aside>
   );
 }

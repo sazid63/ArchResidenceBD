@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ask, isDesktopShell } from "../ipc/core";
 import { useI18n } from "../i18n";
 import { Badge, Button, Callout, Card, PageHeader } from "../ui/kit";
+import { MANUAL_FAQ } from "../data/manualFaq";
 
 interface Answer {
   entry: {
@@ -26,11 +27,12 @@ interface Answer {
  */
 export function HelpScreen() {
   const { t, lang } = useI18n();
-  const [query, setQuery] = useState("");
+  const [queryText, setQuery] = useState("");
   const [answers, setAnswers] = useState<Answer[] | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
 
-  const search = async () => {
+  const search = async (override?: string) => {
+    const query = override ?? queryText;
     if (!query.trim()) {
       setAnswers(null);
       return;
@@ -62,7 +64,7 @@ export function HelpScreen() {
         <input
           className="input grow"
            id="help-search-input"
-          value={query}
+          value={queryText}
           placeholder={t("helpPlaceholder")}
           onChange={(event) => setQuery(event.target.value)}
           onKeyDown={(event) => {
@@ -73,6 +75,31 @@ export function HelpScreen() {
           {t("helpSearch")}
         </Button>
       </div>
+      {answers === null && !problem ? (
+        <Card className="stack">
+          <h2 style={{ fontSize: "1rem", margin: 0 }}>{lang === "bn" ? "যা জানতে চাইতে পারেন" : "Try asking"}</h2>
+          <div className="row" style={{ gap: "8px", flexWrap: "wrap" }}>
+            {MANUAL_FAQ.map((e) => (
+              <button
+                key={e.id}
+                type="button"
+                className="button"
+                onClick={() => {
+                  setQuery(e.question[lang === "bn" ? "bn" : "en"]);
+                  void search(e.question[lang === "bn" ? "bn" : "en"]);
+                }}
+              >
+                {e.question[lang === "bn" ? "bn" : "en"]}
+              </button>
+            ))}
+          </div>
+          <p className="small muted" style={{ margin: 0 }}>
+            {lang === "bn"
+              ? "উত্তরগুলো অ্যাপের নিজস্ব ম্যানুয়াল থেকে আসে এবং প্রতিটির উৎস দেওয়া থাকে। নিয়ম-সংক্রান্ত মান অফিসিয়াল কোডের সাথে মিলিয়ে নিন।"
+              : "Answers come from the app's built-in manual and each names its source. Check regulatory values against the official code."}
+          </p>
+        </Card>
+      ) : null}
       {problem ? (
         <Callout title={t("helpFailed")}>
           <span className="small">{problem}</span>

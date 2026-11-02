@@ -1,4 +1,4 @@
-# ArchResidenceBD v2.4.3
+# ArchResidenceBD v2.4.4
 
 ArchResidenceBD is a specialized civil engineering software suite tailored for residential building design in Bangladesh. It bridges the gap between architectural vision and engineering compliance, integrating local regulations (BNBC/RAJUK) with professional-grade modeling and estimation tools.
 
@@ -67,7 +67,10 @@ Package manager: **npm** (`package-lock.json`). See `RELEASES.md` for release no
 
 ## 🏗️ Version History
 
-### v2.4.3 (Current)
+### v2.4.4 (Current)
+- UI/UX pass: crash fixes, responsive phone drawer, URL routing, reachable Help/About/Templates, accessible dialogs, working Help manual, grouped 3D tree, real FreeCAD/IFC export. See RELEASES.md.
+
+### v2.4.3
 - Structural section sizing from the engine; exact-rise stairs with slab openings; measured BOQ take-off with correct units and reinforcement; `npm run verify` now includes `test:quality` and `audit:sizing`.
 
 ### v2.4.2

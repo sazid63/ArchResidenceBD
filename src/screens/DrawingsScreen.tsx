@@ -111,6 +111,16 @@ export function DrawingsScreen() {
     
     loadDrawings();
   }, [project, t, lang]);
+  // Hooks must run on every render, so they live above the early returns below.
+  const views = useMemo(() => 
+    Object.entries(drawings ?? {}).map(([id, data]) => ({
+      id,
+      title: data.title,
+      type: data.type,
+    })),
+  [drawings]
+);
+
 
   if (error) {
     return (
@@ -133,15 +143,6 @@ export function DrawingsScreen() {
       </div>
     );
   }
-
-  const views = useMemo(() => 
-    Object.entries(drawings).map(([id, data]) => ({
-      id,
-      title: data.title,
-      type: data.type,
-    })),
-  [drawings]
-);
 
   return (
     <div className="screen">

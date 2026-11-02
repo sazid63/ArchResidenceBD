@@ -40,7 +40,8 @@ interface OptimizationResult {
   issues: string[];
 }
 
-// BNBC 2020 minimum room sizes (in sqm) per residential requirements
+// ASSUMED working minimum room sizes (sqm). Not transcribed from BNBC 2020: the repo rule pack lists
+// minimum space requirements as a declared gap, so confirm against BNBC 2020 Part 3 before relying on them.
 const BNBC_MIN_ROOM_SIZES: Record<string, { min: number; labelEn: string; labelBn: string }> = {
   living: { min: 12.0, labelEn: "Living Room", labelBn: "গড় ঘর" },
   bedroom: { min: 9.0, labelEn: "Bedroom", labelBn: "শোবার ঘর" },
@@ -48,7 +49,7 @@ const BNBC_MIN_ROOM_SIZES: Record<string, { min: number; labelEn: string; labelB
   kitchen: { min: 5.0, labelEn: "Kitchen", labelBn: "রান্নাঘর" },
   dining: { min: 8.0, labelEn: "Dining Room", labelBn: "ডিনিং ঘর" },
   bathroom: { min: 3.5, labelEn: "Bathroom", labelBn: "স্নানাগার" },
-  balcony: { min: 3.0, labelEn: "Balcony", labelBn: "জানালা টেরrace" },
+  balcony: { min: 3.0, labelEn: "Balcony", labelBn: "বারান্দা" },
   corridor: { min: 1.5, labelEn: "Corridor", labelBn: "গলিয়াঢ়" },
   stair: { min: 2.5, labelEn: "Stairwell", labelBn: " স্তরাঙ্গ" },
 };
@@ -62,7 +63,7 @@ const UNIT_CONFIGS: UnitConfig[] = [
       { id: "living", nameEn: "Living", nameBn: "গড় ঘর", kind: "living", minAreaM2: 12, maxAreaM2: 20, minWidthMm: 3000, minLengthMm: 4000, count: 1, totalAreaM2: 15 },
       { id: "kitchen", nameEn: "Kitchen", nameBn: "রান্নাঘর", kind: "kitchen", minAreaM2: 5, maxAreaM2: 8, minWidthMm: 2000, minLengthMm: 2500, count: 1, totalAreaM2: 6 },
       { id: "bath", nameEn: "Bathroom", nameBn: "স্নানাগার", kind: "bathroom", minAreaM2: 3.5, maxAreaM2: 5, minWidthMm: 1500, minLengthMm: 2000, count: 1, totalAreaM2: 4 },
-      { id: "balcony", nameEn: "Balcony", nameBn: "জানালা টেরrace", kind: "balcony", minAreaM2: 3, maxAreaM2: 5, minWidthMm: 1500, minLengthMm: 2000, count: 1, totalAreaM2: 4 },
+      { id: "balcony", nameEn: "Balcony", nameBn: "বারান্দা", kind: "balcony", minAreaM2: 3, maxAreaM2: 5, minWidthMm: 1500, minLengthMm: 2000, count: 1, totalAreaM2: 4 },
     ],
     totalAreaM2: 29,
     totalUnits: 0,
@@ -75,7 +76,7 @@ const UNIT_CONFIGS: UnitConfig[] = [
       { id: "bedroom", nameEn: "Bedroom", nameBn: "শোবার ঘর", kind: "bedroom", minAreaM2: 9, maxAreaM2: 14, minWidthMm: 3000, maxLengthMm: 4000, count: 1, totalAreaM2: 12 },
       { id: "kitchen", nameEn: "Kitchen", nameBn: "রান্নাঘর", kind: "kitchen", minAreaM2: 5, maxAreaM2: 8, minWidthMm: 2000, minLengthMm: 2500, count: 1, totalAreaM2: 6 },
       { id: "bath", nameEn: "Bathroom", nameBn: "স্নানাগার", kind: "bathroom", minAreaM2: 3.5, maxAreaM2: 5, minWidthMm: 1500, minLengthMm: 2000, count: 1, totalAreaM2: 4 },
-      { id: "balcony", nameEn: "Balcony", nameBn: "জানালা টেরrace", kind: "balcony", minAreaM2: 3, maxAreaM2: 5, minWidthMm: 1500, minLengthMm: 2000, count: 1, totalAreaM2: 4 },
+      { id: "balcony", nameEn: "Balcony", nameBn: "বারান্দা", kind: "balcony", minAreaM2: 3, maxAreaM2: 5, minWidthMm: 1500, minLengthMm: 2000, count: 1, totalAreaM2: 4 },
     ],
     totalAreaM2: 41,
     totalUnits: 0,
@@ -90,7 +91,7 @@ const UNIT_CONFIGS: UnitConfig[] = [
       { id: "kitchen", nameEn: "Kitchen", nameBn: "রান্নাঘর", kind: "kitchen", minAreaM2: 5, maxAreaM2: 8, minWidthMm: 2000, minLengthMm: 2500, count: 1, totalAreaM2: 6 },
       { id: "dining", nameEn: "Dining", nameBn: "ডিনিং ঘর", kind: "dining", minAreaM2: 8, maxAreaM2: 12, minWidthMm: 2500, maxLengthMm: 3500, count: 1, totalAreaM2: 10 },
       { id: "bath", nameEn: "Bathroom", nameBn: "স্নানাগার", kind: "bathroom", minAreaM2: 3.5, maxAreaM2: 5, minWidthMm: 1500, minLengthMm: 2000, count: 1, totalAreaM2: 4 },
-      { id: "balcony", nameEn: "Balcony", nameBn: "জানালা টেরrace", kind: "balcony", minAreaM2: 3, maxAreaM2: 5, minWidthMm: 1500, minLengthMm: 2000, count: 1, totalAreaM2: 4 },
+      { id: "balcony", nameEn: "Balcony", nameBn: "বারান্দা", kind: "balcony", minAreaM2: 3, maxAreaM2: 5, minWidthMm: 1500, minLengthMm: 2000, count: 1, totalAreaM2: 4 },
     ],
     totalAreaM2: 66,
     totalUnits: 0,
@@ -105,7 +106,7 @@ const UNIT_CONFIGS: UnitConfig[] = [
       { id: "kitchen", nameEn: "Kitchen", nameBn: "রান্নাঘর", kind: "kitchen", minAreaM2: 5, maxAreaM2: 8, minWidthMm: 2000, minLengthMm: 2500, count: 1, totalAreaM2: 6 },
       { id: "dining", nameEn: "Dining", nameBn: "ডিনিং ঘর", kind: "dining", minAreaM2: 8, maxAreaM2: 12, minWidthMm: 2500, maxLengthMm: 3500, count: 1, totalAreaM2: 10 },
       { id: "bath", nameEn: "Bathroom", nameBn: "স্নানাগার", kind: "bathroom", minAreaM2: 3.5, maxAreaM2: 5, minWidthMm: 1500, minLengthMm: 2000, count: 1, totalAreaM2: 4 },
-      { id: "balcony", nameEn: "Balcony", nameBn: "জানালা টেরrace", kind: "balcony", minAreaM2: 3, maxAreaM2: 5, minWidthMm: 1500, minLengthMm: 2000, count: 1, totalAreaM2: 4 },
+      { id: "balcony", nameEn: "Balcony", nameBn: "বারান্দা", kind: "balcony", minAreaM2: 3, maxAreaM2: 5, minWidthMm: 1500, minLengthMm: 2000, count: 1, totalAreaM2: 4 },
     ],
     totalAreaM2: 70,
     totalUnits: 0,
@@ -132,7 +133,16 @@ export function UnitMixOptimizerScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedUnitConfig, setSelectedUnitConfig] = useState<string>("2bed");
-  const [unitMix, setUnitMix] = useState<Record<string, number>>({ studio: 0, "1bed": 0, "2bed": 0, "3bed": 0 });
+  // Start from the project: units/floor x residential floors, flat type chosen from the area per unit.
+  const [unitMix, setUnitMix] = useState<Record<string, number>>(() => {
+    const base: Record<string, number> = { studio: 0, "1bed": 0, "2bed": 0, "3bed": 0 };
+    const p = getActiveProject();
+    if (!p) return base;
+    const perUnit = ((p.plotSqm || 200) * 0.65) / Math.max(1, p.unitsPerFloor || 1);
+    const type = perUnit < 35 ? "studio" : perUnit < 55 ? "1bed" : perUnit < 68 ? "2bed" : "3bed";
+    base[type] = Math.max(1, (p.unitsPerFloor || 1) * Math.max(1, (p.stories || 2) - 1));
+    return base;
+  });
 
   const customization = project?.customization;
   const floorAreaPerFloor = (project?.plotSqm || 200) * 0.65; // 65% MGC
@@ -238,7 +248,7 @@ export function UnitMixOptimizerScreen() {
     md += `**Floor Area Per Floor:** ${Math.round(floorAreaPerFloor)} m²\n`;
     md += `**Total Floor Area:** ${Math.round(totalFloorArea)} m²\n`;
     md += `**Generated:** ${new Date().toLocaleString("en-GB")}\n`;
-    md += `**Standard:** BNBC 2020 Residential Room Sizes\n\n`;
+    md += `**Standard:** assumed working minimum room sizes (not transcribed from BNBC 2020 - confirm against BNBC 2020 Part 3)\n\n`;
 
     md += `---\n\n## Summary\n\n`;
     md += `| Metric | Value |\n|--------|-------|\n`;
@@ -330,7 +340,7 @@ export function UnitMixOptimizerScreen() {
         subtitle={t("unitMixSubtitle")}
         actions={
           <div className="row" style={{ gap: "8px" }}>
-            <Button variant="soft" onClick={handleDownloadReport}>
+            <Button variant="soft" onClick={handleDownloadReport} disabled={Object.values(unitMix).every((v) => !v)}>
               {lang === "bn" ? "রিপোর্ট ডাউনলোড" : "Download Report"}
             </Button>
           </div>

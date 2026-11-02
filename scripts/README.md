@@ -32,6 +32,8 @@ Generated output goes to `audits/audit-out/` and `tests/exporter-out/` (both git
 | `compliance-test.ts` | BNBC/RAJUK compliance check |
 | `batch-export.ts` | Batch export CLI |
 | `model-quality.ts` | **Stairs, section sizing and BOQ unit/measurement gates** (`npm run test:quality`) |
+| `ui/ui-shell.mjs`, `ui/ui-screens.mjs` | **Browser checks**: routing/back button, phone drawer, dialogs, crashes, Help, tree (`npm run test:ui`; needs `puppeteer-core` + `@sparticuz/chromium`, see file header) |
+| `manual-search.ts` | Help search quality (`npm run test:manual`) |
 | `floorplan-chain.ts` | **Chosen floor plan reaches every floor** (`npm run test:floorplan`) |
 
 ---
@@ -42,6 +44,7 @@ Generated output goes to `audits/audit-out/` and `tests/exporter-out/` (both git
 |--------|-----------|---------|
 | `solid-audit.ts` | `audit:solid` | **Strict solid validator**: overlaps, z-fighting, closed/outward faces, floating solids; 11 presets x 3 heights x 2 plots |
 | `mesh-audit.ts` | `audit:mesh` | Deterministic overlap/z-fight audit + software renders (writes PNG + report) |
+| `hooks-audit.ts` | `audit:hooks` | Rules-of-Hooks violations (hook after an early return / in a condition) that blank a screen |
 | `sizing-audit.ts` | `audit:sizing` | Recommended grid/column/beam pass the structural screening checks for 2-12 storeys, 80-500 m2 |
 | `preset-audit.ts` | `audit:presets` | Floor-plan preset data: room overlaps, footprint coverage, rooms without door/window |
 | `structural-sweep.ts` | `audit:structural` | Column/beam sizing sweep across stories |
