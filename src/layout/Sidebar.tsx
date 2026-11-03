@@ -340,16 +340,6 @@ export function Sidebar({ active, onNavigate, open = false }: Props) {
           <span className="grow">{t("documents")}</span>
         </button>
 
-        {/* 13. AI FLEET HUB */}
-        <button
-          type="button"
-          className={cx("nav-item", active === "fleet" && "active")}
-          aria-current={active === "fleet" ? "page" : undefined}
-          onClick={() => onNavigate("fleet")}
-        >
-          <span className="grow">{t("fleet")}</span>
-        </button>
-
         {/* 14. WINDOWS INSTALLER (.exe) */}
         <button
           type="button"

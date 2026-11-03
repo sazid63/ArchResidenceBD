@@ -1,55 +1,51 @@
 /**
- * Maps the user's chosen typical floor plan (one of the 60 catalogue entries in
- * bangladeshFloorplans.ts) to the parametric preset the 3D generator can build.
+ * Which parametric layout builds each storey.
  *
- * The catalogue entries are IMAGES with metadata; they carry no room geometry. Until a plan
- * is traced into a preset, the 3D model follows the closest parametric preset by unit count
- * (and plot size for the narrow-plot variant). The mapping is deliberate and deterministic so a
- * chosen plan always yields the same floors.
+ * The chain is: a storey's own choice → the template assigned to its dwellings-per-floor count →
+ * the project's typical preset → the default preset for that unit count. Because the assignment is
+ * stored per unit count, every floor with the same count resolves to the same 2D drawing (and
+ * therefore the same 3D layout).
  */
 
 import { FLOORPLAN_PRESETS } from "./floorplanPresets";
-import type { FloorPlanImage } from "./bangladeshFloorplans";
+import { fallbackPresetForUnits, getTemplate } from "./floorplanLibrary";
+import { assignedTemplate, type FloorplanHost } from "./floorplanSelection";
 
 /** Preset used when only the number of units per floor is known. */
-export function presetForUnits(unitsPerFloor: number): string {
-  if (unitsPerFloor <= 1) return "preset-single-luxury";
-  if (unitsPerFloor === 2) return "preset-dual-3bed";
-  if (unitsPerFloor === 3) return "preset-triple-rental";
+export function presetForUnits(units: number): string {
+  if (units <= 1) return "preset-single-luxury";
+  if (units === 2) return "preset-dual-3bed";
+  if (units === 3) return "preset-triple-rental";
   return "preset-studio-bachelor";
 }
 
-/** Lower bound (katha) of strings like "3.5-4.5 Katha"; null if unparsable. */
-function minKatha(range: string): number | null {
-  const m = range.match(/(\d+(?:\.\d+)?)/);
-  return m ? Number(m[1]) : null;
-}
-
-export function presetForFloorPlan(plan: FloorPlanImage | null | undefined, fallbackUnits = 2): string {
-  const units = plan?.unitsCount ?? fallbackUnits;
-  const id = presetForUnits(units);
-  // Narrow plots (< 3 katha) with two units use the duct plan, which is built for 25 ft frontage.
-  if (units === 2 && plan) {
-    const lo = minKatha(plan.plotSizeRange);
-    if (lo !== null && lo < 3) return "preset-narrow-duct";
-  }
-  return FLOORPLAN_PRESETS.some((p) => p.id === id) ? id : FLOORPLAN_PRESETS[0].id;
+/** The preset a curated 2D template builds, or the unit-count default when no template is given. */
+export function presetForTemplate(templateId: string | null | undefined, units: number): string {
+  const template = getTemplate(templateId);
+  if (template && template.unitsPerFloor === Math.round(units)) return template.presetId;
+  return presetForUnits(units);
 }
 
 /**
- * The preset for storey `s`: that floor's own selection, else the project's typical plan,
- * else the preset implied by units per floor. Never silently the same default for everything.
+ * The preset for storey `s`: that floor's own selection, else the plan assigned to this unit count,
+ * else the project's typical plan, else the preset implied by units per floor.
  */
 export function resolveFloorPresetId(
-  project: {
-    unitsPerFloor?: number;
-    typicalPresetId?: string;
+  project: FloorplanHost & {
     phases?: Array<{ kind: string; storeyIndex?: number; data?: Record<string, unknown> }>;
   },
   storey: number,
 ): string {
   const phase = project.phases?.find((p) => p.kind === "floor" && p.storeyIndex === storey);
   const own = phase?.data?.selectedFloorplanPreset as string | undefined;
-  const id = own || project.typicalPresetId || presetForUnits(project.unitsPerFloor ?? 2);
-  return FLOORPLAN_PRESETS.some((p) => p.id === id) ? id : presetForUnits(project.unitsPerFloor ?? 2);
+  if (own && FLOORPLAN_PRESETS.some((p) => p.id === own)) return own;
+
+  const units = project.unitsPerFloor ?? 2;
+  const assigned = assignedTemplate(project, units);
+  if (assigned) return assigned.presetId;
+
+  const typical = project.typicalPresetId;
+  if (typical && FLOORPLAN_PRESETS.some((p) => p.id === typical)) return typical;
+
+  return presetForUnits(units) || fallbackPresetForUnits(units);
 }

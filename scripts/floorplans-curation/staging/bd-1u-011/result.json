@@ -1,0 +1,69 @@
+{
+  "id": "bd-1u-011",
+  "url": "https://www.assuregroupbd.com/properties/assure-tasneem-uttara",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "https://www.assuregroupbd.com/images/assure-tasneem-uttara-og.jpg",
+      "kind": "meta",
+      "score": 75,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-011\\cand0.jpg",
+      "bytes": 159945,
+      "w": 600,
+      "h": 315,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://www.assuregroupbd.com/properties/600",
+      "kind": "meta",
+      "score": 60,
+      "ok": false,
+      "status": 404
+    },
+    {
+      "url": "https://www.assuregroupbd.com/properties/315",
+      "kind": "meta",
+      "score": 60,
+      "ok": false,
+      "status": 404
+    },
+    {
+      "url": "https://www.assuregroupbd.com/images/properties/properties-details/assure-tasneem-ground-floor-plan.jpg",
+      "kind": "img",
+      "score": 40,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-011\\cand3.jpg",
+      "bytes": 119089,
+      "w": 700,
+      "h": 1000,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://www.assuregroupbd.com/images/properties/properties-details/assure-tasneem-typical-floor-plan.jpg",
+      "kind": "img",
+      "score": 40,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-011\\cand4.jpg",
+      "bytes": 108047,
+      "w": 700,
+      "h": 1000,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://www.assuregroupbd.com/images/properties/properties-details/assure-tasneem-roof-top-plan.jpg",
+      "kind": "img",
+      "score": 40,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-011\\cand5.jpg",
+      "bytes": 86502,
+      "w": 700,
+      "h": 1000,
+      "ext": "jpg",
+      "status": 200
+    }
+  ]
+}

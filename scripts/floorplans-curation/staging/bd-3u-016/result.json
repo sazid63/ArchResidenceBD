@@ -1,0 +1,66 @@
+{
+  "id": "bd-3u-016",
+  "url": "https://in.pinterest.com/pin/3-unit-floor-plan--377317275048425947/",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "https://in.pinterest.com/pin/3-unit-floor-plan--377317275048425947/997",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html; charset=utf-8"
+    },
+    {
+      "url": "https://in.pinterest.com/pin/3-unit-floor-plan--377317275048425947/736",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html; charset=utf-8"
+    },
+    {
+      "url": "https://i.pinimg.com/736x/29/67/2c/29672c28ad285b3359faaca0d3a62ddf.jpg",
+      "kind": "meta",
+      "score": 70,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-016\\cand2.jpg",
+      "bytes": 141360,
+      "w": 736,
+      "h": 997,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://i.pinimg.com/originals/29/67/2c/29672c28ad285b3359faaca0d3a62ddf.jpg",
+      "kind": "jsonld",
+      "score": 50,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-016\\cand3.jpg",
+      "bytes": 220041,
+      "w": 962,
+      "h": 1304,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://i.pinimg.com/75x75_RS/87/d4/ae/87d4ae6ae1c52d72e49cb1af8222ed0f.jpg",
+      "kind": "img",
+      "score": 10,
+      "ok": false,
+      "note": "too-small"
+    },
+    {
+      "url": "https://i.pinimg.com/200x150/78/3b/db/783bdb8fa8af7912dd45add8d11ab50a.jpg",
+      "kind": "img",
+      "score": 10,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-016\\cand5.jpg",
+      "bytes": 8419,
+      "w": 200,
+      "h": 150,
+      "ext": "jpg",
+      "status": 200
+    }
+  ]
+}

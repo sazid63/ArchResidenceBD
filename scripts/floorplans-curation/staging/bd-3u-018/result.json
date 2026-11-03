@@ -1,0 +1,20 @@
+{
+  "id": "bd-3u-018",
+  "url": "https://www.facebook.com/groups/civilengineeringclassroom/posts/1813402285880810/",
+  "pageStatus": 400,
+  "note": " jina-fallback",
+  "candidates": [
+    {
+      "url": "https://scontent-sea5-1.xx.fbcdn.net/v/t39.30808-6/516992302_122205334400120134_6056138846911492694_n.jpg?stp=dst-jpg_tt6&cstp=mx905x1280&ctp=s720x720&_nc_cat=103&ccb=1-7&_nc_sid=aa7b47&_nc_ohc=q_64eV8sCNIQ7kNvwHpGYQD&_nc_oc=AdqDsg5IhumkMB8tdN2MfTbWQgetInpPrgUbWy-sDoT7m-B1goG6tnZiHh9xUYEZuNvO5VJMY2aAQN0qh0F0o1H7&_nc_zt=23&_nc_ht=scontent-sea5-1.xx&_nc_gid=aEDJwQtwxofbbJSqfsSFkw&_nc_ss=7b289&oh=00_AQQjMwlTuAxBSgb9AgFduIzqXQCp7CGJ2UMkwFFPHI-KUg&oe=6AEFDB00",
+      "kind": "meta",
+      "score": 70,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-018\\cand0.jpg",
+      "bytes": 62621,
+      "w": 509,
+      "h": 720,
+      "ext": "jpg",
+      "status": 200
+    }
+  ]
+}

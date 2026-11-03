@@ -1,0 +1,69 @@
+{
+  "id": "bd-2u-018",
+  "url": "https://clarityarchitects.com/design/40x40_2_unit_floor_plan_dwg_residential_building_design/1487",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "https://clarityarchitects.com/uploads/my_design/71.png",
+      "kind": "meta",
+      "score": 100,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-018\\cand0.png",
+      "bytes": 160402,
+      "w": 626,
+      "h": 722,
+      "ext": "png",
+      "status": 200
+    },
+    {
+      "url": "https://clarityarchitects.com/design/40x40_2_unit_floor_plan_dwg_residential_building_design/1200",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 404
+    },
+    {
+      "url": "https://clarityarchitects.com/design/40x40_2_unit_floor_plan_dwg_residential_building_design/630",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 404
+    },
+    {
+      "url": "https://clarityarchitects.com/uploads/system/f914d0cdf0233e2914cd6fcaec2e700e.jpg",
+      "kind": "meta",
+      "score": 75,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-018\\cand3.jpg",
+      "bytes": 41327,
+      "w": 552,
+      "h": 519,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://clarityarchitects.com/uploads/my_design/59.png",
+      "kind": "img",
+      "score": 40,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-018\\cand4.png",
+      "bytes": 247624,
+      "w": 1567,
+      "h": 297,
+      "ext": "png",
+      "status": 200
+    },
+    {
+      "url": "https://clarityarchitects.com/uploads/my_design/24.png",
+      "kind": "img",
+      "score": 40,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-018\\cand5.png",
+      "bytes": 42241,
+      "w": 616,
+      "h": 562,
+      "ext": "png",
+      "status": 200
+    }
+  ]
+}

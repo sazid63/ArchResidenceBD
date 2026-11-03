@@ -1,0 +1,21 @@
+{
+  "id": "bd-3u-008",
+  "url": "https://www.youtube.com/watch?v=1OFwqGL5n2U",
+  "pageStatus": 200,
+  "note": "youtube-oembed",
+  "title": "Floor plan || 3 Unit House Building Plan in Bangladesh 2021",
+  "candidates": [
+    {
+      "url": "https://i.ytimg.com/vi/1OFwqGL5n2U/hqdefault.jpg",
+      "kind": "meta",
+      "score": 70,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-008\\cand0.jpg",
+      "bytes": 36631,
+      "w": 480,
+      "h": 360,
+      "ext": "jpg",
+      "status": 200
+    }
+  ]
+}

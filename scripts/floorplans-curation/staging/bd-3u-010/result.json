@@ -1,0 +1,80 @@
+{
+  "id": "bd-3u-010",
+  "url": "https://cadbull.com/detail/179857/3-BHK-Apartment-Layout-plan-AutoCAD-Drawing-Download-DWG-File",
+  "pageStatus": 403,
+  "note": " jina-fallback",
+  "candidates": [
+    {
+      "url": "https://assets.cadbull.com/product_img/original/2024/3BHKApartmentLayoutplanAutoCADDrawingDownloadDWGFileSunJan2021110924.jpg",
+      "kind": "meta",
+      "score": 95,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-010\\cand0.webp",
+      "bytes": 78884,
+      "w": 1012,
+      "h": 748,
+      "ext": "webp",
+      "status": 200
+    },
+    {
+      "url": "https://assets.cadbull.com/product_img/large/2026/04/2bhk-25bhk-residential-apartment-plan-dwg-with-sizes-layout-272595-267551-eb9d6f630b.webp",
+      "kind": "meta",
+      "score": 95,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-010\\cand1.webp",
+      "bytes": 141780,
+      "w": 888,
+      "h": 816,
+      "ext": "webp",
+      "status": 200
+    },
+    {
+      "url": "https://assets.cadbull.com/product_img/large/2026/04/luxury-apartment-layout-dwg-four-bedroom-plan-with-dimension-272577-267495-c68f55ea1d.webp",
+      "kind": "meta",
+      "score": 95,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-010\\cand2.webp",
+      "bytes": 97234,
+      "w": 1144,
+      "h": 808,
+      "ext": "webp",
+      "status": 200
+    },
+    {
+      "url": "https://assets.cadbull.com/product_img/large/2026/04/6-bhk-luxury-apartment-layout-dwg-plans-with-dimensions-deta-272570-267468-bdbd893181.webp",
+      "kind": "meta",
+      "score": 95,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-010\\cand3.webp",
+      "bytes": 227930,
+      "w": 1200,
+      "h": 644,
+      "ext": "webp",
+      "status": 200
+    },
+    {
+      "url": "https://assets.cadbull.com/product_img/large/2026/04/2-bhk-residential-apartment-layout-with-detailed-furniture-f-272550-267405-337c5f8399.webp",
+      "kind": "meta",
+      "score": 95,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-010\\cand4.webp",
+      "bytes": 76236,
+      "w": 858,
+      "h": 808,
+      "ext": "webp",
+      "status": 200
+    },
+    {
+      "url": "https://assets.cadbull.com/product_img/large/2026/04/residential-2-bhk-apartment-layout-with-column-and-basement--272548-267402-b52203a68f.webp",
+      "kind": "meta",
+      "score": 95,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-010\\cand5.webp",
+      "bytes": 120116,
+      "w": 1200,
+      "h": 699,
+      "ext": "webp",
+      "status": 200
+    }
+  ]
+}

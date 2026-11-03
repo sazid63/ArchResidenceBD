@@ -1,0 +1,74 @@
+{
+  "id": "bd-2u-017",
+  "url": "https://www.dreamstime.com/detailed-floor-plan-modern-two-unit-residential-building-architectural-showing-layout-room-dimensions-image431689230",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "https://thumbs.dreamstime.com/b/detailed-floor-plan-modern-two-unit-residential-building-architectural-showing-layout-room-dimensions-431689230.jpg",
+      "kind": "meta",
+      "score": 75,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-017\\cand0.webp",
+      "bytes": 18664,
+      "w": 800,
+      "h": 447,
+      "ext": "webp",
+      "status": 200
+    },
+    {
+      "url": "https://www.dreamstime.com/Dreamstime%20banner",
+      "kind": "meta",
+      "score": 60,
+      "ok": false,
+      "status": 403
+    },
+    {
+      "url": "https://thumbs.dreamstime.com/b/detailed-floor-plan-modern-two-unit-residential-building-architectural-showing-layout-room-dimensions-431689230.jpg?w=992",
+      "kind": "img",
+      "score": 15,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-017\\cand2.webp",
+      "bytes": 23870,
+      "w": 992,
+      "h": 554,
+      "ext": "webp",
+      "status": 200
+    },
+    {
+      "url": "https://thumbs.dreamstime.com/b/modern-detailed-floor-plan-apartment-kitchen-living-room-bathroom-hall-top-view-apartment-interior-vector-flat-79507560.jpg",
+      "kind": "img",
+      "score": 15,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-017\\cand3.webp",
+      "bytes": 26846,
+      "w": 800,
+      "h": 800,
+      "ext": "webp",
+      "status": 200
+    },
+    {
+      "url": "https://thumbs.dreamstime.com/b/modern-detailed-floor-plan-apartment-furniture-top-view-apartment-vector-flat-projection-illustration-66740426.jpg",
+      "kind": "img",
+      "score": 15,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-017\\cand4.webp",
+      "bytes": 29132,
+      "w": 800,
+      "h": 728,
+      "ext": "webp",
+      "status": 200
+    },
+    {
+      "url": "https://thumbs.dreamstime.com/b/detailed-floor-plan-small-bedroom-queen-bed-desk-dresser-wardrobe-showcasing-precise-measurements-layout-431689098.jpg",
+      "kind": "img",
+      "score": 15,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-017\\cand5.webp",
+      "bytes": 19614,
+      "w": 800,
+      "h": 447,
+      "ext": "webp",
+      "status": 200
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "id": "bd-2u-004",
+  "url": "https://barirdesign.com/tag/low-cost-house-design-in-bangladesh",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "https://barirdesign.com/tag/240",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://barirdesign.com/tag/90",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://barirdesign.com/uploads/images/2026/05/image_380x226_6a0aa3592048d.jpg",
+      "kind": "img",
+      "score": 40,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-004\\cand2.jpg",
+      "bytes": 23540,
+      "w": 380,
+      "h": 226,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://barirdesign.com/uploads/images/2023/04/image_380x226_642a5046c452f.jpg",
+      "kind": "img",
+      "score": 40,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-004\\cand3.jpg",
+      "bytes": 26942,
+      "w": 380,
+      "h": 226,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://barirdesign.com/uploads/images/2022/06/image_380x226_62a89b693979f.jpg",
+      "kind": "img",
+      "score": 40,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-004\\cand4.jpg",
+      "bytes": 27329,
+      "w": 380,
+      "h": 226,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://barirdesign.com/uploads/images/2022/02/image_380x226_620a28b491f67.jpg",
+      "kind": "img",
+      "score": 40,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-004\\cand5.jpg",
+      "bytes": 28115,
+      "w": 380,
+      "h": 226,
+      "ext": "jpg",
+      "status": 200
+    }
+  ]
+}

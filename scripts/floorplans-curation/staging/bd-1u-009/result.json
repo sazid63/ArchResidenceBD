@@ -1,0 +1,61 @@
+{
+  "id": "bd-1u-009",
+  "url": "https://www.bdhousing.com/details/244466/bddl-shwapno-bilash-2170-sft-4-beds-under-construction-apartment-for-sale-at-bashundhara-r-a",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "https://www.bdhousing.com/api/list/listings/100X100/244466/c3950aef1c84d03e9d1554b9ef87369c.jpg",
+      "kind": "meta",
+      "score": 70,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-009\\cand0.jpg",
+      "bytes": 52391,
+      "w": 870,
+      "h": 585,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://www.bdhousing.com/details/244466/600",
+      "kind": "meta",
+      "score": 60,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://www.bdhousing.com/details/244466/315",
+      "kind": "meta",
+      "score": 60,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://www.bdhousing.com/api/list/images/100X100/26226/50e6fc2b19e2aeb9ea26e29eb42eef2f.jpg",
+      "kind": "img",
+      "score": 15,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-009\\cand3.jpg",
+      "bytes": 72110,
+      "w": 870,
+      "h": 803,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://www.bdhousing.com/api/thum/images/74X74/26226/50e6fc2b19e2aeb9ea26e29eb42eef2f.jpg",
+      "kind": "img",
+      "score": 15,
+      "ok": false,
+      "note": "too-small"
+    },
+    {
+      "url": "https://www.bdhousing.com/api/list/floors/150X150/10229/4101ae716df33f88f452703d694d1f64.JPG",
+      "kind": "img",
+      "score": 15,
+      "ok": false,
+      "note": "too-small"
+    }
+  ]
+}

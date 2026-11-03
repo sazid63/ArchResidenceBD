@@ -1,0 +1,27 @@
+{
+  "id": "bd-2u-014",
+  "url": "https://www.facebook.com/cdz.bd/videos/2-unit-house-plan/1135579012077451/",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "https://scontent.fdac13-1.fna.fbcdn.net/v/t15.5256-10/562009963_1934786347096241_715511629974410514_n.jpg?_nc_cat=110&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=a27664&_nc_ohc=24ZeLB09T3wQ7kNvwEVpxA5&_nc_oc=AdrJvyD2I9XRQueLBqmvIa6b-SzJRGgzsmtXS9SnvQpMVUmqU9HbYZa8R7AWFIo-QmE&_nc_zt=23&_nc_ht=scontent.fdac13-1.fna&_nc_gid=L8Z31hS5g8avZJr63sQsyg&_nc_ss=70289&oh=00_AQTWVKuMqo45Bhxy_nvIwTgOi3tZpebaZugMaGzfcKt_PQ&oe=6AEFEBCB",
+      "kind": "meta",
+      "score": 95,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-014\\cand0.jpg",
+      "bytes": 199088,
+      "w": 830,
+      "h": 1474,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://www.facebook.com/cdz.bd/videos/2-unit-house-plan/1135579012077451/3.1K%20views%20&#xb7;%2030%20reactions%20|%202%20unit%20house%20plan%20%20#fblifestyle%20#engr_khursed%20#construction%20#Bangladesh%20#floorplan%20|%20Creative%20Design%20Zone",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html; charset=\"utf-8\""
+    }
+  ]
+}

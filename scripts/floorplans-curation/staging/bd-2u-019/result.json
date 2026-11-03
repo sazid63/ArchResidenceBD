@@ -1,0 +1,69 @@
+{
+  "id": "bd-2u-019",
+  "url": "https://houseplans.world/items/house-plan-with-double-unit-2bhk-north-facing-home-plan/1564",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "https://houseplans.world/files/items/OrWKz2UeR06DDNm_1756473278.webp",
+      "kind": "meta",
+      "score": 95,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-019\\cand0.webp",
+      "bytes": 130834,
+      "w": 1125,
+      "h": 1985,
+      "ext": "webp",
+      "status": 200
+    },
+    {
+      "url": "https://houseplans.world/items/house-plan-with-double-unit-2bhk-north-facing-home-plan/600",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 404
+    },
+    {
+      "url": "https://houseplans.world/items/house-plan-with-double-unit-2bhk-north-facing-home-plan/316",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 404
+    },
+    {
+      "url": "https://houseplans.world/images/footer-links/FOqfTg3KHwjqvOb_1793610482.png",
+      "kind": "img",
+      "score": 40,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-019\\cand3.png",
+      "bytes": 1533127,
+      "w": 1883,
+      "h": 835,
+      "ext": "png",
+      "status": 200
+    },
+    {
+      "url": "https://houseplans.world/images/footer-links/LsRpeH04fCOCnBC_1793610524.png",
+      "kind": "img",
+      "score": 40,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-019\\cand4.png",
+      "bytes": 1839888,
+      "w": 1890,
+      "h": 832,
+      "ext": "png",
+      "status": 200
+    },
+    {
+      "url": "https://houseplans.world/images/footer-links/FF5E0gpjYlohqBF_1793610596.png",
+      "kind": "img",
+      "score": 40,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-019\\cand5.png",
+      "bytes": 1608865,
+      "w": 1889,
+      "h": 832,
+      "ext": "png",
+      "status": 200
+    }
+  ]
+}

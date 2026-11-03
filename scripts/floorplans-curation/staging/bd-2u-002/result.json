@@ -1,0 +1,60 @@
+{
+  "id": "bd-2u-002",
+  "url": "https://www.facebook.com/firstfloorplan/",
+  "pageStatus": 400,
+  "note": " jina-fallback",
+  "candidates": [
+    {
+      "url": "https://scontent-sea5-1.xx.fbcdn.net/v/t39.30808-6/350763009_248978757822859_5201011809125677051_n.png?stp=dst-png_fb50_s320x320&_nc_cat=105&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=_FYaAE5qrrgQ7kNvwH05YEQ&_nc_oc=Adrx9tSa2g24z2M8c-ZUrR8uQKDGk8XSEW9emhw9SF84Mt2y2MXPGPlN5Dtial7GwMY&_nc_zt=23&_nc_ht=scontent-sea5-1.xx&_nc_gid=DLxBOEVZVSuTMJIPm40L3A&_nc_ss=7b289&oh=00_AQQi2-KxDuQ-tsesGJUfyNdvJZZJg_brmjfKo-2Qh7FPuw&oe=6AEFFA40",
+      "kind": "meta",
+      "score": 70,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-002\\cand0.png",
+      "bytes": 9806,
+      "w": 320,
+      "h": 130,
+      "ext": "png",
+      "status": 200
+    },
+    {
+      "url": "https://scontent-sea5-1.xx.fbcdn.net/v/t39.30808-6/350763009_248978757822859_5201011809125677051_n.png?stp=dst-png&cstp=mx1546x630&ctp=s960x960&_nc_cat=105&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=_FYaAE5qrrgQ7kNvwH05YEQ&_nc_oc=Adrx9tSa2g24z2M8c-ZUrR8uQKDGk8XSEW9emhw9SF84Mt2y2MXPGPlN5Dtial7GwMY&_nc_zt=23&_nc_ht=scontent-sea5-1.xx&_nc_gid=DLxBOEVZVSuTMJIPm40L3A&_nc_ss=7b289&oh=00_AQSEfnOFN0ThiN6-xeckLATitus0SoPA9v3ENkmr6hwouA&oe=6AEFFA40",
+      "kind": "meta",
+      "score": 70,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-002\\cand1.png",
+      "bytes": 155306,
+      "w": 960,
+      "h": 391,
+      "ext": "png",
+      "status": 200
+    },
+    {
+      "url": "https://static.xx.fbcdn.net/rsrc.php/yL/r/VLNVMYsRNQ9.webp",
+      "kind": "meta",
+      "score": 70,
+      "ok": false,
+      "note": "too-small"
+    },
+    {
+      "url": "https://static.xx.fbcdn.net/rsrc.php/yH/r/tL0h0V4PmET.webp",
+      "kind": "meta",
+      "score": 70,
+      "ok": false,
+      "note": "too-small"
+    },
+    {
+      "url": "https://static.xx.fbcdn.net/rsrc.php/y-/r/aa_l5zrpN2S.webp",
+      "kind": "meta",
+      "score": 70,
+      "ok": false,
+      "note": "too-small"
+    },
+    {
+      "url": "https://static.xx.fbcdn.net/rsrc.php/ya/r/3o9J8sZvP-9.webp",
+      "kind": "meta",
+      "score": 70,
+      "ok": false,
+      "note": "too-small"
+    }
+  ]
+}

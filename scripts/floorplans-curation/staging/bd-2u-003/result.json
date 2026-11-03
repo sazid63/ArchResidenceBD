@@ -1,0 +1,21 @@
+{
+  "id": "bd-2u-003",
+  "url": "https://www.youtube.com/watch?v=30d3qo3t_84",
+  "pageStatus": 200,
+  "note": "youtube-oembed",
+  "title": "দুই ইউনিটের বাড়ির প্ল্যান || 2 Unit House Plan in Bangladesh 2022 with Floor Plan Design",
+  "candidates": [
+    {
+      "url": "https://i.ytimg.com/vi/30d3qo3t_84/hqdefault.jpg",
+      "kind": "meta",
+      "score": 70,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-003\\cand0.jpg",
+      "bytes": 29080,
+      "w": 480,
+      "h": 360,
+      "ext": "jpg",
+      "status": 200
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "id": "bd-2u-013",
+  "url": "https://www.youtube.com/watch?v=dgVxYAY7pTY",
+  "pageStatus": 200,
+  "note": "youtube-oembed",
+  "title": "30 X 31 feet 2 UNIT house Plan । 900 sqft area building দের কাঠা জায়গায় 2 UNIT বাড়ির প্লান।",
+  "candidates": [
+    {
+      "url": "https://i.ytimg.com/vi/dgVxYAY7pTY/hqdefault.jpg",
+      "kind": "meta",
+      "score": 70,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-013\\cand0.jpg",
+      "bytes": 29520,
+      "w": 480,
+      "h": 360,
+      "ext": "jpg",
+      "status": 200
+    }
+  ]
+}

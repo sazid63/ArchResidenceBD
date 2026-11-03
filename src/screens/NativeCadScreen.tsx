@@ -7,6 +7,9 @@ import type { BuildingProject } from "../engine/projectState";
 import { Badge, Button, Card, Chip, PageHeader, Stat } from "../ui/kit";
 import { useActiveProject, useProject } from "../context/ProjectContext";
 import { generateBuildingMesh } from "../cad/parametricBuildingGenerator";
+import { templateBehindMesh } from "../data/floorplanSelection";
+import { resolveFloorPresetId } from "../data/floorplanMapping";
+import { FloorplanPreview } from "../components/FloorplanPreview";
 import type { BuildingCustomization } from "../types/customization";
 import {
   DEFAULT_ACCESSIBILITY,
@@ -180,14 +183,14 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
   }, [mesh, treeFilter]);
 
 
-  // Archie CAD Copilot chatbox state
+  // Parametric copilot chatbox state (deterministic local parameter parser)
   const [designChat, setDesignChat] = useState<Array<{ who: "ai" | "user"; text: string }>>([
     {
       who: "ai",
       text:
         lang === "bn"
-          ? `[আর্চি ক্যাড কোপাইলট — মডেল fleet: archres-repair-v0]\nআপনার ${project?.stories ?? 6} তলা ভবনের ৩D মডেল প্রস্তুত। কলামের মাপ, ফুটিং বা ব্যালকনির প্রক্ষেপণ পরিবর্তন করতে নিচে লিখুন।`
-          : `[Archie CAD Copilot — Fleet model: archres-repair-v0]\n3D Parametric model loaded for your ${project?.stories ?? 6}-storey building. Type modifications below (e.g. "resize columns to 400mm", "extend balcony to 1.5m", "change footing pad to 2.2m") to update the 3D geometry in real-time.`,
+          ? `[ক্যাড কোপাইলট] আপনার ${project?.stories ?? 6} তলা ভবনের ৩D মডেল প্রস্তুত। কলামের মাপ, ফুটিং বা ব্যালকনির প্রক্ষেপণ পরিবর্তন করতে নিচে লিখুন।`
+          : `[CAD Copilot] 3D parametric model loaded for your ${project?.stories ?? 6}-storey building. Type a modification below (e.g. "resize columns to 400mm", "extend balcony to 1.5m", "change footing pad to 2.2m") to recompute the 3D solids.`,
     },
   ]);
   const [chatInput, setChatInput] = useState("");
@@ -474,8 +477,8 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
         updated.columnDepthMm = colDim;
         reply =
           lang === "bn"
-            ? `[আর্চি ক্যাড কোপাইলট] কলাম সাইজ পরিবর্তন করে ${colDim}মিমি × ${colDim}মিমি করা হয়েছে। ৩D ফ্রেম পুনর্গণনা সম্পন্ন।`
-            : `[Archie CAD Copilot] Structural columns resized to ${colDim}mm x ${colDim}mm. 3D solid mesh recomputed.`;
+            ? `[ক্যাড কোপাইলট] কলাম সাইজ পরিবর্তন করে ${colDim}মিমি × ${colDim}মিমি করা হয়েছে। ৩D ফ্রেম পুনর্গণনা সম্পন্ন।`
+            : `[CAD Copilot] Structural columns resized to ${colDim}mm x ${colDim}mm. 3D solid mesh recomputed.`;
       } else if (lower.includes("footing") || lower.includes("ফুটিং") || lower.includes("গভীর")) {
         const matchNum = lower.match(/\d+(\.\d+)?/);
         const val = matchNum ? parseFloat(matchNum[0]) : 2.2;
@@ -485,8 +488,8 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
         updated.footingDepthMm = Math.round(sizeMm * 0.9);
         reply =
           lang === "bn"
-            ? `[আর্চি ক্যাড কোপাইলট] ফুটিং প্যাড ${sizeMm}মিমি করা হয়েছে। বেয়ারিং প্রেশার হালনাগাদ করা হলো।`
-            : `[Archie CAD Copilot] Footing pad expanded to ${sizeMm}mm x ${sizeMm}mm. Recomputed soil bearing.`;
+            ? `[ক্যাড কোপাইলট] ফুটিং প্যাড ${sizeMm}মিমি করা হয়েছে। বেয়ারিং প্রেশার হালনাগাদ করা হলো।`
+            : `[CAD Copilot] Footing pad expanded to ${sizeMm}mm x ${sizeMm}mm. Recomputed soil bearing.`;
       } else if (lower.includes("balcony") || lower.includes("বারান্দা")) {
         const matchNum = lower.match(/\d+(\.\d+)?/);
         const val = matchNum ? parseFloat(matchNum[0]) : 1.5;
@@ -494,13 +497,13 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
         updated.balconyDepthMm = depthMm;
         reply =
           lang === "bn"
-            ? `[আর্চি ক্যাড কোপাইলট] ক্যান্টিলিভার বারান্দার প্রক্ষেপণ ${depthMm}মিমি করা হয়েছে। সেফটি রেলিং আপডেট হলো।`
-            : `[Archie CAD Copilot] Extended cantilever balconies to ${depthMm}mm with updated safety railings.`;
+            ? `[ক্যাড কোপাইলট] ক্যান্টিলিভার বারান্দার প্রক্ষেপণ ${depthMm}মিমি করা হয়েছে। সেফটি রেলিং আপডেট হলো।`
+            : `[CAD Copilot] Extended cantilever balconies to ${depthMm}mm with updated safety railings.`;
       } else {
         reply =
           lang === "bn"
-            ? `[আর্চি ক্যাড কোপাইলট] আপনার নির্দেশনা ("${prompt}") অনুযায়ী ৩D মডেল প্যারামিটার আপডেট করা হয়েছে।`
-            : `[Archie CAD Copilot] Applied parameter modification: "${prompt}". Recomputed 3D solids.`;
+            ? `[ক্যাড কোপাইলট] আপনার নির্দেশনা ("${prompt}") অনুযায়ী ৩D মডেল প্যারামিটার আপডেট করা হয়েছে।`
+            : `[CAD Copilot] Applied parameter modification: "${prompt}". Recomputed 3D solids.`;
       }
 
       setCustomAndSave(updated);
@@ -538,6 +541,14 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
   const exportIfc = () => {
     downloadText(buildIfcStep(mesh, exportMeta()), `${exportBase()}_${project?.stories ?? 1}Story.ifc`, "application/x-step");
   };
+
+  // The curated 2D drawing behind this 3D model: the assignment, else the template whose
+  // preset matches what the mesh actually resolved to.
+  const sourceTemplate = templateBehindMesh(
+    project,
+    project.unitsPerFloor || 1,
+    resolveFloorPresetId(project, 1),
+  );
 
   return (
     <div className="screen">
@@ -578,6 +589,30 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
           </div>
         }
       />
+
+      {/* 2D → 3D source: the curated drawing this model was generated from */}
+      {(() => {
+        if (!sourceTemplate) return null;
+        const template = sourceTemplate;
+        return (
+          <div className="card row" style={{ gap: 12, alignItems: "center", padding: 10, marginBottom: 12 }}>
+            <FloorplanPreview plan={template} size={110} />
+            <div className="stack" style={{ gap: 2 }}>
+              <span className="faint" style={{ fontSize: 11 }}>
+                {lang === "bn" ? "২D টেমপ্লেট → ৩D মডেল" : "2D template → 3D model"}
+              </span>
+              <strong style={{ fontSize: 13 }}>{template.title}</strong>
+              <span className="faint small">
+                {template.id} · {template.category} · preset {template.presetId}
+              </span>
+            </div>
+            <div style={{ flex: 1 }} />
+            <Button variant="soft" onClick={() => onNavigate?.("setup")}>
+              {lang === "bn" ? "প্ল্যান বদলান" : "Change plan"}
+            </Button>
+          </div>
+        );
+      })()}
 
       {/* Phase Switcher Tabs at Top of Viewport */}
       <div className="row" style={{ gap: "6px", marginBottom: "12px", overflowX: "auto" }}>
@@ -897,22 +932,22 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
           </Card>
         </div>
 
-        {/* Right Column: Archie CAD Copilot & Parametric Controls */}
+        {/* Right Column: Parametric Copilot & Controls */}
         <div className="stack">
-          {/* Archie CAD Copilot Box */}
+          {/* Parametric Copilot Box */}
           <Card className="stack" style={{ border: "1px solid var(--tone-brand, #3b82f6)" }}>
             <div className="row-between">
               <div>
                 <h3 style={{ margin: 0 }}>
-                  {lang === "bn" ? "আর্চি ক্যাড কোপাইলট" : "Archie CAD Copilot"}
+                  {lang === "bn" ? "প্যারামেট্রিক ক্যাড কোপাইলট" : "Parametric CAD Copilot"}
                 </h3>
                 <span className="small muted">
                   {lang === "bn"
-                    ? "মডেল fleet: archres-repair-v0 (Hugging Face)"
-                    : "Fleet model: archres-repair-v0 (Hugging Face)"}
+                    ? `স্থানীয় কীওয়ার্ড পার্সার · ${sourceTemplate ? sourceTemplate.id : "ডিফল্ট"} নকশা`
+                    : `Local keyword parser · ${sourceTemplate ? sourceTemplate.id : "default"} drawing`}
                 </span>
               </div>
-              <Badge tone="primary">AI Copilot</Badge>
+              <Badge tone="primary">{lang === "bn" ? "নিয়মভিত্তিক" : "Rule-based"}</Badge>
             </div>
 
             {/* Chat Messages */}

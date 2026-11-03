@@ -14,7 +14,6 @@ import { ConnectionDetailingScreen } from "./screens/ConnectionDetailingScreen";
 import { DaylightAnalysisScreen } from "./screens/DaylightAnalysisScreen";
 import { UnitMixOptimizerScreen } from "./screens/UnitMixOptimizerScreen";
 import { ColumnGridOptimizerScreen } from "./screens/ColumnGridOptimizerScreen";
-import { FleetScreen } from "./screens/FleetScreen";
 import { HelpScreen } from "./screens/HelpScreen";
 import { ImportReviewScreen } from "./screens/ImportReviewScreen";
 import { LicencesScreen } from "./screens/LicencesScreen";
@@ -47,7 +46,6 @@ const SCREEN_TITLES: Record<string, [string, string]> = {
   daylight: ["Daylight", "দিনের আলো"],
   "unit-mix": ["Unit Mix", "ইউনিট মিক্স"],
   "column-grid": ["Column Grid", "কলাম গ্রিড"],
-  fleet: ["AI Fleet", "এআই ফ্লিট"],
   windows: ["Windows Package", "উইন্ডোজ প্যাকেজ"],
   units: ["Land Units", "জমির একক"],
   templates: ["Templates", "টেমপ্লেট"],
@@ -181,7 +179,6 @@ function renderView(
   if (view === "daylight") return <DaylightAnalysisScreen />;
   if (view === "unit-mix") return <UnitMixOptimizerScreen />;
   if (view === "column-grid") return <ColumnGridOptimizerScreen />;
-  if (view === "fleet") return <FleetScreen />;
   if (view === "windows") return <WindowsInstallerScreen />;
   if (view === "import-review") return <ImportReviewScreen />;
   if (view === "licences") return <LicencesScreen />;

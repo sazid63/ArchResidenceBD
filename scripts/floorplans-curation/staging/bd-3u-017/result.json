@@ -1,0 +1,71 @@
+{
+  "id": "bd-3u-017",
+  "url": "https://www.bdhousing.com/details/242106/1550-sqft-3-beds-under-construction-flats-for-sale-at-aftab-nagar",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "https://www.bdhousing.com/api/list/listings/100X100/242106/5af5cd7ecc88c243a9c28ea347451bd2.jpg",
+      "kind": "meta",
+      "score": 70,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-017\\cand0.jpg",
+      "bytes": 125027,
+      "w": 870,
+      "h": 1171,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://www.bdhousing.com/details/242106/600",
+      "kind": "meta",
+      "score": 60,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://www.bdhousing.com/details/242106/315",
+      "kind": "meta",
+      "score": 60,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://www.bdhousing.com/api/list/images/100X100/20054/5af5cd7ecc88c243a9c28ea347451bd2.jpg",
+      "kind": "img",
+      "score": 15,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-017\\cand3.jpg",
+      "bytes": 125027,
+      "w": 870,
+      "h": 1171,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://www.bdhousing.com/api/list/images/100X100/20055/6a25a553ca68fb21249b2b0143f0d058.jpg",
+      "kind": "img",
+      "score": 15,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-017\\cand4.jpg",
+      "bytes": 120364,
+      "w": 870,
+      "h": 1521,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://www.bdhousing.com/api/list/images/100X100/20056/b25fb71dee16002fbf8ce75ea76ebb1e.jpg",
+      "kind": "img",
+      "score": 15,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-017\\cand5.jpg",
+      "bytes": 105612,
+      "w": 870,
+      "h": 1521,
+      "ext": "jpg",
+      "status": 200
+    }
+  ]
+}

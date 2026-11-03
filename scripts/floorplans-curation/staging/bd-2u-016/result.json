@@ -1,0 +1,50 @@
+{
+  "id": "bd-2u-016",
+  "url": "https://designscad.com/downloads/twin-2bhk-residential-unit-floor-plan-with-services-bay/",
+  "pageStatus": 403,
+  "note": " jina-fallback",
+  "candidates": [
+    {
+      "url": "https://designscad.com/wp-content/uploads/2026/05/twin-2bhk-featured-1024x1009.png",
+      "kind": "meta",
+      "score": 100,
+      "ok": false,
+      "status": 403
+    },
+    {
+      "url": "https://designscad.com/wp-content/uploads/2026/10/house-7212-800x600.png",
+      "kind": "meta",
+      "score": 100,
+      "ok": false,
+      "status": 403
+    },
+    {
+      "url": "https://designscad.com/wp-content/uploads/2026/10/mechanical-electrical-plumbing-mep-featured-1-800x450.png",
+      "kind": "meta",
+      "score": 100,
+      "ok": false,
+      "status": 403
+    },
+    {
+      "url": "https://designscad.com/wp-content/uploads/2026/10/ground-floor-plumbing-plan-with-septic-tank-and-svp-details-featured-800x600.png",
+      "kind": "meta",
+      "score": 100,
+      "ok": false,
+      "status": 403
+    },
+    {
+      "url": "https://designscad.com/downloads/twin-2bhk-residential-unit-floor-plan-with-services-bay/",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 403
+    },
+    {
+      "url": "https://designscad.com/wp-content/uploads/2026/05/twin-2bhk-featured-300x300.png",
+      "kind": "meta",
+      "score": 80,
+      "ok": false,
+      "status": 403
+    }
+  ]
+}

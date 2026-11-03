@@ -54,7 +54,7 @@ ArchResidenceBD is a specialized civil engineering software suite tailored for r
 | Path | Contents |
 |------|----------|
 | `src/cad/` | Parametric generator, `solidKernel.ts` (disjoint/closed solids + validator), exporters (IFC/FreeCAD), structural, BOQ, drawings |
-| `src/data/` | Floor-plan presets (`floorplanPresets.ts`), 60-plan catalogue + `floorplanMapping.ts` (plan → preset), generated CAD/BOQ data |
+| `src/data/` | Curated 35-plan 2D template library (`floorplanLibrary.ts`) + `floorplanSelection.ts` (manual/random pick per unit category) + `floorplanMapping.ts` (plan → 3D preset), generated CAD/BOQ data |
 | `src/screens`, `src/components`, `src/engine` | UI, project state, Archie chat engine |
 | `src/server/` | Express server (Gemini proxy); `npm run dev` |
 | `scripts/` | `audits/`, `tests/`, `render/`, `extraction/` (see `scripts/README.md`); `npm run verify` |

@@ -1,0 +1,71 @@
+{
+  "id": "bd-3u-014",
+  "url": "https://www.bdhousing.com/details/240237/1310-sqft-3-beds-ready-apartment-flats-for-sale-at-bashundhara-r-a",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "https://www.bdhousing.com/api/list/listings/100X100/240237/a1e85b4de74b08f1cce00be56f3498a7.JPG",
+      "kind": "meta",
+      "score": 70,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-014\\cand0.jpg",
+      "bytes": 52021,
+      "w": 870,
+      "h": 580,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://www.bdhousing.com/details/240237/600",
+      "kind": "meta",
+      "score": 60,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://www.bdhousing.com/details/240237/315",
+      "kind": "meta",
+      "score": 60,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://www.bdhousing.com/api/list/images/100X100/15801/958c0151ec754d8b9c7d71f93cb4cd0d.jpg",
+      "kind": "img",
+      "score": 15,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-014\\cand3.jpg",
+      "bytes": 129057,
+      "w": 870,
+      "h": 1099,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://www.bdhousing.com/api/list/images/100X100/15802/2bcb8d6e8a0a92c6fa6f93f55a552cd6.jpg",
+      "kind": "img",
+      "score": 15,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-014\\cand4.jpg",
+      "bytes": 61026,
+      "w": 870,
+      "h": 615,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://www.bdhousing.com/api/list/images/100X100/15803/e564ef70e046cd1eaafefbee54ac676d.jpg",
+      "kind": "img",
+      "score": 15,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-014\\cand5.jpg",
+      "bytes": 63320,
+      "w": 870,
+      "h": 583,
+      "ext": "jpg",
+      "status": 200
+    }
+  ]
+}

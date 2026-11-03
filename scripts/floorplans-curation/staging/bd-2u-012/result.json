@@ -1,0 +1,21 @@
+{
+  "id": "bd-2u-012",
+  "url": "https://www.youtube.com/watch?v=MZmOLnG4JX8",
+  "pageStatus": 200,
+  "note": "youtube-oembed",
+  "title": "2 unit house plan, modern floor plan bangladesh 2022",
+  "candidates": [
+    {
+      "url": "https://i.ytimg.com/vi/MZmOLnG4JX8/hqdefault.jpg",
+      "kind": "meta",
+      "score": 70,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-012\\cand0.jpg",
+      "bytes": 30839,
+      "w": 480,
+      "h": 360,
+      "ext": "jpg",
+      "status": 200
+    }
+  ]
+}

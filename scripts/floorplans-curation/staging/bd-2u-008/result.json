@@ -1,0 +1,79 @@
+{
+  "id": "bd-2u-008",
+  "url": "https://www.firstfloorplan.com/2020/04/2-unit-apartment-building-floor-plan.html",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgupJEeyBMgfE9qM04TmvNYIUCRk6DQXQKrk7QUmgQAK-DaLP2L4fuw8Z-ektMkO6uJ0KVxop7UDRKFXNckD3jS-fExsiR6RHL6iNvqaMTKNHmsB_x6ra0HsXW2s1VHSDiotzi1cLVUf8aO/w1200-h630-p-k-no-nu/2+unit+Apartment+Building+Floor+Plan+designs.jpg",
+      "kind": "meta",
+      "score": 95,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-008\\cand0.jpg",
+      "bytes": 235417,
+      "w": 1200,
+      "h": 630,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgupJEeyBMgfE9qM04TmvNYIUCRk6DQXQKrk7QUmgQAK-DaLP2L4fuw8Z-ektMkO6uJ0KVxop7UDRKFXNckD3jS-fExsiR6RHL6iNvqaMTKNHmsB_x6ra0HsXW2s1VHSDiotzi1cLVUf8aO/s16000/2+unit+Apartment+Building+Floor+Plan+designs.jpg",
+      "kind": "meta",
+      "score": 95,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-008\\cand1.jpg",
+      "bytes": 506877,
+      "w": 2048,
+      "h": 1026,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgLLdtUVxRB_pKTt-t2eL1dJk2Nbm6G1iFH1p5NPh1p4W-KrBrMOVvk2uzv7PqkgwCJJ2aOIVAMzHUVq3svsRj22QORqC3_IMUt8R9ixMGDnAOjC_qq0Lio5XCJ5vY5G5dBYvk2C8WRM7de/s16000/Apartment+Building+Ground+Floor+Plan.jpg",
+      "kind": "img",
+      "score": 35,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-008\\cand2.jpg",
+      "bytes": 1662438,
+      "w": 1557,
+      "h": 1217,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhoD-c8-fA76R5dAdVaevaTA6gzEQ5R9Q8WK40Iv9I69lQKIgTsv4ZkqJWKzcMl-7C73qwNkXX90iymi67og6J895rQEk81mapVafEyrnOwqYwt1AQ5Re1P_jwGtKL6pNMkk6dJ8N-Wa-b9/s16000/Apartment+Building+Typical+Floor+Plan.jpg",
+      "kind": "img",
+      "score": 35,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-008\\cand3.jpg",
+      "bytes": 1245713,
+      "w": 1499,
+      "h": 1177,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhgc8SmQldhGwt_HwiFsuV5XVz83Q_LS5FXUqwOA88M9XjletjWQJuA6gh5Ht5X5MdKVdq4YM51-GL4MjmucUwCkcbs8Uepv6iNb9SJOQs4mv5ATi0JRoShOFedYj-XOfpXMkgVNtCrIm1M/s16000/apartment+plan+with+dimensions.jpg",
+      "kind": "img",
+      "score": 35,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-008\\cand4.jpg",
+      "bytes": 723712,
+      "w": 1008,
+      "h": 1239,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgAJSl9qlKCpDho9GzWJ55FJXqFNoIMUYyqxZc_H-WBrnA4BBBMNJqbBI1ka1LUUNuH7rDBWUhQS32MJWi1cDqhTtTWvMcZreKAj1qpmp1JKL8-SsEKuRkB4ZRJyGuPWg-xBrlRfoT0nIcK_jLAkby-mzMDlehqp2Th85CroXkzM1l84wxL2DUZS5-0ew/w680/Architect%20and%20Civil%20Engineering%20AutoCAD%20Plans%20and%20Design%20file%20and%20Design%20Calculation%20Excel%20Spreadsheet.png",
+      "kind": "img",
+      "score": 35,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-008\\cand5.png",
+      "bytes": 481670,
+      "w": 680,
+      "h": 387,
+      "ext": "png",
+      "status": 200
+    }
+  ]
+}

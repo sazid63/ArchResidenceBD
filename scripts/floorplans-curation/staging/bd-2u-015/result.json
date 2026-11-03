@@ -1,0 +1,66 @@
+{
+  "id": "bd-2u-015",
+  "url": "https://www.pinterest.com/pin/house-plan-of-1700-sq-ft--336855247138924269/",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "https://www.pinterest.com/pin/house-plan-of-1700-sq-ft--336855247138924269/731",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html; charset=utf-8"
+    },
+    {
+      "url": "https://www.pinterest.com/pin/house-plan-of-1700-sq-ft--336855247138924269/736",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html; charset=utf-8"
+    },
+    {
+      "url": "https://i.pinimg.com/736x/4d/bf/3b/4dbf3b147f7678749b8d5eef8c1bd863.jpg",
+      "kind": "meta",
+      "score": 70,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-015\\cand2.jpg",
+      "bytes": 81746,
+      "w": 735,
+      "h": 731,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://i.pinimg.com/originals/4d/bf/3b/4dbf3b147f7678749b8d5eef8c1bd863.png",
+      "kind": "jsonld",
+      "score": 50,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-015\\cand3.png",
+      "bytes": 218964,
+      "w": 1000,
+      "h": 994,
+      "ext": "png",
+      "status": 200
+    },
+    {
+      "url": "https://i.pinimg.com/75x75_RS/14/ab/09/14ab09f59ef0a9a9a5ea3589d7ed9f60.jpg",
+      "kind": "img",
+      "score": 10,
+      "ok": false,
+      "note": "too-small"
+    },
+    {
+      "url": "https://i.pinimg.com/474x/b8/14/02/b814022616843bbd08ecc78232654448.jpg",
+      "kind": "img",
+      "score": 10,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-015\\cand5.jpg",
+      "bytes": 46945,
+      "w": 474,
+      "h": 712,
+      "ext": "jpg",
+      "status": 200
+    }
+  ]
+}

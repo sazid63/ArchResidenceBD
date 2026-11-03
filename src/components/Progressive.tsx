@@ -77,7 +77,7 @@ export function Progressive<T>({
   }
 
   // Early return if all items fit without pagination
-  if (items.length <= minItems && !hasMore) {
+  if (items.length <= minItems) {
     return (
       <div className={className} style={style}>
         {showCount && (
@@ -86,7 +86,7 @@ export function Progressive<T>({
           </div>
         )}
         {children ? (
-          children({ items })
+          children({ items: visibleItems })
         ) : (
           <div className="progressive-list" style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             {items.map((item, index) => (

@@ -1,0 +1,79 @@
+{
+  "id": "bd-3u-020",
+  "url": "https://www.pinterest.com/ideas/bangladesh-house-design-plan/935738105283/",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "https://i.pinimg.com/474x/b7/5b/c6/b75bc66e709b7fe000d97321ec9e69cb.jpg",
+      "kind": "meta",
+      "score": 70,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-020\\cand0.jpg",
+      "bytes": 61544,
+      "w": 473,
+      "h": 568,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://i.pinimg.com/originals/a5/d0/96/a5d09633843fd05c8675b1df32c7497a.jpg",
+      "kind": "img",
+      "score": 10,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-020\\cand1.jpg",
+      "bytes": 36344,
+      "w": 587,
+      "h": 698,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://i.pinimg.com/originals/9f/14/be/9f14be59915b395feccf7a6731d8cd80.jpg",
+      "kind": "img",
+      "score": 10,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-020\\cand2.jpg",
+      "bytes": 50987,
+      "w": 639,
+      "h": 828,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://i.pinimg.com/originals/e3/99/bd/e399bde84111004c517fb18752f52447.jpg",
+      "kind": "img",
+      "score": 10,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-020\\cand3.jpg",
+      "bytes": 144184,
+      "w": 736,
+      "h": 1308,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://i.pinimg.com/originals/af/68/d5/af68d543868c6669fe906de3d8b3c310.jpg",
+      "kind": "img",
+      "score": 10,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-020\\cand4.jpg",
+      "bytes": 71534,
+      "w": 680,
+      "h": 884,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://i.pinimg.com/originals/3f/37/6b/3f376b5d217c4e491d584f6657b3c70c.jpg",
+      "kind": "img",
+      "score": 10,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-020\\cand5.jpg",
+      "bytes": 88165,
+      "w": 676,
+      "h": 1200,
+      "ext": "jpg",
+      "status": 200
+    }
+  ]
+}

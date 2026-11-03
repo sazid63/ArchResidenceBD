@@ -1,0 +1,79 @@
+{
+  "id": "bd-1u-012",
+  "url": "http://www.fairfaceholdingsltd.com/projects/44",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "http://www.fairfaceholdingsltd.com/storage/photos/project/Wahid%20Villa-3D.jpeg",
+      "kind": "img",
+      "score": 15,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-012\\cand0.jpg",
+      "bytes": 449311,
+      "w": 905,
+      "h": 1225,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "http://www.fairfaceholdingsltd.com/storage/photos/project/bWOXsOg4Ky2BatKuk8yJOT8FKYkOUiVnOvEwim4B.jpg",
+      "kind": "img",
+      "score": 15,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-012\\cand1.jpg",
+      "bytes": 436241,
+      "w": 1600,
+      "h": 1239,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "http://www.fairfaceholdingsltd.com/storage/photos/project/rmLd20zN9t0QK6wgTNRqSvuK7ayxurt23iAP6Ecv.jpg",
+      "kind": "img",
+      "score": 15,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-012\\cand2.jpg",
+      "bytes": 508587,
+      "w": 1600,
+      "h": 1239,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "http://www.fairfaceholdingsltd.com/storage/photos/project/JEFx8fGdXP4HpO55j9NimkQzk0dVffROGHgagwF6.jpg",
+      "kind": "img",
+      "score": 15,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-012\\cand3.jpg",
+      "bytes": 717649,
+      "w": 1600,
+      "h": 1239,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "http://www.fairfaceholdingsltd.com/storage/photos/project/SPCCcWcaXWEyXCh79QqVKKtRqRhvUps6K8Szn17C.jpg",
+      "kind": "img",
+      "score": 15,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-012\\cand4.jpg",
+      "bytes": 333169,
+      "w": 1241,
+      "h": 1755,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "http://www.fairfaceholdingsltd.com/frontend/img/reaz%20(2).jpg",
+      "kind": "img",
+      "score": 10,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-012\\cand5.jpg",
+      "bytes": 2903920,
+      "w": 5411,
+      "h": 3044,
+      "ext": "jpg",
+      "status": 200
+    }
+  ]
+}

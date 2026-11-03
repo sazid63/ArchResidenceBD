@@ -47,13 +47,7 @@ Source: "runtime\\python\\*"; DestDir: "{app}\\runtime\\python"; Flags: ignoreve
 ; 3. NativeCAD Engine (FreeCAD Headless CAD Runtime)
 Source: "bin\\nativecad\\*"; DestDir: "{app}\\bin\\nativecad"; Flags: ignoreversion recursesubdirs createallsubdirs
 
-; 4. llama.cpp Server (GPU/CPU Local Inference Engine)
-Source: "bin\\llama\\*"; DestDir: "{app}\\bin\\llama"; Flags: ignoreversion recursesubdirs createallsubdirs
-
-; 5. Bundled Fine-tuned AI Fleet (Hugging Face GGUF weights)
-Source: "models\\*.gguf"; DestDir: "{app}\\models"; Flags: ignoreversion
-
-; 6. Specifications, Flow Books & PWD Rates Database
+; 4. Specifications, Flow Books & PWD Rates Database
 Source: "data\\*"; DestDir: "{app}\\data"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
@@ -80,14 +74,7 @@ Write-Host "Building Tauri Windows Application..." -ForegroundColor Yellow
 npm run build
 npm run tauri build
 
-# 3. Download AI Fleet from Hugging Face if not present
-Write-Host "Verifying Hugging Face Model Fleet in models/ ..." -ForegroundColor Yellow
-if (-not (Test-Path "models\\archie-chat-v0-Q4_K_M.gguf")) {
-    Write-Host "Downloading models from sazid63/archresidencebd-models..."
-    huggingface-cli download sazid63/archresidencebd-models --local-dir models/
-}
-
-# 4. Compile Inno Setup Script
+# 3. Compile Inno Setup Script
 Write-Host "Compiling standalone Windows Setup .exe..." -ForegroundColor Green
 & "$innoPath" "ArchResidenceBD-Setup.iss"
 
@@ -136,7 +123,7 @@ export function WindowsInstallerScreen() {
       <Callout title="All-In-One Windows Installation Bundle">
         <span>
           When users run <code>ArchResidenceBD-Setup-v1.0.exe</code>, everything needed is installed:
-          the Windows Desktop App, the 4 local Hugging Face AI models, the NativeCAD FreeCAD engine, and the PWD
+          the Windows Desktop App, the NativeCAD FreeCAD engine, and the PWD
           rates database. No terminal, Python install, or localhost setup is ever needed by the end user.
         </span>
       </Callout>
@@ -159,14 +146,6 @@ export function WindowsInstallerScreen() {
                 <Badge tone="sky">Portable Headless (~180 MB)</Badge>
               </div>
               <div className="row-between">
-                <span>llama.cpp Multi-Model Runner</span>
-                <Badge tone="neutral">CUDA / AVX2 (~35 MB)</Badge>
-              </div>
-              <div className="row-between">
-                <span>4 Fine-Tuned GGUF AI Models</span>
-                <Badge tone="amber">Hugging Face Fleet (~6.04 GB)</Badge>
-              </div>
-              <div className="row-between">
                 <span>BNBC 2020 & PWD Rates Data</span>
                 <Badge tone="neutral">JSON Corpus (~12 MB)</Badge>
               </div>
@@ -181,7 +160,7 @@ export function WindowsInstallerScreen() {
               className="row-between"
             >
               <strong>Total Bundled Setup Size:</strong>
-              <strong className="font-mono">~6.33 GB</strong>
+              <strong className="font-mono">~255 MB</strong>
             </div>
           </Card>
 

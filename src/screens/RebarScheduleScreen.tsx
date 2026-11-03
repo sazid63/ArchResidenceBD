@@ -152,7 +152,7 @@ export function RebarScheduleScreen() {
     };
 
     loadData();
-  }, [project, lang]);
+  }, [project]);
 
   // Totals across all members
   const totals = useMemo(() => {

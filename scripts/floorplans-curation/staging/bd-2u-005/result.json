@@ -1,0 +1,27 @@
+{
+  "id": "bd-2u-005",
+  "url": "https://www.facebook.com/cdz.bd/videos/2-unit-house-plan-/2650230328702918/",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "https://scontent.fdac13-1.fna.fbcdn.net/v/t15.5256-10/583121521_1913310629586023_3791603413574832194_n.jpg?_nc_cat=104&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=a27664&_nc_ohc=D-pEmd2m7vIQ7kNvwGdMBMe&_nc_oc=AdpGd8iwqZr-jmmHKRy7ZBgWi-c3MPS_k5QBdQWdHFv8M1nb6vESafySlIgBpwLn3Fs&_nc_zt=23&_nc_ht=scontent.fdac13-1.fna&_nc_gid=JWSsXfvN_zA0YR1XoMmgyQ&_nc_ss=70289&oh=00_AQRmGr3mjEG5_9sYrx3Zk-xfr8DI3i7cvMy1KLzHOXY6Jw&oe=6AEFD6CA",
+      "kind": "meta",
+      "score": 95,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-005\\cand0.jpg",
+      "bytes": 187667,
+      "w": 1080,
+      "h": 1526,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://www.facebook.com/cdz.bd/videos/2-unit-house-plan-/2650230328702918/62K%20views%20&#xb7;%20356%20reactions%20|%202%20unit%20house%20plan%20%20#construction%20#floorplan%20|%20Creative%20Design%20Zone",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html; charset=\"utf-8\""
+    }
+  ]
+}

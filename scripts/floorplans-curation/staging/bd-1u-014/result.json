@@ -1,0 +1,54 @@
+{
+  "id": "bd-1u-014",
+  "url": "https://nbconsultant.com.bd/floor-plan-in-bangladesh/",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "https://nbconsultant.com.bd/floor-plan-in-bangladesh/1200",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 404
+    },
+    {
+      "url": "https://nbconsultant.com.bd/floor-plan-in-bangladesh/630",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 404
+    },
+    {
+      "url": "https://nbconsultant.com.bd/floor-plan-in-bangladesh/%E0%A6%AB%E0%A7%8D%E0%A6%B2%E0%A7%8B%E0%A6%B0%20%E0%A6%AA%E0%A7%8D%E0%A6%B2%E0%A7%8D%E0%A6%AF%E0%A6%BE%E0%A6%A8:%20%E0%A7%A7%E2%80%93%E0%A7%AA%20%E0%A6%87%E0%A6%89%E0%A6%A8%E0%A6%BF%E0%A6%9F%E0%A7%87%E0%A6%B0%20%E0%A6%95%E0%A6%BE%E0%A6%B0%E0%A7%8D%E0%A6%AF%E0%A6%95%E0%A6%B0%20%E0%A6%86%E0%A6%AC%E0%A6%BE%E0%A6%B8%E0%A6%BF%E0%A6%95%20%E0%A6%AC%E0%A6%BF%E0%A6%A8%E0%A7%8D%E0%A6%AF%E0%A6%BE%E0%A6%B8",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 404
+    },
+    {
+      "url": "https://nbconsultant.com.bd/brand/og-default.png",
+      "kind": "meta",
+      "score": 70,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-014\\cand3.png",
+      "bytes": 27675,
+      "w": 1200,
+      "h": 630,
+      "ext": "png",
+      "status": 200
+    },
+    {
+      "url": "https://nbconsultant.com.bd/images/media/by-sha256/789a7926a27b3a2c0cdbed042257e7650bd4a560f90c0c20ddc62f46af7ae190.avif",
+      "kind": "img",
+      "score": 30,
+      "ok": false,
+      "note": "unknown-type:image/avif"
+    },
+    {
+      "url": "https://nbconsultant.com.bd/images/media/by-sha256/f7fcc00868b25c1c35a8fb26432821e678dd2f5a4ea9a273ff0f994c2344d8cc.avif",
+      "kind": "img",
+      "score": 5,
+      "ok": false,
+      "note": "unknown-type:image/avif"
+    }
+  ]
+}

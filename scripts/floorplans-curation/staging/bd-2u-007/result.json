@@ -1,0 +1,16 @@
+{
+  "id": "bd-2u-007",
+  "url": "https://www.tiktok.com/@modern.house.design/video/7312121643038461186",
+  "pageStatus": 200,
+  "note": "tiktok-oembed",
+  "candidates": [
+    {
+      "url": "https://www.tiktok.com/@modern.house.design/video/undefined",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html"
+    }
+  ]
+}

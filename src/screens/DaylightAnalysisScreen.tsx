@@ -198,7 +198,7 @@ export function DaylightAnalysisScreen() {
     };
 
     loadData();
-  }, [project, customization, daylightFactorTarget, windowToFloorRatioMin, lang]);
+  }, [project, customization, daylightFactorTarget, windowToFloorRatioMin]);
 
   if (!project) {
     return (

@@ -1,0 +1,69 @@
+{
+  "id": "bd-3u-006",
+  "url": "https://clarityarchitects.com/design/residential_building_plan_3_unit_autocad_dwg/506",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "https://clarityarchitects.com/uploads/my_design/AutoCAD_DWG.JPG",
+      "kind": "meta",
+      "score": 100,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-006\\cand0.jpg",
+      "bytes": 80989,
+      "w": 657,
+      "h": 709,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://clarityarchitects.com/design/residential_building_plan_3_unit_autocad_dwg/1200",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 404
+    },
+    {
+      "url": "https://clarityarchitects.com/design/residential_building_plan_3_unit_autocad_dwg/630",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 404
+    },
+    {
+      "url": "https://clarityarchitects.com/uploads/system/f914d0cdf0233e2914cd6fcaec2e700e.jpg",
+      "kind": "meta",
+      "score": 75,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-006\\cand3.jpg",
+      "bytes": 41327,
+      "w": 552,
+      "h": 519,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://clarityarchitects.com/uploads/my_design/residential-unit-aggregation-plans-autocad.JPG",
+      "kind": "img",
+      "score": 40,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-006\\cand4.jpg",
+      "bytes": 125450,
+      "w": 1186,
+      "h": 684,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://clarityarchitects.com/uploads/my_design/103.png",
+      "kind": "img",
+      "score": 40,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-006\\cand5.png",
+      "bytes": 78212,
+      "w": 1002,
+      "h": 565,
+      "ext": "png",
+      "status": 200
+    }
+  ]
+}

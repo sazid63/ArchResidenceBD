@@ -1,0 +1,79 @@
+{
+  "id": "bd-3u-015",
+  "url": "https://www.firstfloorplan.com/2019/07/3-unit-floor-plan.html",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhRLiKDaICXsp2QgnxBxHvHwGtq1MrX9j6Lf9W4c35_ILzvUwyND_8rea6GOPkJN6FSfcgL-XVHr8cXQTwK1buqvEiY27_UdwtuViR7QeVto9Uyw20z3wCXti37V4Ttp57esAGpUTL2a1XJ/w1200-h630-p-k-no-nu/First-floor-plan-three+units.png",
+      "kind": "meta",
+      "score": 95,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-015\\cand0.png",
+      "bytes": 220364,
+      "w": 1200,
+      "h": 630,
+      "ext": "png",
+      "status": 200
+    },
+    {
+      "url": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhRLiKDaICXsp2QgnxBxHvHwGtq1MrX9j6Lf9W4c35_ILzvUwyND_8rea6GOPkJN6FSfcgL-XVHr8cXQTwK1buqvEiY27_UdwtuViR7QeVto9Uyw20z3wCXti37V4Ttp57esAGpUTL2a1XJ/s16000/First-floor-plan-three+units.png",
+      "kind": "meta",
+      "score": 95,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-015\\cand1.png",
+      "bytes": 472633,
+      "w": 1660,
+      "h": 2048,
+      "ext": "png",
+      "status": 200
+    },
+    {
+      "url": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhz40kRpPo3rQp6r565rDJbm5lbUjjgBft-_Zpzm2FPjbMw3LR0L21XpYVFzBCZNJmdjw3rwoQ0BW-09oZakeM4MJqdnpJbHCCSkmC_WcpfEpkxXFa1qEMJDJvymeq37YoQBkVzSk_eOE-y/s16000/First-floor-plan-17.png",
+      "kind": "img",
+      "score": 35,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-015\\cand2.png",
+      "bytes": 453763,
+      "w": 1660,
+      "h": 2048,
+      "ext": "png",
+      "status": 200
+    },
+    {
+      "url": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgAJSl9qlKCpDho9GzWJ55FJXqFNoIMUYyqxZc_H-WBrnA4BBBMNJqbBI1ka1LUUNuH7rDBWUhQS32MJWi1cDqhTtTWvMcZreKAj1qpmp1JKL8-SsEKuRkB4ZRJyGuPWg-xBrlRfoT0nIcK_jLAkby-mzMDlehqp2Th85CroXkzM1l84wxL2DUZS5-0ew/w680/Architect%20and%20Civil%20Engineering%20AutoCAD%20Plans%20and%20Design%20file%20and%20Design%20Calculation%20Excel%20Spreadsheet.png",
+      "kind": "img",
+      "score": 35,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-015\\cand3.png",
+      "bytes": 481670,
+      "w": 680,
+      "h": 387,
+      "ext": "png",
+      "status": 200
+    },
+    {
+      "url": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgxRN6jRe4ExlugcktWE44ASRueSJ-AIQffDAEqvgYyDR3LqNWNlRmyKMIq_KAi3vkq1wy-BA5yJAffoHPkwfQ4YOtKCUBGm-viPivOaNyyVG7JaKqDyFFHKMMMZdbHFaH4AdcSejx6hPb3/w680/2d-floor-plan-in-autocad.jpg",
+      "kind": "img",
+      "score": 35,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-015\\cand4.jpg",
+      "bytes": 93149,
+      "w": 680,
+      "h": 341,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEh4VyFTozXXEx_AvNRIzoWDSBr-F0KTw7XCBf_0Vy5mXvnmwxBPARbaRiCytrDqGGoamhQ0DLftkj8rwAPhkmC_KW73VksBv4TXkDsLnPHg7h2ojYoEXC2rbPq5g7ow69x-P8TvsQ99ajTo/w680/5+Story+Apartment+Building+Designs.png",
+      "kind": "img",
+      "score": 35,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-3u-015\\cand5.png",
+      "bytes": 153849,
+      "w": 680,
+      "h": 544,
+      "ext": "png",
+      "status": 200
+    }
+  ]
+}

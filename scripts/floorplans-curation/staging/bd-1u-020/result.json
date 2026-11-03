@@ -1,0 +1,79 @@
+{
+  "id": "bd-1u-020",
+  "url": "https://www.firstfloorplan.com/2020/02/single-unit-modern-house-plans.html",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjrXluUy-OMjJ7JfYtqFNZceJH4kS1Ncm-Edj11sJcF9PTYrcfjuTVBbo0iQj8zZYaPmQdu0FyFfHawp8n4_i0D4eylRW77pIJR-8Y_5V4dqYMjWsWQnBDgaiGqwuLOVpfFesGXd6mpZtLy/w1200-h630-p-k-no-nu/Modern+House+Designs.png",
+      "kind": "meta",
+      "score": 95,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-020\\cand0.png",
+      "bytes": 1144762,
+      "w": 1200,
+      "h": 630,
+      "ext": "png",
+      "status": 200
+    },
+    {
+      "url": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjrXluUy-OMjJ7JfYtqFNZceJH4kS1Ncm-Edj11sJcF9PTYrcfjuTVBbo0iQj8zZYaPmQdu0FyFfHawp8n4_i0D4eylRW77pIJR-8Y_5V4dqYMjWsWQnBDgaiGqwuLOVpfFesGXd6mpZtLy/s16000/Modern+House+Designs.png",
+      "kind": "meta",
+      "score": 95,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-020\\cand1.png",
+      "bytes": 1935446,
+      "w": 2048,
+      "h": 1026,
+      "ext": "png",
+      "status": 200
+    },
+    {
+      "url": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj7p7qkz-tJacPjdvKITjYu047b3vcN5CtM56Cx17-q-dkChKtiT9B8FjsTcmN2tvH7Ye7RTYE6gps7vJqGyC0S7OrCSZEHbCf5Iach2ZB_gQdOiWSqp5NOk9cCHMAKVAulOkBJNRxxzhFb/s16000/Modern+House+Front+Elevation.png",
+      "kind": "img",
+      "score": 35,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-020\\cand2.png",
+      "bytes": 182118,
+      "w": 1464,
+      "h": 586,
+      "ext": "png",
+      "status": 200
+    },
+    {
+      "url": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgowLeSa-290CEHpA0Gd8eRUtpZWzLeyu3n1mXe4dbIhRJ85kjE-WO7rCM3gjibAEJhxJXFMFiuCmj-pJhqPfVYOmx34J0ADeQ3g5hc344dXqmfiBUtUynUpyB1zxoX7Dg6Xk2R6Msx9-XK/s16000/Modern+House+Side+Elevation.png",
+      "kind": "img",
+      "score": 35,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-020\\cand3.png",
+      "bytes": 178750,
+      "w": 1413,
+      "h": 544,
+      "ext": "png",
+      "status": 200
+    },
+    {
+      "url": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEj7cCIaO3hRMIOZQme92ljkzFPndyXa24TdFe2uCL9J9tuwMC23PfymHdMZFk4XwL5okiWCv1qymj1zEg11rxjLJUKit7eUcHVtYif-4XQOabEeyJF5IuAVMOhsZc7L98n2ZC-r0DGamzt9/s16000/Ground+Floor+Plan.png",
+      "kind": "img",
+      "score": 35,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-020\\cand4.png",
+      "bytes": 34419,
+      "w": 1538,
+      "h": 736,
+      "ext": "png",
+      "status": 200
+    },
+    {
+      "url": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjscEXla6zWFTpRlvPPxc1LCISFXDDlBN3z1RJehSL-ZiBXYK3NaFy8Lt_hyq8xWDZISj17MP4RscLWV875vB_SSpzZItqYiafN_Dj7O90sBLfm91K0OraA-UCE9qXll4bYVxn_4CV8L9Db/s16000/Top+Floor+Plan.png",
+      "kind": "img",
+      "score": 35,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-020\\cand5.png",
+      "bytes": 36247,
+      "w": 1509,
+      "h": 751,
+      "ext": "png",
+      "status": 200
+    }
+  ]
+}

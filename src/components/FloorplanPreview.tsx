@@ -1,26 +1,28 @@
 import React from "react";
-import { FloorPlanImage } from "../data/bangladeshFloorplans";
-import { getFloorplanImage } from "../data/floorplanImages";
+import type { FloorPlanTemplate } from "../data/floorplanLibrary";
 
 interface Props {
-  plan: FloorPlanImage;
+  plan: FloorPlanTemplate;
   size?: number;
 }
 
 /**
- * Floorplan Preview Component
- * Shows real floorplan image when available, falls back to procedural SVG.
- * Accessibility: role="img" with aria-label for screen readers.
+ * FloorplanPreview — shows the curated 2D drawing for a template.
+ *
+ * If a template's file is missing at runtime the onError handler swaps in a procedural SVG, so the
+ * gallery never shows a broken image; the fallback is drawn from the same unit count as the plan.
  */
 export function FloorplanPreview({ plan, size = 280 }: Props) {
-  const localImage = getFloorplanImage(plan.id);
-  const ariaLabel = `${plan.title} - ${plan.unitsCount} ${plan.unitsCount === 1 ? "unit" : "units"} floor plan`;
+  const [failed, setFailed] = React.useState(false);
+  const label = plan.title + " — " + plan.unitsPerFloor + (plan.unitsPerFloor === 1 ? " unit" : " units") + " per floor";
 
-  if (localImage) {
+  React.useEffect(() => {
+    setFailed(false);
+  }, [plan.image]);
+
+  if (!failed) {
     return (
       <div
-        role="img"
-        aria-label={ariaLabel}
         style={{
           width: size,
           height: size,
@@ -31,151 +33,63 @@ export function FloorplanPreview({ plan, size = 280 }: Props) {
         }}
       >
         <img
-          src={localImage}
-          alt={ariaLabel}
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "contain", // whole drawing, aspect ratio preserved (cover cropped rooms off)
-            display: "block",
-          }}
+          src={plan.image}
+          alt={label}
+          onError={() => setFailed(true)}
+          style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
           loading="lazy"
         />
       </div>
     );
   }
 
-  // Fallback: Procedural SVG
-  const w = size;
-  const h = size;
+  return <ProceduralPlan plan={plan} size={size} label={label} />;
+}
+
+function ProceduralPlan({ plan, size, label }: { plan: FloorPlanTemplate; size: number; label: string }) {
   const pad = 16;
-  const bw = w - pad * 2;
-  const bh = h - pad * 2;
-
-  const units = plan.unitsCount;
-  const unitWidth = bw / Math.max(units, 1);
-  const unitGap = 4;
-  const unitW = unitWidth - unitGap;
-  const unitH = bh * 0.7;
-  const unitY = pad + bh * 0.15;
-
-  const roomColors: Record<string, string> = {
-    bedroom: "#e8d5c4",
-    living: "#d4e8c4",
-    dining: "#d4c4e8",
-    kitchen: "#e8c4c4",
-    bath: "#c4d4e8",
-    balcony: "#c4e8d4",
-    corridor: "#e8e4c4",
-    stair: "#d4d4d4",
-  };
-
-  const roomsPerUnit = Math.max(2, Math.min(5, plan.features.length));
-  const roomW = unitW / roomsPerUnit;
-  const roomH = unitH / 3;
+  const bw = size - pad * 2;
+  const bh = size - pad * 2;
+  const units = Math.max(1, plan.unitsPerFloor);
+  const unitWidth = bw / units;
+  const unitW = unitWidth - 4;
+  const unitH = bh * 0.66;
+  const unitY = pad + bh * 0.17;
 
   return (
     <svg
       role="img"
-      aria-label={ariaLabel}
-      width={w}
-      height={h}
-      viewBox={`0 0 ${w} ${h}`}
+      aria-label={label}
+      width={size}
+      height={size}
+      viewBox={"0 0 " + size + " " + size}
       xmlns="http://www.w3.org/2000/svg"
-      style={{ display: "block" }}
+      style={{ display: "block", border: "1px solid #e8e4dc", borderRadius: 8, background: "#faf8f5" }}
     >
-      {/* Background */}
-      <rect x={0} y={0} width={w} height={h} fill="#faf8f5" rx="8" />
-
-      {/* Title */}
-      <text x={w / 2} y={18} textAnchor="middle" fontSize="11" fill="#5a4a3a" fontWeight="600">
-        {plan.title}
+      <text x={size / 2} y={18} textAnchor="middle" fontSize="11" fill="#5a4a3a" fontWeight="600">
+        {plan.id}
       </text>
-      <text x={w / 2} y={32} textAnchor="middle" fontSize="9" fill="#8a7a6a">
-        {plan.unitsCount} {plan.unitsCount === 1 ? "Unit" : "Units"} · {plan.plotSizeRange}
+      <text x={size / 2} y={32} textAnchor="middle" fontSize="9" fill="#8a7a6a">
+        {units + (units === 1 ? " unit" : " units") + " per floor · drawing unavailable"}
       </text>
-
-      {/* Building outline */}
-      <rect
-        x={pad}
-        y={pad + 36}
-        width={bw}
-        height={bh - 36}
-        fill="none"
-        stroke="#3d3226"
-        strokeWidth="2"
-        rx="2"
-      />
-
-      {/* Units */}
-      {Array.from({ length: units }).map((_, ui) => {
-        const ux = pad + ui * unitWidth + unitGap / 2;
-        return (
-          <g key={ui}>
-            {/* Unit box */}
-            <rect
-              x={ux}
-              y={unitY}
-              width={unitW}
-              height={unitH}
-              fill="none"
-              stroke="#6b5b4a"
-              strokeWidth="1.5"
-              rx="2"
-            />
-            {/* Unit label */}
-            <text x={ux + unitW / 2} y={unitY - 4} textAnchor="middle" fontSize="8" fill="#6b5b4a">
-              Unit {String.fromCharCode(65 + ui)}
-            </text>
-
-            {/* Rooms inside unit */}
-            {Array.from({ length: roomsPerUnit }).map((_, ri) => {
-              const kinds: (keyof typeof roomColors)[] = ["bedroom", "living", "bath", "kitchen", "balcony"];
-              const kind = kinds[ri % kinds.length];
-              const rx = ux + ri * roomW + 1;
-              const ry = unitY + 1;
-              const rw = roomW - 2;
-              const rh = roomH - 2;
-              return (
-                <g key={ri}>
-                  <rect
-                    x={rx}
-                    y={ry}
-                    width={rw}
-                    height={rh}
-                    fill={roomColors[kind]}
-                    stroke="#8a7a6a"
-                    strokeWidth="0.5"
-                    rx="1"
-                  />
-                  <text x={rx + rw / 2} y={ry + rh / 2 + 2} textAnchor="middle" fontSize="6" fill="#5a4a3a">
-                    {kind}
-                  </text>
-                </g>
-              );
-            })}
-          </g>
-        );
-      })}
-
-      {/* Stair core */}
-      {units > 1 && (
-        <rect
-          x={pad + bw * 0.42}
-          y={unitY + unitH + 4}
-          width={bw * 0.16}
-          height={bh - 36 - unitH - 8}
-          fill="#d4d4d4"
-          stroke="#6b5b4a"
-          strokeWidth="1"
-          rx="1"
-        />
-      )}
-
-      {/* Features list */}
-      <text x={w / 2} y={h - 6} textAnchor="middle" fontSize="7" fill="#8a7a6a">
-        {plan.features.slice(0, 4).join(" · ")}
-      </text>
+      <rect x={pad} y={pad + 36} width={bw} height={bh - 36} fill="none" stroke="#3d3226" strokeWidth={2} />
+      {Array.from({ length: units }).map((_, i) => (
+        <g key={i}>
+          <rect
+            x={pad + i * unitWidth + 2}
+            y={unitY}
+            width={unitW}
+            height={unitH}
+            fill="none"
+            stroke="#6b5b4a"
+            strokeWidth={1.5}
+          />
+          <text x={pad + i * unitWidth + unitW / 2 + 2} y={unitY - 4} textAnchor="middle" fontSize="8" fill="#6b5b4a">
+            {"Unit " + String.fromCharCode(65 + i)}
+          </text>
+        </g>
+      ))}
+      <rect x={pad + bw * 0.42} y={unitY + unitH + 4} width={bw * 0.16} height={bh - 36 - unitH - 8} fill="#d4d4d4" stroke="#6b5b4a" />
     </svg>
   );
 }

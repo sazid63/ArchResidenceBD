@@ -1,0 +1,66 @@
+{
+  "id": "bd-1u-018",
+  "url": "http://www.dwgnet.com/2016/01/single-story-small-house-plan-04/",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "http://www.dwgnet.com/wp-content/uploads/2016/01/Single-story-house-plan-04-plan-1.jpg",
+      "kind": "meta",
+      "score": 100,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-018\\cand0.jpg",
+      "bytes": 377074,
+      "w": 2547,
+      "h": 971,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "http://www.dwgnet.com/2016/01/single-story-small-house-plan-04/2547",
+      "kind": "meta",
+      "score": 65,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html; charset=UTF-8"
+    },
+    {
+      "url": "http://www.dwgnet.com/2016/01/single-story-small-house-plan-04/971",
+      "kind": "meta",
+      "score": 65,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html; charset=UTF-8"
+    },
+    {
+      "url": "http://www.dwgnet.com/2016/01/single-story-small-house-plan-04/image/jpeg",
+      "kind": "meta",
+      "score": 65,
+      "ok": false,
+      "status": 404
+    },
+    {
+      "url": "http://www.dwgnet.com/wp-content/uploads/2016/01/Single-story-house-plan-1.jpg",
+      "kind": "img",
+      "score": 40,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-018\\cand4.jpg",
+      "bytes": 39107,
+      "w": 300,
+      "h": 210,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "http://www.dwgnet.com/wp-content/uploads/2025/04/Tiny-country-house-01.jpg",
+      "kind": "img",
+      "score": 40,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-018\\cand5.jpg",
+      "bytes": 129297,
+      "w": 842,
+      "h": 596,
+      "ext": "jpg",
+      "status": 200
+    }
+  ]
+}

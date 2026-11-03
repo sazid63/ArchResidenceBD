@@ -7,8 +7,9 @@
  */
 
 import type { BuildingCustomization } from "../types/customization";
-import { presetForFloorPlan } from "../data/floorplanMapping";
-import { getFloorPlansByUnits } from "../data/bangladeshFloorplans";
+import { presetForTemplate } from "../data/floorplanMapping";
+import { assignmentPatch, assignedTemplate, chooseTemplate, pickRandomTemplate } from "../data/floorplanSelection";
+import { getTemplate } from "../data/floorplanLibrary";
 import {
   DEFAULT_ACCESSIBILITY,
   DEFAULT_SUSTAINABILITY_DHAKA,
@@ -47,10 +48,15 @@ export interface BuildingProject {
   phases: PhaseItem[];
   designStarted: boolean;
   activePhaseId?: string;
-  /** Catalogue plan (bangladeshFloorplans.ts id) the user picked as the typical floor. */
+  /** Curated 2D template id the user picked (see src/data/floorplanLibrary.ts). */
   floorplanId?: string;
   /** Parametric preset built for every floor that has no selection of its own. */
   typicalPresetId?: string;
+  /**
+   * Dwellings-per-floor → curated 2D template id. One entry per unit count, so every floor with the
+   * same count is built from the same drawing.
+   */
+  floorplanAssignments?: Record<string, string>;
   /**
    * Full customization bundle — drives mesh generation, BOQ, and all optional
    * features (accessibility, sustainability, fire safety, value engineering,
@@ -164,6 +170,70 @@ export function generatePhasesForStories(stories: number): PhaseItem[] {
   return phases;
 }
 
+/**
+ * A project's first plan: the manual pick when it matches the unit count, otherwise one random
+ * drawing from that category. Categories with no verified drawing keep the parametric fallback so
+ * the project still builds a 3D model.
+ */
+export function resolveInitialFloorplan(units: number, templateId?: string) {
+  const { template } = chooseTemplate(units, templateId);
+  if (!template) {
+    console.warn(`[floorplans] no verified 2D template for ${units} unit(s)/floor — using the parametric fallback`);
+    return { floorplanId: undefined, typicalPresetId: presetForTemplate(undefined, units), floorplanAssignments: {} };
+  }
+  return assignmentPatch({}, template, units);
+}
+
+/**
+ * Pin a 2D template for its unit count and rebuild every matching floor from it. Floors with other
+ * unit counts are untouched, which is what keeps same-count floors consistent.
+ */
+export function setFloorplanForUnits(
+  project: BuildingProject,
+  templateId: string,
+  units: number = project.unitsPerFloor,
+): BuildingProject {
+  const template = getTemplate(templateId);
+  if (!template) return project;
+  const phases = project.phases.map((phase) =>
+    phase.kind === "floor"
+      ? { ...phase, data: { ...phase.data, selectedFloorplanPreset: template.presetId } }
+      : phase,
+  );
+  return {
+    ...project,
+    ...assignmentPatch(project, template, units),
+    phases,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+/** Re-roll the drawing for one unit count (manual "shuffle"). */
+export function randomizeFloorplanForUnits(project: BuildingProject, units = project.unitsPerFloor): BuildingProject {
+  const template = pickRandomTemplate(units, Math.random, assignedTemplate(project, units)?.id);
+  return template ? setFloorplanForUnits(project, template.id, units) : project;
+}
+
+/**
+ * Fill in any missing plan assignment (older saved projects, imported projects) and re-sync the floor
+ * phases so the 3D model always matches the 2D drawing that is on screen.
+ */
+export function ensureFloorplanAssignments(project: BuildingProject): BuildingProject {
+  const units = project.unitsPerFloor || 1;
+  const template = assignedTemplate(project, units);
+  if (template) {
+    const missing = !project.floorplanAssignments?.[String(units)];
+    const stale = project.phases.some(
+      (p) => p.kind === "floor" && p.data?.selectedFloorplanPreset !== template.presetId,
+    );
+    if (!missing && !stale && project.typicalPresetId === template.presetId) return project;
+    return setFloorplanForUnits(project, template.id);
+  }
+  const { template: picked } = chooseTemplate(units, undefined);
+  if (!picked) return project;
+  return setFloorplanForUnits(project, picked.id);
+}
+
 export function createNewProject(params: {
   name: string;
   stories: number;
@@ -192,11 +262,7 @@ export function createNewProject(params: {
     designStarted: false,
     activePhaseId: phases[0].id,
     customization: createDefaultCustomization(),
-    floorplanId: params.floorplanId,
-    typicalPresetId: presetForFloorPlan(
-      params.floorplanId ? getFloorPlansByUnits(params.unitsPerFloor).find((f) => f.id === params.floorplanId) : null,
-      params.unitsPerFloor || 2,
-    ),
+    ...resolveInitialFloorplan(params.unitsPerFloor || 2, params.floorplanId),
   };
 
   saveActiveProject(project);
@@ -248,13 +314,16 @@ export function generateRandomBuildingProject(): BuildingProject {
     customization: createDefaultCustomization(),
   };
 
-  saveActiveProject(project);
-  return project;
+  // The archetype's unit count and the drawing assigned to it must agree, or the 3D floors would be
+  // built from a plan nobody is looking at.
+  project.unitsPerFloor = unitsPerFloor;
+  const withPlan = ensureFloorplanAssignments(project);
+  saveActiveProject(withPlan);
+  return withPlan;
 }
 
 /** Helper: populate phase metrics based on phase kind. */
-function populatePhaseMetrics(
-  phase: PhaseItem, stories: number, plotSqm: number, plotSize: number, preset: string,
+function populatePhaseMetrics(  phase: PhaseItem, stories: number, plotSqm: number, plotSize: number, preset: string,
   name: string, unitsPerFloor: number, now: string, timeStr: string,
 ): { metrics: Record<string, string | number>; preset: string; timestamp: string; msg: string; userPrompt?: string } {
   let activePreset = preset;
@@ -318,8 +387,8 @@ function populatePhaseMetrics(
     metrics,
     preset: activePreset,
     timestamp: timeStr,
-    msg: `[Archie Civil AI — sazid63/archresidencebd-models]\nSuccessfully generated ${phase.nameEn} for ${name} in accordance with BNBC 2020 & RAJUK 2008 by-laws.`,
-    userPrompt: `Generate BNBC 2020 structural parameters for ${phase.nameEn}.`,
+    msg: `[Phase Planner]\nPlanned ${phase.nameEn} for ${name} in accordance with BNBC 2020 & RAJUK 2008 by-laws.`,
+    userPrompt: `Plan ${phase.nameEn} for ${name}.`,
   };
 }
 
@@ -340,7 +409,7 @@ export function create4StoryBuildingProject(): BuildingProject {
     const populated = populatePhaseMetrics(p, stories, plotSqm, plotSize, "preset-dual-3bed", name, 2, now, timeStr);
     return makeCompletedPhase(
       p, populated.metrics, populated.preset, populated.timestamp,
-      `[Archie Civil AI]\nSystem reset: New 4-Storey project initialized according to BNBC 2020.`,
+      `[Phase Planner]\nNew 4-storey project initialised according to BNBC 2020.`,
     );
   });
 
@@ -373,8 +442,8 @@ export function create6StoryBuildingProject(): BuildingProject {
     const populated = populatePhaseMetrics(p, stories, plotSqm, plotSize, "preset-dual-3bed", name, 2, now, timeStr);
     return makeCompletedPhase(
       p, populated.metrics, populated.preset, populated.timestamp,
-      `[Archie Civil AI — sazid63/archresidencebd-models]\nVerified ${p.nameEn} for ${name} (${stories} Stories, ${plotSize} Katha plot) in accordance with BNBC 2020 & RAJUK 2008 by-laws. 3D solid geometry recomputed.`,
-      `User prompt for ${p.nameEn}: Please calculate BNBC 2020 metrics and structure preset-dual-3bed partition layout.`,
+      `[Phase Planner]\nPlanned ${p.nameEn} for ${name} (${stories} storeys, ${plotSize} Katha plot) in accordance with BNBC 2020 & RAJUK 2008 by-laws. 3D solid geometry recomputed.`,
+      `Plan ${p.nameEn} for ${name}.`,
     );
   });
 

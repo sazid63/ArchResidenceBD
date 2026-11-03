@@ -1,0 +1,69 @@
+{
+  "id": "bd-1u-002",
+  "url": "https://pbazaar.com/en/1575-sft-ongoing-single-unit-apartmentflat-at-bashundhara-k-block",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "https://pbazaar.com/content/images/thumbs/0206054_1575-sft-ongoing-single-unit-apartment-for-sale-at-bashundhara-k-block_300.jpeg",
+      "kind": "meta",
+      "score": 80,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-002\\cand0.jpg",
+      "bytes": 13759,
+      "w": 180,
+      "h": 300,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://pbazaar.com/content/images/thumbs/0206054_1575-sft-ongoing-single-unit-apartment-for-sale-at-bashundhara-k-block.jpeg",
+      "kind": "img",
+      "score": 20,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-002\\cand1.jpg",
+      "bytes": 133383,
+      "w": 768,
+      "h": 1280,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://pbazaar.com/content/images/thumbs/0206055_1575-sft-ongoing-single-unit-apartment-for-sale-at-bashundhara-k-block.jpeg",
+      "kind": "img",
+      "score": 20,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-002\\cand2.jpg",
+      "bytes": 100658,
+      "w": 842,
+      "h": 1191,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://pbazaar.com/content/images/thumbs/0206056_1575-sft-ongoing-single-unit-apartment-for-sale-at-bashundhara-k-block.jpeg",
+      "kind": "img",
+      "score": 20,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-002\\cand3.jpg",
+      "bytes": 123194,
+      "w": 768,
+      "h": 1280,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://pbazaar.com/Content/Images/flags/bd.png",
+      "kind": "img",
+      "score": 15,
+      "ok": false,
+      "note": "too-small"
+    },
+    {
+      "url": "https://pbazaar.com/Content/Images/flags/us.png",
+      "kind": "img",
+      "score": 15,
+      "ok": false,
+      "note": "too-small"
+    }
+  ]
+}

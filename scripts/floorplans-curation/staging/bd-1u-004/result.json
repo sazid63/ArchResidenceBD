@@ -1,0 +1,61 @@
+{
+  "id": "bd-1u-004",
+  "url": "https://expertinteriorbd.com/modern-house-design-in-bangladesh/",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "https://expertinteriorbd.com/wp-content/uploads/2023/10/Floor-Plan-for-House.png",
+      "kind": "meta",
+      "score": 100,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-004\\cand0.png",
+      "bytes": 258431,
+      "w": 720,
+      "h": 398,
+      "ext": "png",
+      "status": 200
+    },
+    {
+      "url": "https://expertinteriorbd.com/modern-house-design-in-bangladesh/720",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://expertinteriorbd.com/modern-house-design-in-bangladesh/398",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://expertinteriorbd.com/modern-house-design-in-bangladesh/Modern%20House%20Design%20in%20Bangladesh",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 404
+    },
+    {
+      "url": "https://expertinteriorbd.com/modern-house-design-in-bangladesh/image/png",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 404
+    },
+    {
+      "url": "https://expertinteriorbd.com/wp-content/uploads/2023/10/Modern-House-Design-in-Bangladesh.png",
+      "kind": "img",
+      "score": 40,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-004\\cand5.png",
+      "bytes": 411089,
+      "w": 532,
+      "h": 538,
+      "ext": "png",
+      "status": 200
+    }
+  ]
+}

@@ -306,6 +306,7 @@ export function ConnectionDetailingScreen() {
       <Progressive
         items={connections}
         pageSize={20}
+        resetKey={0}
         showCount={true}
         renderItem={(c, idx) => {
           const isSelected = selectedConnection === idx;

@@ -1,0 +1,21 @@
+{
+  "id": "bd-2u-006",
+  "url": "https://www.youtube.com/watch?v=JtMh_-vkewM",
+  "pageStatus": 200,
+  "note": "youtube-oembed",
+  "title": "1417 Sq.ft 2 Unit Modern House Plan Drawing ।। Floor Plan Design 2020.",
+  "candidates": [
+    {
+      "url": "https://i.ytimg.com/vi/JtMh_-vkewM/hqdefault.jpg",
+      "kind": "meta",
+      "score": 70,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-006\\cand0.jpg",
+      "bytes": 32194,
+      "w": 480,
+      "h": 360,
+      "ext": "jpg",
+      "status": 200
+    }
+  ]
+}

@@ -29,6 +29,8 @@ import { buildDogLegStair, planStair, stairFootprint, DEFAULT_STAIR, type StairP
 import type { Void } from "./solidKernel";
 import { resolveFloorPresetId } from "../data/floorplanMapping";
 import { FLOORPLAN_PRESETS, RoomPartition, prepareRooms } from "../data/floorplanPresets";
+import { FloorPlanTemplate, getTemplate } from "../data/floorplanLibrary";
+import { assignedTemplate } from "../data/floorplanSelection";
 import type {
   BuildingCustomization,
   AccessibilitySettings,
@@ -45,13 +47,15 @@ import {
   DEFAULT_CONSTRUCTION_MGMT,
 } from "../types/customization";
 
-/** Simple in-memory mesh cache keyed by all project inputs. */
+/** Simple in-memory LRU mesh cache keyed by all project inputs. */
 const meshCache = new Map<string, MeshDocument>();
+const MAX_CACHE_ENTRIES = 30;
 
 function meshCacheKey(
   project: BuildingProject,
   phaseFilter?: string,
   custom?: BuildingCustomization,
+  templateId?: string | null,
 ): string {
   const keyData = {
     id: project.id,
@@ -64,12 +68,168 @@ function meshCacheKey(
     customization: project.customization,
     custom,
     phaseFilter,
+    templateId,
   };
   return JSON.stringify(keyData);
 }
 
 function clearMeshCache(): void {
   meshCache.clear();
+}
+
+/** Evict oldest entry (first-inserted) when cache is full before inserting. */
+function cacheSet(key: string, value: MeshDocument): void {
+  if (meshCache.size >= MAX_CACHE_ENTRIES) {
+    const firstKey = meshCache.keys().next().value;
+    if (firstKey !== undefined) meshCache.delete(firstKey);
+  }
+  meshCache.set(key, value);
+}
+
+/**
+ * Parse plotSizeRange from a 2D template to extract building footprint dimensions in mm.
+ * Supports formats like "50 × 40 ft", "3300 sqft / floor", "4.0–5.0 Katha", "35'8\" × 42'", etc.
+ * Returns { widthMm, depthMm } or null if parsing fails.
+ */
+function parsePlotDimensions(template: FloorPlanTemplate): { widthMm: number; depthMm: number } | null {
+  const range = template.plotSizeRange;
+  if (!range) return null;
+
+  // Try to parse explicit width × depth in feet: "50 × 40 ft", "33 × 58 ft", "40 × 40 ft"
+  const ftMatch = range.match(/(\d+(?:'\d+)?(?:\.\d+)?)\s*[×x]\s*(\d+(?:'\d+)?(?:\.\d+)?)\s*ft/i);
+  if (ftMatch) {
+    const parseFt = (s: string) => {
+      const parts = s.split("'");
+      const ft = parseFloat(parts[0]);
+      const inch = parts[1] ? parseFloat(parts[1].replace('"', '')) : 0;
+      return (ft + inch / 12) * 304.8; // mm
+    };
+    return { widthMm: Math.round(parseFt(ftMatch[1])), depthMm: Math.round(parseFt(ftMatch[2])) };
+  }
+
+  // Try to parse feet with inches: "35'8\" × 42'", "40'1\" × 46'0\""
+  const ftInMatch = range.match(/(\d+)\s*['′]\s*(\d+)\s*["″]\s*[×x]\s*(\d+)\s*['′]\s*(\d+)\s*["″]/i);
+  if (ftInMatch) {
+    const w = (parseFloat(ftInMatch[1]) + parseFloat(ftInMatch[2]) / 12) * 304.8;
+    const d = (parseFloat(ftInMatch[3]) + parseFloat(ftInMatch[4]) / 12) * 304.8;
+    return { widthMm: Math.round(w), depthMm: Math.round(d) };
+  }
+
+  // Try sqft format: "3300 sqft / floor", "~1700 sqft / floor", "1550 sqft / floor"
+  const sqftMatch = range.match(/([\d~,]+)\s*sqft/i);
+  if (sqftMatch) {
+    const sqft = parseFloat(sqftMatch[1].replace(/,/g, '').replace('~', ''));
+    const areaMm2 = sqft * 92903; // 1 sqft = 92903 mm²
+    // Assume typical aspect ratio for Dhaka: 0.9:1.1
+    const side = Math.sqrt(areaMm2);
+    return { widthMm: Math.round(side * 0.9), depthMm: Math.round(side * 1.1) };
+  }
+
+  // Try Katha format: "4.0–5.0 Katha", "3.5–4.5 Katha" - use midpoint
+  const kathaMatch = range.match(/([\d.]+)\s*[–-]\s*([\d.]+)\s*Katha/i);
+  if (kathaMatch) {
+    const midKatha = (parseFloat(kathaMatch[1]) + parseFloat(kathaMatch[2])) / 2;
+    const areaSqm = midKatha * 66.89; // 1 Katha ≈ 66.89 m²
+    const areaMm2 = areaSqm * 1_000_000;
+    const side = Math.sqrt(areaMm2);
+    return { widthMm: Math.round(side * 0.9), depthMm: Math.round(side * 1.1) };
+  }
+
+  // Try single Katha value: "1.5–3.0 Katha"
+  const singleKathaMatch = range.match(/(\d+(?:\.\d+)?)\s*Katha/i);
+  if (singleKathaMatch) {
+    const katha = parseFloat(singleKathaMatch[1]);
+    const areaSqm = katha * 66.89;
+    const areaMm2 = areaSqm * 1_000_000;
+    const side = Math.sqrt(areaMm2);
+    return { widthMm: Math.round(side * 0.9), depthMm: Math.round(side * 1.1) };
+  }
+
+  return null;
+}
+
+/**
+ * Compute building footprint from 2D template dimensions.
+ * Falls back to plot-area-based calculation if template has no parseable dimensions.
+ */
+function computeBuildingFootprint(
+  project: BuildingProject,
+  template: FloorPlanTemplate | null,
+  custom?: BuildingCustomization,
+): { bldgMinX: number; bldgMaxX: number; bldgMinY: number; bldgMaxY: number; bldgWidthMm: number; bldgLengthMm: number; plotWidthMm: number; plotDepthMm: number } {
+  const plotSqm = project.plotSqm || 200;
+
+  // Try to get dimensions from 2D template
+  const templateDims = template ? parsePlotDimensions(template) : null;
+
+  let plotWidthMm: number;
+  let plotDepthMm: number;
+
+  if (templateDims) {
+    // Use template's actual drawing dimensions + setbacks
+    const frontSetbackMm = 1500;
+    const rearSetbackMm = 2000;
+    const sideSetbackMm = 1000;
+
+    // Template gives building footprint - we need to infer plot size
+    // Building width = template width, so plot width = building + 2*sideSetback
+    plotWidthMm = templateDims.widthMm + 2 * sideSetbackMm;
+    plotDepthMm = templateDims.depthMm + frontSetbackMm + rearSetbackMm;
+
+    // Ensure minimum plot size matches project's plotSqm
+    const minPlotAreaMm2 = plotSqm * 1_000_000;
+    if (plotWidthMm * plotDepthMm < minPlotAreaMm2) {
+      // Scale up proportionally
+      const scale = Math.sqrt(minPlotAreaMm2 / (plotWidthMm * plotDepthMm));
+      plotWidthMm *= scale;
+      plotDepthMm *= scale;
+    }
+  } else {
+    // Fallback: derive from plotSqm with standard aspect ratio
+    const plotSide = Math.sqrt(plotSqm);
+    plotWidthMm = Math.round(plotSide * 0.9 * 1000);
+    plotDepthMm = Math.round(plotSide * 1.1 * 1000);
+  }
+
+  // Building footprint with setbacks
+  const frontSetbackMm = 1500;
+  const rearSetbackMm = 2000;
+  const sideSetbackMm = 1000;
+
+  const bldgMinX = sideSetbackMm;
+  const bldgMaxX = plotWidthMm - sideSetbackMm;
+  const bldgMinY = rearSetbackMm;
+  const bldgMaxY = plotDepthMm - frontSetbackMm;
+
+  // If we have template dims, constrain building to match them (centered)
+  if (templateDims) {
+    const templateWidth = templateDims.widthMm;
+    const templateDepth = templateDims.depthMm;
+    const availWidth = bldgMaxX - bldgMinX;
+    const availDepth = bldgMaxY - bldgMinY;
+
+    // Center the template footprint within available space
+    const finalWidth = Math.min(templateWidth, availWidth);
+    const finalDepth = Math.min(templateDepth, availDepth);
+    const centerX = (bldgMinX + bldgMaxX) / 2;
+    const centerY = (bldgMinY + bldgMaxY) / 2;
+
+    return {
+      bldgMinX: centerX - finalWidth / 2,
+      bldgMaxX: centerX + finalWidth / 2,
+      bldgMinY: centerY - finalDepth / 2,
+      bldgMaxY: centerY + finalDepth / 2,
+      bldgWidthMm: finalWidth,
+      bldgLengthMm: finalDepth,
+      plotWidthMm,
+      plotDepthMm,
+    };
+  }
+
+  const bldgWidthMm = bldgMaxX - bldgMinX;
+  const bldgLengthMm = bldgMaxY - bldgMinY;
+
+  return { bldgMinX, bldgMaxX, bldgMinY, bldgMaxY, bldgWidthMm, bldgLengthMm, plotWidthMm, plotDepthMm };
 }
 
 /**
@@ -1016,14 +1176,25 @@ function roomInsetRect(r: RoomPartition, geo: FloorGeo): [number, number, number
 
 /**
  * Builds the complete 3D parametric building model from project parameters.
+ * If a 2D template is provided, its plot dimensions drive the building footprint
+ * so the 3D output geometrically matches the 2D drawing.
  */
 export function generateBuildingMesh(
   project: BuildingProject,
   phaseFilter?: string, // e.g. "phase-foundation", "phase-ground-floor", "phase-floor-1", or "final"
   custom?: BuildingCustomization,
+  templateOverride?: FloorPlanTemplate | null, // explicit 2D template to drive geometry
 ): MeshDocument {
-  // Check mesh cache first
-  const cacheKey = meshCacheKey(project, phaseFilter, custom);
+  // Resolve the 2D template for this project (first floor typical)
+  const unitsPerFloor = project.unitsPerFloor ?? 2;
+  const resolvedTemplate = templateOverride ?? getTemplate(
+    assignedTemplate(project, unitsPerFloor)?.id ??
+    project.floorplanId ??
+    project.typicalPresetId
+  );
+
+  // Check mesh cache first (include template ID in key)
+  const cacheKey = meshCacheKey(project, phaseFilter, custom, resolvedTemplate?.id);
   const cached = meshCache.get(cacheKey);
   if (cached) {
     return cached;
@@ -1046,24 +1217,18 @@ export function generateBuildingMesh(
   const ve = custom?.valueEngineering ?? DEFAULT_VALUE_ENGINEERING;
   const cm = custom?.constructionMgmt ?? DEFAULT_CONSTRUCTION_MGMT;
 
-  // Derive plot dimensions in mm (assume standard ~1:1.2 aspect ratio in Dhaka/Chittagong)
-  const plotSide = Math.sqrt(plotSqm);
-  const plotWidthMm = Math.round(plotSide * 0.9 * 1000);
-  const plotDepthMm = Math.round(plotSide * 1.1 * 1000);
-
-  // Setbacks according to RAJUK 2008
-  const frontSetbackMm = 1500;
-  const rearSetbackMm = 2000;
-  const sideSetbackMm = 1000;
-
-  // Building footprint in mm
-  const bldgMinX = sideSetbackMm;
-  const bldgMaxX = Math.max(bldgMinX + 7000, plotWidthMm - sideSetbackMm);
-  const bldgMinY = rearSetbackMm;
-  const bldgMaxY = Math.max(bldgMinY + 8000, plotDepthMm - frontSetbackMm);
-
-  const bldgWidthMm = bldgMaxX - bldgMinX;
-  const bldgLengthMm = bldgMaxY - bldgMinY;
+  // Compute building footprint driven by 2D template dimensions (if available)
+  const footprint = computeBuildingFootprint(project, resolvedTemplate, custom);
+  const {
+    bldgMinX,
+    bldgMaxX,
+    bldgMinY,
+    bldgMaxY,
+    bldgWidthMm,
+    bldgLengthMm,
+    plotWidthMm,
+    plotDepthMm,
+  } = footprint;
 
   // Structural sections: grid, column size and beam section come from the repo's own structural
   // checks (src/cad/sectionSizing.ts: M25/Fe415, column util <= 0.80, beam util <= 0.85, L/360).
@@ -1946,8 +2111,8 @@ export function generateBuildingMesh(
     ...(notes.length > 0 ? { notes } : {}),
   };
 
-  // Store in cache
-  meshCache.set(cacheKey, result);
+  // Store in cache (with LRU eviction)
+  cacheSet(cacheKey, result);
 
   return result;
 }

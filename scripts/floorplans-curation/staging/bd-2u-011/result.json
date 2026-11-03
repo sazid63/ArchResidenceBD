@@ -1,0 +1,79 @@
+{
+  "id": "bd-2u-011",
+  "url": "https://www.pinterest.com/ideas/2-unit-house-plans/950467667072/",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "https://i.pinimg.com/474x/73/ea/47/73ea47375fbbda3744c2c480fd7f0249.jpg",
+      "kind": "meta",
+      "score": 70,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-011\\cand0.jpg",
+      "bytes": 72813,
+      "w": 474,
+      "h": 842,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://i.pinimg.com/originals/68/f6/8d/68f68dafbcdc7d4dd32d34ddefc1ff46.png",
+      "kind": "img",
+      "score": 10,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-011\\cand1.png",
+      "bytes": 290805,
+      "w": 2048,
+      "h": 1806,
+      "ext": "png",
+      "status": 200
+    },
+    {
+      "url": "https://i.pinimg.com/originals/79/d9/f9/79d9f9b1aa371bb6a0dfafa7264f85bf.jpg",
+      "kind": "img",
+      "score": 10,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-011\\cand2.jpg",
+      "bytes": 161504,
+      "w": 850,
+      "h": 2092,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://i.pinimg.com/originals/4a/79/c6/4a79c675ceb0167473f6ce13800e9d1d.png",
+      "kind": "img",
+      "score": 10,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-011\\cand3.png",
+      "bytes": 839206,
+      "w": 1000,
+      "h": 755,
+      "ext": "png",
+      "status": 200
+    },
+    {
+      "url": "https://i.pinimg.com/originals/bf/fc/f1/bffcf18db84e12be33e748a9459e40ae.jpg",
+      "kind": "img",
+      "score": 10,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-011\\cand4.jpg",
+      "bytes": 136180,
+      "w": 1080,
+      "h": 1350,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://i.pinimg.com/originals/85/6a/f3/856af3232035cd0e9ba7d602ffcb18c7.jpg",
+      "kind": "img",
+      "score": 10,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-2u-011\\cand5.jpg",
+      "bytes": 100593,
+      "w": 720,
+      "h": 1399,
+      "ext": "jpg",
+      "status": 200
+    }
+  ]
+}

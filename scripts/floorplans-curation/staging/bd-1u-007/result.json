@@ -1,0 +1,66 @@
+{
+  "id": "bd-1u-007",
+  "url": "https://fi.pinterest.com/pin/241998179971973411/",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "https://i.pinimg.com/736x/dd/bd/dd/ddbdddd091bc7859cf65be15b49cc86a.jpg",
+      "kind": "meta",
+      "score": 70,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-007\\cand0.jpg",
+      "bytes": 63099,
+      "w": 736,
+      "h": 752,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://fi.pinterest.com/pin/241998179971973411/752",
+      "kind": "meta",
+      "score": 60,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html; charset=utf-8"
+    },
+    {
+      "url": "https://fi.pinterest.com/pin/241998179971973411/736",
+      "kind": "meta",
+      "score": 60,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html; charset=utf-8"
+    },
+    {
+      "url": "https://i.pinimg.com/originals/dd/bd/dd/ddbdddd091bc7859cf65be15b49cc86a.jpg",
+      "kind": "jsonld",
+      "score": 50,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-007\\cand3.jpg",
+      "bytes": 63099,
+      "w": 736,
+      "h": 752,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://i.pinimg.com/75x75_RS/fa/ea/4e/faea4ea0d558fcb2d35f1ac0790ea053.jpg",
+      "kind": "img",
+      "score": 10,
+      "ok": false,
+      "note": "too-small"
+    },
+    {
+      "url": "https://i.pinimg.com/474x/ec/29/79/ec2979844189cd342bfec86f105fdb73.jpg",
+      "kind": "img",
+      "score": 10,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-007\\cand5.jpg",
+      "bytes": 24727,
+      "w": 474,
+      "h": 491,
+      "ext": "jpg",
+      "status": 200
+    }
+  ]
+}

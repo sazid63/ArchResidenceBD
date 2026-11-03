@@ -1,0 +1,69 @@
+{
+  "id": "bd-1u-016",
+  "url": "https://clarityarchitects.com/design/single_family_residence_cad_plan_dwg/1370",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "https://clarityarchitects.com/uploads/my_design/Single_family_residence_CAD_plan_with_three_bedrooms_and_garage.JPG",
+      "kind": "meta",
+      "score": 100,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-016\\cand0.jpg",
+      "bytes": 133939,
+      "w": 820,
+      "h": 692,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://clarityarchitects.com/design/single_family_residence_cad_plan_dwg/1200",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 404
+    },
+    {
+      "url": "https://clarityarchitects.com/design/single_family_residence_cad_plan_dwg/630",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 404
+    },
+    {
+      "url": "https://clarityarchitects.com/uploads/system/f914d0cdf0233e2914cd6fcaec2e700e.jpg",
+      "kind": "meta",
+      "score": 75,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-016\\cand3.jpg",
+      "bytes": 41327,
+      "w": 552,
+      "h": 519,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://clarityarchitects.com/uploads/my_design/Two_storey_residence_plan_with_three_bedrooms,_garage,_gym,_and_penthouse_terrace.JPG",
+      "kind": "img",
+      "score": 40,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-016\\cand4.jpg",
+      "bytes": 129182,
+      "w": 1118,
+      "h": 753,
+      "ext": "jpg",
+      "status": 200
+    },
+    {
+      "url": "https://clarityarchitects.com/uploads/my_design/Simple_office_floor_plan_CAD_drawing_for_workplace_space_planning.JPG",
+      "kind": "img",
+      "score": 40,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-016\\cand5.jpg",
+      "bytes": 90675,
+      "w": 1170,
+      "h": 583,
+      "ext": "jpg",
+      "status": 200
+    }
+  ]
+}

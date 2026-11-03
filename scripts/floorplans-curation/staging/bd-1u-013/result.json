@@ -1,0 +1,71 @@
+{
+  "id": "bd-1u-013",
+  "url": "https://sirajtech.org/product/one-storey-house-plan",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "https://aa.sirajtech.org/storage/media_gallery/uploads/2025/01/One-Storey-House-Plan.jpg",
+      "kind": "meta",
+      "score": 100,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-013\\cand0.webp",
+      "bytes": 301602,
+      "w": 1600,
+      "h": 1600,
+      "ext": "webp",
+      "status": 200
+    },
+    {
+      "url": "https://sirajtech.org/product/One%20Storey%20House%20Plan%20Price%20in%20Bangladesh",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html; charset=utf-8"
+    },
+    {
+      "url": "https://sirajtech.org/product/800",
+      "kind": "meta",
+      "score": 60,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html; charset=utf-8"
+    },
+    {
+      "url": "https://aa.sirajtech.org/storage/media_gallery/uploads/2022/07/U-shaped-2-story-house-plans-711x400.jpg",
+      "kind": "img",
+      "score": 40,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-013\\cand3.webp",
+      "bytes": 48300,
+      "w": 711,
+      "h": 400,
+      "ext": "webp",
+      "status": 200
+    },
+    {
+      "url": "https://aa.sirajtech.org/storage/media_gallery/uploads/2022/02/L-shaped-5-bedroom-house-plans-711x400.jpg",
+      "kind": "img",
+      "score": 40,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-013\\cand4.webp",
+      "bytes": 50914,
+      "w": 711,
+      "h": 400,
+      "ext": "webp",
+      "status": 200
+    },
+    {
+      "url": "https://aa.sirajtech.org/storage/media_gallery/uploads/2022/01/Steel-structure-warehouse-design-762x400.jpg",
+      "kind": "img",
+      "score": 40,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-013\\cand5.webp",
+      "bytes": 46076,
+      "w": 762,
+      "h": 400,
+      "ext": "webp",
+      "status": 200
+    }
+  ]
+}

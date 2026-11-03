@@ -1,0 +1,61 @@
+{
+  "id": "bd-1u-005",
+  "url": "https://studioarchifiction.com/house-design-bangladesh/",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "https://studioarchifiction.com/house-design-bangladesh/1000",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://studioarchifiction.com/house-design-bangladesh/1913",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://studioarchifiction.com/house-design-bangladesh/Completed%20residential%20facade%20with%20apartment%20roof%20design,%20terrace%20pergola,%20and%20projecting%20balconies%20in%20Bashundhara.%20-%20building%20design,%20Dr.%20Jasim&#039;s%20Residence,%20Bashundhara,%20Dhaka",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 404
+    },
+    {
+      "url": "https://studioarchifiction.com/house-design-bangladesh/image/jpeg",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 404
+    },
+    {
+      "url": "https://studioarchifiction.com/wp-content/uploads/2025/08/1-f.jpg",
+      "kind": "meta",
+      "score": 75,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-005\\cand4.webp",
+      "bytes": 262538,
+      "w": 1000,
+      "h": 1913,
+      "ext": "webp",
+      "status": 200
+    },
+    {
+      "url": "https://studioarchifiction.com/wp-content/uploads/2025/08/studio-archifiction-symbol-450-transparent.webp",
+      "kind": "jsonld",
+      "score": 55,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-005\\cand5.webp",
+      "bytes": 25922,
+      "w": 450,
+      "h": 393,
+      "ext": "webp",
+      "status": 200
+    }
+  ]
+}

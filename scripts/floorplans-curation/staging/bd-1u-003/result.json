@@ -1,0 +1,66 @@
+{
+  "id": "bd-1u-003",
+  "url": "https://dreamtouch-bd.com/4-bedroom-house-design-in-bangladesh/",
+  "pageStatus": 200,
+  "candidates": [
+    {
+      "url": "https://dreamtouch-bd.com/wp-content/uploads/2025/03/four-bedroom-house-design-in-bangladesh.webp",
+      "kind": "meta",
+      "score": 100,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-003\\cand0.webp",
+      "bytes": 38604,
+      "w": 1200,
+      "h": 628,
+      "ext": "webp",
+      "status": 200
+    },
+    {
+      "url": "https://dreamtouch-bd.com/4-bedroom-house-design-in-bangladesh/1200",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://dreamtouch-bd.com/4-bedroom-house-design-in-bangladesh/628",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 200,
+      "note": "not-image:text/html; charset=UTF-8"
+    },
+    {
+      "url": "https://dreamtouch-bd.com/4-bedroom-house-design-in-bangladesh/image/webp",
+      "kind": "meta",
+      "score": 85,
+      "ok": false,
+      "status": 404
+    },
+    {
+      "url": "https://dreamtouch-bd.com/wp-content/uploads/2025/03/4-bedroom-house-design-in-bangladesh.webp",
+      "kind": "jsonld",
+      "score": 80,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-003\\cand4.webp",
+      "bytes": 48356,
+      "w": 1000,
+      "h": 660,
+      "ext": "webp",
+      "status": 200
+    },
+    {
+      "url": "https://dreamtouch-bd.com/wp-content/uploads/elementor/thumbs/4-bedroom-house-design-in-bangladesh-r3a1jzif0asdi8nlkngkovuit2r5rz3u2pu8q6ah8o.webp",
+      "kind": "img",
+      "score": 20,
+      "ok": true,
+      "file": "C:\\1_SAJID\\ArchResidenceBD\\repo\\scripts\\floorplans-curation\\staging\\bd-1u-003\\cand5.webp",
+      "bytes": 104826,
+      "w": 1000,
+      "h": 660,
+      "ext": "webp",
+      "status": 200
+    }
+  ]
+}
