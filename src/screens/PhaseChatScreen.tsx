@@ -218,11 +218,19 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
           )}
 
           <div className="chips" style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 6 }}>
-            {chips.map((chip, i) => (
-              <Chip key={i} tone="sky" onClick={() => send(chip)}>
-                {chip}
-              </Chip>
-            ))}
+            {chips.map((chip, i) => {
+              // "Start 3D Design Now 🚀" chip (Utilities phase) → directly open 3D design
+              const isDesignChip = chip.includes("3D Design") || chip.includes("৩D ডিজাইন");
+              return (
+                <Chip
+                  key={i}
+                  tone="sky"
+                  onClick={() => isDesignChip ? startDesign() : send(chip)}
+                >
+                  {chip}
+                </Chip>
+              );
+            })}
           </div>
 
           <div className="chat-input-row" style={{ marginTop: 12 }}>
