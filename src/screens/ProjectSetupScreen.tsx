@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useI18n, fmtNum } from "../i18n";
 import { Button, Card, PageHeader, Callout } from "../ui/kit";
 import { createNewProject, generateRandomBuildingProject, plotToSqm } from "../engine/projectState";
@@ -38,7 +38,9 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
     });
   }, [unitsPerFloor]);
 
-  const create = () => {
+  const create = useCallback((e?: React.MouseEvent<HTMLButtonElement>) => {
+    e?.stopPropagation();
+    e?.preventDefault();
     if (!name.trim()) return setError(bn ? "প্রকল্পের নাম লিখুন।" : "Please enter a project name.");
     if (stories < 1 || stories > 30) return setError(bn ? "তলা ১–৩০ এর মধ্যে হতে হবে।" : "Stories must be between 1 and 30.");
     if (plotSize <= 0) return setError(bn ? "জমির পরিমাণ দিন।" : "Please enter a valid plot size.");
@@ -54,12 +56,12 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
     });
     onProjectCreated?.();
     onNavigate(`phase:${project.phases[0].id}`);
-  };
+  }, [name, stories, plotSize, plotUnit, unitsPerFloor, location, selectedId, onProjectCreated, onNavigate]);
 
-  const randomize = () => {
+  const randomize = useCallback(() => {
     const { template } = chooseTemplate(unitsPerFloor);
     if (template) setSelectedId(template.id);
-  };
+  }, [unitsPerFloor]);
 
   return (
     <div className="screen">
