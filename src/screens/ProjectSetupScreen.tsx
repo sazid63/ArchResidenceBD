@@ -5,6 +5,7 @@ import { createNewProject, generateRandomBuildingProject, plotToSqm } from "../e
 import { availableTemplates, chooseTemplate } from "../data/floorplanSelection";
 import { categoryForUnits, getTemplate, type FloorPlanTemplate } from "../data/floorplanLibrary";
 import { FloorplanPreview } from "../components/FloorplanPreview";
+import { useProject } from "../context/ProjectContext";
 
 interface Props {
   onNavigate: (id: string) => void;
@@ -14,6 +15,7 @@ interface Props {
 export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
   const { t, lang } = useI18n();
   const bn = lang === "bn";
+  const { saveProject } = useProject();
 
   const [name, setName] = useState("Dhanmondi Residential Building");
   const [stories, setStories] = useState(6);
@@ -54,9 +56,11 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
       address: location,
       floorplanId: selectedId ?? undefined, // undefined → random pick from the category
     });
+    // Save through context to keep React state in sync with localStorage
+    saveProject(project);
     onProjectCreated?.();
     onNavigate(`phase:${project.phases[0].id}`);
-  }, [name, stories, plotSize, plotUnit, unitsPerFloor, location, selectedId, onProjectCreated, onNavigate]);
+  }, [name, stories, plotSize, plotUnit, unitsPerFloor, location, selectedId, onProjectCreated, onNavigate, saveProject]);
 
   const randomize = useCallback(() => {
     const { template } = chooseTemplate(unitsPerFloor);
@@ -72,7 +76,8 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
           <Button
             variant="primary"
             onClick={() => {
-              generateRandomBuildingProject();
+              const project = generateRandomBuildingProject();
+              saveProject(project);
               onProjectCreated?.();
               onNavigate("design:final");
             }}
