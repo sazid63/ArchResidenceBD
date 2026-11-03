@@ -74,7 +74,7 @@ scripts/
 | Steel | Fe415 | f_y = 415 MPa, f_yd = 360.87 MPa, γ_s = 1.15 |
 | Brick Masonry | 7.5 MPa | Typical for Bangladesh |
 
-### Column Auto-Sizing (Validated by `scripts/structural-sweep.ts`)
+### Column Auto-Sizing (Validated by `scripts/audits/structural-sweep.ts`)
 
 | Stories | Small Plot (<200 m²) | Medium (200–300 m²) | Large (>300 m²) |
 |---------|---------------------|---------------------|-----------------|

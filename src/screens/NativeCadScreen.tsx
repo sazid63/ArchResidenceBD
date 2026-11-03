@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { sizeMm, volumeM3 } from "../cad/mesh";
-import type { MeshDocument } from "../cad/mesh";
+import type { MeshDocument, MeshObject } from "../cad/mesh";
 import { MeshViewer } from "../cad/viewer";
 import { useI18n } from "../i18n";
 import type { BuildingProject } from "../engine/projectState";
@@ -164,6 +164,21 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
       },
     } as BuildingProject, designPhaseId, customParams),
   );
+
+  // 3D model tree state: hooks must stay above the early `if (!project)` return further down.
+  const [treeFilter, setTreeFilter] = useState("");
+  const [openKinds, setOpenKinds] = useState<Record<string, boolean>>({});
+  const [treeShowAll, setTreeShowAll] = useState<Record<string, boolean>>({});
+  const treeGroups = useMemo(() => {
+    const q = treeFilter.trim().toLowerCase();
+    const map = new Map<string, MeshObject[]>();
+    for (const o of mesh?.objects ?? []) {
+      if (q && !(o.label.toLowerCase().includes(q) || o.kind.toLowerCase().includes(q) || o.id.toLowerCase().includes(q))) continue;
+      (map.get(o.kind) ?? map.set(o.kind, []).get(o.kind)!).push(o);
+    }
+    return [...map.entries()].sort((x, y) => y[1].length - x[1].length);
+  }, [mesh, treeFilter]);
+
 
   // Archie CAD Copilot chatbox state
   const [designChat, setDesignChat] = useState<Array<{ who: "ai" | "user"; text: string }>>([
@@ -381,7 +396,10 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
     const objects = mesh?.objects ?? [];
     const triangles = objects.reduce((sum, object) => sum + object.indices.length / 3, 0);
     const volume = objects.reduce((sum, object) => sum + volumeM3(object), 0);
-    return { objects: objects.length, triangles, volume };
+    // Only reinforced-concrete elements count as concrete (walls, tanks and fixtures are not).
+    const RCC = new Set(["footing", "column", "pier", "beam", "lintel", "slab", "balcony", "canopy", "stair"]);
+    const concrete = objects.filter((o) => RCC.has(o.kind)).reduce((sum, object) => sum + volumeM3(object), 0);
+    return { objects: objects.length, triangles, volume, concrete };
   }, [mesh]);
 
   // Early return — all hooks above are now called unconditionally
@@ -494,80 +512,45 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
   const toggle = (id: string) => setHidden((prev) => ({ ...prev, [id]: !prev[id] }));
 
   // Export FreeCAD Python Macro
-  const exportFreeCadMacro = () => {
-    const code = `# ArchResidenceBD NativeCAD / FreeCAD Parametric Macro
-# Project: ${project.name} (${project.stories} Stories, ${project.plotSize} ${project.plotUnit})
-# Generated from trained archres-repair-v0 model fleet (sazid63/archresidencebd-models)
-import FreeCAD as App
-import Part
-
-doc = App.newDocument("${project.name.replace(/[^a-zA-Z0-9]/g, "_")}")
-
-# 1. Foundation Footings & Pedestal Stubs
-grid_x = [0, 3600, 7200, 10800]
-grid_y = [0, 4200, 8400]
-footing_size = ${customParams.footingSizeMm || 1800}
-footing_depth = ${customParams.footingDepthMm || 1600}
-col_size_x = ${customParams.columnWidthMm || 250}
-col_size_y = ${customParams.columnDepthMm || 250}
-
-for x in grid_x:
-    for y in grid_y:
-        pad = Part.makeBox(footing_size, footing_size, 450, App.Vector(x - footing_size/2, y - footing_size/2, -footing_depth))
-        stub = Part.makeBox(col_size_x + 50, col_size_y + 50, footing_depth - 450, App.Vector(x - (col_size_x+50)/2, y - (col_size_y+50)/2, -footing_depth + 450))
-        Part.show(pad.fuse(stub))
-
-# 2. Grade Tie Beams (250mm x 450mm)
-for y in grid_y:
-    beam = Part.makeBox(10800, 250, 450, App.Vector(0, y - 125, -450))
-    Part.show(beam)
-for x in grid_x:
-    beam = Part.makeBox(250, 8400, 450, App.Vector(x - 125, 0, -450))
-    Part.show(beam)
-
-# 3. Multi-Storey Columns, Slabs, Balconies & Room Partitions
-for story in range(${project.stories}):
-    z_floor = story * 3000
-    # Columns
-    for x in grid_x:
-        for y in grid_y:
-            col = Part.makeBox(col_size_x, col_size_y, 3000, App.Vector(x - col_size_x/2, y - col_size_y/2, z_floor))
-            Part.show(col)
-    # Floor Slab
-    slab = Part.makeBox(11200, 8800, 125, App.Vector(-200, -200, z_floor + 3000))
-    Part.show(slab)
-    # Cantilever Balcony Projection
-    balcony = Part.makeBox(4800, ${customParams.balconyDepthMm || 1200}, 125, App.Vector(3000, 8600, z_floor + 3000))
-    Part.show(balcony)
-
-# 4. Rooftop Headroom, Parapet & Overhead Water Reservoir Tank
-z_roof = ${project.stories} * 3000
-parapet = Part.makeBox(11200, 8800, 1000, App.Vector(-200, -200, z_roof + 125))
-water_tank = Part.makeBox(3600, 3000, 1800, App.Vector(3600, 2400, z_roof + 125 + 800))
-Part.show(parapet)
-Part.show(water_tank)
-
-doc.recompute()
-print("ArchResidenceBD: Watertight 3D Building Assembly Successfully Generated in FreeCAD.")
-`;
-    const blob = new Blob([code], { type: "text/x-python;charset=utf-8" });
+  const downloadText = (text: string, filename: string, mime: string) => {
+    const blob = new Blob([text], { type: `${mime};charset=utf-8` });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${project.name.replace(/[^a-zA-Z0-9]/g, "_")}_${project.stories}Story_FreeCAD.py`;
+    a.download = filename;
     a.click();
-    URL.revokeObjectURL(url);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+  const exportBase = () => (project?.name ?? "building").replace(/[^a-zA-Z0-9]/g, "_");
+  const exportMeta = () => ({
+    projectName: project?.name ?? "Building",
+    stories: project?.stories ?? 1,
+    plotSize: project?.plotSize ?? 0,
+    plotUnit: project?.plotUnit ?? "katha",
+  });
+
+  // v2.4.4: export the model on screen. The old button wrote a hard-coded 4 x 3 template macro
+  // (fixed grid, 250 mm columns, no beams/walls/stairs) that did not match the project at all.
+  const exportFreeCadMacro = () => {
+    const doc = mesh;
+    downloadText(buildFreeCadMacro(doc, exportMeta()), `${exportBase()}_${project?.stories ?? 1}Story_FreeCAD.py`, "text/x-python");
+  };
+  const exportIfc = () => {
+    downloadText(buildIfcStep(mesh, exportMeta()), `${exportBase()}_${project?.stories ?? 1}Story.ifc`, "application/x-step");
   };
 
   return (
     <div className="screen">
       <PageHeader
         title={lang === "bn" ? "নেটিভক্যাড ৩D পূর্ণাঙ্গ ভবন ডিজাইন" : "NativeCAD 3D Full Building Architecture"}
-        subtitle={`${project.name} · ${project.stories} ${lang === "bn" ? "তলা পূর্ণাঙ্গ স্ট্রাকচারাল ফ্রেম" : "Storey Full Building Frame"} · ${totals.objects} solids · ${totals.volume.toFixed(2)} m³ concrete`}
+        subtitle={`${project.name} · ${project.stories} ${lang === "bn" ? "তলা পূর্ণাঙ্গ স্ট্রাকচারাল ফ্রেম" : "Storey Full Building Frame"} · ${totals.objects} elements · ${totals.concrete.toFixed(1)} m³ RCC`}
         actions={
           <div className="row" style={{ gap: "8px" }}>
             <Button variant="soft" onClick={exportFreeCadMacro}>
               {lang === "bn" ? "ফ্রিক্যাড ম্যাক্রো (.py)" : "Export FreeCAD (.py)"}
+            </Button>
+            <Button variant="soft" onClick={exportIfc}>
+              {lang === "bn" ? "আইএফসি (.ifc)" : "Export IFC (.ifc)"}
             </Button>
             <Button variant="soft" onClick={() => setActiveTab("title-block")}>
               {lang === "bn" ? "টাইটেল ব্লক ✏️" : "Title Block ✏️"}
@@ -739,6 +722,36 @@ print("ArchResidenceBD: Watertight 3D Building Assembly Successfully Generated i
             <div className="cad-viewport" style={{ position: "relative" }}>
               <canvas ref={canvasRef} className="cad-canvas" />
               {!mesh && !error ? <span className="muted small">{t("cadLoading")}</span> : null}
+              {error ? (
+                <div
+                  role="alert"
+                  style={{
+                    position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center",
+                    justifyContent: "center", gap: "10px", padding: "24px", textAlign: "center",
+                    background: "var(--surface-2)", borderRadius: "var(--r-md)",
+                  }}
+                >
+                  <strong>{lang === "bn" ? "৩ডি ভিউ চালু করা যায়নি" : "The 3D view could not start"}</strong>
+                  <span className="small muted" style={{ maxWidth: 420 }}>
+                    {/webgl/i.test(error)
+                      ? lang === "bn"
+                        ? "এই ডিভাইস বা ব্রাউজারে WebGL বন্ধ আছে। ব্রাউজার আপডেট করুন বা হার্ডওয়্যার অ্যাক্সেলারেশন চালু করুন। ড্রয়িং, BOQ ও রিপোর্ট এখনও কাজ করবে।"
+                        : "WebGL is turned off or unsupported on this device or browser. Update the browser or enable hardware acceleration. Drawings, the BOQ and reports still work."
+                      : error}
+                  </span>
+                  <div className="row" style={{ gap: "8px", justifyContent: "center", flexWrap: "wrap" }}>
+                    <button type="button" className="button" onClick={() => window.location.reload()}>
+                      {lang === "bn" ? "আবার চেষ্টা করুন" : "Try again"}
+                    </button>
+                    <button type="button" className="button button--primary" onClick={() => onNavigate?.("docs:drawings")}>
+                      {lang === "bn" ? "ড্রয়িং দেখুন" : "Open drawings"}
+                    </button>
+                    <button type="button" className="button" onClick={() => onNavigate?.("boq")}>
+                      {lang === "bn" ? "BOQ দেখুন" : "Open BOQ"}
+                    </button>
+                  </div>
+                </div>
+              ) : null}
             </div>
 
             {measureMode && measurePoints.length > 0 && (
@@ -815,29 +828,71 @@ print("ArchResidenceBD: Watertight 3D Building Assembly Successfully Generated i
           <Card className="stack">
             <div className="row-between">
               <h3>{t("cadModelTree")}</h3>
-              <span className="small faint">{mesh?.objects?.length || 0} solids</span>
+              <span className="small faint">{mesh?.objects?.length || 0} elements</span>
             </div>
-            <div style={{ maxHeight: "200px", overflowY: "auto" }}>
-              {(mesh?.objects ?? []).map((object) => {
-                const size = sizeMm(object);
+            <label htmlFor="cad-tree-filter" className="visually-hidden">{lang === "bn" ? "এলিমেন্ট খুঁজুন" : "Filter elements"}</label>
+            <input
+              id="cad-tree-filter"
+              className="input"
+              placeholder={lang === "bn" ? "নাম বা ধরন দিয়ে খুঁজুন…" : "Filter by name or type…"}
+              value={treeFilter}
+              onChange={(e) => setTreeFilter(e.target.value)}
+            />
+            <div style={{ maxHeight: "340px", overflowY: "auto" }} role="tree" aria-label={t("cadModelTree")}>
+              {treeGroups.map(([kind, items]) => {
+                const open = treeFilter.trim() ? true : !!openKinds[kind];
+                const allHidden = items.every((o) => hidden[o.id]);
+                const shown = open ? items.slice(0, treeShowAll[kind] ? items.length : 60) : [];
                 return (
-                  <div className="cad-tree-row" key={object.id}>
-                    <button
-                      type="button"
-                      className="button button--ghost cad-eye"
-                      onClick={() => toggle(object.id)}
-                      aria-label={hidden[object.id] ? t("cadShow") : t("cadHide")}
-                    >
-                      {hidden[object.id] ? "○" : "●"}
-                    </button>
-                    <span className="grow ellipsis">{object.label}</span>
-                    <Badge tone="neutral">{object.kind}</Badge>
-                    <span className="mono faint small">
-                      {Math.round(size[0])}×{Math.round(size[1])}×{Math.round(size[2])} mm
-                    </span>
+                  <div key={kind} role="treeitem" aria-expanded={open}>
+                    <div className="cad-tree-row">
+                      <button
+                        type="button"
+                        className="button button--ghost cad-eye"
+                        onClick={() => setHidden((prev) => { const next = { ...prev }; items.forEach((o) => { next[o.id] = !allHidden; }); return next; })}
+                        aria-label={`${allHidden ? t("cadShow") : t("cadHide")}: ${kind} (${items.length})`}
+                      >
+                        {allHidden ? "○" : "●"}
+                      </button>
+                      <button
+                        type="button"
+                        className="button button--ghost grow"
+                        style={{ justifyContent: "flex-start", textAlign: "left" }}
+                        aria-label={`${kind}, ${items.length}`}
+                        onClick={() => setOpenKinds((prev) => ({ ...prev, [kind]: !prev[kind] }))}
+                      >
+                        <span aria-hidden="true">{open ? "▾" : "▸"}</span> {kind}
+                      </button>
+                      <Badge tone="neutral">{items.length}</Badge>
+                    </div>
+                    {shown.map((object) => {
+                      const size = sizeMm(object);
+                      return (
+                        <div className="cad-tree-row" key={object.id} style={{ paddingInlineStart: "20px" }}>
+                          <button
+                            type="button"
+                            className="button button--ghost cad-eye"
+                            onClick={() => toggle(object.id)}
+                            aria-label={`${hidden[object.id] ? t("cadShow") : t("cadHide")}: ${object.label}`}
+                          >
+                            {hidden[object.id] ? "○" : "●"}
+                          </button>
+                          <span className="grow ellipsis" title={object.id}>{object.label}</span>
+                          <span className="mono faint small">
+                            {Math.round(size[0])}×{Math.round(size[1])}×{Math.round(size[2])} mm
+                          </span>
+                        </div>
+                      );
+                    })}
+                    {open && items.length > shown.length ? (
+                      <button type="button" className="button button--ghost small" onClick={() => setTreeShowAll((prev) => ({ ...prev, [kind]: true }))}>
+                        {lang === "bn" ? `আরও ${items.length - shown.length}টি দেখান` : `Show ${items.length - shown.length} more`}
+                      </button>
+                    ) : null}
                   </div>
                 );
               })}
+              {treeGroups.length === 0 ? <p className="small muted">{lang === "bn" ? "কিছু পাওয়া যায়নি।" : "Nothing matches."}</p> : null}
             </div>
           </Card>
         </div>

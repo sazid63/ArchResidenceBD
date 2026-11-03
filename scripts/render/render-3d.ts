@@ -9,10 +9,10 @@
  */
 import { writeFileSync } from "fs";
 import { deflateSync } from "zlib";
-import { createNewProject } from "../src/engine/projectState.js";
-import { generateBuildingMesh } from "../src/cad/parametricBuildingGenerator.js";
-import { getColorForObject, type Vec3 } from "../src/cad/viewer.js";
-import type { MeshDocument } from "../src/cad/mesh.js";
+import { createNewProject } from "../../src/engine/projectState.js";
+import { generateBuildingMesh } from "../../src/cad/parametricBuildingGenerator.js";
+import { getColorForObject, type Vec3 } from "../../src/cad/viewer.js";
+import type { MeshDocument } from "../../src/cad/mesh.js";
 
 // ---------------------------------------------------------------------------
 // PNG writer (RGBA8, no interlace)

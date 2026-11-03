@@ -1,0 +1,429 @@
+{
+  "projectId": "boq-test-5st",
+  "projectName": "5-Storey Residential BOQ Test",
+  "location": "Dhaka, Bangladesh",
+  "generatedAt": "2026-10-31T23:19:03.567Z",
+  "currency": "BDT",
+  "rateTable": "DHAKA_RATES_2025",
+  "items": [
+    {
+      "itemNo": "001",
+      "description": "Excavation for underground tanks (600 mm working space each side)",
+      "unit": "m³",
+      "quantity": 103.873,
+      "rateBDT": 450,
+      "amountBDT": 46743,
+      "category": "Excavation & Site Works",
+      "meshKinds": [
+        "tank"
+      ],
+      "assumptions": [
+        "Footing excavation is included in the footing rate",
+        "Backfill and dewatering not measured"
+      ]
+    },
+    {
+      "itemNo": "002",
+      "description": "RCC footings M25 incl. formwork, excavation",
+      "unit": "m³",
+      "quantity": 23.328,
+      "rateBDT": 9000,
+      "amountBDT": 209952,
+      "category": "Concrete Works",
+      "meshKinds": [
+        "footing"
+      ],
+      "assumptions": [
+        "16 footing pads"
+      ]
+    },
+    {
+      "itemNo": "003",
+      "description": "RCC columns, beams and lintels M25 incl. formwork",
+      "unit": "m³",
+      "quantity": 93.951,
+      "rateBDT": 10500,
+      "amountBDT": 986484,
+      "category": "Concrete Works",
+      "meshKinds": [
+        "column",
+        "pier",
+        "beam",
+        "lintel"
+      ],
+      "assumptions": [
+        "Disjoint solids: no double count at column/beam/wall junctions",
+        "Window sills measured with lintels"
+      ]
+    },
+    {
+      "itemNo": "004",
+      "description": "RCC slabs, balconies, canopy and entry steps M25 incl. formwork",
+      "unit": "m³",
+      "quantity": 139.51,
+      "rateBDT": 12500,
+      "amountBDT": 1743878,
+      "category": "Concrete Works",
+      "meshKinds": [
+        "slab",
+        "balcony",
+        "canopy"
+      ],
+      "assumptions": []
+    },
+    {
+      "itemNo": "005",
+      "description": "RCC dog-legged staircases M25 incl. formwork",
+      "unit": "m³",
+      "quantity": 6.038,
+      "rateBDT": 11500,
+      "amountBDT": 69435,
+      "category": "Concrete Works",
+      "meshKinds": [
+        "stair"
+      ],
+      "assumptions": [
+        "Stepped solid blocks (riser + 150 mm waist) overstate a true waist-slab stair by roughly 10-20 %"
+      ]
+    },
+    {
+      "itemNo": "006",
+      "description": "RCC tank shells M25 (walls, base and cover slab)",
+      "unit": "m³",
+      "quantity": 21.514,
+      "rateBDT": 12500,
+      "amountBDT": 268922,
+      "category": "Concrete Works",
+      "meshKinds": [
+        "tank"
+      ],
+      "assumptions": [
+        "Shell = envelope surface x 200 mm (underground) / 150 mm (overhead); tanks are modelled as solid boxes, so their volume is NOT concrete"
+      ]
+    },
+    {
+      "itemNo": "007",
+      "description": "TMT reinforcement Fe415, all diameters (screening estimate)",
+      "unit": "ton",
+      "quantity": 32.89,
+      "rateBDT": 95000,
+      "amountBDT": 3124579,
+      "category": "Reinforcement",
+      "meshKinds": [
+        "footing",
+        "column",
+        "beam",
+        "slab",
+        "stair",
+        "tank"
+      ],
+      "assumptions": [
+        "ASSUMED kg/m3: footing 80, column 200, beam/lintel 150, slab 90, stair 110, tank shell 120",
+        "Replace with the bar schedule when available"
+      ]
+    },
+    {
+      "itemNo": "008",
+      "description": "Brickwork, external walls, parapets and plinth course (net of openings)",
+      "unit": "m²",
+      "quantity": 416.812,
+      "rateBDT": 7023,
+      "amountBDT": 2927286,
+      "category": "Masonry Works",
+      "meshKinds": [
+        "wall",
+        "parapet"
+      ],
+      "assumptions": [
+        "Net area = volume / thickness (openings and column/beam wraps already removed)",
+        "Table rate is for 136 mm; scaled by actual thickness (250 mm walls ~ x1.8)"
+      ]
+    },
+    {
+      "itemNo": "009",
+      "description": "Brick partition walls (net of openings)",
+      "unit": "m²",
+      "quantity": 667.938,
+      "rateBDT": 2260,
+      "amountBDT": 1509292,
+      "category": "Masonry Works",
+      "meshKinds": [
+        "partition"
+      ],
+      "assumptions": [
+        "Net area = volume / thickness",
+        "Table rate is for 102.5 mm; scaled by actual thickness"
+      ]
+    },
+    {
+      "itemNo": "010",
+      "description": "Interior doors, flush shutter, timber frame",
+      "unit": "m²",
+      "quantity": 83.258,
+      "rateBDT": 3200,
+      "amountBDT": 266424,
+      "category": "Joinery",
+      "meshKinds": [
+        "door",
+        "door_frame"
+      ],
+      "assumptions": [
+        "47 door(s), clear opening area"
+      ]
+    },
+    {
+      "itemNo": "011",
+      "description": "Windows and balcony doors (glazed, sliding)",
+      "unit": "m²",
+      "quantity": 55.368,
+      "rateBDT": 3800,
+      "amountBDT": 210398,
+      "category": "Joinery",
+      "meshKinds": [
+        "window",
+        "window_frame"
+      ],
+      "assumptions": [
+        "33 window(s)/glazed door(s), opening area"
+      ]
+    },
+    {
+      "itemNo": "012",
+      "description": "Louvre ventilators (bath)",
+      "unit": "m²",
+      "quantity": 0.3,
+      "rateBDT": 3200,
+      "amountBDT": 960,
+      "category": "Joinery",
+      "meshKinds": [
+        "louver",
+        "window_frame"
+      ],
+      "assumptions": [
+        "1 ventilator(s), opening area"
+      ]
+    },
+    {
+      "itemNo": "013",
+      "description": "Cement plaster 12 mm, all exposed masonry faces",
+      "unit": "m²",
+      "quantity": 1952.555,
+      "rateBDT": 320,
+      "amountBDT": 624817,
+      "category": "Finishes",
+      "meshKinds": [
+        "wall",
+        "partition",
+        "parapet"
+      ],
+      "assumptions": [
+        "Exposed vertical faces only (faces touching columns, beams, slabs or other walls are excluded)",
+        "Plaster on RCC faces and soffits not measured"
+      ]
+    },
+    {
+      "itemNo": "014",
+      "description": "External lime wash 2 coats, exterior wall faces",
+      "unit": "m²",
+      "quantity": 365.872,
+      "rateBDT": 280,
+      "amountBDT": 102444,
+      "category": "Finishes",
+      "meshKinds": [
+        "wall"
+      ],
+      "assumptions": [
+        "Exterior faces on the frame line"
+      ]
+    },
+    {
+      "itemNo": "015",
+      "description": "Cement-sand screed 50 mm under floor finishes",
+      "unit": "m²",
+      "quantity": 734.569,
+      "rateBDT": 450,
+      "amountBDT": 330556,
+      "category": "Finishes",
+      "meshKinds": [
+        "slab"
+      ],
+      "assumptions": [
+        "Upper floors + balconies: exposed slab top (excludes wall footprints); ground floor: frame footprint"
+      ]
+    },
+    {
+      "itemNo": "016",
+      "description": "Ceramic floor tiles 300x300",
+      "unit": "m²",
+      "quantity": 734.569,
+      "rateBDT": 1200,
+      "amountBDT": 881483,
+      "category": "Finishes",
+      "meshKinds": [
+        "slab"
+      ],
+      "assumptions": [
+        "Same area as screed; wet-area vitrified premium not separated"
+      ]
+    },
+    {
+      "itemNo": "017",
+      "description": "Roof screed / topping (waterproofing membrane not in rate table)",
+      "unit": "m²",
+      "quantity": 159.057,
+      "rateBDT": 450,
+      "amountBDT": 71576,
+      "category": "Finishes",
+      "meshKinds": [
+        "slab"
+      ],
+      "assumptions": [
+        "Waterproofing membrane unpriced: add a rate"
+      ]
+    },
+    {
+      "itemNo": "018",
+      "description": "Sanitary plumbing, 13 bathroom(s)",
+      "unit": "kp",
+      "quantity": 13,
+      "rateBDT": 285000,
+      "amountBDT": 3705000,
+      "category": "Plumbing & Sanitary",
+      "meshKinds": [],
+      "assumptions": [
+        "Bathrooms counted from plumbing risers in the 3D model"
+      ]
+    },
+    {
+      "itemNo": "019",
+      "description": "Copper wiring 2.5mm² PVC conduit concealed — 5 storey",
+      "unit": "m",
+      "quantity": 1480,
+      "rateBDT": 120,
+      "amountBDT": 177600,
+      "category": "Electrical",
+      "meshKinds": [],
+      "assumptions": [
+        "1.8× floor area per floor (circuits + vertical risers)",
+        "2.5mm² copper, PVC conduit"
+      ]
+    },
+    {
+      "itemNo": "020",
+      "description": "Distribution board + MCB switchgear — 5 storey",
+      "unit": "unit",
+      "quantity": 5,
+      "rateBDT": 3500,
+      "amountBDT": 17500,
+      "category": "Electrical",
+      "meshKinds": [],
+      "assumptions": [
+        "One distribution board per floor",
+        "8-way MCB panel"
+      ]
+    },
+    {
+      "itemNo": "021",
+      "description": "LED light fixtures + fan + socket points",
+      "unit": "unit",
+      "quantity": 148,
+      "rateBDT": 850,
+      "amountBDT": 125800,
+      "category": "Electrical",
+      "meshKinds": [],
+      "assumptions": [
+        "0.18 fixtures per m² of floor area",
+        "LED + fan + socket per point"
+      ]
+    },
+    {
+      "itemNo": "022",
+      "description": "Earthing system — 6m copper rod + GI strip (BNBC Ch.13)",
+      "unit": "unit",
+      "quantity": 1,
+      "rateBDT": 12000,
+      "amountBDT": 12000,
+      "category": "Electrical",
+      "meshKinds": [],
+      "assumptions": [
+        "BNBC 2020 Chapter 13 mandatory",
+        "6m deep copper rod + 25×3mm GI strip"
+      ]
+    },
+    {
+      "itemNo": "023",
+      "description": "Backup diesel generator + ATS panel (BNBC 2020)",
+      "unit": "unit",
+      "quantity": 1,
+      "rateBDT": 150000,
+      "amountBDT": 150000,
+      "category": "Electrical",
+      "meshKinds": [],
+      "assumptions": [
+        "Required for buildings ≥ 4 stories per BNBC 2020",
+        "30-50 kVA generator + ATS"
+      ]
+    },
+    {
+      "itemNo": "024",
+      "description": "Balcony glass / steel railing 900 mm (supply + fix)",
+      "unit": "m",
+      "quantity": 44.848,
+      "rateBDT": 0,
+      "amountBDT": 0,
+      "category": "Metal Works",
+      "meshKinds": [
+        "railing"
+      ],
+      "assumptions": [
+        "UNPRICED: no rate in the rate table; quantity only",
+        "Add a per-metre rate to the rate table to price this line"
+      ]
+    }
+  ],
+  "totals": {
+    "totalItems": 24,
+    "subtotalBDT": 17563129,
+    "taxRate": 0.05,
+    "taxBDT": 878156,
+    "totalBDT": 18441285,
+    "totalsByCategory": {
+      "Excavation & Site Works": {
+        "quantity": 103.873,
+        "amount": 46742.85
+      },
+      "Concrete Works": {
+        "quantity": 284.34068777777804,
+        "amount": 3278670.9850000027
+      },
+      "Reinforcement": {
+        "quantity": 32.89030429444444,
+        "amount": 3124578.9079722217
+      },
+      "Masonry Works": {
+        "quantity": 1084.7497499999997,
+        "amount": 4436578.516302005
+      },
+      "Finishes": {
+        "quantity": 3946.62163,
+        "amount": 2010876.0579999997
+      },
+      "Joinery": {
+        "quantity": 138.9255,
+        "amount": 477782.3999999999
+      },
+      "Metal Works": {
+        "quantity": 44.848000000000006,
+        "amount": 0
+      },
+      "Plumbing & Sanitary": {
+        "quantity": 13,
+        "amount": 3705000
+      },
+      "Electrical": {
+        "quantity": 1635,
+        "amount": 482900
+      }
+    }
+  }
+}

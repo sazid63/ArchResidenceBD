@@ -40,8 +40,8 @@ export const FLOORPLAN_PRESETS: FloorplanPreset[] = [
     descriptionBn: "বাংলাদেশের সর্বাধিক জনপ্রিয় দ্বৈত ফ্ল্যাট বিন্যাস। সামনে ও পেছনে ২টি ফ্ল্যাট এবং মাঝে সেন্ট্রাল লিফট-সিঁড়ি লবি।",
     rooms: [
       // Unit A (Front Flat)
-      { id: "uA_master", nameEn: "Unit A Master Bed", nameBn: "ইউনিট এ মাস্টার বেড", kind: "bedroom", boundsRel: [0.05, 0.55, 0.45, 0.95], doorSide: "rear", windowSide: "front" },
-      { id: "uA_bed2", nameEn: "Unit A Bed 2", nameBn: "ইউনিট এ বেড ২", kind: "bedroom", boundsRel: [0.05, 0.25, 0.40, 0.55], doorSide: "right", windowSide: "left" },
+      { id: "uA_master", nameEn: "Unit A Master Bed", nameBn: "ইউনিট এ মাস্টার বেড", kind: "bedroom", boundsRel: [0.05, 0.56, 0.45, 0.95], doorSide: "rear", windowSide: "front" },
+      { id: "uA_bed2", nameEn: "Unit A Bed 2", nameBn: "ইউনিট এ বেড ২", kind: "bedroom", boundsRel: [0.05, 0.35, 0.40, 0.56], doorSide: "right", windowSide: "left" },
       { id: "uA_living", nameEn: "Unit A Drawing & Dining", nameBn: "ইউনিট এ ড্রয়িং-ডাইনিং", kind: "living", boundsRel: [0.45, 0.50, 0.80, 0.95], doorSide: "left", windowSide: "front" },
       { id: "uA_kitchen", nameEn: "Unit A Kitchen", nameBn: "ইউনিট এ রান্নাঘর", kind: "kitchen", boundsRel: [0.80, 0.70, 0.95, 0.95], doorSide: "left", windowSide: "right" },
       { id: "uA_bath1", nameEn: "Unit A Master Bath", nameBn: "ইউনিট এ মাস্টার বাথ", kind: "bath", boundsRel: [0.45, 0.35, 0.60, 0.50], doorSide: "rear", windowSide: "left" },
@@ -71,10 +71,10 @@ export const FLOORPLAN_PRESETS: FloorplanPreset[] = [
       { id: "lux_bed3", nameEn: "Bedroom 3", nameBn: "বেডরুম ৩", kind: "bedroom", boundsRel: [0.05, 0.15, 0.35, 0.45], doorSide: "front", windowSide: "rear" },
       { id: "lux_guest", nameEn: "Guest Bedroom", nameBn: "গেস্ট বেডরুম", kind: "bedroom", boundsRel: [0.65, 0.15, 0.95, 0.45], doorSide: "front", windowSide: "rear" },
       { id: "lux_living", nameEn: "Family Living Hall", nameBn: "ফ্যামিলি লিভিং হল", kind: "living", boundsRel: [0.25, 0.45, 0.75, 0.60], doorSide: "rear", windowSide: "left" },
-      { id: "lux_dining", nameEn: "Formal Dining Hall", nameBn: "ফরমাল ডাইনিং", kind: "dining", boundsRel: [0.35, 0.15, 0.65, 0.40], doorSide: "front", windowSide: "right" },
+      { id: "lux_dining", nameEn: "Formal Dining Hall", nameBn: "ফরমাল ডাইনিং", kind: "dining", boundsRel: [0.35, 0.15, 0.65, 0.33], doorSide: "front", windowSide: "right" },
       { id: "lux_kitchen", nameEn: "Chef Kitchen", nameBn: "রান্নাঘর", kind: "kitchen", boundsRel: [0.75, 0.45, 0.95, 0.60], doorSide: "left", windowSide: "right" },
       { id: "lux_bath1", nameEn: "Master Bath & Closet", nameBn: "মাস্টার বাথ ও ড্রেসিং", kind: "bath", boundsRel: [0.45, 0.75, 0.55, 0.95], doorSide: "left", windowSide: "front" },
-      { id: "lux_bath2", nameEn: "Common Bath", nameBn: "সাধারণ বাথরুম", kind: "bath", boundsRel: [0.35, 0.40, 0.45, 0.50], doorSide: "rear", windowSide: "left" },
+      { id: "lux_bath2", nameEn: "Common Bath", nameBn: "সাধারণ বাথরুম", kind: "bath", boundsRel: [0.35, 0.33, 0.50, 0.45], doorSide: "rear", windowSide: "left" },
     ],
   },
   {
@@ -154,7 +154,7 @@ export const FLOORPLAN_PRESETS: FloorplanPreset[] = [
     descriptionEn: "Main road frontage layout: Open-plan commercial display showroom on lower floors, luxury apartments above.",
     descriptionBn: "প্রধান সড়ক সংলগ্ন মিক্সড প্ল্যান: নিচের তলায় শোরুম/ব্যাংক এবং ওপরের তলাগুলোতে ৩ বেডরুমের ফ্যামিলি ফ্ল্যাট।",
     rooms: [
-      { id: "comm_hall", nameEn: "Open Display Showroom Hall", nameBn: "ওপেন ডিসপ্লে শোরুম হল", kind: "living", boundsRel: [0.05, 0.10, 0.95, 1.00], doorSide: "front", windowSide: "front" },
+      { id: "comm_hall", nameEn: "Open Display Showroom Hall", nameBn: "ওপেন ডিসপ্লে শোরুম হল", kind: "living", boundsRel: [0.05, 0.10, 0.95, 1.00], pointsRel: [[0.05, 0.10], [0.70, 0.10], [0.70, 0.40], [0.95, 0.40], [0.95, 1.0], [0.05, 1.0]], doorSide: "front", windowSide: "front" },
       { id: "comm_stair", nameEn: "Commercial Fire Escape Stair", nameBn: "কমার্শিয়াল সিঁড়ি ও লিফট", kind: "stair", boundsRel: [0.70, 0.10, 0.95, 0.40], doorSide: "left", windowSide: "right" },
     ],
   },
@@ -237,3 +237,49 @@ export const FLOORPLAN_PRESETS: FloorplanPreset[] = [
     ],
   },
 ];
+
+/**
+ * Presets leave a ~5 % margin between rooms and the facade (and 0.95 against the far side). The
+ * generator builds a full-span exterior envelope, so a room that stops 0.5 m short of it gets no
+ * exterior wall of its own (its windows were dropped as "interior") and a dead strip appears
+ * behind the facade. Coordinates within `tol` of 0 or 1 are snapped onto the envelope.
+ */
+export function snapRoomsToEnvelope(rooms: RoomPartition[], tol = 0.06): RoomPartition[] {
+  const snap = (v: number) => (v <= tol ? 0 : v >= 1 - tol ? 1 : v);
+  return rooms.map((r) => ({
+    ...r,
+    boundsRel: r.boundsRel.map(snap) as RoomPartition["boundsRel"],
+    ...(r.pointsRel ? { pointsRel: r.pointsRel.map(([x, y]) => [snap(x), snap(y)] as [number, number]) } : {}),
+  }));
+}
+
+const GROW_KINDS = new Set(["bedroom", "living", "kitchen", "dining"]);
+
+/**
+ * A habitable room that stops short of the facade with nothing in between (an unassigned strip
+ * no deeper than `maxStrip` of the plan) claims that strip, so it can have an exterior wall and
+ * a window. Only the room's `windowSide` edge is grown, and only rectangular rooms. Genuine
+ * circulation (strips that another room touches) is left alone.
+ */
+export function growRoomsToEnvelope(rooms: RoomPartition[], maxStrip = 0.25): RoomPartition[] {
+  const out = rooms.map((r) => ({ ...r, boundsRel: [...r.boundsRel] as RoomPartition["boundsRel"] }));
+  const overlaps = (a: [number, number, number, number], b: [number, number, number, number]) =>
+    a[0] < b[2] - 1e-6 && b[0] < a[2] - 1e-6 && a[1] < b[3] - 1e-6 && b[1] < a[3] - 1e-6;
+  for (const r of out) {
+    if (!GROW_KINDS.has(r.kind) || !r.windowSide || r.pointsRel) continue;
+    const [x1, y1, x2, y2] = r.boundsRel;
+    let strip: [number, number, number, number] | null = null;
+    let apply: (() => void) | null = null;
+    if (r.windowSide === "front" && y2 < 1 && 1 - y2 <= maxStrip) { strip = [x1, y2, x2, 1]; apply = () => (r.boundsRel[3] = 1); }
+    if (r.windowSide === "rear" && y1 > 0 && y1 <= maxStrip) { strip = [x1, 0, x2, y1]; apply = () => (r.boundsRel[1] = 0); }
+    if (r.windowSide === "left" && x1 > 0 && x1 <= maxStrip) { strip = [0, y1, x1, y2]; apply = () => (r.boundsRel[0] = 0); }
+    if (r.windowSide === "right" && x2 < 1 && 1 - x2 <= maxStrip) { strip = [x2, y1, 1, y2]; apply = () => (r.boundsRel[2] = 1); }
+    if (strip && apply && !out.some((o) => o !== r && overlaps(strip!, o.boundsRel))) apply();
+  }
+  return out;
+}
+
+/** Snap near-edge bounds onto the envelope, then let windowed rooms claim empty facade strips. */
+export function prepareRooms(rooms: RoomPartition[]): RoomPartition[] {
+  return growRoomsToEnvelope(snapRoomsToEnvelope(rooms));
+}

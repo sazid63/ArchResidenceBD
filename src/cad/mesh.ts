@@ -25,6 +25,8 @@ export interface MeshObject {
   positions: number[];
   normals: number[];
   indices: number[];
+  /** Set when this solid is one piece of an element carved into disjoint boxes. */
+  parentId?: string;
 }
 
 export interface MeshDocument {

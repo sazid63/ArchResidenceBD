@@ -2,6 +2,11 @@ import React, { Component, ErrorInfo, ReactNode } from "react";
 
 interface Props {
   children: ReactNode;
+  /** When this changes (e.g. the user navigates to another screen) the error state is cleared. */
+  resetKey?: string;
+  /** Optional escape hatch shown next to Reload, e.g. "Back to project". */
+  onRecover?: () => void;
+  recoverLabel?: string;
 }
 
 interface State {
@@ -21,7 +26,15 @@ export class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error, errorInfo: null };
   }
 
+  public componentDidUpdate(prev: Props) {
+    if (this.state.hasError && prev.resetKey !== this.props.resetKey) {
+      this.setState({ hasError: false, error: null, errorInfo: null });
+    }
+  }
+
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // eslint-disable-next-line no-console
+    console.error("[ErrorBoundary]", error, errorInfo?.componentStack);
     this.setState({
       error,
       errorInfo,
@@ -75,7 +88,7 @@ export class ErrorBoundary extends Component<Props, State> {
               Something went wrong
             </h1>
             <p style={{ marginBottom: "32px", opacity: 0.8, lineHeight: "1.6" }}>
-              We're sorry, but something unexpected happened. The error has been logged and our team has been notified.
+              This screen hit an unexpected error. Your project is saved on this device and was not changed. You can go back, or reload the page. Nothing is sent anywhere automatically: use "Copy Debug Info" if you want to report it.
             </p>
 
             {this.state.error && (
@@ -99,6 +112,15 @@ export class ErrorBoundary extends Component<Props, State> {
             )}
 
             <div className="row" style={{ gap: "12px", justifyContent: "center", marginBottom: "24px" }}>
+              {this.props.onRecover && (
+                <button
+                  type="button"
+                  onClick={() => { this.props.onRecover!(); this.setState({ hasError: false, error: null, errorInfo: null }); }}
+                  style={{ padding: "12px 24px", background: "var(--primary)", color: "var(--on-primary)", border: "none", borderRadius: "6px", cursor: "pointer", fontWeight: 500 }}
+                >
+                  {this.props.recoverLabel ?? "Go back"}
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => window.location.reload()}
@@ -132,8 +154,8 @@ export class ErrorBoundary extends Component<Props, State> {
             </div>
 
             <div style={{ fontSize: "12px", opacity: 0.6 }}>
-              <p>If the problem persists, please contact support with the debug information.</p>
-              <p>Error ID: {Date.now()}</p>
+              <p>If the problem persists, send the debug information to the project maintainers.</p>
+              
             </div>
           </div>
         </div>

@@ -6,12 +6,12 @@
 import { writeFileSync, mkdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { generateBuildingMesh } from "../src/cad/parametricBuildingGenerator.js";
-import { runComplianceCheck, buildComplianceContext } from "../src/cad/codeCompliance.js";
-import { analyzeBeam, analyzeColumn, designFooting, seismicAnalysis, CONCRETE_GRADES, STEEL_GRADES, DEFAULT_CONCRETE, DEFAULT_STEEL_EXPORT } from "../src/cad/structuralEngine.js";
-import { getColorForObject } from "../src/cad/viewer.js";
-import type { MeshDocument, MeshObject } from "../src/cad/mesh.js";
-import type { BuildingProject } from "../src/engine/projectState.js";
+import { generateBuildingMesh } from "../../src/cad/parametricBuildingGenerator.js";
+import { runComplianceCheck, buildComplianceContext } from "../../src/cad/codeCompliance.js";
+import { analyzeBeam, analyzeColumn, designFooting, seismicAnalysis, CONCRETE_GRADES, STEEL_GRADES, DEFAULT_CONCRETE, DEFAULT_STEEL_EXPORT } from "../../src/cad/structuralEngine.js";
+import { getColorForObject } from "../../src/cad/viewer.js";
+import type { MeshDocument, MeshObject } from "../../src/cad/mesh.js";
+import type { BuildingProject } from "../../src/engine/projectState.js";
 
 const OUT = join(dirname(fileURLToPath(import.meta.url)), "audit-out");
 mkdirSync(OUT, { recursive: true });

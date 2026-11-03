@@ -8,6 +8,7 @@
  */
 
 import type { MeshDocument, MeshObject } from "./mesh";
+import { exposedFaceAreas } from "./quantityTakeoff";
 import { generateBuildingMesh, type BuildingCustomization } from "./parametricBuildingGenerator";
 import type { BuildingProject } from "../engine/projectState";
 
@@ -138,34 +139,22 @@ export function generateBOQ(
   const items: BOQItem[] = [];
   const totalsByCategory: Record<string, { quantity: number; amount: number }> = {};
 
-  // Aggregate quantities by kind
-  const quantities: Record<string, { volumeM3: number; areaM2: number; count: number; lengths: number[] }> = {};
+  // ---- Measured quantities (v2.4.3) ---------------------------------------------------------
+  // Solids are interior-disjoint, so volumes are summed directly and exposed face areas give
+  // plaster / floor areas without counting hidden contact faces. Units follow the rate table.
+  const objs = mesh.objects;
+  const faces = exposedFaceAreas(objs);
+  const m3 = (o: MeshObject) => o.volumeMm3 / 1e9;
+  const vol = (pred: (o: MeshObject) => boolean) => objs.filter(pred).reduce((t, o) => t + m3(o), 0);
+  const kindIs = (...k: string[]) => (o: MeshObject) => k.includes(o.kind);
+  const dims = (o: MeshObject) => [o.bboxMaxMm[0] - o.bboxMinMm[0], o.bboxMaxMm[1] - o.bboxMinMm[1], o.bboxMaxMm[2] - o.bboxMinMm[2]];
+  const round3 = (n: number) => Math.round(n * 1000) / 1000;
 
-  for (const obj of mesh.objects) {
-    const kind = obj.kind;
-    if (!quantities[kind]) {
-      quantities[kind] = { volumeM3: 0, areaM2: 0, count: 0, lengths: [] };
-    }
-    const q = quantities[kind];
-    q.volumeM3 += obj.volumeMm3 / 1e9; // mm³ → m³
-    const dx = obj.bboxMaxMm[0] - obj.bboxMinMm[0];
-    const dy = obj.bboxMaxMm[1] - obj.bboxMinMm[1];
-    const dz = obj.bboxMaxMm[2] - obj.bboxMinMm[2];
-    q.areaM2 += (2 * (dx * dy + dx * dz + dy * dz)) / 1e6; // mm² → m²
-    q.count += 1;
-    // Lengths for linear elements (beams, columns)
-    const maxDim = Math.max(dx, dy, dz);
-    if (kind === "beam" || kind === "column") {
-      q.lengths.push(maxDim / 1000); // mm → m
-    }
-  }
-
-  // Map to BOQ items
   const categoryOrder: Record<string, number> = {
     "Excavation & Site Works": 1,
     "Concrete Works": 2,
-    "Masonry Works": 3,
-    "Reinforcement": 4,
+    "Reinforcement": 3,
+    "Masonry Works": 4,
     "Joinery": 5,
     "Finishes": 6,
     "Plumbing & Sanitary": 7,
@@ -173,70 +162,160 @@ export function generateBOQ(
     "Metal Works": 9,
     "Site Works": 10,
   };
-
   let itemNo = 0;
-  const sortedKinds = Object.keys(quantities).sort((a, b) => {
-    const catA = KIND_TO_BOQ[a]?.category || "Other";
-    const catB = KIND_TO_BOQ[b]?.category || "Other";
-    return (categoryOrder[catA] ?? 99) - (categoryOrder[catB] ?? 99);
-  });
-
-  for (const kind of sortedKinds) {
-    const q = quantities[kind];
-    const mapping = KIND_TO_BOQ[kind];
-    if (!mapping) continue;
-
-    const rate = rates[mapping.rateKey];
-    if (!rate) continue;
-
+  const addItem = (
+    category: string, description: string, rateKey: string | null, quantity: number,
+    meshKinds: string[], assumptions: string[], opts?: { effectiveRate?: number; unit?: string },
+  ) => {
+    if (!(quantity > 0)) return;
+    const rate = rateKey ? rates[rateKey] : undefined;
+    const rateBDT = opts?.effectiveRate ?? rate?.rateBDT ?? 0;
+    const unit = opts?.unit ?? rate?.unit ?? "item";
+    const amount = quantity * rateBDT;
     itemNo++;
-    const quantity = q.volumeM3; // default to volume
-    const description = `${mapping.category === "Concrete Works" ? "RCC" :
-      mapping.category === "Masonry Works" ? "Masonry" :
-      mapping.category === "Joinery" ? "Joinery" :
-      mapping.category === "Finishes" ? "Finishes" :
-      mapping.category === "Metal Works" ? "Metal" : "Work"}: ${rate.description}`;
-
-    const amount = quantity * rate.rateBDT;
-    const boqItem: BOQItem = {
-      itemNo: `${itemNo.toString().padStart(3, "0")}`,
-      description: `${kind.charAt(0).toUpperCase() + kind.slice(1)} — ${rate.description}`,
-      unit: rate.unit,
-      quantity: Math.round(quantity * 1000) / 1000,
-      rateBDT: rate.rateBDT,
+    items.push({
+      itemNo: String(itemNo).padStart(3, "0"),
+      description,
+      unit,
+      quantity: round3(quantity),
+      rateBDT: Math.round(rateBDT),
       amountBDT: Math.round(amount),
-      category: mapping.category,
-      meshKinds: mapping.meshKinds,
-      assumptions: [
-        `Volume: ${Math.round(quantity * 1000) / 1000} ${rate.unit}`,
-        `Objects: ${q.count}`,
-      ],
-    };
-    items.push(boqItem);
+      category,
+      meshKinds,
+      assumptions: rateBDT === 0 ? ["UNPRICED: no rate in the rate table; quantity only", ...assumptions] : assumptions,
+    });
+    (totalsByCategory[category] ??= { quantity: 0, amount: 0 });
+    totalsByCategory[category].quantity += quantity;
+    totalsByCategory[category].amount += amount;
+  };
 
-    if (!totalsByCategory[mapping.category]) {
-      totalsByCategory[mapping.category] = { quantity: 0, amount: 0 };
+  // Frame extents (outer faces of the ground-storey columns) for exterior-face detection.
+  const frameCols = objs.filter((o) => o.kind === "column" && o.phase === "ground_floor" && o.bboxMinMm[2] >= 0);
+  const fMinX = Math.min(...frameCols.map((o) => o.bboxMinMm[0]));
+  const fMaxX = Math.max(...frameCols.map((o) => o.bboxMaxMm[0]));
+  const fMinY = Math.min(...frameCols.map((o) => o.bboxMinMm[1]));
+  const fMaxY = Math.max(...frameCols.map((o) => o.bboxMaxMm[1]));
+  const frameAreaM2 = frameCols.length ? ((fMaxX - fMinX) * (fMaxY - fMinY)) / 1e6 : (project.plotSqm || 200) * 0.7;
+
+  // 1. Excavation: underground tanks only (the footing rate already includes its excavation).
+  const ugTanks = objs.filter((o) => o.kind === "tank" && o.bboxMaxMm[2] <= 0);
+  const excavation = ugTanks.reduce((t, o) => { const d = dims(o); return t + ((d[0] + 1200) * (d[1] + 1200) * (o.bboxMaxMm[2] + 600 - o.bboxMinMm[2] + 600)) / 1e9; }, 0);
+  addItem("Excavation & Site Works", "Excavation for underground tanks (600 mm working space each side)", "excavation", excavation, ["tank"],
+    ["Footing excavation is included in the footing rate", "Backfill and dewatering not measured"]);
+
+  // 2. Concrete (rates include formwork and placement)
+  const footingVol = vol(kindIs("footing"));
+  addItem("Concrete Works", "RCC footings M25 incl. formwork, excavation", "footing", footingVol, ["footing"], [`${objs.filter(kindIs("footing")).length} footing pads`]);
+  const frameVol = vol(kindIs("column", "pier", "beam", "lintel"));
+  addItem("Concrete Works", "RCC columns, beams and lintels M25 incl. formwork", "columns-and-beams", frameVol, ["column", "pier", "beam", "lintel"],
+    ["Disjoint solids: no double count at column/beam/wall junctions", "Window sills measured with lintels"]);
+  const slabVol = vol(kindIs("slab", "balcony", "canopy"));
+  addItem("Concrete Works", "RCC slabs, balconies, canopy and entry steps M25 incl. formwork", "ready-mix-concrete-m25", slabVol, ["slab", "balcony", "canopy"], []);
+  addItem("Concrete Works", "RCC dog-legged staircases M25 incl. formwork", "staircase-rcc", vol(kindIs("stair")), ["stair"],
+    ["Stepped solid blocks (riser + 150 mm waist) overstate a true waist-slab stair by roughly 10-20 %"]);
+  const shell = (o: MeshObject, t: number) => { const d = dims(o); return (2 * (d[0] * d[1] + d[0] * d[2] + d[1] * d[2]) * t) / 1e9; };
+  const tankShell = objs.filter(kindIs("tank")).reduce((tot, o) => tot + shell(o, o.bboxMaxMm[2] <= 0 ? 200 : 150), 0);
+  addItem("Concrete Works", "RCC tank shells M25 (walls, base and cover slab)", "ready-mix-concrete-m25", tankShell, ["tank"],
+    ["Shell = envelope surface x 200 mm (underground) / 150 mm (overhead); tanks are modelled as solid boxes, so their volume is NOT concrete"]);
+
+  // 3. Reinforcement: screening kg/m3 factors (ASSUMED typical residential values, not a bar schedule)
+  const KG_PER_M3 = { footing: 80, column: 200, beam: 150, slab: 90, stair: 110, tank: 120 };
+  const steelKg =
+    footingVol * KG_PER_M3.footing +
+    vol(kindIs("column", "pier")) * KG_PER_M3.column +
+    vol(kindIs("beam", "lintel")) * KG_PER_M3.beam +
+    vol(kindIs("slab", "balcony", "canopy")) * KG_PER_M3.slab +
+    vol(kindIs("stair")) * KG_PER_M3.stair +
+    tankShell * KG_PER_M3.tank;
+  addItem("Reinforcement", "TMT reinforcement Fe415, all diameters (screening estimate)", "steel-tmt-16mm", steelKg / 1000, ["footing", "column", "beam", "slab", "stair", "tank"],
+    [`ASSUMED kg/m3: footing ${KG_PER_M3.footing}, column ${KG_PER_M3.column}, beam/lintel ${KG_PER_M3.beam}, slab ${KG_PER_M3.slab}, stair ${KG_PER_M3.stair}, tank shell ${KG_PER_M3.tank}`, "Replace with the bar schedule when available"],
+    { unit: "ton" });
+
+  // 4. Masonry: net face area (volume / thickness); rate scaled by thickness / reference thickness
+  const masonry = (pred: (o: MeshObject) => boolean, rateKey: string, refMm: number) => {
+    let area = 0, amount = 0;
+    for (const o of objs.filter(pred)) {
+      const d = dims(o);
+      const a = (Math.max(d[0], d[1]) * d[2]) / 1e6; // face area = length x height
+      const t = m3(o) / a * 1000; // mm; pieces may be L-shaped after column carving
+      area += a;
+      amount += a * (rates[rateKey]?.rateBDT ?? 0) * (t / refMm);
     }
-    totalsByCategory[mapping.category].quantity += quantity;
-    totalsByCategory[mapping.category].amount += amount;
+    return { area, eff: area ? amount / area : 0, refMm };
+  };
+  const ext = masonry(kindIs("wall", "parapet"), "brick-wall-4x", 136);
+  addItem("Masonry Works", "Brickwork, external walls, parapets and plinth course (net of openings)", "brick-wall-4x", ext.area, ["wall", "parapet"],
+    ["Net area = volume / thickness (openings and column/beam wraps already removed)", `Table rate is for ${ext.refMm} mm; scaled by actual thickness (250 mm walls ~ x1.8)`], { effectiveRate: ext.eff });
+  const part = masonry(kindIs("partition"), "partition-wall", 102.5);
+  addItem("Masonry Works", "Brick partition walls (net of openings)", "partition-wall", part.area, ["partition"],
+    ["Net area = volume / thickness", `Table rate is for ${part.refMm} mm; scaled by actual thickness`], { effectiveRate: part.eff });
+
+  // 5. Finishes from exposed faces
+  const wallObjs = objs.filter(kindIs("wall", "parapet", "partition"));
+  let plasterMm2 = 0, extMm2 = 0;
+  for (const o of wallObjs) {
+    const f = faces.get(o.id)!;
+    plasterMm2 += f.px + f.nx + f.py + f.ny;
+    if (Math.abs(o.bboxMinMm[0] - fMinX) < 5) extMm2 += f.nx;
+    if (Math.abs(o.bboxMaxMm[0] - fMaxX) < 5) extMm2 += f.px;
+    if (Math.abs(o.bboxMinMm[1] - fMinY) < 5) extMm2 += f.ny;
+    if (Math.abs(o.bboxMaxMm[1] - fMaxY) < 5) extMm2 += f.py;
   }
+  addItem("Finishes", "Cement plaster 12 mm, all exposed masonry faces", "wall-plaster", plasterMm2 / 1e6, ["wall", "partition", "parapet"],
+    ["Exposed vertical faces only (faces touching columns, beams, slabs or other walls are excluded)", "Plaster on RCC faces and soffits not measured"]);
+  addItem("Finishes", "External lime wash 2 coats, exterior wall faces", "wall-lime-wash", extMm2 / 1e6, ["wall"], ["Exterior faces on the frame line"]);
+  const floorMm2 = objs.filter((o) => /^(slab_f\d+|balcony_front_f\d+)/.test(o.id)).reduce((t, o) => t + faces.get(o.id)!.pz, 0);
+  const floorM2 = floorMm2 / 1e6 + frameAreaM2;
+  addItem("Finishes", "Cement-sand screed 50 mm under floor finishes", "floor-screed", floorM2, ["slab"],
+    ["Upper floors + balconies: exposed slab top (excludes wall footprints); ground floor: frame footprint"]);
+  addItem("Finishes", "Ceramic floor tiles 300x300", "tile-flooring-ceramic", floorM2, ["slab"], ["Same area as screed; wet-area vitrified premium not separated"]);
+  const roofMm2 = objs.filter((o) => /^(roof_slab|penthouse_slab)(~\d+)?$/.test(o.id)).reduce((t, o) => t + faces.get(o.id)!.pz, 0);
+  addItem("Finishes", "Roof screed / topping (waterproofing membrane not in rate table)", "floor-screed", roofMm2 / 1e6, ["slab"], ["Waterproofing membrane unpriced: add a rate"]);
+
+  // 6. Joinery: opening areas from assemblies (groups of door / window / louver parts)
+  const assembly = (id: string) => id.replace(/~\d+$/, "").replace(/_(leaf|pane_\d+|blade_\d+|frm_[a-z]+)$/, "");
+  const groups = new Map<string, MeshObject[]>();
+  for (const o of objs.filter(kindIs("door", "window", "louver", "window_frame", "door_frame"))) (groups.get(assembly(o.id)) ?? groups.set(assembly(o.id), []).get(assembly(o.id))!).push(o);
+  let mainArea = 0, mainN = 0, doorArea = 0, doorN = 0, winArea = 0, winN = 0, louverArea = 0, louverN = 0;
+  for (const [id, parts] of groups) {
+    const minX = Math.min(...parts.map((p) => p.bboxMinMm[0])), maxX = Math.max(...parts.map((p) => p.bboxMaxMm[0]));
+    const minY = Math.min(...parts.map((p) => p.bboxMinMm[1])), maxY = Math.max(...parts.map((p) => p.bboxMaxMm[1]));
+    const minZ = Math.min(...parts.map((p) => p.bboxMinMm[2])), maxZ = Math.max(...parts.map((p) => p.bboxMaxMm[2]));
+    const area = (Math.max(maxX - minX, maxY - minY) * (maxZ - minZ)) / 1e6;
+    if (!parts.some((p) => p.kind === "door" || p.kind === "window" || p.kind === "louver")) continue;
+    const isDoor = parts.some((p) => p.kind === "door");
+    if (isDoor) { if (/main/i.test(id)) { mainArea += area; mainN++; } else { doorArea += area; doorN++; } }
+    else if (parts.some((p) => p.kind === "louver")) { louverArea += area; louverN++; }
+    else { winArea += area; winN++; }
+  }
+  addItem("Joinery", "Main entrance door, hardwood frame + shutter", "door-wooden-main", mainArea, ["door", "door_frame"], [`${mainN} door(s), clear opening area`]);
+  addItem("Joinery", "Interior doors, flush shutter, timber frame", "door-wooden-interior", doorArea, ["door", "door_frame"], [`${doorN} door(s), clear opening area`]);
+  addItem("Joinery", "Windows and balcony doors (glazed, sliding)", "window-wooden-800x1500", winArea, ["window", "window_frame"], [`${winN} window(s)/glazed door(s), opening area`]);
+  addItem("Joinery", "Louvre ventilators (bath)", "window-louver", louverArea, ["louver", "window_frame"], [`${louverN} ventilator(s), opening area`]);
+
+  // 7. Metal works: balcony railings measured in metres; no rate in the table -> unpriced
+  const railLen = objs.filter(kindIs("railing")).reduce((t, o) => { const d = dims(o); return t + Math.max(d[0], d[1]) / 1000; }, 0);
+  addItem("Metal Works", "Balcony glass / steel railing 900 mm (supply + fix)", null, railLen, ["railing"], ["Add a per-metre rate to the rate table to price this line"], { unit: "m" });
+
+  // Counts used by the services below
+  const bathCount = new Set(objs.filter((o) => /_bath_shaft(~\d+)?$/.test(o.id)).map((o) => o.id.replace(/~\d+$/, ""))).size;
 
   // Add estimated services (not directly measurable in mesh)
-  const floorArea = (project.plotSqm || 200) * 0.7;
+  const floorArea = frameAreaM2; // built area per floor from the model frame
   const servicesItems: BOQItem[] = [];
   if (project.stories >= 1) {
     // Sanitary
     itemNo++;
     servicesItems.push({
       itemNo: `${itemNo.toString().padStart(3, "0")}`,
-      description: `Sanitary plumbing — ${project.stories} storey(s), ${Math.ceil(project.stories / 2)} bathrooms`,
+      description: `Sanitary plumbing, ${bathCount || Math.ceil(project.stories / 2)} bathroom(s)`,
       unit: "kp",
-      quantity: Math.ceil(project.stories / 2),
+      quantity: bathCount || Math.ceil(project.stories / 2),
       rateBDT: DHAKA_RATES_2025["plumbing-sanitary"].rateBDT,
-      amountBDT: Math.ceil(project.stories / 2) * DHAKA_RATES_2025["plumbing-sanitary"].rateBDT,
+      amountBDT: (bathCount || Math.ceil(project.stories / 2)) * DHAKA_RATES_2025["plumbing-sanitary"].rateBDT,
       category: "Plumbing & Sanitary",
       meshKinds: [],
-      assumptions: ["Estimated 1 bathroom per 2 storeys"],
+      assumptions: [bathCount ? "Bathrooms counted from plumbing risers in the 3D model" : "No bathrooms in the model: estimated 1 per 2 storeys"],
     });
 
     // ── Electrical BOQ (proper method per PWD SOR / IEC 60364) ──

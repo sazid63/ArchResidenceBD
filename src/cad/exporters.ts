@@ -188,6 +188,8 @@ const PROXY_OBJECT_TYPES: Record<string, string> = {
   balcony: "Balcony",
   canopy: "Canopy",
   door_frame: "DoorFrame",
+  window_frame: "WindowFrame",
+  hardware: "DoorHardware",
   excavation: "Excavation",
   glass: "GlassPanel",
   guard: "Guard",
@@ -402,6 +404,8 @@ const MACRO_KINDS = [
   "guard",
   "glass",
   "door_frame",
+  "window_frame",
+  "hardware",
 ];
 
 export function buildFreeCadMacro(doc: MeshDocument, meta: ExportMeta): string {

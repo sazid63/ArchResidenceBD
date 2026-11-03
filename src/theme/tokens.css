@@ -49,7 +49,7 @@
 
   /* Typography */
   --font-ui: "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system,
-    "Noto Sans Bengali", "Nirmala UI", sans-serif;
+    "Noto Sans Bengali", "Hind Siliguri", "Nirmala UI", "Kalpurush", "SolaimanLipi", "Siyam Rupali", "Vrinda", sans-serif;
   --fs-xs: 12px;
   --fs-sm: 13px;
   --fs-md: 14px;
@@ -158,4 +158,24 @@
   --shadow-sm: 0 0 0 1px #000000;
   --shadow-md: 0 0 0 2px #000000;
   --shadow-lg: 0 0 0 3px #000000;
+}
+
+/* Aliases for names that components use but the token set never defined (v2.4.4).
+   Before this, `var(--border)` (57 uses), `--surface-sunken`, `--tone-*` etc. resolved to nothing:
+   inputs and cards lost their borders and tinted backgrounds. They follow the active theme because
+   every theme overrides the base tokens on this same root element. */
+:root {
+  --border: var(--line);
+  --surface-sunken: var(--surface-3);
+  --surface-active: var(--primary-soft);
+  --color-surface: var(--surface);
+  --tone-sage: var(--sage-ink);
+  --tone-amber: var(--amber-ink);
+  --tone-brand: var(--primary);
+  --tone-blush: var(--primary-soft);
+  --muted: var(--ink-soft);
+  --ink-2: var(--ink-soft);
+  --text-primary: var(--ink);
+  --text-secondary: var(--ink-soft);
+  --shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.25);
 }

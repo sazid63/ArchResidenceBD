@@ -308,9 +308,13 @@
   gap: var(--s-1);
   flex-wrap: wrap;
   background: var(--surface-2);
-  border-radius: var(--r-pill);
-  padding: 2px;
-  padding-inline: 2px;
+  border-radius: var(--r-lg); /* a full pill turns into a blob once the tabs wrap */
+  padding: 4px;
+}
+@media (max-width: 900px) {
+  /* Many tabs: scroll sideways in one row instead of wrapping into a large block. */
+  .tabs { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+  .tabs .tab { flex: none; white-space: nowrap; }
 }
 .tab {
   padding: 7px 14px;

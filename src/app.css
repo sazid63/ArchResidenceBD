@@ -375,3 +375,110 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ------------------------------------------------------------------
+   v2.4.4 responsive shell, dialogs, touch targets
+   ------------------------------------------------------------------ */
+.app-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.app-body .app-main { flex: 1; min-height: 0; }
+.app-main:focus { outline: none; }
+.mobile-bar { display: none; }
+.sidebar-backdrop { display: none; }
+body.no-scroll { overflow: hidden; }
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(20, 16, 12, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--s-4);
+}
+.dialog {
+  width: min(440px, 100%);
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  padding: var(--s-6);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+.dialog-title { margin: 0 0 var(--s-2); font-size: 1.125rem; }
+.dialog-msg { margin: 0 0 var(--s-5); line-height: 1.5; color: var(--ink-2, inherit); }
+.dialog-actions { display: flex; gap: var(--s-3); justify-content: flex-end; flex-wrap: wrap; }
+.button--danger { background: #b3261e; color: #fff; border-color: #b3261e; }
+.button--danger:hover { background: #8c1d18; }
+
+@media (max-width: 900px) {
+  .app-shell { position: relative; }
+  .sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: min(86vw, 320px);
+    z-index: 1500;
+    transform: translateX(-105%);
+    transition: transform var(--dur, 0.2s) var(--ease, ease);
+    box-shadow: none;
+    overflow-y: auto;
+  }
+  .sidebar.open { transform: none; box-shadow: 8px 0 40px rgba(0, 0, 0, 0.3); }
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 1400;
+    background: rgba(20, 16, 12, 0.45);
+  }
+  .mobile-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    flex: none;
+    min-height: 52px;
+    padding: 6px var(--s-3);
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .mobile-bar-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--r-md);
+    border: 1px solid var(--line);
+    background: var(--surface-2, var(--surface));
+    color: inherit;
+    font-size: 1.25rem;
+    cursor: pointer;
+  }
+  .mobile-bar-title {
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .screen { padding: var(--s-4) var(--s-4) var(--s-8); gap: var(--s-4); }
+  .page-head { flex-direction: column; align-items: stretch; }
+  .page-head h1 { font-size: 1.5rem; line-height: 1.25; }
+}
+
+/* Touch devices: comfortable tap targets for the controls people hit most. */
+@media (pointer: coarse) {
+  .button, .nav-item, .nav-group-head, .nav-new, .chip, select, input:not([type="checkbox"]):not([type="radio"]) {
+    min-height: 44px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sidebar { transition: none; }
+}

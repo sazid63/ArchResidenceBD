@@ -3,6 +3,7 @@ import { useI18n, fmtNum } from "../i18n";
 import { Button, Card, PageHeader, Callout } from "../ui/kit";
 import { createNewProject, generateRandomBuildingProject, plotToSqm } from "../engine/projectState";
 import { getFloorPlansByUnits, getRandomFloorPlan, FloorPlanImage } from "../data/bangladeshFloorplans";
+import { getFloorplanImage } from "../data/floorplanImages";
 import { FloorplanPreview } from "../components/FloorplanPreview";
 
 interface Props {
@@ -26,10 +27,14 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
   const calculatedSqm = Math.round(plotToSqm(plotSize, plotUnit) * 100) / 100;
   const calculatedSqft = Math.round(calculatedSqm * 10.7639);
 
-  // Auto-select random floorplan when unitsPerFloor changes
+  // When the unit count changes, keep the user's plan if it still matches; otherwise default to the
+  // first catalogue plan for that unit count that has a real drawing (stable, not re-rolled).
   useEffect(() => {
-    const plan = getRandomFloorPlan(unitsPerFloor);
-    setSelectedFloorplan(plan);
+    setSelectedFloorplan((current) => {
+      const plans = getFloorPlansByUnits(unitsPerFloor);
+      if (current && plans.some((p) => p.id === current.id)) return current;
+      return plans.find((p) => getFloorplanImage(p.id)) ?? plans[0] ?? null;
+    });
   }, [unitsPerFloor]);
 
   const availableFloorplans = getFloorPlansByUnits(unitsPerFloor);
@@ -55,6 +60,7 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
       plotUnit,
       unitsPerFloor,
       address: location,
+      floorplanId: selectedFloorplan?.id,
     });
 
     onProjectCreated?.();
@@ -233,10 +239,10 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
                   <FloorplanPreview plan={selectedFloorplan} size={240} />
                   <div className="stack" style={{ flex: 1, minWidth: "200px" }}>
                     <h4 style={{ margin: 0, fontSize: "14px" }}>
-                      {selectedFloorplan?.titleBn || selectedFloorplan?.title || ""}
+                      {(lang === "bn" ? selectedFloorplan?.titleBn : selectedFloorplan?.title) || selectedFloorplan?.title || ""}
                     </h4>
                     <p style={{ margin: "4px 0", fontSize: "12px", color: "var(--muted)" }}>
-                      {selectedFloorplan?.descriptionBn || selectedFloorplan?.description || ""}
+                      {(lang === "bn" ? selectedFloorplan?.descriptionBn : selectedFloorplan?.description) || selectedFloorplan?.description || ""}
                     </p>
                     <div className="row" style={{ gap: "4px", flexWrap: "wrap", marginTop: "4px" }}>
                       {selectedFloorplan?.features?.slice(0, 5).map((f: string, i: number) => (
@@ -328,10 +334,10 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
                       >
                         <FloorplanPreview plan={plan} size={200} />
                         <h5 style={{ margin: "8px 0 4px", fontSize: "12px", textAlign: "center" }}>
-                          {lang === "bn" ? selectedFloorplan?.titleBn : plan.title}
+                          {(lang === "bn" ? plan.titleBn : plan.title) || plan.title}
                         </h5>
                         <p style={{ fontSize: "10px", color: "var(--muted)", textAlign: "center" }}>
-                          {selectedFloorplan?.plotSizeRange} · {selectedFloorplan?.features.slice(0, 2).join(", ")}
+                          {plan.plotSizeRange} · {plan.features.slice(0, 2).join(", ")}
                         </p>
                       </div>
                     ))}

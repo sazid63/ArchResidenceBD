@@ -7,9 +7,9 @@ import { deflateSync } from "node:zlib";
 import { writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { generateBuildingMesh } from "../src/cad/parametricBuildingGenerator.js";
-import { getColorForObject } from "../src/cad/viewer.js";
-import type { MeshDocument, MeshObject } from "../src/cad/mesh.js";
+import { generateBuildingMesh } from "../../src/cad/parametricBuildingGenerator.js";
+import { getColorForObject } from "../../src/cad/viewer.js";
+import type { MeshDocument, MeshObject } from "../../src/cad/mesh.js";
 
 const OUT = join(dirname(fileURLToPath(import.meta.url)), "planning");
 mkdirSync(OUT, { recursive: true });

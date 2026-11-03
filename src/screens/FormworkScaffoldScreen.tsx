@@ -57,29 +57,7 @@ export function FormworkScaffoldScreen() {
     
     loadData();
   }, [project]);
-
-  if (error) {
-    return (
-      <div className="screen">
-        <PageHeader title={t("formworkTitle")} subtitle={t("formworkSubtitle")} />
-        <Card>
-          <p className="muted">{error}</p>
-        </Card>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="screen">
-        <PageHeader title={t("formworkTitle")} subtitle={t("formworkSubtitle")} />
-        <div style={{ padding: "24px", textAlign: "center", opacity: 0.7 }}>
-          {lang === "bn" ? "ফর্মওয়ার্ক ও স্ক্যাফোল্ড গণনা হচ্ছে..." : "Calculating formwork & scaffold..."}
-        </div>
-      </div>
-    );
-  }
-
+  // Hooks must run on every render, so they live above the early returns below.
   const filteredFormworkItems = useMemo(() => 
     formwork?.items?.filter((item) => 
       materialFilter === "all" || item.material === materialFilter
@@ -122,6 +100,29 @@ export function FormworkScaffoldScreen() {
     const scaffoldCost = (scaffold?.totalScaffoldAreaM2 || 0) * 250;
     return formworkCost + scaffoldCost;
   }, [formwork?.byMaterial, scaffold?.totalScaffoldAreaM2]);
+
+
+  if (error) {
+    return (
+      <div className="screen">
+        <PageHeader title={t("formworkTitle")} subtitle={t("formworkSubtitle")} />
+        <Card>
+          <p className="muted">{error}</p>
+        </Card>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="screen">
+        <PageHeader title={t("formworkTitle")} subtitle={t("formworkSubtitle")} />
+        <div style={{ padding: "24px", textAlign: "center", opacity: 0.7 }}>
+          {lang === "bn" ? "ফর্মওয়ার্ক ও স্ক্যাফোল্ড গণনা হচ্ছে..." : "Calculating formwork & scaffold..."}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="screen">
@@ -421,7 +422,7 @@ export function FormworkScaffoldScreen() {
                 {lang === "bn" ? "ফর্মওয়ার্ক উপাদান খরচ:" : "Formwork material:"} <strong>৳{Object.entries(formwork?.byMaterial || {}).reduce((sum: number, [mat, totals]: [string, TypeTotals]) => sum + totals.shutteringM2 * (mat === "aluminum" ? 8500 : mat === "steel" ? 3500 : mat === "plywood" ? 1200 : 850), 0).toLocaleString()}</strong>
               </p>
               <p className="small muted" style={{ margin: "4px 0" }}>
-                {lang === "bn" ? "স্ক্যাফোল্ড ভাড়া (সprecated):" : "Scaffold hire (est):"} <strong>৳{((scaffold?.totalScaffoldAreaM2 || 0) * 250).toLocaleString()}</strong>
+                {lang === "bn" ? "স্ক্যাফোল্ড ভাড়া (আনুমানিক):" : "Scaffold hire (est):"} <strong>৳{((scaffold?.totalScaffoldAreaM2 || 0) * 250).toLocaleString()}</strong>
               </p>
               <p className="small muted" style={{ margin: "4px 0" }}>
                 {lang === "bn" ? "মোট অনুমানিত:" : "Total estimate:"} <strong>৳{(Object.entries(formwork?.byMaterial || {}).reduce((sum: number, [mat, totals]: [string, TypeTotals]) => sum + totals.shutteringM2 * (mat === "aluminum" ? 8500 : mat === "steel" ? 3500 : mat === "plywood" ? 1200 : 850), 0) + (scaffold?.totalScaffoldAreaM2 || 0) * 250).toLocaleString()}</strong>

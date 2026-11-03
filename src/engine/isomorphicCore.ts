@@ -1,3 +1,4 @@
+import { searchManual } from "../data/manualFaq";
 /**
  * Isomorphic Core Engine for ArchResidenceBD
  *
@@ -501,45 +502,7 @@ export const isomorphicCore = {
   },
 
   manualSearch(query: string) {
-    const q = (query || "").toLowerCase();
-    const articles = [
-      {
-        title: "BNBC 2020 Residential Building Guidelines",
-        section: "Building Regulations",
-        excerpt:
-          "BNBC 2020 establishes mandatory FAR tables, seismic zoning parameters (Dhaka: Z=0.20, Chittagong: Z=0.28, Sylhet: Z=0.36), and soil investigation standards for all RCC structures.",
-      },
-      {
-        title: "RAJUK Dhaka Mohanogor Imarat Nirman Bidhimala",
-        section: "Setbacks & FAR",
-        excerpt:
-          "For residential plots up to 3 Katha, minimum front setback is 1.5m, rear setback is 2.0m, and side setbacks must be at least 1.0m. Road width determines FAR multiplier.",
-      },
-      {
-        title: "PWD Bangladesh Schedule of Rates (SOR)",
-        section: "Cost Estimation & BOQ",
-        excerpt:
-          "PWD unit rates cover 72.5G high-strength rebar (per MT), 50kg OPC/PCC cement bags, Sylhet coarse sand (FM 2.5), local sand, 1st class brickwork, and daily mason/helper wage brackets.",
-      },
-      {
-        title: "NativeCAD FreeCAD Modeling Architecture",
-        section: "3D Parametric CAD",
-        excerpt:
-          "NativeCAD uses FreeCAD's OpenCASCADE parametric kernel. Every plan phase generates dedicated Python macros for foundation footings, column grids, tie beams, floor slabs, and rebar.",
-      },
-    ];
-
-    const matches = articles.filter(
-      (a) =>
-        a.title.toLowerCase().includes(q) ||
-        a.excerpt.toLowerCase().includes(q) ||
-        a.section.toLowerCase().includes(q),
-    );
-
-    return {
-      query,
-      matches: matches.length > 0 ? matches : articles.slice(0, 2),
-    };
+    return { query, answers: searchManual(query) };
   },
 
   importCandidates() {

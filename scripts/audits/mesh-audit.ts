@@ -29,12 +29,12 @@ import { mkdirSync, writeFileSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { generateBuildingMesh } from "../src/cad/parametricBuildingGenerator";
-import type { BuildingCustomization } from "../src/cad/parametricBuildingGenerator";
-import { FLOORPLAN_PRESETS } from "../src/data/floorplanPresets";
-import { getColorForObject } from "../src/cad/viewer";
-import type { MeshDocument, MeshObject } from "../src/cad/mesh";
-import type { BuildingProject, PhaseItem } from "../src/engine/projectState";
+import { generateBuildingMesh } from "../../src/cad/parametricBuildingGenerator";
+import type { BuildingCustomization } from "../../src/cad/parametricBuildingGenerator";
+import { FLOORPLAN_PRESETS } from "../../src/data/floorplanPresets";
+import { getColorForObject } from "../../src/cad/viewer";
+import type { MeshDocument, MeshObject } from "../../src/cad/mesh";
+import type { BuildingProject, PhaseItem } from "../../src/engine/projectState";
 
 // ---------------------------------------------------------------------------
 // Constants
