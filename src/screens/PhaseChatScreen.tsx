@@ -84,6 +84,13 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
     else startDesign();
   };
 
+  // Robust handler for "Start 3D Design" chip - works even with stale closures
+  const handleDesignChip = () => {
+    // Force refresh project from context before saving
+    refreshProject();
+    startDesign();
+  };
+
   const send = (text?: string) => {
     const message = (text ?? inputText).trim();
     if (!message) return;
@@ -136,7 +143,7 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
               </Button>
             ) : null}
             {allCompleted ? (
-              <Button variant="primary" onClick={startDesign}>
+              <Button variant="primary" onClick={handleDesignChip}>
                 {bn ? "৩D ডিজাইন ➔" : "Open 3D Design ➔"}
               </Button>
             ) : null}
@@ -225,7 +232,7 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
                 <Chip
                   key={i}
                   tone="sky"
-                  onClick={() => isDesignChip ? startDesign() : send(chip)}
+                  onClick={() => isDesignChip ? handleDesignChip() : send(chip)}
                 >
                   {chip}
                 </Chip>
