@@ -35,7 +35,7 @@ function numberFrom(text: string, pattern: RegExp): number | null {
   return null;
 }
 
-const APPROVALS = ["approve", "next", "proceed", "yes", "done", "অনুমোদন", "পরবর্তী", "ঠিক আছে", "হ্যাঁ"];
+const APPROVALS = ["approve", "next", "proceed", "yes", "done", "design", "start", "3d", "open", "অনুমোদন", "পরবর্তী", "ঠিক আছে", "হ্যাঁ"];
 
 function isApprovalText(text: string): boolean {
   const msg = text.toLowerCase();
