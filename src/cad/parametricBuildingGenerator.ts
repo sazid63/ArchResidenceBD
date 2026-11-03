@@ -45,6 +45,33 @@ import {
   DEFAULT_CONSTRUCTION_MGMT,
 } from "../types/customization";
 
+/** Simple in-memory mesh cache keyed by all project inputs. */
+const meshCache = new Map<string, MeshDocument>();
+
+function meshCacheKey(
+  project: BuildingProject,
+  phaseFilter?: string,
+  custom?: BuildingCustomization,
+): string {
+  const keyData = {
+    id: project.id,
+    name: project.name,
+    stories: project.stories,
+    plotSqm: project.plotSqm,
+    plotUnit: project.plotUnit,
+    unitsPerFloor: project.unitsPerFloor,
+    typicalPresetId: project.typicalPresetId,
+    customization: project.customization,
+    custom,
+    phaseFilter,
+  };
+  return JSON.stringify(keyData);
+}
+
+function clearMeshCache(): void {
+  meshCache.clear();
+}
+
 /**
  * Filter mesh objects by phase. Centralized phase filtering logic.
  * Returns all objects when phaseFilter is null, "final", or unrecognized.
@@ -995,6 +1022,13 @@ export function generateBuildingMesh(
   phaseFilter?: string, // e.g. "phase-foundation", "phase-ground-floor", "phase-floor-1", or "final"
   custom?: BuildingCustomization,
 ): MeshDocument {
+  // Check mesh cache first
+  const cacheKey = meshCacheKey(project, phaseFilter, custom);
+  const cached = meshCache.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
   const stories = Math.max(1, project.stories || 2);
   const plotSqm = project.plotSqm || 200; // e.g. 200 m2 (3 katha)
 
@@ -1905,12 +1939,17 @@ export function generateBuildingMesh(
   // Filter out any null entries (degenerate boxes from createBoxMesh)
   const cleanObjects = filtered.filter((o): o is MeshObject => o != null);
 
-  return {
+  const result: MeshDocument = {
     schemaVersion: "0.1.0",
     units: "mm",
     objects: cleanObjects,
     ...(notes.length > 0 ? { notes } : {}),
   };
+
+  // Store in cache
+  meshCache.set(cacheKey, result);
+
+  return result;
 }
 
 /** Split [a0,a1] at each cut interval [c0,c1] (sorted), yielding disjoint pieces. */
@@ -1965,3 +2004,6 @@ export {
   DEFAULT_VALUE_ENGINEERING,
   DEFAULT_CONSTRUCTION_MGMT,
 } from "../types/customization";
+
+// Export cache management function
+export { clearMeshCache };

@@ -5,6 +5,7 @@ import { getActiveProject, type BuildingProject } from "../engine/projectState";
 import { generateBuildingMesh } from "../cad/parametricBuildingGenerator";
 import type { MeshDocument, MeshObject } from "../cad/mesh";
 import { fmtNum } from "../i18n";
+import { Progressive } from "../components/Progressive";
 
 interface RoomDaylightData {
   roomId: string;
@@ -387,9 +388,13 @@ export function DaylightAnalysisScreen() {
         </div>
       )}
 
-      {/* Room Details */}
-      <div className="stack" style={{ gap: "12px" }}>
-        {filteredRooms.map((room) => (
+      {/* Room Details with Progressive Rendering */}
+      <Progressive
+        items={filteredRooms}
+        pageSize={50}
+        resetKey={selectedFloor}
+        showCount={true}
+        renderItem={(room) => (
           <Card
             key={room.roomId}
             className="stack"
@@ -441,8 +446,66 @@ export function DaylightAnalysisScreen() {
               </div>
             )}
           </Card>
-        ))}
-      </div>
+        )}
+      >
+        {({ items: visibleRooms }) => (
+          <div className="stack" style={{ gap: "12px" }}>
+            {visibleRooms.map((room) => (
+              <Card
+                key={room.roomId}
+                className="stack"
+                style={{
+                  border: room.meetsTarget
+                    ? "1px solid var(--tone-sage, #10b981)"
+                    : "1px solid var(--tone-amber, #f59e0b)",
+                }}
+              >
+                <div className="row-between">
+                  <div>
+                    <h4 style={{ margin: "0 0 4px 0" }}>{room.roomName}</h4>
+                    <span className="faint small font-mono">
+                      {room.floorAreaM2} m² · {room.windowAreaM2} m² windows
+                    </span>
+                  </div>
+                  <div className="row" style={{ gap: "8px" }}>
+                    <Badge tone={room.meetsTarget ? "sage" : "amber"}>
+                      {room.daylightFactor}% DF
+                    </Badge>
+                    <Badge tone="neutral">
+                      {Math.round(room.perforationRatio * 100)}% perf
+                    </Badge>
+                  </div>
+                </div>
+
+                {room.recommendations.length > 0 && (
+                  <div
+                    style={{
+                      marginTop: "8px",
+                      padding: "8px",
+                      background: room.meetsTarget
+                        ? "var(--surface-sunken)"
+                        : "var(--surface-2)",
+                      borderRadius: "var(--r-sm)",
+                      fontSize: "12px",
+                    }}
+                  >
+                    <strong style={{ color: room.meetsTarget ? "var(--tone-sage)" : "var(--tone-amber)" }}>
+                      {lang === "bn" ? "সুপারিশ:" : "Recommendations:"}
+                    </strong>
+                    <ul style={{ margin: "4px 0 0 0", paddingLeft: "16px" }}>
+                      {room.recommendations.map((rec, i) => (
+                        <li key={i} className="small muted">
+                          {rec}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </Card>
+            ))}
+          </div>
+        )}
+      </Progressive>
     </div>
   );
 }

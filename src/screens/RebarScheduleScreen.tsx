@@ -6,6 +6,7 @@ import { generateBuildingMesh } from "../cad/parametricBuildingGenerator";
 import { generateRebarDetails, type BarBendingSchedule, type RebarDetail } from "../cad/rebarDetailer";
 import type { MeshDocument, MeshObject } from "../cad/mesh";
 import { fmtNum } from "../i18n";
+import { Progressive } from "../components/Progressive";
 
 const STEEL_COST_BDT_PER_KG = 95; // ~95,000 BDT/ton for Fe415
 
@@ -335,9 +336,13 @@ export function RebarScheduleScreen() {
         ))}
       </div>
 
-      {/* Member Cards */}
-      <div className="stack" style={{ gap: "12px" }}>
-        {filteredMembers.map((m, idx) => {
+      {/* Member Cards with Progressive Rendering */}
+      <Progressive
+        items={filteredMembers}
+        pageSize={20}
+        resetKey={filterType}
+        showCount={true}
+        renderItem={(m, idx) => {
           const isSelected = selectedMember === idx;
           const memberWeight = m.bbs.items.reduce((sum, item) => {
             return sum + (item.role === "mesh" || item.role === "link" ? item.weightKg : item.weightKg * m.count);
@@ -421,8 +426,98 @@ export function RebarScheduleScreen() {
               )}
             </Card>
           );
-        })}
-      </div>
+        }}
+      >
+        {({ items: visibleMembers }) => (
+          <div className="stack" style={{ gap: "12px" }}>
+            {visibleMembers.map((m, idx) => {
+              const isSelected = selectedMember === idx;
+              const memberWeight = m.bbs.items.reduce((sum, item) => {
+                return sum + (item.role === "mesh" || item.role === "link" ? item.weightKg : item.weightKg * m.count);
+              }, 0);
+              return (
+                <Card
+                  key={m.elementId}
+                  className="stack"
+                  style={{
+                    cursor: "pointer",
+                    border: isSelected ? "1.5px solid var(--primary)" : "1px solid var(--border)",
+                  }}
+                  onClick={() => setSelectedMember(isSelected ? null : idx)}
+                >
+                  <div className="row-between">
+                    <div>
+                      <h4 style={{ margin: "0 0 4px 0" }}>{m.label}</h4>
+                      <span className="faint small font-mono">
+                        {m.dimensions.width} × {m.dimensions.depth} × {m.dimensions.length} mm
+                        {m.count > 1 ? ` × ${m.count}` : ""}
+                      </span>
+                    </div>
+                    <div className="row" style={{ gap: "8px" }}>
+                      <Badge tone="sky">{m.memberType}</Badge>
+                      <Badge tone="sage">{Math.round(memberWeight * 100) / 100} kg</Badge>
+                    </div>
+                  </div>
+
+                  {isSelected && (
+                    <div style={{ marginTop: "8px" }}>
+                      <table className="table" style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
+                        <thead>
+                          <tr style={{ borderBottom: "1px solid var(--border)", opacity: 0.8, fontSize: "12px" }}>
+                            <th scope="col" style={{ padding: "8px" }}>{lang === "bn" ? "মার্ক" : "Mark"}</th>
+                            <th scope="col" style={{ padding: "8px" }}>{lang === "bn" ? "ভূমিকা" : "Role"}</th>
+                            <th scope="col" style={{ padding: "8px" }}>{lang === "bn" ? "ডায়া" : "Dia"}</th>
+                            <th scope="col" style={{ padding: "8px" }}>{lang === "bn" ? "কাট (মিমি)" : "Cut (mm)"}</th>
+                            <th scope="col" style={{ padding: "8px" }}>{lang === "bn" ? "ব্যান্ড" : "Bends"}</th>
+                            <th scope="col" style={{ padding: "8px" }}>{lang === "bn" ? "সংখ্যার" : "Count"}</th>
+                            <th scope="col" style={{ padding: "8px" }}>{lang === "bn" ? "ওজন (কেজি)" : "Weight (kg)"}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {m.bbs.items.map((item: RebarDetail) => (
+                            <tr key={item.mark} style={{ borderBottom: "1px solid var(--border)" }}>
+                              <td style={{ padding: "8px", fontFamily: "var(--font-mono)" }}>{item.mark}</td>
+                              <td style={{ padding: "8px" }}>
+                                <Badge tone="neutral">{item.role}</Badge>
+                              </td>
+                              <td style={{ padding: "8px", fontFamily: "var(--font-mono)" }}>
+                                ⌀{item.diameterMm}
+                              </td>
+                              <td style={{ padding: "8px", fontFamily: "var(--font-mono)" }}>
+                                {item.cutLengthMm.toLocaleString()}
+                              </td>
+                              <td style={{ padding: "8px", fontFamily: "var(--font-mono)" }}>
+                                {item.bendAngles.length > 0 ? item.bendAngles.map((a) => `${a}°`).join(" ") : "—"}
+                              </td>
+                              <td style={{ padding: "8px", fontFamily: "var(--font-mono)" }}>
+                                {item.role === "mesh" || item.role === "link" ? item.count : `${item.count} × ${m.count}`}
+                              </td>
+                              <td style={{ padding: "8px", fontFamily: "var(--font-mono)" }}>
+                                {Math.round((item.role === "mesh" || item.role === "link" ? item.weightKg : item.weightKg * m.count) * 100) / 100}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+
+                      {m.bbs.assumptions.length > 0 && (
+                        <div style={{ marginTop: "8px", padding: "8px", background: "var(--surface-2)", borderRadius: "var(--r-sm)", fontSize: "12px" }}>
+                          <strong>{lang === "bn" ? "অনুমান:" : "Assumptions:"}</strong>
+                          {m.bbs.assumptions.map((a, i) => (
+                            <div key={i} className="small muted" style={{ marginTop: "4px" }}>
+                              • {a.reason} <span className="font-mono">({a.codeRef})</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </Card>
+              );
+            })}
+          </div>
+        )}
+      </Progressive>
     </div>
   );
 }

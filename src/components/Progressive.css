@@ -1,0 +1,25 @@
+.progressive-empty {
+  padding: 24px;
+  text-align: center;
+}
+
+.progressive-count {
+  margin-bottom: 8px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.progressive-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.progressive-loadmore {
+  margin-top: 16px;
+  text-align: center;
+}
+
+.progressive-loadmore button {
+  min-width: 200px;
+}

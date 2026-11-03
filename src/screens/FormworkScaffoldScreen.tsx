@@ -7,6 +7,7 @@ import { generateFormworkQuantities, generateScaffoldQuantities, generateFormwor
 import type { FormworkSummary, ScaffoldSummary, FormworkItem, ScaffoldItem } from "../cad/formworkScaffold";
 import type { MeshDocument } from "../cad/mesh";
 import { fmtBdt, fmtNum } from "../i18n";
+import { Progressive } from "../components/Progressive";
 
 interface TypeTotals {
   areaM2: number;
@@ -228,70 +229,110 @@ export function FormworkScaffoldScreen() {
             </div>
           </Card>
 
-          {/* Formwork Items Table */}
+          {/* Formwork Items Table with Progressive Rendering */}
           <Card className="stack">
-            <table className="table" style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ borderBottom: "1px solid var(--border)", opacity: 0.8 }}>
-                  <th scope="col" style={{ padding: "10px" }}>#</th>
-                  <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "এলিমেন্ট" : "Element"}</th>
-                  <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "টাইপ" : "Type"}</th>
-                  <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "এলাকা (m²)" : "Area (m²)"}</th>
-                  <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "কংক্রিট (m³)" : "Concrete (m³)"}</th>
-                  <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "উপাদান" : "Material"}</th>
-                  <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "পুনর্ব্যবহার" : "Reuses"}</th>
-                  <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "শাটারিং (m²)" : "Shuttering (m²)"}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredFormworkItems.map((item, idx: number) => (
-                  <tr key={item.elementId} style={{ borderBottom: "1px solid var(--border)" }}>
-                    <td style={{ padding: "10px", fontFamily: "var(--font-mono)", opacity: 0.6 }}>
-                      {idx + 1}
-                    </td>
-                    <td style={{ padding: "10px" }}>
-                      <strong>{item.label}</strong>
-                      <div className="faint small">{item.elementKind}</div>
-                    </td>
-                    <td style={{ padding: "10px" }}>
-                      <Badge tone="sky">{item.formworkType}</Badge>
-                    </td>
-                    <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                      {fmtNum(item.formworkAreaM2, lang)}
-                    </td>
-                    <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                      {fmtNum(item.concreteVolumeM3, lang)}
-                    </td>
-                    <td style={{ padding: "10px" }}>
-                      <Badge tone="amber">{item.material}</Badge>
-                    </td>
-                    <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                      {item.reuseCount}
-                    </td>
-                    <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                      {fmtNum(item.totalShutteringM2, lang)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr style={{ borderTop: "2px solid var(--border)", fontWeight: 700 }}>
-                  <td colSpan={3} style={{ padding: "12px", textAlign: "right" }}>
-                    {lang === "bn" ? "মোট:" : "Total:"}
+            <Progressive
+              items={filteredFormworkItems}
+              pageSize={50}
+              resetKey={materialFilter}
+              showCount={true}
+              renderItem={(item, idx) => (
+                <tr key={item.elementId} style={{ borderBottom: "1px solid var(--border)" }}>
+                  <td style={{ padding: "10px", fontFamily: "var(--font-mono)", opacity: 0.6 }}>
+                    {idx + 1}
                   </td>
-                  <td style={{ padding: "12px", fontFamily: "var(--font-mono)" }}>
-                    {fmtNum(formwork?.totalFormworkAreaM2 || 0, lang)}
+                  <td style={{ padding: "10px" }}>
+                    <strong>{item.label}</strong>
+                    <div className="faint small">{item.elementKind}</div>
                   </td>
-                  <td style={{ padding: "12px", fontFamily: "var(--font-mono)" }}>
-                    {fmtNum(formwork?.items?.reduce((sum: number, i: FormworkItem) => sum + i.concreteVolumeM3, 0) || 0, lang)}
+                  <td style={{ padding: "10px" }}>
+                    <Badge tone="sky">{item.formworkType}</Badge>
                   </td>
-                  <td colSpan={2} style={{ padding: "12px" }}></td>
-                  <td style={{ padding: "12px", fontFamily: "var(--font-mono)" }}>
-                    {fmtNum(formwork?.totalShutteringM2 || 0, lang)}
+                  <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
+                    {fmtNum(item.formworkAreaM2, lang)}
+                  </td>
+                  <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
+                    {fmtNum(item.concreteVolumeM3, lang)}
+                  </td>
+                  <td style={{ padding: "10px" }}>
+                    <Badge tone="amber">{item.material}</Badge>
+                  </td>
+                  <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
+                    {item.reuseCount}
+                  </td>
+                  <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
+                    {fmtNum(item.totalShutteringM2, lang)}
                   </td>
                 </tr>
-              </tfoot>
-            </table>
+              )}
+            >
+              {({ items: visibleItems }) => (
+                <>
+                  <table className="table" style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
+                    <thead>
+                      <tr style={{ borderBottom: "1px solid var(--border)", opacity: 0.8 }}>
+                        <th scope="col" style={{ padding: "10px" }}>#</th>
+                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "এলিমেন্ট" : "Element"}</th>
+                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "টাইপ" : "Type"}</th>
+                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "এলাকা (m²)" : "Area (m²)"}</th>
+                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "কংক্রিট (m³)" : "Concrete (m³)"}</th>
+                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "উপাদান" : "Material"}</th>
+                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "পুনর্ব্যবহার" : "Reuses"}</th>
+                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "শাটারিং (m²)" : "Shuttering (m²)"}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {visibleItems.map((item, idx) => (
+                        <tr key={item.elementId} style={{ borderBottom: "1px solid var(--border)" }}>
+                          <td style={{ padding: "10px", fontFamily: "var(--font-mono)", opacity: 0.6 }}>
+                            {idx + 1}
+                          </td>
+                          <td style={{ padding: "10px" }}>
+                            <strong>{item.label}</strong>
+                            <div className="faint small">{item.elementKind}</div>
+                          </td>
+                          <td style={{ padding: "10px" }}>
+                            <Badge tone="sky">{item.formworkType}</Badge>
+                          </td>
+                          <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
+                            {fmtNum(item.formworkAreaM2, lang)}
+                          </td>
+                          <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
+                            {fmtNum(item.concreteVolumeM3, lang)}
+                          </td>
+                          <td style={{ padding: "10px" }}>
+                            <Badge tone="amber">{item.material}</Badge>
+                          </td>
+                          <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
+                            {item.reuseCount}
+                          </td>
+                          <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
+                            {fmtNum(item.totalShutteringM2, lang)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr style={{ borderTop: "2px solid var(--border)", fontWeight: 700 }}>
+                        <td colSpan={3} style={{ padding: "12px", textAlign: "right" }}>
+                          {lang === "bn" ? "মোট:" : "Total:"}
+                        </td>
+                        <td style={{ padding: "12px", fontFamily: "var(--font-mono)" }}>
+                          {fmtNum(formwork?.totalFormworkAreaM2 || 0, lang)}
+                        </td>
+                        <td style={{ padding: "12px", fontFamily: "var(--font-mono)" }}>
+                          {fmtNum(formwork?.items?.reduce((sum: number, i: FormworkItem) => sum + i.concreteVolumeM3, 0) || 0, lang)}
+                        </td>
+                        <td colSpan={2} style={{ padding: "12px" }}></td>
+                        <td style={{ padding: "12px", fontFamily: "var(--font-mono)" }}>
+                          {fmtNum(formwork?.totalShutteringM2 || 0, lang)}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </>
+              )}
+            </Progressive>
           </Card>
         </div>
       )}
@@ -313,70 +354,111 @@ export function FormworkScaffoldScreen() {
             </div>
           </Card>
 
-          {/* Scaffold Items Table */}
+          {/* Scaffold Items Table with Progressive Rendering */}
           <Card className="stack">
-            <table className="table" style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ borderBottom: "1px solid var(--border)", opacity: 0.8 }}>
-                  <th scope="col" style={{ padding: "10px" }}>#</th>
-                  <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "এলিমেন্ট" : "Element"}</th>
-                  <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "টাইপ" : "Type"}</th>
-                  <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "এলাকা (m²)" : "Area (m²)"}</th>
-                  <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "উচ্চতা (m)" : "Height (m)"}</th>
-                  <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "ভলিউম (m³)" : "Volume (m³)"}</th>
-                  <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "লোড ক্লাস" : "Load Class"}</th>
-                  <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "সময় (দিন)" : "Duration (days)"}</th>
+            <Progressive
+              items={scaffold?.items || []}
+              pageSize={50}
+              showCount={true}
+              renderItem={(item, idx) => (
+                <tr key={item.elementId} style={{ borderBottom: "1px solid var(--border)" }}>
+                  <td style={{ padding: "10px", fontFamily: "var(--font-mono)", opacity: 0.6 }}>
+                    {idx + 1}
+                  </td>
+                  <td style={{ padding: "10px" }}>
+                    <strong>{item.label}</strong>
+                    <div className="faint small">{item.elementKind}</div>
+                  </td>
+                  <td style={{ padding: "10px" }}>
+                    <Badge tone="amber">{item.scaffoldType}</Badge>
+                  </td>
+                  <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
+                    {fmtNum(item.areaM2, lang)}
+                  </td>
+                  <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
+                    {item.heightM}
+                  </td>
+                  <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
+                    {fmtNum(item.areaM2 * item.heightM, lang)}
+                  </td>
+                  <td style={{ padding: "10px" }}>
+                    <Badge tone={item.loadClass === "heavy" ? "blush" : item.loadClass === "medium" ? "amber" : "sage"}>
+                      {item.loadClass}
+                    </Badge>
+                  </td>
+                  <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
+                    {item.durationDays}
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {scaffold?.items?.map((item, idx: number) => (
-                  <tr key={item.elementId} style={{ borderBottom: "1px solid var(--border)" }}>
-                    <td style={{ padding: "10px", fontFamily: "var(--font-mono)", opacity: 0.6 }}>
-                      {idx + 1}
-                    </td>
-                    <td style={{ padding: "10px" }}>
-                      <strong>{item.label}</strong>
-                      <div className="faint small">{item.elementKind}</div>
-                    </td>
-                    <td style={{ padding: "10px" }}>
-                      <Badge tone="amber">{item.scaffoldType}</Badge>
-                    </td>
-                    <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                      {fmtNum(item.areaM2, lang)}
-                    </td>
-                    <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                      {item.heightM}
-                    </td>
-                    <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                      {fmtNum(item.areaM2 * item.heightM, lang)}
-                    </td>
-                    <td style={{ padding: "10px" }}>
-                      <Badge tone={item.loadClass === "heavy" ? "blush" : item.loadClass === "medium" ? "amber" : "sage"}>
-                        {item.loadClass}
-                      </Badge>
-                    </td>
-                    <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                      {item.durationDays}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr style={{ borderTop: "2px solid var(--border)", fontWeight: 700 }}>
-                  <td colSpan={3} style={{ padding: "12px", textAlign: "right" }}>
-                    {lang === "bn" ? "মোট:" : "Total:"}
-                  </td>
-                  <td style={{ padding: "12px", fontFamily: "var(--font-mono)" }}>
-                    {fmtNum(scaffold?.totalScaffoldAreaM2 || 0, lang)}
-                  </td>
-                  <td style={{ padding: "12px" }}></td>
-                  <td style={{ padding: "12px", fontFamily: "var(--font-mono)" }}>
-                    {fmtNum(scaffold?.totalScaffoldVolumeM3 || 0, lang)}
-                  </td>
-                  <td colSpan={2} style={{ padding: "12px" }}></td>
-                </tr>
-              </tfoot>
-            </table>
+              )}
+            >
+              {({ items: visibleItems }) => (
+                <>
+                  <table className="table" style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
+                    <thead>
+                      <tr style={{ borderBottom: "1px solid var(--border)", opacity: 0.8 }}>
+                        <th scope="col" style={{ padding: "10px" }}>#</th>
+                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "এলিমেন্ট" : "Element"}</th>
+                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "টাইপ" : "Type"}</th>
+                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "এলাকা (m²)" : "Area (m²)"}</th>
+                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "উচ্চতা (m)" : "Height (m)"}</th>
+                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "ভলিউম (m³)" : "Volume (m³)"}</th>
+                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "লোড ক্লাস" : "Load Class"}</th>
+                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "সময় (দিন)" : "Duration (days)"}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {visibleItems.map((item, idx) => (
+                        <tr key={item.elementId} style={{ borderBottom: "1px solid var(--border)" }}>
+                          <td style={{ padding: "10px", fontFamily: "var(--font-mono)", opacity: 0.6 }}>
+                            {idx + 1}
+                          </td>
+                          <td style={{ padding: "10px" }}>
+                            <strong>{item.label}</strong>
+                            <div className="faint small">{item.elementKind}</div>
+                          </td>
+                          <td style={{ padding: "10px" }}>
+                            <Badge tone="amber">{item.scaffoldType}</Badge>
+                          </td>
+                          <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
+                            {fmtNum(item.areaM2, lang)}
+                          </td>
+                          <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
+                            {item.heightM}
+                          </td>
+                          <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
+                            {fmtNum(item.areaM2 * item.heightM, lang)}
+                          </td>
+                          <td style={{ padding: "10px" }}>
+                            <Badge tone={item.loadClass === "heavy" ? "blush" : item.loadClass === "medium" ? "amber" : "sage"}>
+                              {item.loadClass}
+                            </Badge>
+                          </td>
+                          <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
+                            {item.durationDays}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr style={{ borderTop: "2px solid var(--border)", fontWeight: 700 }}>
+                        <td colSpan={3} style={{ padding: "12px", textAlign: "right" }}>
+                          {lang === "bn" ? "মোট:" : "Total:"}
+                        </td>
+                        <td style={{ padding: "12px", fontFamily: "var(--font-mono)" }}>
+                          {fmtNum(scaffold?.totalScaffoldAreaM2 || 0, lang)}
+                        </td>
+                        <td style={{ padding: "12px" }}></td>
+                        <td style={{ padding: "12px", fontFamily: "var(--font-mono)" }}>
+                          {fmtNum(scaffold?.totalScaffoldVolumeM3 || 0, lang)}
+                        </td>
+                        <td colSpan={2} style={{ padding: "12px" }}></td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </>
+              )}
+            </Progressive>
           </Card>
         </div>
       )}

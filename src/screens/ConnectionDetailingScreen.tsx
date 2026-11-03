@@ -5,6 +5,7 @@ import { getActiveProject, type BuildingProject } from "../engine/projectState";
 import { generateBuildingMesh } from "../cad/parametricBuildingGenerator";
 import type { MeshDocument, MeshObject } from "../cad/mesh";
 import { fmtNum } from "../i18n";
+import { Progressive } from "../components/Progressive";
 
 interface ConnectionDetail {
   memberId: string;
@@ -301,9 +302,12 @@ export function ConnectionDetailingScreen() {
         <Stat label={lang === "bn" ? "বীম-স্ল্যাব" : "Beam-Slab"} value={connections.filter(c => c.memberType === "beam-slab").length.toString()} />
       </div>
 
-      {/* Connections List */}
-      <div className="stack" style={{ gap: "12px" }}>
-        {connections.map((c, idx) => {
+      {/* Connections List with Progressive Rendering */}
+      <Progressive
+        items={connections}
+        pageSize={20}
+        showCount={true}
+        renderItem={(c, idx) => {
           const isSelected = selectedConnection === idx;
           return (
             <Card
@@ -371,8 +375,82 @@ export function ConnectionDetailingScreen() {
               )}
             </Card>
           );
-        })}
-      </div>
+        }}
+      >
+        {({ items: visibleConnections }) => (
+          <div className="stack" style={{ gap: "12px" }}>
+            {visibleConnections.map((c, idx) => {
+              const isSelected = selectedConnection === idx;
+              return (
+                <Card
+                  key={c.memberId}
+                  className="stack"
+                  style={{
+                    cursor: "pointer",
+                    border: isSelected ? "1.5px solid var(--primary)" : "1px solid var(--border)",
+                  }}
+                  onClick={() => setSelectedConnection(isSelected ? null : idx)}
+                >
+                  <div className="row-between">
+                    <div>
+                      <h4 style={{ margin: "0 0 4px 0" }}>{c.location}</h4>
+                      <span className="faint small font-mono">{c.memberType}</span>
+                    </div>
+                    <div className="row" style={{ gap: "8px" }}>
+                      <Badge tone="sky">{c.designShear.toLocaleString()} N</Badge>
+                      <Badge tone="amber">{c.designMoment.toLocaleString()} N·mm</Badge>
+                    </div>
+                  </div>
+
+                  {isSelected && (
+                    <div style={{ marginTop: "8px" }}>
+                      <div style={{ marginBottom: "8px" }}>
+                        <strong>{lang === "bn" ? "প্রতিভা কর্তব্য (Lap Length):" : "Lap Length:"}</strong> {c.lapLength} mm
+                      </div>
+                      <div style={{ marginBottom: "8px" }}>
+                        <strong>{lang === "bn" ? "বিকাশ দৈর্ঘ্য (Dev Length):" : "Development Length:"}</strong> {c.developmentLength} mm
+                      </div>
+                      <div style={{ marginBottom: "8px" }}>
+                        <strong>{lang === "bn" ? "কনক্রিট কভার:" : "Concrete Cover:"}</strong> {c.concreteCover} mm
+                      </div>
+                      <div style={{ marginBottom: "8px" }}>
+                        <strong>{lang === "bn" ? "ডিজাইন শিয়ার:" : "Design Shear:"}</strong> {c.designShear.toLocaleString()} N
+                      </div>
+                      <div style={{ marginBottom: "8px" }}>
+                        <strong>{lang === "bn" ? "ডিজাইন মোমেন্ট:" : "Design Moment:"}</strong> {c.designMoment.toLocaleString()} N·mm
+                      </div>
+                      <table className="table" style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
+                        <thead>
+                          <tr style={{ borderBottom: "1px solid var(--border)", opacity: 0.8, fontSize: "12px" }}>
+                            <th scope="col" style={{ padding: "8px" }}>{lang === "bn" ? "বারের ব্যাস" : "Bar Dia"}</th>
+                            <th scope="col" style={{ padding: "8px" }}>{lang === "bn" ? "সংখ্যা" : "Count"}</th>
+                            <th scope="col" style={{ padding: "8px" }}>{lang === "bn" ? "দৈর্ঘ্য" : "Length"}</th>
+                            <th scope="col" style={{ padding: "8px" }}>{lang === "bn" ? "আকৃতি" : "Shape"}</th>
+                            <th scope="col" style={{ padding: "8px" }}>{lang === "bn" ? "ব্যান্ড" : "Bends"}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {c.rebars.map((r) => (
+                            <tr key={`${c.memberId}-${r.diameter}`} style={{ borderBottom: "1px solid var(--border)" }}>
+                              <td style={{ padding: "8px", fontFamily: "var(--font-mono)" }}>⌀{r.diameter}</td>
+                              <td style={{ padding: "8px", fontFamily: "var(--font-mono)" }}>{r.count}</td>
+                              <td style={{ padding: "8px", fontFamily: "var(--font-mono)" }}>{r.length}</td>
+                              <td style={{ padding: "8px", fontFamily: "var(--font-mono)" }}>{r.shape}</td>
+                              <td style={{ padding: "8px", fontFamily: "var(--font-mono)" }}>
+                                {r.bends.length > 0 ? r.bends.map((b) => `${b}°`).join(" ") : "—"}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </Card>
+              );
+            })}
+          </div>
+        )}
+      </Progressive>
     </div>
   );
 }
