@@ -52,3 +52,6 @@ Thumbs.db
 # generated audit/test output
 scripts/audits/audit-out/
 scripts/tests/exporter-out/
+
+# Design system sync output
+scripts/design-system/out/
