@@ -14,7 +14,7 @@
  */
 
 import type { MeshDocument, MeshObject } from "../cad/mesh";
-import { createDoor3DMesh, createWindow3DMesh } from "../cad/parametricBuildingGenerator";
+import { createDoor3DMesh, createWindow3DMesh } from "../cad/meshParts";
 import { createBoxMesh, resolveSolids, type Box, type Void } from "../cad/solidKernel";
 import { buildDogLegStair, planStair, type StairPlacement } from "../cad/stairBuilder";
 import { OUTSIDE, type FloorGeometry } from "../plans/geometry";

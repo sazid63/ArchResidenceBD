@@ -7,9 +7,7 @@
  */
 
 import type { BuildingCustomization } from "../types/customization";
-import { presetForTemplate } from "../data/floorplanMapping";
-import { assignmentPatch, assignedTemplate, chooseTemplate, pickRandomTemplate } from "../data/floorplanSelection";
-import { getTemplate } from "../data/floorplanLibrary";
+import { FEET_TO_M, planChoices } from "../model/planChoices";
 import {
   DEFAULT_ACCESSIBILITY,
   DEFAULT_SUSTAINABILITY_DHAKA,
@@ -48,15 +46,6 @@ export interface BuildingProject {
   phases: PhaseItem[];
   designStarted: boolean;
   activePhaseId?: string;
-  /** Curated 2D template id the user picked (see src/data/floorplanLibrary.ts). */
-  floorplanId?: string;
-  /** Parametric preset built for every floor that has no selection of its own. */
-  typicalPresetId?: string;
-  /**
-   * Dwellings-per-floor → curated 2D template id. One entry per unit count, so every floor with the
-   * same count is built from the same drawing.
-   */
-  floorplanAssignments?: Record<string, string>;
   /**
    * Full customization bundle — drives mesh generation, BOQ, and all optional
    * features (accessibility, sustainability, fire safety, value engineering,
@@ -191,70 +180,6 @@ export function generatePhasesForStories(stories: number): PhaseItem[] {
   return phases;
 }
 
-/**
- * A project's first plan: the manual pick when it matches the unit count, otherwise one random
- * drawing from that category. Categories with no verified drawing keep the parametric fallback so
- * the project still builds a 3D model.
- */
-export function resolveInitialFloorplan(units: number, templateId?: string) {
-  const { template } = chooseTemplate(units, templateId);
-  if (!template) {
-    console.warn(`[floorplans] no verified 2D template for ${units} unit(s)/floor — using the parametric fallback`);
-    return { floorplanId: undefined, typicalPresetId: presetForTemplate(undefined, units), floorplanAssignments: {} };
-  }
-  return assignmentPatch({}, template, units);
-}
-
-/**
- * Pin a 2D template for its unit count and rebuild every matching floor from it. Floors with other
- * unit counts are untouched, which is what keeps same-count floors consistent.
- */
-export function setFloorplanForUnits(
-  project: BuildingProject,
-  templateId: string,
-  units: number = project.unitsPerFloor,
-): BuildingProject {
-  const template = getTemplate(templateId);
-  if (!template) return project;
-  const phases = project.phases.map((phase) =>
-    phase.kind === "floor"
-      ? { ...phase, data: { ...phase.data, selectedFloorplanPreset: template.presetId } }
-      : phase,
-  );
-  return {
-    ...project,
-    ...assignmentPatch(project, template, units),
-    phases,
-    updatedAt: new Date().toISOString(),
-  };
-}
-
-/** Re-roll the drawing for one unit count (manual "shuffle"). */
-export function randomizeFloorplanForUnits(project: BuildingProject, units = project.unitsPerFloor): BuildingProject {
-  const template = pickRandomTemplate(units, Math.random, assignedTemplate(project, units)?.id);
-  return template ? setFloorplanForUnits(project, template.id, units) : project;
-}
-
-/**
- * Fill in any missing plan assignment (older saved projects, imported projects) and re-sync the floor
- * phases so the 3D model always matches the 2D drawing that is on screen.
- */
-export function ensureFloorplanAssignments(project: BuildingProject): BuildingProject {
-  const units = project.unitsPerFloor || 1;
-  const template = assignedTemplate(project, units);
-  if (template) {
-    const missing = !project.floorplanAssignments?.[String(units)];
-    const stale = project.phases.some(
-      (p) => p.kind === "floor" && p.data?.selectedFloorplanPreset !== template.presetId,
-    );
-    if (!missing && !stale && project.typicalPresetId === template.presetId) return project;
-    return setFloorplanForUnits(project, template.id);
-  }
-  const { template: picked } = chooseTemplate(units, undefined);
-  if (!picked) return project;
-  return setFloorplanForUnits(project, picked.id);
-}
-
 export function createNewProject(params: {
   name: string;
   stories: number;
@@ -262,7 +187,6 @@ export function createNewProject(params: {
   plotUnit: "katha" | "decimal" | "sqft" | "sqm";
   unitsPerFloor: number;
   address?: string;
-  floorplanId?: string;
   plot?: BuildingProject["plot"];
   planId?: string;
   mirror?: boolean;
@@ -286,7 +210,6 @@ export function createNewProject(params: {
     designStarted: false,
     activePhaseId: phases[0].id,
     customization: createDefaultCustomization(),
-    ...resolveInitialFloorplan(params.unitsPerFloor || 2, params.floorplanId),
     ...(params.plot ? { plot: params.plot } : {}),
     ...(params.planId ? { planId: params.planId } : {}),
     ...(params.mirror ? { mirror: true } : {}),
@@ -307,46 +230,45 @@ export function createNewProject(params: {
 }
 
 export function generateRandomBuildingProject(): BuildingProject {
+  // Dhaka (RAJUK) plots; each is sized so at least one library plan fits.
   const archetypes = [
-    { name: "Padma Garden Heights (6-Storey Dual Units)", address: "Road 11, Banani, Dhaka", stories: 6, plotSize: 4.2, preset: "preset-dual-3bed", unitsPerFloor: 2 },
-    { name: "Shapla Executive Villa (7-Storey Full-Floor)", address: "Sector 4, Uttara, Dhaka", stories: 7, plotSize: 4.8, preset: "preset-single-luxury", unitsPerFloor: 1 },
-    { name: "Jamuna Rental Suite (8-Storey Triple Units)", address: "Mirpur DOHS, Dhaka", stories: 8, plotSize: 5.2, preset: "preset-triple-rental", unitsPerFloor: 3 },
-    { name: "Purbachal Duplex Villa (2-Storey Courtyard)", address: "Sector 1, Purbachal Smart City, Dhaka", stories: 2, plotSize: 3.5, preset: "preset-duplex-courtyard", unitsPerFloor: 1 },
-    { name: "South Khulshi Corner Tower (6-Storey Corner Plot)", address: "Road 3, South Khulshi, Chittagong", stories: 6, plotSize: 4.5, preset: "preset-dual-3bed", unitsPerFloor: 2 },
-    { name: "Farmgate Studio Apartments (6-Storey 4-Unit)", address: "Indira Road, Farmgate, Dhaka", stories: 6, plotSize: 3.8, preset: "preset-studio-bachelor", unitsPerFloor: 4 },
-    { name: "Pragoti Mixed Tower (7-Storey Showroom + Flats)", address: "Pragoti Sarani, Baridhara, Dhaka", stories: 7, plotSize: 5.5, preset: "preset-commercial-mixed", unitsPerFloor: 2 },
-    { name: "Sylhet Family Residence (4-Storey Joint Family)", address: "Zindabazar, Sylhet", stories: 4, plotSize: 3.6, preset: "preset-family-duplex", unitsPerFloor: 1 },
-    { name: "Gulshan Sky Penthouse (8-Storey Luxury Suite)", address: "Road 71, Gulshan 2, Dhaka", stories: 8, plotSize: 6.0, preset: "preset-penthouse-luxury", unitsPerFloor: 1 },
-    { name: "Lalbagh Heritage Residence (6-Storey Narrow Plot)", address: "Water Works Road, Lalbagh, Old Dhaka", stories: 6, plotSize: 2.8, preset: "preset-narrow-duct", unitsPerFloor: 2 },
+    { name: "Banani Family House (6-Storey)", address: "Road 11, Banani, Dhaka", stories: 6, frontageFt: 40, depthFt: 65, roadFt: 20, unitsPerFloor: 1 },
+    { name: "Uttara Executive Residence (7-Storey)", address: "Sector 4, Uttara, Dhaka", stories: 7, frontageFt: 45, depthFt: 70, roadFt: 25, unitsPerFloor: 1 },
+    { name: "Purbachal Villa (2-Storey)", address: "Sector 1, Purbachal, Dhaka", stories: 2, frontageFt: 40, depthFt: 65, roadFt: 30, unitsPerFloor: 1 },
+    { name: "Dhanmondi Two-Flat Block (6-Storey)", address: "Road 5, Dhanmondi, Dhaka", stories: 6, frontageFt: 40, depthFt: 80, roadFt: 20, unitsPerFloor: 2 },
+    { name: "Gulshan Wide-Plot Block (8-Storey)", address: "Road 71, Gulshan 2, Dhaka", stories: 8, frontageFt: 60, depthFt: 60, roadFt: 30, unitsPerFloor: 2 },
+    { name: "Mirpur Residential Block (5-Storey)", address: "Section 10, Mirpur, Dhaka", stories: 5, frontageFt: 45, depthFt: 80, roadFt: 20, unitsPerFloor: 2 },
   ];
 
   const selected = archetypes[Math.floor(Math.random() * archetypes.length)];
-  const { name, address, stories, plotSize, preset, unitsPerFloor } = selected;
+  const { name, address, stories, unitsPerFloor } = selected;
+  const frontageM = Math.round(selected.frontageFt * FEET_TO_M * 100) / 100;
+  const depthM = Math.round(selected.depthFt * FEET_TO_M * 100) / 100;
+  const roadWidthM = Math.round(selected.roadFt * FEET_TO_M * 100) / 100;
+  const planId = planChoices(frontageM, depthM, { unitsPerFloor }).find((c) => c.fit.ok)?.plan.id;
   const id = `project-rand-${uniqueSuffix()}`;
-  const plotSqm = plotToSqm(plotSize, "katha");
+  const plotSqm = frontageM * depthM;
+  const plotSize = Math.round((plotSqm / 66.89) * 100) / 100;
   const phases = generatePhasesForStories(stories);
   const now = new Date().toISOString();
   const timeStr = "10:01 AM";
 
   const populatedPhases = phases.map((p) => {
-    const populated = populatePhaseMetrics(p, stories, plotSqm, plotSize, preset, name, unitsPerFloor, now, timeStr);
+    const populated = populatePhaseMetrics(p, stories, plotSqm, plotSize, planId ?? "", name, unitsPerFloor, now, timeStr);
     return makeCompletedPhase(p, populated.metrics, populated.preset, populated.timestamp, populated.msg, populated.userPrompt);
   });
 
   const project: BuildingProject = {
     id, name, address, stories, plotSize, plotUnit: "katha",
-    plotSqm: Math.round(plotSqm * 100) / 100, unitsPerFloor: 2,
+    plotSqm: Math.round(plotSqm * 100) / 100, unitsPerFloor,
     createdAt: now, updatedAt: now,
     phases: populatedPhases, designStarted: true, activePhaseId: "final",
     customization: createDefaultCustomization(),
+    plot: { frontageM, depthM, roadWidthM, roadSide: "south" },
+    ...(planId ? { planId } : {}),
   };
-
-  // The archetype's unit count and the drawing assigned to it must agree, or the 3D floors would be
-  // built from a plan nobody is looking at.
-  project.unitsPerFloor = unitsPerFloor;
-  const withPlan = ensureFloorplanAssignments(project);
-  saveActiveProject(withPlan);
-  return withPlan;
+  saveActiveProject(project);
+  return project;
 }
 
 /** Helper: populate phase metrics based on phase kind. */

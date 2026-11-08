@@ -6,11 +6,11 @@ Your task: one ticket. Read only your section: `grep -n -A14 "^## <ID>" docs/han
 
 Settled (don't revisit): no AI models · Civic style, Monsoon indigo tokens (`src/theme/tokens.css`) · RAJUK 2008 now; BNBC/DAP values only with citations, else "not checked" · original plans only · Windows + web · Dhaka only.
 
-Map: `src/plans` grid floor plans (fit, geometry, validate, render, library) · `src/model` project format v3, migration, store · `src/cad` v2 engines (generator 2,174 lines still makes the 3D; structural/compliance/rebar known-wrong) · `src/engine/projectState.ts` v2 store the UI still uses · `src/ui/kit.tsx` components. Old reports in `docs/` (audits, KNOWLEDGE_BASE, MODEL_CARD, docs/plan, docs/work) are outdated: skip.
+Map: `src/plans` grid floor plans (fit, geometry, validate, render, library) · `src/model` project format v3, migration, store · `src/model` also has `building.ts` (plot + plan → BuildingModel), `toMesh.ts` (model → 3D), `projectMesh.ts` (project → mesh), `planChoices.ts` (which plans fit) · `src/cad` v2 engines (`parametricBuildingGenerator.ts` is now a thin wrapper; structural/compliance/rebar known-wrong) · `src/engine/projectState.ts` v2 store the UI still uses · `src/ui/kit.tsx` components. Old reports in `docs/` (audits, KNOWLEDGE_BASE, MODEL_CARD, docs/plan, docs/work) are outdated: skip.
 
 Rules:
 - Grep, then read line ranges. Never read whole `parametricBuildingGenerator.ts`, `NativeCadScreen.tsx`, `i18n.tsx`.
-- `npx vitest run <path>` while working; `npm run verify` once before commit (+ `npm run audit:mesh`, `test:exporters`, `build` if 3D/exports touched).
+- `npx vitest run <path>` while working; `npm run verify` once before commit (+ `npm run audit:mesh`, `test:exporters`, `build` if 3D/exports touched); owner paused full runs until all phases are done: use targeted checks (`tsc --noEmit`, `npx vitest run`).
 - Every behaviour change gets a test. Regulation values cited or flagged "assumption". Lengths integer mm. Colours via tokens. UI text EN + BN.
 - No screenshots unless UI changed (headless Edge: `msedge --headless=new --screenshot=<png> --window-size=1280,860 <url>`).
 - Commit on `v3` (with the attribution line your session gives you); mark the ticket `done <hash>`; don't push unless asked. Reply in ≤ 5 lines.

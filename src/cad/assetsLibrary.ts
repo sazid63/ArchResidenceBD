@@ -5,7 +5,7 @@
  */
 
 import { MeshObject } from "./mesh";
-import { createBoxMesh } from "./parametricBuildingGenerator";
+import { createBoxMesh } from "./meshParts";
 
 export interface ArchitecturalAsset {
   id: string;

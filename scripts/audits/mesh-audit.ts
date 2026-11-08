@@ -29,16 +29,13 @@ import { mkdirSync, writeFileSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { generateBuildingMesh } from "../../src/cad/parametricBuildingGenerator";
 import { deriveBuilding, DEFAULT_SETBACKS_MM, type BuildingInput } from "../../src/model/building";
 import { buildMesh } from "../../src/model/toMesh";
 import { fitRange } from "../../src/plans/fit";
 import { PLAN_LIBRARY } from "../../src/plans/library";
 import type { BuildingCustomization } from "../../src/cad/parametricBuildingGenerator";
-import { FLOORPLAN_PRESETS } from "../../src/data/floorplanPresets";
 import { getColorForObject } from "../../src/cad/viewer";
 import type { MeshDocument, MeshObject } from "../../src/cad/mesh";
-import type { BuildingProject, PhaseItem } from "../../src/engine/projectState";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -111,81 +108,6 @@ interface CaseSpec {
   kind: "matrix" | "sweep" | "random";
 }
 
-function buildCases(): CaseSpec[] {
-  const rng = mulberry32(SEED);
-  const cases: CaseSpec[] = [];
-  let idx = 0;
-
-  // 1. Deterministic matrix: 2 cases per floorplan preset, round-robin over
-  //    stories and plot sizes so every combination axis is covered.
-  FLOORPLAN_PRESETS.forEach((preset, p) => {
-    for (let variant = 0; variant < 2; variant++) {
-      const stories = STORIES[(p + variant * 2) % 4];
-      const plotSqm = PLOTS[(p + 1 + variant * 2) % 4];
-      const choices = stories >= 6 ? COL_TALL : COL_SMALL;
-      const col = choices[(p + variant) % 2];
-      cases.push({
-        caseId: `mx-${String(++idx).padStart(2, "0")}-s${stories}-p${plotSqm}-${preset.id}-c${col}`,
-        stories,
-        plotSqm,
-        kind: "matrix",
-        presetIds: Array.from({ length: stories - 1 }, () => preset.id),
-        custom: { columnWidthMm: col, columnDepthMm: col },
-      });
-    }
-  });
-
-  // 2. Column-size sweep (every stories bucket x its column choices).
-  for (const stories of STORIES) {
-    const cols = stories >= 6 ? COL_TALL : COL_SMALL;
-    for (const col of cols) {
-      const preset = FLOORPLAN_PRESETS[(stories + col / 50) % FLOORPLAN_PRESETS.length];
-      const plotSqm = PLOTS[(stories / 2 + col / 50) % PLOTS.length];
-      cases.push({
-        caseId: `col-${String(++idx).padStart(2, "0")}-s${stories}-c${col}-${preset.id}`,
-        stories,
-        plotSqm,
-        kind: "sweep",
-        presetIds: Array.from({ length: stories - 1 }, () => preset.id),
-        custom: { columnWidthMm: col, columnDepthMm: col },
-      });
-    }
-  }
-
-  // 3. Seeded pseudo-random buildings (random stories, plot, per-floor preset,
-  //    and custom column / footing / balcony parameters).
-  for (let i = 0; i < 20; i++) {
-    const stories = 2 + Math.floor(rng() * 7); // 2..8
-    const plotBase = PLOTS[Math.floor(rng() * PLOTS.length)];
-    const plotSqm = Math.round(plotBase * (0.75 + rng() * 0.5) * 10) / 10;
-    const presetIds = Array.from({ length: stories - 1 }, () =>
-      FLOORPLAN_PRESETS[Math.floor(rng() * FLOORPLAN_PRESETS.length)].id,
-    );
-    const pick = (arr: number[]) => arr[Math.floor(rng() * arr.length)];
-    // One case exercises the generator's defaults (no custom block at all).
-    const custom: BuildingCustomization | undefined =
-      i === 17
-        ? undefined
-        : {
-            columnWidthMm: pick([250, 300, 350, 400]),
-            columnDepthMm: pick([250, 300, 350, 400]),
-            footingSizeMm: pick([1600, 1800, 2000, 2200]),
-            footingDepthMm: pick([1400, 1600, 1800, 2000]),
-            balconyDepthMm: pick([900, 1200, 1500]),
-          };
-    cases.push({
-      caseId: `rnd-${String(++idx).padStart(2, "0")}-s${stories}-p${plotSqm}`,
-      stories,
-      plotSqm,
-      kind: "random",
-      presetIds,
-      custom,
-    });
-  }
-
-  return cases;
-}
-
 function presetSummary(ids: string[]): string {
   const uniq = [...new Set(ids)];
   if (uniq.length <= 1) return uniq[0] ?? "(none)";
@@ -193,63 +115,6 @@ function presetSummary(ids: string[]): string {
   return joined.length > 64
     ? `mixed(${uniq.length}):${joined.slice(0, 64)}…`
     : `mixed(${uniq.length}):${joined}`;
-}
-
-// ---------------------------------------------------------------------------
-// Project construction (phases built like the app's phase generator)
-// ---------------------------------------------------------------------------
-
-function buildProject(
-  caseId: string,
-  stories: number,
-  plotSqm: number,
-  presetIds: string[],
-): BuildingProject {
-  const mkPhase = (
-    id: string,
-    kind: PhaseItem["kind"],
-    storeyIndex: number | undefined,
-    data: Record<string, unknown>,
-  ): PhaseItem => ({
-    id,
-    nameEn: id,
-    nameBn: "",
-    kind,
-    storeyIndex,
-    status: "completed",
-    data,
-    messages: [],
-  });
-
-  const phases: PhaseItem[] = [
-    mkPhase("phase-site", "site", undefined, {}),
-    mkPhase("phase-foundation", "foundation", undefined, {}),
-    mkPhase("phase-ground-floor", "ground_floor", 0, {}),
-  ];
-  for (let s = 1; s < stories; s++) {
-    phases.push(
-      mkPhase(`phase-floor-${s}`, "floor", s, {
-        selectedFloorplanPreset: presetIds[s - 1],
-      }),
-    );
-  }
-  phases.push(mkPhase("phase-rooftop", "roof", undefined, {}));
-  phases.push(mkPhase("phase-utilities", "utility", undefined, {}));
-
-  return {
-    id: `audit-${caseId}`,
-    name: `Audit ${caseId}`,
-    address: "Dhaka, Bangladesh",
-    stories,
-    plotSize: plotSqm,
-    plotUnit: "sqm",
-    plotSqm,
-    unitsPerFloor: 2,
-    createdAt: "2026-10-28T00:00:00.000Z",
-    updatedAt: "2026-10-28T00:00:00.000Z",
-    designStarted: true,
-    phases,
-  };
 }
 
 // ---------------------------------------------------------------------------
@@ -1000,7 +865,7 @@ function modelCases(): Array<{ caseId: string; input: BuildingInput }> {
 
 function main(): void {
   const started = Date.now();
-  const cases = buildCases();
+  const cases = modelCases();
   rmSync(AUDIT_OUT, { recursive: true, force: true });
   mkdirSync(AUDIT_OUT, { recursive: true });
 
@@ -1010,39 +875,6 @@ function main(): void {
   );
 
   const results: CaseAudit[] = [];
-  for (const spec of cases) {
-    const project = buildProject(spec.caseId, spec.stories, spec.plotSqm, spec.presetIds);
-    const mesh = generateBuildingMesh(project, "final", spec.custom);
-    const audit = auditMesh(spec, mesh);
-    results.push(audit);
-
-    const dir = join(AUDIT_OUT, spec.caseId);
-    mkdirSync(dir, { recursive: true });
-    const frame = frameBBox(mesh.objects);
-    const camIso1 = isoCamera(0.9, frame.center, frame.span3, IMG_W, IMG_H);
-    const camIso2 = isoCamera(4.0, frame.center, frame.span3, IMG_W, IMG_H);
-    const camTop = topCamera(frame.center, frame.spanXY, IMG_W, IMG_H);
-
-    writeFileSync(
-      join(dir, "iso1.png"),
-      encodePng(renderScene(mesh.objects, camIso1, IMG_W, IMG_H, null), IMG_W, IMG_H),
-    );
-    writeFileSync(
-      join(dir, "iso2.png"),
-      encodePng(renderScene(mesh.objects, camIso2, IMG_W, IMG_H, null), IMG_W, IMG_H),
-    );
-    writeFileSync(
-      join(dir, "top.png"),
-      encodePng(renderScene(mesh.objects, camTop, IMG_W, IMG_H, null), IMG_W, IMG_H),
-    );
-    // iso1 with every clash / z-fight participant painted solid red.
-    writeFileSync(
-      join(dir, "issues.png"),
-      encodePng(renderScene(mesh.objects, camIso1, IMG_W, IMG_H, audit.flaggedIds), IMG_W, IMG_H),
-    );
-
-    logCase(audit);
-  }
 
   // New path (M2-2): building model → mesh. Strict: any defect fails the audit.
   let modelDefects = 0;

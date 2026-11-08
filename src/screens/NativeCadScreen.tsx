@@ -7,9 +7,10 @@ import type { BuildingProject } from "../engine/projectState";
 import { Badge, Button, Card, Chip, PageHeader, Stat } from "../ui/kit";
 import { useActiveProject, useProject } from "../context/ProjectContext";
 import { generateBuildingMesh } from "../cad/parametricBuildingGenerator";
-import { templateBehindMesh } from "../data/floorplanSelection";
-import { resolveFloorPresetId } from "../data/floorplanMapping";
-import { FloorplanPreview } from "../components/FloorplanPreview";
+import { buildingForProject } from "../model/projectMesh";
+import { PlotShapeCallout } from "../components/PlotShapeCallout";
+import { PLACEHOLDER } from "../model/toMesh";
+import { PlanCard } from "../components/PlanCard";
 import type { BuildingCustomization } from "../types/customization";
 import {
   DEFAULT_ACCESSIBILITY,
@@ -334,13 +335,19 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
         linkDia: 8,
       };
 
+      // With a building model, spans, columns, footprint and storey height come from it. Older saves
+      // (no plot shape) keep the rough v2 estimates until the plot shape is entered.
+      const built = buildingForProject(project);
+      const model = built?.ok ? built.model : null;
       const footprintSqm = project.plotSqm;
-      const floorAreaPerStory = footprintSqm * 0.7;
+      const floorAreaPerStory = model ? model.footprintAreaM2 : footprintSqm * 0.7;
       // Factored gravity: 24 kN/m² (1.4D + 1.6L, D=13, L=4.5 typical residential + walls)
       const gravityPerStory = floorAreaPerStory * 24; // kN
-      const columnCount = Math.max(9, Math.round(Math.sqrt(footprintSqm) / 3.6) * 4);
+      const columnCount = model
+        ? model.storeys[model.storeys.length > 1 ? 1 : 0].geometry.columns.length
+        : Math.max(9, Math.round(Math.sqrt(footprintSqm) / 3.6) * 4);
       const columnLoad = (gravityPerStory * project.stories) / columnCount; // kN each
-      const storyHeight = 3.0;
+      const storyHeight = model ? model.input.floorToFloorMm / 1000 : 3.0;
 
       const column = analyzeColumn(colSection, {
         axialLoad: columnLoad,
@@ -349,10 +356,12 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
         unbracedLength: storyHeight,
       }, concrete, steel);
 
-      const beamSpan = 4.5; // m typical grid
+      const beamSpan = model
+        ? Math.max(...model.storeys[model.storeys.length > 1 ? 1 : 0].geometry.beams.map((b) => b.spanMm)) / 1000
+        : 4.5; // m typical grid (older saves)
       const beamSection: RectSection = {
-        width: 250,
-        depth: 450,
+        width: PLACEHOLDER.beamWidth,
+        depth: PLACEHOLDER.beamDepth,
         cover: 40,
         mainBarDia: 16,
         numMainBars: 6,
@@ -542,14 +551,6 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
     downloadText(buildIfcStep(mesh, exportMeta()), `${exportBase()}_${project?.stories ?? 1}Story.ifc`, "application/x-step");
   };
 
-  // The curated 2D drawing behind this 3D model: the assignment, else the template whose
-  // preset matches what the mesh actually resolved to.
-  const sourceTemplate = templateBehindMesh(
-    project,
-    project.unitsPerFloor || 1,
-    resolveFloorPresetId(project, 1),
-  );
-
   return (
     <div className="screen">
       <PageHeader
@@ -588,30 +589,9 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
           </div>
         }
       />
+      <PlotShapeCallout project={project} />
 
-      {/* 2D → 3D source: the curated drawing this model was generated from */}
-      {(() => {
-        if (!sourceTemplate) return null;
-        const template = sourceTemplate;
-        return (
-          <div className="card row" style={{ gap: 12, alignItems: "center", padding: 10, marginBottom: 12 }}>
-            <FloorplanPreview plan={template} size={110} />
-            <div className="stack" style={{ gap: 2 }}>
-              <span className="faint" style={{ fontSize: 11 }}>
-                {lang === "bn" ? "২D টেমপ্লেট → ৩D মডেল" : "2D template → 3D model"}
-              </span>
-              <strong style={{ fontSize: 13 }}>{template.title}</strong>
-              <span className="faint small">
-                {template.id} · {template.category} · preset {template.presetId}
-              </span>
-            </div>
-            <div style={{ flex: 1 }} />
-            <Button variant="soft" onClick={() => onNavigate?.("setup")}>
-              {lang === "bn" ? "প্ল্যান বদলান" : "Change plan"}
-            </Button>
-          </div>
-        );
-      })()}
+      <PlanCard project={project} />
 
       {/* Phase Switcher Tabs at Top of Viewport */}
       <div className="row" style={{ gap: "6px", marginBottom: "12px", overflowX: "auto" }}>
@@ -942,8 +922,8 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
                 </h3>
                 <span className="small muted">
                   {lang === "bn"
-                    ? `স্থানীয় কীওয়ার্ড পার্সার · ${sourceTemplate ? sourceTemplate.id : "ডিফল্ট"} নকশা`
-                    : `Local keyword parser · ${sourceTemplate ? sourceTemplate.id : "default"} drawing`}
+                    ? `স্থানীয় কীওয়ার্ড পার্সার · ${project.planId ?? "ডিফল্ট"} নকশা`
+                    : `Local keyword parser · ${project.planId ?? "no plan yet"} plan`}
                 </span>
               </div>
               <Badge tone="primary">{lang === "bn" ? "নিয়মভিত্তিক" : "Rule-based"}</Badge>

@@ -2,11 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { useI18n } from "../i18n";
 import { Button, Card, Chip, PageHeader, Badge } from "../ui/kit";
 import { useActiveProject, useProject } from "../context/ProjectContext";
-import { areAllPhasesCompleted, setFloorplanForUnits, type PhaseItem } from "../engine/projectState";
+import { areAllPhasesCompleted, type PhaseItem } from "../engine/projectState";
 import { getInitialGreeting, processPhaseUserMessage } from "../engine/phasePlanner";
-import { availableTemplates, templateBehindMesh } from "../data/floorplanSelection";
-import { resolveFloorPresetId } from "../data/floorplanMapping";
-import { FloorplanPreview } from "../components/FloorplanPreview";
+import { PlanCard } from "../components/PlanCard";
+import { PlotShapeCallout } from "../components/PlotShapeCallout";
 
 interface Props {
   phaseId: string;
@@ -67,8 +66,6 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
   }
 
   const units = project.unitsPerFloor || 1;
-  const templates = availableTemplates(units);
-  const activeTemplate = templateBehindMesh(project, units, resolveFloorPresetId(project, 1));
 
   const startDesign = () => {
     saveProject({ ...project, designStarted: true, updatedAt: new Date().toISOString() });
@@ -114,12 +111,6 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
         : p,
     );
     saveProject({ ...project, phases, updatedAt: new Date().toISOString() });
-    onProjectUpdated?.();
-  };
-
-  const selectPlan = (templateId: string) => {
-    saveProject(setFloorplanForUnits(project, templateId));
-    refreshProject();
     onProjectUpdated?.();
   };
 
@@ -183,44 +174,9 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
           </div>
 
           {phase.kind === "floor" && (
-            <div style={{ marginTop: 12, padding: 12, background: "var(--surface-2)", borderRadius: 8 }}>
-              <div className="row" style={{ justifyContent: "space-between", marginBottom: 6 }}>
-                <h4 style={{ margin: 0, fontSize: 13 }}>
-                  {bn ? `২D ফ্লোর প্ল্যান — ${units} ইউনিট/তলা` : `2D floor plan — ${units} unit(s) per floor`}
-                </h4>
-                <Badge tone="sky">
-                  {templates.length} {bn ? "নকশা" : "designs"}
-                </Badge>
-              </div>
-              <p className="faint small" style={{ margin: "0 0 8px" }}>
-                {bn
-                  ? "একটি নকশা বাছুন — একই ইউনিট সংখ্যার সব তলায় এটিই ব্যবহৃত হবে এবং এটি থেকেই ৩D মডেল তৈরি হবে।"
-                  : "Pick one drawing — every floor with this unit count uses it, and it drives the 3D model."}
-              </p>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: 8 }}>
-                {templates.map((plan) => {
-                  const isActive = activeTemplate?.id === plan.id;
-                  return (
-                    <div
-                      key={plan.id}
-                      onClick={() => selectPlan(plan.id)}
-                      style={{
-                        cursor: "pointer",
-                        padding: 6,
-                        borderRadius: 8,
-                        background: isActive ? "var(--surface-active)" : "var(--paper)",
-                        border: isActive ? "2px solid var(--primary)" : "1px solid var(--border)",
-                      }}
-                    >
-                      <FloorplanPreview plan={plan} size={130} />
-                      <div style={{ fontSize: 11, marginTop: 4 }}>{plan.title}</div>
-                      <div className="faint" style={{ fontSize: 10 }}>
-                        {isActive ? (bn ? "✓ নির্বাচিত" : "✓ selected") : plan.id}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+            <div style={{ marginTop: 12 }}>
+              <PlotShapeCallout project={project} />
+              <PlanCard project={project} switchable onChanged={() => { refreshProject(); onProjectUpdated?.(); }} />
             </div>
           )}
 

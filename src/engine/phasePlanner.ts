@@ -8,8 +8,7 @@
  */
 
 import type { BuildingProject, PhaseItem } from "./projectState";
-import { assignedTemplate } from "../data/floorplanSelection";
-import { getTemplate } from "../data/floorplanLibrary";
+import { getPlan } from "../plans/library";
 
 export interface PhasePlanReply {
   replyText: string;
@@ -43,9 +42,7 @@ function isApprovalText(text: string): boolean {
 }
 
 function floorPlanLabel(project: BuildingProject): string | null {
-  const template = assignedTemplate(project, project.unitsPerFloor || 1);
-  if (template) return template.title;
-  return getTemplate(project.floorplanId)?.title ?? null;
+  return getPlan(project.planId ?? "")?.name.en ?? null;
 }
 
 export function getInitialGreeting(project: BuildingProject, phase: PhaseItem, lang: "en" | "bn"): string {
@@ -195,16 +192,16 @@ export function processPhaseUserMessage(
   }
 
   if (phase.kind === "floor") {
-    const plan = assignedTemplate(project, units);
+    const plan = getPlan(project.planId ?? "");
     const colDim = stories >= 6 ? 350 : 250;
     const balcony = numeric && numeric > 0 && numeric < 10 ? Math.min(2, Math.max(0.9, numeric)) : 1.2;
     const planLine = plan
       ? isBn
-        ? `২D টেমপ্লেট: ${plan.title} (${plan.id}), ${plan.unitsPerFloor} ইউনিট/তলা — এই প্ল্যানটি একই ইউনিট সংখ্যার সব তলায় প্রযোজ্য।`
-        : `2D template: ${plan.title} (${plan.id}), ${plan.unitsPerFloor} unit(s) per floor — this drawing applies to every floor with the same unit count.`
+        ? `ফ্লোর প্ল্যান: ${plan.name.bn} (${plan.id}), ${plan.unitsPerFloor} ইউনিট/তলা — এই প্ল্যানটি সব তলায় প্রযোজ্য।`
+        : `Floor plan: ${plan.name.en} (${plan.id}), ${plan.unitsPerFloor} unit(s) per floor — this plan applies to every typical floor.`
       : isBn
-        ? "কোনো ২D টেমপ্লেট নির্বাচিত হয়নি; নিচের গ্যালারি থেকে বেছে নিন।"
-        : "No 2D template selected yet — pick one from the gallery below.";
+        ? "কোনো ফ্লোর প্ল্যান নির্বাচিত হয়নি; প্রকল্প সেটআপে প্লটের মাপ দিয়ে বেছে নিন।"
+        : "No floor plan chosen yet — enter the plot shape in project setup and pick one.";
     return {
       replyText: `${planLine}\n${
         isBn
@@ -213,7 +210,7 @@ export function processPhaseUserMessage(
       }`,
       metrics: {
         "Units per Floor": `${units}`,
-        "2D Template": plan ? plan.id : "none",
+        "Floor Plan": plan ? plan.id : "none",
         "Slab Thickness": "125 mm",
         "Column Sizing": `${colDim} × ${colDim} mm`,
         "Balcony Depth": `${balcony} m`,
