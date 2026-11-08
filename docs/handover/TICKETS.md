@@ -28,7 +28,7 @@ Do: add to `src/plans/library.ts`: `p1-3b`, `p2-2b-lr`, `p2-3b-lr`, `p2-3b-fb`, 
 Test: the existing sweep in `plans.test.ts` must pass. Render each once (`renderPlanSvg` + headless Edge) into `../review/`.
 Status: added `p1-3b`, `p1-4b-wide`, `p2-2b-lr`, `p2-3b-lr`, `p2-3b-fb` (sweep passes, rendered in `../review/plan-*.png`). Still open: `p3-2b`, `p4-2b`, `p4-1b`. Three or four flats per floor leave interior kitchens and toilets, so they need the light-shaft decision (toilets/kitchens on a shaft); until then they are blocked, not skipped. Defaults used: lift and duct one bay in the X4 plans and a separate duct in the wide plans; toilets on outside walls; 1.35 m spine kept in the X4 plans, 1.5 m horizontal corridor in the wide plans.
 
-## M2-4 Site entry + plan picker · Sonnet high · todo
+## M2-4 Site entry + plan picker · Sonnet high · done
 Read: `src/screens/ProjectSetupScreen.tsx`; `BuildingProject` and `createNewProject` in `src/engine/projectState.ts` (grep); `src/model/{building,migrate,legacyV2}.ts`; `src/plans/{fit,render}.ts`.
 Do: setup asks frontage, depth, road width, road side, corner (area shown in katha and m²). `BuildingProject` gains optional `plot`, `planId`, `mirror`; `migrateV2` maps them and drops the matching `pendingInputs`. Picker: plans that fit show an inline SVG; plans that don't show the fitter's reason.
 Test: unit tests for new pure logic; one headless screenshot in light and dark.

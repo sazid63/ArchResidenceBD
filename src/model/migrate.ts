@@ -18,6 +18,7 @@ import {
   type ProjectSpec,
   type SteelGradeMpa,
 } from "./projectSpec";
+import { getPlan } from "../plans/library";
 import { landAreaToSqm, normaliseLandUnit } from "./units";
 
 export class ProjectFormatError extends Error {
@@ -49,6 +50,20 @@ function wholeAtLeastOne(x: unknown): number | undefined {
   return n === undefined ? undefined : Math.max(1, Math.round(n));
 }
 
+const ROAD_SIDES = ["north", "south", "east", "west"] as const;
+
+/** The plot shape from a 2.6+ save, or undefined when any number is missing or not positive. */
+function readPlotShape(x: unknown) {
+  if (!x || typeof x !== "object") return undefined;
+  const o = x as Record<string, unknown>;
+  const frontageM = positiveNumber(o.frontageM);
+  const depthM = positiveNumber(o.depthM);
+  const roadWidthM = positiveNumber(o.roadWidthM);
+  if (frontageM === undefined || depthM === undefined || roadWidthM === undefined) return undefined;
+  const roadSide = ROAD_SIDES.find((s) => s === o.roadSide);
+  return { frontageM, depthM, roadWidthM, ...(roadSide ? { roadSide } : {}), ...(o.cornerPlot === true ? { cornerPlot: true } : {}) };
+}
+
 function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T;
 }
@@ -67,8 +82,13 @@ export function migrateV2(p: V2Project, now: string = new Date().toISOString()):
   if (areaSqm === undefined) pendingInputs.push("/site/plot/areaSqm");
   else provenance["/site/plot/areaSqm"] = imported;
 
-  // v2 never asked for the plot's shape or road; the building can't be fitted without them.
-  pendingInputs.push("/site/plot/frontageM", "/site/plot/depthM", "/site/plot/roadWidthM");
+  // Saves from before 2.6 never asked for the plot's shape or road; the building can't be fitted without them.
+  const shape = readPlotShape(p.plot);
+  if (shape) {
+    const entered: ProvenanceEntry = { source: "user", detail: "entered in project setup", at: now };
+    for (const k of ["frontageM", "depthM", "roadWidthM"]) provenance[`/site/plot/${k}`] = entered;
+    if (shape.roadSide) provenance["/site/plot/roadSide"] = entered;
+  } else pendingInputs.push("/site/plot/frontageM", "/site/plot/depthM", "/site/plot/roadWidthM");
 
   const storeys = wholeAtLeastOne(p.stories);
   if (storeys === undefined) pendingInputs.push("/building/storeys/count");
@@ -86,6 +106,12 @@ export function migrateV2(p: V2Project, now: string = new Date().toISOString()):
 
   const planByUnits: Record<string, string> = { ...(p.floorplanAssignments ?? {}) };
   if (p.floorplanId && units !== undefined && !planByUnits[String(units)]) planByUnits[String(units)] = p.floorplanId;
+  // A v3 plan id, when it names a real library plan, wins over the legacy template for that unit count.
+  const planId = typeof p.planId === "string" && getPlan(p.planId) ? p.planId : undefined;
+  if (planId && units !== undefined) {
+    planByUnits[String(units)] = planId;
+    provenance[`/design/planByUnits/${units}`] = { source: "user", detail: "chosen in project setup", at: now };
+  }
 
   const { phases, ...rest } = p;
 
@@ -102,7 +128,7 @@ export function migrateV2(p: V2Project, now: string = new Date().toISOString()):
     },
     site: {
       address: { division: "Dhaka", district: "Dhaka", ...(p.address ? { addressLine: p.address } : {}) },
-      plot: { areaSqm: areaSqm ?? 0 },
+      plot: { areaSqm: areaSqm ?? 0, ...(shape ?? {}) },
       soil: { status: "not_provided" },
       jurisdiction: { authority: "rajuk", rulePack: "rajuk-2008" },
     },
@@ -116,21 +142,26 @@ export function migrateV2(p: V2Project, now: string = new Date().toISOString()):
     },
     design: {
       planByUnits,
+      ...(p.mirror === true ? { mirror: true } : {}),
       concreteGradeMpa: concrete ?? 25,
       steelGradeMpa: steel ?? 415,
     },
     phases: clone(Array.isArray(phases) ? phases : []) as PhaseRecord[],
     ...(p.activePhaseId ? { activePhaseId: p.activePhaseId } : {}),
     assumptions: [
-      {
-        id: "v2-plot-shape",
-        subject: "Plot shape",
-        statement:
-          "Plot frontage, depth and road width were not recorded before v3. They must be entered before the building can be fitted to the plot.",
-        basis: "conservative_default",
-        verifyOnSite: true,
-        relatedPath: "/site/plot/frontageM",
-      },
+      ...(shape
+        ? []
+        : [
+            {
+              id: "v2-plot-shape",
+              subject: "Plot shape",
+              statement:
+                "Plot frontage, depth and road width were not recorded before v3. They must be entered before the building can be fitted to the plot.",
+              basis: "conservative_default" as const,
+              verifyOnSite: true,
+              relatedPath: "/site/plot/frontageM",
+            },
+          ]),
       {
         id: "v2-region",
         subject: "Location",

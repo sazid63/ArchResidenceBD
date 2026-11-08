@@ -443,3 +443,6 @@ body.no-scroll { overflow: hidden; }
 @media (max-width: 640px) {
   .settings-row { flex-direction: column; align-items: flex-start; }
 }
+
+/* Plan thumbnails in the setup picker: the SVG has fixed pixel size, so let it scale to the card. */
+.plan-thumb svg { display: block; width: 100%; height: auto; }

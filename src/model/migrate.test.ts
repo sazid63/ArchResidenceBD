@@ -44,6 +44,33 @@ describe("migrateV2", () => {
     expect(spec.assumptions.map((a) => a.id)).toContain("v2-plot-shape");
   });
 
+  it("takes the plot shape, plan and mirror from a 2.6 save and stops asking for them", () => {
+    const v2 = realV2({
+      plot: { frontageM: 12.2, depthM: 18.3, roadWidthM: 6, roadSide: "south", cornerPlot: true },
+      planId: "p1-4b",
+      mirror: true,
+    });
+    const spec = migrateV2(v2, NOW);
+    expect(spec.site.plot).toMatchObject({ frontageM: 12.2, depthM: 18.3, roadWidthM: 6, roadSide: "south", cornerPlot: true });
+    expect(spec.pendingInputs).not.toContain("/site/plot/frontageM");
+    expect(spec.pendingInputs).not.toContain("/site/plot/depthM");
+    expect(spec.pendingInputs).not.toContain("/site/plot/roadWidthM");
+    expect(spec.assumptions.map((a) => a.id)).not.toContain("v2-plot-shape");
+    expect(spec.design.planByUnits["2"]).toBe("p1-4b");
+    expect(spec.design.mirror).toBe(true);
+    expect(spec.provenance["/site/plot/frontageM"].source).toBe("user");
+    expect(spec.provenance["/design/planByUnits/2"].source).toBe("user");
+  });
+
+  it("ignores an unknown plan id and a plot shape with a missing number", () => {
+    const v2 = realV2({ planId: "no-such-plan" });
+    (v2 as V2Project).plot = { frontageM: 12, depthM: 0, roadWidthM: 6, roadSide: "north" };
+    const spec = migrateV2(v2, NOW);
+    expect(spec.design.planByUnits["2"]).not.toBe("no-such-plan");
+    expect(spec.site.plot.frontageM).toBeUndefined();
+    expect(spec.pendingInputs).toContain("/site/plot/depthM");
+  });
+
   it("keeps every phase and every unmapped v2 field", () => {
     const v2 = realV2();
     v2.phases[0].messages.push({ who: "user", text: "৪ কাঠা" });

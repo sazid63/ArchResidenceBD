@@ -63,6 +63,18 @@ export interface BuildingProject {
    * construction management). Optional for backward compatibility.
    */
   customization?: BuildingCustomization;
+  /** The plot's real shape and access road (2.6, M2-4). Absent in older saves: ask, never guess. */
+  plot?: {
+    frontageM: number;
+    depthM: number;
+    roadWidthM: number;
+    roadSide: "north" | "south" | "east" | "west";
+    cornerPlot?: boolean;
+  };
+  /** Plan from `src/plans/library.ts` chosen for this plot. */
+  planId?: string;
+  /** Flip the plan left-right. */
+  mirror?: boolean;
 }
 
 const STORAGE_KEY = "archres_v2_active_project";
@@ -251,6 +263,9 @@ export function createNewProject(params: {
   unitsPerFloor: number;
   address?: string;
   floorplanId?: string;
+  plot?: BuildingProject["plot"];
+  planId?: string;
+  mirror?: boolean;
 }): BuildingProject {
   const id = `project-${uniqueSuffix()}`;
   const plotSqm = plotToSqm(params.plotSize, params.plotUnit);
@@ -272,6 +287,9 @@ export function createNewProject(params: {
     activePhaseId: phases[0].id,
     customization: createDefaultCustomization(),
     ...resolveInitialFloorplan(params.unitsPerFloor || 2, params.floorplanId),
+    ...(params.plot ? { plot: params.plot } : {}),
+    ...(params.planId ? { planId: params.planId } : {}),
+    ...(params.mirror ? { mirror: true } : {}),
   };
 
   saveActiveProject(project);

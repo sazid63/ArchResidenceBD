@@ -1,16 +1,38 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useI18n, fmtNum } from "../i18n";
 import { Button, Card, PageHeader, Callout } from "../ui/kit";
-import { createNewProject, generateRandomBuildingProject, plotToSqm } from "../engine/projectState";
-import { availableTemplates, chooseTemplate } from "../data/floorplanSelection";
-import { categoryForUnits, getTemplate, type FloorPlanTemplate } from "../data/floorplanLibrary";
-import { FloorplanPreview } from "../components/FloorplanPreview";
+import { createNewProject, generateRandomBuildingProject } from "../engine/projectState";
 import { useProject } from "../context/ProjectContext";
+import { deriveGeometry } from "../plans/geometry";
+import { renderPlanSvg } from "../plans/render";
+import {
+  FEET_TO_M,
+  availableUnitCounts,
+  planChoices,
+  plotProblems,
+  rejectionText,
+  summarisePlot,
+  type PlotShape,
+} from "../model/planChoices";
 
 interface Props {
   onNavigate: (id: string) => void;
   onProjectCreated?: () => void;
 }
+
+type LengthUnit = "ft" | "m";
+type RoadSide = PlotShape["roadSide"];
+
+const toM = (v: number, u: LengthUnit) => (u === "ft" ? v * FEET_TO_M : v);
+const fromM = (m: number, u: LengthUnit) => (u === "ft" ? m / FEET_TO_M : m);
+const round1 = (v: number) => Math.round(v * 10) / 10;
+
+const ROAD_SIDES: Array<{ id: RoadSide; en: string; bn: string }> = [
+  { id: "south", en: "South", bn: "দক্ষিণ" },
+  { id: "north", en: "North", bn: "উত্তর" },
+  { id: "east", en: "East", bn: "পূর্ব" },
+  { id: "west", en: "West", bn: "পশ্চিম" },
+];
 
 export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
   const { t, lang } = useI18n();
@@ -19,59 +41,100 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
 
   const [name, setName] = useState("Dhanmondi Residential Building");
   const [stories, setStories] = useState(6);
-  const [plotSize, setPlotSize] = useState(3.5);
-  const [plotUnit, setPlotUnit] = useState<"katha" | "decimal" | "sqft" | "sqm">("katha");
-  const [unitsPerFloor, setUnitsPerFloor] = useState(2);
+  const [unit, setUnit] = useState<LengthUnit>("ft");
+  const [frontage, setFrontage] = useState(40);
+  const [depth, setDepth] = useState(65);
+  const [roadWidth, setRoadWidth] = useState(20);
+  const [roadSide, setRoadSide] = useState<RoadSide>("south");
+  const [corner, setCorner] = useState(false);
+  const [mirror, setMirror] = useState(false);
+  const unitCounts = useMemo(() => availableUnitCounts(), []);
+  const [unitsPerFloor, setUnitsPerFloor] = useState(unitCounts[0]);
+  const [planId, setPlanId] = useState<string | null>(null);
   const [location, setLocation] = useState("Dhaka (RAJUK)");
   const [error, setError] = useState<string | null>(null);
-  /** null = no manual choice; a random drawing from the matching category is used at creation. */
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [showGallery, setShowGallery] = useState(false);
 
-  const sqm = Math.round(plotToSqm(plotSize, plotUnit) * 100) / 100;
-  const available: FloorPlanTemplate[] = availableTemplates(unitsPerFloor);
-  const selected = getTemplate(selectedId);
+  const frontageM = toM(frontage, unit);
+  const depthM = toM(depth, unit);
+  const roadWidthM = toM(roadWidth, unit);
+  const problems = plotProblems({ frontageM, depthM, roadWidthM });
+  const summary = problems.includes("frontage") || problems.includes("depth") ? null : summarisePlot(frontageM, depthM);
 
-  // A manual pick only survives while it belongs to the current unit category.
+  const choices = useMemo(
+    () => (summary ? planChoices(frontageM, depthM, { unitsPerFloor, mirror }) : []),
+    [summary, frontageM, depthM, unitsPerFloor, mirror],
+  );
+  const previews = useMemo(() => {
+    const out: Record<string, string> = {};
+    for (const c of choices) if (c.fit.ok) out[c.plan.id] = renderPlanSvg(deriveGeometry(c.fit.fitted), { lang });
+    return out;
+  }, [choices, lang]);
+
+  // The selected plan must still fit; otherwise fall back to the first one that does.
   useEffect(() => {
-    setSelectedId((current) => {
-      const template = getTemplate(current);
-      return template && categoryForUnits(template.unitsPerFloor) === categoryForUnits(unitsPerFloor) ? current : null;
+    setPlanId((current) => {
+      const fits = choices.filter((c) => c.fit.ok);
+      if (current && fits.some((c) => c.plan.id === current)) return current;
+      return fits[0]?.plan.id ?? null;
     });
-  }, [unitsPerFloor]);
+  }, [choices]);
+
+  const changeUnit = (next: LengthUnit) => {
+    if (next === unit) return;
+    setFrontage(round1(fromM(frontageM, next)));
+    setDepth(round1(fromM(depthM, next)));
+    setRoadWidth(round1(fromM(roadWidthM, next)));
+    setUnit(next);
+  };
 
   const create = useCallback((e?: React.MouseEvent<HTMLButtonElement>) => {
     e?.stopPropagation();
     e?.preventDefault();
     if (!name.trim()) return setError(bn ? "প্রকল্পের নাম লিখুন।" : "Please enter a project name.");
     if (stories < 1 || stories > 30) return setError(bn ? "তলা ১–৩০ এর মধ্যে হতে হবে।" : "Stories must be between 1 and 30.");
-    if (plotSize <= 0) return setError(bn ? "জমির পরিমাণ দিন।" : "Please enter a valid plot size.");
+    if (problems.length || !summary) return setError(bn ? "প্লটের সামনের দিক, গভীরতা ও রাস্তার প্রস্থ দিন।" : "Enter the plot frontage, depth and road width.");
+    if (!planId) return setError(bn ? "এই প্লটে কোনো নকশা বসে না — মাপ বাড়ান বা ইউনিট সংখ্যা বদলান।" : "No plan fits this plot. Change the size or the number of flats per floor.");
 
     const project = createNewProject({
       name: name.trim(),
       stories,
-      plotSize,
-      plotUnit,
+      plotSize: summary.katha,
+      plotUnit: "katha",
       unitsPerFloor,
       address: location,
-      floorplanId: selectedId ?? undefined, // undefined → random pick from the category
+      plot: {
+        frontageM: Math.round(frontageM * 100) / 100,
+        depthM: Math.round(depthM * 100) / 100,
+        roadWidthM: Math.round(roadWidthM * 100) / 100,
+        roadSide,
+        ...(corner ? { cornerPlot: true } : {}),
+      },
+      planId,
+      mirror,
     });
-    // Save through context to keep React state in sync with localStorage
     saveProject(project);
     onProjectCreated?.();
     onNavigate(`phase:${project.phases[0].id}`);
-  }, [name, stories, plotSize, plotUnit, unitsPerFloor, location, selectedId, onProjectCreated, onNavigate, saveProject]);
+  }, [name, stories, problems, summary, planId, unitsPerFloor, location, frontageM, depthM, roadWidthM, roadSide, corner, mirror, bn, onProjectCreated, onNavigate, saveProject]);
 
-  const randomize = useCallback(() => {
-    const { template } = chooseTemplate(unitsPerFloor);
-    if (template) setSelectedId(template.id);
-  }, [unitsPerFloor]);
+  const unitLabel = unit === "ft" ? (bn ? "ফুট" : "ft") : bn ? "মিটার" : "m";
+  const fitCount = choices.filter((c) => c.fit.ok).length;
+
+  const lengthField = (id: string, label: string, value: number, set: (n: number) => void) => (
+    <div className="field" style={{ flex: 1, minWidth: 120 }}>
+      <label className="field-label" htmlFor={id}>{label}</label>
+      <div className="row" style={{ gap: 6, alignItems: "center" }}>
+        <input id={id} type="number" step="0.5" min={0.5} className="input" style={{ width: 96 }} value={value} onChange={(e) => set(Number(e.target.value) || 0)} />
+        <span className="faint small">{unitLabel}</span>
+      </div>
+    </div>
+  );
 
   return (
     <div className="screen">
       <PageHeader
         title={bn ? "নতুন আবাসিক ভবন প্রকল্প" : "Start New Residential Project"}
-        subtitle={bn ? "নির্বাচিত ২D ফ্লোর প্ল্যান থেকেই ৩D মডেল তৈরি হবে" : "The selected 2D floor plan is what the 3D model is built from"}
+        subtitle={bn ? "আপনার প্লটের মাপে নকশা বসিয়ে ভবন তৈরি হবে" : "The building is fitted to your plot's real size and shape"}
         actions={
           <Button
             variant="primary"
@@ -89,7 +152,7 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
 
       <div className="grid-2">
         <Card className="stack">
-          <h3>{bn ? "১. ভবনের তথ্য" : "1. Building Specifications"}</h3>
+          <h3>{bn ? "১. প্লট ও ভবন" : "1. Plot and Building"}</h3>
 
           <div className="field">
             <label className="field-label" htmlFor="project-name-input">{t("setupNameLabel")}</label>
@@ -97,218 +160,138 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
           </div>
 
           <div className="field">
-            <label className="field-label" htmlFor="project-stories-input">
-              {bn ? "তলা সংখ্যা" : "Number of Stories"}
-            </label>
+            <label className="field-label" htmlFor="project-stories-input">{bn ? "তলা সংখ্যা" : "Number of Stories"}</label>
             <div className="row" style={{ gap: 8 }}>
-              <input
-                id="project-stories-input"
-                type="number"
-                min={1}
-                max={30}
-                className="input"
-                style={{ width: 110 }}
-                value={stories}
-                onChange={(e) => setStories(Number(e.target.value) || 1)}
-              />
+              <input id="project-stories-input" type="number" min={1} max={30} className="input" style={{ width: 110 }} value={stories} onChange={(e) => setStories(Number(e.target.value) || 1)} />
               {[2, 4, 6, 8].map((s) => (
-                <Button key={s} variant={stories === s ? "primary" : "soft"} onClick={() => setStories(s)}>
-                  {s}
-                </Button>
+                <Button key={s} variant={stories === s ? "primary" : "soft"} onClick={() => setStories(s)}>{s}</Button>
               ))}
             </div>
           </div>
 
           <div className="field">
-            <label className="field-label" htmlFor="project-plot-size-input">
-              {bn ? "জমির পরিমাণ" : "Plot Size & Unit"}
-            </label>
-            <div className="row" style={{ gap: 8 }}>
-              <input
-                id="project-plot-size-input"
-                type="number"
-                step="0.1"
-                min={0.1}
-                className="input"
-                style={{ width: 110 }}
-                value={plotSize}
-                onChange={(e) => setPlotSize(Number(e.target.value) || 1)}
-              />
-              <select
-                className="input"
-                style={{ width: 150 }}
-                value={plotUnit}
-                aria-label={bn ? "জমির একক" : "Plot unit"}
-                onChange={(e) => setPlotUnit(e.target.value as "katha" | "decimal" | "sqft" | "sqm")}
-              >
-                <option value="katha">কাঠা (Katha)</option>
-                <option value="decimal">শতক (Decimal)</option>
-                <option value="sqft">বর্গফুট (Sq.ft)</option>
-                <option value="sqm">বর্গমিটার (Sq.m)</option>
-              </select>
+            <div className="row" style={{ justifyContent: "space-between", alignItems: "center" }}>
+              <span className="field-label">{bn ? "প্লটের মাপ" : "Plot size"}</span>
+              <div className="row" style={{ gap: 4 }} role="group" aria-label={bn ? "দৈর্ঘ্যের একক" : "Length unit"}>
+                <Button variant={unit === "ft" ? "primary" : "soft"} onClick={() => changeUnit("ft")}>{bn ? "ফুট" : "ft"}</Button>
+                <Button variant={unit === "m" ? "primary" : "soft"} onClick={() => changeUnit("m")}>{bn ? "মিটার" : "m"}</Button>
+              </div>
             </div>
-            <span className="faint small">≈ {sqm} m² ({Math.round(sqm * 10.7639)} sq.ft)</span>
-          </div>
-
-          <div className="field">
-            <label className="field-label">{bn ? "প্রতি তলায় ইউনিট" : "Units Per Floor"}</label>
-            <div className="row" style={{ gap: 6 }}>
-              {[1, 2, 3, 4].map((u) => (
-                <Button key={u} variant={unitsPerFloor === u ? "primary" : "soft"} onClick={() => setUnitsPerFloor(u)}>
-                  {u} {bn ? "ইউনিট" : u === 1 ? "Single Unit" : "Units"}
-                </Button>
-              ))}
+            <div className="row" style={{ gap: 12, flexWrap: "wrap" }}>
+              {lengthField("plot-frontage-input", bn ? "রাস্তার দিকের মাপ" : "Frontage (along the road)", frontage, setFrontage)}
+              {lengthField("plot-depth-input", bn ? "গভীরতা" : "Depth", depth, setDepth)}
+              {lengthField("plot-road-input", bn ? "রাস্তার প্রস্থ" : "Road width", roadWidth, setRoadWidth)}
             </div>
             <span className="faint small">
-              {available.length} {bn ? "টি যাচাইকৃত ২D নকশা" : "verified 2D designs in this category"}
+              {summary
+                ? `≈ ${fmtNum(summary.katha, lang)} ${bn ? "কাঠা" : "katha"} · ${fmtNum(summary.areaSqm, lang)} m² · ${fmtNum(summary.sqft, lang)} ${bn ? "বর্গফুট" : "sq ft"}`
+                : bn ? "মাপগুলো দিন" : "Enter the three sizes"}
             </span>
           </div>
 
-          <div className="field">
-            <label className="field-label">{bn ? "ফ্লোরপ্ল্যান টেমপ্লেট" : "Floorplan Template"}</label>
-            <div className="row" style={{ gap: 8, marginBottom: 8 }}>
-              <Button variant={showGallery ? "primary" : "soft"} onClick={() => setShowGallery(!showGallery)}>
-                {showGallery ? (bn ? "গ্যালারি লুকান" : "Hide Gallery") : (bn ? "গ্যালারি" : "Show Gallery")}
-              </Button>
-              <Button variant="soft" onClick={randomize} disabled={available.length === 0}>
-                🎲 {bn ? "একটি বাছুন" : "Pick one for me"}
-              </Button>
-              {selectedId ? (
-                <Button variant="ghost" onClick={() => setSelectedId(null)}>
-                  {bn ? "স্বয়ংক্রিয়" : "Back to automatic"}
-                </Button>
-              ) : null}
+          <div className="row" style={{ gap: 16, flexWrap: "wrap", alignItems: "flex-end" }}>
+            <div className="field">
+              <label className="field-label" htmlFor="plot-roadside-select">{bn ? "রাস্তা কোন দিকে" : "Road is on the"}</label>
+              <select id="plot-roadside-select" className="input" value={roadSide} onChange={(e) => setRoadSide(e.target.value as RoadSide)}>
+                {ROAD_SIDES.map((s) => <option key={s.id} value={s.id}>{bn ? s.bn : s.en}</option>)}
+              </select>
             </div>
-
-            {selected ? (
-              <div className="card" style={{ padding: 8 }}>
-                <div className="row" style={{ gap: 12, flexWrap: "wrap", alignItems: "center" }}>
-                  <FloorplanPreview plan={selected} size={220} />
-                  <div className="stack" style={{ flex: 1, minWidth: 190 }}>
-                    <h4 style={{ margin: 0, fontSize: 14 }}>{selected.title}</h4>
-                    <p style={{ margin: 0, fontSize: 12, color: "var(--muted)" }}>{selected.description}</p>
-                    <div className="row" style={{ gap: 4, flexWrap: "wrap" }}>
-                      {selected.features.slice(0, 4).map((f, i) => (
-                        <span key={i} className="badge" style={{ fontSize: 10 }}>{f}</span>
-                      ))}
-                    </div>
-                    <span className="faint small">
-                      {selected.id} · {selected.category} · 3D {selected.presetId}
-                      {selected.plotSizeRange ? ` · ${selected.plotSizeRange}` : ""}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="card" style={{ padding: 10, borderStyle: "dashed" }}>
-                <strong style={{ fontSize: 13 }}>{bn ? "স্বয়ংক্রিয় নির্বাচন" : "Automatic selection"}</strong>
-                <p className="faint small" style={{ margin: "4px 0 0" }}>
-                  {bn
-                    ? `প্রকল্প তৈরির সময় ${unitsPerFloor}-ইউনিট ক্যাটাগরি থেকে একটি নকশা র্যান্ডমভাবে নেওয়া হবে।`
-                    : `A design will be picked at random from the ${unitsPerFloor}-unit category when the project is created.`}
-                </p>
-              </div>
-            )}
-
-            {showGallery && available.length > 0 && (
-              <div
-                onClick={() => setShowGallery(false)}
-                style={{
-                  position: "fixed",
-                  inset: 0,
-                  background: "color-mix(in srgb, #0b0f19 45%, transparent)",
-                  zIndex: 1000,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: 20,
-                }}
-              >
-                <div
-                  onClick={(e) => e.stopPropagation()}
-                  className="card"
-                  style={{ width: "90%", maxWidth: 900, maxHeight: "80vh", overflow: "auto", padding: 16 }}
-                >
-                  <div className="row" style={{ justifyContent: "space-between", marginBottom: 8 }}>
-                    <h3>{bn ? "ফ্লোরপ্ল্যান গ্যালারি" : "Floorplan Gallery"}</h3>
-                    <Button variant="ghost" onClick={() => setShowGallery(false)}>✕</Button>
-                  </div>
-                  <p className="faint small">
-                    {bn
-                      ? "একটি নকশা বেছে নিন — একই ইউনিট সংখ্যার সব তলায় এটিই ব্যবহৃত হবে।"
-                      : "Pick one drawing — every floor with this unit count will use it."}
-                  </p>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(210px, 1fr))", gap: 12 }}>
-                    {available.map((plan) => (
-                      <div
-                        key={plan.id}
-                        className="card"
-                        style={{
-                          cursor: "pointer",
-                          padding: 6,
-                          border: selectedId === plan.id ? "2px solid var(--tone-brand)" : "1px solid var(--border)",
-                        }}
-                        onClick={() => {
-                          setSelectedId(plan.id);
-                          setShowGallery(false);
-                        }}
-                      >
-                        <FloorplanPreview plan={plan} size={190} />
-                        <div style={{ fontSize: 12, textAlign: "center", marginTop: 6 }}>{plan.title}</div>
-                        <div className="faint" style={{ fontSize: 10, textAlign: "center" }}>{plan.id}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
+            <label className="row" style={{ gap: 6, alignItems: "center" }}>
+              <input type="checkbox" checked={corner} onChange={(e) => setCorner(e.target.checked)} />
+              <span>{bn ? "কর্নার প্লট" : "Corner plot"}</span>
+            </label>
           </div>
 
           <div className="field">
-            <label className="field-label" htmlFor="project-location-select">
-              {bn ? "অবস্থান ও কর্তৃপক্ষ" : "Location & Authority"}
-            </label>
+            <label className="field-label">{bn ? "প্রতি তলায় ফ্ল্যাট" : "Flats per floor"}</label>
+            <div className="row" style={{ gap: 6 }}>
+              {unitCounts.map((u) => (
+                <Button key={u} variant={unitsPerFloor === u ? "primary" : "soft"} onClick={() => setUnitsPerFloor(u)}>
+                  {fmtNum(u, lang)}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <div className="field">
+            <label className="field-label" htmlFor="project-location-select">{bn ? "অবস্থান ও কর্তৃপক্ষ" : "Location & Authority"}</label>
             <select id="project-location-select" className="input" value={location} onChange={(e) => setLocation(e.target.value)}>
               <option value="Dhaka (RAJUK)">Dhaka (RAJUK)</option>
-              <option value="Chittagong (CDA)">Chittagong (CDA)</option>
-              <option value="Sylhet (SCC)">Sylhet (SCC)</option>
-              <option value="Pourashava / District">Pourashava / Municipality</option>
             </select>
           </div>
         </Card>
 
         <Card className="stack">
-          <h3>{bn ? "২. পর্যায়ক্রম" : "2. Generated Phase Breakdown"}</h3>
-          <p className="muted small">
-            {bn ? `${stories} তলা ভবনের ধাপগুলো:` : `Your ${stories}-storey structure will be planned in these phases:`}
+          <div className="row" style={{ justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+            <h3>{bn ? "২. নকশা বাছুন" : "2. Choose a Plan"}</h3>
+            <label className="row" style={{ gap: 6, alignItems: "center" }}>
+              <input type="checkbox" checked={mirror} onChange={(e) => setMirror(e.target.checked)} />
+              <span className="small">{bn ? "ডান-বাম উল্টে দিন" : "Mirror left–right"}</span>
+            </label>
+          </div>
+          <p className="muted small" style={{ margin: 0 }}>
+            {summary
+              ? bn
+                ? `${fmtNum(fitCount, lang)}টি নকশা এই প্লটে বসে। সেটব্যাক ধরা হয়েছে সামনে ১.৫ মি, পেছনে ২ মি, দুই পাশে ১ মি (অনুমান — RAJUK সারণি যোগ হলে বদলাবে)।`
+                : `${fitCount} of ${choices.length} plans fit this plot. Setbacks assumed: 1.5 m front, 2 m rear, 1 m each side (an assumption until the RAJUK table is added).`
+              : bn ? "প্লটের মাপ দিলে নকশা দেখা যাবে।" : "Enter the plot size to see which plans fit."}
           </p>
-          <div className="stack" style={{ gap: 6 }}>
-            {[
-              bn ? "সাইট ও খনন" : "Site & Excavation",
-              bn ? "ফাউন্ডেশন ও ফুটিং" : "Foundation & Footings",
-              bn ? "নিচতলা (পার্কিং ও প্রবেশ)" : "Ground Floor (Parking & Entry)",
-              ...Array.from({ length: Math.max(0, stories - 1) }).map(
-                (_, i) => (bn ? `${fmtNum(i + 1, lang)}ম তলা` : `Floor ${i + 1}`) + ` · ${unitsPerFloor} ${bn ? "ইউনিট" : "units"}`,
-              ),
-              bn ? "ছাদ ও সীমানা প্রাচীর" : "Rooftop & Boundary",
-              bn ? "ইউটিলিটি ও সেবা" : "Utilities & Common Services",
-            ].map((label, i) => (
-              <div key={i} className="row" style={{ padding: "6px 10px", background: "var(--surface-sunken)", borderRadius: 6 }}>
-                <span style={{ fontWeight: 600, width: 22 }}>{i + 1}.</span>
-                <span className="grow">{label}</span>
-              </div>
-            ))}
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(190px, 1fr))", gap: 12 }}>
+            {choices.map((c) => {
+              const ok = c.fit.ok;
+              const selected = ok && planId === c.plan.id;
+              return (
+                <button
+                  key={c.plan.id}
+                  type="button"
+                  disabled={!ok}
+                  aria-pressed={selected}
+                  onClick={() => setPlanId(c.plan.id)}
+                  className="card"
+                  data-plan-id={c.plan.id}
+                  style={{
+                    textAlign: "left",
+                    padding: 8,
+                    cursor: ok ? "pointer" : "not-allowed",
+                    opacity: ok ? 1 : 0.7,
+                    border: selected ? "2px solid var(--tone-brand)" : "1px solid var(--border)",
+                    background: "var(--surface)",
+                    color: "inherit",
+                  }}
+                >
+                  {ok ? (
+                    <div className="plan-thumb" dangerouslySetInnerHTML={{ __html: previews[c.plan.id] }} />
+                  ) : (
+                    <div className="faint small" style={{ minHeight: 80, display: "flex", alignItems: "center" }}>
+                      {rejectionText(c.fit.ok ? [] : c.fit.reasons, lang)}
+                    </div>
+                  )}
+                  <div style={{ fontSize: 13, fontWeight: 600, marginTop: 6 }}>{c.plan.name[lang]}</div>
+                  <div className="faint" style={{ fontSize: 11 }}>
+                    {fmtNum(c.plan.unitsPerFloor, lang)} × {fmtNum(c.plan.bedroomsPerUnit, lang)} {bn ? "বেডরুম" : "bed"}
+                  </div>
+                </button>
+              );
+            })}
           </div>
 
-          <Callout title={bn ? "টেমপ্লেট ওয়ার্কফ্লো" : "Template workflow"}>
+          <Callout title={bn ? "নকশা কীভাবে বসে" : "How the plan is fitted"}>
             {bn
-              ? "একই ইউনিট সংখ্যার সব তলা একই ২D নকশা ব্যবহার করে, এবং সেই নকশা থেকেই ৩D মডেল তৈরি হয়।"
-              : "Floors with the same unit count share one 2D drawing, and that drawing is what generates the 3D model."}
+              ? "প্লটের মাপ বদলালে ঘরের মাপও বদলায়, তবে প্রতিটি ঘর তার নির্ধারিত সীমার মধ্যে থাকে। কলাম ও বিম নকশার গ্রিড লাইনেই বসে।"
+              : "When the plot changes, the rooms resize inside fixed limits. Columns and beams sit on the plan's own grid lines."}
           </Callout>
 
-          {error ? <div style={{ color: "var(--bad-ink)", fontSize: 13 }}>⚠ {error}</div> : null}
+          <h4 style={{ margin: "8px 0 0" }}>{bn ? "পর্যায়ক্রম" : "Phases"}</h4>
+          <p className="muted small" style={{ margin: 0 }}>
+            {bn
+              ? `${fmtNum(stories, lang)} তলা ভবন: সাইট ও খনন, ফাউন্ডেশন, নিচতলা (পার্কিং), ${fmtNum(Math.max(0, stories - 1), lang)}টি তলা, ছাদ, ইউটিলিটি।`
+              : `${stories}-storey building: site & excavation, foundation, ground floor (parking), ${Math.max(0, stories - 1)} floors, rooftop, utilities.`}
+          </p>
 
-          <Button variant="primary" style={{ marginTop: 12, width: "100%", padding: 12 }} onClick={create}>
+          {error ? <div role="alert" style={{ color: "var(--bad-ink)", fontSize: 13 }}>⚠ {error}</div> : null}
+
+          <Button variant="primary" style={{ marginTop: 8, width: "100%", padding: 12 }} onClick={create} disabled={!planId}>
             {bn ? "প্রকল্প তৈরি করে শুরু করুন ➔" : "Create Project & Start Planning ➔"}
           </Button>
         </Card>

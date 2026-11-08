@@ -37,6 +37,16 @@ export interface V2Project {
   typicalPresetId?: string;
   floorplanAssignments?: Record<string, string>;
   customization?: Record<string, unknown>;
+  /** Added in 2.6 (M2-4): the plot's shape and the v3 plan chosen for it. Absent in older saves. */
+  plot?: {
+    frontageM: number;
+    depthM: number;
+    roadWidthM: number;
+    roadSide: "north" | "south" | "east" | "west";
+    cornerPlot?: boolean;
+  };
+  planId?: string;
+  mirror?: boolean;
 }
 
 /** Loose check: enough of the v2 shape is present to migrate it. */
