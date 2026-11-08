@@ -17,7 +17,7 @@ Read: `src/plans/{types,fit,geometry,validate}.ts`.
 Do: `src/model/building.ts` `deriveBuilding({plotWidthMm, plotDepthMm, storeys, planId, mirror, floorToFloorMm = 3000, setbacksMm})` → plot, envelope, building origin (front-aligned, centred), `storeys[]` (level, height, use, `FloorGeometry`, phaseId), ground floor = typical grid with every non-core cell in one `parking` room + door lobby↔parking, roof (stair cover, lift room, 1 m parapet). Export `DEFAULT_SETBACKS_MM = {front 1500, rear 2000, left 1000, right 1000}` flagged as an assumption until M3-2. Phase ids as in `src/engine/projectState.ts` (`phase-ground-floor`, `phase-floor-<i>`, `phase-rooftop`). Fitter rejections pass through.
 Test: envelope maths, storey levels, ground and typical share grid lines and columns, every library plan has 0 validator errors on every storey.
 
-## M2-2 Model → 3D mesh · Opus high · done c86c8fb
+## M2-2 Model → 3D mesh · Opus high · done c137c90
 Read (ranges): `src/cad/mesh.ts`; `solidKernel.ts` (`createBoxMesh`, `resolveSolids`, `validateSolids`); `stairBuilder.ts`; in `parametricBuildingGenerator.ts` `createDoor3DMesh` (~381), `createWindow3DMesh` (~437) and the `kind`/`phase` strings it uses.
 Do: `src/model/toMesh.ts` `buildMesh(model)`: placeholder pads 1500×1500×450 at 1.5 m depth, columns 300×300, beams 250×450 on structural lines, slabs 150 ground / 125 typical with stair, lift and shaft openings, walls 250/125 cut for every opening, door and window meshes, stair per storey (`planStair`), roof items; same kinds and phase ids as the old generator; `resolveSolids`. Old generator untouched.
 Test: object counts follow the model, 0 overlaps, IFC export 0 errors; add the new path to `mesh-audit` and `solid-audit` (every plan × 3 sizes × 2/6/10 storeys).
