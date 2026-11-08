@@ -4,8 +4,8 @@
   "description": "Civil engineering software for residential building design in Bangladesh with bilingual AI planning, BNBC/RAJUK compliance, NativeCAD 3D modeling, and PWD BOQ cost estimation.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#fbf6ef",
-  "theme_color": "#e07856",
+  "background_color": "#ffffff",
+  "theme_color": "#2e4fa3",
   "orientation": "portrait-primary",
   "icons": [
     {

@@ -53,6 +53,14 @@ export const PHASE_COLORS: Record<string, Vec3> = {
 
 const GROUND_COLOR: Vec3 = [0.93, 0.91, 0.88];
 
+/** A theme colour token (#rrggbb) as WebGL floats; falls back when the token is missing. */
+function themeColor(token: string, fallback: Vec3): Vec3 {
+  if (typeof document === "undefined") return fallback;
+  const hex = getComputedStyle(document.documentElement).getPropertyValue(token).trim();
+  const m = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex);
+  return m ? [parseInt(m[1], 16) / 255, parseInt(m[2], 16) / 255, parseInt(m[3], 16) / 255] : fallback;
+}
+
 export function getColorForObject(object?: MeshObject): Vec3 {
   if (!object) return [0.7, 0.7, 0.7];
 
@@ -215,9 +223,15 @@ export class MeshViewer {
   private currentView: Mat4 | null = null;
   private currentEye: Vec3 = [0, 0, 0];
   private measureOverlayCtx: CanvasRenderingContext2D | null = null;
+  /** Redraws when the light/dark theme changes, so the background follows it. */
+  private themeObserver: MutationObserver | null = null;
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
+    if (typeof MutationObserver !== "undefined" && typeof document !== "undefined") {
+      this.themeObserver = new MutationObserver(() => this.render());
+      this.themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "data-high-contrast"] });
+    }
     const gl = canvas.getContext("webgl", { antialias: true, alpha: true });
     if (!gl) {
       throw new Error("WebGL is not available");
@@ -508,7 +522,9 @@ export class MeshViewer {
     const width = this.canvas.width;
     const height = this.canvas.height;
     gl.viewport(0, 0, width, height);
-    gl.clearColor(0.98, 0.965, 0.94, 1);
+    // Viewport background follows the light/dark theme (--viewport-bg in tokens.css).
+    const bg = themeColor("--viewport-bg", [0.93, 0.945, 0.965]);
+    gl.clearColor(bg[0], bg[1], bg[2], 1);
     gl.enable(gl.DEPTH_TEST);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.useProgram(this.program);
@@ -531,7 +547,7 @@ export class MeshViewer {
     gl.uniformMatrix4fv(this.viewLocation, false, view);
 
     if (this.ground) {
-      this.draw(this.ground, GROUND_COLOR, 1);
+      this.draw(this.ground, themeColor("--viewport-ground", GROUND_COLOR), 1);
     }
 
     for (const [id, buffers] of this.buffers) {
@@ -672,7 +688,8 @@ export class MeshViewer {
       if (screen) projected.push(screen);
     }
 
-    ctx.strokeStyle = "#e07856";
+    const accent = getComputedStyle(document.documentElement).getPropertyValue("--primary").trim() || "#2e4fa3";
+    ctx.strokeStyle = accent;
     ctx.lineWidth = 2;
     ctx.setLineDash([8, 4]);
     ctx.beginPath();
@@ -685,7 +702,7 @@ export class MeshViewer {
 
     // Draw points
     for (const p of projected) {
-      ctx.fillStyle = "#e07856";
+      ctx.fillStyle = accent;
       ctx.beginPath();
       ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
       ctx.fill();
@@ -758,6 +775,8 @@ export class MeshViewer {
 
   dispose(): void {
     this.disposed = true;
+    this.themeObserver?.disconnect();
+    this.themeObserver = null;
     this.measureOverlay = null;
     this.measureOverlayCtx = null;
     const gl = this.gl;

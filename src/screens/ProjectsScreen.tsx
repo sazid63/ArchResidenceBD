@@ -112,7 +112,7 @@ export function ProjectsScreen({ onNavigate }: { onNavigate: (id: string) => voi
                 <Button
                   variant="ghost"
                   size="small"
-                  style={{ color: "var(--tone-blush, #ef4444)" }}
+                  style={{ color: "var(--bad-ink)" }}
                   onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleDelete(e, proj)}
                 >
                   {lang === "bn" ? "মুছুন" : "Delete"}

@@ -581,7 +581,6 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
             </Button>
             <Button
               variant="primary"
-              style={{ background: "var(--tone-sage, #10b981)" }}
               onClick={() => onNavigate?.("boq")}
             >
               {lang === "bn" ? "প্রাক্কলন ও BOQ দেখুন ➔" : "View BOQ & Costing ➔"}
@@ -710,7 +709,7 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
                     });
                     setHidden(newHidden);
                   }}
-                  style={{ padding: "4px 8px", fontSize: "11px", background: "var(--surface-active, rgba(59,130,246,0.1))" }}
+                  style={{ padding: "4px 8px", fontSize: "11px", background: "var(--surface-active)" }}
                   title="Hide floor slabs to look inside rooms"
                 >
                   🏠 {lang === "bn" ? "রুমের ভেতর দেখুন (Hide Slabs)" : "Look Inside Rooms"}
@@ -935,7 +934,7 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
         {/* Right Column: Parametric Copilot & Controls */}
         <div className="stack">
           {/* Parametric Copilot Box */}
-          <Card className="stack" style={{ border: "1px solid var(--tone-brand, #3b82f6)" }}>
+          <Card className="stack">
             <div className="row-between">
               <div>
                 <h3 style={{ margin: 0 }}>
@@ -971,10 +970,10 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
                     maxWidth: "88%",
                     padding: "8px 12px",
                     borderRadius: "var(--r-md)",
-                    background: msg.who === "user" ? "var(--tone-brand, #2563eb)" : "var(--paper)",
-                    color: msg.who === "user" ? "#ffffff" : "var(--ink)",
+                    background: msg.who === "user" ? "var(--primary)" : "var(--paper)",
+                    color: msg.who === "user" ? "var(--on-primary)" : "var(--ink)",
                     fontSize: "13px",
-                    boxShadow: "0 1px 2px rgba(0,0,0,0.06)",
+                    border: msg.who === "user" ? "none" : "1px solid var(--line)",
                     whiteSpace: "pre-wrap",
                   }}
                 >
@@ -1088,7 +1087,7 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
 
           {/* Structural Engineering Analysis — BNBC 2020 */}
           {structural && (
-            <Card className="stack" style={{ border: "1px solid var(--tone-sage, #10b981)" }}>
+            <Card className="stack">
               <div className="row-between">
                 <div>
                   <h3 style={{ margin: 0 }}>
@@ -1253,7 +1252,7 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
       {/* Title Block Editor Modal */}
       {activeTab === "title-block" && (
         <div className="modal-overlay" style={{
-          position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+          position: "fixed", inset: 0, background: "color-mix(in srgb, #0b0f19 45%, transparent)",
           display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000
         }} onClick={() => setActiveTab(designPhaseId)}>
         <div className="modal" style={{

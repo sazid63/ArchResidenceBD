@@ -2,35 +2,20 @@
 // Caches core assets for offline use
 
 // Bump this version to force re-cache on next deploy
-const CACHE_NAME = 'archresidencebd-v1';
+const CACHE_NAME = 'archresidencebd-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  // Self-hosted fonts (OFL licensed) - cached for offline use
-  '/assets/fonts/inter-latin-400-normal.woff2',
-  '/assets/fonts/inter-latin-500-normal.woff2',
-  '/assets/fonts/inter-latin-600-normal.woff2',
-  '/assets/fonts/inter-latin-700-normal.woff2',
-  '/assets/fonts/inter-latin-400-italic.woff2',
-  '/assets/fonts/inter-latin-500-italic.woff2',
-  '/assets/fonts/inter-latin-600-normal.woff2',
-  '/assets/fonts/inter-latin-600-italic.woff2',
-  '/assets/fonts/inter-latin-700-normal.woff2',
-  '/assets/fonts/inter-latin-700-italic.woff2',
-  '/assets/fonts/lora-latin-400-normal.woff2',
-  '/assets/fonts/lora-latin-500-normal.woff2',
-  '/assets/fonts/lora-latin-600-normal.woff2',
-  '/assets/fonts/lora-latin-700-normal.woff2',
-  '/assets/fonts/lora-latin-400-italic.woff2',
-  '/assets/fonts/lora-latin-500-italic.woff2',
-  '/assets/fonts/lora-latin-600-italic.woff2',
-  '/assets/fonts/lora-latin-700-normal.woff2',
+  // Self-hosted fonts (OFL licensed) - cached for offline use (see scripts/copy-fonts.mjs)
+  '/assets/fonts/noto-sans-latin-400-normal.woff2',
+  '/assets/fonts/noto-sans-latin-500-normal.woff2',
+  '/assets/fonts/noto-sans-latin-600-normal.woff2',
+  '/assets/fonts/noto-sans-latin-700-normal.woff2',
   '/assets/fonts/noto-sans-bengali-bengali-400-normal.woff2',
   '/assets/fonts/noto-sans-bengali-bengali-500-normal.woff2',
   '/assets/fonts/noto-sans-bengali-bengali-600-normal.woff2',
   '/assets/fonts/noto-sans-bengali-bengali-700-normal.woff2',
-  '/assets/fonts/noto-sans-bengali-latin-400-normal.woff2',
   // Note: In production, these would be the actual built asset paths
   // '/assets/index-*.css',
   // '/assets/index-*.js',
@@ -91,6 +76,21 @@ self.addEventListener('fetch', (event) => {
 
   // Skip chrome-extension and other non-http requests
   if (!event.request.url.startsWith('http')) return;
+
+  // Page loads: network first, so a new release is picked up as soon as it is online;
+  // the cached page is only the offline fallback. (Cache-first here kept old builds forever.)
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          return response;
+        })
+        .catch(() => caches.match(event.request).then((hit) => hit || caches.match('/index.html'))),
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request)

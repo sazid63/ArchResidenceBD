@@ -1,14 +1,40 @@
-import { useEffect, useState } from "react";
+import { useState, type ComponentType } from "react";
+import {
+  Box,
+  Building2,
+  Check,
+  ChevronDown,
+  CircleHelp,
+  FileText,
+  FolderOpen,
+  Grid3x3,
+  Info,
+  Layers,
+  LayoutTemplate,
+  Library,
+  Link2,
+  Lock,
+  MessagesSquare,
+  Monitor,
+  Moon,
+  Plus,
+  Receipt,
+  Ruler,
+  Settings,
+  ShieldCheck,
+  Sun,
+  SunMedium,
+  Timer,
+  Trash2,
+  Users,
+} from "lucide-react";
 import { useI18n } from "../i18n";
 import { useTheme } from "../theme/theme";
-import { cx, Badge, Dot } from "../ui/kit";
-import {
-  BuildingProject,
-  areAllPhasesCompleted,
-  clearAllProjects,
-} from "../engine/projectState";
+import { cx, Badge } from "../ui/kit";
+import { areAllPhasesCompleted, deleteSavedProject } from "../engine/projectState";
 import { useActiveProject, useProject } from "../context/ProjectContext";
 import { ConfirmDialog } from "../components/ConfirmDialog";
+import { APP_VERSION } from "../version";
 import "./sidebar.css";
 
 interface Props {
@@ -18,120 +44,185 @@ interface Props {
   open?: boolean;
 }
 
+type Icon = ComponentType<{ size?: number; strokeWidth?: number; "aria-hidden"?: boolean }>;
+
+interface Item {
+  id: string;
+  icon: Icon;
+  en: string;
+  bn: string;
+  /** Needs the phase interviews finished first. */
+  gated?: boolean;
+}
+
+interface Group {
+  en: string;
+  bn: string;
+  items: Item[];
+}
+
+const ICON = { size: 17, strokeWidth: 1.75, "aria-hidden": true } as const;
+
 export function Sidebar({ active, onNavigate, open = false }: Props) {
-  const { t, lang, setLang } = useI18n();
-  const { theme, toggle } = useTheme();
+  const { lang, setLang } = useI18n();
+  const { theme, setTheme } = useTheme();
   const project = useActiveProject();
   const { refreshProject } = useProject();
+  const bn = lang === "bn";
+  const L = (en: string, bnText: string) => (bn ? bnText : en);
 
-  const [openPhases, setOpenPhases] = useState(true);
-  const [openDesign, setOpenDesign] = useState(true);
+  const [openInterview, setOpenInterview] = useState(true);
+  const [openPhaseViews, setOpenPhaseViews] = useState(false);
+  const [confirmReset, setConfirmReset] = useState(false);
 
   const allPhasesDone = project ? areAllPhasesCompleted(project) : false;
-  const designUnlocked = project ? (project.designStarted || allPhasesDone) : false;
+  const designUnlocked = project ? project.designStarted || allPhasesDone : false;
+  const doneCount = project ? project.phases.filter((p) => p.status === "completed").length : 0;
 
-  const handleNewProject = () => {
-    onNavigate("setup");
+  const go = (id: string, gated?: boolean) => {
+    if (!project && id !== "projects") return onNavigate("setup");
+    if (gated && !designUnlocked) return onNavigate(project?.activePhaseId ? `phase:${project.activePhaseId}` : "phase:phase-site");
+    onNavigate(id);
   };
 
-  const [confirmReset, setConfirmReset] = useState(false);
-  const handleReset = () => setConfirmReset(true);
-  const doReset = () => {
-    setConfirmReset(false);
-    clearAllProjects();
-    refreshProject();
-    onNavigate("setup");
+  const groups: Group[] = [
+    {
+      en: "Design",
+      bn: "নকশা",
+      items: [
+        { id: "design:final", icon: Box, en: "3D model", bn: "৩ডি মডেল", gated: true },
+        { id: "unit-mix", icon: Users, en: "Unit mix", bn: "ইউনিট মিক্স" },
+        { id: "daylight", icon: SunMedium, en: "Daylight", bn: "দিবালোক" },
+        { id: "templates", icon: LayoutTemplate, en: "Templates", bn: "টেমপ্লেট" },
+        { id: "assets", icon: Library, en: "Asset library", bn: "অ্যাসেট লাইব্রেরি" },
+      ],
+    },
+    {
+      en: "Engineering",
+      bn: "প্রকৌশল",
+      items: [
+        { id: "compliance", icon: ShieldCheck, en: "Code compliance", bn: "বিধিমালা যাচাই" },
+        { id: "column-grid", icon: Grid3x3, en: "Column grid", bn: "কলাম গ্রিড" },
+        { id: "rebar", icon: Ruler, en: "Rebar schedule", bn: "রিবার শিডিউল" },
+        { id: "connections", icon: Link2, en: "Connections", bn: "সংযোগ" },
+      ],
+    },
+    {
+      en: "Construction",
+      bn: "নির্মাণ",
+      items: [
+        { id: "boq", icon: Receipt, en: "Bill of quantities", bn: "প্রাক্কলন (BOQ)", gated: true },
+        { id: "formwork", icon: Layers, en: "Formwork", bn: "ফর্মওয়ার্ক" },
+        { id: "pour", icon: Timer, en: "Pour sequence", bn: "ঢালাইয়ের ক্রম" },
+      ],
+    },
+    {
+      en: "Documents",
+      bn: "নথিপত্র",
+      items: [{ id: "docs:drawings", icon: FileText, en: "Drawings and exports", bn: "ড্রয়িং ও এক্সপোর্ট" }],
+    },
+  ];
+
+  const footerItems: Item[] = [
+    { id: "units", icon: Ruler, en: "Land units", bn: "জমির একক" },
+    { id: "help", icon: CircleHelp, en: "Help", bn: "সহায়তা" },
+    { id: "settings", icon: Settings, en: "Settings", bn: "সেটিংস" },
+    { id: "about", icon: Info, en: "About", bn: "পরিচিতি" },
+  ];
+
+  const navButton = (item: Item, opts: { child?: boolean; needsProject?: boolean } = {}) => {
+    const isActive = active === item.id || (item.id === "about" && active === "licences");
+    const locked = !!item.gated && !!project && !designUnlocked;
+    const Icon = item.icon;
+    return (
+      <button
+        key={item.id}
+        type="button"
+        className={cx("nav-item", opts.child && "child", isActive && "active")}
+        aria-current={isActive ? "page" : undefined}
+        onClick={() => (opts.needsProject === false ? onNavigate(item.id) : go(item.id, item.gated))}
+        title={locked ? L("Finish the phase interviews to unlock", "সব পর্যায় শেষ হলে খুলবে") : undefined}
+      >
+        <Icon {...ICON} />
+        <span className="grow ellipsis">{L(item.en, item.bn)}</span>
+        {locked ? <Lock size={13} strokeWidth={1.75} aria-label={L("Locked", "বন্ধ")} className="nav-lock" /> : null}
+      </button>
+    );
   };
+
+  const themeOptions = [
+    { value: "light", icon: Sun, en: "Light", bn: "হালকা" },
+    { value: "dark", icon: Moon, en: "Dark", bn: "গাঢ়" },
+    { value: "system", icon: Monitor, en: "System", bn: "সিস্টেম" },
+  ] as const;
 
   return (
-    <aside id="app-sidebar" className={cx("sidebar", open && "open")} aria-label={lang === "bn" ? "প্রধান নেভিগেশন" : "Main navigation"}>
-      {/* Brand Header */}
+    <aside id="app-sidebar" className={cx("sidebar", open && "open")} aria-label={L("Main navigation", "প্রধান নেভিগেশন")}>
       <div className="sidebar-head">
-        <span className="logo-dot" />
+        <span className="logo-mark" aria-hidden="true">
+          <Building2 size={16} strokeWidth={2} />
+        </span>
         <div className="grow">
-          <div className="app-title">{t("appName")}</div>
-          <div className="app-tagline faint">{t("tagline")}</div>
+          <div className="app-title">ArchResidenceBD</div>
+          <div className="app-tagline">{L("Residential design for Bangladesh", "বাংলাদেশের আবাসিক নকশা")}</div>
         </div>
       </div>
 
       <nav className="sidebar-nav">
-        {/* + New Project Button */}
-        <button type="button" className="nav-new" onClick={handleNewProject}>
-          + {t("newProject")}
+        <button type="button" className="nav-new" onClick={() => onNavigate("setup")}>
+          <Plus size={16} strokeWidth={2} aria-hidden="true" />
+          {L("New project", "নতুন প্রকল্প")}
         </button>
-        <button
-          type="button"
-          className={cx("nav-item", active === "projects" && "active")}
-          aria-current={active === "projects" ? "page" : undefined}
-          onClick={() => onNavigate("projects")}
-        >
-          <span className="grow ellipsis">{lang === "bn" ? "আমার প্রকল্পসমূহ" : "My Projects"}</span>
-        </button>
+        {navButton({ id: "projects", icon: FolderOpen, en: "Your projects", bn: "আপনার প্রকল্প" }, { needsProject: false })}
 
-        {/* Active Project Card */}
         {project ? (
           <div className="proj-head">
-            <span className="proj-badge">
+            <span className="proj-badge" aria-hidden="true">
               {project.name.slice(0, 2).toUpperCase() || "BD"}
             </span>
-            <div className="grow">
-              <div className="proj-name">{project.name}</div>
-              <div className="faint small">
-                {project.stories} {lang === "bn" ? "তলা" : "Stories"} · {project.plotSize}{" "}
-                {project.plotUnit} · {project.unitsPerFloor} {lang === "bn" ? "ইউনিট" : "Units"}
+            <div className="grow" style={{ minWidth: 0 }}>
+              <div className="proj-name ellipsis" title={project.name}>{project.name}</div>
+              <div className="proj-meta">
+                {project.stories} {L("storeys", "তলা")} · {project.plotSize} {project.plotUnit} · {project.unitsPerFloor}{" "}
+                {L("units/floor", "ইউনিট/তলা")}
               </div>
             </div>
             <button
               type="button"
-              className="button button--ghost small nav-reset"
-              onClick={handleReset}
-              aria-label={lang === "bn" ? "প্রকল্প মুছুন" : "Delete project"}
-              title={lang === "bn" ? "প্রকল্প মুছুন" : "Delete project"}
+              className="icon-button"
+              onClick={() => setConfirmReset(true)}
+              aria-label={L("Delete project", "প্রকল্প মুছুন")}
+              title={L("Delete project", "প্রকল্প মুছুন")}
             >
-              {lang === "bn" ? "মুছুন" : "Delete"}
+              <Trash2 size={15} strokeWidth={1.75} aria-hidden="true" />
             </button>
           </div>
         ) : (
           <div className="no-project-placeholder">
-            <div className="small muted">
-              {lang === "bn" ? "কোনো প্রকল্প তৈরি করা হয়নি" : "No active project"}
-            </div>
-            <button
-              type="button"
-              className="button button--primary small"
-              onClick={handleNewProject}
-            >
-              {lang === "bn" ? "নতুন প্রকল্প শুরু করুন" : "Start New Project"}
-            </button>
+            <div className="small muted">{L("No project open", "কোনো প্রকল্প খোলা নেই")}</div>
           </div>
         )}
 
-        {/* 1. DYNAMIC PHASES SECTION */}
         {project && (
           <div className="nav-group">
             <button
               type="button"
               className="nav-group-head"
-              aria-expanded={openPhases}
-              onClick={() => setOpenPhases(!openPhases)}
+              aria-expanded={openInterview}
+              onClick={() => setOpenInterview(!openInterview)}
             >
-              <span className={cx("chev", openPhases && "open")}>▾</span>
-              <span className="grow">
-                {lang === "bn" ? "১. পর্যায়ভিত্তিক ইন্টারভিউ" : "1. Phase Interviews"}
-              </span>
-              <Badge tone={allPhasesDone ? "sage" : "amber"}>
-                {project.phases.filter((p) => p.status === "completed").length}/
-                {project.phases.length}
+              <MessagesSquare {...ICON} />
+              <span className="grow">{L("Phase interviews", "পর্যায়ভিত্তিক সাক্ষাৎকার")}</span>
+              <Badge tone={allPhasesDone ? "sage" : "neutral"}>
+                {doneCount}/{project.phases.length}
               </Badge>
+              <ChevronDown size={15} strokeWidth={1.75} aria-hidden="true" className={cx("chev", openInterview && "open")} />
             </button>
-
-            {openPhases && (
+            {openInterview && (
               <div className="nav-children">
                 {project.phases.map((phase) => {
                   const isActive = active === `phase:${phase.id}`;
                   const isDone = phase.status === "completed";
-                  const isInProgress = phase.status === "in_progress";
-
                   return (
                     <button
                       key={phase.id}
@@ -140,13 +231,13 @@ export function Sidebar({ active, onNavigate, open = false }: Props) {
                       aria-current={isActive ? "page" : undefined}
                       onClick={() => onNavigate(`phase:${phase.id}`)}
                     >
-                      <Dot tone={isDone ? "sage" : isInProgress ? "amber" : "neutral"} />
-                      <span className="grow ellipsis">
-                        {lang === "bn" ? phase.nameBn : phase.nameEn}
+                      <span className={cx("phase-dot", isDone && "done", phase.status === "in_progress" && "doing")} aria-hidden="true">
+                        {isDone ? <Check size={10} strokeWidth={3} /> : null}
                       </span>
-                      {isDone ? (
-                        <span className="phase-check">✓</span>
-                      ) : null}
+                      <span className="grow ellipsis">{bn ? phase.nameBn : phase.nameEn}</span>
+                      <span className="visually-hidden">
+                        {isDone ? L("done", "সম্পন্ন") : phase.status === "in_progress" ? L("in progress", "চলছে") : L("not started", "শুরু হয়নি")}
+                      </span>
                     </button>
                   );
                 })}
@@ -155,275 +246,95 @@ export function Sidebar({ active, onNavigate, open = false }: Props) {
           </div>
         )}
 
-        {/* 2. DYNAMIC DESIGN SECTION (Gated) */}
-        {project && (
-          <div className="nav-group">
-            <button
-              type="button"
-              className="nav-group-head"
-              aria-expanded={openDesign}
-              onClick={() => setOpenDesign(!openDesign)}
-            >
-              <span className={cx("chev", openDesign && "open")}>▾</span>
-              <span className="grow">
-                {lang === "bn" ? "২. ৩D ক্যাড ডিজাইন" : "2. 3D CAD Design"}
-              </span>
-              {!designUnlocked && (
-                <span className="faint small" title="Complete phase interviews first">
-                  🔒
-                </span>
-              )}
-            </button>
-
-            {openDesign && (
-              <div className="nav-children">
-                {!designUnlocked ? (
-                  <div
-                    className="faint small"
-                    style={{ padding: "8px 12px", fontStyle: "italic" }}
-                  >
-                    {lang === "bn"
-                      ? "সব পর্যায়ের পরিকল্পনা শেষে ডিজাইন উন্মুক্ত হবে"
-                      : "Unlocks after completing phase interviews"}
-                  </div>
-                ) : (
+        {groups.map((group) => (
+          <div className="nav-section" key={group.en}>
+            <div className="nav-section-label">{L(group.en, group.bn)}</div>
+            {group.items.map((item) => (
+              <div key={item.id}>
+                {navButton(item)}
+                {item.id === "design:final" && project && designUnlocked && (
                   <>
-                    {/* Individual Phase Design Views */}
-                    {project.phases.map((phase) => {
-                      const isActive = active === `design:${phase.id}`;
-                      return (
-                        <button
-                          key={phase.id}
-                          type="button"
-                          className={cx("nav-item", "child", isActive && "active")}
-                      aria-current={isActive ? "page" : undefined}
-                          onClick={() => onNavigate(`design:${phase.id}`)}
-                        >
-                          <span className="dot-spacer" />
-                          <span className="grow ellipsis">
-                            {lang === "bn" ? phase.nameBn : phase.nameEn} 3D
-                          </span>
-                        </button>
-                      );
-                    })}
-
-                    {/* Combined Master Federated 3D Model */}
                     <button
                       type="button"
-                      className={cx("nav-item", "child", "nav-master", active === "design:final" && "active")}
-          aria-current={active === "design:final" ? "page" : undefined}
-                      onClick={() => onNavigate("design:final")}
+                      className="nav-subtoggle"
+                      aria-expanded={openPhaseViews}
+                      onClick={() => setOpenPhaseViews(!openPhaseViews)}
                     >
-                      <Dot tone="primary" />
-                      <span className="grow ellipsis">
-                        {lang === "bn" ? "সম্পূর্ণ ৩D মডেল (মাস্টার)" : "Combined Master 3D"}
-                      </span>
+                      <ChevronDown size={13} strokeWidth={1.75} aria-hidden="true" className={cx("chev", openPhaseViews && "open")} />
+                      {L("Views by phase", "পর্যায় অনুযায়ী দেখুন")}
                     </button>
+                    {openPhaseViews &&
+                      project.phases.map((phase) => {
+                        const id = `design:${phase.id}`;
+                        const isActive = active === id;
+                        return (
+                          <button
+                            key={id}
+                            type="button"
+                            className={cx("nav-item", "child", "subchild", isActive && "active")}
+                            aria-current={isActive ? "page" : undefined}
+                            onClick={() => onNavigate(id)}
+                          >
+                            <span className="grow ellipsis">{bn ? phase.nameBn : phase.nameEn}</span>
+                          </button>
+                        );
+                      })}
                   </>
                 )}
               </div>
-            )}
+            ))}
           </div>
-        )}
-
-        {/* 3. BOQ & COSTING TAB (Gated) */}
-        <button
-          type="button"
-          className={cx("nav-item", active === "boq" && "active")}
-          aria-current={active === "boq" ? "page" : undefined}
-          onClick={() => {
-            if (!project) onNavigate("setup");
-            else onNavigate("boq");
-          }}
-        >
-          <span className="grow">{t("boq")}</span>
-          {!designUnlocked && project && <span className="faint small">🔒</span>}
-        </button>
-
-        {/* ARCHITECTURAL ASSET LIBRARY */}
-        <button
-          type="button"
-          className={cx("nav-item", active === "assets" && "active")}
-          aria-current={active === "assets" ? "page" : undefined}
-          onClick={() => onNavigate("assets")}
-        >
-          <span className="grow">{lang === "bn" ? "আর্কিটেকচারাল অ্যাসেট লাইব্রেরি" : "Architectural Assets"}</span>
-          <span className="faint small">3D</span>
-        </button>
-
-        {/* 4. COMPLIANCE & REPORTS */}
-        <button
-          type="button"
-          className={cx("nav-item", active === "compliance" && "active")}
-          aria-current={active === "compliance" ? "page" : undefined}
-          onClick={() => onNavigate("compliance")}
-        >
-          <span className="grow">{t("compliance")}</span>
-        </button>
-
-        {/* 5. FORMWORK & SCAFFOLD */}
-        <button
-          type="button"
-          className={cx("nav-item", active === "formwork" && "active")}
-          aria-current={active === "formwork" ? "page" : undefined}
-          onClick={() => onNavigate("formwork")}
-        >
-          <span className="grow">{t("formwork")}</span>
-        </button>
-
-        {/* 6. POUR SEQUENCE */}
-        <button
-          type="button"
-          className={cx("nav-item", active === "pour" && "active")}
-          aria-current={active === "pour" ? "page" : undefined}
-          onClick={() => onNavigate("pour")}
-        >
-          <span className="grow">{t("pourSequence")}</span>
-        </button>
-
-        {/* 7. REBAR SCHEDULE */}
-        <button
-          type="button"
-          className={cx("nav-item", active === "rebar" && "active")}
-          aria-current={active === "rebar" ? "page" : undefined}
-          onClick={() => onNavigate("rebar")}
-        >
-          <span className="grow">{t("rebar")}</span>
-        </button>
-
-        {/* 8. CONNECTION DETAILING */}
-        <button
-          type="button"
-          className={cx("nav-item", active === "connections" && "active")}
-          aria-current={active === "connections" ? "page" : undefined}
-          onClick={() => onNavigate("connections")}
-        >
-          <span className="grow">{t("connections")}</span>
-        </button>
-
-        {/* 9. DAYLIGHT ANALYSIS */}
-        <button
-          type="button"
-          className={cx("nav-item", active === "daylight" && "active")}
-          aria-current={active === "daylight" ? "page" : undefined}
-          onClick={() => onNavigate("daylight")}
-        >
-          <span className="grow">{t("daylightNav")}</span>
-        </button>
-
-        {/* 10. UNIT MIX OPTIMIZER */}
-        <button
-          type="button"
-          className={cx("nav-item", active === "unit-mix" && "active")}
-          aria-current={active === "unit-mix" ? "page" : undefined}
-          onClick={() => onNavigate("unit-mix")}
-        >
-          <span className="grow">{t("unitMixNav")}</span>
-        </button>
-
-        {/* 11. COLUMN GRID OPTIMIZER */}
-        <button
-          type="button"
-          className={cx("nav-item", active === "column-grid" && "active")}
-          aria-current={active === "column-grid" ? "page" : undefined}
-          onClick={() => onNavigate("column-grid")}
-        >
-          <span className="grow">{t("columnGridNav")}</span>
-        </button>
-        {/* 12. DOCUMENTS & EXPORTS */}
-        <button
-          type="button"
-          className={cx("nav-item", active === "docs:drawings" && "active")}
-          aria-current={active === "docs:drawings" ? "page" : undefined}
-          onClick={() => onNavigate("docs:drawings")}
-        >
-          <span className="grow">{t("documents")}</span>
-        </button>
-
-        {/* 14. WINDOWS INSTALLER (.exe) */}
-        <button
-          type="button"
-          className={cx("nav-item", active === "windows" && "active")}
-          aria-current={active === "windows" ? "page" : undefined}
-          onClick={() => onNavigate("windows")}
-        >
-          <span className="grow">{t("windows")}</span>
-        </button>
-
-        {/* 15. LAND UNIT CONVERTER */}
-        <button
-          type="button"
-          className={cx("nav-item", active === "units" && "active")}
-          aria-current={active === "units" ? "page" : undefined}
-          onClick={() => onNavigate("units")}
-        >
-          <span className="grow">{t("unitsTitle")}</span>
-        </button>
-            <div className="nav-group" >
-        <div className="nav-group-head" role="presentation" style={{ cursor: "default" }}>
-          <span className="grow">{lang === "bn" ? "আরও" : "MORE"}</span>
-        </div>
-        {([
-          ["templates", "Templates", "টেমপ্লেট"],
-          ["help", "Help", "সহায়তা"],
-          ["about", "About & licences", "সম্পর্কে ও লাইসেন্স"],
-        ] as const).map(([id, en, bn]) => (
-          <button
-            key={id}
-            type="button"
-            className={cx("nav-item", (active === id || (id === "about" && active === "licences")) && "active")}
-            aria-current={active === id ? "page" : undefined}
-            onClick={() => onNavigate(id)}
-          >
-            <span className="grow ellipsis">{lang === "bn" ? bn : en}</span>
-          </button>
         ))}
-      </div>
+
+        <div className="nav-section nav-section--quiet">
+          {footerItems.map((item) => navButton(item, { needsProject: false }))}
+        </div>
       </nav>
 
-      {/* Sidebar Footer */}
       <div className="sidebar-foot">
-        <div className="lang-toggle">
-          <button
-            type="button"
-            className={cx("lang-pill", lang === "bn" && "active")}
-            aria-pressed={lang === "bn"}
-            aria-label="বাংলা"
-            onClick={() => setLang("bn")}
-          >
-            বাং
+        <div className="seg-mini" role="group" aria-label={L("Language", "ভাষা")}>
+          <button type="button" className={cx(lang === "bn" && "on")} aria-pressed={lang === "bn"} lang="bn" onClick={() => setLang("bn")}>
+            বাংলা
           </button>
-          <button
-            type="button"
-            className={cx("lang-pill", lang === "en" && "active")}
-            aria-pressed={lang === "en"}
-            aria-label="English"
-            onClick={() => setLang("en")}
-          >
+          <button type="button" className={cx(lang === "en" && "on")} aria-pressed={lang === "en"} lang="en" onClick={() => setLang("en")}>
             EN
           </button>
         </div>
-        <button
-          type="button"
-          className="theme-toggle"
-          onClick={toggle}
-          title={theme === "light" ? "Switch to Dark" : theme === "dark" ? "Switch to High Contrast" : "Switch to Light"}
-        >
-          {theme === "light" ? "☾" : theme === "dark" ? "⬤" : "☀"}
-        </button>
-        <span className="faint small">ArchResidenceBD v1.0</span>
+        <div className="seg-mini" role="group" aria-label={L("Theme", "থিম")}>
+          {themeOptions.map((o) => (
+            <button
+              key={o.value}
+              type="button"
+              className={cx(theme === o.value && "on")}
+              aria-pressed={theme === o.value}
+              aria-label={L(o.en, o.bn)}
+              title={L(o.en, o.bn)}
+              onClick={() => setTheme(o.value)}
+            >
+              <o.icon size={14} strokeWidth={1.75} aria-hidden={true} />
+            </button>
+          ))}
+        </div>
+        <span className="foot-version">v{APP_VERSION}</span>
       </div>
+
       <ConfirmDialog
         open={confirmReset}
-        title={lang === "bn" ? "প্রকল্প মুছবেন?" : "Delete this project?"}
+        title={L("Delete this project?", "প্রকল্প মুছবেন?")}
         message={
-          lang === "bn"
+          bn
             ? `"${project?.name ?? ""}" এই ডিভাইস থেকে মুছে যাবে। এটি ফেরানো যাবে না।`
-            : `"${project?.name ?? ""}" will be removed from this device. This cannot be undone.`
+            : `"${project?.name ?? ""}" will be removed from this device. This can't be undone.`
         }
-        confirmLabel={lang === "bn" ? "মুছুন" : "Delete project"}
-        cancelLabel={lang === "bn" ? "বাতিল" : "Cancel"}
-        onConfirm={doReset}
+        confirmLabel={L("Delete project", "মুছুন")}
+        cancelLabel={L("Cancel", "বাতিল")}
+        onConfirm={() => {
+          setConfirmReset(false);
+          // Delete only this project (v2 cleared every saved project here).
+          if (project) deleteSavedProject(project.id);
+          refreshProject();
+          onNavigate("setup");
+        }}
         onCancel={() => setConfirmReset(false)}
       />
     </aside>

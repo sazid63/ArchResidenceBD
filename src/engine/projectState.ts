@@ -66,6 +66,15 @@ export interface BuildingProject {
 }
 
 const STORAGE_KEY = "archres_v2_active_project";
+
+/** Time-ordered and unique even when two projects are created in the same millisecond. */
+function uniqueSuffix(): string {
+  const rand =
+    typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID().slice(0, 8)
+      : Math.random().toString(36).slice(2, 10);
+  return `${Date.now()}-${rand}`;
+}
 const ALL_PROJECTS_KEY = "archres_v2_all_projects";
 
 export function plotToSqm(size: number, unit: string): number {
@@ -243,7 +252,7 @@ export function createNewProject(params: {
   address?: string;
   floorplanId?: string;
 }): BuildingProject {
-  const id = `project-${Date.now()}`;
+  const id = `project-${uniqueSuffix()}`;
   const plotSqm = plotToSqm(params.plotSize, params.plotUnit);
   const phases = generatePhasesForStories(params.stories);
 
@@ -295,7 +304,7 @@ export function generateRandomBuildingProject(): BuildingProject {
 
   const selected = archetypes[Math.floor(Math.random() * archetypes.length)];
   const { name, address, stories, plotSize, preset, unitsPerFloor } = selected;
-  const id = `project-rand-${Date.now()}`;
+  const id = `project-rand-${uniqueSuffix()}`;
   const plotSqm = plotToSqm(plotSize, "katha");
   const phases = generatePhasesForStories(stories);
   const now = new Date().toISOString();
@@ -393,13 +402,12 @@ function populatePhaseMetrics(  phase: PhaseItem, stories: number, plotSqm: numb
 }
 
 export function create4StoryBuildingProject(): BuildingProject {
-  clearAllProjects();
-
+  // Adds the demo; never clears saved projects (v2 wiped them all here on every fresh start).
   const name = "Sitalakshya Heritage (4-Storey)";
   const address = "Road 5, Dhanmondi, Dhaka";
   const stories = 4;
   const plotSize = 3.5;
-  const id = `project-4story-${Date.now()}`;
+  const id = `project-4story-${uniqueSuffix()}`;
   const plotSqm = plotToSqm(plotSize, "katha");
   const phases = generatePhasesForStories(stories);
   const now = new Date().toISOString();
@@ -426,13 +434,11 @@ export function create4StoryBuildingProject(): BuildingProject {
 }
 
 export function create6StoryBuildingProject(): BuildingProject {
-  clearAllProjects();
-
   const name = "Jamuna Crown Residence (6-Storey)";
   const address = "Sector 4, Road 12, Uttara, Dhaka";
   const stories = 6;
   const plotSize = 4.0;
-  const id = `project-6story-${Date.now()}`;
+  const id = `project-6story-${uniqueSuffix()}`;
   const plotSqm = plotToSqm(plotSize, "katha");
   const phases = generatePhasesForStories(stories);
   const now = new Date().toISOString();
@@ -480,6 +486,21 @@ export function saveActiveProject(project: BuildingProject): void {
     else all.unshift(project);
     localStorage.setItem(ALL_PROJECTS_KEY, JSON.stringify(all));
   }
+}
+
+/**
+ * Make a saved project the open one without modifying it: the given id, or else the most
+ * recently changed. Returns it, or null when nothing is saved.
+ */
+export function activateSavedProject(id?: string): BuildingProject | null {
+  if (typeof localStorage === "undefined") return null;
+  const all = getSavedProjects();
+  const pick = id
+    ? all.find((p) => p.id === id)
+    : [...all].sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""))[0];
+  if (!pick) return null;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(pick));
+  return pick;
 }
 
 export function getSavedProjects(): BuildingProject[] {

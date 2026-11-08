@@ -216,7 +216,7 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
                 style={{
                   position: "fixed",
                   inset: 0,
-                  background: "rgba(0,0,0,0.5)",
+                  background: "color-mix(in srgb, #0b0f19 45%, transparent)",
                   zIndex: 1000,
                   display: "flex",
                   alignItems: "center",
@@ -306,7 +306,7 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
               : "Floors with the same unit count share one 2D drawing, and that drawing is what generates the 3D model."}
           </Callout>
 
-          {error ? <div style={{ color: "var(--tone-blush, #ef4444)", fontSize: 13 }}>⚠ {error}</div> : null}
+          {error ? <div style={{ color: "var(--bad-ink)", fontSize: 13 }}>⚠ {error}</div> : null}
 
           <Button variant="primary" style={{ marginTop: 12, width: "100%", padding: 12 }} onClick={create}>
             {bn ? "প্রকল্প তৈরি করে শুরু করুন ➔" : "Create Project & Start Planning ➔"}

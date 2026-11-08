@@ -160,7 +160,7 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
                 {msg.metrics && Object.keys(msg.metrics).length > 0 ? (
                   <div
                     style={{
-                      background: "rgba(0,0,0,0.06)",
+                      background: "var(--surface-2)",
                       padding: "8px 12px",
                       borderRadius: 6,
                       marginTop: 8,
@@ -208,8 +208,8 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
                         cursor: "pointer",
                         padding: 6,
                         borderRadius: 8,
-                        background: isActive ? "var(--surface-active, rgba(59,130,246,0.12))" : "var(--paper)",
-                        border: isActive ? "2px solid var(--tone-brand, #3b82f6)" : "1px solid var(--border)",
+                        background: isActive ? "var(--surface-active)" : "var(--paper)",
+                        border: isActive ? "2px solid var(--primary)" : "1px solid var(--border)",
                       }}
                     >
                       <FloorplanPreview plan={plan} size={130} />
@@ -290,7 +290,7 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
                 style={{
                   fontSize: 12,
                   padding: "4px 6px",
-                  background: p.id === phase.id ? "var(--surface-active, rgba(59,130,246,0.12))" : "transparent",
+                  background: p.id === phase.id ? "var(--surface-active)" : "transparent",
                   border: "none",
                   cursor: "pointer",
                   textAlign: "left",

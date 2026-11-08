@@ -1,4 +1,5 @@
-/* Base styles — soft theme, rounded everything (corner policy). */
+/* Base styles: Civic style (v3).
+   Fonts live in tokens.css (self-hosted Noto Sans + Noto Sans Bengali); nothing loads from the network. */
 
 *,
 *::before,
@@ -6,83 +7,7 @@
   box-sizing: border-box;
 }
 
-/* ---- Local font faces with font-display: swap ----
-   Tokens.css ships Inter/system-ui as --font-ui, but the HTML loads
-   Plus Jakarta Sans (Latin) + Hind Siliguri (Bengali) + JetBrains Mono.
-   Re-map the stack here so the loaded fonts are used, with system fallbacks.
-   font-display: swap ensures text renders immediately from fallback, then
-   swaps to the webfont once downloaded — no invisible text while loading. */
-@font-face {
-  font-family: "ArchResUI";
-  src: url("https://fonts.gstatic.com/s/plusjakartasans/v8/pxiDyp8Pywk8kXKLrPRnsbFm6zMmSg.woff2") format("woff2");
-  font-weight: 400;
-  font-display: swap;
-}
-@font-face {
-  font-family: "ArchResUI";
-  src: url("https://fonts.gstatic.com/s/plusjakartasans/v8/pxiDyp8Pywk8kXKLrPRnsbFm6zMmSg.woff2") format("woff2");
-  font-weight: 500;
-  font-display: swap;
-}
-@font-face {
-  font-family: "ArchResUI";
-  src: url("https://fonts.gstatic.com/s/plusjakartasans/v8/pxiDyp8Pywk8kXKLrPRnsbFm6zMmSg.woff2") format("woff2");
-  font-weight: 600;
-  font-display: swap;
-}
-@font-face {
-  font-family: "ArchResUI";
-  src: url("https://fonts.gstatic.com/s/plusjakartasans/v8/pxiDyp8Pywk8kXKLrPRnsbFm6zMmSg.woff2") format("woff2");
-  font-weight: 700;
-  font-display: swap;
-}
-@font-face {
-  font-family: "ArchResBengali";
-  src: url("https://fonts.gstatic.com/s/hindsiliguri/v11/yUMdMIlzdpvBhQQL_Jq66Yf0.woff2") format("woff2");
-  font-weight: 400;
-  font-display: swap;
-  unicode-range: U+0980-09FF;
-}
-@font-face {
-  font-family: "ArchResBengali";
-  src: url("https://fonts.gstatic.com/s/hindsiliguri/v11/yUMdMIlzdpvBhQQL_Jq66Yf0.woff2") format("woff2");
-  font-weight: 500;
-  font-display: swap;
-  unicode-range: U+0980-09FF;
-}
-@font-face {
-  font-family: "ArchResBengali";
-  src: url("https://fonts.gstatic.com/s/hindsiliguri/v11/yUMdMIlzdpvBhQQL_Jq66Yf0.woff2") format("woff2");
-  font-weight: 600;
-  font-display: swap;
-  unicode-range: U+0980-09FF;
-}
-@font-face {
-  font-family: "ArchResBengali";
-  src: url("https://fonts.gstatic.com/s/hindsiliguri/v11/yUMdMIlzdpvBhQQL_Jq66Yf0.woff2") format("woff2");
-  font-weight: 700;
-  font-display: swap;
-  unicode-range: U+0980-09FF;
-}
-@font-face {
-  font-family: "ArchResMono";
-  src: url("https://fonts.gstatic.com/s/jetbrainsmono/v13/tDepLQkAJx1m4L7uXzYvM6r9.woff2") format("woff2");
-  font-weight: 400;
-  font-display: swap;
-}
-@font-face {
-  font-family: "ArchResMono";
-  src: url("https://fonts.gstatic.com/s/jetbrainsmono/v13/tDepLQkAJx1m4L7uXzYvM6r9.woff2") format("woff2");
-  font-weight: 500;
-  font-display: swap;
-}
-
-:root {
-  --font-ui: "ArchResUI", "ArchResBengali", "Plus Jakarta Sans", "Hind Siliguri", system-ui, -apple-system, "Segoe UI", "Noto Sans Bengali", "Nirmala UI", sans-serif;
-  --font-mono: "ArchResMono", "JetBrains Mono", "Fira Code", ui-monospace, "SFMono-Regular", "Menlo", "Consolas", monospace;
-}
-
-/* Skip link — visible on focus only */
+/* Skip link: visible on focus only */
 .skip-link {
   position: absolute;
   top: -3rem;
@@ -95,14 +20,12 @@
   font-weight: 600;
   z-index: 10000;
   transition: top 0.2s ease;
-  outline: 3px solid var(--primary);
-  outline-offset: 2px;
 }
 .skip-link:focus {
   top: 0;
 }
 
-/* Reduced motion preference — disable non-essential transitions */
+/* Reduced motion preference: disable non-essential transitions */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -127,31 +50,37 @@ body {
   font-size: var(--fs-md);
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+  font-feature-settings: "tnum" 0;
   transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
 }
 
-/* ---- Standardized heading hierarchy ---- */
+/* Bangla needs a little more room for its vowel signs above and below the line. */
+:lang(bn) {
+  line-height: 1.65;
+}
+
+/* ---- Heading hierarchy ---- */
 h1 {
   font-size: var(--fs-3xl);
-  font-weight: 700;
-  letter-spacing: -0.015em;
-  line-height: 1.2;
-}
-h2 {
-  font-size: var(--fs-2xl);
   font-weight: 600;
   letter-spacing: -0.01em;
   line-height: 1.25;
 }
+h2 {
+  font-size: var(--fs-2xl);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.3;
+}
 h3 {
   font-size: var(--fs-lg);
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.35;
 }
 h4 {
   font-size: var(--fs-md);
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.4;
 }
 h5 {
   font-size: var(--fs-sm);
@@ -187,13 +116,36 @@ textarea {
   border-radius: var(--r-md);
 }
 
-/* Monospace + weight helper classes used across screens */
+/* Native form fields get the Civic look unless a screen styles them itself.
+   :where() keeps these at zero specificity, so any class rule on a screen wins. */
+:where(input:not([type="range"], [type="checkbox"], [type="radio"], [type="color"], [type="file"]), select, textarea) {
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  padding: 7px 10px;
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+:where(input:not([type="range"], [type="checkbox"], [type="radio"]), select, textarea):hover {
+  border-color: color-mix(in srgb, var(--ink-faint) 60%, var(--line-strong));
+}
+:where(input[type="checkbox"], input[type="radio"]) {
+  accent-color: var(--primary);
+}
+
+/* Numbers: screens mark figures with .mono; in the Civic style they stay in the UI font with
+   aligned (tabular) digits. Real code samples use <code>, which keeps the monospace font. */
 .mono,
 .font-mono {
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+}
+code,
+kbd,
+pre {
   font-family: var(--font-mono);
+  font-size: 0.92em;
 }
 .bold {
-  font-weight: 700;
+  font-weight: 600;
 }
 
 a {
@@ -201,28 +153,23 @@ a {
   text-decoration: none;
   border-radius: var(--r-sm);
 }
+a:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
 
+/* One focus style everywhere: a 2px indigo outline that clears the element. */
 :focus-visible {
-  outline: 3px solid var(--primary);
-  outline-offset: 2px;
-  border-radius: var(--r-md);
-}
-
-/* Ensure inputs also have a focus indicator beyond their border-color */
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: 3px solid var(--primary);
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
-
-/* Ensure buttons have a focus-within indicator for disabled states */
-button:focus-visible:not(:disabled) {
-  outline: 3px solid var(--primary);
-  outline-offset: 2px;
+:where(input, select, textarea):focus-visible {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: var(--focus-ring);
 }
 
-/* Modal overlays should trap focus — ensure they capture focus */
+/* Modal overlays should trap focus */
 .modal-focus-trap {
   position: absolute !important;
   width: 1px !important;
@@ -240,7 +187,7 @@ button:focus-visible:not(:disabled) {
   color: var(--primary-ink);
 }
 
-/* Rounded soft scrollbars */
+/* Slim scrollbars */
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -249,7 +196,7 @@ button:focus-visible:not(:disabled) {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--ink-faint) 45%, transparent);
+  background: color-mix(in srgb, var(--ink-faint) 35%, transparent);
   border-radius: var(--r-pill);
   border: 2px solid var(--paper);
 }
@@ -257,7 +204,7 @@ button:focus-visible:not(:disabled) {
   background: var(--ink-faint);
 }
 
-/* Visually hidden but accessible to screen readers */
+/* Visually hidden but available to screen readers */
 .visually-hidden {
   position: absolute !important;
   width: 1px !important;

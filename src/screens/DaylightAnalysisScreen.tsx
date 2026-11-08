@@ -400,8 +400,8 @@ export function DaylightAnalysisScreen() {
             className="stack"
             style={{
               border: room.meetsTarget
-                ? "1px solid var(--tone-sage, #10b981)"
-                : "1px solid var(--tone-amber, #f59e0b)",
+                ? "1px solid var(--ok)"
+                : "1px solid var(--warn)",
             }}
           >
             <div className="row-between">
@@ -456,8 +456,8 @@ export function DaylightAnalysisScreen() {
                 className="stack"
                 style={{
                   border: room.meetsTarget
-                    ? "1px solid var(--tone-sage, #10b981)"
-                    : "1px solid var(--tone-amber, #f59e0b)",
+                    ? "1px solid var(--ok)"
+                    : "1px solid var(--warn)",
                 }}
               >
                 <div className="row-between">

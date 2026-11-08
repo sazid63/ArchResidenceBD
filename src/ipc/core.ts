@@ -123,19 +123,9 @@ export async function ask(
       case "manual.search":
         result = isomorphicCore.manualSearch(String(params.query || ""));
         break;
-      case "import.candidates":
-        result = isomorphicCore.importCandidates();
-        break;
-      case "import.review":
-        result = {
-          candidateId: params.candidateId,
-          decision: params.decision,
-          reviewed: 1,
-        };
-        break;
       default:
-        result = { status: "ok", method, params };
-        break;
+        // Never pretend an unknown request worked.
+        return { id, error: { code: "unknown_method", message: `Unknown method: ${method}` } };
     }
 
     return { id, result };

@@ -1,21 +1,13 @@
 /**
- * The app's legal surface (ADR-0004, W5.1).
+ * The app's legal surface: third-party notices shown on the Licences screen (linked from About).
  *
- * This is the **only** place in the app where a bundled component may be named: the
- * required licence notices are legal text, not branding. The brand guard skips
- * `app/src/legal/**` by design, and every other surface shows the product's own name
- * (ArchResidenceBD / NativeCAD) - About carries no "powered by" line, it links here.
- *
- * The facts come from the repo's third-party register (`docs/licenses/THIRD_PARTY.md`),
- * and `tools/ci/licence_notice_guard.py` holds this list to it - so the legal text and
- * the register cannot drift apart.
- *
- * The app's **own** terms are the owner's decision (OWNER-ATTENTION #10); until they
- * are set, this screen says so rather than inventing them.
+ * This list must match docs/licenses/THIRD_PARTY.md and the packages the build actually ships
+ * (package.json dependencies, the self-hosted fonts, the Tauri shell). v3 dropped the local AI
+ * model fleet, so llama.cpp, llama-swap and the Qwen3 models are no longer listed.
  */
 
 export interface Notice {
-  /** A stable id, so the screen and the guard can talk about the same component. */
+  /** A stable id, so the screen and the register can talk about the same component. */
   id: string;
   /** The component as the register names it. */
   component: string;
@@ -23,69 +15,59 @@ export interface Notice {
   role: string;
   /** The licence, by its SPDX id. */
   licence: string;
-  /** Whether this build bundles it. */
+  /** Whether this build ships it. */
   status: "bundled" | "planned";
-  /** The notice the app shows, and the licence file the install folder carries. */
+  /** The notice the app shows. */
   notice: string;
-  licenceFile: string;
+  /** Upstream project, where the full licence text is published. */
+  source: string;
 }
 
 export const notices: Notice[] = [
   {
-    id: "freecad",
-    component: "FreeCAD",
-    role: "NativeCAD engine (bundled)",
-    licence: "LGPL-2.1",
-    status: "planned",
-    notice:
-      "This application bundles FreeCAD. FreeCAD is licensed under the GNU Lesser General " +
-      "Public License, version 2.1. FreeCAD is used unmodified. The full licence text and " +
-      "the corresponding source availability information are shipped in the install folder.",
-    licenceFile: "licenses/LGPL-2.1.txt",
-  },
-  {
-    id: "llama-cpp",
-    component: "llama.cpp",
-    role: "Inference runtime",
+    id: "react",
+    component: "React and React DOM",
+    role: "User interface library",
     licence: "MIT",
-    status: "planned",
-    notice:
-      "This application bundles llama.cpp, licensed under the MIT licence. The full licence " +
-      "text is shipped in the install folder.",
-    licenceFile: "licenses/MIT-llama.cpp.txt",
+    status: "bundled",
+    notice: "Copyright (c) Meta Platforms, Inc. and affiliates. Used under the MIT licence.",
+    source: "https://github.com/facebook/react",
   },
   {
-    id: "llama-swap",
-    component: "llama-swap",
-    role: "Fleet manager",
+    id: "lucide",
+    component: "Lucide icons (lucide-react)",
+    role: "Interface icons",
+    licence: "ISC",
+    status: "bundled",
+    notice: "Copyright (c) Lucide Contributors. Used under the ISC licence.",
+    source: "https://github.com/lucide-icons/lucide",
+  },
+  {
+    id: "noto",
+    component: "Noto Sans and Noto Sans Bengali",
+    role: "Interface fonts (English and Bangla)",
+    licence: "OFL-1.1",
+    status: "bundled",
+    notice: "Copyright The Noto Project Authors. Used under the SIL Open Font License, version 1.1.",
+    source: "https://github.com/notofonts",
+  },
+  {
+    id: "tailwindcss",
+    component: "Tailwind CSS",
+    role: "Base stylesheet reset",
     licence: "MIT",
-    status: "planned",
-    notice:
-      "This application bundles llama-swap, licensed under the MIT licence. The full licence " +
-      "text is shipped in the install folder.",
-    licenceFile: "licenses/MIT-llama-swap.txt",
+    status: "bundled",
+    notice: "Copyright (c) Tailwind Labs, Inc. Used under the MIT licence.",
+    source: "https://github.com/tailwindlabs/tailwindcss",
   },
   {
-    id: "pynite",
-    component: "PyNite",
-    role: "3D FEM (v1.5 module)",
-    licence: "MIT",
-    status: "planned",
-    notice:
-      "This application bundles PyNite, licensed under the MIT licence. The full licence " +
-      "text is shipped in the install folder.",
-    licenceFile: "licenses/MIT-PyNite.txt",
-  },
-  {
-    id: "qwen3",
-    component: "Qwen3 family",
-    role: "Fleet bases, embedder and reranker",
-    licence: "Apache-2.0",
-    status: "planned",
-    notice:
-      "The models this application uses are derived from the Qwen3 family, licensed under " +
-      "the Apache Licence 2.0. The full licence text is shipped in the install folder.",
-    licenceFile: "licenses/Apache-2.0.txt",
+    id: "tauri",
+    component: "Tauri",
+    role: "Windows desktop shell",
+    licence: "Apache-2.0 OR MIT",
+    status: "bundled",
+    notice: "Copyright (c) The Tauri Programme within The Commons Conservancy. Used under the MIT licence.",
+    source: "https://github.com/tauri-apps/tauri",
   },
 ];
 

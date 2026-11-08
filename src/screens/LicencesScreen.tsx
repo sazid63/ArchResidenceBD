@@ -2,13 +2,7 @@ import { notices } from "../legal/notices";
 import { useI18n } from "../i18n";
 import { Badge, Card, PageHeader } from "../ui/kit";
 
-/**
- * The Licences screen (ADR-0004, W5.1).
- *
- * The **only** legal surface in the app: the required licence notices live here, and
- * About links to it. Nothing else in the app names a bundled component - the brand
- * guard holds that (ADR-0004), and `app/src/legal/**` is the one path it skips.
- */
+/** Third-party notices (the list lives in src/legal/notices.ts). About links here. */
 export function LicencesScreen() {
   const { t } = useI18n();
   return (
@@ -23,7 +17,7 @@ export function LicencesScreen() {
             <div className="grow">
               <div className="doc-desc muted">{notice.component}</div>
               <div className="faint small">
-                {notice.role} · {notice.licence} · {notice.licenceFile}
+                {notice.role} · {notice.licence} · <a href={notice.source} target="_blank" rel="noreferrer">{notice.source.replace("https://", "")}</a>
               </div>
               <div className="small">{notice.notice}</div>
             </div>

@@ -1,128 +1,46 @@
-/* ArchResidenceBD — design tokens v0 (W0.2).
-   Source of truth for the soft theme + no-sharp-edges corner policy.
-   See docs/design/design-tokens-v0.md. Every corner is rounded; radius 0 never appears. */
+/* ArchResidenceBD design tokens v3: Civic style, Monsoon indigo palette.
+   Plain and calm: white surfaces, cool grey neutrals, soft rounding, indigo for actions,
+   green/amber/red only for results. Token NAMES are unchanged from v2 so every screen picks
+   up the new look; new semantic tokens (--ok, --warn, --bad, --info, --phase-*) are added
+   at the end for new code. Light is the default; [data-theme="dark"] is set by ThemeProvider
+   (it also resolves the "system" choice). */
 
-/* Self-hosted fonts (OFL licensed) - replaces Google Fonts for offline/performance */
+/* Self-hosted fonts (OFL). Copied by scripts/copy-fonts.mjs; never loaded from the network. */
 @font-face {
-  font-family: "Inter";
-  src: url("/assets/fonts/inter-latin-400-normal.woff2") format("woff2");
+  font-family: "Noto Sans";
+  src: url("/assets/fonts/noto-sans-latin-400-normal.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: "Inter";
-  src: url("/assets/fonts/inter-latin-500-normal.woff2") format("woff2");
+  font-family: "Noto Sans";
+  src: url("/assets/fonts/noto-sans-latin-500-normal.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: "Inter";
-  src: url("/assets/fonts/inter-latin-600-normal.woff2") format("woff2");
+  font-family: "Noto Sans";
+  src: url("/assets/fonts/noto-sans-latin-600-normal.woff2") format("woff2");
   font-weight: 600;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: "Inter";
-  src: url("/assets/fonts/inter-latin-700-normal.woff2") format("woff2");
+  font-family: "Noto Sans";
+  src: url("/assets/fonts/noto-sans-latin-700-normal.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
-@font-face {
-  font-family: "Inter";
-  src: url("/assets/fonts/inter-latin-400-italic.woff2") format("woff2");
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Inter";
-  src: url("/assets/fonts/inter-latin-500-italic.woff2") format("woff2");
-  font-weight: 500;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Inter";
-  src: url("/assets/fonts/inter-latin-600-italic.woff2") format("woff2");
-  font-weight: 600;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Inter";
-  src: url("/assets/fonts/inter-latin-700-italic.woff2") format("woff2");
-  font-weight: 700;
-  font-style: italic;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Lora";
-  src: url("/assets/fonts/lora-latin-400-normal.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Lora";
-  src: url("/assets/fonts/lora-latin-500-normal.woff2") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Lora";
-  src: url("/assets/fonts/lora-latin-600-normal.woff2") format("woff2");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Lora";
-  src: url("/assets/fonts/lora-latin-700-normal.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Lora";
-  src: url("/assets/fonts/lora-latin-400-italic.woff2") format("woff2");
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Lora";
-  src: url("/assets/fonts/lora-latin-500-italic.woff2") format("woff2");
-  font-weight: 500;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Lora";
-  src: url("/assets/fonts/lora-latin-600-italic.woff2") format("woff2");
-  font-weight: 600;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Lora";
-  src: url("/assets/fonts/lora-latin-700-italic.woff2") format("woff2");
-  font-weight: 700;
-  font-style: italic;
-  font-display: swap;
-}
-
 @font-face {
   font-family: "Noto Sans Bengali";
   src: url("/assets/fonts/noto-sans-bengali-bengali-400-normal.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
+  unicode-range: U+0951-0952, U+0964-0965, U+0980-09FE, U+1CD0, U+1CD2, U+1CD5-1CD6, U+1CD8, U+1CE1, U+1CEA, U+1CED, U+1CF2, U+1CF5-1CF7, U+200C-200D, U+20B9, U+25CC, U+A8F1;
 }
 @font-face {
   font-family: "Noto Sans Bengali";
@@ -130,6 +48,7 @@
   font-weight: 500;
   font-style: normal;
   font-display: swap;
+  unicode-range: U+0951-0952, U+0964-0965, U+0980-09FE, U+1CD0, U+1CD2, U+1CD5-1CD6, U+1CD8, U+1CE1, U+1CEA, U+1CED, U+1CF2, U+1CF5-1CF7, U+200C-200D, U+20B9, U+25CC, U+A8F1;
 }
 @font-face {
   font-family: "Noto Sans Bengali";
@@ -137,6 +56,7 @@
   font-weight: 600;
   font-style: normal;
   font-display: swap;
+  unicode-range: U+0951-0952, U+0964-0965, U+0980-09FE, U+1CD0, U+1CD2, U+1CD5-1CD6, U+1CD8, U+1CE1, U+1CEA, U+1CED, U+1CF2, U+1CF5-1CF7, U+200C-200D, U+20B9, U+25CC, U+A8F1;
 }
 @font-face {
   font-family: "Noto Sans Bengali";
@@ -144,47 +64,56 @@
   font-weight: 700;
   font-style: normal;
   font-display: swap;
-}
-@font-face {
-  font-family: "Noto Sans Bengali";
-  src: url("/assets/fonts/noto-sans-bengali-latin-400-normal.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
+  unicode-range: U+0951-0952, U+0964-0965, U+0980-09FE, U+1CD0, U+1CD2, U+1CD5-1CD6, U+1CD8, U+1CE1, U+1CEA, U+1CED, U+1CF2, U+1CF5-1CF7, U+200C-200D, U+20B9, U+25CC, U+A8F1;
 }
 
 :root {
-  /* Base palette — warm cream/paper, warm ink (never harsh white/black) */
-  --paper: #fbf6ef; /* app background */
-  --surface: #fffdf9; /* cards, panels */
-  --surface-2: #f4ede2; /* recessed areas, hovers */
-  --surface-3: #ece3d5; /* stronger recess */
-  --ink: #3e3833; /* primary text — warm charcoal, never black */
-  --ink-soft: #6f6459; /* secondary text */
-  --ink-faint: #9d9184; /* hints, disabled */
-  --line: #e9dfd1; /* soft dividers */
+  color-scheme: light;
 
-  /* Primary — warm coral/terracotta */
-  --primary: #e07856;
-  --primary-hover: #d46a47;
-  --primary-active: #c55e3c;
-  --primary-soft: #fbe9e0;
-  --primary-ink: #a34b2b;
-  --on-primary: #fffaf6;
+  /* Neutrals: white surfaces, cool grey ink */
+  --paper: #ffffff; /* app background */
+  --surface: #ffffff; /* cards, panels (separated by --line borders) */
+  --surface-2: #f3f5f9; /* sidebar, hovers, recessed tiles */
+  --surface-3: #e8ecf3; /* stronger recess, pressed */
+  --ink: #171c29; /* primary text */
+  --ink-soft: #4e5668; /* secondary text */
+  --ink-faint: #626a7d; /* hints, captions (still AA on white and surface-2) */
+  --line: #e2e5ec; /* dividers, card borders */
+  --line-strong: #cdd2dd; /* input borders, emphasised dividers */
 
-  /* Meaning-coded pastels (phases, statuses, cost types) */
-  --sky: #7fb3d5;      --sky-soft: #e6f0f7;      --sky-ink: #3f6e8c;
-  --sage: #8fb58a;     --sage-soft: #eaf2e7;     --sage-ink: #4e7a49;
-  --lavender: #a99bd0; --lavender-soft: #efebf8; --lavender-ink: #6b5ca5;
-  --amber: #dfa761;    --amber-soft: #faf0de;    --amber-ink: #a1742c;
-  --blush: #e2a0ab;    --blush-soft: #fae9ec;    --blush-ink: #ad5666;
-  --mint: #7fc4b4;     --mint-soft: #e5f4f0;     --mint-ink: #3f8272;
+  /* Primary: Monsoon indigo (actions only, never results) */
+  --primary: #2e4fa3;
+  --primary-hover: #27458f;
+  --primary-active: #213c7d;
+  --primary-soft: #e3e9f7;
+  --primary-ink: #233d80;
+  --on-primary: #ffffff;
 
-  /* Radii — no sharp edges: 8 / 12 / 18 / 24 / pill */
-  --r-sm: 8px;
-  --r-md: 12px;
-  --r-lg: 18px;
-  --r-xl: 24px;
+  /* Tones: base / soft fill / ink text on the soft fill.
+     sky = info, sage = pass, amber = warning, blush = fail, lavender + mint = categories. */
+  --sky: #3b6fc4;      --sky-soft: #e5eefa;      --sky-ink: #24539c;
+  --sage: #2f8a5b;     --sage-soft: #e1f2e8;     --sage-ink: #1b6a43;
+  --lavender: #7363c2; --lavender-soft: #eeebf8; --lavender-ink: #4f3fa0;
+  --amber: #b07508;    --amber-soft: #fbf1dc;    --amber-ink: #7f5606;
+  --blush: #c9364f;    --blush-soft: #fbe6e9;    --blush-ink: #9c2238;
+  --mint: #1f8a73;     --mint-soft: #ddf2ec;     --mint-ink: #136150;
+
+  /* Construction phases (3D colour-by-phase, progress bars, charts) */
+  --phase-site: #a0703c;
+  --phase-foundation: #6b7280;
+  --phase-floor: var(--primary);
+  --phase-roof: #b07c0c;
+  --phase-utility: #1f8a70;
+
+  /* 3D viewport (read by src/cad/viewer.ts; must stay #rrggbb) */
+  --viewport-bg: #eef1f6;
+  --viewport-ground: #dfe3ea;
+
+  /* Radii: soft, not bubbly */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 18px;
   --r-pill: 999px;
 
   /* Spacing */
@@ -198,60 +127,70 @@
   --s-10: 40px;
   --s-12: 48px;
 
-  /* Typography */
-  --font-ui: "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system,
-    "Noto Sans Bengali", "Hind Siliguri", "Nirmala UI", "Kalpurush", "SolaimanLipi", "Siyam Rupali", "Vrinda", sans-serif;
+  /* Typography: Noto Sans + Noto Sans Bengali (one family, two scripts) */
+  --font-ui: "Noto Sans", "Noto Sans Bengali", system-ui, -apple-system, "Segoe UI", "Nirmala UI", sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", "Segoe UI Mono", Consolas, "Liberation Mono", monospace;
   --fs-xs: 12px;
   --fs-sm: 13px;
   --fs-md: 14px;
   --fs-lg: 16px;
   --fs-xl: 18px;
   --fs-2xl: 22px;
-  --fs-3xl: 28px;
+  --fs-3xl: 26px;
 
-  /* Soft diffuse shadows (warm, never harsh) */
-  --shadow-sm: 0 1px 2px rgba(96, 74, 54, 0.05), 0 2px 8px rgba(96, 74, 54, 0.06);
-  --shadow-md: 0 4px 14px rgba(96, 74, 54, 0.1);
-  --shadow-lg: 0 12px 32px rgba(96, 74, 54, 0.16);
+  /* Shadows: barely there; borders do the separating */
+  --shadow-sm: 0 1px 2px rgba(23, 28, 41, 0.06);
+  --shadow-md: 0 4px 12px rgba(23, 28, 41, 0.08);
+  --shadow-lg: 0 16px 40px rgba(23, 28, 41, 0.14);
 
-  /* Gentle motion 150–200 ms */
-  --dur-fast: 150ms;
-  --dur: 180ms;
+  /* Motion */
+  --dur-fast: 120ms;
+  --dur: 160ms;
   --dur-slow: 220ms;
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
-/* Warm charcoal dark mode */
 :root[data-theme="dark"] {
-  --paper: #262119;
-  --surface: #2e2820;
-  --surface-2: #383129;
-  --surface-3: #423a30;
-  --ink: #f1e9dd;
-  --ink-soft: #c9bcab;
-  --ink-faint: #93887a;
-  --line: #443c32;
+  color-scheme: dark;
 
-  --primary: #e68a66;
-  --primary-hover: #eb9979;
-  --primary-active: #f0a98c;
-  --primary-soft: #4a352a;
-  --primary-ink: #f3c3ab;
-  --on-primary: #2b2118;
+  --paper: #10131c;
+  --surface: #161a25;
+  --surface-2: #1c2130;
+  --surface-3: #252b3c;
+  --ink: #e7eaf2;
+  --ink-soft: #aeb5c6;
+  --ink-faint: #8a92a6;
+  --line: #2a3042;
+  --line-strong: #3a4258;
 
-  --sky-soft: #2b3944;      --sky-ink: #a8cfe6;
-  --sage-soft: #2f3b2d;     --sage-ink: #b7d5b2;
-  --lavender-soft: #37324a; --lavender-ink: #c9bff0;
-  --amber-soft: #453a28;    --amber-ink: #ecc98f;
-  --blush-soft: #443034;    --blush-ink: #efb6c0;
-  --mint-soft: #2b3f3a;     --mint-ink: #a9dccd;
+  --primary: #8ea6f0;
+  --primary-hover: #a3b7f4;
+  --primary-active: #b6c6f7;
+  --primary-soft: #1f2a4a;
+  --primary-ink: #c4d1fa;
+  --on-primary: #101c40;
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25), 0 2px 8px rgba(0, 0, 0, 0.25);
-  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.45);
+  --sky: #6b9be6;      --sky-soft: #182b47;      --sky-ink: #a9c6f4;
+  --sage: #5cc28a;     --sage-soft: #14301f;     --sage-ink: #9eddb9;
+  --lavender: #9d8fe3; --lavender-soft: #262245; --lavender-ink: #c9c0f3;
+  --amber: #e5b04a;    --amber-soft: #33270f;    --amber-ink: #f2d28f;
+  --blush: #ee7387;    --blush-soft: #3a1a21;    --blush-ink: #f6aeba;
+  --mint: #4cc3a6;     --mint-soft: #11302a;     --mint-ink: #9be2d0;
+
+  --phase-site: #c9955c;
+  --phase-foundation: #9aa1ae;
+  --phase-roof: #e5b04a;
+  --phase-utility: #4cc3a6;
+
+  --viewport-bg: #1a1f2c;
+  --viewport-ground: #2a3142;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.5);
 }
 
-/* High contrast mode - WCAG AAA compliant contrast ratios */
+/* High contrast (dark) - WCAG AAA */
 :root[data-theme="dark"][data-high-contrast="true"] {
   --paper: #000000;
   --surface: #0a0a0a;
@@ -261,12 +200,13 @@
   --ink-soft: #e0e0e0;
   --ink-faint: #b0b0b0;
   --line: #ffffff;
+  --line-strong: #ffffff;
 
   --primary: #ffff00;
   --primary-hover: #ffff33;
   --primary-active: #e6e600;
   --primary-soft: #333300;
-  --primary-ink: #000000;
+  --primary-ink: #ffff00;
   --on-primary: #000000;
 
   --sky: #00ffff;      --sky-soft: #003333;      --sky-ink: #00ffff;
@@ -281,41 +221,46 @@
   --shadow-lg: 0 0 0 3px #ffffff;
 }
 
-/* Light mode high contrast */
+/* High contrast (light) */
 :root[data-theme="light"][data-high-contrast="true"] {
   --paper: #ffffff;
-  --surface: #f0f0f0;
-  --surface-2: #e0e0e0;
-  --surface-3: #d0d0d0;
+  --surface: #ffffff;
+  --surface-2: #eeeeee;
+  --surface-3: #dddddd;
   --ink: #000000;
-  --ink-soft: #333333;
-  --ink-faint: #666666;
+  --ink-soft: #222222;
+  --ink-faint: #444444;
   --line: #000000;
+  --line-strong: #000000;
 
-  --primary: #000000;
-  --primary-hover: #333333;
-  --primary-active: #1a1a1a;
-  --primary-soft: #f0f0f0;
-  --primary-ink: #ffffff;
+  --primary: #00227a;
+  --primary-hover: #001a5e;
+  --primary-active: #001449;
+  --primary-soft: #dde4f7;
+  --primary-ink: #00227a;
   --on-primary: #ffffff;
 
-  --sky: #0000aa;      --sky-soft: #eef;      --sky-ink: #0000aa;
-  --sage: #006600;     --sage-soft: #efe;     --sage-ink: #006600;
-  --lavender: #660066; --lavender-soft: #fef; --lavender-ink: #660066;
-  --amber: #aa5500;    --amber-soft: #fee;    --amber-ink: #aa5500;
-  --blush: #aa0000;    --blush-soft: #fee;    --blush-ink: #aa0000;
-  --mint: #006666;     --mint-soft: #eff;     --mint-ink: #006666;
+  --sky: #0000aa;      --sky-soft: #eeeeff;   --sky-ink: #0000aa;
+  --sage: #006600;     --sage-soft: #eeffee;  --sage-ink: #006600;
+  --lavender: #660066; --lavender-soft: #ffeeff; --lavender-ink: #660066;
+  --amber: #7a4000;    --amber-soft: #fff2e0; --amber-ink: #7a4000;
+  --blush: #aa0000;    --blush-soft: #ffeeee; --blush-ink: #aa0000;
+  --mint: #005555;     --mint-soft: #eeffff;  --mint-ink: #005555;
 
   --shadow-sm: 0 0 0 1px #000000;
   --shadow-md: 0 0 0 2px #000000;
   --shadow-lg: 0 0 0 3px #000000;
 }
 
-/* Aliases for names that components use but the token set never defined (v2.4.4).
-   Before this, `var(--border)` (57 uses), `--surface-sunken`, `--tone-*` etc. resolved to nothing:
-   inputs and cards lost their borders and tinted backgrounds. They follow the active theme because
-   every theme overrides the base tokens on this same root element. */
+/* Semantic aliases. New code should use these rather than the tone names. */
 :root {
+  --ok: var(--sage);       --ok-soft: var(--sage-soft);    --ok-ink: var(--sage-ink);
+  --warn: var(--amber);    --warn-soft: var(--amber-soft); --warn-ink: var(--amber-ink);
+  --bad: var(--blush);     --bad-soft: var(--blush-soft);  --bad-ink: var(--blush-ink);
+  --info: var(--sky);      --info-soft: var(--sky-soft);   --info-ink: var(--sky-ink);
+  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--primary) 40%, transparent);
+
+  /* Names components used before v2.4.4 without the token set defining them. */
   --border: var(--line);
   --surface-sunken: var(--surface-3);
   --surface-active: var(--primary-soft);
@@ -328,5 +273,5 @@
   --ink-2: var(--ink-soft);
   --text-primary: var(--ink);
   --text-secondary: var(--ink-soft);
-  --shadow-xl: 0 20px 50px rgba(0, 0, 0, 0.25);
+  --shadow-xl: var(--shadow-lg);
 }

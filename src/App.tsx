@@ -15,7 +15,6 @@ import { DaylightAnalysisScreen } from "./screens/DaylightAnalysisScreen";
 import { UnitMixOptimizerScreen } from "./screens/UnitMixOptimizerScreen";
 import { ColumnGridOptimizerScreen } from "./screens/ColumnGridOptimizerScreen";
 import { HelpScreen } from "./screens/HelpScreen";
-import { ImportReviewScreen } from "./screens/ImportReviewScreen";
 import { LicencesScreen } from "./screens/LicencesScreen";
 import { NativeCadScreen } from "./screens/NativeCadScreen";
 import { PhaseChatScreen } from "./screens/PhaseChatScreen";
@@ -23,8 +22,8 @@ import { ProjectSetupScreen } from "./screens/ProjectSetupScreen";
 import { ProjectsScreen } from "./screens/ProjectsScreen";
 import { TemplatesScreen } from "./screens/TemplatesScreen";
 import { UnitsScreen } from "./screens/UnitsScreen";
-import { WindowsInstallerScreen } from "./screens/WindowsInstallerScreen";
-import { getActiveProject, create4StoryBuildingProject } from "./engine/projectState";
+import { SettingsScreen } from "./screens/SettingsScreen";
+import { activateSavedProject, getActiveProject, create4StoryBuildingProject } from "./engine/projectState";
 import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { useHashRoute } from "./hooks/useHashRoute";
@@ -46,7 +45,7 @@ const SCREEN_TITLES: Record<string, [string, string]> = {
   daylight: ["Daylight", "দিনের আলো"],
   "unit-mix": ["Unit Mix", "ইউনিট মিক্স"],
   "column-grid": ["Column Grid", "কলাম গ্রিড"],
-  windows: ["Windows Package", "উইন্ডোজ প্যাকেজ"],
+  settings: ["Settings", "সেটিংস"],
   units: ["Land Units", "জমির একক"],
   templates: ["Templates", "টেমপ্লেট"],
   about: ["About", "সম্পর্কে"],
@@ -135,7 +134,8 @@ function Shell() {
 export function App() {
   // First visit: create the demo 4-storey project once so the app opens on something real.
   useState(() => {
-    if (!getActiveProject()) create4StoryBuildingProject();
+    // Reopen the most recent saved project; only a truly empty install gets the demo.
+    if (!getActiveProject() && !activateSavedProject()) create4StoryBuildingProject();
     return null;
   });
   return (
@@ -179,8 +179,7 @@ function renderView(
   if (view === "daylight") return <DaylightAnalysisScreen />;
   if (view === "unit-mix") return <UnitMixOptimizerScreen />;
   if (view === "column-grid") return <ColumnGridOptimizerScreen />;
-  if (view === "windows") return <WindowsInstallerScreen />;
-  if (view === "import-review") return <ImportReviewScreen />;
+  if (view === "settings") return <SettingsScreen />;
   if (view === "licences") return <LicencesScreen />;
   if (view === "help") return <HelpScreen />;
   if (view === "units") return <UnitsScreen />;

@@ -184,7 +184,7 @@ export function TemplatesScreen({ onPick }: { onPick: (id: string) => void }) {
         actions={
           <Button
             variant="primary"
-            style={{ background: "var(--tone-brand, #3b82f6)", display: "flex", alignItems: "center", gap: "6px" }}
+            style={{ display: "flex", alignItems: "center", gap: "6px" }}
             onClick={handlePickRandom}
           >
             🎲 {lang === "bn" ? "র্যান্ডম ডিজাইন তৈরি করুন" : "Generate Random Design"}

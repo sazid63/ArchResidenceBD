@@ -28,8 +28,8 @@ export function FloorplanPreview({ plan, size = 280 }: Props) {
           height: size,
           borderRadius: 8,
           overflow: "hidden",
-          background: "#faf8f5",
-          border: "1px solid #e8e4dc",
+          background: "var(--surface-2)",
+          border: "1px solid var(--line)",
         }}
       >
         <img
@@ -64,15 +64,15 @@ function ProceduralPlan({ plan, size, label }: { plan: FloorPlanTemplate; size: 
       height={size}
       viewBox={"0 0 " + size + " " + size}
       xmlns="http://www.w3.org/2000/svg"
-      style={{ display: "block", border: "1px solid #e8e4dc", borderRadius: 8, background: "#faf8f5" }}
+      style={{ display: "block", border: "1px solid var(--line)", borderRadius: 8, background: "var(--surface-2)" }}
     >
-      <text x={size / 2} y={18} textAnchor="middle" fontSize="11" fill="#5a4a3a" fontWeight="600">
+      <text x={size / 2} y={18} textAnchor="middle" fontSize="11" fill="var(--ink)" fontWeight="600">
         {plan.id}
       </text>
-      <text x={size / 2} y={32} textAnchor="middle" fontSize="9" fill="#8a7a6a">
+      <text x={size / 2} y={32} textAnchor="middle" fontSize="9" fill="var(--ink-soft)">
         {units + (units === 1 ? " unit" : " units") + " per floor · drawing unavailable"}
       </text>
-      <rect x={pad} y={pad + 36} width={bw} height={bh - 36} fill="none" stroke="#3d3226" strokeWidth={2} />
+      <rect x={pad} y={pad + 36} width={bw} height={bh - 36} fill="none" stroke="var(--ink)" strokeWidth={2} />
       {Array.from({ length: units }).map((_, i) => (
         <g key={i}>
           <rect
@@ -81,15 +81,15 @@ function ProceduralPlan({ plan, size, label }: { plan: FloorPlanTemplate; size: 
             width={unitW}
             height={unitH}
             fill="none"
-            stroke="#6b5b4a"
+            stroke="var(--ink-soft)"
             strokeWidth={1.5}
           />
-          <text x={pad + i * unitWidth + unitW / 2 + 2} y={unitY - 4} textAnchor="middle" fontSize="8" fill="#6b5b4a">
+          <text x={pad + i * unitWidth + unitW / 2 + 2} y={unitY - 4} textAnchor="middle" fontSize="8" fill="var(--ink-soft)">
             {"Unit " + String.fromCharCode(65 + i)}
           </text>
         </g>
       ))}
-      <rect x={pad + bw * 0.42} y={unitY + unitH + 4} width={bw * 0.16} height={bh - 36 - unitH - 8} fill="#d4d4d4" stroke="#6b5b4a" />
+      <rect x={pad + bw * 0.42} y={unitY + unitH + 4} width={bw * 0.16} height={bh - 36 - unitH - 8} fill="var(--surface-3)" stroke="var(--ink-soft)" />
     </svg>
   );
 }

@@ -5,7 +5,7 @@ export type Lang = "bn" | "en";
 
 const en = {
   appName: "ArchResidenceBD",
-  tagline: "Your AI civil engineer",
+  tagline: "Residential design for Bangladesh",
   projects: "Projects",
   newProject: "New Project",
   projectSetup: "Project Setup",
@@ -140,7 +140,7 @@ const en = {
   licencesBundled: "Bundled",
   licencesPlanned: "Planned",
   aboutTitle: "About",
-  aboutTagline: "Your AI civil engineer",
+  aboutTagline: "Residential design and engineering checks for Bangladesh",
   aboutVersion: "Version",
   aboutBuild: "Build",
   aboutBuildValue: "W5.1 (prototype)",
@@ -270,7 +270,7 @@ const en = {
 
 const bn: typeof en = {
   appName: "ArchResidenceBD",
-  tagline: "আপনার এআই সিভিল ইঞ্জিনিয়ার",
+  tagline: "বাংলাদেশের আবাসিক নকশা",
   projects: "প্রকল্পসমূহ",
   newProject: "নতুন প্রকল্প",
   projectSetup: "প্রকল্প সেটআপ",
@@ -279,7 +279,7 @@ const bn: typeof en = {
   designFinal: "চূড়ান্ত (সম্মিলিত মডেল)",
   boq: "প্রাক্কলন (BOQ)",
   formwork: "ফর্মওয়ার্ক",
-  pourSequence: "পার্সিকোয়েন্স",
+  pourSequence: "ঢালাইয়ের ক্রম",
   rebar: "রিবার",
   rebarTitle: "রিবার কাটিং শেডিউল",
   rebarSubtitle: "বিনবিসি ২০২০ / ACI ৩১৮ অনুযায়ী বার বেঙ্গিং শেডিউল",
@@ -404,7 +404,7 @@ const bn: typeof en = {
   licencesBundled: "সংযুক্ত",
   licencesPlanned: "এখনও সংযুক্ত নয়",
   aboutTitle: "পরিচিতি",
-  aboutTagline: "আপনার এআই সিভিল ইঞ্জিনিয়ার",
+  aboutTagline: "বাংলাদেশের আবাসিক নকশা ও প্রকৌশল যাচাই",
   aboutVersion: "সংস্করণ",
   aboutBuild: "বিল্ড",
   aboutBuildValue: "W5.1 (প্রোটোটাইপ)",
@@ -429,7 +429,7 @@ const bn: typeof en = {
   helpNeedsShell: "সাহায্যতা খোজে অ্যাপের কোর, যা ডেস্কটপ শেলের ভেতরে চলে।",
   locked: "লক করা",
   revisionLabel: "সংশোধন {n}",
-  unitsTitle: "জমির রেলে",
+  unitsTitle: "জমির একক রূপান্তর",
   unitsSubtitle: "বাংলাদেশের নজদের প্রয়োজনে রূপান্তরিত করুন।",
   unitsConvert: "রূপান্তরিত করুন",
   unitsConverted: "রূপান্তরিত হয়েছে",

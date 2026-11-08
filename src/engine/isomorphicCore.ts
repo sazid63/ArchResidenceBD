@@ -505,31 +505,4 @@ export const isomorphicCore = {
     return { query, answers: searchManual(query) };
   },
 
-  importCandidates() {
-    return {
-      candidates: [
-        {
-          id: "rajuk-bidhimala-2008-sec4",
-          source: "RAJUK Imarat Nirman Bidhimala 2008",
-          section: "Section 4: Setback Specifications",
-          snippet: "আবশ্যিক উন্মুক্ত স্থান: সর্বমোট সর্বনিম্ন পরিমাপ...",
-          status: "accepted",
-        },
-        {
-          id: "bnbc-2020-part3-ch2",
-          source: "BNBC 2020 Building By-Laws",
-          section: "Part 3, Chapter 2: Occupancy & Height Restrictions",
-          snippet: "Residential A1/A2 occupancy light and ventilation court dimensions...",
-          status: "accepted",
-        },
-        {
-          id: "pwd-sor-2022-concrete",
-          source: "PWD Schedule of Rates 2022 (Civil Works)",
-          section: "Item 4.1.2: RCC 1:1.5:3 in columns and beams",
-          snippet: "Reinforced cement concrete with stone shingles including shuttering...",
-          status: "pending_review",
-        },
-      ],
-    };
-  },
 };

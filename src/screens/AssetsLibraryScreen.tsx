@@ -102,7 +102,7 @@ export function AssetsLibraryScreen() {
               className="stack"
               style={{
                 cursor: "pointer",
-                border: selectedAsset.id === asset.id ? "1.5px solid var(--primary, #2563eb)" : "1px solid var(--border)",
+                border: selectedAsset.id === asset.id ? "1.5px solid var(--primary)" : "1px solid var(--border)",
               }}
               onClick={() => setSelectedAsset(asset)}
             >

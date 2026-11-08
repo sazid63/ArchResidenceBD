@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from "react";
  */
 const PLAIN = new Set([
   "setup", "projects", "boq", "assets", "compliance", "formwork", "pour", "rebar", "connections", "daylight", "unit-mix",
-  "column-grid", "fleet", "windows", "import-review", "licences", "help", "units", "templates", "about",
+  "column-grid", "licences", "help", "units", "templates", "about", "settings",
 ]);
 const PREFIXED = ["phase", "design", "docs"];
 
