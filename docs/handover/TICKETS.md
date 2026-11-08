@@ -12,7 +12,7 @@ Opus only where an error is costly and no test can catch it (M2-2, M3-1, M4-1, M
 
 Done (2026-11-08): M0 foundation (pushed, CI green) · M1 new look · M2 plan engine + 2 plans (`efef993`, local).
 
-## M2-1 Building model · Sonnet high · todo
+## M2-1 Building model · Sonnet high · done
 Read: `src/plans/{types,fit,geometry,validate}.ts`.
 Do: `src/model/building.ts` `deriveBuilding({plotWidthMm, plotDepthMm, storeys, planId, mirror, floorToFloorMm = 3000, setbacksMm})` → plot, envelope, building origin (front-aligned, centred), `storeys[]` (level, height, use, `FloorGeometry`, phaseId), ground floor = typical grid with every non-core cell in one `parking` room + door lobby↔parking, roof (stair cover, lift room, 1 m parapet). Export `DEFAULT_SETBACKS_MM = {front 1500, rear 2000, left 1000, right 1000}` flagged as an assumption until M3-2. Phase ids as in `src/engine/projectState.ts` (`phase-ground-floor`, `phase-floor-<i>`, `phase-rooftop`). Fitter rejections pass through.
 Test: envelope maths, storey levels, ground and typical share grid lines and columns, every library plan has 0 validator errors on every storey.
