@@ -30,6 +30,10 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { generateBuildingMesh } from "../../src/cad/parametricBuildingGenerator";
+import { deriveBuilding, DEFAULT_SETBACKS_MM, type BuildingInput } from "../../src/model/building";
+import { buildMesh } from "../../src/model/toMesh";
+import { fitRange } from "../../src/plans/fit";
+import { PLAN_LIBRARY } from "../../src/plans/library";
 import type { BuildingCustomization } from "../../src/cad/parametricBuildingGenerator";
 import { FLOORPLAN_PRESETS } from "../../src/data/floorplanPresets";
 import { getColorForObject } from "../../src/cad/viewer";
@@ -972,6 +976,28 @@ function writeReports(
 // Main
 // ---------------------------------------------------------------------------
 
+
+/** New path (M2-2): every library plan at its min / preferred / max size × 2, 6, 10 storeys. */
+function modelCases(): Array<{ caseId: string; input: BuildingInput }> {
+  const out: Array<{ caseId: string; input: BuildingInput }> = [];
+  for (const plan of PLAN_LIBRARY) {
+    const r = fitRange(plan);
+    const sizes = (["min", "pref", "max"] as const).map((k) => [k, r.widthMm[k], r.depthMm[k]] as const);
+    for (const [k, w, d] of sizes)
+      for (const storeys of [2, 6, 10])
+        out.push({
+          caseId: `model-${plan.id}-${k}-${storeys}st`,
+          input: {
+            planId: plan.id,
+            storeys,
+            plotWidthMm: w + DEFAULT_SETBACKS_MM.left + DEFAULT_SETBACKS_MM.right,
+            plotDepthMm: d + DEFAULT_SETBACKS_MM.front + DEFAULT_SETBACKS_MM.rear,
+          },
+        });
+  }
+  return out;
+}
+
 function main(): void {
   const started = Date.now();
   const cases = buildCases();
@@ -1017,6 +1043,25 @@ function main(): void {
 
     logCase(audit);
   }
+
+  // New path (M2-2): building model → mesh. Strict: any defect fails the audit.
+  let modelDefects = 0;
+  for (const c of modelCases()) {
+    const b = deriveBuilding(c.input);
+    if (!b.ok) { modelDefects++; console.log(`[mesh-audit] ${c.caseId}: ${b.reasons[0].message.en}`); continue; }
+    const mesh = buildMesh(b.model);
+    const spec: CaseSpec = { caseId: c.caseId, stories: c.input.storeys, plotSqm: (c.input.plotWidthMm * c.input.plotDepthMm) / 1e6, presetIds: [], kind: "matrix" };
+    const audit = auditMesh(spec, mesh);
+    results.push(audit);
+    modelDefects += audit.counts.overlaps + audit.counts.zFights + audit.counts.duplicates + audit.counts.degenerates;
+    const dir = join(AUDIT_OUT, c.caseId);
+    mkdirSync(dir, { recursive: true });
+    const frame = frameBBox(mesh.objects);
+    const cam = isoCamera(0.9, frame.center, frame.span3, IMG_W, IMG_H);
+    writeFileSync(join(dir, "iso1.png"), encodePng(renderScene(mesh.objects, cam, IMG_W, IMG_H, audit.flaggedIds), IMG_W, IMG_H));
+    logCase(audit);
+  }
+  if (modelDefects) process.exitCode = 1;
 
   const durationMs = Date.now() - started;
   writeReports(AUDIT_OUT, results, durationMs);
