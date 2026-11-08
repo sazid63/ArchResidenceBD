@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [develop, main, v3]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Type check, tests, audits, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install
+        run: npm ci --no-audit --no-fund
+
+      # Type check, unit tests (Vitest) and the geometry/plan audits.
+      - name: Verify
+        run: npm run verify
+
+      - name: Mesh audit
+        run: npm run audit:mesh
+
+      - name: Exporter tests (IFC, FreeCAD)
+        run: npm run test:exporters
+
+      # Not run yet: audit:structural fails 17 of 36 cases on the current engine.
+      # It is rebuilt in milestone M4 (BUILD_PLAN.md) and added here then.
+
+      - name: Build
+        run: npm run build

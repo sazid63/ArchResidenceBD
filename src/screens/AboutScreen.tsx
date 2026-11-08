@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { coreHealth, isDesktopShell } from "../ipc/core";
+import { APP_VERSION } from "../version";
 import { useI18n } from "../i18n";
 import { Button, Card, PageHeader, Stat } from "../ui/kit";
 
@@ -37,7 +38,7 @@ export function AboutScreen({ onOpenLicences }: { onOpenLicences: () => void }) 
     <div className="screen">
       <PageHeader title={t("aboutTitle")} subtitle={t("aboutTagline")} />
       <div className="row">
-        <Stat label={t("aboutVersion")} value={t("aboutVersionValue")} />
+        <Stat label={t("aboutVersion")} value={APP_VERSION} />
         <Stat label={t("aboutBuild")} value={t("aboutBuildValue")} />
         <Stat
           label={t("aboutCore")}

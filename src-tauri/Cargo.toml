@@ -1,6 +1,6 @@
 [package]
 name = "archresidencebd"
-version = "1.0.0"
+version = "2.5.4"
 description = "AI-powered civil engineering assistant for Bangladeshi residential buildings"
 authors = ["Sazid Hossain <sazid63@users.noreply.github.com>"]
 license = "MIT"

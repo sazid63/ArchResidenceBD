@@ -1,8 +1,10 @@
 #[tauri::command]
-fn get_app_info() -> serde_json::Value {
+fn get_app_info(app: tauri::AppHandle) -> serde_json::Value {
+  // The version comes from tauri.conf.json, which points at package.json (the single source).
+  let info = app.package_info();
   serde_json::json!({
-    "name": "ArchResidenceBD",
-    "version": "1.0.0",
+    "name": info.name,
+    "version": info.version.to_string(),
     "engine": "tauri",
     "platform": std::env::consts::OS,
   })
