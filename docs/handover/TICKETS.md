@@ -22,10 +22,11 @@ Read (ranges): `src/cad/mesh.ts`; `solidKernel.ts` (`createBoxMesh`, `resolveSol
 Do: `src/model/toMesh.ts` `buildMesh(model)`: placeholder pads 1500×1500×450 at 1.5 m depth, columns 300×300, beams 250×450 on structural lines, slabs 150 ground / 125 typical with stair, lift and shaft openings, walls 250/125 cut for every opening, door and window meshes, stair per storey (`planStair`), roof items; same kinds and phase ids as the old generator; `resolveSolids`. Old generator untouched.
 Test: object counts follow the model, 0 overlaps, IFC export 0 errors; add the new path to `mesh-audit` and `solid-audit` (every plan × 3 sizes × 2/6/10 storeys).
 
-## M2-3 Eight more plans · Sonnet high · todo
+## M2-3 Eight more plans · Sonnet high · partly done (5 of 8)
 First ask the owner if not yet answered: split the lift bay into lift + duct? toilets on side walls or light shafts? keep the 1.35 m corridor spine? which layouts are most common?
 Do: add to `src/plans/library.ts`: `p1-3b`, `p2-2b-lr`, `p2-3b-lr`, `p2-3b-fb`, `p3-2b`, `p4-2b`, `p4-1b`, `p1-4b-wide`. Follow the two existing plans' conventions; spans ≤ 6 m; one main door per flat; bedrooms and living on outside walls; kitchens and toilets on an outside wall or shaft.
 Test: the existing sweep in `plans.test.ts` must pass. Render each once (`renderPlanSvg` + headless Edge) into `../review/`.
+Status: added `p1-3b`, `p1-4b-wide`, `p2-2b-lr`, `p2-3b-lr`, `p2-3b-fb` (sweep passes, rendered in `../review/plan-*.png`). Still open: `p3-2b`, `p4-2b`, `p4-1b`. Three or four flats per floor leave interior kitchens and toilets, so they need the light-shaft decision (toilets/kitchens on a shaft); until then they are blocked, not skipped. Defaults used: lift and duct one bay in the X4 plans and a separate duct in the wide plans; toilets on outside walls; 1.35 m spine kept in the X4 plans, 1.5 m horizontal corridor in the wide plans.
 
 ## M2-4 Site entry + plan picker · Sonnet high · todo
 Read: `src/screens/ProjectSetupScreen.tsx`; `BuildingProject` and `createNewProject` in `src/engine/projectState.ts` (grep); `src/model/{building,migrate,legacyV2}.ts`; `src/plans/{fit,render}.ts`.
