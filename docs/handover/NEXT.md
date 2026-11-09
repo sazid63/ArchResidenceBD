@@ -34,7 +34,7 @@ The owner (a civil engineer) confirmed the structural assumptions as correct: fc
 - **Fire and accessibility mostly "not checked":** no occupancy class for Table 4.3.8, no cited accessibility figures. **DAP** land-use is parked.
 - **Plan-validator messages are English only.**
 - **Not done in M6-2:** Unit mix, Daylight, Formwork and Pour screens still read the 3D mesh, not the model geometry; the Templates screen is a v2 demo; `App.tsx` creates a demo 4-storey project on a truly empty install.
-- **Packaging, not verified on a real machine:** the installers have not been built (no Rust toolchain here, so the release workflow and `tauri build` are untested), the desktop CSP was checked in a browser but not inside Tauri, and the service worker was tested only in a Node sandbox (the in-app browser pane cannot register service workers). First tagged release: run it, install, open offline.
+- **Packaging (verified 2026-11-09):** `npx tauri build --bundles nsis,msi` works locally (Rust 1.99.1 in %USERPROFILE%.cargo): NSIS 2.53 MiB, MSI 3.50 MiB under `src-tauri/target/release/bundle/`. The built exe ran: tauri.localhost, strict CSP enforced (Tauri adds the script hashes), no service worker, no console errors. Offline was verified in real Chrome (worker active, 64 files cached, app reloads with the server down, lazy screens too). Not done: running the installers themselves, the GitHub release workflow (needs a pushed tag), code signing.
 - CI (`verify`, `audit:mesh`, `test:exporters`, `build`) has not run locally since M2. `scripts/tests/batch-export.ts` was deleted (it could not run in Node: no stored projects).
 
 ## Practical notes
