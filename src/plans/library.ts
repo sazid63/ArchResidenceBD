@@ -157,18 +157,50 @@ const room = (id: string, kind: RoomDef["kind"], unit: string | undefined, en: s
 
 /** Like p1-4b, but the fourth bedroom becomes a family lounge: three bedrooms. */
 export const P1_3B: PlanDefinition = {
-  ...P1_4B,
   id: "p1-3b",
   name: t("One flat per floor, 3 bedrooms", "প্রতি তলায় একটি ফ্ল্যাট, ৩ বেডরুম"),
   description: t(
-    "Three bedrooms down the left wall and a family lounge at the back right; living room on the road side. For narrow, deep plots.",
-    "বাম দেয়ালে তিনটি বেডরুম, পেছনে ডানে পারিবারিক বসার ঘর; রাস্তার দিকে বসার ঘর। সরু ও গভীর প্লটের জন্য।",
+    "Living and dining down the left wall, a master suite and two large bedrooms down the right, kitchen and stair at the back. For narrow, deep plots.",
+    "বাম দেয়ালে বসার ও খাবার ঘর, ডানে মাস্টার স্যুট ও দুটি বড় বেডরুম, পেছনে রান্নাঘর ও সিঁড়ি। সরু, গভীর জমির জন্য।",
   ),
+  unitsPerFloor: 1,
   bedroomsPerUnit: 3,
-  rooms: P1_4B.rooms.map((r) =>
-    r.id === "a-bed4" ? { ...r, id: "a-lounge", kind: "living" as const, name: t("Family lounge", "পারিবারিক বসার ঘর") } : r,
-  ),
-  doors: P1_4B.doors.map((d) => ({ ...d, between: d.between.map((x) => (x === "a-bed4" ? "a-lounge" : x)) as unknown as typeof d.between })),
+  baysX: X4,
+  baysY: [bay(3600, 4200, 4500), bay(1500, 1500, 1800), bay(3300, 3450, 3900), bay(1500, 1500, 1800), bay(3300, 3450, 3900), bay(2450, 2550, 3000)],
+  structuralX: [0, 2, 3, 4],
+  structuralY: [0, 1, 2, 4, 5, 6],
+  rooms: [
+    { id: "a-living", kind: "living", unit: "A", name: t("Living room", "বসার ঘর"), cells: [[0, 0, 1, 0]] },
+    { id: "a-bed1", kind: "bedroom", unit: "A", name: t("Master bedroom", "মাস্টার বেডরুম"), cells: [[2, 0, 3, 0]] },
+    { id: "a-dining", kind: "dining", unit: "A", name: t("Dining", "খাবার ঘর"), cells: [[0, 1, 0, 2]] },
+    { id: "a-corridor", kind: "corridor", unit: "A", name: t("Corridor", "করিডোর"), cells: [[1, 1, 1, 4]] },
+    { id: "a-store1", kind: "store", unit: "A", name: t("Dressing", "ড্রেসিং"), cells: [[2, 1, 2, 1]] },
+    { id: "a-toilet1", kind: "toilet", unit: "A", name: t("Master toilet", "মাস্টার টয়লেট"), cells: [[3, 1, 3, 1]] },
+    { id: "a-bed2", kind: "bedroom", unit: "A", name: t("Bedroom 2", "বেডরুম ২"), cells: [[2, 2, 3, 2]] },
+    { id: "a-toilet2", kind: "toilet", unit: "A", name: t("Common toilet", "কমন টয়লেট"), cells: [[0, 3, 0, 3]] },
+    { id: "a-store2", kind: "store", unit: "A", name: t("Store", "স্টোর"), cells: [[2, 3, 2, 3]] },
+    { id: "a-toilet3", kind: "toilet", unit: "A", name: t("Toilet 2", "টয়লেট ২"), cells: [[3, 3, 3, 3]] },
+    { id: "a-kitchen", kind: "kitchen", unit: "A", name: t("Kitchen", "রান্নাঘর"), cells: [[0, 4, 0, 4]] },
+    { id: "a-bed3", kind: "bedroom", unit: "A", name: t("Bedroom 3", "বেডরুম ৩"), cells: [[2, 4, 3, 4]] },
+    ...core(5),
+  ],
+  doors: [
+    { between: ["a-living", "a-corridor"] },
+    { between: ["a-living", "a-bed1"] },
+    { between: ["a-living", "a-dining"] },
+    { between: ["a-dining", "a-corridor"] },
+    { between: ["a-bed1", "a-toilet1"] },
+    { between: ["a-bed1", "a-store1"] },
+    { between: ["a-corridor", "a-store1"] },
+    { between: ["a-corridor", "a-bed2"] },
+    { between: ["a-bed2", "a-toilet3"] },
+    { between: ["a-corridor", "a-toilet2"] },
+    { between: ["a-corridor", "a-store2"] },
+    { between: ["a-corridor", "a-kitchen"] },
+    { between: ["a-corridor", "a-bed3"] },
+    { between: ["a-corridor", "lobby"], main: true },
+    ...CORE_DOORS,
+  ],
 };
 
 // Five columns for the wide plans: bedroom edge, three inner bays, bedroom/service edge.
