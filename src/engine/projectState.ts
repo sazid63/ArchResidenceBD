@@ -230,7 +230,7 @@ export function generateRandomBuildingProject(): BuildingProject {
     { name: "Banani Family House (6-Storey)", address: "Road 11, Banani, Dhaka", stories: 6, frontageFt: 40, depthFt: 65, roadFt: 20, unitsPerFloor: 1 },
     { name: "Uttara Executive Residence (7-Storey)", address: "Sector 4, Uttara, Dhaka", stories: 7, frontageFt: 45, depthFt: 70, roadFt: 25, unitsPerFloor: 1 },
     { name: "Purbachal Villa (2-Storey)", address: "Sector 1, Purbachal, Dhaka", stories: 2, frontageFt: 40, depthFt: 65, roadFt: 30, unitsPerFloor: 1 },
-    { name: "Dhanmondi Two-Flat Block (6-Storey)", address: "Road 5, Dhanmondi, Dhaka", stories: 6, frontageFt: 40, depthFt: 80, roadFt: 20, unitsPerFloor: 2 },
+    { name: "Dhanmondi Two-Flat Block (6-Storey)", address: "Road 5, Dhanmondi, Dhaka", stories: 6, frontageFt: 45, depthFt: 80, roadFt: 20, unitsPerFloor: 2 },
     { name: "Gulshan Wide-Plot Block (8-Storey)", address: "Road 71, Gulshan 2, Dhaka", stories: 8, frontageFt: 60, depthFt: 60, roadFt: 30, unitsPerFloor: 2 },
     { name: "Mirpur Residential Block (5-Storey)", address: "Section 10, Mirpur, Dhaka", stories: 5, frontageFt: 45, depthFt: 80, roadFt: 20, unitsPerFloor: 2 },
   ];
