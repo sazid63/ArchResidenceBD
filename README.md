@@ -1,4 +1,4 @@
-# ArchResidenceBD (v3 work in progress)
+# ArchResidenceBD v2.5.4 (v3 work in progress)
 
 A bilingual (English / Bangla) app for residential buildings in Dhaka. Enter a plot, pick a floor plan, and the app derives the 3D model, a structural screening, the RAJUK and BNBC checks, the bar schedule, a bill of quantities and drawings from that one choice. Everything runs in the browser (and in a Tauri desktop shell); there is no server, no account and no upload.
 
