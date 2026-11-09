@@ -14,6 +14,8 @@ import {
   questionOf,
   SKIP_CHIP_ID,
 } from "./flow";
+import { quantize } from "./units";
+import { schemaAt, validatePointer } from "./schema";
 import { answer, answerOpen, answerWrites, describeStep, phaseRecordId, readPointer, seedValues, skip, startInterview, writePointer, type InterviewState } from "./runner";
 
 const NOW = "2026-11-09T10:00:00.000Z";
@@ -172,7 +174,7 @@ describe("the setup interview", () => {
   it("writes every answer to its pointer, in canonical units", () => {
     expect(spec.project.name).toBe("Green Villa");
     expect(spec.project.displayUnits).toMatchObject({ area: "katha", length: "ft" });
-    expect(spec.site.address).toMatchObject({ division: "dhaka", district: "Dhaka" });
+    expect(spec.site.address).toMatchObject({ division: "Dhaka", district: "Dhaka" }); // the English label, as migration writes it
     expect(spec.site.plot.areaSqm).toBeCloseTo(367.9, 2);
     expect(spec.site.plot.frontageM).toBeCloseTo(12.192, 3);
     expect(spec.site.plot.depthM).toBeCloseTo(18.288, 3);
@@ -355,5 +357,74 @@ describe("derive with nothing to derive from, and cross-flow conditions", () => 
       for (let i = 0; i < 100 && cur.current; i++) cur = skip(cur, NOW).state;
       expect(cur.current, f.id).toBeNull();
     }
+  });
+});
+
+describe("agreement with the Building Spec schema (audit)", () => {
+  const qs = allQuestions(book);
+  const DECLARED = new Set(["/project/displayUnits/area", "/pricing/source", "/site/soil/status", "/site/jurisdiction/authority", "/site/address/division"]);
+
+  it("every pointer outside the open phase payloads exists in the schema", () => {
+    for (const q of qs) if (!q.mapsTo.startsWith("/phases/")) expect(schemaAt(q.mapsTo), q.id).not.toBeNull();
+  });
+
+  it("every choice option the runner writes verbatim is in the schema enum", () => {
+    for (const q of qs) {
+      if (q.type !== "choice" || q.mapsTo.startsWith("/phases/") || DECLARED.has(q.mapsTo)) continue;
+      for (const o of q.options) expect(validatePointer(q.mapsTo, o.value), `${q.id}=${o.value}`).toBeNull();
+    }
+    // the declared ones go through answerWrites
+    const authority = questionOf(book, "authority");
+    for (const o of authority.options) {
+      const w = answerWrites(authority, authority.mapsTo, o.value);
+      if (w) expect(validatePointer(w[0][0], w[0][1]), o.value).toBeNull();
+    }
+    const display = questionOf(book, "display-units");
+    for (const o of display.options) for (const [ptr, v] of answerWrites(display, display.mapsTo, o.value)!) expect(validatePointer(ptr, v), o.value).toBeNull();
+  });
+
+  it("every authored default fits the schema once mapped (what a don't-know would write)", () => {
+    for (const q of qs) {
+      const v = q.fallback?.value;
+      if (!q.fallback || (q.fallback.kind !== "default" && q.fallback.kind !== "area_default" && q.fallback.kind !== "registry") || v === undefined) continue;
+      if (q.type === "choice" && !q.options.some((o) => o.value === v)) continue; // symbolic: recorded as pending, not written
+      const pairs = answerWrites(q, q.mapsTo, v) ?? [[q.mapsTo, v]];
+      for (const [ptr, val] of pairs) expect(validatePointer(ptr, val), `${q.id} -> ${String(val)}`).toBeNull();
+    }
+  });
+
+  it("the parser's own bounds agree with the schema's for storeys and floor heights", () => {
+    // storeys 1..20 in the schema
+    expect(validatePointer("/building/storeys/count", 20)).toBeNull();
+    expect(validatePointer("/building/storeys/count", 21)).toMatch(/at most 20/);
+    // floor heights must be more than 2 m: a "1 m" answer is re-asked, not written
+    const s = startInterview(freshSpec(), "floor");
+    expect(s.current?.key).toBe("ground-floor-height@0");
+    const bad = answer(s, "1 m", NOW);
+    expect(bad.turn).toMatchObject({ kind: "ask_again", reason: "schema" });
+    expect(bad.turn.reply.en).toMatch(/greater than 2/);
+    expect(bad.state).toBe(s);
+    expect(answer(s, "2.4 m", NOW).turn.kind).toBe("accept");
+  });
+
+  it("the schema accepts what the setup interview writes", () => {
+    for (const [ptr, v] of [["/site/plot/areaSqm", 334.45], ["/site/plot/roadWidthM", 6.096], ["/site/soil/status", "area_default"], ["/pricing/source", "fetched"], ["/building/groundFloorUsage", "parking"]] as const) {
+      expect(validatePointer(ptr, v), ptr).toBeNull();
+    }
+    expect(validatePointer("/site/plot/areaSqm", 0)).toMatch(/greater than 0/);
+    expect(validatePointer("/site/plot/areaSqm", "5")).toMatch(/must be number/);
+    expect(validatePointer("/phases/floor-1/data/anything", 5)).toBeNull(); // open payload
+  });
+});
+
+describe("rounding (audit): half up in decimal, not binary", () => {
+  it("rounds the cases that binary multiplication gets wrong", () => {
+    expect(quantize(1.005, 2)).toBe(1.01);
+    expect(quantize(2.675, 2)).toBe(2.68);
+    expect(quantize(334.4509, 2)).toBe(334.45);
+    expect(quantize(0.9144, 3)).toBe(0.914);
+    expect(quantize(-1.005, 2)).toBe(-1.01);
+    expect(quantize(12, 2)).toBe(12);
+    expect(quantize(1e-7, 2)).toBe(0);
   });
 });

@@ -46,6 +46,7 @@ export function normalize(text: string): string {
   v = v.replace(/[০-৯]/g, (d) => String(BN_DIGITS.indexOf(d)));
   v = v.replace(/[’‘]/g, "'").replace(/[“”]/g, '"').replace(/ /g, " ");
   v = v.toLowerCase();
+  v = v.replace(/\bsq\.\s*/g, "sq ");
   v = v.replace(/(?<=\d),(?=\d{3}(?!\d))/g, "");
   v = v.replace(/\s+/g, " ").trim();
   return v.replace(/^[ \t.,;:!?।]+|[ \t.,;:!?।]+$/g, "");
@@ -80,7 +81,7 @@ const FRACTION_STANDALONE: Record<string, number> = Object.fromEntries(
 );
 const FRACTION_HINTS = normAll(["সাড়ে", "দেড়", "আড়াই", "সোয়া", "পৌনে", "half"]);
 
-const YES_WORDS = normAll(["yes", "y", "yeah", "yep", "yup", "sure", "ok", "okay", "true", "ha", "haa", "han", "hyan", "hae", "ache", "ase", "korbo", "lagbe", "chai", "হ্যাঁ", "হা", "জি", "আছে", "করব", "লাগবে", "চাই", "হবে", "ঠিক আছে"]);
+const YES_WORDS = normAll(["yes", "y", "yeah", "yep", "yup", "sure", "ok", "okay", "true", "ha", "haa", "han", "hyan", "hae", "ache", "ase", "ji", "jee", "haan", "hya", "korbo", "lagbe", "chai", "হ্যাঁ", "হা", "জি", "আছে", "করব", "লাগবে", "চাই", "হবে", "ঠিক আছে"]);
 const NO_WORDS = normAll(["no", "n", "nope", "nah", "na", "naa", "nahi", "false", "না", "নেই", "লাগবে না", "চাই না", "করব না", "হবে না", "দরকার নেই"]);
 const DONT_KNOW = normAll([
   "don't know", "dont know", "do not know", "no idea", "not sure", "unsure", "no clue", "can't say", "cannot say", "unknown", "skip", "pass", "later", "no answer",
@@ -117,10 +118,33 @@ const DIMENSION: Record<string, string> = { sqm: "area", m2: "area", sqft: "area
 const CANONICAL_DIMENSION: Record<string, string> = { m: "length", m2: "area", mm: "length", kPa: "pressure", BDT: "money" };
 const CANONICAL_DECIMALS: Record<string, number> = { m2: 2, m: 3, mm: 2, kPa: 2, BDT: 2 };
 
+/** Like `contains`, but a digit may sit right before the word: "5katha", "1200sqft", "40ft". */
+function containsUnit(haystack: string, needle: string): boolean {
+  if (!needle) return false;
+  // An English alias may take a plural s ("kathas", "feet" is its own alias).
+  const plural = /[a-z]$/.test(needle) ? "s?" : "";
+  return new RegExp(`(?<![\\p{L}\\p{M}_])${escapeRe(needle)}${plural}(?![${WORD}])`, "u").test(haystack);
+}
+
 const findUnit = (norm: string): string | null => {
-  for (const a of ALIASES_BY_LENGTH) if (contains(norm, a)) return UNIT_ALIASES[a];
+  for (const a of ALIASES_BY_LENGTH) if (containsUnit(norm, a)) return UNIT_ALIASES[a];
+  // Prime marks: 40' is feet, 6" is inches.
+  if (/\d\s*'/.test(norm)) return "ft";
+  if (/\d\s*"/.test(norm)) return "inch";
   return null;
 };
+
+/** Words that may follow a number without being a unit ("5 or so", "40 only"). */
+const NOT_A_UNIT = new Set(["or", "only", "approx", "approximately", "about", "around", "ish", "total", "plus", "and", "by", "x", "টা", "টি", "মত", "প্রায়", "ta", "mot"]);
+
+/** The word right after the number when it is neither a known unit nor an ignorable filler: "5 acre", "30 yards". */
+function unknownUnitWord(norm: string): string | null {
+  const m = /\d(?:\.\d+)?\s*([\p{L}\p{M}]+)/u.exec(norm);
+  if (!m) return null;
+  const word = m[1];
+  if (NOT_A_UNIT.has(word) || word in ALL_NUMBER_WORDS) return null;
+  return word;
+}
 
 const numbersIn = (norm: string): number[] => (norm.match(/\d+(?:\.\d+)?/g) ?? []).map(Number);
 
@@ -289,6 +313,9 @@ function parseNumber(q: Question, input: string, raw: string, areaDisplay: strin
   const foundUnit = findUnit(norm);
   if (foundUnit !== null) enteredUnit = foundUnit;
   let usedDisplay = false;
+  if (foundUnit === null && !integer && unitCode(q) && unknownUnitWord(norm)) {
+    return { decision: "ask_again", reason: "unknown_unit", unit: unknownUnitWord(norm) ?? undefined, asEntered: raw };
+  }
   if (enteredUnit === null) {
     enteredUnit = displayUnit(q, areaDisplay, lengthDisplay);
     usedDisplay = enteredUnit !== null;

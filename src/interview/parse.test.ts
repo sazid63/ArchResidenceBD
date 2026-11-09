@@ -41,6 +41,53 @@ describe("area answers convert to canonical m2", () => {
   });
 });
 
+describe("units glued to the number, and units we do not know (audit)", () => {
+  it.each([
+    ["5katha", 334.45],
+    ["5কাঠা", 334.45],
+    ["1200sqft", 111.48],
+    ["১২০০বর্গফুট", 111.48],
+    ["1,200 sq. ft.", 111.48],
+    ["1200 sq.ft", 111.48],
+    ["5 Kathas", 334.45],
+  ])("area %s -> %f m2, never read in the display unit", (text, value) => {
+    const r = parse("plot-area", text, "katha");
+    expect(r.decision).toBe("accept");
+    expect(r.value).toBeCloseTo(value, 2);
+    expect(r.usedDisplayUnit).toBeFalsy();
+  });
+
+  it.each([
+    ["40ft", 12.192],
+    ["40m", 40],
+    ["40'", 12.192],
+    ["12.5m", 12.5],
+  ])("length %s -> %f m with the display unit set to feet", (text, value) => {
+    const r = parse("plot-frontage", text, "katha", "ft");
+    expect(r.decision).toBe("accept");
+    expect(r.value).toBeCloseTo(value, 3);
+    expect(r.usedDisplayUnit).toBeFalsy();
+  });
+
+  it.each(["5 acre", "5 acres", "30 yards", "2 kani", "5acre"])("an unknown unit is re-asked, never read as the display unit: %s", (text) => {
+    expect(parse("plot-area", text, "katha")).toMatchObject({ decision: "ask_again", reason: "unknown_unit" });
+  });
+
+  it("fillers after a number are not units", () => {
+    expect(parse("plot-area", "5 or so", "katha").decision).toBe("accept");
+    expect(parse("plot-area", "about 5", "katha").usedDisplayUnit).toBe(true);
+  });
+
+  it("an unknown word after a count is a unit problem only on unit questions", () => {
+    expect(parse("storeys-count", "4 storey").value).toBe(4);
+    expect(parse("storeys-count", "৫ তলা").value).toBe(5);
+  });
+
+  it.each(["ji", "haan", "Jee"])("more Banglish yes: %s", (text) => {
+    expect(parse("corner-plot", text).value).toBe(true);
+  });
+});
+
 describe("length, pressure and money", () => {
   it.each([
     ["40 ft", 12.192],

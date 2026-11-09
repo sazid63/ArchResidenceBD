@@ -61,8 +61,12 @@ export class UnitError extends Error {}
 
 /** Round half up to `places` decimals (the parser's canonical precision). */
 export function quantize(value: number, places: number): number {
-  const f = 10 ** places;
-  return Math.round((value + Number.EPSILON * Math.sign(value)) * f) / f;
+  if (!Number.isFinite(value)) return value;
+  // Shift the decimal point in the decimal text, not by multiplication: 1.005 * 100 is 100.49999999999999.
+  const sign = value < 0 ? -1 : 1;
+  const [mantissa, exp = "0"] = Math.abs(value).toExponential(15).split("e");
+  const shifted = Math.round(Number(`${mantissa}e${Number(exp) + places}`));
+  return sign * Number(`${shifted}e-${places}`);
 }
 
 export function areaToM2(value: number, unit: string): number {

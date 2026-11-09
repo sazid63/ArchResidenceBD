@@ -31,6 +31,7 @@ import {
   type Question,
 } from "./flow";
 import { parseAnswer, type ParseResult } from "./parse";
+import { validatePointer } from "./schema";
 import { UNIT_WORDS, bnDigits, formatNumber } from "./units";
 
 export interface Step {
@@ -194,6 +195,7 @@ export function answerWrites(q: Question, pointer: string, value: unknown): Pair
     if (value === false) return null;
     return [[pointer, value]];
   }
+  if (q.mapsTo === "/site/address/division") return [[pointer, q.options.find((o) => o.value === value)?.label.en ?? value]];
   if (FALLBACK_OPTIONS[q.mapsTo]?.includes(String(value))) return null;
   return [[pointer, value]];
 }
@@ -288,6 +290,7 @@ export function displayValue(step: Step, value: unknown, lang: "en" | "bn"): str
 }
 
 const ASK_AGAIN: Record<string, Bi> = {
+  schema: { en: "That value is not allowed here.", bn: "এই মানটি এখানে অনুমোদিত নয়।" },
   empty: { en: "Please type an answer, or tap a button.", bn: "একটি উত্তর লিখুন, অথবা বোতামে চাপ দিন।" },
   ambiguous_choice: { en: "That matches more than one option. Which one?", bn: "এটি একাধিক বিকল্পের সাথে মেলে। কোনটি?" },
   ambiguous_yesno: { en: "Is that a yes or a no?", bn: "এটা কি হ্যাঁ, নাকি না?" },
@@ -295,6 +298,7 @@ const ASK_AGAIN: Record<string, Bi> = {
   whole_number: { en: "Please give a whole number.", bn: "একটি পূর্ণসংখ্যা দিন।" },
   unexpected_unit: { en: "This answer is a count: no unit needed.", bn: "এটি একটি গণনা: কোনো একক লাগবে না।" },
   multiple_numbers: { en: "I found more than one number. Give just one.", bn: "একাধিক সংখ্যা পেয়েছি। শুধু একটি দিন।" },
+  unknown_unit: { en: "I did not recognise that unit. Use katha, shotok, bigha, sqft or sqm for area; m or ft for length.", bn: "এককটি চিনতে পারিনি। ক্ষেত্রফলে কাঠা, শতক, বিঘা, বর্গফুট বা বর্গমিটার; দৈর্ঘ্যে মিটার বা ফুট ব্যবহার করুন।" },
   wrong_dimension: { en: "That unit does not fit this question (area vs length).", bn: "এই এককটি এই প্রশ্নের সাথে মেলে না (ক্ষেত্রফল বনাম দৈর্ঘ্য)।" },
   too_long: { en: "That is too long. Please shorten it.", bn: "উত্তরটি খুব বড়। ছোট করুন।" },
 };
@@ -405,6 +409,12 @@ function applyParsed(state: InterviewState, step: Step, parsed: ParseResult, sai
     case "accept": {
       const pairs = answerWrites(q, step.pointer, parsed.value);
       if (!pairs) return applyFallback(state, step, parsed.reason ?? "answer", now, book);
+      for (const [pointer, value] of pairs) {
+        const why = validatePointer(pointer, value);
+        if (why) {
+          return { state, turn: { kind: "ask_again", ...base, reason: "schema", reply: { en: `${ASK_AGAIN.schema.en} It ${why}.`, bn: `${ASK_AGAIN.schema.bn} (${why})` }, chips: chipsFor(q, "en") } };
+        }
+      }
       const readAs = parsed.asEntered && parsed.asEntered !== said ? `; read as: ${parsed.asEntered}` : "";
       const detail = `interview: ${q.id}${step.storeyIndex !== undefined ? ` (storey ${step.storeyIndex})` : ""} (said: "${said}"${readAs})`;
       let s = commit(state, pairs, provenanceFor("user", detail, parsed.usedDisplayUnit ? "medium" : "high", now), now, book);
