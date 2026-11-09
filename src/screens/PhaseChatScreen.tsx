@@ -179,7 +179,7 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
               className="input"
               value={inputText}
               disabled={!view.guided || view.done}
-              placeholder={bn ? "আপনার উত্তর লিখুন, অথবা বোতামে চাপ দিন" : "Type your answer, or tap a button"}
+              placeholder={bn ? "আপনার উত্তর" : "Your answer"}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
@@ -196,7 +196,7 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
 
         <div className="stack">
           <Card className="stack">
-            <h3>{bn ? "আপনার উত্তর" : "Your answers"}</h3>
+            <h2 className="section-title">{bn ? "আপনার উত্তর" : "Your answers"}</h2>
             {view.answers.length > 0 ? (
               <div className="stack" style={{ gap: 8 }}>
                 {view.answers.map((a) => (
@@ -222,7 +222,7 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
 
           {view.assumptions.length > 0 ? (
             <Card className="stack">
-              <h3>{bn ? "অনুমান" : "Assumptions"}</h3>
+              <h2 className="section-title">{bn ? "অনুমান" : "Assumptions"}</h2>
               {view.assumptions.map((a) => (
                 <p key={a.id} className="small" style={{ margin: 0 }}>
                   {a.statement}
@@ -232,28 +232,6 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
             </Card>
           ) : null}
 
-          <Card className="stack">
-            <h3>{bn ? "ধাপের অগ্রগতি" : "Phase progress"}</h3>
-            {project.phases.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                className="row-between"
-                style={{
-                  fontSize: 12,
-                  padding: "4px 6px",
-                  background: p.id === phase.id ? "var(--surface-active)" : "transparent",
-                  border: "none",
-                  cursor: "pointer",
-                  textAlign: "left",
-                }}
-                onClick={() => onNavigate(`phase:${p.id}`)}
-              >
-                <span className="grow">{bn ? p.nameBn : p.nameEn}</span>
-                <span className="faint">{p.status === "completed" ? "✓" : p.status === "in_progress" ? "…" : "·"}</span>
-              </button>
-            ))}
-          </Card>
         </div>
       </div>
     </div>

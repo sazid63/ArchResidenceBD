@@ -472,8 +472,15 @@
 .verdict-item--bad { background: var(--bad-soft); border-color: transparent; color: var(--bad-ink); }
 .verdict-item--bad .verdict-value { color: var(--bad-ink); }
 
+/* Headings that keep the h1 > h2 > h3 order without changing the sizes */
+.section-title { margin: 0; font-size: var(--fs-lg); font-weight: 600; line-height: 1.35; }
+.card-title { margin: 0; font-size: var(--fs-md); font-weight: 600; line-height: 1.4; }
+
 /* Data tables (Structure screen): tokens only */
 .data-table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
 .data-table th { text-align: left; font-weight: 600; color: var(--ink-soft); padding: 6px 10px; border-bottom: 1px solid var(--line-strong); white-space: nowrap; }
 .data-table td { padding: 6px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
 .data-table tbody tr:hover { background: var(--surface-2); }
+.data-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.data-table th.num { text-align: right; }
+.cell-clip { display: inline-block; max-width: 22ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }

@@ -6,6 +6,7 @@ import { analyzeStructure } from "../structure/analyze";
 import { buildBbs, type BbsFamily, type BbsIssue, type BbsResult } from "../structure/bbs";
 import { bbsToCsv } from "../structure/bbsCsv";
 import { STOCK_BARS } from "../structure/barSelect";
+import { fmtDec, fmtInt } from "../ui/format";
 import { Button, Callout, Card, EmptyState, PageHeader, ResultChip, SegmentedControl, Stat, VerdictStrip } from "../ui/kit";
 
 type Filter = "all" | BbsFamily;
@@ -134,14 +135,14 @@ export function RebarScheduleScreen() {
       />
 
       <section className="stack" style={{ gap: 12 }} aria-label={bn ? "সমস্যা" : "Issues"}>
-        <h3 style={{ margin: 0 }}>{bn ? "আগে সমস্যাগুলো" : "Issues first"}</h3>
+        <h2 className="section-title">{bn ? "আগে সমস্যাগুলো" : "Issues first"}</h2>
         {issues.length === 0 ? (
           <Card><p className="muted" style={{ margin: 0 }}>{bn ? "কোনো সমস্যা নেই: সব রড বসে এবং অ্যাঙ্কর হয়।" : "No issues: every bar fits and anchors."}</p></Card>
         ) : (
           groups.map((g) => (
             <Card key={g.cause} className="stack">
               <div className="row-between">
-                <h4 style={{ margin: 0 }}>{bn ? CAUSES[g.cause].title.bn : CAUSES[g.cause].title.en}</h4>
+                <h3 className="card-title">{bn ? CAUSES[g.cause].title.bn : CAUSES[g.cause].title.en}</h3>
                 <ResultChip result={g.severity === "fail" ? "fail" : "warn"} lang={lang} />
               </div>
               <span className="small muted">
@@ -160,14 +161,14 @@ export function RebarScheduleScreen() {
       </section>
 
       <section className="stack" style={{ marginTop: 24, gap: 12 }} aria-label={bn ? "মোট" : "Totals"}>
-        <h3 style={{ margin: 0 }}>{bn ? "ব্যাস অনুযায়ী মোট" : "Totals by diameter"}</h3>
+        <h2 className="section-title">{bn ? "ব্যাস অনুযায়ী মোট" : "Totals by diameter"}</h2>
         <div style={{ overflowX: "auto" }}>
           <table className="data-table">
             <thead>
               <tr>
                 <th>{bn ? "ব্যাস (মিমি)" : "Diameter (mm)"}</th>
-                <th>{bn ? "দৈর্ঘ্য (মি)" : "Length (m)"}</th>
-                <th>{bn ? "ওজন (কেজি)" : "Weight (kg)"}</th>
+                <th className="num">{bn ? "দৈর্ঘ্য (মি)" : "Length (m)"}</th>
+                <th className="num">{bn ? "ওজন (কেজি)" : "Weight (kg)"}</th>
               </tr>
             </thead>
             <tbody>
@@ -176,8 +177,8 @@ export function RebarScheduleScreen() {
                 return t ? (
                   <tr key={d}>
                     <td>{d}</td>
-                    <td>{t.lengthM.toFixed(0)}</td>
-                    <td>{kg(t.weightKg)}</td>
+                    <td className="num">{fmtInt(t.lengthM)}</td>
+                    <td className="num">{fmtInt(t.weightKg)}</td>
                   </tr>
                 ) : null;
               })}
@@ -191,7 +192,7 @@ export function RebarScheduleScreen() {
 
       <section className="stack" style={{ marginTop: 24, gap: 12 }} aria-label={bn ? "বার বেন্ডিং শিডিউল" : "Bar bending schedule"}>
         <div className="row-between">
-          <h3 style={{ margin: 0 }}>{bn ? "বার বেন্ডিং শিডিউল" : "Bar bending schedule"}</h3>
+          <h2 className="section-title">{bn ? "বার বেন্ডিং শিডিউল" : "Bar bending schedule"}</h2>
           <Button variant="ghost" onClick={() => download(`${project.name.replace(/[^\w-]+/g, "_") || "project"}-bbs.csv`, bbsToCsv(bbs.rows))}>
             {bn ? "CSV ডাউনলোড" : "Download CSV"}
           </Button>
@@ -206,12 +207,12 @@ export function RebarScheduleScreen() {
                 <th>{bn ? "ব্যাস" : "Dia"}</th>
                 <th>{bn ? "আকৃতি" : "Shape"}</th>
                 <th>{bn ? "মাপ A / B / C (মিমি)" : "A / B / C (mm)"}</th>
-                <th>{bn ? "কাটা দৈর্ঘ্য (মিমি)" : "Cut length (mm)"}</th>
-                <th>{bn ? "রড/সদস্য" : "Bars each"}</th>
-                <th>{bn ? "সদস্য" : "Members"}</th>
-                <th>{bn ? "মোট রড" : "Total bars"}</th>
-                <th>{bn ? "দৈর্ঘ্য (মি)" : "Length (m)"}</th>
-                <th>{bn ? "ওজন (কেজি)" : "Weight (kg)"}</th>
+                <th className="num">{bn ? "কাটা দৈর্ঘ্য (মিমি)" : "Cut length (mm)"}</th>
+                <th className="num">{bn ? "রড/সদস্য" : "Bars each"}</th>
+                <th className="num">{bn ? "সদস্য" : "Members"}</th>
+                <th className="num">{bn ? "মোট রড" : "Total bars"}</th>
+                <th className="num">{bn ? "দৈর্ঘ্য (মি)" : "Length (m)"}</th>
+                <th className="num">{bn ? "ওজন (কেজি)" : "Weight (kg)"}</th>
                 <th>{bn ? "স্তর" : "Levels"}</th>
               </tr>
             </thead>
@@ -223,12 +224,12 @@ export function RebarScheduleScreen() {
                   <td>{r.diaMm}</td>
                   <td title={bn ? SHAPE_NOTE[r.shape].bn : SHAPE_NOTE[r.shape].en}>{r.shape}</td>
                   <td>{r.dimsMm.join(" / ")}</td>
-                  <td>{r.cutLengthMm}</td>
-                  <td>{r.barsPerMember}</td>
-                  <td>{r.members}</td>
-                  <td>{r.totalBars}</td>
-                  <td>{r.totalLengthM.toFixed(1)}</td>
-                  <td>{r.weightKg.toFixed(0)}</td>
+                  <td className="num">{fmtInt(r.cutLengthMm)}</td>
+                  <td className="num">{r.barsPerMember}</td>
+                  <td className="num">{r.members}</td>
+                  <td className="num">{fmtInt(r.totalBars)}</td>
+                  <td className="num">{fmtDec(r.totalLengthM, 1)}</td>
+                  <td className="num">{fmtInt(r.weightKg)}</td>
                   <td>{levelsText(r.levels)}</td>
                 </tr>
               ))}
@@ -240,10 +241,16 @@ export function RebarScheduleScreen() {
             ? "আকৃতি কোড বিএস ৮৬৬৬ রীতি অনুযায়ী: ০০ সোজা, ১১ একটি ৯০° বাঁক, ২১ দুটি ৯০° বাঁক, ৫১ বন্ধ স্টিরাপ ১৩৫° হুকসহ। কাটা দৈর্ঘ্যে বাঁকের বিয়োজন ধরা আছে।"
             : "Shape codes follow the BS 8666 convention: 00 straight, 11 one 90° bend, 21 two 90° bends, 51 closed link with 135° hooks. Cut lengths include the bend deductions."}
         </p>
+      
+        <p className="small muted" style={{ margin: 0 }}>
+          {bn ? "আকৃতি: " : "Shape: "}
+          {(["00", "11", "21", "51"] as const).map((k) => `${k} ${bn ? SHAPE_NOTE[k].bn : SHAPE_NOTE[k].en}`).join(" · ")}
+          {bn ? "। A, B, C হলো বাইরের মাপ।" : ". A, B, C are the outside dimensions of the shape."}
+        </p>
       </section>
 
       <section className="stack" style={{ marginTop: 24, gap: 8 }} aria-label={bn ? "অনুমান" : "Assumptions"}>
-        <h3 style={{ margin: 0 }}>{bn ? "অনুমান" : "Assumptions"}</h3>
+        <h2 className="section-title">{bn ? "অনুমান" : "Assumptions"}</h2>
         <ul className="small muted" style={{ margin: 0, paddingLeft: 18 }}>
           {data.assumptions.map((a) => <li key={a.id}>{bn ? a.bn : a.en}</li>)}
         </ul>

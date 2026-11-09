@@ -41,7 +41,7 @@ function Table({ head, rows }: { head: string[]; rows: ReactNode[][] }) {
         </thead>
         <tbody>
           {rows.map((r, i) => (
-            <tr key={i}>{r.map((c, j) => <td key={j}>{c}</td>)}</tr>
+            <tr key={i}>{r.map((c, j) => <td key={j}>{typeof c === "string" && c.length > 24 ? <span className="cell-clip" title={c}>{c}</span> : c}</td>)}</tr>
           ))}
         </tbody>
       </table>
@@ -113,7 +113,7 @@ export function StructureScreen() {
   );
 
   const title = bn ? "কাঠামো" : "Structure";
-  const subtitle = bn ? "প্রাথমিক যাচাই, চূড়ান্ত নকশা নয়" : "Screening, not final design";
+  const subtitle = bn ? "বিএনবিসি ২০২০ পার্ট ৬: লোড, সদস্য, কলাম ও ভূমিকম্প" : "BNBC 2020 Part 6: loads, members, columns and seismic";
 
   if (!project || !built) {
     return (
@@ -169,7 +169,7 @@ export function StructureScreen() {
       </div>
 
       <section className="stack" style={{ gap: 12 }} aria-label={bn ? "ইনপুট" : "Inputs"}>
-        <h3 style={{ margin: 0 }}>{bn ? "ইনপুট (অনুমান)" : "Inputs (assumptions)"}</h3>
+        <h2 className="section-title">{bn ? "ইনপুট (অনুমান)" : "Inputs (assumptions)"}</h2>
         <div className="row" style={{ gap: 16, flexWrap: "wrap" }}>
           <label className="stack" style={{ gap: 4 }}>
             <span className="small muted">{bn ? "সাইট ক্লাস (ঢাকা, Z = ০.২০)" : "Site class (Dhaka, Z = 0.20)"}</span>
@@ -196,7 +196,7 @@ export function StructureScreen() {
       </section>
 
       <section className="stack" style={{ marginTop: 20, gap: 12 }} aria-label={bn ? "অনুত্তীর্ণ সদস্য" : "Failures"}>
-        <h3 style={{ margin: 0 }}>{bn ? "আগে অনুত্তীর্ণগুলো" : "Failures first"}</h3>
+        <h2 className="section-title">{bn ? "আগে অনুত্তীর্ণগুলো" : "Failures first"}</h2>
         {failures.length === 0 ? (
           <Card><p className="muted" style={{ margin: 0 }}>{bn ? "কোনো সদস্য সীমা ছাড়ায়নি (প্রাথমিক যাচাইয়ে)।" : "No member exceeds its limit in this screening."}</p></Card>
         ) : (
@@ -220,7 +220,7 @@ export function StructureScreen() {
 
       <section className="stack" style={{ marginTop: 24, gap: 12 }} aria-label={bn ? "গ্রিড" : "Grid"}>
         <div className="row-between">
-          <h3 style={{ margin: 0 }}>{bn ? "গ্রিড, স্ল্যাব ও বিম" : "Grid, slabs and beams"}</h3>
+          <h2 className="section-title">{bn ? "গ্রিড, স্ল্যাব ও বিম" : "Grid, slabs and beams"}</h2>
           <label className="row" style={{ gap: 8 }}>
             <span className="small muted">{bn ? "স্তর (তলার উপরের স্ল্যাব)" : "Level (slab above storey)"}</span>
             <select className="input" value={level.index} onChange={(e) => setLevelIdx(Number(e.target.value))}>
@@ -231,7 +231,7 @@ export function StructureScreen() {
         <PlanGrid level={level} widthMm={model.widthMm} depthMm={model.depthMm} columnsAt={columnsAt} bn={bn} />
         <p className="small muted" style={{ margin: 0 }}>{bn ? "রং: সবুজ ≤ ৯০%, হলুদ ৯০–১০০%, লাল > ১০০%। স্ল্যাবের লেবেলে পুরুত্ব (মিমি)।" : "Colour: green up to 90 %, amber 90–100 %, red over 100 %. Slab labels show the thickness in mm."}</p>
 
-        <h4 style={{ margin: "8px 0 0" }}>{bn ? "স্ল্যাব" : "Slabs"}</h4>
+        <h3 className="card-title" style={{ marginTop: 8 }}>{bn ? "স্ল্যাব" : "Slabs"}</h3>
         <Table
           head={[bn ? "স্ল্যাব" : "Slab", bn ? "ধরন" : "Type", bn ? "কেস" : "Case", bn ? "পুরুত্ব (মিমি)" : "Thickness (mm)", bn ? "ধনাত্মক ও ঋণাত্মক মোমেন্ট (কিনিমি/মি)" : "+M / −M (kN·m/m)", bn ? "অনুপাত" : "Ratio", bn ? "নিয়ন্ত্রক" : "Governs"]}
           rows={level.panels.map((p) => [
@@ -245,7 +245,7 @@ export function StructureScreen() {
           ])}
         />
 
-        <h4 style={{ margin: "8px 0 0" }}>{bn ? "বিম লাইন" : "Beam lines"}</h4>
+        <h3 className="card-title" style={{ marginTop: 8 }}>{bn ? "বিম লাইন" : "Beam lines"}</h3>
         <Table
           head={[bn ? "লাইন" : "Line", bn ? "স্প্যান" : "Spans", bn ? "সেকশন (মিমি)" : "Section (mm)", bn ? "সর্বোচ্চ ঋণাত্মক / ধনাত্মক মোমেন্ট (কিনিমি)" : "Max −M / +M (kN·m)", bn ? "অনুপাত" : "Ratio", bn ? "নিয়ন্ত্রক" : "Governs"]}
           rows={level.beamLines.map((b) => {
@@ -264,7 +264,7 @@ export function StructureScreen() {
 
       <section className="stack" style={{ marginTop: 24, gap: 12 }} aria-label={bn ? "কলাম ও ফুটিং" : "Columns and footings"}>
         <div className="row-between">
-          <h3 style={{ margin: 0 }}>{bn ? "কলাম ও ফুটিং" : "Columns and footings"}</h3>
+          <h2 className="section-title">{bn ? "কলাম ও ফুটিং" : "Columns and footings"}</h2>
           <label className="row" style={{ gap: 8 }}>
             <span className="small muted">{bn ? "তলা" : "Storey"}</span>
             <select className="input" value={sIdx} onChange={(e) => setStoreyIdx(Number(e.target.value))}>
@@ -295,7 +295,7 @@ export function StructureScreen() {
       </section>
 
       <section className="stack" style={{ marginTop: 24, gap: 12 }} aria-label={bn ? "ভূমিকম্প" : "Seismic"}>
-        <h3 style={{ margin: 0 }}>{bn ? "ভূমিকম্প (সমতুল্য স্থির পদ্ধতি)" : "Earthquake (equivalent static)"}</h3>
+        <h2 className="section-title">{bn ? "ভূমিকম্প (সমতুল্য স্থির পদ্ধতি)" : "Earthquake (equivalent static)"}</h2>
         <div className="row" style={{ gap: 16, flexWrap: "wrap" }}>
           <Stat label="Z" value={fr.seismicX.z.toFixed(2)} />
           <Stat label="I" value={fr.seismicX.importance.toFixed(2)} />
@@ -315,7 +315,7 @@ export function StructureScreen() {
       </section>
 
       <section className="stack" style={{ marginTop: 24, gap: 8 }} aria-label={bn ? "অনুমান" : "Assumptions"}>
-        <h3 style={{ margin: 0 }}>{bn ? "অনুমান" : "Assumptions"}</h3>
+        <h2 className="section-title">{bn ? "অনুমান" : "Assumptions"}</h2>
         <ul className="small muted" style={{ margin: 0, paddingLeft: 18 }}>
           {result.assumptions.map((a) => <li key={a.id}>{bn ? a.bn : a.en}</li>)}
         </ul>

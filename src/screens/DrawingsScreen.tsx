@@ -105,7 +105,7 @@ export function DrawingsScreen() {
       </Card>
 
       <Card className="stack" style={{ marginTop: 16 }}>
-        <h3 style={{ margin: 0 }}>{bn ? "পারমিট প্যাকেজ" : "Permit package"}</h3>
+        <h2 className="section-title">{bn ? "পারমিট প্যাকেজ" : "Permit package"}</h2>
         <p className="muted" style={{ margin: 0 }}>
           {bn
             ? "সব ড্রয়িং (এসভিজি ও ডিএক্সএফ), বিওকিউ, রিবার শিডিউল, কমপ্লায়েন্স রিপোর্ট ও অনুমানের তালিকা একটি জিপ ফাইলে।"

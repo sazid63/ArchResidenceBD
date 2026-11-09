@@ -98,11 +98,11 @@ export function ComplianceScreen() {
         if (!rows.length) return null;
         return (
           <section key={sec.id} className="stack" style={{ marginTop: 20, gap: 12 }} aria-label={bn ? sec.bn : sec.en}>
-            <h3 style={{ margin: 0 }}>{bn ? sec.bn : sec.en}</h3>
+            <h2 className="section-title">{bn ? sec.bn : sec.en}</h2>
             {rows.map((item) => (
               <Card key={item.id} className="stack">
                 <div className="row-between">
-                  <h4 style={{ margin: 0 }}>{bn ? item.title.bn : item.title.en}</h4>
+                  <h3 className="card-title">{bn ? item.title.bn : item.title.en}</h3>
                   <ResultChip result={item.status} lang={lang} />
                 </div>
                 {item.expected || item.actual ? (
@@ -158,7 +158,7 @@ export function ComplianceScreen() {
       ) : null}
 
       <section className="stack" style={{ marginTop: 28, gap: 12 }} aria-label={bn ? "বিচ্যুতি তালিকা" : "Deviation register"}>
-        <h3 style={{ margin: 0 }}>{bn ? "বিচ্যুতি তালিকা" : "Deviation register"}</h3>
+        <h2 className="section-title">{bn ? "বিচ্যুতি তালিকা" : "Deviation register"}</h2>
         <p className="small muted" style={{ margin: 0 }}>
           {bn ? "নথিভুক্ত বিচ্যুতি একটি তারিখসহ নোট মাত্র; এতে অনুত্তীর্ণ ফলাফল উত্তীর্ণ হয়ে যায় না।" : "A recorded deviation is a dated note. It does not turn a failure into a pass."}
         </p>
@@ -168,7 +168,7 @@ export function ComplianceScreen() {
           deviations.map((d) => (
             <Card key={d.id} className="stack">
               <div className="row-between">
-                <h4 style={{ margin: 0 }}>{d.ruleTitle ?? d.ruleRef}</h4>
+                <h3 className="card-title">{d.ruleTitle ?? d.ruleRef}</h3>
                 <Button variant="ghost" onClick={() => onRemove(d.ruleRef)}>{bn ? "সরান" : "Remove"}</Button>
               </div>
               <div className="small muted">{bn ? "প্রয়োজন" : "Required"}: {d.expected} · {bn ? "আছে" : "Actual"}: {d.actual}</div>

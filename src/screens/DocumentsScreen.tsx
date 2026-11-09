@@ -112,7 +112,7 @@ export function DocumentsScreen() {
             return (
               <Card key={g.prefix} className="stack" style={{ marginTop: 12 }}>
                 <div className="row-between">
-                  <h3 style={{ margin: 0 }}>{bn ? g.bn : g.en}</h3>
+                  <h2 className="section-title">{bn ? g.bn : g.en}</h2>
                   <Badge tone="neutral">{list.length}</Badge>
                 </div>
                 <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>

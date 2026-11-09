@@ -94,7 +94,7 @@ export function BoqScreen() {
 
       <Card className="stack">
         <div className="row" style={{ justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
-          <h3 style={{ margin: 0 }}>{bn ? "আইটেম" : "Items"}</h3>
+          <h2 className="section-title">{bn ? "আইটেম" : "Items"}</h2>
           <Button variant="ghost" onClick={() => download(csvName, boqToCsv(boq))}>{bn ? "সিএসভি ডাউনলোড" : "Download CSV"}</Button>
         </div>
         <div style={{ overflowX: "auto" }}>
@@ -119,7 +119,7 @@ export function BoqScreen() {
                   </td>
                   <td>{u(l.unit)}</td>
                   <td style={{ textAlign: "right" }}>{num(l.quantity, l.quantity < 100 ? 2 : 0)}</td>
-                  <td style={{ textAlign: "right" }}>{l.rateBdt === null ? "" : num(l.rateBdt)}</td>
+                  <td style={{ textAlign: "right" }}>{l.rateBdt === null ? <span className="faint">–</span> : num(l.rateBdt)}</td>
                   <td style={{ textAlign: "right" }}>
                     {l.amountBdt !== null ? num(l.amountBdt) : l.rateKey ? (bn ? "কার্ডে দাম নেই" : "no rate in card") : <span className="muted">{bn ? "পরিমাণ মাত্র" : "quantity only"}</span>}
                   </td>
@@ -137,7 +137,7 @@ export function BoqScreen() {
       </Card>
 
       <Card className="stack" style={{ marginTop: 16 }}>
-        <h3 style={{ margin: 0 }}>{bn ? "ধরে নেওয়া বিষয়" : "Assumptions"}</h3>
+        <h2 className="section-title">{bn ? "ধরে নেওয়া বিষয়" : "Assumptions"}</h2>
         <ul style={{ margin: 0, paddingLeft: 20 }}>
           {BOQ_ASSUMPTIONS.map((a) => <li key={a.id}>{bn ? a.bn : a.en}</li>)}
         </ul>
