@@ -58,7 +58,7 @@ Test: one hand-worked example per module inside the test; property tests (longer
 ## M4-2 Columns, footings, seismic, Structure screen · Opus high · done ef247f6 (engine 534ae41)
 Do: column load takedown by tributary area per storey, minimum eccentricity, slenderness, axial + bending; footing area from service load ÷ allowable bearing, depth from punching at d/2 and one-way shear; equivalent static base shear and drift; section sizing from stock lists. Structure screen (grid, members, failures first, "screening, not final design"). Rebuild `audit:structural` on the model and add it to CI.
 
-## M4-3 Rebar / BBS · Sonnet high · todo
+## M4-3 Rebar / BBS · Sonnet high · done 6e11cbc
 Do: rebar from M4 member results; stock bars only (8, 10, 12, 16, 20, 22, 25, 28, 32 mm); development and lap lengths; BBS rows with shape codes and weights; Rebar screen reads it. Delete `rebarDetailer.ts` once unused.
 
 ## M5-1 Quantities + BOQ · Sonnet high · todo
