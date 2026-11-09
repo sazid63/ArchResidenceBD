@@ -1,11 +1,13 @@
 /**
  * Design of one continuous beam line (spans between columns along a structural grid line): factored pattern-load
- * envelope, flexure at supports and mid-span, shear at d from the support face, service deflection after partitions.
- * Utilisation is never clamped. Units: kN, m, mm unless a name says otherwise.
+ * envelope, flexure at supports and mid-span, shear at d from the support face, service deflection against both
+ * Table 6.6.2 limits. Live load is reduced per Sec 2.3.13. Utilisation is never clamped.
+ * Units: kN, m, mm unless a name says otherwise.
  */
 
+import { structurePack } from "../rules/bnbcStructure";
 import { analyseSpans, envelope, midMoment } from "./continuousBeam";
-import { beamSelfWeightKnM, wallLineLoadKnM } from "./loads";
+import { beamSelfWeightKnM, liveReductionFactor, wallLineLoadKnM } from "./loads";
 import { DESIGN, ecMPa, MATERIALS } from "./materials";
 import { beamMinAs, crackedInertia, flexure, shear, type FlexureResult, type ShearResult } from "./section";
 
@@ -25,11 +27,14 @@ export const BEAM_SECTIONS: BeamSection[] = (() => {
 
 export interface BeamSpanInput {
   lengthMm: number;
-  /** Slab load carried by this span as an equivalent UDL for bending and for shear, kN/m (unfactored). */
-  slabDeadBend: number;
-  slabDeadShear: number;
-  slabLiveBend: number;
-  slabLiveShear: number;
+  /** Slab dead load on this span as a uniform line load, kN/m (unfactored, slab self-weight and finishes included). */
+  slabDead: number;
+  /** Slab live load on this span, kN/m: the Table 6.2.3 part (reducible) and the partition allowance (not reduced). */
+  slabLiveTable: number;
+  slabLivePartition: number;
+  /** Largest unreduced Table 6.2.3 live load of the adjoining panels, kN/m2, and the tributary area of the span, m2. */
+  liveBaseKnM2: number;
+  tributaryAreaM2: number;
   /** Walls on this span: thickness (mm) and the share of the span they cover (0..1), or null for none. */
   wallThicknessMm: number | null;
   wallShare: number;
@@ -37,15 +42,19 @@ export interface BeamSpanInput {
 
 export interface BeamLineInput {
   spans: BeamSpanInput[];
-  /** Storey height above the beam (wall height before taking off the beam depth), mm; roof parapets pass their own height. */
+  /** Wall height before taking off the beam depth, mm (a roof parapet passes its own height). */
   wallHeightMm: number;
   slabThicknessMm: number;
+  /** Floors reduce live load (Sec 2.3.13); roof live loads are not reduced there. */
+  reduceLive: boolean;
 }
 
 export interface BeamDeflection {
   immediateLiveMm: number;
   /** Long-term growth of the dead part plus the immediate live part. */
   afterPartitionsMm: number;
+  /** Limits: span/360 on the immediate live part, span/480 on the part after partitions. */
+  liveLimitMm: number;
   limitMm: number;
   util: number;
 }
@@ -64,9 +73,11 @@ export interface BeamSpanResult {
   /** Stirrup spacing for 2-leg 10 mm stirrups, mm (rounded down to 25). */
   stirrupSpacingMm: number;
   deflection: BeamDeflection;
-  /** Service line load used, kN/m: dead and live (bending equivalent). */
+  /** Service line loads used, kN/m: dead and (reduced) live. */
   dKnM: number;
   lKnM: number;
+  /** L / L0 from Sec 2.3.13 (1 when no reduction applies). */
+  liveFactor: number;
   util: number;
   governs: "flexure" | "shear" | "deflection";
 }
@@ -82,12 +93,12 @@ export interface BeamLineResult {
 const roundDown25 = (v: number) => Math.floor(v / 25) * 25;
 const STIRRUP_AREA_MM2 = 2 * Math.PI * (DESIGN.stirrupMm / 2) ** 2;
 
-/** Service deflection of one span under the given load, mm (ACI 318 effective-moment form with Branson Ie). */
+/** Service deflection of one span under the given load, mm (Eq 6.6.1 Branson Ie at mid-span, effective-moment form). */
 function spanDeflection(lMm: number, mMid: number, mL: number, mR: number, sec: BeamSection, asMm2: number): number {
   if (mMid <= 0) return 0;
   const ec = ecMPa(MATERIALS.fcMPa);
   const ig = (sec.bMm * sec.hMm ** 3) / 12;
-  const mcr = (0.62 * Math.sqrt(MATERIALS.fcMPa) * ig) / (sec.hMm / 2) / 1e6;
+  const mcr = (0.62 * Math.sqrt(MATERIALS.fcMPa) * ig) / (sec.hMm / 2) / 1e6; // fr = 0.62 sqrt(fc), Eq 6.6.3
   const d = sec.hMm - DESIGN.coverBeamMm - DESIGN.stirrupMm - DESIGN.mainBarMm / 2;
   const icr = crackedInertia(sec.bMm, d, asMm2, MATERIALS.EsMPa / ec);
   const r = Math.min(mcr / mMid, 1) ** 3;
@@ -103,26 +114,24 @@ export function designBeamLine(input: BeamLineInput, sec: BeamSection): BeamLine
   const self = beamSelfWeightKnM(sec.bMm, sec.hMm, input.slabThicknessMm);
   const clearH = Math.max(input.wallHeightMm / 1000 - hM, 0);
   const wall = sp.map((s) => (s.wallThicknessMm ? wallLineLoadKnM(s.wallThicknessMm, clearH) * s.wallShare : 0));
-  const dB = sp.map((s, i) => s.slabDeadBend + self + wall[i]);
-  const dS = sp.map((s, i) => s.slabDeadShear + self + wall[i]);
-  const lB = sp.map((s) => s.slabLiveBend);
-  const lS = sp.map((s) => s.slabLiveShear);
+  const kll = structurePack().liveLoadReduction.kll.interiorBeams; // interior and edge beams without cantilever slabs: 2
+  const factor = sp.map((s) => (input.reduceLive ? liveReductionFactor(s.liveBaseKnM2, s.tributaryAreaM2, kll) : 1));
+  const dead = sp.map((s, i) => s.slabDead + self + wall[i]);
+  const live = sp.map((s, i) => s.slabLiveTable * factor[i] + s.slabLivePartition);
   const lens = sp.map((s) => s.lengthMm / 1000);
 
-  const envM = envelope(lens, dB, lB, 1.2, 1.6);
-  const envV = envelope(lens, dS, lS, 1.2, 1.6);
-  const service = analyseSpans(lens.map((L, i) => ({ lengthM: L, w: dB[i] + lB[i] })));
-  const dead = analyseSpans(lens.map((L, i) => ({ lengthM: L, w: dB[i] })));
+  const env = envelope(lens, dead, live, 1.2, 1.6);
+  const service = analyseSpans(lens.map((L, i) => ({ lengthM: L, w: dead[i] + live[i] })));
+  const deadOnly = analyseSpans(lens.map((L, i) => ({ lengthM: L, w: dead[i] })));
 
   const results: BeamSpanResult[] = sp.map((s, i) => {
     const L = lens[i];
-    const wFull = Math.max(1.4 * dB[i], 1.2 * dB[i] + 1.6 * lB[i]);
-    const nominalEnd = (wFull * L * L) / 24; // end support nominal restraint (assumption)
-    const mPos = envM.spans[i].mPos;
-    const mNegL = Math.max(-envM.spans[i].mLeft, i === 0 ? nominalEnd : 0);
-    const mNegR = Math.max(-envM.spans[i].mRight, i === sp.length - 1 ? nominalEnd : 0);
-    const wuShear = Math.max(1.4 * dS[i], 1.2 * dS[i] + 1.6 * lS[i]);
-    const vu = Math.max(envV.spans[i].vMax - (wuShear * (DESIGN.supportWidthMm / 2 + dMm)) / 1000, 0);
+    const wFull = Math.max(1.4 * dead[i], 1.2 * dead[i] + 1.6 * live[i]);
+    const nominalEnd = (wFull * L * L) / 24; // Sec 6.1.4.3: exterior support is a spandrel beam, wu ln^2 / 24
+    const mPos = env.spans[i].mPos;
+    const mNegL = Math.max(-env.spans[i].mLeft, i === 0 ? nominalEnd : 0);
+    const mNegR = Math.max(-env.spans[i].mRight, i === sp.length - 1 ? nominalEnd : 0);
+    const vu = Math.max(env.spans[i].vMax - (wFull * (DESIGN.supportWidthMm / 2 + dMm)) / 1000, 0);
     const minAs = beamMinAs(sec.bMm, dMm);
     const pos = flexure(mPos, sec.bMm, dMm, minAs);
     const negLeft = flexure(mNegL, sec.bMm, dMm, minAs);
@@ -130,14 +139,15 @@ export function designBeamLine(input: BeamLineInput, sec: BeamSection): BeamLine
     const sh = shear(vu, sec.bMm, dMm);
 
     const asProv = Number.isFinite(pos.asReqMm2) ? pos.asReqMm2 : minAs;
-    const mDL = midMoment({ lengthM: L, w: dB[i] + lB[i] }, service[i]);
-    const mD = midMoment({ lengthM: L, w: dB[i] }, dead[i]);
+    const mDL = midMoment({ lengthM: L, w: dead[i] + live[i] }, service[i]);
+    const mD = midMoment({ lengthM: L, w: dead[i] }, deadOnly[i]);
     const dDL = spanDeflection(s.lengthMm, mDL, service[i].mLeft, service[i].mRight, sec, asProv);
-    const dD = spanDeflection(s.lengthMm, mD, dead[i].mLeft, dead[i].mRight, sec, asProv);
+    const dD = spanDeflection(s.lengthMm, mD, deadOnly[i].mLeft, deadOnly[i].mRight, sec, asProv);
     const dLive = Math.max(dDL - dD, 0);
     const after = DESIGN.longTermFactor * dD + dLive;
     const limit = s.lengthMm / DESIGN.deflectionLimitDiv;
-    const defl: BeamDeflection = { immediateLiveMm: dLive, afterPartitionsMm: after, limitMm: limit, util: after / limit };
+    const liveLimit = s.lengthMm / DESIGN.liveDeflectionLimitDiv;
+    const defl: BeamDeflection = { immediateLiveMm: dLive, afterPartitionsMm: after, liveLimitMm: liveLimit, limitMm: limit, util: Math.max(after / limit, dLive / liveLimit) };
 
     const flexUtil = Math.max(pos.util, negLeft.util, negRight.util);
     const util = Math.max(flexUtil, sh.util, defl.util);
@@ -156,8 +166,9 @@ export function designBeamLine(input: BeamLineInput, sec: BeamSection): BeamLine
       shear: sh,
       stirrupSpacingMm: roundDown25(Math.min(sNeed, sMax)),
       deflection: defl,
-      dKnM: dB[i],
-      lKnM: lB[i],
+      dKnM: dead[i],
+      lKnM: live[i],
+      liveFactor: factor[i],
       util,
       governs,
     };

@@ -1,38 +1,53 @@
+import { structurePack } from "../rules/bnbcStructure";
+
 /**
- * Material properties and every structural assumption in one place, so the Structure screen can list them.
- * BNBC 2020 Part 6 Ch 5 (reinforced concrete) and Ch 2 Tables 6.2.1-6.2.2 (unit weights) are NOT transcribed in
- * spec/rules/bnbc-2020.yaml (see its gaps); every value taken from elsewhere is flagged here as an assumption.
+ * Material properties, design constants and every remaining structural assumption in one place, so the Structure
+ * screen can list them. Values come from BNBC 2020 Part 6 via spec/rules/bnbc-2020-structure.yaml wherever the
+ * gazette gives one; what the gazette does not give is flagged in ASSUMPTIONS below.
  */
 
 export const MATERIALS = {
-  /** Cylinder strength, MPa. Assumption: common Dhaka residential grade. */
+  /** Cylinder strength, MPa. Assumption (the gazette sets minima by exposure, not a grade): common Dhaka residential grade. */
   fcMPa: 20,
-  /** Longitudinal and stirrup yield strength, MPa. Assumption: Grade 60 (420 MPa) bars. */
+  /** Longitudinal and stirrup yield strength, MPa: Grade 420, the grade the gazette equations are written for. */
   fyMPa: 420,
   fytMPa: 420,
   EsMPa: 200_000,
 } as const;
 
-/** ACI 318 Ec = 4700 sqrt(fc). Assumption (BNBC Part 6 Ch 5 follows ACI 318; formula not read from the gazette). */
+/** BNBC Sec 5.13.2.1: Ec = 4700 sqrt(fc) for normal-density concrete (gazette page 3437). */
 export const ecMPa = (fcMPa: number): number => 4700 * Math.sqrt(fcMPa);
 
-/** ACI 318 stress-block factor beta1. */
+/** Stress-block factor beta1 (ACI 318 form; the gazette equations use the same factor, value not separately transcribed). */
 export const beta1 = (fcMPa: number): number => (fcMPa <= 28 ? 0.85 : Math.max(0.65, 0.85 - (0.05 * (fcMPa - 28)) / 7));
 
-/** Unit weights, kN/m3 (and finishes kN/m2). Assumptions: Tables 6.2.1-6.2.2 not transcribed. */
+/**
+ * Dead-load values from BNBC 2020 Tables 6.2.1-6.2.2 (spec/rules/bnbc-2020-structure.yaml), kN/m3 unless named.
+ * Reinforced concrete follows the Table 6.2.1 footnote: 22.8 kN/m3 plus 0.63 per 1 % of main steel by volume.
+ */
+const PACK = structurePack();
+/** Assumed main-steel volume in beams and columns, percent (assumption; slabs use the Table 6.2.2 slab value). */
+export const FRAME_STEEL_PERCENT = 2;
 export const UNIT_WEIGHTS = {
-  reinforcedConcrete: 25,
-  brickMasonry: 19,
-  plaster: 20,
-  /** Floor finish (screed and tiles), kN/m2. */
-  floorFinishKnM2: 1.5,
-  /** Roof finish (waterproofing and screed), kN/m2. */
-  roofFinishKnM2: 1.5,
-  /** Plaster each face, mm. */
+  /** Solid slab, stone aggregate: Table 6.2.2 gives 2.360 kN/m2 per 100 mm = 23.6 kN/m3. */
+  slabConcrete: PACK.constructionWeights.concreteSlabStone.per100mmKnM2 * 10,
+  /** Beams and columns: 22.8 + 0.63 x 2 % = 24.06 kN/m3. */
+  frameConcrete: PACK.unitWeights.concreteStoneUnreinforced + PACK.unitWeights.reinforcementAddKnM3PerPercent * FRAME_STEEL_PERCENT,
+  /** Burnt-clay brick masonry excluding plaster, kN/m2 per mm of wall thickness (1.910 per 100 mm). */
+  masonryKnM2PerMm: PACK.constructionWeights.brickMasonryBurntClayPer100mm / 100,
+  /** Cement plaster, kN/m2 per mm (0.230 per 10 mm). */
+  plasterKnM2PerMm: PACK.constructionWeights.cementPlasterPer10mm / 10,
+  /** Plaster each face of a wall, mm (assumption). */
   plasterMm: 12,
+  /** Cement-sand screed thickness under tiles and on roofs, mm (assumption); weighed at the cement-plaster rate. */
+  screedMm: 50,
+  /** Floor finish: screed + 13 mm clay tiling + 13 mm ceiling plaster, kN/m2. */
+  floorFinishKnM2: PACK.constructionWeights.cementPlasterPer10mm * 5 + PACK.constructionWeights.claytiling13mm + PACK.constructionWeights.ceilingCementPlaster13mm,
+  /** Roof finish: screed to falls + 5-ply felt and gravel + ceiling plaster, kN/m2. */
+  roofFinishKnM2: PACK.constructionWeights.cementPlasterPer10mm * 5 + PACK.constructionWeights.bituminousFeltGravel5ply + PACK.constructionWeights.ceilingCementPlaster13mm,
 } as const;
 
-/** Reinforcement strength-reduction and cover. Assumptions (ACI 318). */
+/** Strength-reduction factors (Sec 6.2.3.2), cover (Sec 8.1.7.2) and the rest of the design constants. */
 export const DESIGN = {
   phiFlexure: 0.9,
   phiShear: 0.75,
@@ -41,13 +56,15 @@ export const DESIGN = {
   stirrupMm: 10,
   mainBarMm: 20,
   slabBarMm: 10,
+  /** Where thickness selection starts: 125 mm is the floor of Eq 6.6.5 for slabs with beams (Sec 6.2.5.3.3). */
   minSlabThicknessMm: 125,
   /** Support width used to take design shear at d from the face. */
   supportWidthMm: 300,
-  /** Long-term deflection multiplier, no compression steel (ACI 318: xi = 2.0 at 5 years or more). */
+  /** Time-dependent factor xi for 5 years or more, no compression steel (Sec 6.2.5.2.5, Eq 6.6.4). */
   longTermFactor: 2,
-  /** Deflection limit on the part occurring after partitions are built (ACI 318 Table 24.2.2). */
+  /** Table 6.6.2: part of the deflection after partitions are attached: span/480; immediate live deflection: span/360. */
   deflectionLimitDiv: 480,
+  liveDeflectionLimitDiv: 360,
 } as const;
 
 export interface Assumption {
@@ -57,12 +74,14 @@ export interface Assumption {
 }
 
 export const ASSUMPTIONS: Assumption[] = [
-  { id: "materials", en: "Concrete fc 20 MPa and bar fy 420 MPa (Grade 60). BNBC Part 6 Ch 5 is not transcribed.", bn: "কংক্রিট fc ২০ এমপিএ, রডের fy ৪২০ এমপিএ (গ্রেড ৬০)। বিএনবিসি পার্ট ৬ অধ্যায় ৫ লিপিবদ্ধ নয়।" },
-  { id: "unit-weights", en: "Unit weights (RC 25, brick 19 kN/m3, finishes 1.5 kN/m2) are assumed: BNBC Tables 6.2.1-6.2.2 are not transcribed.", bn: "একক ওজন (আরসি ২৫, ইট ১৯ কিনি/ঘনমি, ফিনিশ ১.৫ কিনি/বর্গমি) অনুমিত: বিএনবিসি সারণি ৬.২.১-৬.২.২ লিপিবদ্ধ নয়।" },
-  { id: "slab-method", en: "Slab moments: Rankine-Grashof load share between the two directions, then ACI 318 section 6.5 coefficients. The tabulated two-way coefficient table is not transcribed.", bn: "স্ল্যাবের মোমেন্ট: দুই দিকে র‍্যাঙ্কিন-গ্র্যাশফ লোড ভাগ, পরে এসিআই ৩১৮ ধারা ৬.৫ সহগ। দ্বিমুখী সহগ সারণি লিপিবদ্ধ নয়।" },
-  { id: "beam-supports", en: "Beams are continuous over columns (columns as simple supports), with pattern live loading. End supports get a nominal hogging moment of wL2/24.", bn: "বিম কলামের উপর অবিচ্ছিন্ন (কলাম সরল অবলম্বন), লাইভ লোডের প্যাটার্নসহ। প্রান্তে নামমাত্র wL²/২৪ হগিং মোমেন্ট।" },
-  { id: "partitions", en: "Walls on a beam line are line loads on that beam; other partitions are covered by the 1.2 kN/m2 allowance (BNBC Sec 2.3.6).", bn: "বিমের উপরের দেয়াল সেই বিমে রেখা লোড; অন্য পার্টিশন ১.২ কিনি/বর্গমি ভাতায় ধরা (বিএনবিসি ধারা ২.৩.৬)।" },
-  { id: "no-reduction", en: "No live-load reduction (BNBC Sec 2.3.13 is not transcribed): conservative.", bn: "লাইভ লোড হ্রাস নেই (বিএনবিসি ধারা ২.৩.১৩ লিপিবদ্ধ নয়): নিরাপদ দিক।" },
-  { id: "deflection", en: "Deflection after partitions limited to span/480 with a long-term factor of 2.0 (ACI 318 Table 24.2.2); BNBC limit not transcribed.", bn: "পার্টিশনের পরের বিচ্যুতি স্প্যান/৪৮০, দীর্ঘমেয়াদী গুণক ২.০ (এসিআই ৩১৮); বিএনবিসি সীমা লিপিবদ্ধ নয়।" },
+  { id: "materials", en: "Concrete fc 20 MPa (the gazette sets exposure minima, not a grade) and Grade 420 bars. Frame concrete 24.06 kN/m3 assumes 2 % main steel.", bn: "কংক্রিট fc ২০ এমপিএ (গেজেটে গ্রেড নেই, শুধু এক্সপোজার অনুযায়ী সর্বনিম্ন) ও গ্রেড ৪২০ রড। ফ্রেম কংক্রিট ২৪.০৬ কিনি/ঘনমি, ২% মূল রডের অনুমানে।" },
+  { id: "finishes", en: "Finishes are built from BNBC Table 6.2.2 rates with assumed thicknesses: 50 mm screed, 12 mm plaster each wall face; walls are 250 mm exterior and 125 mm interior burnt-clay brick.", bn: "ফিনিশ বিএনবিসি সারণি ৬.২.২ হার ও অনুমিত পুরুত্বে: ৫০ মিমি স্ক্রিড, দেয়ালের প্রতি পাশে ১২ মিমি প্লাস্টার; বাইরের দেয়াল ২৫০ ও ভিতরের ১২৫ মিমি পোড়া ইট।" },
+  { id: "slab-spans", en: "Two-way slabs use the gazette coefficient method (Tables 6.6.8-6.6.11) with centre-to-centre spans, which gives slightly larger moments than clear spans. Negative moment at a discontinuous edge is one third of the positive moment (ACI 318-63 rule; the gazette has no figure).", bn: "দ্বিমুখী স্ল্যাব গেজেটের সহগ পদ্ধতিতে (সারণি ৬.৬.৮-৬.৬.১১), কেন্দ্র থেকে কেন্দ্র স্প্যান ধরে। অবিচ্ছিন্ন নয় এমন কিনারায় ঋণাত্মক মোমেন্ট ধনাত্মকের এক-তৃতীয়াংশ (এসিআই ৩১৮-৬৩; গেজেটে মান নেই)।" },
+  { id: "slab-stiffness", en: "Slab thickness for deflection uses the beam-to-slab stiffness ratio of the beams actually sized (T-beam flanges per ACI 318 overhang rule); the gazette does not define the flange width.", bn: "ডিফ্লেকশনের জন্য স্ল্যাবের পুরুত্ব নির্ধারিত বিমের কঠোরতা অনুপাতে (টি-বিমের ফ্ল্যাঞ্জ এসিআই ৩১৮ নিয়মে); গেজেটে ফ্ল্যাঞ্জ প্রস্থ নেই।" },
+  { id: "beam-supports", en: "Beams are continuous over columns (columns as simple supports) with pattern live loading; end supports get a nominal hogging moment of wL2/24 (Sec 6.1.4.3, support is a spandrel beam).", bn: "বিম কলামের উপর অবিচ্ছিন্ন (কলাম সরল অবলম্বন), লাইভ লোডের প্যাটার্নসহ; প্রান্তে নামমাত্র wL²/২৪ হগিং মোমেন্ট (ধারা ৬.১.৪.৩)।" },
+  { id: "partitions", en: "Walls on a beam line are line loads on that beam; other partitions are covered by the 1.2 kN/m2 allowance (Sec 2.3.6), which is not reduced.", bn: "বিমের উপরের দেয়াল সেই বিমে রেখা লোড; অন্য পার্টিশন ১.২ কিনি/বর্গমি ভাতায় (ধারা ২.৩.৬), যা হ্রাস করা হয় না।" },
+  { id: "live-reduction", en: "Live load on beams is reduced per Sec 2.3.13 (K_LL = 2, floor 0.5 L0). Slabs and roofs are not reduced; roof reduction (Sec 2.3.14) is not transcribed.", bn: "বিমের লাইভ লোড ধারা ২.৩.১৩ অনুযায়ী হ্রাসকৃত (K_LL = ২, সর্বনিম্ন ০.৫ L0)। স্ল্যাব ও ছাদে হ্রাস নেই; ছাদের হ্রাস (ধারা ২.৩.১৪) লিপিবদ্ধ নয়।" },
+  { id: "deflection", en: "Both Table 6.6.2 limits are applied to floors and roofs alike: immediate live deflection span/360 and the part after partitions span/480 (long-term factor 2.0). Flat roofs would be allowed span/180 if nothing damageable is attached.", bn: "ছাদ ও মেঝে উভয়ে সারণি ৬.৬.২-এর দুই সীমা: তাৎক্ষণিক লাইভ বিচ্যুতি স্প্যান/৩৬০ এবং পার্টিশনের পরের অংশ স্প্যান/৪৮০ (দীর্ঘমেয়াদী গুণক ২.০)।" },
+  { id: "cover", en: "Cover is 20 mm in slabs and 40 mm in beams (mild environment, Sec 8.1.7.2); exposed beams with 19 mm and larger bars would need 50 mm.", bn: "স্ল্যাবে ২০ মিমি ও বিমে ৪০ মিমি কভার (মৃদু পরিবেশ, ধারা ৮.১.৭.২); উন্মুক্ত বিমে ১৯ মিমি বা বড় রডে ৫০ মিমি লাগবে।" },
   { id: "screening", en: "Screening, not final design: a licensed structural engineer must design and sign the structure.", bn: "প্রাথমিক যাচাই, চূড়ান্ত নকশা নয়: লাইসেন্সপ্রাপ্ত কাঠামো প্রকৌশলীকে নকশা ও স্বাক্ষর করতে হবে।" },
 ];

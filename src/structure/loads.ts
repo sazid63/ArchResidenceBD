@@ -1,21 +1,33 @@
 /** Dead and live loads and BNBC strength / service combinations (gravity cases). kN, m, kN/m2. */
 
 import { liveLoadKnM2 } from "../rules/bnbc";
+import { structurePack } from "../rules/bnbcStructure";
 import type { RoomKind } from "../plans/types";
 import { UNIT_WEIGHTS } from "./materials";
 
 /** Self-weight of a slab of thickness `mm`, kN/m2. */
-export const slabSelfWeightKnM2 = (mm: number): number => (UNIT_WEIGHTS.reinforcedConcrete * mm) / 1000;
+export const slabSelfWeightKnM2 = (mm: number): number => (UNIT_WEIGHTS.slabConcrete * mm) / 1000;
 
-/** Dead load of a wall per metre of length: masonry plus plaster on both faces, times clear height (m). */
+/** Dead load of a wall per metre of length: burnt-clay masonry plus cement plaster on both faces (Table 6.2.2), times clear height (m). */
 export function wallLineLoadKnM(thicknessMm: number, clearHeightM: number): number {
-  const perM2 = (thicknessMm / 1000) * UNIT_WEIGHTS.brickMasonry + 2 * (UNIT_WEIGHTS.plasterMm / 1000) * UNIT_WEIGHTS.plaster;
+  const perM2 = thicknessMm * UNIT_WEIGHTS.masonryKnM2PerMm + 2 * UNIT_WEIGHTS.plasterMm * UNIT_WEIGHTS.plasterKnM2PerMm;
   return perM2 * clearHeightM;
 }
 
 /** Self-weight of a beam web below the slab, kN/m. */
 export const beamSelfWeightKnM = (bMm: number, hMm: number, slabMm: number): number =>
-  (UNIT_WEIGHTS.reinforcedConcrete * bMm * Math.max(0, hMm - slabMm)) / 1e6;
+  (UNIT_WEIGHTS.frameConcrete * bMm * Math.max(0, hMm - slabMm)) / 1e6;
+
+/**
+ * Sec 2.3.13 live-load reduction factor L / L0 for a member with tributary area `atM2` and element factor `kll`
+ * (Eq 6.2.1): 1 below K_LL A_T = 37.16 m2; never below 0.5 for a member carrying one floor. Loads above 4.8 kN/m2
+ * are not reduced (Sec 2.3.13.2).
+ */
+export function liveReductionFactor(l0KnM2: number, atM2: number, kll: number): number {
+  const red = structurePack().liveLoadReduction;
+  if (l0KnM2 > red.noReductionAboveKnM2 || kll * atM2 < red.appliesWhenKllAtAtLeastM2) return 1;
+  return Math.max(0.25 + 4.57 / Math.sqrt(kll * atM2), red.minFraction.oneFloor);
+}
 
 /** BNBC Table 6.2.3 row used for a room (flats: private rooms 2.0, public rooms and corridors 4.8). */
 export function liveLoadRowFor(kind: RoomKind): string {

@@ -3,12 +3,13 @@ import { fitRange } from "../plans/fit";
 import { PLAN_LIBRARY } from "../plans/library";
 import { DEFAULT_SETBACKS_MM, deriveBuilding } from "../model/building";
 import { bnbcPack, liveLoadKnM2 } from "../rules/bnbc";
-import { analyzeStructure, panelToBeam } from "./analyze";
+import { alphaF, analyzeStructure, tBeamInertia } from "./analyze";
 import { designBeamLine, sizeBeamLine, type BeamLineInput } from "./beam";
 import { analyseSpans, envelope, supportMoments } from "./continuousBeam";
-import { factoredLoad, slabSelfWeightKnM2, wallLineLoadKnM } from "./loads";
+import { factoredLoad, liveReductionFactor, slabSelfWeightKnM2, wallLineLoadKnM } from "./loads";
+import { UNIT_WEIGHTS } from "./materials";
 import { crackedInertia, flexure, shear } from "./section";
-import { designSlab, shortShare, stripMoments, type SlabInput } from "./slab";
+import { designSlab, type SlabInput } from "./slab";
 
 const S = DEFAULT_SETBACKS_MM;
 
@@ -34,10 +35,23 @@ describe("loads and combinations", () => {
     expect(factoredLoad(5, 0, 1).value).toBeCloseTo(7.6, 10);
   });
 
-  it("hand example: 150 mm slab = 3.75 kN/m2; 250 mm wall 2.5 m high = 13.075 kN/m", () => {
-    expect(slabSelfWeightKnM2(150)).toBeCloseTo(3.75, 10);
-    // (0.25 x 19 + 2 x 0.012 x 20) x 2.5 = (4.75 + 0.48) x 2.5
-    expect(wallLineLoadKnM(250, 2.5)).toBeCloseTo(13.075, 10);
+  it("hand example (Tables 6.2.1-6.2.2): 150 mm slab = 3.54 kN/m2; 250 mm wall 2.5 m high = 13.3175 kN/m", () => {
+    expect(slabSelfWeightKnM2(150)).toBeCloseTo(3.54, 10);
+    // (250 x 0.0191 + 2 x 12 x 0.023) x 2.5 = (4.775 + 0.552) x 2.5
+    expect(wallLineLoadKnM(250, 2.5)).toBeCloseTo(13.3175, 10);
+  });
+
+  it("finishes are built from table rates: floor 1.150 + 0.268 + 0.287, roof 1.150 + 0.431 + 0.287", () => {
+    expect(UNIT_WEIGHTS.floorFinishKnM2).toBeCloseTo(1.705, 10);
+    expect(UNIT_WEIGHTS.roofFinishKnM2).toBeCloseTo(1.868, 10);
+    expect(UNIT_WEIGHTS.frameConcrete).toBeCloseTo(24.06, 10);
+  });
+
+  it("live-load reduction (Eq 6.2.1): KLL 2, AT 50 m2 -> 0.25 + 4.57 / 10 = 0.707; none below KLL.AT 37.16; floor 0.5; none above 4.8", () => {
+    expect(liveReductionFactor(2, 50, 2)).toBeCloseTo(0.707, 10);
+    expect(liveReductionFactor(2, 18, 2)).toBe(1);
+    expect(liveReductionFactor(2, 400, 2)).toBe(0.5);
+    expect(liveReductionFactor(5, 50, 2)).toBe(1);
   });
 });
 
@@ -107,39 +121,60 @@ describe("continuous beam", () => {
 const slabIn = (over: Partial<SlabInput> = {}): SlabInput => ({
   shortM: 4,
   longM: 4,
-  contShort: 0,
-  contLong: 0,
-  deadExtraKnM2: 1.5,
-  liveKnM2: 3.2,
+  contLongEdges: 0,
+  contShortEdges: 0,
+  deadExtraKnM2: 1.705,
+  liveBaseKnM2: 2,
+  livePartitionKnM2: 1.2,
   roofLiveKnM2: 0,
   ...over,
 });
 
-describe("slabs", () => {
-  it("coefficients: both ends continuous w=10, L=4 -> +wL2/16 = 10, -wL2/11 = 14.545", () => {
-    const m = stripMoments(10, 4, 2);
-    expect(m.pos).toBeCloseTo(10, 10);
-    expect(m.neg).toBeCloseTo(160 / 11, 10);
-  });
-
-  it("load share: square 0.5, 2:1 panel 16/17", () => {
-    expect(shortShare(4, 4)).toBeCloseTo(0.5, 10);
-    expect(shortShare(3, 6)).toBeCloseTo(16 / 17, 10);
-  });
-
-  it("hand example: 4 x 4 m simply supported, h 150: wu = 1.2 x 5.25 + 1.6 x 3.2 = 11.42; each way 5.71; M+ = 11.42 kN.m/m", () => {
-    const r = designSlab(slabIn({ thicknessMm: 150 }));
+describe("slabs (coefficient method, Sec 6.5.8.3)", () => {
+  it("hand example, Case 2 (all edges continuous), 4 x 4 m, h 150: wd = 1.2 x 5.245, wl = 1.6 x 3.2, w = 11.414", () => {
+    // negative: 0.045 x 11.414 x 16 = 8.218; positive: (0.018 x 6.294 + 0.027 x 5.12) x 16 = 4.0245
+    const r = designSlab(slabIn({ thicknessMm: 150, contLongEdges: 2, contShortEdges: 2 }));
     expect(r.type).toBe("two-way");
-    expect(r.dKnM2).toBeCloseTo(5.25, 10);
-    expect(r.wuKnM2).toBeCloseTo(11.42, 10);
+    expect(r.caseNo).toBe(2);
+    expect(r.dKnM2).toBeCloseTo(5.245, 10);
+    expect(r.wuKnM2).toBeCloseTo(11.414, 10);
     expect(r.combo).toBe(2);
-    expect(r.short.posKnM).toBeCloseTo((5.71 * 16) / 8, 8);
+    expect(r.short.negKnM).toBeCloseTo(8.2181, 3);
+    expect(r.short.posKnM).toBeCloseTo(4.0245, 3);
+    expect(r.long!.posKnM).toBeCloseTo(4.0245, 3);
   });
 
-  it("a panel longer than 2:1 spans one way", () => {
-    const r = designSlab(slabIn({ shortM: 2, longM: 4.5 }));
+  it("Case 1 (simply supported all round): positive 0.036 w l2 = 6.5745; the discontinuous-edge negative is one third of it", () => {
+    const r = designSlab(slabIn({ thicknessMm: 150 }));
+    expect(r.caseNo).toBe(1);
+    expect(r.short.posKnM).toBeCloseTo(0.036 * 11.414 * 16, 3);
+    expect(r.short.negKnM).toBeCloseTo((0.036 * 11.414 * 16) / 3, 3);
+  });
+
+  it("slab shear uses the Table 6.6.11 share: square Case 2 carries half the load each way, 0.5 x wu x (la/2 - d)", () => {
+    const r = designSlab(slabIn({ thicknessMm: 150, contLongEdges: 2, contShortEdges: 2 }));
+    expect(r.shareShort).toBe(0.5);
+    expect(r.short.vuKn).toBeCloseTo(0.5 * 11.414 * (2 - 0.125), 3);
+  });
+
+  it("a panel longer than 2:1 spans one way with the Sec 6.1.4.3 coefficients (interior: +w l2/16, -w l2/12 up to 3.048 m)", () => {
+    const r = designSlab(slabIn({ shortM: 2, longM: 4.5, contLongEdges: 2, thicknessMm: 150 }));
     expect(r.type).toBe("one-way");
     expect(r.long).toBeNull();
+    expect(r.short.posKnM).toBeCloseTo((11.414 * 4) / 16, 3);
+    expect(r.short.negKnM).toBeCloseTo((11.414 * 4) / 12, 3);
+  });
+
+  it("minimum thickness: Eq 6.6.6 for stiff beams, Eq 6.6.5 (>= 125 mm) for flexible beams, +10 % with a weak edge beam", () => {
+    // ln = 4000 - 250 = 3750, beta = 1; fy 420 -> 0.8 + 0.3 = 1.1
+    const stiff = designSlab(slabIn({ thicknessMm: 150, alphaFm: 3 }));
+    expect(stiff.minThicknessMm).toBeCloseTo((3750 * 1.1) / (36 + 9), 6); // 91.67 mm, above the 90 mm floor
+    const flexible = designSlab(slabIn({ thicknessMm: 150, alphaFm: 1 }));
+    expect(flexible.minThicknessMm).toBeCloseTo(Math.max((3750 * 1.1) / (36 + 5 * 0.8), 125), 6);
+    const weak = designSlab(slabIn({ thicknessMm: 150, alphaFm: 3, weakEdgeBeam: true }));
+    expect(weak.minThicknessMm).toBeCloseTo(stiff.minThicknessMm * 1.1, 6);
+    // one way, both ends continuous: l / 28
+    expect(designSlab(slabIn({ shortM: 2.8, longM: 6, contLongEdges: 2, thicknessMm: 150 })).minThicknessMm).toBeCloseTo(100, 6);
   });
 
   it("picks the smallest thickness that passes, never below 125 mm, and reports >1 when nothing passes", () => {
@@ -150,37 +185,50 @@ describe("slabs", () => {
     expect(bad.util).toBeGreaterThan(1);
   });
 
-  it("property: a longer span gives a larger moment", () => {
+  it("property: a longer span gives a larger moment; continuity never raises the positive moment", () => {
     let prev = 0;
     for (const s of [3, 4, 5, 6]) {
       const r = designSlab(slabIn({ shortM: s, longM: s, thicknessMm: 200 }));
       expect(r.short.posKnM).toBeGreaterThan(prev);
       prev = r.short.posKnM;
     }
+    const free = designSlab(slabIn({ thicknessMm: 150 })).short.posKnM;
+    const cont = designSlab(slabIn({ thicknessMm: 150, contLongEdges: 2, contShortEdges: 2 })).short.posKnM;
+    expect(cont).toBeLessThan(free);
   });
 });
 
-const line = (lengthsMm: number[], over: Partial<BeamLineInput["spans"][number]> = {}): BeamLineInput => ({
+const line = (lengthsMm: number[], over: Partial<BeamLineInput["spans"][number]> = {}, reduceLive = false): BeamLineInput => ({
   slabThicknessMm: 125,
   wallHeightMm: 3000,
-  spans: lengthsMm.map((l) => ({ lengthMm: l, slabDeadBend: 10, slabDeadShear: 10, slabLiveBend: 5, slabLiveShear: 5, wallThicknessMm: null, wallShare: 0, ...over })),
+  reduceLive,
+  spans: lengthsMm.map((l) => ({ lengthMm: l, slabDead: 10, slabLiveTable: 5, slabLivePartition: 0, liveBaseKnM2: 2, tributaryAreaM2: 10, wallThicknessMm: null, wallShare: 0, ...over })),
 });
 
 describe("beam line", () => {
-  it("hand example: one 5 m span, 250 x 500, slab 125: self 2.34 kN/m, wu = 22.8125, M+ = wL2/8 = 71.29, Vu = 43.6 at d from the face", () => {
-    // self = 25 x 0.25 x (0.5 - 0.125) = 2.34375; D = 12.34375, L = 5; wu = max(17.28, 14.8125 + 8) = 22.8125
+  it("hand example: one 5 m span, 250 x 500, slab 125: self 2.2556 kN/m, wu = 22.70675, M+ = wL2/8, Vu at d from the face", () => {
+    // self = 24.06 x 0.25 x (0.5 - 0.125) = 2.255625; D = 12.255625, L = 5; wu = max(1.4 D = 17.16, 1.2 D + 1.6 L = 22.70675)
     const r = designBeamLine(line([5000]), { bMm: 250, hMm: 500 });
     const s = r.spans[0];
-    expect(s.mPosKnM).toBeCloseTo((22.8125 * 25) / 8, 6);
-    // d = 500 - 40 - 10 - 10 = 440; Vu = wu L/2 - wu (0.15 + 0.44) = 57.03 - 13.46
+    expect(s.mPosKnM).toBeCloseTo((22.70675 * 25) / 8, 6);
+    // d = 500 - 40 - 10 - 10 = 440; Vu = wu L/2 - wu (0.15 + 0.44)
     expect(r.dMm).toBe(440);
-    expect(s.vuKn).toBeCloseTo(22.8125 * 2.5 - 22.8125 * 0.59, 6);
-    expect(s.mNegLeftKnM).toBeCloseTo((22.8125 * 25) / 24, 6);
+    expect(s.vuKn).toBeCloseTo(22.70675 * 2.5 - 22.70675 * 0.59, 6);
+    expect(s.mNegLeftKnM).toBeCloseTo((22.70675 * 25) / 24, 6);
   });
 
-  it("deflection is checked against span/480 and reported, not clamped", () => {
+  it("live reduction (Sec 2.3.13) applies on floors only: A_T 50 m2 -> 0.707 of the table part, partition allowance kept", () => {
+    const floor = designBeamLine(line([5000], { tributaryAreaM2: 50, slabLivePartition: 1 }, true), { bMm: 250, hMm: 500 });
+    expect(floor.spans[0].liveFactor).toBeCloseTo(0.707, 10);
+    expect(floor.spans[0].lKnM).toBeCloseTo(5 * 0.707 + 1, 10);
+    const roof = designBeamLine(line([5000], { tributaryAreaM2: 50 }, false), { bMm: 250, hMm: 500 });
+    expect(roof.spans[0].liveFactor).toBe(1);
+  });
+
+  it("deflection is checked against span/480 after partitions and span/360 for the immediate live part, not clamped", () => {
     const r = designBeamLine(line([9000]), { bMm: 250, hMm: 350 });
     expect(r.spans[0].deflection.limitMm).toBeCloseTo(9000 / 480, 10);
+    expect(r.spans[0].deflection.liveLimitMm).toBeCloseTo(9000 / 360, 10);
     expect(r.spans[0].deflection.util).toBeGreaterThan(1);
     expect(r.ok).toBe(false);
   });
@@ -205,21 +253,21 @@ describe("beam line", () => {
   });
 });
 
-describe("slab load to beams", () => {
-  it("square 4 x 4: triangular, bend w S/3, shear w S/4", () => {
-    const c = panelToBeam(4000, 4000, 4000);
-    expect(c.bend).toBeCloseTo(4 / 3, 10);
-    expect(c.shear).toBeCloseTo(1, 10);
+describe("beam-to-slab stiffness ratio", () => {
+  it("a T section with no overhang and a flange as wide as the web is the plain rectangle", () => {
+    expect(tBeamInertia(250, 450, 125, 0)).toBeCloseTo((250 * 450 ** 3) / 12, 0);
   });
-  it("3 x 5: trapezoid on the long beam carries total w S/2 (L - S/2) = 6.75 per unit load", () => {
-    const c = panelToBeam(5000, 3000, 5000);
-    expect(c.shear * 5).toBeCloseTo(1.5 * (5 - 1.5), 8);
-    // triangle on the short beam: S/3 and S/4
-    expect(panelToBeam(3000, 3000, 5000).shear).toBeCloseTo(0.75, 10);
+
+  it("hand example: 250 x 450 beam, 125 slab, both overhangs of min(325, 500) -> flange 900; strip 4000 mm", () => {
+    // Af = 112500 at 62.5, Aw = 81250 at 287.5, yBar = 30390625 / 193750 = 156.855
+    const yBar = (112500 * 62.5 + 81250 * 287.5) / 193750;
+    const ib = (900 * 125 ** 3) / 12 + 112500 * (62.5 - yBar) ** 2 + (250 * 325 ** 3) / 12 + 81250 * (287.5 - yBar) ** 2;
+    expect(tBeamInertia(250, 450, 125, 2)).toBeCloseTo(ib, 0);
+    expect(alphaF({ bMm: 250, hMm: 450 }, 125, 2, 4000)).toBeCloseTo(ib / ((4000 * 125 ** 3) / 12), 8);
   });
-  it("one-way panel: only the long beams load, with w S/2", () => {
-    expect(panelToBeam(5000, 2000, 5000)).toEqual({ bend: 1, shear: 1 });
-    expect(panelToBeam(2000, 2000, 5000)).toEqual({ bend: 0, shear: 0 });
+
+  it("property: a deeper beam is stiffer", () => {
+    expect(alphaF({ bMm: 250, hMm: 550 }, 125, 2, 4000)).toBeGreaterThan(alphaF({ bMm: 250, hMm: 450 }, 125, 2, 4000));
   });
 });
 
@@ -247,12 +295,12 @@ describe("whole building", () => {
     expect(res.ok).toBe(res.failures.length === 0);
   });
 
-  it("roof slabs carry the roof live load, floors the residential live load", () => {
+  it("roof slabs carry the roof live load, floors the residential live load plus the partition allowance", () => {
     const res = analyzeStructure(model("p1-4b", 3));
     const floor = res.levels[0].panels[0].result;
     const roof = res.levels[2].panels[0].result;
-    expect(roof.lKnM2).toBe(1);
-    expect(floor.lKnM2).toBeGreaterThanOrEqual(3.2);
+    expect(roof.lRoofKnM2).toBe(1);
+    expect(floor.lBaseKnM2 + floor.lPartitionKnM2).toBeGreaterThanOrEqual(3.2);
   });
 
   it("a single storey is only a roof", () => {

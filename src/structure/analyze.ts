@@ -2,16 +2,18 @@
  * BuildingModel -> slabs and beams of every level. Pure and deterministic. Slab panels are the cells between
  * adjacent structural grid lines; each beam line is the chain of spans along one structural line. Level k means the
  * slab above storey k (the last level is the roof). Identical floors are computed once and shared.
- * Columns, footings and seismic follow in M4-2, so this module also exposes the per-support data they need.
+ * Slab thickness depends on beam stiffness (BNBC Eq 6.6.5/6.6.6) and beam size on slab load, so each level iterates
+ * until neither changes. Columns, footings and seismic follow in M4-2; they will read the beam-line spans and slab
+ * loads from here.
  */
 
 import type { BuildingModel } from "../model/building";
 import type { FloorGeometry } from "../plans/geometry";
-import { ASSUMPTIONS, type Assumption } from "./materials";
+import type { RoomKind } from "../plans/types";
+import { ASSUMPTIONS, UNIT_WEIGHTS, type Assumption } from "./materials";
 import { liveLoadForKind, partitionAllowanceKnM2, roofLiveKnM2 } from "./loads";
-import { UNIT_WEIGHTS } from "./materials";
-import { designSlab, type Continuity, type SlabResult } from "./slab";
-import { sizeBeamLine, type BeamLineResult, type BeamSpanInput } from "./beam";
+import { designSlab, type Continuity, type SlabInput, type SlabResult } from "./slab";
+import { sizeBeamLine, type BeamLineResult, type BeamSection, type BeamSpanInput } from "./beam";
 
 export interface PanelResult {
   /** Panel index along x and y between structural lines. */
@@ -69,21 +71,26 @@ interface Panel {
   y0: number;
   x1: number;
   y1: number;
-  kinds: string[];
+  kinds: RoomKind[];
 }
 
 const TOL = 1;
 
-/** Equivalent uniform line loads (bending, shear) one panel puts on a beam of length `beamMm`, per kN/m2 of panel load. */
-export function panelToBeam(beamMm: number, panelXMm: number, panelYMm: number): { bend: number; shear: number } {
-  const s = Math.min(panelXMm, panelYMm) / 1000;
-  const l = Math.max(panelXMm, panelYMm) / 1000;
-  const oneWay = l / s > 2;
-  const alongShort = Math.abs(beamMm - s * 1000) < TOL;
-  if (oneWay) return alongShort ? { bend: 0, shear: 0 } : { bend: s / 2, shear: s / 2 };
-  const m = s / l;
-  if (alongShort) return { bend: s / 3, shear: s / 4 };
-  return { bend: (s / 3) * ((3 - m * m) / 2), shear: (s / 2) * (1 - m / 2) };
+/** Second moment of area (mm4) of a T-beam: web bw x h with flange overhangs of min(h - hf, 4 hf) on each adjoining side (ACI 318 rule). */
+export function tBeamInertia(bwMm: number, hMm: number, hfMm: number, sides: number): number {
+  const overhang = Math.min(hMm - hfMm, 4 * hfMm);
+  const bf = bwMm + sides * overhang;
+  const aF = bf * hfMm;
+  const aW = bwMm * (hMm - hfMm);
+  const yF = hfMm / 2;
+  const yW = hfMm + (hMm - hfMm) / 2;
+  const yBar = (aF * yF + aW * yW) / (aF + aW);
+  return (bf * hfMm ** 3) / 12 + aF * (yF - yBar) ** 2 + (bwMm * (hMm - hfMm) ** 3) / 12 + aW * (yW - yBar) ** 2;
+}
+
+/** Beam-to-slab stiffness ratio alpha_f (Sec 6.2.5.3.3): Ib / Is, with Is the slab strip bounded by the adjoining panel centrelines. */
+export function alphaF(sec: BeamSection, hfMm: number, sides: number, stripWidthMm: number): number {
+  return tBeamInertia(sec.bMm, sec.hMm, hfMm, sides) / ((stripWidthMm * hfMm ** 3) / 12);
 }
 
 function panelsOf(geo: FloorGeometry, loadsGeo: FloorGeometry): Panel[] {
@@ -91,7 +98,7 @@ function panelsOf(geo: FloorGeometry, loadsGeo: FloorGeometry): Panel[] {
   const out: Panel[] = [];
   for (let px = 0; px + 1 < f.structuralX.length; px++)
     for (let py = 0; py + 1 < f.structuralY.length; py++) {
-      const kinds = new Set<string>();
+      const kinds = new Set<RoomKind>();
       for (let gx = f.structuralX[px]; gx < f.structuralX[px + 1]; gx++)
         for (let gy = f.structuralY[py]; gy < f.structuralY[py + 1]; gy++) {
           const o = loadsGeo.owner[gx]?.[gy] ?? -1;
@@ -103,6 +110,8 @@ function panelsOf(geo: FloorGeometry, loadsGeo: FloorGeometry): Panel[] {
   return out;
 }
 
+const lineKey = (orientation: "v" | "h", at: number) => `${orientation}${at}`;
+
 function computeLevel(model: BuildingModel, k: number): Omit<LevelResult, "index" | "levelMm"> {
   const n = model.storeys.length;
   const roof = k === n - 1;
@@ -110,104 +119,163 @@ function computeLevel(model: BuildingModel, k: number): Omit<LevelResult, "index
   const loadsGeo = roof ? geo : model.storeys[k + 1].geometry;
   const f = geo.fitted;
   const panels = panelsOf(geo, loadsGeo);
-  const has = (px: number, py: number) => panels.some((p) => p.px === px && p.py === py);
+  const at = (px: number, py: number) => panels.find((p) => p.px === px && p.py === py);
 
-  const live = (p: Panel) => (roof ? 0 : Math.max(...p.kinds.map((kd) => liveLoadForKind(kd as never))) + partitionAllowanceKnM2());
-  const slabIn = (p: Panel, thicknessMm?: number) => {
-    const wx = p.x1 - p.x0;
-    const wy = p.y1 - p.y0;
-    const xCont = ((has(p.px - 1, p.py) ? 1 : 0) + (has(p.px + 1, p.py) ? 1 : 0)) as Continuity;
-    const yCont = ((has(p.px, p.py - 1) ? 1 : 0) + (has(p.px, p.py + 1) ? 1 : 0)) as Continuity;
-    const xShort = wx <= wy;
+  const liveBase = (p: Panel) => (roof ? 0 : Math.max(...p.kinds.map((kd) => liveLoadForKind(kd))));
+  const wx = (p: Panel) => p.x1 - p.x0;
+  const wy = (p: Panel) => p.y1 - p.y0;
+  // la runs along x when the panel is no deeper than wide (squares too); its long edges are then the vertical ones.
+  const xShort = (p: Panel) => wx(p) <= wy(p);
+  const nbX = (p: Panel) => (at(p.px - 1, p.py) ? 1 : 0) + (at(p.px + 1, p.py) ? 1 : 0);
+  const nbY = (p: Panel) => (at(p.px, p.py - 1) ? 1 : 0) + (at(p.px, p.py + 1) ? 1 : 0);
+
+  /** The four edge beams of a panel: key, whether a neighbour lies across it, and the slab strip width across the beam. */
+  const edges = (p: Panel) => {
+    const e: Array<{ key: string; neighbour: boolean; strip: number }> = [];
+    const side = (orientation: "v" | "h", pos: number, own: number, other: Panel | undefined) =>
+      e.push({ key: lineKey(orientation, pos), neighbour: !!other, strip: own / 2 + (other ? (orientation === "v" ? wx(other) : wy(other)) / 2 : 0) });
+    side("v", p.x0, wx(p), at(p.px - 1, p.py));
+    side("v", p.x1, wx(p), at(p.px + 1, p.py));
+    side("h", p.y0, wy(p), at(p.px, p.py - 1));
+    side("h", p.y1, wy(p), at(p.px, p.py + 1));
+    return e;
+  };
+
+  const sx = f.structuralX;
+  const sy = f.structuralY;
+  // Trial beams for the first pass: 250 wide, span / 12 deep (at least 350 mm), per line.
+  const trial = new Map<string, BeamSection>();
+  const trialFor = (orientation: "v" | "h", pos: number) => {
+    const along = orientation === "v" ? f.yLines : f.xLines;
+    const idx = orientation === "v" ? sy : sx;
+    let longest = 0;
+    for (let q = 0; q + 1 < idx.length; q++) longest = Math.max(longest, along[idx[q + 1]] - along[idx[q]]);
+    trial.set(lineKey(orientation, pos), { bMm: 250, hMm: Math.max(350, Math.ceil(longest / 12 / 50) * 50) });
+  };
+  sx.forEach((g) => trialFor("v", f.xLines[g]));
+  sy.forEach((g) => trialFor("h", f.yLines[g]));
+
+  const slabIn = (p: Panel, sections: Map<string, BeamSection>, thicknessMm?: number): SlabInput => {
+    const hf = thicknessMm ?? 150;
+    const alphas = edges(p).map((ed) => ({
+      a: alphaF(sections.get(ed.key) ?? { bMm: 250, hMm: 450 }, hf, ed.neighbour ? 2 : 1, ed.strip),
+      neighbour: ed.neighbour,
+    }));
+    const alphaFm = alphas.reduce((a, c) => a + c.a, 0) / alphas.length;
+    const weak = alphas.some((c) => !c.neighbour && c.a < 0.8);
+    const xs = xShort(p);
+    const cx = nbX(p) as Continuity;
+    const cy = nbY(p) as Continuity;
     return {
-      shortM: Math.min(wx, wy) / 1000,
-      longM: Math.max(wx, wy) / 1000,
-      contShort: xShort ? xCont : yCont,
-      contLong: xShort ? yCont : xCont,
+      shortM: Math.min(wx(p), wy(p)) / 1000,
+      longM: Math.max(wx(p), wy(p)) / 1000,
+      // The strip across the short span ends on the long edges: left and right when la runs along x.
+      contLongEdges: xs ? cx : cy,
+      contShortEdges: xs ? cy : cx,
       deadExtraKnM2: roof ? UNIT_WEIGHTS.roofFinishKnM2 : UNIT_WEIGHTS.floorFinishKnM2,
-      liveKnM2: live(p),
+      liveBaseKnM2: liveBase(p),
+      livePartitionKnM2: roof ? 0 : partitionAllowanceKnM2(),
       roofLiveKnM2: roof ? roofLiveKnM2() : 0,
+      alphaFm,
+      weakEdgeBeam: weak,
       thicknessMm,
     };
   };
-  const first = panels.map((p) => designSlab(slabIn(p)));
-  const slabMm = Math.max(125, ...first.map((r) => r.thicknessMm));
-  const slabs = panels.map((p) => ({ p, r: designSlab(slabIn(p, slabMm)) }));
-  const panelResults: PanelResult[] = slabs.map(({ p, r }) => ({ px: p.px, py: p.py, x0: p.x0, y0: p.y0, x1: p.x1, y1: p.y1, result: r }));
 
   // Walls that sit on this level's beams: the storey above (floors) or the parapet (roof).
   const wallGeo = roof ? geo : loadsGeo;
   const walls = wallGeo.walls.filter((w) => (roof ? w.exterior : true));
   const wallHeightMm = roof ? model.roof.parapetMm : model.storeys[k + 1].heightMm;
 
-  const beamLines: BeamLinePlaced[] = [];
-  const sx = f.structuralX;
-  const sy = f.structuralY;
-  const lineFor = (orientation: "v" | "h", lineIdx: number): BeamLinePlaced | null => {
-    const vertical = orientation === "v";
-    const grid = vertical ? sx : sy;
-    const along = vertical ? sy : sx;
-    const at = vertical ? f.xLines[grid[lineIdx]] : f.yLines[grid[lineIdx]];
-    const alongLines = vertical ? f.yLines : f.xLines;
-    const spans: BeamSpanInput[] = [];
-    const stations: number[] = [alongLines[along[0]]];
-    for (let q = 0; q + 1 < along.length; q++) {
-      const from = alongLines[along[q]];
-      const to = alongLines[along[q + 1]];
-      const len = to - from;
-      // The two panels beside this span: index lineIdx-1 and lineIdx across the line, q along it.
-      const side = (across: number) => {
-        const px = vertical ? across : q;
-        const py = vertical ? q : across;
-        return slabs.find(({ p }) => p.px === px && p.py === py);
-      };
-      let dBend = 0;
-      let dShear = 0;
-      let lBend = 0;
-      let lShear = 0;
-      for (const sd of [side(lineIdx - 1), side(lineIdx)]) {
-        if (!sd) continue;
-        const dx = sd.p.x1 - sd.p.x0;
-        const dy = sd.p.y1 - sd.p.y0;
-        const c = panelToBeam(len, dx, dy);
-        dBend += c.bend * sd.r.dKnM2;
-        dShear += c.shear * sd.r.dKnM2;
-        lBend += c.bend * sd.r.lKnM2;
-        lShear += c.shear * sd.r.lKnM2;
-      }
-      // Walls collinear with this span.
-      let wallLen = 0;
-      let wallMass = 0;
-      for (const w of walls) {
-        if (w.orientation !== orientation || Math.abs(w.at - at) > TOL) continue;
-        const ov = Math.min(w.to, to) - Math.max(w.from, from);
-        if (ov > 0) {
-          wallLen += ov;
-          wallMass += ov * w.thicknessMm;
+  const buildLines = (slabs: Array<{ p: Panel; r: SlabResult }>, slabMm: number): BeamLinePlaced[] => {
+    const lines: BeamLinePlaced[] = [];
+    const lineFor = (orientation: "v" | "h", lineIdx: number): BeamLinePlaced | null => {
+      const vertical = orientation === "v";
+      const grid = vertical ? sx : sy;
+      const along = vertical ? sy : sx;
+      const atPos = vertical ? f.xLines[grid[lineIdx]] : f.yLines[grid[lineIdx]];
+      const alongLines = vertical ? f.yLines : f.xLines;
+      const spans: BeamSpanInput[] = [];
+      const stations: number[] = [alongLines[along[0]]];
+      for (let q = 0; q + 1 < along.length; q++) {
+        const from = alongLines[along[q]];
+        const to = alongLines[along[q + 1]];
+        const len = to - from;
+        const side = (across: number) => {
+          const px = vertical ? across : q;
+          const py = vertical ? q : across;
+          return slabs.find(({ p }) => p.px === px && p.py === py);
+        };
+        let dead = 0;
+        let liveTable = 0;
+        let livePart = 0;
+        let area = 0;
+        let base = 0;
+        for (const sd of [side(lineIdx - 1), side(lineIdx)]) {
+          if (!sd) continue;
+          const { p, r } = sd;
+          // Table 6.6.11: a long-edge beam carries w_a la / 2 per metre, a short-edge beam w_b lb / 2.
+          const longOrientation: "v" | "h" = xShort(p) ? "v" : "h";
+          const lineLoad = orientation === longOrientation ? (r.shareShort * r.short.spanM) / 2 : r.long ? (r.shareLong * r.long.spanM) / 2 : 0;
+          dead += lineLoad * r.dKnM2;
+          liveTable += lineLoad * (r.lBaseKnM2 + r.lRoofKnM2);
+          livePart += lineLoad * r.lPartitionKnM2;
+          area += lineLoad * (len / 1000);
+          base = Math.max(base, r.lBaseKnM2);
         }
+        let wallLen = 0;
+        let wallMass = 0;
+        for (const w of walls) {
+          if (w.orientation !== orientation || Math.abs(w.at - atPos) > TOL) continue;
+          const ov = Math.min(w.to, to) - Math.max(w.from, from);
+          if (ov > 0) {
+            wallLen += ov;
+            wallMass += ov * w.thicknessMm;
+          }
+        }
+        spans.push({
+          lengthMm: len,
+          slabDead: dead,
+          slabLiveTable: liveTable,
+          slabLivePartition: livePart,
+          liveBaseKnM2: base,
+          tributaryAreaM2: area,
+          wallThicknessMm: wallLen > 0 ? wallMass / wallLen : null,
+          wallShare: Math.min(wallLen / len, 1),
+        });
+        stations.push(to);
       }
-      spans.push({
-        lengthMm: len,
-        slabDeadBend: dBend,
-        slabDeadShear: dShear,
-        slabLiveBend: lBend,
-        slabLiveShear: lShear,
-        wallThicknessMm: wallLen > 0 ? wallMass / wallLen : null,
-        wallShare: Math.min(wallLen / len, 1),
-      });
-      stations.push(to);
+      if (!spans.length || spans.every((s) => s.slabDead === 0 && !s.wallThicknessMm)) return null;
+      return { orientation, at: atPos, stations, result: sizeBeamLine({ spans, wallHeightMm, slabThicknessMm: slabMm, reduceLive: !roof }) };
+    };
+    for (let i = 0; i < sx.length; i++) {
+      const b = lineFor("v", i);
+      if (b) lines.push(b);
     }
-    if (!spans.length || spans.every((s) => s.slabDeadBend === 0 && s.slabDeadShear === 0 && !s.wallThicknessMm)) return null;
-    return { orientation, at, stations, result: sizeBeamLine({ spans, wallHeightMm, slabThicknessMm: slabMm }) };
+    for (let i = 0; i < sy.length; i++) {
+      const b = lineFor("h", i);
+      if (b) lines.push(b);
+    }
+    return lines;
   };
-  for (let i = 0; i < sx.length; i++) {
-    const b = lineFor("v", i);
-    if (b) beamLines.push(b);
+
+  // Slab thickness depends on beam stiffness and beam size on slab load: iterate until neither changes.
+  let sections = trial;
+  let slabMm = 125;
+  let slabs: Array<{ p: Panel; r: SlabResult }> = [];
+  let beamLines: BeamLinePlaced[] = [];
+  for (let pass = 0; pass < 6; pass++) {
+    const first = panels.map((p) => designSlab(slabIn(p, sections)));
+    slabMm = Math.max(125, slabMm, ...first.map((r) => r.thicknessMm));
+    slabs = panels.map((p) => ({ p, r: designSlab(slabIn(p, sections, slabMm)) }));
+    beamLines = buildLines(slabs, slabMm);
+    const next = new Map(beamLines.map((b) => [lineKey(b.orientation, b.at), b.result.section]));
+    for (const [key, sec] of trial) if (!next.has(key)) next.set(key, sec);
+    const same = [...next].every(([key, sec]) => sections.get(key)?.hMm === sec.hMm && sections.get(key)?.bMm === sec.bMm);
+    sections = next;
+    if (same) break;
   }
-  for (let i = 0; i < sy.length; i++) {
-    const b = lineFor("h", i);
-    if (b) beamLines.push(b);
-  }
+  const panelResults: PanelResult[] = slabs.map(({ p, r }) => ({ px: p.px, py: p.py, x0: p.x0, y0: p.y0, x1: p.x1, y1: p.y1, result: r }));
   const util = Math.max(0, ...panelResults.map((p) => p.result.util), ...beamLines.map((b) => b.result.util));
   return { kind: roof ? "roof" : "floor", slabThicknessMm: slabMm, panels: panelResults, beamLines, util };
 }

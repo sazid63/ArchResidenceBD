@@ -1,0 +1,278 @@
+# BNBC 2020 structural-design values used by src/structure (ticket M4-1 transcription pass, 2026-11-09).
+# Companion to spec/rules/bnbc-2020.yaml (same source, same citation scheme); kept in its own file so the
+# owner-reviewed pack is untouched. status: candidate - owner has not reviewed these tables.
+# Source: Bangladesh National Building Code 2020, S.R.O. No. 55-Law/2020, gazette extra issue 11 Feb 2021
+# (registry id bnbc-2020-gazette). Part 6 = Structural Design: Ch 2 loads, Ch 6 (printed "6.x" tables) concrete design.
+# Every number was read from a rendered page image. The text layer was then used to cross-check the coefficient
+# tables: all 6 table blocks match the page text digit for digit and in cell order, except the printed typo noted in gaps.
+# src/structure/transcription.test.ts checks internal consistency (w_a + w_b = 1, monotone rows, symmetric cases).
+# pdfPage = page index in the PDF; gazette page = printed number in the page header.
+
+packVersion: "0.1.0"
+id: "bnbc-structure@2020.1"
+authority: "bnbc"
+regime: "2020"
+status: "candidate"
+
+citations:
+  dead-materials: {gazettePage: "3110-3111", pdfPage: "529-530", note: "Part 6 Sec 2.2.4; Table 6.2.1 Unit Weight of Basic Materials"}
+  dead-constr:    {gazettePage: "3111-3112", pdfPage: "530-531", note: "Part 6 Table 6.2.2 Weight of Construction Materials"}
+  live-reduction: {gazettePage: "3123-3124", pdfPage: "542-543", note: "Part 6 Sec 2.3.13 Reduction of Live Loads; Eq 6.2.1; Table 6.2.7 K_LL"}
+  ec:             {gazettePage: "3437", pdfPage: 856, note: "Part 6 Sec 5.13.2.1 modulus of elasticity"}
+  approx-coeff:   {gazettePage: "3472", pdfPage: 891, note: "Part 6 Sec 6.1.4.3 approximate moments and shears, continuous beams and one-way slabs"}
+  phi:            {gazettePage: "3478-3479", pdfPage: "897-898", note: "Part 6 Sec 6.2.3.2 strength reduction factors (0.90 tension-controlled; shear 0.75)"}
+  deflection:     {gazettePage: "3480-3484", pdfPage: "899-903", note: "Part 6 Sec 6.2.5: Table 6.6.1, Eq 6.6.1-6.6.6, Table 6.6.2"}
+  min-flexure:    {gazettePage: "3488", pdfPage: 907, note: "Part 6 Sec 6.3.5 Eq 6.6.10a, 6.6.10b minimum flexural reinforcement"}
+  shear:          {gazettePage: "3503-3506", pdfPage: "922-925", note: "Part 6 Sec 6.4.2.1.1 Eq 6.6.49 Vc; Sec 6.4.3.5 Eq 6.6.55 minimum shear reinforcement"}
+  coeff-neg:      {gazettePage: "3542-3543", pdfPage: "961-962", note: "Part 6 Sec 6.5.8.3 Table 6.6.8 negative-moment coefficients"}
+  coeff-dead:     {gazettePage: "3543-3544", pdfPage: "962-963", note: "Part 6 Table 6.6.9 dead-load positive-moment coefficients"}
+  coeff-live:     {gazettePage: "3545", pdfPage: 964, note: "Part 6 Table 6.6.10 live-load positive-moment coefficients"}
+  coeff-shear:    {gazettePage: "3546", pdfPage: 965, note: "Part 6 Table 6.6.11 ratio of load in la and lb directions for shear and load on supports"}
+  shrinkage:      {gazettePage: "3655", pdfPage: 1075, note: "Part 6 Sec 8.1.11.2 shrinkage and temperature reinforcement"}
+  cover:          {gazettePage: "3650", pdfPage: 1069, note: "Part 6 Sec 8.1.7.2 cover for cast-in-place concrete"}
+
+# ---------------------------------------------------------------- dead loads
+unitWeights:                       # Table 6.2.1, kN/m3
+  cite: dead-materials
+  brick: 18.9
+  cementLooseNote: "Cement 14.7; sand (dry) 15.7; granite/basalt 26.4; limestone 24.5; steel 77.0"
+  concreteStoneUnreinforced: 22.8   # footnote *: brick aggregate 20.4; for reinforced concrete add 0.63 kN/m3 per 1 % of main reinforcement by volume
+  concreteBrickUnreinforced: 20.4
+  reinforcementAddKnM3PerPercent: 0.63
+  brickAggregateFraction: 0.9       # Table 6.2.2 footnote: for brick aggregate 90 % of the listed values may be used
+
+constructionWeights:               # Table 6.2.2, kN/m2 unless stated
+  cite: dead-constr
+  concreteSlabStone: {per100mmKnM2: 2.360, cite: dead-constr, note: "solid slab 100 mm 2.360; 150 mm 3.540 (= 23.6 kN/m3, stone aggregate)"}
+  brickMasonryBurntClayPer100mm: 1.910     # excluding plaster
+  brickMasonrySandLimePer100mm: 1.980
+  cementPlasterPer10mm: 0.230
+  claytiling13mm: 0.268
+  terrazzo16mm: 0.431
+  bituminousFeltGravel5ply: 0.431          # roof
+  ceilingCementPlaster13mm: 0.287
+
+# ---------------------------------------------------------------- live-load reduction (Sec 2.3.13)
+liveLoadReduction:
+  cite: live-reduction
+  appliesWhenKllAtAtLeastM2: 37.16
+  expr: "L = L0 (0.25 + 4.57 / sqrt(KLL AT))"
+  minFraction: {oneFloor: 0.50, twoOrMoreFloors: 0.40}
+  noReductionAboveKnM2: 4.80
+  roofNote: "Roof uniform live loads are not reduced under Sec 2.3.13 (Sec 2.3.14 has its own rule, not transcribed)."
+  kll: {interiorColumns: 4, exteriorColumnsNoCantilever: 4, edgeColumnsCantilever: 3, cornerColumnsCantilever: 2, edgeBeamsNoCantilever: 2, interiorBeams: 2, other: 1}
+  otherNote: "Table 6.2.7 'all other members' (one-way and two-way slabs, members without continuous shear transfer) = 1: read from the page text (pdf 543); the cell sits across the page break."
+
+# ---------------------------------------------------------------- concrete and reinforcement
+concrete:
+  ecNormal: {expr: "4700 sqrt(fc')", cite: ec}
+  ecBrickAggregate: {expr: "3750 sqrt(fc')", cite: ec}
+  modulusOfRupture: {expr: "fr = 0.62 sqrt(fc')", cite: deflection}
+  effectiveInertia: {expr: "Ie = (Mcr/Ma)^3 Ig + (1 - (Mcr/Ma)^3) Icr <= Ig", cite: deflection}
+  continuousIe: "Prismatic members: Ie at mid-span for simple and continuous spans (Sec 6.2.5.2.4)."
+  longTerm: {expr: "lambda = xi / (1 + 50 rho')", xi: {y5orMore: 2.0, m12: 1.4, m6: 1.2, m3: 1.0}, cite: deflection}
+strength:
+  phiFlexureTensionControlled: 0.90
+  phiShear: 0.75
+  cite: phi
+shear:
+  vc: {expr: "Vc = 0.17 sqrt(fc') bw d", cite: shear}
+  minAvOverS: {expr: "Av,min/s = 0.062 sqrt(fc') bw / fyt, not less than 0.35 bw / fyt", cite: shear}
+minFlexure:
+  expr: "As,min = max(0.25 sqrt(fc') / fy, 1.4 / fy) bw d"
+  cite: min-flexure
+  slabsSameAsShrinkage: true
+shrinkage:                         # Sec 8.1.11.2, ratio of steel to gross concrete area
+  cite: shrinkage
+  fy275or350: 0.0020
+  fy420: 0.0018
+  floor: 0.0014
+cover:                              # Sec 8.1.7.2, mm, concrete not exposed to weather or ground
+  cite: cover
+  slabsWalls: {bar36andSmaller: 20, bar40to57: 40}
+  exposedToWeatherOrEarth: {bar19to57: 50, bar16andSmaller: 40}
+  againstEarth: 75
+  beamsColumnsNote: "Beams and columns: primary reinforcement, ties and stirrups; the row values sit in a text block that the page text scrambles. 40 mm is used (mild, not exposed) and flagged as an assumption in src/structure/materials.ts."
+
+# ---------------------------------------------------------------- deflection and minimum thickness
+minThickness:
+  table_6_6_1:                      # as a fraction of the span l: simply supported / one end continuous / both ends continuous / cantilever
+    cite: deflection
+    solidOneWaySlab: {divisors: [20, 24, 28, 10]}
+    beamOrRibbedSlab: {divisors: [16, 18.5, 21, 8]}
+    note: "Values for normal-weight concrete and Grade 420; for other fy multiply by (0.4 + fy/700)."
+  twoWay:
+    cite: deflection
+    eq_6_6_5: {alphaFmBetween: [0.2, 2.0], expr: "h = ln (0.8 + fy/1400) / (36 + 5 beta (alphaFm - 0.2))", minMm: 125}
+    eq_6_6_6: {alphaFmAbove: 2.0, expr: "h = ln (0.8 + fy/1400) / (36 + 9 beta)", minMm: 90}
+    discontinuousEdge: "An edge beam with alpha_f >= 0.80 shall be provided at discontinuous edges, or h from Eq 6.6.5 / 6.6.6 is increased by at least 10 % in the panel (Sec 6.2.5.3.3 d)."
+    ln: "clear span in the long direction, face to face of beams; beta = clear long / clear short"
+deflectionLimits:                   # Table 6.6.2, span l
+  cite: deflection
+  flatRoofNotDamaged: {basis: "immediate live-load deflection", divisor: 180}
+  floorNotDamaged: {basis: "immediate live-load deflection", divisor: 360}
+  supportingDamageable: {basis: "part after attachment of nonstructural elements: long-term deflection of sustained loads plus immediate deflection of added live load", divisor: 480}
+  notDamageable: {basis: "same part", divisor: 240}
+
+# ---------------------------------------------------------------- approximate moments, continuous beams and one-way slabs (Sec 6.1.4.3)
+approxCoefficients:
+  cite: approx-coeff
+  conditions: ["two or more spans", "adjacent spans differ by not more than 20 %", "uniform loads", "unfactored L <= 3 D", "prismatic members"]
+  momentDivisors:                   # wu ln^2 / divisor; ln = clear span (negative moments: average of adjacent clear spans)
+    positiveEndSpanDiscontinuousEndUnrestrained: 11
+    positiveEndSpanDiscontinuousEndIntegral: 14
+    positiveInterior: 16
+    negativeFirstInteriorSupportTwoSpans: 9
+    negativeFirstInteriorSupportMoreThanTwo: 10
+    negativeOtherInteriorFaces: 11
+    negativeAllSupportsSlabSpanUpTo3048mm: 12
+    negativeExteriorFaceSpandrelBeam: 24
+    negativeExteriorFaceColumn: 16
+  shearFactors: {firstInteriorSupportEndMember: 1.15, otherSupports: 1.0}
+
+# ---------------------------------------------------------------- two-way edge-supported slabs, coefficient method (Sec 6.5.8.3)
+# Panels: rectangular, longer / shorter centre-to-centre span <= 2, edges on walls or beams at least 3 x slab thickness deep (Sec 6.5.8.2).
+# la = shorter span, lb = longer span, m = la / lb. Ma = Ca w la^2, Mb = Cb w lb^2. w factored: negative with total w, dead positive with dead w, live positive with live w.
+# Cases 1..9 by continuous edges. The icons in the table show continuity as a shaded edge; read from the page images:
+#   long edges = the two edges of length lb (they bound the la span), short edges = the two edges of length la.
+#   1 none | 2 all four | 3 both short edges | 4 one short + one long (adjacent) | 5 both long edges
+#   6 one long edge | 7 one short edge | 8 both short + one long | 9 both long + one short
+twoWayCases:
+  - {case: 1, shortContinuous: 0, longContinuous: 0}
+  - {case: 2, shortContinuous: 2, longContinuous: 2}
+  - {case: 3, shortContinuous: 2, longContinuous: 0}
+  - {case: 4, shortContinuous: 1, longContinuous: 1}
+  - {case: 5, shortContinuous: 0, longContinuous: 2}
+  - {case: 6, shortContinuous: 0, longContinuous: 1}
+  - {case: 7, shortContinuous: 1, longContinuous: 0}
+  - {case: 8, shortContinuous: 2, longContinuous: 1}
+  - {case: 9, shortContinuous: 1, longContinuous: 2}
+# Each row: m, then nine values for cases 1..9; null = blank cell (no negative moment in that direction).
+coefficients:
+  negA:   # Table 6.6.8 Ca,neg
+    cite: coeff-neg
+    rows:
+      - {m: 1.00, v: [null, 0.045, null, 0.050, 0.075, 0.071, null, 0.033, 0.061]}
+      - {m: 0.95, v: [null, 0.050, null, 0.055, 0.079, 0.075, null, 0.038, 0.065]}
+      - {m: 0.90, v: [null, 0.055, null, 0.060, 0.080, 0.079, null, 0.043, 0.068]}
+      - {m: 0.85, v: [null, 0.060, null, 0.066, 0.082, 0.083, null, 0.049, 0.072]}
+      - {m: 0.80, v: [null, 0.065, null, 0.071, 0.083, 0.086, null, 0.055, 0.075]}
+      - {m: 0.75, v: [null, 0.069, null, 0.076, 0.085, 0.088, null, 0.061, 0.078]}
+      - {m: 0.70, v: [null, 0.074, null, 0.081, 0.086, 0.091, null, 0.068, 0.081]}
+      - {m: 0.65, v: [null, 0.077, null, 0.085, 0.087, 0.093, null, 0.074, 0.083]}
+      - {m: 0.60, v: [null, 0.081, null, 0.089, 0.088, 0.095, null, 0.080, 0.085]}
+      - {m: 0.55, v: [null, 0.084, null, 0.092, 0.089, 0.096, null, 0.085, 0.086]}
+      - {m: 0.50, v: [null, 0.086, null, 0.094, 0.090, 0.097, null, 0.089, 0.088]}
+  negB:   # Table 6.6.8 Cb,neg
+    cite: coeff-neg
+    rows:
+      - {m: 1.00, v: [null, 0.045, 0.076, 0.050, null, null, 0.071, 0.061, 0.033]}
+      - {m: 0.95, v: [null, 0.041, 0.072, 0.045, null, null, 0.067, 0.056, 0.029]}
+      - {m: 0.90, v: [null, 0.037, 0.070, 0.040, null, null, 0.062, 0.052, 0.025]}
+      - {m: 0.85, v: [null, 0.031, 0.065, 0.034, null, null, 0.057, 0.046, 0.021]}
+      - {m: 0.80, v: [null, 0.027, 0.061, 0.029, null, null, 0.051, 0.041, 0.017]}
+      - {m: 0.75, v: [null, 0.022, 0.056, 0.024, null, null, 0.044, 0.036, 0.014]}
+      - {m: 0.70, v: [null, 0.017, 0.050, 0.019, null, null, 0.038, 0.029, 0.011]}
+      - {m: 0.65, v: [null, 0.014, 0.043, 0.015, null, null, 0.031, 0.024, 0.008]}
+      - {m: 0.60, v: [null, 0.010, 0.035, 0.011, null, null, 0.024, 0.018, 0.006]}
+      - {m: 0.55, v: [null, 0.007, 0.028, 0.008, null, null, 0.019, 0.014, 0.005]}
+      - {m: 0.50, v: [null, 0.006, 0.022, 0.006, null, null, 0.014, 0.010, 0.003]}
+  deadA:  # Table 6.6.9 Ca,dl
+    cite: coeff-dead
+    rows:
+      - {m: 1.00, v: [0.036, 0.018, 0.018, 0.027, 0.027, 0.033, 0.027, 0.020, 0.023]}
+      - {m: 0.95, v: [0.040, 0.020, 0.021, 0.030, 0.028, 0.036, 0.031, 0.022, 0.024]}
+      - {m: 0.90, v: [0.045, 0.022, 0.025, 0.033, 0.029, 0.039, 0.035, 0.025, 0.026]}
+      - {m: 0.85, v: [0.050, 0.024, 0.029, 0.036, 0.031, 0.042, 0.040, 0.029, 0.028]}
+      - {m: 0.80, v: [0.056, 0.026, 0.034, 0.039, 0.032, 0.045, 0.045, 0.032, 0.029]}
+      - {m: 0.75, v: [0.061, 0.028, 0.040, 0.043, 0.033, 0.048, 0.051, 0.036, 0.031]}
+      - {m: 0.70, v: [0.068, 0.030, 0.046, 0.046, 0.035, 0.051, 0.058, 0.040, 0.033]}
+      - {m: 0.65, v: [0.074, 0.032, 0.054, 0.050, 0.036, 0.054, 0.065, 0.044, 0.034]}
+      - {m: 0.60, v: [0.081, 0.034, 0.062, 0.053, 0.037, 0.056, 0.073, 0.048, 0.036]}
+      - {m: 0.55, v: [0.088, 0.035, 0.071, 0.056, 0.038, 0.058, 0.081, 0.052, 0.037]}
+      - {m: 0.50, v: [0.095, 0.037, 0.080, 0.059, 0.039, 0.061, 0.089, 0.056, 0.038]}
+  deadB:  # Table 6.6.9 Cb,dl
+    cite: coeff-dead
+    rows:
+      - {m: 1.00, v: [0.036, 0.018, 0.027, 0.027, 0.018, 0.027, 0.033, 0.023, 0.020]}
+      - {m: 0.95, v: [0.033, 0.016, 0.025, 0.024, 0.015, 0.024, 0.031, 0.021, 0.017]}
+      - {m: 0.90, v: [0.029, 0.014, 0.024, 0.022, 0.013, 0.021, 0.028, 0.019, 0.015]}
+      - {m: 0.85, v: [0.026, 0.012, 0.022, 0.019, 0.011, 0.017, 0.025, 0.017, 0.013]}
+      - {m: 0.80, v: [0.023, 0.011, 0.020, 0.016, 0.009, 0.015, 0.022, 0.015, 0.010]}
+      - {m: 0.75, v: [0.019, 0.009, 0.018, 0.013, 0.007, 0.012, 0.020, 0.013, 0.007]}
+      - {m: 0.70, v: [0.016, 0.007, 0.016, 0.011, 0.005, 0.009, 0.017, 0.011, 0.006]}
+      - {m: 0.65, v: [0.013, 0.006, 0.014, 0.009, 0.004, 0.007, 0.014, 0.009, 0.005]}
+      - {m: 0.60, v: [0.010, 0.004, 0.011, 0.007, 0.003, 0.006, 0.012, 0.007, 0.004]}
+      - {m: 0.55, v: [0.008, 0.003, 0.009, 0.005, 0.002, 0.004, 0.009, 0.005, 0.003]}
+      - {m: 0.50, v: [0.006, 0.002, 0.007, 0.004, 0.001, 0.003, 0.007, 0.004, 0.002]}
+  liveA:  # Table 6.6.10 Ca,ll
+    cite: coeff-live
+    rows:
+      - {m: 1.00, v: [0.036, 0.027, 0.027, 0.032, 0.032, 0.035, 0.032, 0.028, 0.030]}
+      - {m: 0.95, v: [0.040, 0.030, 0.031, 0.035, 0.034, 0.038, 0.036, 0.031, 0.032]}
+      - {m: 0.90, v: [0.045, 0.034, 0.035, 0.039, 0.037, 0.042, 0.040, 0.035, 0.036]}
+      - {m: 0.85, v: [0.050, 0.037, 0.040, 0.043, 0.041, 0.046, 0.045, 0.040, 0.039]}
+      - {m: 0.80, v: [0.056, 0.041, 0.045, 0.048, 0.044, 0.051, 0.051, 0.044, 0.042]}
+      - {m: 0.75, v: [0.061, 0.045, 0.051, 0.052, 0.047, 0.055, 0.056, 0.049, 0.046]}
+      - {m: 0.70, v: [0.068, 0.049, 0.057, 0.057, 0.051, 0.060, 0.063, 0.054, 0.050]}
+      - {m: 0.65, v: [0.074, 0.053, 0.064, 0.062, 0.055, 0.064, 0.070, 0.059, 0.054]}
+      - {m: 0.60, v: [0.081, 0.058, 0.071, 0.067, 0.059, 0.068, 0.077, 0.065, 0.059]}
+      - {m: 0.55, v: [0.088, 0.062, 0.080, 0.072, 0.063, 0.073, 0.085, 0.070, 0.063]}   # printed "00.063" for Case 9: typo for 0.063 (monotone with 0.067 at m=0.50 and 0.059 at m=0.60)
+      - {m: 0.50, v: [0.095, 0.066, 0.088, 0.077, 0.067, 0.078, 0.092, 0.076, 0.067]}
+  liveB:  # Table 6.6.10 Cb,ll
+    cite: coeff-live
+    rows:
+      - {m: 1.00, v: [0.036, 0.027, 0.032, 0.032, 0.027, 0.032, 0.035, 0.030, 0.028]}
+      - {m: 0.95, v: [0.033, 0.025, 0.029, 0.029, 0.024, 0.029, 0.032, 0.027, 0.025]}
+      - {m: 0.90, v: [0.029, 0.022, 0.027, 0.026, 0.021, 0.025, 0.029, 0.024, 0.022]}
+      - {m: 0.85, v: [0.026, 0.019, 0.024, 0.023, 0.019, 0.022, 0.026, 0.022, 0.020]}
+      - {m: 0.80, v: [0.023, 0.017, 0.022, 0.020, 0.016, 0.019, 0.023, 0.019, 0.017]}
+      - {m: 0.75, v: [0.019, 0.014, 0.019, 0.016, 0.013, 0.016, 0.020, 0.016, 0.013]}
+      - {m: 0.70, v: [0.016, 0.012, 0.016, 0.014, 0.011, 0.013, 0.017, 0.014, 0.011]}
+      - {m: 0.65, v: [0.013, 0.010, 0.014, 0.011, 0.009, 0.010, 0.014, 0.011, 0.009]}
+      - {m: 0.60, v: [0.010, 0.007, 0.011, 0.009, 0.007, 0.008, 0.011, 0.009, 0.007]}
+      - {m: 0.55, v: [0.008, 0.006, 0.009, 0.007, 0.005, 0.006, 0.009, 0.007, 0.006]}
+      - {m: 0.50, v: [0.006, 0.004, 0.007, 0.005, 0.004, 0.005, 0.007, 0.005, 0.004]}
+  shareA: # Table 6.6.11 w_a: ratio of total load carried in the la direction
+    cite: coeff-shear
+    rows:
+      - {m: 1.00, v: [0.50, 0.50, 0.17, 0.50, 0.83, 0.71, 0.29, 0.33, 0.67]}
+      - {m: 0.95, v: [0.55, 0.55, 0.20, 0.55, 0.86, 0.75, 0.33, 0.38, 0.71]}
+      - {m: 0.90, v: [0.60, 0.60, 0.23, 0.60, 0.88, 0.79, 0.38, 0.43, 0.75]}
+      - {m: 0.85, v: [0.66, 0.66, 0.28, 0.66, 0.90, 0.83, 0.43, 0.49, 0.79]}
+      - {m: 0.80, v: [0.71, 0.71, 0.33, 0.71, 0.92, 0.86, 0.49, 0.55, 0.83]}
+      - {m: 0.75, v: [0.76, 0.76, 0.39, 0.76, 0.94, 0.88, 0.56, 0.61, 0.86]}
+      - {m: 0.70, v: [0.81, 0.81, 0.45, 0.81, 0.95, 0.91, 0.62, 0.68, 0.89]}
+      - {m: 0.65, v: [0.85, 0.85, 0.53, 0.85, 0.96, 0.93, 0.69, 0.74, 0.92]}
+      - {m: 0.60, v: [0.89, 0.89, 0.61, 0.89, 0.97, 0.95, 0.76, 0.80, 0.94]}
+      - {m: 0.55, v: [0.92, 0.92, 0.69, 0.92, 0.98, 0.96, 0.81, 0.85, 0.95]}
+      - {m: 0.50, v: [0.94, 0.94, 0.76, 0.94, 0.99, 0.97, 0.86, 0.89, 0.97]}
+  shareB: # Table 6.6.11 w_b: ratio carried in the lb direction (= 1 - w_a)
+    cite: coeff-shear
+    rows:
+      - {m: 1.00, v: [0.50, 0.50, 0.83, 0.50, 0.17, 0.29, 0.71, 0.67, 0.33]}
+      - {m: 0.95, v: [0.45, 0.45, 0.80, 0.45, 0.14, 0.25, 0.67, 0.62, 0.29]}
+      - {m: 0.90, v: [0.40, 0.40, 0.77, 0.40, 0.12, 0.21, 0.62, 0.57, 0.25]}
+      - {m: 0.85, v: [0.34, 0.34, 0.72, 0.34, 0.10, 0.17, 0.57, 0.51, 0.21]}
+      - {m: 0.80, v: [0.29, 0.29, 0.67, 0.29, 0.08, 0.14, 0.51, 0.45, 0.17]}
+      - {m: 0.75, v: [0.24, 0.24, 0.61, 0.24, 0.06, 0.12, 0.44, 0.39, 0.14]}
+      - {m: 0.70, v: [0.19, 0.19, 0.55, 0.19, 0.05, 0.09, 0.38, 0.32, 0.11]}
+      - {m: 0.65, v: [0.15, 0.15, 0.47, 0.15, 0.04, 0.07, 0.31, 0.26, 0.08]}
+      - {m: 0.60, v: [0.11, 0.11, 0.39, 0.11, 0.03, 0.05, 0.24, 0.20, 0.06]}
+      - {m: 0.55, v: [0.08, 0.08, 0.31, 0.08, 0.02, 0.04, 0.19, 0.15, 0.05]}
+      - {m: 0.50, v: [0.06, 0.06, 0.24, 0.06, 0.01, 0.03, 0.14, 0.11, 0.03]}
+  loadOnSupports: "Beam on a long edge (length lb) carries w_a la / 2 per unit length; beam on a short edge (length la) carries w_b lb / 2 (ACI 318-63 reading of Table 6.6.11; the gazette gives the table only, Sec 6.5.8.3.1 says 'loads on the supporting beams shall be computed from Table 6.6.11')."
+
+gaps:
+  - id: gap-discontinuous-edge-negative
+    what: "The gazette's coefficient method (Sec 6.5.8.3) says nothing about negative moment at a discontinuous edge (cases 1, 3, 5, 6, 7 have blank Ca,neg or Cb,neg cells)."
+    why: "src/structure/slab.ts uses one third of the positive moment there (ACI 318-63 rule, not in the gazette) and says so in its assumptions list."
+  - id: gap-livefactor-table-6-6-10-typo
+    what: "Table 6.6.10, Case 9 at m = 0.55 prints '00.063'."
+    why: "Read as 0.063 (monotone between 0.059 and 0.067); an engineer should confirm."
+  - id: gap-roof-live-reduction
+    what: "Sec 2.3.14 reduction of roof live loads not transcribed."
+    why: "Roof live load is used unreduced (conservative)."
+  - id: gap-fc-selection
+    what: "No BNBC value tells which fc' a residential building must use; Table 6.8.3 gives exposure-based minima and the page text scrambles the cover table for beams and columns."
+    why: "fc' 20 MPa and 40 mm beam cover stay as flagged assumptions; fy 420 MPa (Grade 420) is the grade the gazette's design equations are written for."
