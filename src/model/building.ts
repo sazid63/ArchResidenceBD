@@ -124,7 +124,13 @@ export function groundFloorPlan(plan: PlanDefinition): PlanDefinition {
   };
 }
 
+/** Plot sides the model accepts, mm. Below 3 m nothing fits; above 300 m the input is a mistake. */
+export const PLOT_SIDE_LIMITS_MM = { min: 3000, max: 300_000 } as const;
+
 export function deriveBuilding(input: BuildingInput): BuildingResult {
+  const sideOk = (v: number) => Number.isFinite(v) && v >= PLOT_SIDE_LIMITS_MM.min && v <= PLOT_SIDE_LIMITS_MM.max;
+  if (!sideOk(input.plotWidthMm) || !sideOk(input.plotDepthMm))
+    return reject("Plot sides must be between 3 m and 300 m.", "প্লটের পাশ ৩ মিটার থেকে ৩০০ মিটারের মধ্যে হতে হবে।");
   const plan = getPlan(input.planId);
   if (!plan) return reject(`Unknown plan "${input.planId}".`, `অজানা প্ল্যান "${input.planId}"।`);
   if (!Number.isInteger(input.storeys) || input.storeys < 1 || input.storeys > 30)

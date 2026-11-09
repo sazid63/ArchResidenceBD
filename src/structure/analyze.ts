@@ -289,7 +289,14 @@ function computeLevel(model: BuildingModel, k: number): Omit<LevelResult, "index
   return { kind: roof ? "roof" : "floor", slabThicknessMm: slabMm, panels: panelResults, beamLines, util };
 }
 
+const SITE_CLASSES: readonly string[] = ["SA", "SB", "SC", "SD", "SE"];
+
 export function analyzeStructure(model: BuildingModel, frameOptions: FrameOptions = {}): StructureResult {
+  // Say what is wrong with an input instead of failing deep inside the seismic tables.
+  if (frameOptions.siteClass !== undefined && !SITE_CLASSES.includes(frameOptions.siteClass))
+    throw new RangeError(`Unknown site class "${frameOptions.siteClass}": use one of ${SITE_CLASSES.join(", ")} (class SF needs a site-specific study and is not supported).`);
+  if (frameOptions.allowableBearingKpa !== undefined && !(Number.isFinite(frameOptions.allowableBearingKpa) && frameOptions.allowableBearingKpa >= 20 && frameOptions.allowableBearingKpa <= 1000))
+    throw new RangeError(`Allowable bearing must be between 20 and 1000 kPa, got ${frameOptions.allowableBearingKpa}.`);
   const n = model.storeys.length;
   const cache = new Map<string, Omit<LevelResult, "index" | "levelMm">>();
   const levels: LevelResult[] = [];

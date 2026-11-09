@@ -8,7 +8,7 @@ import { PLAN_LIBRARY } from "../plans/library";
 import type { FitRejection, FitResult, PlanDefinition } from "../plans/types";
 import { rajukSetbacks } from "../rules/setbacks";
 import { check } from "../rules/check";
-import { deriveBuilding, type Setbacks } from "./building";
+import { deriveBuilding, type Setbacks, PLOT_SIDE_LIMITS_MM } from "./building";
 import { sqmToLandArea } from "./units";
 
 export const FEET_TO_M = 0.3048;
@@ -85,6 +85,12 @@ function coverageOf(frontageM: number, depthM: number, plan: PlanDefinition, opt
 
 /** Every library plan (optionally one unit count) with the result of fitting it to the plot. Plans that fit and keep to the coverage limit first, then plans that fit but exceed it, then the rest. */
 export function planChoices(frontageM: number, depthM: number, opts: ChoiceOptions = {}): PlanChoice[] {
+  const sideOk = (m: number) => Number.isFinite(m) && mToMm(m) >= PLOT_SIDE_LIMITS_MM.min && mToMm(m) <= PLOT_SIDE_LIMITS_MM.max;
+  if (!sideOk(frontageM) || !sideOk(depthM)) {
+    // An impossible plot fits nothing; say so instead of failing inside the setback lookup.
+    const why = { code: "invalid_plan" as const, message: { en: "Plot sides must be between 3 m and 300 m.", bn: "প্লটের পাশ ৩ মিটার থেকে ৩০০ মিটারের মধ্যে হতে হবে।" } };
+    return PLAN_LIBRARY.filter((p) => opts.unitsPerFloor === undefined || p.unitsPerFloor === opts.unitsPerFloor).map((plan) => ({ plan, fit: { ok: false as const, reasons: [why] }, coverage: null }));
+  }
   const env = envelopeFor(frontageM, depthM, opts.setbacks, opts.storeys);
   const list = PLAN_LIBRARY.filter((p) => opts.unitsPerFloor === undefined || p.unitsPerFloor === opts.unitsPerFloor);
   const choices: PlanChoice[] = list.map((plan) => {
