@@ -97,3 +97,29 @@ describe("validator catches problems", () => {
     expect(r.ok).toBe(false);
   });
 });
+
+describe("validator messages in Bangla", () => {
+  const issuesOf = (plan: PlanDefinition, env: { widthMm: number; depthMm: number }) => {
+    const r = fitPlan(plan, env);
+    if (!r.ok) throw new Error("does not fit");
+    return validateFitted(r.fitted, {}).issues;
+  };
+  const BANGLA = /[ঀ-৿]/;
+
+  it("every issue carries a Bangla message with Bangla numerals only", () => {
+    const narrow = clone(P1_4B);
+    narrow.baysX[1] = { min: 1000, pref: 1000, max: 1000 };
+    const inside = clone(P1_4B);
+    inside.rooms.find((r) => r.id === "a-store")!.cells = [[0, 3, 0, 3]];
+    inside.rooms.find((r) => r.id === "a-toilet2")!.cells = [[2, 3, 2, 3]];
+    const all = [
+      ...issuesOf(narrow, { widthMm: 10600, depthMm: 16650 }),
+      ...issuesOf(inside, { widthMm: 10950, depthMm: 16650 }),
+    ];
+    expect(all.length).toBeGreaterThan(1);
+    for (const i of all) {
+      expect(i.messageBn).toMatch(BANGLA);
+      expect(i.messageBn).not.toMatch(/[0-9]/);
+    }
+  });
+});

@@ -27,6 +27,8 @@ export interface Issue {
   severity: "error" | "warning";
   roomId?: string;
   message: string;
+  /** The same message in Bangla (digits in Bangla numerals). */
+  messageBn: string;
   /** "cited" = BNBC 2020 figure, "assumption" = working value, "geometry" = a pure geometry fact. */
   basis: "cited" | "assumption" | "geometry";
 }
@@ -37,13 +39,16 @@ export interface ValidateOptions {
 }
 
 const m = (mm: number) => (mm / 1000).toFixed(2);
+const BN_DIGITS = "০১২৩৪৫৬৭৮৯";
+/** Bangla numerals for a number or numeric string. */
+const bn = (v: number | string) => String(v).replace(/\d/g, (d) => BN_DIGITS[Number(d)]);
 
 export function validateFloor(geo: FloorGeometry, opts: ValidateOptions = {}): Issue[] {
   const f: FittedPlan = geo.fitted;
   const issues: Issue[] = [];
   const add = (i: Issue) => issues.push(i);
 
-  for (const e of checkDefinition(f.plan)) add({ code: "definition", severity: "error", message: e, basis: "geometry" });
+  for (const e of checkDefinition(f.plan)) add({ code: "definition", severity: "error", message: e, messageBn: `পরিকল্পনার সংজ্ঞায় ত্রুটি: ${e}`, basis: "geometry" });
 
   // Room sizes and daylight.
   f.rooms.forEach((room, i) => {
@@ -52,13 +57,13 @@ export function validateFloor(geo: FloorGeometry, opts: ValidateOptions = {}): I
     const id = room.def.id;
     const sized = roomRuleBasis(room.def.kind);
     if (rule?.minAreaM2 !== undefined && met.netAreaM2 < rule.minAreaM2)
-      add({ code: "room_too_small", severity: "error", roomId: id, basis: sized, message: `${room.def.name.en} is ${met.netAreaM2.toFixed(1)} m² net; ${sized === "cited" ? "BNBC minimum" : "working minimum"} ${rule.minAreaM2} m².` });
+      add({ code: "room_too_small", severity: "error", roomId: id, basis: sized, message: `${room.def.name.en} is ${met.netAreaM2.toFixed(1)} m² net; ${sized === "cited" ? "BNBC minimum" : "working minimum"} ${rule.minAreaM2} m².`, messageBn: `${room.def.name.bn}-এর নিট ক্ষেত্রফল ${bn(met.netAreaM2.toFixed(1))} বর্গমিটার; ${sized === "cited" ? "বিএনবিসি ন্যূনতম" : "কাজের ন্যূনতম"} ${bn(rule.minAreaM2)} বর্গমিটার।` });
     if (rule?.minWidthMm !== undefined && met.netWidthMm < rule.minWidthMm)
-      add({ code: "room_too_narrow", severity: "error", roomId: id, basis: sized, message: `${room.def.name.en} is ${m(met.netWidthMm)} m wide net; ${sized === "cited" ? "BNBC minimum" : "working minimum"} ${m(rule.minWidthMm)} m.` });
+      add({ code: "room_too_narrow", severity: "error", roomId: id, basis: sized, message: `${room.def.name.en} is ${m(met.netWidthMm)} m wide net; ${sized === "cited" ? "BNBC minimum" : "working minimum"} ${m(rule.minWidthMm)} m.`, messageBn: `${room.def.name.bn}-এর নিট প্রস্থ ${bn(m(met.netWidthMm))} মিটার; ${sized === "cited" ? "বিএনবিসি ন্যূনতম" : "কাজের ন্যূনতম"} ${bn(m(rule.minWidthMm))} মিটার।` });
     if (rule?.needs === "exterior" && met.exteriorMm === 0)
-      add({ code: "no_daylight", severity: "error", roomId: id, basis: RULES_SOURCE.status, message: `${room.def.name.en} has no outside wall for a window.` });
+      add({ code: "no_daylight", severity: "error", roomId: id, basis: RULES_SOURCE.status, message: `${room.def.name.en} has no outside wall for a window.`, messageBn: `${room.def.name.bn}-এর জানালার জন্য বাইরের দেয়াল নেই।` });
     if (rule?.needs === "exterior_or_shaft" && met.exteriorMm === 0 && met.shaftMm === 0)
-      add({ code: "no_ventilation", severity: "error", roomId: id, basis: RULES_SOURCE.status, message: `${room.def.name.en} has neither an outside wall nor a light shaft.` });
+      add({ code: "no_ventilation", severity: "error", roomId: id, basis: RULES_SOURCE.status, message: `${room.def.name.en} has neither an outside wall nor a light shaft.`, messageBn: `${room.def.name.bn}-এর বাইরের দেয়ালও নেই, আলো-বাতাসের শাফটও নেই।` });
   });
 
   // Stair: must hold a dog-leg stair for this floor height plus an arrival landing.
@@ -75,12 +80,13 @@ export function validateFloor(geo: FloorGeometry, opts: ValidateOptions = {}): I
         roomId: room.def.id,
         basis: "geometry",
         message: `Stair room is ${m(met.netDepthMm)} × ${m(met.netWidthMm)} m net; a dog-leg stair for ${m(opts.floorToFloorMm ?? 3000)} m floors needs ${m(needLong)} × ${m(needWide)} m.`,
+        messageBn: `সিঁড়িঘরের নিট মাপ ${bn(m(met.netDepthMm))} × ${bn(m(met.netWidthMm))} মিটার; ${bn(m(opts.floorToFloorMm ?? 3000))} মিটার উচ্চতার তলার ডগ-লেগ সিঁড়ির জন্য দরকার ${bn(m(needLong))} × ${bn(m(needWide))} মিটার।`,
       });
   });
 
   // Doors that could not be placed.
   for (const p of geo.doorProblems)
-    add({ code: "door_not_placeable", severity: "error", basis: "geometry", message: `Door ${p.between[0]} ↔ ${p.between[1]}: ${p.reason}.` });
+    add({ code: "door_not_placeable", severity: "error", basis: "geometry", message: `Door ${p.between[0]} ↔ ${p.between[1]}: ${p.reason}.`, messageBn: `দরজা ${p.between[0]} ↔ ${p.between[1]}: ${p.reasonBn}।` });
 
   // Reachability: within each dwelling from its entrance; the core from any entrance.
   const n = f.rooms.length;
@@ -94,7 +100,7 @@ export function validateFloor(geo: FloorGeometry, opts: ValidateOptions = {}): I
   for (const unit of units) {
     const mains = geo.doors.filter((d) => d.main && [d.a, d.b].some((x) => x !== OUTSIDE && f.rooms[x].def.unit === unit));
     if (mains.length !== 1) {
-      add({ code: "no_entrance", severity: "error", basis: "geometry", message: `Dwelling ${unit} has ${mains.length} entrance doors; it needs exactly one.` });
+      add({ code: "no_entrance", severity: "error", basis: "geometry", message: `Dwelling ${unit} has ${mains.length} entrance doors; it needs exactly one.`, messageBn: `ইউনিট ${unit}-এ প্রবেশের দরজা ${bn(mains.length)}টি; ঠিক একটি থাকতে হবে।` });
       continue;
     }
     const start = [mains[0].a, mains[0].b].find((x) => f.rooms[x].def.unit === unit)!;
@@ -106,20 +112,21 @@ export function validateFloor(geo: FloorGeometry, opts: ValidateOptions = {}): I
     }
     f.rooms.forEach((r, i) => {
       if (r.def.unit === unit && !seen.has(i) && r.def.kind !== "shaft")
-        add({ code: "unreachable", severity: "error", roomId: r.def.id, basis: "geometry", message: `${r.def.name.en} can't be reached from dwelling ${unit}'s entrance.` });
+        add({ code: "unreachable", severity: "error", roomId: r.def.id, basis: "geometry", message: `${r.def.name.en} can't be reached from dwelling ${unit}'s entrance.`, messageBn: `ইউনিট ${unit}-এর প্রবেশপথ থেকে ${r.def.name.bn}-এ পৌঁছানো যায় না।` });
     });
     // Composition.
     const kinds = f.rooms.filter((r) => r.def.unit === unit).map((r) => r.def.kind);
     const count = (k: string) => kinds.filter((x) => x === k).length;
     const missing: string[] = [];
-    if (count("bedroom") < f.plan.bedroomsPerUnit) missing.push(`${f.plan.bedroomsPerUnit} bedrooms (has ${count("bedroom")})`);
-    if (count("kitchen") < 1) missing.push("a kitchen");
-    if (count("toilet") < 1) missing.push("a toilet");
-    if (count("living") < 1) missing.push("a living room");
-    if (missing.length) add({ code: "unit_incomplete", severity: "error", basis: "geometry", message: `Dwelling ${unit} is missing ${missing.join(", ")}.` });
+    const missingBn: string[] = [];
+    if (count("bedroom") < f.plan.bedroomsPerUnit) { missing.push(`${f.plan.bedroomsPerUnit} bedrooms (has ${count("bedroom")})`); missingBn.push(`${bn(f.plan.bedroomsPerUnit)}টি শয়নকক্ষ (আছে ${bn(count("bedroom"))}টি)`); }
+    if (count("kitchen") < 1) { missing.push("a kitchen"); missingBn.push("রান্নাঘর"); }
+    if (count("toilet") < 1) { missing.push("a toilet"); missingBn.push("টয়লেট"); }
+    if (count("living") < 1) { missing.push("a living room"); missingBn.push("বসার ঘর"); }
+    if (missing.length) add({ code: "unit_incomplete", severity: "error", basis: "geometry", message: `Dwelling ${unit} is missing ${missing.join(", ")}.`, messageBn: `ইউনিট ${unit}-এ নেই: ${missingBn.join(", ")}।` });
   }
   if (units.length !== f.plan.unitsPerFloor)
-    add({ code: "unit_incomplete", severity: "error", basis: "geometry", message: `Plan says ${f.plan.unitsPerFloor} dwellings per floor but defines ${units.length}.` });
+    add({ code: "unit_incomplete", severity: "error", basis: "geometry", message: `Plan says ${f.plan.unitsPerFloor} dwellings per floor but defines ${units.length}.`, messageBn: `পরিকল্পনায় প্রতি তলায় ${bn(f.plan.unitsPerFloor)}টি ইউনিট বলা আছে, কিন্তু সংজ্ঞায় আছে ${bn(units.length)}টি।` });
 
   // Core: stair and lift reachable from a lobby; every entrance opens onto the core.
   const core = f.rooms.map((r, i) => (!r.def.unit ? i : -1)).filter((i) => i >= 0);
@@ -133,18 +140,18 @@ export function validateFloor(geo: FloorGeometry, opts: ValidateOptions = {}): I
     }
     for (const i of core)
       if (!seen.has(i) && f.rooms[i].def.kind !== "shaft")
-        add({ code: "unreachable", severity: "error", roomId: f.rooms[i].def.id, basis: "geometry", message: `${f.rooms[i].def.name.en} doesn't open onto the lobby.` });
+        add({ code: "unreachable", severity: "error", roomId: f.rooms[i].def.id, basis: "geometry", message: `${f.rooms[i].def.name.en} doesn't open onto the lobby.`, messageBn: `${f.rooms[i].def.name.bn} লবিতে খোলে না।` });
     for (const d of geo.doors.filter((x) => x.main)) {
       const coreSide = [d.a, d.b].find((x) => x !== OUTSIDE && !f.rooms[x].def.unit);
       if (coreSide === undefined)
-        add({ code: "no_entrance", severity: "error", basis: "geometry", message: "An entrance door doesn't open onto the shared core." });
+        add({ code: "no_entrance", severity: "error", basis: "geometry", message: "An entrance door doesn't open onto the shared core.", messageBn: "একটি প্রবেশের দরজা সাধারণ কোরে খোলে না।" });
     }
   }
 
   // Structural spans between column lines.
   for (const b of geo.beams)
     if (b.spanMm > MAX_SPAN_MM)
-      add({ code: "span_too_long", severity: "error", basis: RULES_SOURCE.status, message: `Beam span ${m(b.spanMm)} m exceeds the ${m(MAX_SPAN_MM)} m screening limit.` });
+      add({ code: "span_too_long", severity: "error", basis: RULES_SOURCE.status, message: `Beam span ${m(b.spanMm)} m exceeds the ${m(MAX_SPAN_MM)} m screening limit.`, messageBn: `বিমের স্প্যান ${bn(m(b.spanMm))} মিটার, যা ${bn(m(MAX_SPAN_MM))} মিটারের যাচাই-সীমা ছাড়িয়েছে।` });
 
   return issues;
 }

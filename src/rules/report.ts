@@ -74,6 +74,7 @@ function hash(text: string): string {
 
 function fromIssue(issue: Issue, section: ReportSection, floors: Set<"ground" | "typical">): ReportItem {
   const where = floors.size === 2 ? "" : floors.has("ground") ? " (ground floor)" : " (upper floors)";
+  const whereBn = floors.size === 2 ? "" : floors.has("ground") ? " (নিচতলা)" : " (উপরের তলাগুলো)";
   return {
     id: `plan.${issue.code}.${issue.roomId ?? "all"}.${hash(issue.message)}`,
     section,
@@ -82,7 +83,7 @@ function fromIssue(issue: Issue, section: ReportSection, floors: Set<"ground" | 
     expected: null,
     actual: null,
     citation: issue.basis === "cited" ? { en: "BNBC 2020", bn: "বিএনবিসি ২০২০" } : null,
-    note: { en: issue.message + where, bn: issue.message + where },
+    note: { en: issue.message + where, bn: issue.messageBn + whereBn },
     basis: issue.basis,
   };
 }

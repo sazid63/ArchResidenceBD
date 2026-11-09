@@ -67,7 +67,7 @@ export interface FloorGeometry {
   walls: WallSegment[];
   doors: Opening[];
   /** Doors that could not be placed (rooms don't share enough wall). */
-  doorProblems: Array<{ between: readonly [string, string]; reason: string }>;
+  doorProblems: Array<{ between: readonly [string, string]; reason: string; reasonBn: string }>;
   windows: Opening[];
   columns: Column[];
   beams: Beam[];
@@ -187,6 +187,8 @@ function metricsOf(f: FittedPlan, room: FittedRoom, index: number, walls: WallSe
   };
 }
 
+const bnDigits = (v: number) => String(v).replace(/\d/g, (d) => "০১২৩৪৫৬৭৮৯"[Number(d)]);
+
 export function deriveGeometry(f: FittedPlan): FloorGeometry {
   const owner = ownerGrid(f);
   const walls = wallsOf(f, owner);
@@ -200,13 +202,13 @@ export function deriveGeometry(f: FittedPlan): FloorGeometry {
     const a = idx.get(d.between[0]);
     const b = idx.get(d.between[1]);
     if (a === undefined || b === undefined) {
-      doorProblems.push({ between: d.between, reason: "unknown room" });
+      doorProblems.push({ between: d.between, reason: "unknown room", reasonBn: "ঘরটি অজানা" });
       continue;
     }
     const width = d.widthMm ?? doorWidth([f.rooms[a].def.kind, f.rooms[b].def.kind], d.main);
     const shared = walls.filter((w) => (w.a === a && w.b === b) || (w.a === b && w.b === a)).sort((p, q) => q.to - q.from - (p.to - p.from));
     if (!shared.length) {
-      doorProblems.push({ between: d.between, reason: "the rooms do not share a wall" });
+      doorProblems.push({ between: d.between, reason: "the rooms do not share a wall", reasonBn: "ঘর দুটির মধ্যে সাধারণ দেয়াল নেই" });
       continue;
     }
     // The longest stretch of shared wall that is clear of columns.
@@ -216,7 +218,7 @@ export function deriveGeometry(f: FittedPlan): FloorGeometry {
     const best = options[0];
     const usable = best ? best.room.length : 0;
     if (!best || usable < width) {
-      doorProblems.push({ between: d.between, reason: `usable shared wall is ${usable} mm (after jambs and columns); the door is ${width} mm` });
+      doorProblems.push({ between: d.between, reason: `usable shared wall is ${usable} mm (after jambs and columns); the door is ${width} mm`, reasonBn: `দরজা বসানোর মতো দেয়াল ${bnDigits(usable)} মিমি (চৌকাঠ ও কলাম বাদে); দরজা ${bnDigits(width)} মিমি` });
       continue;
     }
     const mid = Math.round((best.room.from + best.room.to) / 2);
