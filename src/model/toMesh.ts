@@ -21,6 +21,7 @@ import { buildDogLegStair, planStair, type StairPlacement } from "../cad/stairBu
 import { OUTSIDE, type FloorGeometry } from "../plans/geometry";
 import type { Rect } from "../plans/types";
 import type { StructureResult } from "../structure/analyze";
+import { TANK_HEIGHT_MM, TANK_INSET_MM } from "./roofEquipment";
 import type { BuildingModel } from "./building";
 
 /** Placeholder sections (mm) until M4 sizes them. */
@@ -240,7 +241,7 @@ export function buildMesh(model: BuildingModel, design?: StructureResult): MeshD
     // Overhead water tank on the stair cover.
     const r = stairCover.r;
     const top = R + model.roof.coverHeightMm;
-    box("roof_tank", "Overhead Water Tank", "tank", "roof", { x0: r.x0 + 300, y0: r.y0 + 300, z0: top, x1: r.x1 - 300, y1: r.y1 - 300, z1: top + 1200 });
+    box("roof_tank", "Overhead Water Tank", "tank", "roof", { x0: r.x0 + TANK_INSET_MM, y0: r.y0 + TANK_INSET_MM, z0: top, x1: r.x1 - TANK_INSET_MM, y1: r.y1 - TANK_INSET_MM, z1: top + TANK_HEIGHT_MM });
   }
   // Parapet around the roof edge (after the covers, so a cover wall on the facade wins the overlap).
   const p = model.roof.parapetMm;

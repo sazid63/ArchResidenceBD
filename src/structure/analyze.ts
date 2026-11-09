@@ -16,6 +16,7 @@ import { designSlab, type Continuity, type SlabInput, type SlabResult } from "./
 import { alphaF, tBeamInertia } from "./tbeam";
 import { analyzeFrame, type FrameOptions, type FrameResult } from "./frame";
 import { planFoundation, type FoundationResult } from "./foundation";
+import { roofLoads } from "../model/roofEquipment";
 import { sizeBeamLine, type BeamLineResult, type BeamSection, type BeamSpanInput } from "./beam";
 
 export interface PanelResult {
@@ -81,6 +82,8 @@ interface Panel {
 }
 
 const TOL = 1;
+/** Stair flights (150 mm waist and steps) weigh about this much more per m2 of plan than a flat slab of the same thickness. Assumption. */
+export const STAIR_DEAD_KN_M2 = 3.0;
 
 export { alphaF, tBeamInertia };
 
@@ -146,6 +149,21 @@ function computeLevel(model: BuildingModel, k: number): Omit<LevelResult, "index
   sx.forEach((g) => trialFor("v", f.xLines[g]));
   sy.forEach((g) => trialFor("h", f.yLines[g]));
 
+  // Loads the plan does not show as slab: stair flights and steps on stair panels, and on the roof the stair cover, the lift
+  // machine room and the water tank (model/roofEquipment.ts), spread over the roof panels they stand on in proportion to overlap.
+  const overlapM2 = (p: Panel, r: { x0: number; y0: number; x1: number; y1: number }) =>
+    (Math.max(0, Math.min(p.x1, r.x1) - Math.max(p.x0, r.x0)) * Math.max(0, Math.min(p.y1, r.y1) - Math.max(p.y0, r.y0))) / 1e6;
+  const equipment = roof ? roofLoads(model) : [];
+  const extraDead = (p: Panel): number => {
+    let q = p.kinds.includes("stair") ? STAIR_DEAD_KN_M2 : 0;
+    const panelM2 = ((p.x1 - p.x0) * (p.y1 - p.y0)) / 1e6;
+    for (const e of equipment) {
+      const coverM2 = ((e.rect.x1 - e.rect.x0) * (e.rect.y1 - e.rect.y0)) / 1e6;
+      if (coverM2 > 0 && panelM2 > 0) q += (e.kn * overlapM2(p, e.rect)) / coverM2 / panelM2;
+    }
+    return q;
+  };
+
   const slabIn = (p: Panel, sections: Map<string, BeamSection>, thicknessMm?: number): SlabInput => {
     const hf = thicknessMm ?? 150;
     const alphas = edges(p).map((ed) => ({
@@ -163,7 +181,7 @@ function computeLevel(model: BuildingModel, k: number): Omit<LevelResult, "index
       // The strip across the short span ends on the long edges: left and right when la runs along x.
       contLongEdges: xs ? cx : cy,
       contShortEdges: xs ? cy : cx,
-      deadExtraKnM2: roof ? UNIT_WEIGHTS.roofFinishKnM2 : UNIT_WEIGHTS.floorFinishKnM2,
+      deadExtraKnM2: (roof ? UNIT_WEIGHTS.roofFinishKnM2 : UNIT_WEIGHTS.floorFinishKnM2) + extraDead(p),
       liveBaseKnM2: liveBase(p),
       livePartitionKnM2: roof ? 0 : partitionAllowanceKnM2(),
       roofLiveKnM2: roof ? roofLiveKnM2() : 0,
