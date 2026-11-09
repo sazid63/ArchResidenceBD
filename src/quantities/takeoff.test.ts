@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_SETBACKS_MM, deriveBuilding } from "../model/building";
+import { DEFAULT_SETBACKS_MM, deriveBuilding, type BuildingModel } from "../model/building";
 import { fitRange } from "../plans/fit";
 import { PLAN_LIBRARY } from "../plans/library";
 import { analyzeStructure } from "../structure/analyze";
@@ -32,6 +32,74 @@ describe("rate card", () => {
   });
 });
 
+describe("envelope, hand-worked", () => {
+  // One storey, 3000 mm high: a 4000 mm exterior wall (250 mm) with a 1000 mm window, a 2000 mm interior wall (125 mm) with a 900 mm door.
+  // Roof: parapet round a 4000 x 3000 building, no cover rooms.
+  const fake = {
+    widthMm: 4000,
+    depthMm: 3000,
+    footprintAreaM2: 12,
+    roof: { parapetMm: 1000, coverHeightMm: 2400, stairCover: null, liftRoom: null },
+    storeys: [
+      {
+        heightMm: 3000,
+        geometry: {
+          walls: [
+            { orientation: "h", at: 0, from: 0, to: 4000, exterior: true, thicknessMm: 250 },
+            { orientation: "v", at: 2000, from: 0, to: 2000, exterior: false, thicknessMm: 125 },
+          ],
+          windows: [{ kind: "window", orientation: "h", at: 0, from: 500, to: 1500 }],
+          doors: [{ kind: "door", orientation: "v", at: 2000, from: 500, to: 1400 }],
+        },
+      },
+    ],
+  } as unknown as BuildingModel;
+
+  it("walls: height 2500; volume less each opening at its own wall thickness", () => {
+    // ext 4.0 x 2.5 x 0.25 = 2.5 ; int 2.0 x 2.5 x 0.125 = 0.625 ; window 1.0 x 1.2 x 0.25 = 0.3 ; door 0.9 x 2.1 x 0.125 = 0.23625
+    // parapet 14.0 m x 1.0 x 0.125 = 1.75
+    const e = envelopeQuantities(fake);
+    expect(e.wallM3).toBeCloseTo(2.5 + 0.625 - 0.3 - 0.23625 + 1.75, 6);
+  });
+
+  it("plaster: both faces, openings off; parapet both faces", () => {
+    // wall area (4.0 + 2.0) x 2.5 = 15 ; openings 1.2 + 1.89 = 3.09 ; both faces 2 x 11.91 = 23.82 ; parapet 2 x 14 x 1 = 28
+    expect(envelopeQuantities(fake).plasterM2).toBeCloseTo(23.82 + 28, 6);
+  });
+
+  it("screed: one storey plus the roof", () => {
+    expect(envelopeQuantities(fake).screedM2).toBeCloseTo(24, 6);
+  });
+
+  it("stair cover and lift room walls are added at 125 mm, plastered both sides", () => {
+    const withCover = { ...fake, roof: { ...fake.roof, stairCover: { x0: 0, y0: 0, x1: 3000, y1: 2000 }, liftRoom: { x0: 0, y0: 0, x1: 1000, y1: 1000 } } } as unknown as BuildingModel;
+    // perimeters 10 m and 4 m, 2.4 m high: 14 x 2.4 x 0.125 = 4.2 m3 ; plaster 2 x 14 x 2.4 = 67.2 m2
+    const a = envelopeQuantities(fake);
+    const b = envelopeQuantities(withCover);
+    expect(b.wallM3 - a.wallM3).toBeCloseTo(4.2, 6);
+    expect(b.plasterM2 - a.plasterM2).toBeCloseTo(67.2, 6);
+  });
+});
+
+describe("rate card shape (spec/schemas/rate-card.schema.json)", () => {
+  it("has the required fields; machinery lines carry operator and fuel flags; others do not", () => {
+    for (const k of ["schemaVersion", "cardId", "region", "currency", "status", "effectiveFrom", "source", "lines"]) expect(DEFAULT_RATE_CARD).toHaveProperty(k);
+    expect(DEFAULT_RATE_CARD.cardId).toMatch(/^[a-z0-9][a-z0-9-]*$/);
+    for (const l of DEFAULT_RATE_CARD.lines as unknown as Array<Record<string, unknown>>) {
+      for (const k of ["key", "label", "costType", "unit", "rateBdt"]) expect(l).toHaveProperty(k);
+      expect(["material", "labour", "machinery", "subcontract", "other"]).toContain(l.costType);
+      if (l.costType === "machinery") {
+        expect(typeof l.operatorIncluded).toBe("boolean");
+        expect(typeof l.fuelIncluded).toBe("boolean");
+        expect(["hour", "day"]).toContain(l.unit);
+      } else {
+        expect(l).not.toHaveProperty("operatorIncluded");
+        expect(l).not.toHaveProperty("fuelIncluded");
+      }
+    }
+  });
+});
+
 describe("takeoff", () => {
   const m = model("p1-4b", 5);
   const bbs = buildBbs(analyzeStructure(m), m);
@@ -60,7 +128,8 @@ describe("takeoff", () => {
     expect(env.wallM3).toBeGreaterThan(50);
     let gross = 0;
     for (const st of m.storeys) for (const w of st.geometry.walls) gross += ((w.to - w.from) * st.heightMm * w.thicknessMm) / 1e9;
-    expect(env.wallM3).toBeLessThan(gross);
+    // openings come off, the roof parapet and cover walls go on: still within the gross storey walls plus the roof rings
+    expect(env.wallM3).toBeLessThan(gross + 30);
     // plaster is both faces of less than the gross wall area
     expect(env.plasterM2).toBeGreaterThan(0);
   });

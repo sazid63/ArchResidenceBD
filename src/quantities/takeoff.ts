@@ -63,6 +63,8 @@ export const BOQ = {
   wallDeductMm: 500,
   doorHeightMm: 2100,
   windowHeightMm: 1200,
+  /** Interior partition and roof wall thickness, mm. */
+  partitionMm: 125,
   plasterMm: 12,
   screedMm: 50,
 } as const;
@@ -70,9 +72,9 @@ export const BOQ = {
 export const BOQ_ASSUMPTIONS: Array<{ id: string; en: string; bn: string }> = [
   { id: "concrete-mix", en: "Concrete 1 : 1.5 : 3 (cement : sand : stone chips) by volume, dry volume 1.54 x wet; one 50 kg bag = 0.0347 m3.", bn: "কংক্রিট ১ : ১.৫ : ৩ (সিমেন্ট : বালি : পাথর) আয়তনে, শুকনো আয়তন ভেজার ১.৫৪ গুণ; ৫০ কেজির ব্যাগ = ০.০৩৪৭ ঘনমিটার।" },
   { id: "mortar", en: "Mortar 1 : 4 for brickwork, plaster and screed, dry volume 1.27 x wet; brickwork takes 0.25 m3 mortar per m3 of wall and 500 bricks per m3.", bn: "ইটের গাঁথুনি, প্লাস্টার ও স্ক্রিডে মর্টার ১ : ৪, শুকনো আয়তন ভেজার ১.২৭ গুণ; গাঁথুনিতে প্রতি ঘনমিটারে ০.২৫ ঘনমিটার মর্টার ও ৫০০টি ইট।" },
-  { id: "wall-height", en: "Wall height = storey height - 500 mm (beam or slab above); doors 2.1 m and windows 1.2 m high are deducted from wall and plaster.", bn: "দেয়ালের উচ্চতা = তলার উচ্চতা - ৫০০ মিমি; ২.১ মিটার দরজা ও ১.২ মিটার জানালা দেয়াল ও প্লাস্টার থেকে বাদ।" },
+  { id: "wall-height", en: "Wall height = storey height - 500 mm (beam or slab above); doors 2.1 m and windows 1.2 m high are deducted from wall and plaster at the thickness of the wall they sit in. The roof parapet (1 m) and the stair and lift cover walls are 125 mm.", bn: "দেয়ালের উচ্চতা = তলার উচ্চতা - ৫০০ মিমি; ২.১ মিটার দরজা ও ১.২ মিটার জানালা নিজ দেয়ালের পুরুত্বে বাদ। ছাদের ১ মিটার প্যারাপেট এবং সিঁড়ি ও লিফট ঘরের দেয়াল ১২৫ মিমি।" },
   { id: "finishes", en: "Plaster 12 mm on both wall faces; 50 mm screed on every floor and the roof. Slab soffit plaster, tiles, paint, doors, windows, services and earthwork are not taken off.", bn: "দেয়ালের দুই পাশে ১২ মিমি প্লাস্টার; প্রতি তলা ও ছাদে ৫০ মিমি স্ক্রিড। সিলিং প্লাস্টার, টাইলস, রং, দরজা-জানালা, সার্ভিস ও মাটির কাজ ধরা হয়নি।" },
-  { id: "steel", en: "Steel is the bar bending schedule total, no wastage or binding wire added.", bn: "রড বার বেন্ডিং শিডিউলের মোট, অপচয় বা বাইন্ডিং তার যোগ করা হয়নি।" },
+  { id: "steel", en: "Steel is the bar bending schedule total, no wastage or binding wire added; the card has only a B400 (60 grade) rod rate, used for the Grade 420 bars.", bn: "রড বার বেন্ডিং শিডিউলের মোট, অপচয় বা বাইন্ডিং তার যোগ করা হয়নি; কার্ডে কেবল বি৪০০ (৬০ গ্রেড) রডের দর আছে, ৪২০ গ্রেডে তা-ই ধরা হয়েছে।" },
   { id: "rates", en: "Prices come from the rate card (source and date shown). Items with no line in the card (stone chips, labour, machinery output) are listed without a price, so the total is a lower bound.", bn: "দাম রেট কার্ড থেকে (উৎস ও তারিখ দেখানো)। কার্ডে যে আইটেমের লাইন নেই (পাথর, শ্রম, যন্ত্র) সেগুলোর দাম নেই, তাই মোট একটি নিম্নসীমা।" },
 ];
 
@@ -118,25 +120,31 @@ export function envelopeQuantities(model: BuildingModel) {
   for (const st of model.storeys) {
     const h = Math.max(st.heightMm - BOQ.wallDeductMm, 0);
     const g = st.geometry;
-    let openingM2 = 0;
-    let openingWallM3 = 0;
-    for (const o of g.doors) {
-      openingM2 += ((o.to - o.from) * BOQ.doorHeightMm) / 1e6;
-    }
-    for (const o of g.windows) {
-      openingM2 += ((o.to - o.from) * BOQ.windowHeightMm) / 1e6;
-    }
     let wallAreaM2 = 0;
     for (const w of g.walls) {
       const len = w.to - w.from;
       wallAreaM2 += (len * h) / 1e6;
       wallM3 += (len * h * w.thicknessMm) / 1e9;
     }
-    // Openings sit in walls of both thicknesses; take them off at the interior thickness (125 mm) for doors and 250 mm for windows.
-    openingWallM3 += g.doors.reduce((s, o) => s + ((o.to - o.from) * BOQ.doorHeightMm * 125) / 1e9, 0);
-    openingWallM3 += g.windows.reduce((s, o) => s + ((o.to - o.from) * BOQ.windowHeightMm * 250) / 1e9, 0);
-    wallM3 -= openingWallM3;
+    // Each opening comes out of the wall it sits in, at that wall's own thickness.
+    let openingM2 = 0;
+    for (const o of [...g.doors, ...g.windows]) {
+      const oh = o.kind === "door" ? BOQ.doorHeightMm : BOQ.windowHeightMm;
+      const host = g.walls.find((w) => w.orientation === o.orientation && w.at === o.at && w.from <= o.from && w.to >= o.to);
+      const area = ((o.to - o.from) * oh) / 1e6;
+      openingM2 += area;
+      wallM3 -= (area * (host?.thicknessMm ?? BOQ.partitionMm)) / 1000;
+    }
     plasterM2 += 2 * Math.max(wallAreaM2 - openingM2, 0);
+  }
+  // Roof: parapet round the building and the walls of the stair cover and lift room, all 125 mm, plastered both faces.
+  const roofRing = (perimeterMm: number, heightMm: number) => {
+    wallM3 += (perimeterMm * heightMm * BOQ.partitionMm) / 1e9;
+    plasterM2 += (2 * perimeterMm * heightMm) / 1e6;
+  };
+  roofRing(2 * (model.widthMm + model.depthMm), model.roof.parapetMm);
+  for (const r of [model.roof.stairCover, model.roof.liftRoom]) {
+    if (r) roofRing(2 * (r.x1 - r.x0 + (r.y1 - r.y0)), model.roof.coverHeightMm);
   }
   const floors = model.storeys.length + 1; // every storey slab plus the roof
   const screedM2 = floors * model.footprintAreaM2;
@@ -162,7 +170,7 @@ export function takeoff(model: BuildingModel, bbs: BbsResult): TakeoffItem[] {
     { id: "concrete-cement", category: "concrete", description: bi("Cement in concrete", "কংক্রিটে সিমেন্ট"), unit: "bag", quantity: cementConcM3 / BAG_M3, rateKey: "cement-opc-43", basis: bi("dry volume / 0.0347 m3 per bag", "শুকনো আয়তন / প্রতি ব্যাগ ০.০৩৪৭ ঘনমিটার") },
     { id: "concrete-sand", category: "concrete", description: bi("Sand in concrete", "কংক্রিটে বালি"), unit: "cft", quantity: sandConcM3 * CFT_PER_M3, rateKey: "sand-fine", basis: bi("m3 x 35.31", "ঘনমিটার × ৩৫.৩১") },
     { id: "concrete-stone", category: "concrete", description: bi("Stone chips in concrete", "কংক্রিটে পাথর"), unit: "cft", quantity: stoneConcM3 * CFT_PER_M3, rateKey: "stone-chips", basis: bi("m3 x 35.31 (no rate in the card)", "ঘনমিটার × ৩৫.৩১ (কার্ডে দাম নেই)") },
-    { id: "steel", category: "steel", description: bi("Reinforcement bars, Grade 420 (bar schedule total)", "রড গ্রেড ৪২০ (বার শিডিউলের মোট)"), unit: "ton", quantity: bbs.totals.weightKg / 1000, rateKey: "rod-60g", basis: bi("kg / 1000", "কেজি / ১০০০") },
+    { id: "steel", category: "steel", description: bi("Reinforcement bars, Grade 420 (bar schedule total; priced at the card's B400 rod line)", "রড গ্রেড ৪২০ (বার শিডিউলের মোট; কার্ডের বি৪০০ রডের দরে)"), unit: "ton", quantity: bbs.totals.weightKg / 1000, rateKey: "rod-60g", basis: bi("kg / 1000", "কেজি / ১০০০") },
     { id: "brickwork", category: "masonry", description: bi("Brick masonry, 250 mm and 125 mm walls, openings deducted", "ইটের গাঁথুনি ২৫০ ও ১২৫ মিমি দেয়াল, খোলা অংশ বাদে"), unit: "m3", quantity: env.wallM3, basis: bi("wall length x height x thickness", "দেয়ালের দৈর্ঘ্য × উচ্চতা × পুরুত্ব") },
     { id: "bricks", category: "masonry", description: bi("First-class bricks", "প্রথম শ্রেণির ইট"), unit: "each", quantity: env.wallM3 * BOQ.bricksPerM3, rateKey: "brick-1st", basis: bi("500 per m3 of wall", "প্রতি ঘনমিটারে ৫০০টি") },
     { id: "plaster", category: "finishes", description: bi("Cement plaster 12 mm, both wall faces", "সিমেন্ট প্লাস্টার ১২ মিমি, দেয়ালের দুই পাশ"), unit: "m2", quantity: env.plasterM2, basis: bi("area less openings, both faces", "খোলা অংশ বাদে দুই পাশের ক্ষেত্রফল") },
