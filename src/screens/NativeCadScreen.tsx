@@ -4,12 +4,12 @@ import type { MeshDocument, MeshObject } from "../cad/mesh";
 import { MeshViewer } from "../cad/viewer";
 import { useI18n } from "../i18n";
 import type { BuildingProject } from "../engine/projectState";
-import { Badge, Button, Card, Chip, PageHeader, Stat } from "../ui/kit";
+import { Badge, Button, Card, PageHeader, Stat } from "../ui/kit";
 import { useActiveProject, useProject } from "../context/ProjectContext";
 import { generateBuildingMesh } from "../cad/parametricBuildingGenerator";
 import { buildingForProject } from "../model/projectMesh";
+import { analyzeStructure } from "../structure/analyze";
 import { PlotShapeCallout } from "../components/PlotShapeCallout";
-import { PLACEHOLDER } from "../model/toMesh";
 import { PlanCard } from "../components/PlanCard";
 import type { BuildingCustomization } from "../types/customization";
 import {
@@ -85,6 +85,25 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
   const [measureMode, setMeasureMode] = useState(false);
   const [measurePoints, setMeasurePoints] = useState<{ x: number; y: number; z: number }[]>([]);
   const [measureDistance, setMeasureDistance] = useState(0);
+  const built = useMemo(() => (project && project.plot && project.planId ? buildingForProject(project) : null), [project]);
+  const design = useMemo(() => (built && built.ok ? analyzeStructure(built.model) : null), [built]);
+  const designRows = useMemo<Array<[string, string, string]>>(() => {
+    if (!design) return [];
+    const uniq = (xs: string[]) => [...new Set(xs)].join(", ");
+    const cols = design.frame.columns;
+    const ground = uniq(cols.map((c) => `${c.storeys[0].section.bx}×${c.storeys[0].section.by}`));
+    const top = uniq(cols.map((c) => { const st = c.storeys[c.storeys.length - 1]; return `${st.section.bx}×${st.section.by}`; }));
+    const beams = uniq(design.levels.flatMap((l) => l.beamLines.map((b) => `${b.result.section.bMm}×${b.result.section.hMm}`)));
+    const slabs = uniq(design.levels.map((l) => String(l.slabThicknessMm)));
+    const sides = cols.map((c) => c.footing.sideMm);
+    return [
+      ["Columns, ground storey (mm)", "কলাম, নিচতলা (মিমি)", ground],
+      ["Columns, top storey (mm)", "কলাম, সবচেয়ে উপরের তলা (মিমি)", top],
+      ["Beams, width × depth (mm)", "বিম, প্রস্থ × গভীরতা (মিমি)", beams],
+      ["Slab thickness (mm)", "স্ল্যাবের পুরুত্ব (মিমি)", slabs],
+      ["Footing sides (mm)", "ফুটিংয়ের বাহু (মিমি)", `${Math.min(...sides)} to ${Math.max(...sides)}`],
+    ];
+  }, [design]);
 
   // Title block state
   const [titleBlock, setTitleBlock] = useState<TitleBlockData>({
@@ -118,14 +137,6 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
     };
     return { ...base, ...(project?.customization || {}) };
   });
-
-  // Persist customization changes back to project
-  const setCustomAndSave = (patch: Partial<BuildingCustomization>) => {
-    const next = { ...customParams, ...patch };
-    setCustomParams(next);
-    saveCustomization(next);
-    refreshProject();
-  };
 
   // Pre-generate mesh synchronously so state is never null
   const [mesh, setMesh] = useState<MeshDocument>(() =>
@@ -173,19 +184,6 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
     return [...map.entries()].sort((x, y) => y[1].length - x[1].length);
   }, [mesh, treeFilter]);
 
-
-  // Parametric tweak box state (deterministic local parameter parser)
-  const [designChat, setDesignChat] = useState<Array<{ who: "ai" | "user"; text: string }>>([
-    {
-      who: "ai",
-      text:
-        lang === "bn"
-          ? `[প্যারামেট্রিক ক্যাড] আপনার ${project?.stories ?? 6} তলা ভবনের ৩D মডেল প্রস্তুত। কলামের মাপ, ফুটিং বা ব্যালকনির প্রক্ষেপণ পরিবর্তন করতে নিচে লিখুন।`
-          : `[Parametric CAD] 3D parametric model loaded for your ${project?.stories ?? 6}-storey building. Type a modification below (e.g. "resize columns to 400mm", "extend balcony to 1.5m", "change footing pad to 2.2m") to recompute the 3D solids.`,
-    },
-  ]);
-  const [chatInput, setChatInput] = useState("");
-  const [aiTyping, setAiTyping] = useState(false);
 
   useEffect(() => {
     setActiveTab(designPhaseId);
@@ -342,62 +340,6 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
   const handleResetCamera = () => {
     setCameraMode("iso");
     viewerRef.current?.resetCamera();
-  };
-
-  // Plain-language tweaks ("column 400", "balcony 1.5 m"): a deterministic keyword parse, no model and no server.
-  const handleDesignChatSend = async (customPrompt?: string) => {
-    const prompt = (customPrompt || chatInput).trim();
-    if (!prompt || aiTyping) return;
-
-    setChatInput("");
-    setDesignChat((prev) => [...prev, { who: "user", text: prompt }]);
-    setAiTyping(true);
-
-    setTimeout(() => {
-      let reply = "";
-      const lower = prompt.toLowerCase();
-      const updated = { ...customParams };
-
-      if (lower.includes("column") || lower.includes("কলাম")) {
-        const matchNum = lower.match(/\d+/);
-        const colDim = matchNum ? Number(matchNum[0]) : 350;
-        updated.columnWidthMm = colDim;
-        updated.columnDepthMm = colDim;
-        reply =
-          lang === "bn"
-            ? `[প্যারামেট্রিক ক্যাড] কলাম সাইজ পরিবর্তন করে ${colDim}মিমি × ${colDim}মিমি করা হয়েছে। ৩D ফ্রেম পুনর্গণনা সম্পন্ন।`
-            : `[Parametric CAD] Structural columns resized to ${colDim}mm x ${colDim}mm. 3D solid mesh recomputed.`;
-      } else if (lower.includes("footing") || lower.includes("ফুটিং") || lower.includes("গভীর")) {
-        const matchNum = lower.match(/\d+(\.\d+)?/);
-        const val = matchNum ? parseFloat(matchNum[0]) : 2.2;
-        const sizeMm = val < 10 ? Math.round(val * 1000) : Math.round(val);
-
-        updated.footingSizeMm = sizeMm;
-        updated.footingDepthMm = Math.round(sizeMm * 0.9);
-        reply =
-          lang === "bn"
-            ? `[প্যারামেট্রিক ক্যাড] ফুটিং প্যাড ${sizeMm}মিমি করা হয়েছে। বেয়ারিং প্রেশার হালনাগাদ করা হলো।`
-            : `[Parametric CAD] Footing pad expanded to ${sizeMm}mm x ${sizeMm}mm. Recomputed soil bearing.`;
-      } else if (lower.includes("balcony") || lower.includes("বারান্দা")) {
-        const matchNum = lower.match(/\d+(\.\d+)?/);
-        const val = matchNum ? parseFloat(matchNum[0]) : 1.5;
-        const depthMm = val < 10 ? Math.round(val * 1000) : Math.round(val);
-        updated.balconyDepthMm = depthMm;
-        reply =
-          lang === "bn"
-            ? `[প্যারামেট্রিক ক্যাড] ক্যান্টিলিভার বারান্দার প্রক্ষেপণ ${depthMm}মিমি করা হয়েছে। সেফটি রেলিং আপডেট হলো।`
-            : `[Parametric CAD] Extended cantilever balconies to ${depthMm}mm with updated safety railings.`;
-      } else {
-        reply =
-          lang === "bn"
-            ? `[প্যারামেট্রিক ক্যাড] আপনার নির্দেশনা ("${prompt}") অনুযায়ী ৩D মডেল প্যারামিটার আপডেট করা হয়েছে।`
-            : `[Parametric CAD] Applied parameter modification: "${prompt}". Recomputed 3D solids.`;
-      }
-
-      setCustomAndSave(updated);
-      setDesignChat((prev) => [...prev, { who: "ai", text: reply }]);
-      setAiTyping(false);
-    }, 400);
   };
 
   const toggle = (id: string) => setHidden((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -792,156 +734,28 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
 
         {/* Right Column: Parametric tweaks & controls */}
         <div className="stack">
-          {/* Parametric tweak box */}
+          {/* The members the 3D shows: the structure result, not placeholders */}
           <Card className="stack">
-            <div className="row-between">
-              <div>
-                <h3 style={{ margin: 0 }}>
-                  {lang === "bn" ? "প্যারামেট্রিক ক্যাড পরিবর্তন" : "Parametric CAD tweaks"}
-                </h3>
-                <span className="small muted">
+            <h3 style={{ margin: 0 }}>{lang === "bn" ? "ডিজাইন করা সদস্যের মাপ" : "Designed members"}</h3>
+            {design ? (
+              <div className="stack" style={{ gap: "8px" }}>
+                <p className="small muted" style={{ margin: 0 }}>
                   {lang === "bn"
-                    ? `স্থানীয় কীওয়ার্ড পার্সার · ${project.planId ?? "ডিফল্ট"} নকশা`
-                    : `Local keyword parser · ${project.planId ?? "no plan yet"} plan`}
-                </span>
+                    ? "৩D মডেলের কলাম, বিম, স্ল্যাব ও ফুটিং স্ট্রাকচার স্ক্রিনের ফলাফল থেকে আসে। মাপ বদলাতে প্ল্যান, তলা সংখ্যা বা মাটির বেয়ারিং বদলান।"
+                    : "The columns, beams, slabs and footings in the 3D come from the Structure result. To change a size, change the plan, the storeys or the soil bearing."}
+                </p>
+                {designRows.map(([en, bnLabel, value]) => (
+                  <div className="row-between" key={en}>
+                    <span className="small muted">{lang === "bn" ? bnLabel : en}</span>
+                    <span className="mono bold">{value}</span>
+                  </div>
+                ))}
               </div>
-              <Badge tone="primary">{lang === "bn" ? "নিয়মভিত্তিক" : "Rule-based"}</Badge>
-            </div>
-
-            {/* Chat Messages */}
-            <div
-              style={{
-                height: "260px",
-                overflowY: "auto",
-                display: "flex",
-                flexDirection: "column",
-                gap: "8px",
-                padding: "8px",
-                background: "var(--surface-2)",
-                borderRadius: "var(--r-md)",
-              }}
-            >
-              {designChat.map((msg, i) => (
-                <div
-                  key={i}
-                  style={{
-                    alignSelf: msg.who === "user" ? "flex-end" : "flex-start",
-                    maxWidth: "88%",
-                    padding: "8px 12px",
-                    borderRadius: "var(--r-md)",
-                    background: msg.who === "user" ? "var(--primary)" : "var(--paper)",
-                    color: msg.who === "user" ? "var(--on-primary)" : "var(--ink)",
-                    fontSize: "13px",
-                    border: msg.who === "user" ? "none" : "1px solid var(--line)",
-                    whiteSpace: "pre-wrap",
-                  }}
-                >
-                  {msg.text}
-                </div>
-              ))}
-              {aiTyping && (
-                <div
-                  style={{
-                    alignSelf: "flex-start",
-                    padding: "6px 12px",
-                    borderRadius: "var(--r-md)",
-                    background: "var(--paper)",
-                    fontSize: "12px",
-                    color: "var(--ink-soft)",
-                  }}
-                >
-                  {lang === "bn" ? "৩D জ্যামিতি পুনর্গণনা চলছে..." : "Recomputing 3D geometry..."}
-                </div>
-              )}
-            </div>
-
-            {/* Suggestion Chips */}
-            <div className="row" style={{ gap: "6px", flexWrap: "wrap" }}>
-              <Chip
-                tone="sky"
-                onClick={() => handleDesignChatSend(lang === "bn" ? "কলাম সাইজ বৃদ্ধি করে ৩৫০মিমি করুন" : "Resize columns to 350mm")}
-              >
-                {lang === "bn" ? "কলাম ৩৫০মিমি করুন" : "Resize Columns 350mm"}
-              </Chip>
-              <Chip
-                tone="sky"
-                onClick={() => handleDesignChatSend(lang === "bn" ? "ব্যালকনি প্রক্ষেপণ ১.৫ মিটার করুন" : "Extend cantilever balconies to 1.5m")}
-              >
-                {lang === "bn" ? "ব্যালকনি ১.৫মি করুন" : "Extend Balconies 1.5m"}
-              </Chip>
-              <Chip
-                tone="sky"
-                onClick={() => handleDesignChatSend(lang === "bn" ? "ফুটিং প্যাড ২.২ মিটার করুন" : "Increase footing pad to 2.2m")}
-              >
-                {lang === "bn" ? "ফুটিং ২.২মি করুন" : "Make Footings 2.2m"}
-              </Chip>
-            </div>
-
-            {/* Input & Send */}
-            <div className="row" style={{ gap: "6px" }}>
-              <label htmlFor="cad-chat-input" className="visually-hidden">
-                {lang === "bn" ? "৩D ফ্রেম পরিবর্তন লিখুন" : "Describe 3D frame modification"}
-              </label>
-              <input
-                id="cad-chat-input"
-                type="text"
-                className="input grow"
-                placeholder={
-                  lang === "bn"
-                    ? "৩D ফ্রেম পরিবর্তনের জন্য লিখুন (উদাঃ কলাম ৪০০মিমি করুন)..."
-                    : "Describe 3D modification (e.g. increase column to 400mm)..."
-                }
-                value={chatInput}
-                onChange={(e) => setChatInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleDesignChatSend()}
-                disabled={aiTyping}
-              />
-              <Button
-                variant="primary"
-                onClick={() => handleDesignChatSend()}
-                disabled={!chatInput.trim() || aiTyping}
-              >
-                {lang === "bn" ? "পাঠান" : "Send"}
-              </Button>
-            </div>
-          </Card>
-
-          {/* Quick Parametric Sliders / Controls */}
-          <Card className="stack">
-            <h3>{lang === "bn" ? "প্যারামেট্রিক সলিড স্পেসিফিকেশন" : "Parametric Solid Specifications"}</h3>
-
-            <div className="stack" style={{ gap: "8px" }}>
-              <div className="row-between">
-                <span className="small muted">
-                  {lang === "bn" ? "কলামের মাপ:" : "Column Size:"}
-                </span>
-                <span className="mono bold">{customParams.columnWidthMm} × {customParams.columnDepthMm} mm</span>
-              </div>
-              <div className="row-between">
-                <span className="small muted">
-                  {lang === "bn" ? "ফুটিং প্যাড সাইজ:" : "Footing Pad Size:"}
-                </span>
-                <span className="mono bold">{customParams.footingSizeMm} × {customParams.footingSizeMm} mm</span>
-              </div>
-              <div className="row-between">
-                <span className="small muted">
-                  {lang === "bn" ? "ব্যালকনির গভীরতা:" : "Balcony Depth:"}
-                </span>
-                <span className="mono bold">{customParams.balconyDepthMm} mm</span>
-              </div>
-              <div className="row-between">
-                <span className="small muted">
-                  {lang === "bn" ? "স্ল্যাব বেধ:" : "Slab Thickness:"}
-                </span>
-                <span className="mono bold">125 mm (5 in)</span>
-              </div>
-              <div className="row-between">
-                <span className="small muted">
-                  {lang === "bn" ? "ফ্লোর বিম:" : "Floor Frame Beams:"}
-                </span>
-                <span className="mono bold">250 × 450 mm</span>
-              </div>
-            </div>
+            ) : (
+              <p className="small muted" style={{ margin: 0 }}>
+                {lang === "bn" ? "প্ল্যান বাছাই করলে ডিজাইন করা মাপ এখানে দেখা যাবে।" : "Choose a plan and the designed sizes appear here."}
+              </p>
+            )}
           </Card>
 
           <Card className="stack">

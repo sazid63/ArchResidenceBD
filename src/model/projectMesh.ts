@@ -11,6 +11,7 @@ import { filterMeshByPhase } from "../cad/meshParts";
 import type { BuildingProject } from "../engine/projectState";
 import { deriveBuilding, type BuildingInput, type BuildingResult } from "./building";
 import { mToMm } from "./planChoices";
+import { analyzeStructure } from "../structure/analyze";
 import { buildMesh } from "./toMesh";
 
 /** Drop cached meshes (tests and audits). */
@@ -52,7 +53,7 @@ export function meshForProject(project: BuildingProject, phaseFilter?: string): 
   let full = cache.get(key);
   if (!full) {
     const b = deriveBuilding(input);
-    full = b.ok ? buildMesh(b.model) : { schemaVersion: "0.1.0", units: "mm", objects: [] };
+    full = b.ok ? buildMesh(b.model, analyzeStructure(b.model)) : { schemaVersion: "0.1.0", units: "mm", objects: [] };
     if (cache.size >= MAX_CACHE) cache.delete(cache.keys().next().value as string);
     cache.set(key, full);
   }

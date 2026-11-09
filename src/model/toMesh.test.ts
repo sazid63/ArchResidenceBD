@@ -4,6 +4,7 @@ import { validateSolids } from "../cad/solidKernel";
 import { deriveBuilding, DEFAULT_SETBACKS_MM } from "./building";
 import { fitRange } from "../plans/fit";
 import { PLAN_LIBRARY } from "../plans/library";
+import { analyzeStructure } from "../structure/analyze";
 import { buildMesh, PLACEHOLDER, stairPlacement } from "./toMesh";
 
 const S = DEFAULT_SETBACKS_MM;
@@ -112,5 +113,55 @@ describe("stairPlacement", () => {
     const outside = stairPlacement({ x0: 0, y0: 0, x1: 3000, y1: 4000 }, 1000, 2000);
     const inside = stairPlacement({ x0: 3000, y0: 3000, x1: 6000, y1: 7000 }, 1000, 2000);
     expect(outside.originX).toBeGreaterThan(inside.originX - 3000 - 1000 + 1000);
+  });
+});
+
+describe("buildMesh with the structure result", () => {
+  it("draws the designed columns, footings, beams and slabs, not the placeholders", () => {
+    const { model } = mesh("p2-2b-fb", 6);
+    const res = analyzeStructure(model);
+    const doc = buildMesh(model, res);
+    const size = (o: { bboxMinMm: number[]; bboxMaxMm: number[] }) => o.bboxMaxMm.map((v, k) => Math.round(v - o.bboxMinMm[k]));
+    const at = (phase: string, kind: string, x: number, y: number) =>
+      doc.objects.find((o) => o.phase === phase && o.kind === kind && !o.id.includes("~") && Math.abs((o.bboxMinMm[0] + o.bboxMaxMm[0]) / 2 - (model.origin.x + x)) < 1 && Math.abs((o.bboxMinMm[1] + o.bboxMaxMm[1]) / 2 - (model.origin.y + y)) < 1);
+    // columns: ground storey section of every column
+    let checkedCols = 0;
+    for (const c of res.frame.columns) {
+      const o = at("ground_floor", "column", c.xMm, c.yMm);
+      if (!o) continue;
+      const [dx, dy] = size(o);
+      expect([dx, dy]).toEqual([c.storeys[0].section.bx, c.storeys[0].section.by]);
+      checkedCols++;
+    }
+    expect(checkedCols).toBeGreaterThan(res.frame.columns.length / 2);
+    // footings
+    for (const c of res.frame.columns) {
+      const o = at("foundation", "footing", c.xMm, c.yMm);
+      if (!o) continue;
+      expect(size(o)).toEqual([c.footing.sideMm, c.footing.sideMm, c.footing.depthMm]);
+    }
+    // some column is bigger than the placeholder and some footing is bigger than 1.5 m, so the test can tell the two apart
+    expect(res.frame.columns.some((c) => c.storeys[0].section.bx > PLACEHOLDER.column)).toBe(true);
+    expect(res.frame.columns.some((c) => c.footing.sideMm > PLACEHOLDER.padSize)).toBe(true);
+    // beams under the first floor slab: depth is the designed depth of their line
+    const lv0 = res.levels[0];
+    const deepest = Math.max(...lv0.beamLines.map((b) => b.result.section.hMm));
+    const beamDepths = doc.objects.filter((o) => o.phase === "ground_floor" && o.kind === "beam" && !o.id.includes("~")).map((o) => size(o)[2]);
+    expect(Math.max(...beamDepths)).toBe(deepest);
+    // the roof slab is as thick as the designed roof slab
+    const roof = doc.objects.find((o) => o.id === "roof_slab" || o.parentId === "roof_slab")!;
+    expect(size(roof)[2]).toBe(res.levels[res.levels.length - 1].slabThicknessMm);
+    // the geometry is still sound
+    expect(validateSolids(doc.objects).pass).toBe(true);
+  });
+
+  it("the project mesh (what the 3D screen shows) is built from the designed sections", () => {
+    const { model } = mesh("p1-4b", 4);
+    const res = analyzeStructure(model);
+    const withDesign = buildMesh(model, res);
+    const without = buildMesh(model);
+    const colSizes = (d: typeof withDesign) => new Set(d.objects.filter((o) => o.kind === "column").map((o) => `${Math.round(o.bboxMaxMm[0] - o.bboxMinMm[0])}x${Math.round(o.bboxMaxMm[1] - o.bboxMinMm[1])}`));
+    expect(colSizes(without).has("300x300")).toBe(true);
+    expect([...colSizes(withDesign)].some((s) => s !== "300x300")).toBe(true);
   });
 });

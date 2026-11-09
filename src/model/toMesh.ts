@@ -6,8 +6,9 @@
  * Plot frame, integer mm. z = 0 is the ground-floor finish. Per storey i (level L_i):
  *   floor slab [L_i − t, L_i] (ground: [−150, 0]); walls [L_i, L_{i+1} − 125], carved by beams;
  *   beams [L_{i+1} − 450, L_{i+1}] on structural lines; columns [L_i, L_{i+1}].
- * Foundation: pads under every column, column stubs and plinth beams. Section sizes here are
- * PLACEHOLDERS until the structural engine sizes them (M4).
+ * Foundation: pads under every column, column stubs and plinth beams. Section sizes come from the
+ * structure result when one is passed (the app always passes it), so the 3D shows the members the
+ * structure, bar schedule and BOQ were made for; without one, PLACEHOLDER sizes are used.
  *
  * Phases match the old generator ("foundation", "ground_floor", "floor_<n>", "roof"), so
  * `filterMeshByPhase`, the viewer, BOQ and exporters keep working.
@@ -19,6 +20,7 @@ import { createBoxMesh, resolveSolids, type Box, type Void } from "../cad/solidK
 import { buildDogLegStair, planStair, type StairPlacement } from "../cad/stairBuilder";
 import { OUTSIDE, type FloorGeometry } from "../plans/geometry";
 import type { Rect } from "../plans/types";
+import type { StructureResult } from "../structure/analyze";
 import type { BuildingModel } from "./building";
 
 /** Placeholder sections (mm) until M4 sizes them. */
@@ -44,7 +46,35 @@ const STAIR_ARRIVAL = 1000;
 
 const meshPhase = (index: number) => (index === 0 ? "ground_floor" : `floor_${index}`);
 
-export function buildMesh(model: BuildingModel): MeshDocument {
+/** The section sizes the mesh draws: the designed ones when a structure result is given, else the placeholders. */
+export function sectionsFor(design: StructureResult | undefined) {
+  const P = PLACEHOLDER;
+  const colAt = (x: number, y: number) => design?.frame.columns.find((c) => c.xMm === x && c.yMm === y);
+  const lineAt = (orientation: "v" | "h", at: number, level: number) => design?.levels[level]?.beamLines.find((b) => b.orientation === orientation && b.at === at);
+  return {
+    designed: !!design,
+    column(x: number, y: number, storey: number): { bx: number; by: number } {
+      const s = colAt(x, y)?.storeys[storey]?.section;
+      return s ? { bx: s.bx, by: s.by } : { bx: P.column, by: P.column };
+    },
+    pad(x: number, y: number): { side: number; depth: number } {
+      const f = colAt(x, y)?.footing;
+      return f ? { side: f.sideMm, depth: f.depthMm } : { side: P.padSize, depth: P.padDepth };
+    },
+    /** Beam under the slab above storey `level`. */
+    beam(orientation: "v" | "h", at: number, level: number): { b: number; h: number } {
+      const s = lineAt(orientation, at, level)?.result.section;
+      return s ? { b: s.bMm, h: s.hMm } : { b: P.beamWidth, h: P.beamDepth };
+    },
+    /** Slab above storey `level` (the last level is the roof). */
+    slabAbove(level: number): number {
+      return design?.levels[level]?.slabThicknessMm ?? P.slabTypical;
+    },
+  };
+}
+
+export function buildMesh(model: BuildingModel, design?: StructureResult): MeshDocument {
+  const S = sectionsFor(design);
   const { x: ox, y: oy } = model.origin;
   const objs: MeshObject[] = [];
   const voids: Void[] = [];
@@ -63,21 +93,23 @@ export function buildMesh(model: BuildingModel): MeshDocument {
 
   // ---- Foundation ------------------------------------------------------------------------
   const P = PLACEHOLDER;
+  const tagOf = (what: string) => (S.designed ? what : `${what} (placeholder size)`);
+  // The top of every pad sits at one level; a deeper pad reaches further down.
   const padTop = -P.foundationDepth + P.padDepth;
-  const c2 = P.column / 2;
-  const b2 = P.beamWidth / 2;
   for (const col of typical.columns) {
     const x = ox + col.x;
     const y = oy + col.y;
     const tag = `${col.gridX}_${col.gridY}`;
-    box(`pad_${tag}`, "Isolated Footing (placeholder size)", "footing", "foundation", {
-      x0: x - P.padSize / 2, y0: y - P.padSize / 2, z0: -P.foundationDepth, x1: x + P.padSize / 2, y1: y + P.padSize / 2, z1: padTop,
+    const pad = S.pad(col.x, col.y);
+    box(`pad_${tag}`, tagOf("Isolated Footing"), "footing", "foundation", {
+      x0: x - pad.side / 2, y0: y - pad.side / 2, z0: padTop - pad.depth, x1: x + pad.side / 2, y1: y + pad.side / 2, z1: padTop,
     });
     // Stub from the pad to the ground-floor finish (z = 0).
-    box(`stub_${tag}`, "Column Stub", "column", "foundation", { x0: x - c2, y0: y - c2, z0: padTop, x1: x + c2, y1: y + c2, z1: 0 });
+    const c0 = S.column(col.x, col.y, 0);
+    box(`stub_${tag}`, "Column Stub", "column", "foundation", { x0: x - c0.bx / 2, y0: y - c0.by / 2, z0: padTop, x1: x + c0.bx / 2, y1: y + c0.by / 2, z1: 0 });
   }
   typical.beams.forEach((bm, k) => {
-    const r = beamRect(bm, ox, oy, b2);
+    const r = beamRect(bm, ox, oy, S.beam(bm.orientation, bm.at, 0).b / 2);
     box(`plinth_${k}`, "Plinth Beam", "beam", "foundation", { ...r, z0: -P.plinthDepth, z1: 0 });
   });
 
@@ -87,7 +119,8 @@ export function buildMesh(model: BuildingModel): MeshDocument {
     const phase = meshPhase(i);
     const L = level(i);
     const top = level(i + 1);
-    const slabT = i === 0 ? P.slabGround : P.slabTypical;
+    const slabT = i === 0 ? P.slabGround : S.slabAbove(i - 1);
+    const slabTop = S.slabAbove(i);
     const pre = `s${i}`;
 
     // Floor slab over the whole footprint; openings cut below.
@@ -98,11 +131,13 @@ export function buildMesh(model: BuildingModel): MeshDocument {
     for (const col of geo.columns) {
       const x = ox + col.x;
       const y = oy + col.y;
-      box(`${pre}_col_${col.gridX}_${col.gridY}`, "RCC Column (placeholder size)", "column", phase, { x0: x - c2, y0: y - c2, z0: L, x1: x + c2, y1: y + c2, z1: top });
+      const sc = S.column(col.x, col.y, i);
+      box(`${pre}_col_${col.gridX}_${col.gridY}`, tagOf("RCC Column"), "column", phase, { x0: x - sc.bx / 2, y0: y - sc.by / 2, z0: L, x1: x + sc.bx / 2, y1: y + sc.by / 2, z1: top });
     }
     geo.beams.forEach((bm, k) => {
-      const r = beamRect(bm, ox, oy, b2);
-      box(`${pre}_beam_${k}`, "RCC Beam (placeholder size)", "beam", phase, { ...r, z0: top - P.beamDepth, z1: top });
+      const sb = S.beam(bm.orientation, bm.at, i);
+      const r = beamRect(bm, ox, oy, sb.b / 2);
+      box(`${pre}_beam_${k}`, tagOf("RCC Beam"), "beam", phase, { ...r, z0: top - sb.h, z1: top });
     });
 
     // Walls on the grid lines; the ground floor leaves the parking open to the outside.
@@ -115,7 +150,7 @@ export function buildMesh(model: BuildingModel): MeshDocument {
         ? { x0: ox + w.at - t / 2, y0: oy + w.from, x1: ox + w.at + t / 2, y1: oy + w.to }
         : { x0: ox + w.from, y0: oy + w.at - t / 2, x1: ox + w.to, y1: oy + w.at + t / 2 };
       box(`${pre}_wall_${k}`, w.exterior ? "Brick Wall 250" : "Brick Partition 125", w.exterior ? "wall" : "partition", phase, {
-        ...r, z0: L, z1: top - P.slabTypical,
+        ...r, z0: L, z1: top - slabTop,
       });
     });
 
@@ -160,8 +195,9 @@ export function buildMesh(model: BuildingModel): MeshDocument {
 
   // ---- Roof ------------------------------------------------------------------------------
   const R = model.roof.levelMm;
-  box("roof_slab", "Roof Slab", "slab", "roof", { x0: ox, y0: oy, z0: R - P.slabTypical, x1: ox + W, y1: oy + D, z1: R });
-  slabOpenings(typical, ox, oy, R - P.slabTypical, R, "roof_slab", model, voidBox, isSlab);
+  const roofT = S.slabAbove(N - 1);
+  box("roof_slab", "Roof Slab", "slab", "roof", { x0: ox, y0: oy, z0: R - roofT, x1: ox + W, y1: oy + D, z1: R });
+  slabOpenings(typical, ox, oy, R - roofT, R, "roof_slab", model, voidBox, isSlab);
 
   const cover = (rect: Rect | null, name: string, label: string) => {
     if (!rect) return;
