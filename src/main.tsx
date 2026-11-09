@@ -17,3 +17,17 @@ createRoot(document.getElementById("root")!).render(
     </ThemeProvider>
   </StrictMode>,
 );
+
+// Service worker: production web builds only. Not in dev (it served stale modules there) and not in the
+// desktop shell (the installer already ships every file).
+const inDesktopShell = "__TAURI_INTERNALS__" in window || "__TAURI__" in window;
+if ("serviceWorker" in navigator) {
+  if (import.meta.env.PROD && !inDesktopShell) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js").catch((err) => console.warn("[PWA] Service worker registration failed:", err));
+    });
+  } else {
+    navigator.serviceWorker.getRegistrations().then((rs) => rs.forEach((r) => void r.unregister())).catch(() => undefined);
+    caches.keys().then((ks) => ks.filter((k) => k.startsWith("archresidencebd-")).forEach((k) => void caches.delete(k))).catch(() => undefined);
+  }
+}

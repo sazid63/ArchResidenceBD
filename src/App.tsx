@@ -1,29 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 
 import { Sidebar } from "./layout/Sidebar";
-import { AboutScreen } from "./screens/AboutScreen";
-import { AssetsLibraryScreen } from "./screens/AssetsLibraryScreen";
-import { BoqScreen } from "./screens/BoqScreen";
-import { ComplianceScreen } from "./screens/ComplianceScreen";
-import { StructureScreen } from "./screens/StructureScreen";
-import { DocumentsScreen } from "./screens/DocumentsScreen";
-import { DrawingsScreen } from "./screens/DrawingsScreen";
-import { FormworkScaffoldScreen } from "./screens/FormworkScaffoldScreen";
-import { PourSequenceScreen } from "./screens/PourSequenceScreen";
-import { RebarScheduleScreen } from "./screens/RebarScheduleScreen";
-import { ConnectionDetailingScreen } from "./screens/ConnectionDetailingScreen";
-import { DaylightAnalysisScreen } from "./screens/DaylightAnalysisScreen";
-import { UnitMixOptimizerScreen } from "./screens/UnitMixOptimizerScreen";
-import { ColumnGridOptimizerScreen } from "./screens/ColumnGridOptimizerScreen";
-import { HelpScreen } from "./screens/HelpScreen";
-import { LicencesScreen } from "./screens/LicencesScreen";
-import { NativeCadScreen } from "./screens/NativeCadScreen";
-import { PhaseChatScreen } from "./screens/PhaseChatScreen";
-import { ProjectSetupScreen } from "./screens/ProjectSetupScreen";
-import { ProjectsScreen } from "./screens/ProjectsScreen";
-import { TemplatesScreen } from "./screens/TemplatesScreen";
-import { UnitsScreen } from "./screens/UnitsScreen";
-import { SettingsScreen } from "./screens/SettingsScreen";
 import { activateSavedProject, getActiveProject, create4StoryBuildingProject } from "./engine/projectState";
 import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import { ErrorBoundary } from "./components/ErrorBoundary";
@@ -32,6 +9,31 @@ import { useI18n } from "./i18n";
 import { useActiveProject } from "./context/ProjectContext";
 import { ProjectProvider } from "./context/ProjectContext";
 import "./app.css";
+
+// Screens load on demand so the first paint ships only the shell (see scripts/check-bundle-size.mjs).
+const AboutScreen = lazy(() => import("./screens/AboutScreen").then((m) => ({ default: m.AboutScreen })));
+const AssetsLibraryScreen = lazy(() => import("./screens/AssetsLibraryScreen").then((m) => ({ default: m.AssetsLibraryScreen })));
+const BoqScreen = lazy(() => import("./screens/BoqScreen").then((m) => ({ default: m.BoqScreen })));
+const ComplianceScreen = lazy(() => import("./screens/ComplianceScreen").then((m) => ({ default: m.ComplianceScreen })));
+const StructureScreen = lazy(() => import("./screens/StructureScreen").then((m) => ({ default: m.StructureScreen })));
+const DocumentsScreen = lazy(() => import("./screens/DocumentsScreen").then((m) => ({ default: m.DocumentsScreen })));
+const DrawingsScreen = lazy(() => import("./screens/DrawingsScreen").then((m) => ({ default: m.DrawingsScreen })));
+const FormworkScaffoldScreen = lazy(() => import("./screens/FormworkScaffoldScreen").then((m) => ({ default: m.FormworkScaffoldScreen })));
+const PourSequenceScreen = lazy(() => import("./screens/PourSequenceScreen").then((m) => ({ default: m.PourSequenceScreen })));
+const RebarScheduleScreen = lazy(() => import("./screens/RebarScheduleScreen").then((m) => ({ default: m.RebarScheduleScreen })));
+const ConnectionDetailingScreen = lazy(() => import("./screens/ConnectionDetailingScreen").then((m) => ({ default: m.ConnectionDetailingScreen })));
+const DaylightAnalysisScreen = lazy(() => import("./screens/DaylightAnalysisScreen").then((m) => ({ default: m.DaylightAnalysisScreen })));
+const UnitMixOptimizerScreen = lazy(() => import("./screens/UnitMixOptimizerScreen").then((m) => ({ default: m.UnitMixOptimizerScreen })));
+const ColumnGridOptimizerScreen = lazy(() => import("./screens/ColumnGridOptimizerScreen").then((m) => ({ default: m.ColumnGridOptimizerScreen })));
+const HelpScreen = lazy(() => import("./screens/HelpScreen").then((m) => ({ default: m.HelpScreen })));
+const LicencesScreen = lazy(() => import("./screens/LicencesScreen").then((m) => ({ default: m.LicencesScreen })));
+const NativeCadScreen = lazy(() => import("./screens/NativeCadScreen").then((m) => ({ default: m.NativeCadScreen })));
+const PhaseChatScreen = lazy(() => import("./screens/PhaseChatScreen").then((m) => ({ default: m.PhaseChatScreen })));
+const ProjectSetupScreen = lazy(() => import("./screens/ProjectSetupScreen").then((m) => ({ default: m.ProjectSetupScreen })));
+const ProjectsScreen = lazy(() => import("./screens/ProjectsScreen").then((m) => ({ default: m.ProjectsScreen })));
+const TemplatesScreen = lazy(() => import("./screens/TemplatesScreen").then((m) => ({ default: m.TemplatesScreen })));
+const UnitsScreen = lazy(() => import("./screens/UnitsScreen").then((m) => ({ default: m.UnitsScreen })));
+const SettingsScreen = lazy(() => import("./screens/SettingsScreen").then((m) => ({ default: m.SettingsScreen })));
 
 const SCREEN_TITLES: Record<string, [string, string]> = {
   setup: ["New project", "নতুন প্রকল্প"],
@@ -124,7 +126,9 @@ function Shell() {
             onRecover={() => navigate("setup")}
             recoverLabel={lang === "bn" ? "শুরুতে ফিরুন" : "Back to start"}
           >
-            {renderView(view, navigate)}
+            <Suspense fallback={<div className="screen" role="status" aria-live="polite"><p className="faint">{lang === "bn" ? "লোড হচ্ছে…" : "Loading…"}</p></div>}>
+              {renderView(view, navigate)}
+            </Suspense>
           </ErrorBoundary>
         </main>
       </div>

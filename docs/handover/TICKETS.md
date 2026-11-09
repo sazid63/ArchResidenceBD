@@ -73,7 +73,7 @@ Do: runner for `spec/flows/phase-flow-book.yaml`; port the v0 parser (`core/src/
 ## M6-2 Cleanup · Sonnet medium · done (see git log)
 Do: UI on the v3 store (`src/model/projectStore`, migrate on first load); remaining screens (formwork, pour, daylight, unit mix, connections, column grid) read the model; delete unused v2 state, `/api/cad`, `src/server` (dev via Vite), `isomorphicCore` stubs; README and Help honest (no AI claims).
 
-## M7-1 Packaging · Sonnet medium · todo
+## M7-1 Packaging · Sonnet medium · done (see git log)
 Do: `tauri.conf.json` devUrl and beforeDevCommand; `npx tauri icon` (adds the missing 128x128@2x); a CSP; `React.lazy` per screen with a bundle-size budget; PWA icons; CI builds the Windows installer on tags (windows-latest); offline check.
 
 ## DS-1 Design system re-sync · Sonnet medium · after M7-1

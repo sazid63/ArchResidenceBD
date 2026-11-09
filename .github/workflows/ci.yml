@@ -41,3 +41,10 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      # M7-1: first-load size budget, and the service worker + desktop config checks on the built files.
+      - name: Bundle size budget
+        run: npm run check:bundle
+
+      - name: Offline check
+        run: npm run test:offline

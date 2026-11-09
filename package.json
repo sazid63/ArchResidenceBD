@@ -6,8 +6,10 @@
   "scripts": {
     "dev": "vite --port 3000 --host 0.0.0.0",
     "start": "vite --port 3000 --host 0.0.0.0",
-    "build": "vite build --configLoader=native",
+    "build": "vite build --configLoader=native && node scripts/build-sw.mjs",
     "preview": "vite preview --configLoader=native",
+    "check:bundle": "node scripts/check-bundle-size.mjs",
+    "test:offline": "node scripts/tests/offline-check.mjs && node scripts/tests/sw-offline.mjs",
     "lint": "tsc --noEmit",
     "clean": "rm -rf dist",
     "audit:mesh": "tsx --import ./scripts/loaders/raw.mjs scripts/audits/mesh-audit.ts",

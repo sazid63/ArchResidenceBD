@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- ArchResidenceBD app icon: a residential block on Monsoon indigo. Full bleed, mark inside the central 60% so it also works as a maskable icon. -->
+  <rect width="1024" height="1024" fill="#2e4fa3"/>
+  <rect x="352" y="250" width="320" height="500" rx="14" fill="#ffffff"/>
+  <rect x="402" y="230" width="220" height="32" rx="8" fill="#dfe6f7"/>
+  <g fill="#2e4fa3">
+    <rect x="392" y="296" width="64" height="52" rx="8"/><rect x="568" y="296" width="64" height="52" rx="8"/>
+    <rect x="392" y="388" width="64" height="52" rx="8"/><rect x="568" y="388" width="64" height="52" rx="8"/>
+    <rect x="392" y="480" width="64" height="52" rx="8"/><rect x="568" y="480" width="64" height="52" rx="8"/>
+    <rect x="392" y="572" width="64" height="52" rx="8"/><rect x="568" y="572" width="64" height="52" rx="8"/>
+    <rect x="478" y="648" width="68" height="102" rx="10"/>
+  </g>
+  <rect x="300" y="750" width="424" height="22" rx="11" fill="#ffffff"/>
+</svg>

@@ -1,58 +1,37 @@
-# Building the Windows Desktop App
+# Building the Windows desktop app
 
 ## Prerequisites
 
-1. **Rust toolchain** (via rustup)
-   ```bash
-   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-   rustup default stable-x86_64-pc-windows-msvc
-   ```
+1. **Rust** (rustup, stable, MSVC toolchain) and the **Visual Studio Build Tools** with the C++ workload.
+2. **Node 20 or newer**, then `npm ci` in the repository root (the Tauri CLI is a dev dependency).
+3. WebView2 comes with Windows 10/11; the installers bootstrap it if it is missing.
 
-2. **Tauri CLI**
-   ```bash
-   npm install -D @tauri-apps/cli@^2
-   ```
-
-3. **Visual Studio Build Tools** (with C++ workload)
-   - [Download Build Tools](https://visualstudio.microsoft.com/downloads/)
-
-4. **WebView2 Runtime** — automatically bundled with NSIS installer
-
-## Build Commands
+## Commands
 
 | Task | Command |
 |------|---------|
-| Dev mode (hot reload) | `npx tauri dev` |
-| Production build (Vite) | `npm run build` |
-| Tauri production build | `npx tauri build --target x86_64-pc-windows-msvc` |
-| MS only | `npx tauri build --target x86_64-pc-windows-msvc --bundle msi` |
-| NSIS only | `npx tauri build --target x86_64-pc-windows-msvc --bundle nsis` |
+| Run the desktop app in dev | `npx tauri dev` (starts `npm run dev` on port 3000 for you) |
+| Web build only | `npm run build` (also writes the service worker) |
+| Installers | `npx tauri build --bundles nsis,msi` |
 
-## Output
+Output: `src-tauri/target/release/bundle/nsis/*.exe` (end users) and `bundle/msi/*.msi` (enterprise).
 
-```
-src-tauri/target/x86_64-pc-windows-msvc/debug/bundle/
-├── msi/ArchResidenceBD_1.0.0_x64_en-US.msi        (Enterprise)
-├── nsis/ArchResidenceBD_1.0.0_x64-setup.exe        (End-user)
-└── portable/ArchResidenceBD_1.0.0_x64.zip          (Extractable)
-```
+## Releases
 
-## Architecture
+Push a tag that matches the version in `package.json` (`git tag v2.6.0 && git push origin v2.6.0`). The **Release** workflow (`.github/workflows/release.yml`) checks types and tests, builds the web app, runs the bundle-size and offline checks, builds both installers on `windows-latest` and attaches them to a **draft** GitHub release. The installers are not code-signed by the workflow (`sign-release.ps1` is for a local, signed build).
 
-- **Frontend**: Vite + React + TypeScript (builds to `dist/`)
-- **Runtime**: Tauri 2 + WebView2 (Windows 10/11)
-- **Rust**: Core logic, file I/O, process management
-- **Installer**: NSIS (single .exe) + MSI (enterprise)
+## What the build enforces
 
-## Customization
+- `npm run check:bundle`: first-load script 160 KB gzip, any one chunk 50 KB, all JavaScript 380 KB (screens load on demand).
+- `npm run test:offline`: the service worker precaches every built file and answers offline; the manifest icons exist; the desktop CSP is set (same origin, no eval, no inline scripts); the Tauri dev URL matches `npm run dev`.
+- The desktop shell does not register the service worker: the installer already contains every file.
 
-- **App icon**: `src-tauri/icons/` (32/128/256px PNG + ICO + ICNS)
-- **Build config**: `src-tauri/tauri.conf.json`
-- **Bundle resources**: Add to `src-tauri/tauri.conf.json > bundle > resources`
-- **External binaries**: `src-tauri/tauri.conf.json > bundle > externalBin`
+## Customisation
+
+- **Icon**: edit `assets/icon.svg`, then `node scripts/make-icons.mjs` (renders with Edge: the 1024 px source and the PWA icons) and `npx tauri icon assets/icon-1024.png` (the desktop set). Delete the generated `src-tauri/icons/android` and `ios` folders; only the desktop icons are used.
+- **Build config and CSP**: `src-tauri/tauri.conf.json`. To try the CSP in a browser, serve the build with `node scripts/tests/serve-dist.mjs 4199 --csp`.
 
 ## Notes
 
-- The NSIS installer uses English only (Bengali language file not in default NSIS distribution)
-- The app itself supports full Bengali i18n via `src/i18n.tsx`
-- Vite's `build.chunkSizeWarningLimit` is left at default; main bundle is 708kB (gzip 200kB) — acceptable for desktop
+- The NSIS installer is English only (Bengali is not in the default NSIS language set); the app itself is fully bilingual.
+- The Rust side is a stub (`src/lib.rs`: `get_app_info`); all application logic runs in the web view.

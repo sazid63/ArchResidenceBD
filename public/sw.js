@@ -1,138 +1,68 @@
-// ArchResidenceBD Service Worker
-// Caches core assets for offline use
+// ArchResidenceBD service worker (production web build only; see src/main.tsx).
+//
+// scripts/build-sw.mjs rewrites this file into dist/sw.js: VERSION becomes a hash of the build and PRECACHE the
+// list of every built file, so the whole app is cached when the worker installs and works offline from then on.
+// In this source copy both are placeholders; the worker is never registered in dev.
 
-// Bump this version to force re-cache on next deploy
-const CACHE_NAME = 'archresidencebd-v2';
-const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  // Self-hosted fonts (OFL licensed) - cached for offline use (see scripts/copy-fonts.mjs)
-  '/assets/fonts/noto-sans-latin-400-normal.woff2',
-  '/assets/fonts/noto-sans-latin-500-normal.woff2',
-  '/assets/fonts/noto-sans-latin-600-normal.woff2',
-  '/assets/fonts/noto-sans-latin-700-normal.woff2',
-  '/assets/fonts/noto-sans-bengali-bengali-400-normal.woff2',
-  '/assets/fonts/noto-sans-bengali-bengali-500-normal.woff2',
-  '/assets/fonts/noto-sans-bengali-bengali-600-normal.woff2',
-  '/assets/fonts/noto-sans-bengali-bengali-700-normal.woff2',
-  // Note: In production, these would be the actual built asset paths
-  // '/assets/index-*.css',
-  // '/assets/index-*.js',
-];
+const VERSION = /*__VERSION__*/ "dev";
+const PRECACHE = /*__PRECACHE__*/ [];
+const CACHE = "archresidencebd-" + VERSION;
 
-// Install - cache static assets one-by-one so a single missing file
-// doesn't abort the entire install.
-self.addEventListener('install', (event) => {
+// Install: cache the whole build in one step. If any file is missing the install fails and is retried on the
+// next visit, so a half-cached app is never activated.
+self.addEventListener("install", (event) => {
+  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)).then(() => self.skipWaiting()));
+});
+
+// Activate: drop the caches of older builds.
+self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] Caching static assets');
-      // Use allSettled so partial failures don't abort install.
-      const results = STATIC_ASSETS.map((url) =>
-        cache.add(url).catch(() => console.warn(`[SW] Failed to cache ${url}`)),
-      );
-      return Promise.allSettled(results);
-    }).then(() => self.skipWaiting())
+    caches
+      .keys()
+      .then((names) => Promise.all(names.filter((n) => n.startsWith("archresidencebd-") && n !== CACHE).map((n) => caches.delete(n))))
+      .then(() => self.clients.claim()),
   );
 });
 
-// Activate - clean old caches
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys()
-      .then((cacheNames) => {
-        return Promise.all(
-          cacheNames
-            .filter((name) => name !== CACHE_NAME)
-            .map((name) => caches.delete(name))
-        );
-      })
-      .then(() => self.clients.claim())
-  );
-});
+self.addEventListener("fetch", (event) => {
+  const req = event.request;
+  if (req.method !== "GET") return;
+  const url = new URL(req.url);
+  if (url.origin !== self.location.origin) return; // never touch other origins
 
-/** Returns true when the request is for this app's own API (not external). */
-function isAppApiRequest(url) {
-  try {
-    const reqUrl = new URL(url);
-    // Match relative /api/* paths or same-origin calls
-    return reqUrl.pathname.startsWith('/api/')
-      || (reqUrl.origin === location.origin && !reqUrl.pathname.startsWith('/assets/') && reqUrl.pathname !== '/');
-  } catch {
-    return url.includes('/api/');
-  }
-}
-
-/** Returns true when the request is for a static binary asset (font, image, CSS, JS). */
-function isBinaryAsset(url) {
-  return /\.(woff2?|ttf|eot|otf|png|jpe?g|gif|svg|ico|css|js)(\?.*)?$/.test(url)
-    || url.endsWith('.map');
-}
-
-// Fetch - cache-first for static assets, network-first for API
-self.addEventListener('fetch', (event) => {
-  // Skip non-GET requests
-  if (event.request.method !== 'GET') return;
-
-  // Skip chrome-extension and other non-http requests
-  if (!event.request.url.startsWith('http')) return;
-
-  // Page loads: network first, so a new release is picked up as soon as it is online;
-  // the cached page is only the offline fallback. (Cache-first here kept old builds forever.)
-  if (event.request.mode === 'navigate') {
+  // Page loads: the network first, so a new release is picked up as soon as the user is online;
+  // the cached app shell is the offline fallback.
+  if (req.mode === "navigate") {
     event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-          return response;
+      fetch(req)
+        .then((res) => {
+          if (res.ok) {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put("/index.html", copy));
+          }
+          return res;
         })
-        .catch(() => caches.match(event.request).then((hit) => hit || caches.match('/index.html'))),
+        .catch(() => caches.match("/index.html").then((hit) => hit || caches.match("/"))),
     );
     return;
   }
 
+  // Built files have hashed names and never change: the cache first, the network only for a miss.
   event.respondWith(
-    caches.match(event.request)
-      .then((cachedResponse) => {
-        // ── Cache hit: serve immediately ──
-        if (cachedResponse) return cachedResponse;
-
-        // ── No cache hit: network fetch ──
-        return fetch(event.request)
-          .then((response) => {
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const responseClone = response.clone();
-            // Stale-while-revalidate: put successful responses in cache for next visit
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseClone);
-            });
-            return response;
-          })
-          .catch(() => {
-            // ── Offline fallback ──
-            // For binary assets (fonts, stylesheets, images) return the raw request
-            // so the browser reports a network error gracefully instead of
-            // receiving a JSON text body it cannot parse.
-            if (isBinaryAsset(event.request.url)) {
-              return new Response('', { status: 0 });
-            }
-            // For navigations and JSON API calls, return a structured offline notice
-            return new Response(
-              JSON.stringify({ error: 'Offline', message: 'Please check your connection' }),
-              { headers: { 'Content-Type': 'application/json' }, status: 503 }
-            );
-          });
-      })
+    caches.match(req).then(
+      (hit) =>
+        hit ||
+        fetch(req).then((res) => {
+          if (res.ok) {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(req, copy));
+          }
+          return res;
+        }),
+    ),
   );
 });
 
-// Handle messages from main thread
-self.addEventListener('message', (event) => {
-  if (event.data === 'skipWaiting') {
-    self.skipWaiting();
-  }
-  if (event.data === 'clearCache') {
-    caches.delete(CACHE_NAME);
-  }
+self.addEventListener("message", (event) => {
+  if (event.data === "skipWaiting") self.skipWaiting();
 });

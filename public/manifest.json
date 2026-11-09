@@ -1,65 +1,76 @@
 {
   "name": "ArchResidenceBD — Civil Engineering Suite for Bangladesh",
   "short_name": "ArchResidenceBD",
-  "description": "Civil engineering software for residential building design in Bangladesh with bilingual AI planning, BNBC/RAJUK compliance, NativeCAD 3D modeling, and PWD BOQ cost estimation.",
+  "description": "Residential building design for Dhaka: floor plans, 3D, structural screening, RAJUK and BNBC checks, bar schedule, BOQ and drawings. Bilingual, works offline.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2e4fa3",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "icons": [
     {
       "src": "/icons/icon-72.png",
       "sizes": "72x72",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-96.png",
       "sizes": "96x96",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-128.png",
       "sizes": "128x128",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-144.png",
       "sizes": "144x144",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-152.png",
       "sizes": "152x152",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-384.png",
       "sizes": "384x384",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
-  "categories": ["productivity", "engineering", "utilities"],
-  "lang": "bn",
+  "categories": [
+    "productivity",
+    "engineering",
+    "utilities"
+  ],
+  "lang": "en",
   "dir": "ltr",
   "prefer_related_applications": false,
-  "scope": "/"
+  "scope": "/",
+  "id": "/"
 }
