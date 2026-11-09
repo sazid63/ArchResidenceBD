@@ -17,6 +17,7 @@ import { alphaF, tBeamInertia } from "./tbeam";
 import { analyzeFrame, type FrameOptions, type FrameResult } from "./frame";
 import { planFoundation, type FoundationResult } from "./foundation";
 import { roofLoads } from "../model/roofEquipment";
+import { slabWallKn } from "./slabWalls";
 import { sizeBeamLine, type BeamLineResult, type BeamSection, type BeamSpanInput } from "./beam";
 
 export interface PanelResult {
@@ -154,8 +155,13 @@ function computeLevel(model: BuildingModel, k: number): Omit<LevelResult, "index
   const overlapM2 = (p: Panel, r: { x0: number; y0: number; x1: number; y1: number }) =>
     (Math.max(0, Math.min(p.x1, r.x1) - Math.max(p.x0, r.x0)) * Math.max(0, Math.min(p.y1, r.y1) - Math.max(p.y0, r.y0))) / 1e6;
   const equipment = roof ? roofLoads(model) : [];
+  // Walls that stand on the slab (not on a structural line) are spread over their panel; walls on a line load that beam instead.
+  const structuralLines = new Set<string>([...f.structuralX.map((g) => lineKey("v", f.xLines[g])), ...f.structuralY.map((g) => lineKey("h", f.yLines[g]))]);
+  const slabWalls = roof ? new Map<string, number>() : slabWallKn(model.storeys[k + 1].geometry.walls, structuralLines, panels, model.storeys[k + 1].heightMm - 125);
   const extraDead = (p: Panel): number => {
     let q = p.kinds.includes("stair") ? STAIR_DEAD_KN_M2 : 0;
+    const panelAreaM2 = ((p.x1 - p.x0) * (p.y1 - p.y0)) / 1e6;
+    if (panelAreaM2 > 0) q += (slabWalls.get(`${p.px},${p.py}`) ?? 0) / panelAreaM2;
     const panelM2 = ((p.x1 - p.x0) * (p.y1 - p.y0)) / 1e6;
     for (const e of equipment) {
       const coverM2 = ((e.rect.x1 - e.rect.x0) * (e.rect.y1 - e.rect.y0)) / 1e6;
