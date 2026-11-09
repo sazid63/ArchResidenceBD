@@ -1,18 +1,11 @@
 # ArchResidenceBD v3 (branch `v3`)
+Bilingual EN/BN Dhaka app: plot → plan → 3D → structure → RAJUK/BNBC → BOQ → drawings. React 19, TS, Vite 8, Tauri.
 
-Bilingual EN/BN app: Dhaka plot → floor plan → 3D → structure → RAJUK/BNBC checks → BOQ → drawings. React 19 + TS + Vite 8, Tauri shell, all logic in the browser.
+Read `docs/handover/NEXT.md` first. Plan: `docs/audit/production-readiness-2026-11.md`. Do what the owner names.
+Find code: `node floorplan/query.mjs find "<words>"`, then grep + read line ranges. Never read whole `parametricBuildingGenerator.ts`, `NativeCadScreen.tsx`, `i18n.tsx`. Skip old docs (KNOWLEDGE_BASE, MODEL_CARD, docs/plan, docs/work).
 
-Start with `docs/handover/NEXT.md` (current state, next step, open decisions). Your task: one ticket. Read only your section: `grep -n -A14 "^## <ID>" docs/handover/TICKETS.md`. Background only if the ticket needs it: `docs/BUILD_PLAN.md`.
+Settled: no AI · Monsoon indigo tokens (`src/theme/tokens.css`) · RAJUK 2008; BNBC/DAP only with citation, else "not checked" · original plans only · Windows+web · Dhaka only.
 
-Settled (don't revisit): no AI models · Civic style, Monsoon indigo tokens (`src/theme/tokens.css`) · RAJUK 2008 now; BNBC/DAP values only with citations, else "not checked" · original plans only · Windows + web · Dhaka only.
+Rules: test every behaviour change · cite regulations or mark "assumption" · integer mm · colours via tokens · UI text EN+BN · work: `npx vitest run <path>`, `tsc --noEmit`; before commit: `npm run verify` · commit on `v3`, never push unless asked · reply ≤5 lines.
 
-Map: `src/plans` grid floor plans (fit, geometry, validate, render, library) · `src/model` project format v3, migration, store · `src/model` also has `building.ts` (plot + plan → BuildingModel), `toMesh.ts` (model → 3D), `projectMesh.ts` (project → mesh), `planChoices.ts` (which plans fit) · `src/rules` RAJUK pack loader, evaluators, `check()`, `buildReport()` (Compliance screen), deviations · `src/cad` v2 engines (`parametricBuildingGenerator.ts` is now a thin wrapper; structural/rebar known-wrong) · `src/engine/projectState.ts` v2 store the UI still uses · `src/ui/kit.tsx` components. Old reports in `docs/` (audits, KNOWLEDGE_BASE, MODEL_CARD, docs/plan, docs/work) are outdated: skip.
-
-Rules:
-- Grep, then read line ranges. Never read whole `parametricBuildingGenerator.ts`, `NativeCadScreen.tsx`, `i18n.tsx`.
-- `npx vitest run <path>` while working; `npm run verify` once before commit (+ `npm run audit:mesh`, `test:exporters`, `build` if 3D/exports touched); owner paused full runs until all phases are done: use targeted checks (`tsc --noEmit`, `npx vitest run`).
-- Every behaviour change gets a test. Regulation values cited or flagged "assumption". Lengths integer mm. Colours via tokens. UI text EN + BN.
-- No screenshots unless UI changed (headless Edge: `msedge --headless=new --screenshot=<png> --window-size=1280,860 <url>`).
-- Commit on `v3` (with the attribution line your session gives you); mark the ticket `done <hash>`; don't push unless asked. Reply in ≤ 5 lines.
-
-Windows: `python3` hangs (use node) · files are CRLF (scripted edits must normalise `\r\n`) · stop any `vite preview` before `npm ci`.
+Windows: no `python3` (use node) · files CRLF · stop `vite preview` before `npm ci`.
