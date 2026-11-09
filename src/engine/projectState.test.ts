@@ -15,3 +15,24 @@ describe("the random demo building", () => {
     expect(seen.size).toBeGreaterThanOrEqual(5); // every archetype was drawn at least in passing
   });
 });
+
+describe("the project a fresh install opens on", () => {
+  it("has a real plot and a plan that fits and keeps within the ground-coverage limit, and nothing pre-answered", async () => {
+    const { create4StoryBuildingProject } = await import("./projectState");
+    const { check } = await import("../rules/check");
+    const p = create4StoryBuildingProject();
+    expect(p.plot).toMatchObject({ frontageM: 18, depthM: 28, roadWidthM: 9 });
+    expect(p.planId).toBeTruthy();
+    const b = buildingForProject(p);
+    expect(b && b.ok).toBe(true);
+    if (!b || !b.ok) return;
+    expect(check(b.model, { roadWidthM: 9 }).find((r) => r.ruleId === "rajuk.mgc")?.status).toBe("pass");
+    // honest phases: not started, no canned messages, the basics phase first
+    expect(p.phases[0].id).toBe("phase-basics");
+    for (const ph of p.phases) {
+      expect(ph.status).toBe("not_started");
+      expect(ph.messages).toEqual([]);
+    }
+    expect(p.designStarted).toBe(false);
+  });
+});

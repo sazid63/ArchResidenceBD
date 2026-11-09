@@ -338,36 +338,30 @@ function populatePhaseMetrics(  phase: PhaseItem, stories: number, plotSqm: numb
   };
 }
 
+/**
+ * The project a fresh install opens on: a 4-storey block with two flats per floor on a real plot (18 x 28 m, 9 m road),
+ * with a plan that fits and keeps within the RAJUK ground-coverage limit. Its phases are not started: nothing is
+ * pre-answered, so the guided interview and every screen work as for a project the user made.
+ * Adds the demo; never clears saved projects (v2 wiped them all here on every fresh start).
+ */
 export function create4StoryBuildingProject(): BuildingProject {
-  // Adds the demo; never clears saved projects (v2 wiped them all here on every fresh start).
-  const name = "Sitalakshya Heritage (4-Storey)";
-  const address = "Road 5, Dhanmondi, Dhaka";
+  const frontageM = 18;
+  const depthM = 28;
+  const roadWidthM = 9;
   const stories = 4;
-  const plotSize = 3.5;
-  const id = `project-4story-${uniqueSuffix()}`;
-  const plotSqm = plotToSqm(plotSize, "katha");
-  const phases = generatePhasesForStories(stories);
-  const now = new Date().toISOString();
-  const timeStr = new Date().toLocaleTimeString();
-
-  const populatedPhases = phases.map((p) => {
-    const populated = populatePhaseMetrics(p, stories, plotSqm, plotSize, "preset-dual-3bed", name, 2, now, timeStr);
-    return makeCompletedPhase(
-      p, populated.metrics, populated.preset, populated.timestamp,
-      `[Phase Planner]\nNew 4-storey project initialised according to BNBC 2020.`,
-    );
+  const choices = planChoices(frontageM, depthM, { unitsPerFloor: 2, storeys: stories, roadWidthM });
+  const pick = choices.find((c) => c.fit.ok && c.coverage?.status !== "fail") ?? choices.find((c) => c.fit.ok);
+  const areaSqm = frontageM * depthM;
+  return createNewProject({
+    name: "Sample block (4 storeys)",
+    stories,
+    plotSize: Math.round((areaSqm / plotToSqm(1, "katha")) * 10) / 10,
+    plotUnit: "katha",
+    unitsPerFloor: 2,
+    address: "Dhaka",
+    plot: { frontageM, depthM, roadWidthM, roadSide: "south" },
+    ...(pick ? { planId: pick.plan.id } : {}),
   });
-
-  const project: BuildingProject = {
-    id, name, address, stories, plotSize, plotUnit: "katha",
-    plotSqm: Math.round(plotSqm * 100) / 100, unitsPerFloor: 2,
-    createdAt: now, updatedAt: now,
-    phases: populatedPhases, designStarted: true, activePhaseId: "final",
-    customization: createDefaultCustomization(),
-  };
-
-  saveActiveProject(project);
-  return project;
 }
 
 // ─── Storage Operations ─────────────────────────────────────────────────
