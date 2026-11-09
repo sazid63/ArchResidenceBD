@@ -8,8 +8,8 @@ Ticket <ID>. Follow CLAUDE.md. Do only this ticket, run its checks, commit, repl
 
 Current state and open decisions: `NEXT.md`.
 
-Order: M2-1 → M2-2 → M2-3 + M2-4 (any order) → M2-5 → M3-1 → M3-2 → M3-3 → M4-1 → M4-2 → M4-3 → M5-1 → M5-2 → M6-1 → M6-2 → M7-1 → DS-1.
-Quality gate: tests every ticket; one Opus `/code-review` (medium effort) after M2-5, M3-3, M4-3 and M7-1. Use high/extra effort only to unstick a hard bug.
+Order: none. The owner dropped the fixed ticket order; do whichever ticket the owner names, or ask which is next.
+Quality gate: tests every ticket. The mandatory `/code-review` after M2-5, M3-3, M4-3 and M7-1 is dropped; run one only if the owner asks.
 Opus only where an error is costly and no test can catch it (M2-2, M3-1, M4-1, M4-2); Sonnet for the rest. Haiku is fine for one-line fixes and text edits.
 
 Done (2026-11-08): M0 foundation (pushed, CI green) · M1 new look · M2 plan engine + 2 plans (`efef993`, local).

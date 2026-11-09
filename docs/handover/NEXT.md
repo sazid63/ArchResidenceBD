@@ -12,13 +12,11 @@ M0, M1, M2-1..M2-5 (M2-3 only 5 of 8 extra plans), M3-1 BNBC pack, M3-2 RAJUK ev
 - Compliance screen: tabs All / Fails / Passes / Not checked; sections RAJUK, plan, fire, accessibility; deviation register stored in `BuildingProject.deviations`. Old `src/cad/codeCompliance.ts` deleted.
 
 ## Next
-1. One Opus `/code-review` at medium effort (TICKETS.md quality gate after M3-3).
-2. M4-1 (Opus high): loads, slabs, beams. Use the BNBC pack's `liveLoads`, `loadCombinations`, `seismic` (Dhaka Z = 0.20) and `shaftTable`/`egress`.
-3. Then M4-2, M4-3, M5-1, M5-2, M6-1, M6-2, M7-1, DS-1.
+No fixed order (owner, 2026-11-09). Remaining tickets in TICKETS.md: M4-1, M4-2, M4-3, M5-1, M5-2, M6-1, M6-2, M7-1, DS-1, plus the 3 missing M2-3 plans. Do what the owner names; if nothing is named, ask which one. No mandatory code-review gate.
 
 Start prompt for a clean session:
 ```
-Ticket M4-1. Follow CLAUDE.md. Read docs/handover/NEXT.md first. Do only this ticket, run its checks, commit, reply in 5 lines.
+Ticket <ID>. Follow CLAUDE.md. Read docs/handover/NEXT.md first. Do only this ticket, run its checks, commit, reply in 5 lines.
 ```
 
 ## Open items and decisions for the owner
