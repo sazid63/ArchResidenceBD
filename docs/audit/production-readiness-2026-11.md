@@ -175,3 +175,69 @@ D1 starts as soon as A1 to A5 are in. E waits for everything else. The 3D tweak 
 2. **Narrow plots.** Recommended: Phase B1 before anything else in B, because it decides whether most Dhaka users can use the app.
 3. **Who does Phase D.** The reference buildings and plan review need a licensed engineer or architect other than the author.
 4. **Cost promise.** Recommended: say "structure materials only" on the BOQ until labour, finishes, services and joinery have rates.
+
+## 6. Second audit pass (same day)
+
+Method: dense sweeps (about 6,900 fits at every 130 mm of width and 170 mm of depth, mirrored and not), an adjacency review of every
+plan, geometry and 3D checks on every plan, structure invariants (mirror, determinism, 1 to 10 storeys, bearing 50 to 600 kPa, site
+classes, floor heights), compliance and input extremes, and BOQ against the 3D model. Findings continue the numbering above.
+
+### What held up
+
+- Every plan fits and validates at every sampled size in its range, mirrored and not, with no fit or validator failures and no
+  dimensions off the 10 mm grid.
+- Doors and windows never overlap each other or sit on a column. Stair flights rise exactly one floor. Lift and stair openings are cut
+  in the slabs of the 3D model.
+- Structure is deterministic, mirror-symmetric (identical steel and concrete), has no NaN or infinite values, and grows steadily with
+  storeys (footing, steel and concrete never fall as floors are added). Footings shrink as bearing rises.
+- Inputs: storeys outside 1 to 30 are rejected with a clear message.
+
+### New findings
+
+**P0**
+
+- **F19. The ground floor has no entrance.** On all 10 plans the ground-floor geometry has zero doors to the outside. The floor is
+  lift, lobby, stair and one "parking" room, so there is no car entrance, no pedestrian door and no gate, and the stair and lobby cannot
+  be reached from outside. The 3D model shows windows on the ground floor as well, so the parking floor looks like a closed storey.
+  A stilt parking floor should be open on the road side.
+- **F20. Walls that sit on slabs carry no line load.** In `p1-4b`, `p1-3b` and `p2-2b-fb`, 22 to 33 m of interior wall per floor
+  (runs up to 4.95 m) lie on grid lines with no beam. The beam design takes wall loads only for walls on beam lines
+  (`beam.ts`, `wallShare`); the slab sees only a flat partition allowance. A 125 mm brick wall is about 6 to 7 kN per metre, a
+  concentrated load a slab of 125 to 150 mm at 4 to 5 m spans does not take as a uniform allowance. The other 7 plans put every interior
+  wall on a beam line, which avoids this but pays for it in extra beams.
+
+**P1**
+
+- **F21. Dining rooms are dark.** 8 of 10 plans have a dining room with no outside wall and no shaft (all but the two redrawn 3-bedroom
+  plans). The rule pack leaves dining as an assumption, so nothing is flagged.
+- **F22. Privacy and circulation.** 6 plans have a toilet door opening straight onto the dining room; 7 plans have the flat's entrance
+  open into the dining room (the entrance should reach the living room or a foyer).
+- **F23. Rooms are small for the flat type.** Living rooms are 10.4 to 12.2 m2 on 8 plans (11.0 m2 on most 2 to 4 flat plans);
+  bedrooms in the 3 and 4 flat plans are 10.1 to 10.5 m2, and master bedrooms under 11 m2. These pass the cited 9.5 m2 minimum, which is
+  the legal floor, not the market norm (living 14 to 18 m2, master 13 to 16 m2).
+- **F24. FAR and coverage are not checked for roads under 6 m.** For road widths 0 to 5.99 m the report returns "not checked" for FAR
+  and ground coverage. Many older Dhaka plots front lanes of 3 to 5 m, so the most common narrow-plot case gets no result.
+- **F25. BOQ and 3D disagree on masonry.** BOQ wall volume is 14 to 21 percent above the volume of walls and partitions in the 3D model
+  (ratios 1.16, 1.14, 1.21 on 3 buildings). One of the two is wrong or they use different assumptions.
+- **F26. Slab panels cover the stair and lift.** Panel areas equal footprint times storeys exactly, so the structure, concrete and
+  BOQ include slab over the stair and lift cells that the 3D model cuts out.
+
+**P2**
+
+- **F27.** An unsupported site class (e.g. "SF") crashes the analysis with "Cannot read properties of undefined" instead of a message.
+- **F28.** A plot of 0, negative or non-numeric area makes plan choice throw "No RAJUK setback row for a plot of 0 sqm"; a plot of a
+  billion metres per side is accepted. Both need input limits.
+- **F29.** Footing depth is 700 mm at every bearing from 50 to 600 kPa on the 6-storey test building, while pad size ranges from
+  6.35 m to 1.85 m. Probably correct (shear and flexure checks pass) but worth a hand check at both ends.
+
+### Changes to the plan
+
+Add to Phase A: **A7** a real ground floor (open or gated car entrance, pedestrian door, stall layout; links to B4); **A8** line loads
+for walls on slabs, or secondary beams under them, decided per plan; **A9** reconcile BOQ masonry and slab concrete with the model
+(deduct stair and lift openings, one source of wall volume); **A10** reject or message invalid input (site class, plot size).
+
+Add to Phase B: **B7** plan quality bar: dining reaches daylight or a shaft, entrance opens into a foyer or living room, no toilet door
+onto dining, living at least 14 m2 and master at least 12 m2 on plans for 4 katha and above, checked by the validator; **B8**
+RAJUK FAR and coverage for roads under 6 m, or an explicit "enter the road width" gate.
+
+Re-run: `npm run audit:structural` (the scenario script) and the checks listed here when each item closes.
