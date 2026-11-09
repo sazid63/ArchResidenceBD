@@ -76,5 +76,5 @@ Do: UI on the v3 store (`src/model/projectStore`, migrate on first load); remain
 ## M7-1 Packaging · Sonnet medium · done (see git log)
 Do: `tauri.conf.json` devUrl and beforeDevCommand; `npx tauri icon` (adds the missing 128x128@2x); a CSP; `React.lazy` per screen with a bundle-size budget; PWA icons; CI builds the Windows installer on tags (windows-latest); offline check.
 
-## DS-1 Design system re-sync · Sonnet medium · after M7-1
+## DS-1 Design system re-sync · Sonnet medium · done (re-synced 2026-11-09: only bundle.css changed, the data-table class; tokens and the 41 other files identical)
 Do: `node scripts/design-system/gen-tokens.cjs && node scripts/design-system/build.mjs && node scripts/design-system/gen-comps.cjs`, then publish `scripts/design-system/out/project/` to https://claude.ai/artifact/V44tU8dshbDmJ5PsCHo3LA following its `SKILL.md` (re-read the index right before; index in the last call).
