@@ -130,3 +130,23 @@ describe("groundFloorPlan", () => {
     }
   });
 });
+
+describe("the ground floor is open parking", () => {
+  it("no wall stands between the parking and the outside; the core keeps its walls and the lobby opens onto the parking", () => {
+    for (const plan of PLAN_LIBRARY) {
+      const range = fitRange(plan);
+      const r = deriveBuilding({ planId: plan.id, storeys: 4, plotWidthMm: range.widthMm.pref + 4000, plotDepthMm: range.depthMm.pref + 7000 });
+      if (!r.ok) continue;
+      const g = r.model.storeys[0].geometry;
+      const rooms = g.fitted.rooms;
+      const parking = rooms.findIndex((x) => x.def.kind === "parking");
+      expect(parking, plan.id).toBeGreaterThanOrEqual(0);
+      expect(g.walls.some((w) => w.exterior && (w.a === parking || w.b === parking)), plan.id).toBe(false);
+      // the core still has outside walls somewhere and the lobby has a door onto the parking
+      expect(g.walls.some((w) => w.exterior), plan.id).toBe(true);
+      expect(g.doors.some((d) => [d.a, d.b].includes(parking) && [d.a, d.b].some((i) => rooms[i]?.def.kind === "lobby")), plan.id).toBe(true);
+      // upper floors still have all their outside walls
+      expect(r.model.storeys[1].geometry.walls.some((w) => w.exterior)).toBe(true);
+    }
+  });
+});

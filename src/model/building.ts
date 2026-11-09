@@ -9,7 +9,7 @@
  */
 
 import { fitPlan, type Envelope } from "../plans/fit";
-import { deriveGeometry, type FloorGeometry } from "../plans/geometry";
+import { deriveGeometry, OUTSIDE, type FloorGeometry } from "../plans/geometry";
 import { getPlan } from "../plans/library";
 import type { CellRect, FitRejection, PlanDefinition, Rect, RoomDef } from "../plans/types";
 import { validateFloor, type Issue } from "../plans/validate";
@@ -151,7 +151,11 @@ export function deriveBuilding(input: BuildingInput): BuildingResult {
   if (!ground.ok) return { ok: false, reasons: ground.reasons };
 
   const typicalGeo = deriveGeometry(typical.fitted);
-  const groundGeo = deriveGeometry(ground.fitted);
+  const groundGeoRaw = deriveGeometry(ground.fitted);
+  // The ground floor is stilt parking, open to the road: no wall stands between the parking and the outside, so none is drawn,
+  // counted in the bill of quantities or loaded. The core (stair, lift, lobby) keeps its walls, and the lobby opens onto the parking.
+  const isParking = (i: number) => i !== OUTSIDE && groundGeoRaw.fitted.rooms[i].def.kind === "parking";
+  const groundGeo = { ...groundGeoRaw, walls: groundGeoRaw.walls.filter((w) => !(w.exterior && (isParking(w.a) || isParking(w.b)))) };
   const opts = { floorToFloorMm };
   const typicalIssues = validateFloor(typicalGeo, opts);
   const groundIssues = validateFloor(groundGeo, opts);
