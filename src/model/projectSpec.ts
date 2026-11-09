@@ -69,6 +69,14 @@ export interface PhaseRecord {
   }>;
 }
 
+/** Where one phase's guided interview stands, so it can resume: steps handled, essential ones left open, derived items pending. */
+export interface InterviewProgress {
+  done: string[];
+  open: string[];
+  pending: Array<{ key: string; pointer: string; kind: "derive" | "registry" | "area_default"; reason: string; assumption?: { en: string; bn: string } }>;
+  log: Array<{ key: string; outcome: "answered" | "default" | "omitted" | "open" | "pending" | "not_applicable" | "condition_unanswered"; value?: unknown }>;
+}
+
 export interface ProjectSpec {
   schemaVersion: typeof PROJECT_SCHEMA_VERSION;
   /** Increases by one on every save. */
@@ -81,6 +89,8 @@ export interface ProjectSpec {
   design: DesignChoices;
   phases: PhaseRecord[];
   activePhaseId?: string;
+  /** Guided-interview progress by phase id (see src/interview/chat.ts). */
+  interview?: Record<string, InterviewProgress>;
   pricing?: { rateCardId?: string; /** From the interview: the user has prices ("user") or wants them fetched ("fetched"). */ source?: "user" | "fetched" };
   assumptions: Assumption[];
   deviations: Deviation[];

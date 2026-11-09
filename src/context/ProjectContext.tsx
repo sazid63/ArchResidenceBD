@@ -8,13 +8,19 @@
 import { createContext, useContext, useState, useCallback, useMemo, ReactNode } from "react";
 import {
   getActiveProject,
+  getActiveSpec,
   saveActiveProject,
+  saveActiveSpec,
   type BuildingProject,
 } from "../engine/projectState";
+import type { ProjectSpec } from "../model/projectSpec";
 import type { BuildingCustomization } from "../types/customization";
 
 export interface ProjectContextValue {
   project: BuildingProject | null;
+  /** The same project as the v3 spec: what the guided interview reads and writes. */
+  spec: ProjectSpec | null;
+  saveSpec: (spec: ProjectSpec) => void;
   projectVersion: number;
   refreshProject: () => void;
   saveCustomization: (customization: Partial<BuildingCustomization>) => void;
@@ -26,10 +32,12 @@ const ProjectContext = createContext<ProjectContextValue | undefined>(undefined)
 
 export function ProjectProvider({ children }: { children: ReactNode }) {
   const [project, setProject] = useState<BuildingProject | null>(() => getActiveProject());
+  const [spec, setSpec] = useState<ProjectSpec | null>(() => getActiveSpec());
   const [projectVersion, setProjectVersion] = useState(0);
 
   const refreshProject = useCallback(() => {
     setProject(getActiveProject());
+    setSpec(getActiveSpec());
     setProjectVersion((v) => v + 1);
   }, []);
 
@@ -45,23 +53,34 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     };
     saveActiveProject(updatedProject);
     setProject(updatedProject);
+    setSpec(getActiveSpec());
     setProjectVersion((v) => v + 1);
   }, [project]);
 
   const saveProject = useCallback((updatedProject: BuildingProject) => {
     saveActiveProject(updatedProject);
     setProject(updatedProject);
+    setSpec(getActiveSpec());
+    setProjectVersion((v) => v + 1);
+  }, []);
+
+  const saveSpec = useCallback((next: ProjectSpec) => {
+    saveActiveSpec(next);
+    setProject(getActiveProject());
+    setSpec(getActiveSpec());
     setProjectVersion((v) => v + 1);
   }, []);
 
   const value = useMemo<ProjectContextValue>(() => ({
     project,
+    spec,
+    saveSpec,
     projectVersion,
     refreshProject,
     saveCustomization,
     saveProject,
     activeCustomization: project?.customization,
-  }), [project, projectVersion, refreshProject, saveCustomization, saveProject]);
+  }), [project, spec, saveSpec, projectVersion, refreshProject, saveCustomization, saveProject]);
 
   return (
     <ProjectContext.Provider value={value}>

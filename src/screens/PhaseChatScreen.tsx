@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useI18n } from "../i18n";
-import { Button, Card, Chip, PageHeader, Badge } from "../ui/kit";
+import { Badge, Button, Card, Chip, PageHeader } from "../ui/kit";
 import { useActiveProject, useProject } from "../context/ProjectContext";
-import { areAllPhasesCompleted, type PhaseItem } from "../engine/projectState";
-import { getInitialGreeting, processPhaseUserMessage } from "../engine/phasePlanner";
+import { areAllPhasesCompleted } from "../engine/projectState";
+import { chatSend, chatStart, chatView } from "../interview/chat";
 import { PlanCard } from "../components/PlanCard";
 import { PlotShapeCallout } from "../components/PlotShapeCallout";
 
@@ -13,109 +13,96 @@ interface Props {
   onProjectUpdated?: () => void;
 }
 
-const stamp = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+const SOURCE_LABEL = {
+  user: { en: "you", bn: "আপনি" },
+  default: { en: "default", bn: "ডিফল্ট" },
+  assumption: { en: "assumption", bn: "অনুমান" },
+  engine: { en: "derived", bn: "হিসাবকৃত" },
+} as const;
 
+const SOURCE_TONE = { user: "sage", default: "amber", assumption: "amber", engine: "sky" } as const;
+
+/**
+ * The phase chat: the guided interview of one phase, driven by the flow book (src/interview).
+ * Answers are read by a deterministic parser, never a model, and written to the project with provenance.
+ */
 export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props) {
   const { lang } = useI18n();
   const bn = lang === "bn";
   const project = useActiveProject();
-  const { saveProject, refreshProject } = useProject();
+  const { spec, saveSpec, saveProject, refreshProject } = useProject();
 
   const [inputText, setInputText] = useState("");
-  const [chips, setChips] = useState<string[]>([]);
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   const phaseIndex = (project?.phases || []).findIndex((p) => p.id === phaseId);
-  const phase: PhaseItem | null = project ? project.phases[phaseIndex >= 0 ? phaseIndex : 0] ?? null : null;
-  const nextPhase =
-    project && phaseIndex >= 0 && phaseIndex < project.phases.length - 1 ? project.phases[phaseIndex + 1] : null;
+  const phase = project ? project.phases[phaseIndex >= 0 ? phaseIndex : 0] ?? null : null;
+  const nextPhase = project && phaseIndex >= 0 && phaseIndex < project.phases.length - 1 ? project.phases[phaseIndex + 1] : null;
 
-  // Seed the phase with its opening message exactly once.
+  // Open the phase with its goal and first question, once.
   useEffect(() => {
-    if (!project || !phase) return;
-    if ((phase.messages || []).length > 0) return;
-    const greeting = getInitialGreeting(project, phase, lang);
-    const phases = project.phases.map((p) =>
-      p.id === phase.id
-        ? { ...p, status: "in_progress" as const, messages: [{ who: "ai" as const, text: greeting, timestamp: stamp() }] }
-        : p,
-    );
-    saveProject({ ...project, phases, updatedAt: new Date().toISOString() });
-    setChips(
-      bn
-        ? ["অনুমোদন করে পরবর্তী ধাপে যান ➔", "পরিমাপ পরিবর্তন করুন"]
-        : ["Approve & Proceed to Next Phase ➔", "Adjust dimensions"],
-    );
-  }, [project, phase, lang, bn, saveProject]);
+    if (!spec || !phase) return;
+    const next = chatStart(spec, phase.id, lang, new Date().toISOString());
+    if (next !== spec) {
+      saveSpec(next);
+      onProjectUpdated?.();
+    }
+  }, [spec, phase?.id, lang]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [phase?.messages.length]);
 
-  if (!project || !phase) {
+  const view = useMemo(() => (spec && phase ? chatView(spec, phase.id, lang) : null), [spec, phase, lang]);
+
+  if (!project || !phase || !spec || !view) {
     return (
       <div className="screen">
-        <PageHeader title="Phase Planning" subtitle="No active project found" />
+        <PageHeader title={bn ? "ধাপের পরিকল্পনা" : "Phase planning"} subtitle={bn ? "কোনো সক্রিয় প্রকল্প নেই" : "No active project found"} />
         <Card>
           <Button variant="primary" onClick={() => onNavigate("setup")}>
-            Create New Project
+            {bn ? "নতুন প্রকল্প" : "Create new project"}
           </Button>
         </Card>
       </div>
     );
   }
 
-  const units = project.unitsPerFloor || 1;
+  const now = () => new Date().toISOString();
 
   const startDesign = () => {
-    saveProject({ ...project, designStarted: true, updatedAt: new Date().toISOString() });
+    saveProject({ ...project, designStarted: true, updatedAt: now() });
     onProjectUpdated?.();
     onNavigate("design:final");
   };
 
   const approveAndNext = () => {
     const phases = project.phases.map((p) => (p.id === phase.id ? { ...p, status: "completed" as const } : p));
-    saveProject({ ...project, phases, updatedAt: new Date().toISOString() });
+    saveProject({ ...project, phases, updatedAt: now() });
     onProjectUpdated?.();
     if (nextPhase) onNavigate(`phase:${nextPhase.id}`);
     else startDesign();
   };
 
-  // Robust handler for "Start 3D Design" chip - works even with stale closures
   const handleDesignChip = () => {
-    // Force refresh project from context before saving
     refreshProject();
     startDesign();
   };
 
-  const send = (text?: string) => {
-    const message = (text ?? inputText).trim();
-    if (!message) return;
+  const send = (text: string) => {
+    if (!text.trim()) return;
     setInputText("");
-
-    const reply = processPhaseUserMessage(project, phase, message, lang);
-    setChips(reply.suggestedChips);
-
-    const phases = project.phases.map((p) =>
-      p.id === phase.id
-        ? {
-            ...p,
-            status: reply.isPhaseSatisfied ? ("completed" as const) : ("in_progress" as const),
-            data: { ...p.data, ...reply.metrics },
-            messages: [
-              ...(p.messages || []),
-              { who: "user" as const, text: message, timestamp: stamp() },
-              { who: "ai" as const, text: reply.replyText, metrics: reply.metrics, timestamp: stamp() },
-            ],
-          }
-        : p,
-    );
-    saveProject({ ...project, phases, updatedAt: new Date().toISOString() });
+    saveSpec(chatSend(spec, phase.id, { text }, lang, now()));
     onProjectUpdated?.();
   };
 
-  const metrics = phase.data && Object.keys(phase.data).length > 0 ? (phase.data as Record<string, string | number>) : null;
+  const skip = () => {
+    saveSpec(chatSend(spec, phase.id, { skip: true }, lang, now()));
+    onProjectUpdated?.();
+  };
+
   const allCompleted = areAllPhasesCompleted(project);
+  const done = view.done || phase.status === "completed";
 
   return (
     <div className="screen">
@@ -124,18 +111,18 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
         subtitle={`${project.name} · ${project.stories} ${bn ? "তলা" : "storeys"} (${project.plotSize} ${project.plotUnit})`}
         actions={
           <div className="row" style={{ gap: 8 }}>
-            <Badge tone="sky">{bn ? "টেমপ্লেট প্ল্যানার" : "Template planner"}</Badge>
+            <Badge tone="sky">{bn ? "নির্দেশিত প্রশ্নোত্তর" : "Guided interview"}</Badge>
             <Badge tone={phase.status === "completed" ? "sage" : "amber"}>
-              {phase.status === "completed" ? (bn ? "✓ অনুমোদিত" : "✓ Approved") : bn ? "চলমান" : "In Progress"}
+              {phase.status === "completed" ? (bn ? "✓ সম্পন্ন" : "✓ Done") : bn ? "চলমান" : "In progress"}
             </Badge>
-            {phase.status === "completed" && nextPhase ? (
+            {done && nextPhase ? (
               <Button variant="primary" onClick={approveAndNext}>
-                {bn ? "পরবর্তী ধাপ ➔" : "Next Phase ➔"}
+                {bn ? "পরবর্তী ধাপ ➔" : "Next phase ➔"}
               </Button>
             ) : null}
             {allCompleted ? (
               <Button variant="primary" onClick={handleDesignChip}>
-                {bn ? "৩D ডিজাইন ➔" : "Open 3D Design ➔"}
+                {bn ? "৩D ডিজাইন ➔" : "Open 3D design ➔"}
               </Button>
             ) : null}
           </div>
@@ -148,28 +135,13 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
             {(phase.messages || []).map((msg, i) => (
               <div key={i} className={`bubble bubble--${msg.who}`}>
                 <div style={{ whiteSpace: "pre-wrap", lineHeight: 1.5 }}>{msg.text}</div>
-                {msg.metrics && Object.keys(msg.metrics).length > 0 ? (
-                  <div
-                    style={{
-                      background: "var(--surface-2)",
-                      padding: "8px 12px",
-                      borderRadius: 6,
-                      marginTop: 8,
-                      fontSize: 12,
-                      display: "flex",
-                      flexWrap: "wrap",
-                      gap: 10,
-                    }}
-                  >
-                    {Object.entries(msg.metrics).map(([k, v]) => (
-                      <span key={k}>
-                        <strong style={{ opacity: 0.8 }}>{k}:</strong> {String(v)}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
               </div>
             ))}
+            {view.supported && !view.guided && phase.messages.length > 0 ? (
+              <p className="faint small" style={{ margin: "8px 0 0" }}>
+                {bn ? "এই ধাপ পুরোনো সংস্করণে পূরণ করা হয়েছে, তাই এখানে আর প্রশ্ন করা হয় না।" : "This phase was filled in by an older version, so it asks no more questions."}
+              </p>
+            ) : null}
             <div ref={bottomRef} />
           </div>
 
@@ -181,39 +153,42 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
           )}
 
           <div className="chips" style={{ marginTop: 10, display: "flex", flexWrap: "wrap", gap: 6 }}>
-            {chips.map((chip, i) => {
-              // "Start 3D Design Now 🚀" chip (Utilities phase) → directly open 3D design
-              const isDesignChip = chip.includes("3D Design") || chip.includes("৩D ডিজাইন");
-              return (
-                <Chip
-                  key={i}
-                  tone="sky"
-                  onClick={() => isDesignChip ? handleDesignChip() : send(chip)}
-                >
-                  {chip}
-                </Chip>
-              );
-            })}
+            {view.chips.map((chip) => (
+              <Chip key={chip.id} tone={chip.kind === "skip" ? "neutral" : "sky"} onClick={() => (chip.kind === "skip" ? skip() : send(chip.label))}>
+                {chip.label}
+              </Chip>
+            ))}
+            {done && nextPhase ? (
+              <Chip tone="sage" onClick={approveAndNext}>
+                {bn ? "অনুমোদন করে পরবর্তী ধাপে যান ➔" : "Approve & go to the next phase ➔"}
+              </Chip>
+            ) : null}
+            {done && !nextPhase ? (
+              <Chip tone="sage" onClick={handleDesignChip}>
+                {bn ? "৩D ডিজাইন শুরু করুন ➔" : "Start 3D design ➔"}
+              </Chip>
+            ) : null}
           </div>
 
           <div className="chat-input-row" style={{ marginTop: 12 }}>
             <label htmlFor="chat-input" className="visually-hidden">
-              {bn ? "বার্তা লিখুন" : "Type your message"}
+              {bn ? "উত্তর লিখুন" : "Type your answer"}
             </label>
             <input
               id="chat-input"
               className="input"
               value={inputText}
-              placeholder={bn ? "যেমন: ফুটিং ২.২ মিটার, পার্কিং ৪টি" : "e.g. footing 2.2 m, 4 parking bays"}
+              disabled={!view.guided || view.done}
+              placeholder={bn ? "আপনার উত্তর লিখুন, অথবা বোতামে চাপ দিন" : "Type your answer, or tap a button"}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
-                  send();
+                  send(inputText);
                 }
               }}
             />
-            <Button variant="primary" onClick={() => send()} disabled={!inputText.trim()}>
+            <Button variant="primary" onClick={() => send(inputText)} disabled={!inputText.trim() || !view.guided || view.done}>
               {bn ? "পাঠান" : "Send"}
             </Button>
           </div>
@@ -221,23 +196,44 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
 
         <div className="stack">
           <Card className="stack">
-            <h3>{bn ? "হিসাব ও পরিমাপ" : "Calculated Metrics"}</h3>
-            {metrics ? (
+            <h3>{bn ? "আপনার উত্তর" : "Your answers"}</h3>
+            {view.answers.length > 0 ? (
               <div className="stack" style={{ gap: 8 }}>
-                {Object.entries(metrics).map(([k, v]) => (
-                  <div key={k} className="row-between" style={{ fontSize: 13 }}>
-                    <span className="muted">{k}:</span>
-                    <strong className="font-mono">{String(v)}</strong>
+                {view.answers.map((a) => (
+                  <div key={a.key} style={{ fontSize: 13 }}>
+                    <div className="muted">{a.question}</div>
+                    <div className="row" style={{ gap: 6, alignItems: "center" }}>
+                      {a.open ? (
+                        <Badge tone="blush">{bn ? "খোলা" : "open"}</Badge>
+                      ) : (
+                        <>
+                          <strong className="font-mono">{a.value}</strong>
+                          <Badge tone={SOURCE_TONE[a.source]}>{SOURCE_LABEL[a.source][lang]}</Badge>
+                        </>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="faint small">{bn ? "এখনো কোনো হিসাব নেই।" : "No metrics yet."}</p>
+              <p className="faint small">{bn ? "এখনো কোনো উত্তর নেই।" : "No answers yet."}</p>
             )}
           </Card>
 
+          {view.assumptions.length > 0 ? (
+            <Card className="stack">
+              <h3>{bn ? "অনুমান" : "Assumptions"}</h3>
+              {view.assumptions.map((a) => (
+                <p key={a.id} className="small" style={{ margin: 0 }}>
+                  {a.statement}
+                  {a.verifyOnSite ? <Badge tone="amber">{bn ? "সাইটে যাচাই" : "verify on site"}</Badge> : null}
+                </p>
+              ))}
+            </Card>
+          ) : null}
+
           <Card className="stack">
-            <h3>{bn ? "ধাপের অগ্রগতি" : "Phase Progress"}</h3>
+            <h3>{bn ? "ধাপের অগ্রগতি" : "Phase progress"}</h3>
             {project.phases.map((p) => (
               <button
                 key={p.id}

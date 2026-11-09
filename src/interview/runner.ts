@@ -16,7 +16,7 @@
  */
 
 import type { Assumption, ProvenanceEntry } from "../spec.gen";
-import type { PhaseRecord, ProjectSpec } from "../model/projectSpec";
+import type { InterviewProgress, PhaseRecord, ProjectSpec } from "../model/projectSpec";
 import {
   chips as chipsFor,
   conditionHolds,
@@ -59,6 +59,8 @@ export interface LogEntry {
 export interface InterviewState {
   spec: ProjectSpec;
   flowId: string;
+  /** For a per-storey flow run for one storey only (a floor phase). */
+  storey?: number;
   /** Answer values by question id (a yes/no is true/false, a choice its option value). Used by `when`. */
   values: Record<string, unknown>;
   /** Steps handled: answered, fallback applied, omitted, or skipped as not applicable. */
@@ -221,12 +223,18 @@ export function seedValues(spec: ProjectSpec, book: FlowBook = getBook()): Recor
 
 const keyOf = (q: Question, storey?: number) => (storey === undefined ? q.id : `${q.id}@${storey}`);
 
-function stepsOf(flow: Flow, spec: ProjectSpec): Step[] {
+function stepsOf(flow: Flow, spec: ProjectSpec, only?: number): Step[] {
   const storeys = flow.repeats === "per_storey" ? Math.max(1, Math.round(spec.building.storeys.count || 1)) : 0;
   const out: Step[] = [];
   const build = (q: Question, storey?: number) => out.push({ question: q, storeyIndex: storey, pointer: pointerFor(q, storey), key: keyOf(q, storey) });
-  if (flow.repeats === "per_storey") for (let n = 0; n < storeys; n++) for (const q of flow.questions) build(q, n);
-  else for (const q of flow.questions) build(q);
+  if (flow.repeats === "per_storey") {
+    for (let n = 0; n < storeys; n++) {
+      if (only !== undefined && only !== n) continue;
+      for (const q of flow.questions) build(q, n);
+    }
+  } else {
+    for (const q of flow.questions) build(q);
+  }
   return out;
 }
 
@@ -236,7 +244,7 @@ const handledElsewhere = (s: InterviewState, step: Step) => s.log.some((l) => l.
 /** Skip steps that do not apply and stop at the next one to ask. */
 function advance(state: InterviewState, book: FlowBook): InterviewState {
   const s: InterviewState = { ...state, done: [...state.done], log: [...state.log] };
-  for (const step of stepsOf(flowOf(book, s.flowId), s.spec)) {
+  for (const step of stepsOf(flowOf(book, s.flowId), s.spec, s.storey)) {
     if (s.done.includes(step.key)) continue;
     // A building-wide question inside a per-storey flow (its pointer has no <n>) is asked once, at the first storey where it applies.
     if (step.storeyIndex !== undefined && !step.question.mapsTo.includes("<n>") && handledElsewhere(s, step)) {
@@ -263,10 +271,19 @@ function advance(state: InterviewState, book: FlowBook): InterviewState {
   return { ...s, current: null };
 }
 
-export function startInterview(spec: ProjectSpec, flowId: string, opts: { book?: FlowBook; values?: Record<string, unknown> } = {}): InterviewState {
+export function startInterview(spec: ProjectSpec, flowId: string, opts: { book?: FlowBook; values?: Record<string, unknown>; storey?: number; progress?: InterviewProgress } = {}): InterviewState {
   const book = opts.book ?? getBook();
   flowOf(book, flowId); // throws for an unknown flow
-  return advance({ spec, flowId, values: { ...seedValues(spec, book), ...(opts.values ?? {}) }, done: [], open: [], pending: [], log: [], current: null }, book);
+  const p = opts.progress;
+  return advance(
+    { spec, flowId, ...(opts.storey !== undefined ? { storey: opts.storey } : {}), values: { ...seedValues(spec, book), ...(opts.values ?? {}) }, done: p ? [...p.done] : [], open: p ? [...p.open] : [], pending: p ? [...p.pending] : [], log: p ? [...p.log] : [], current: null },
+    book,
+  );
+}
+
+/** What to save so the interview can resume later. */
+export function progressOf(state: InterviewState): InterviewProgress {
+  return { done: [...state.done], open: [...state.open], pending: [...state.pending], log: [...state.log] };
 }
 
 // --- replies ---------------------------------------------------------------------------------
@@ -452,7 +469,7 @@ export function skip(state: InterviewState, now: string, book: FlowBook = getBoo
 
 /** Answer a question that was left open earlier. */
 export function answerOpen(state: InterviewState, key: string, text: string, now: string, book: FlowBook = getBook()): { state: InterviewState; turn: Turn } {
-  const step = stepsOf(flowOf(book, state.flowId), state.spec).find((s) => s.key === key);
+  const step = stepsOf(flowOf(book, state.flowId), state.spec, state.storey).find((s) => s.key === key);
   if (!step || !state.open.includes(key)) throw new Error(`"${key}" is not an open question`);
   const parsed = parseAnswer(step.question, text, displayUnitsOf(state.spec));
   const out = applyParsed({ ...state, done: state.done.filter((k) => k !== key) }, step, parsed, text, now, book);

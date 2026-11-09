@@ -420,6 +420,28 @@ export function getActiveProject(): BuildingProject | null {
   }, null);
 }
 
+/** The open project as the v3 spec (the guided interview reads and writes this). */
+export function getActiveSpec(): ProjectSpec | null {
+  const store = browserStore();
+  if (!store) return null;
+  return guard(() => {
+    const specs = loadSpecs(store);
+    const id = getActiveProjectId(store);
+    return specs.find((s) => s.project.id === id) ?? null;
+  }, null);
+}
+
+/** Save a spec as the open project (bumps its revision). */
+export function saveActiveSpec(spec: ProjectSpec): ProjectSpec | null {
+  const store = browserStore();
+  if (!store) return null;
+  return guard(() => {
+    const saved = upsertProject(store, spec);
+    setActiveProjectId(store, saved.project.id);
+    return saved;
+  }, null);
+}
+
 export function saveActiveProject(project: BuildingProject): void {
   project.updatedAt = new Date().toISOString();
   const store = browserStore();
