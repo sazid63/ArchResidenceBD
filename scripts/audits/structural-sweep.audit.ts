@@ -7,7 +7,9 @@
  *   - base shear = Sa x W; the seismic weight is plausible per m2 of floor (8 to 20 kN/m2);
  *   - total base column load, base shear and footing size never fall as storeys are added;
  *   - nothing is clamped: any member over its limit is listed as a failure with a ratio over 1;
- *   - a building with no listed failure has every member ratio at or below 1.
+ *   - a building with no listed failure has every member ratio at or below 1;
+ *   - the bar schedule uses stock diameters only, provides at least the steel required by every member that fits,
+ *     adds up, and stays between 50 and 200 kg of steel per m3 of concrete.
  *
  * The outcome per case (pass or the worst ratio) is written to scripts/audits/audit-out/structural-sweep.md; outcomes
  * are reported, not asserted, because tall frames legitimately fail drift without shear walls.
@@ -20,6 +22,8 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { analyzeStructure } from "../../src/structure/analyze";
+import { isStockBar } from "../../src/structure/barSelect";
+import { buildBbs } from "../../src/structure/bbs";
 import { UNIT_WEIGHTS } from "../../src/structure/materials";
 import { DEFAULT_SETBACKS_MM, deriveBuilding } from "../../src/model/building";
 import { fitRange } from "../../src/plans/fit";
@@ -50,6 +54,8 @@ interface Row {
   maxColumn: string;
   footing: string;
   iterations: number;
+  steelKg: number;
+  kgPerM3: number;
 }
 
 const rows: Row[] = [];
@@ -91,6 +97,15 @@ describe("structural sweep", () => {
             if (res.failures.length === 0) for (const u of allUtils) expect(u).toBeLessThanOrEqual(1 + 1e-9);
             expect(res.ok).toBe(res.failures.length === 0);
 
+            // 5. bar bending schedule
+            const bbs = buildBbs(res, m);
+            for (const r of bbs.rows) expect(isStockBar(r.diaMm)).toBe(true);
+            for (const pk of bbs.picks) if (pk.fits) expect(pk.providedMm2).toBeGreaterThanOrEqual(pk.requiredMm2 - 1e-6);
+            expect(bbs.totals.weightKg).toBeCloseTo(bbs.rows.reduce((a, r) => a + r.weightKg, 0), 6);
+            expect(bbs.totals.kgPerM3).toBeGreaterThan(50);
+            expect(bbs.totals.kgPerM3).toBeLessThan(200);
+            if (res.ok) expect(bbs.issues.filter((i) => i.severity === "fail")).toHaveLength(0);
+
             const c0 = fr.columns.reduce((a, c) => (c.storeys[0].section.bx * c.storeys[0].section.by > a.storeys[0].section.bx * a.storeys[0].section.by ? c : a));
             history.push({ n, load: fr.columns.reduce((a, c) => a + c.storeys[0].deadKn + c.storeys[0].liveKn, 0), shear: sx.baseShearKn, side: Math.max(...fr.columns.map((c) => c.footing.sideMm)) });
             rows.push({
@@ -105,6 +120,8 @@ describe("structural sweep", () => {
               maxColumn: `${c0.storeys[0].section.bx}x${c0.storeys[0].section.by}`,
               footing: `${Math.max(...fr.columns.map((c) => c.footing.sideMm))}`,
               iterations: fr.iterations,
+              steelKg: bbs.totals.weightKg,
+              kgPerM3: bbs.totals.kgPerM3,
             });
           });
         }
@@ -122,9 +139,9 @@ describe("structural sweep", () => {
   it("writes the sweep report", () => {
     const dir = join(dirname(fileURLToPath(import.meta.url)), "audit-out");
     mkdirSync(dir, { recursive: true });
-    const head = "| plan | storeys | site | outcome | worst | T (s) | V (kN) | W kN/m2 | largest column | largest footing (mm) | iterations |\n|---|---|---|---|---|---|---|---|---|---|---|\n";
+    const head = "| plan | storeys | site | outcome | worst | T (s) | V (kN) | W kN/m2 | largest column | largest footing (mm) | iterations | steel (kg) | kg/m3 |\n|---|---|---|---|---|---|---|---|---|---|---|---|---|\n";
     const body = rows
-      .map((r) => `| ${r.plan} | ${r.storeys} | ${r.site} | ${r.outcome} | ${Math.round(r.worst * 100)}% | ${r.period.toFixed(2)} | ${r.baseShear.toFixed(0)} | ${r.weightPerM2.toFixed(1)} | ${r.maxColumn} | ${r.footing} | ${r.iterations} |`)
+      .map((r) => `| ${r.plan} | ${r.storeys} | ${r.site} | ${r.outcome} | ${Math.round(r.worst * 100)}% | ${r.period.toFixed(2)} | ${r.baseShear.toFixed(0)} | ${r.weightPerM2.toFixed(1)} | ${r.maxColumn} | ${r.footing} | ${r.iterations} | ${r.steelKg.toFixed(0)} | ${r.kgPerM3.toFixed(0)} |`)
       .join("\n");
     const pass = rows.filter((r) => r.outcome === "pass").length;
     writeFileSync(join(dir, "structural-sweep.md"), `# Structural sweep\n\n${pass} of ${rows.length} cases pass every member check (the rest are reported, not asserted: tall frames need shear walls).\n\n${head}${body}\n`);

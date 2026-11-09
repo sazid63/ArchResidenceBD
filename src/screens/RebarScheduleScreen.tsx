@@ -1,523 +1,230 @@
-import { useState, useEffect, useMemo } from "react";
+import { useMemo, useState } from "react";
+import { useProject } from "../context/ProjectContext";
 import { useI18n } from "../i18n";
-import { Badge, Button, Card, PageHeader, Stat } from "../ui/kit";
-import { getActiveProject, type BuildingProject } from "../engine/projectState";
-import { generateBuildingMesh } from "../cad/parametricBuildingGenerator";
-import { generateRebarDetails, type BarBendingSchedule, type RebarDetail } from "../cad/rebarDetailer";
-import type { MeshDocument, MeshObject } from "../cad/mesh";
-import { fmtNum } from "../i18n";
-import { Progressive } from "../components/Progressive";
+import { buildingForProject } from "../model/projectMesh";
+import { analyzeStructure } from "../structure/analyze";
+import { buildBbs, type BbsFamily, type BbsResult, type BbsRow } from "../structure/bbs";
+import { STOCK_BARS } from "../structure/barSelect";
+import { Button, Callout, Card, EmptyState, PageHeader, ResultChip, SegmentedControl, Stat } from "../ui/kit";
 
-const STEEL_COST_BDT_PER_KG = 95; // ~95,000 BDT/ton for Fe415
+type Filter = "all" | BbsFamily;
 
-interface MemberSchedule {
-  elementId: string;
-  label: string;
-  memberType: "column" | "beam" | "footing" | "slab";
-  dimensions: { width: number; depth: number; length: number };
-  count: number;
-  bbs: BarBendingSchedule;
+const FAMILY_LABEL: Record<BbsFamily, { en: string; bn: string }> = {
+  footing: { en: "Footings", bn: "ফুটিং" },
+  column: { en: "Columns", bn: "কলাম" },
+  beam: { en: "Beams", bn: "বিম" },
+  slab: { en: "Slabs", bn: "স্ল্যাব" },
+};
+
+const SHAPE_NOTE: Record<string, { en: string; bn: string }> = {
+  "00": { en: "straight", bn: "সোজা" },
+  "11": { en: "one 90° bend", bn: "একটি ৯০° বাঁক" },
+  "21": { en: "two 90° bends (U)", bn: "দুটি ৯০° বাঁক (U)" },
+  "51": { en: "closed link, 135° hooks", bn: "বন্ধ স্টিরাপ, ১৩৫° হুক" },
+};
+
+const kg = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 0 });
+
+/** The schedule as CSV text: one line per row, dimensions in separate columns. */
+export function bbsToCsv(rows: BbsRow[]): string {
+  const head = ["mark", "member", "description", "dia_mm", "shape", "A_mm", "B_mm", "C_mm", "cut_length_mm", "bars_per_member", "members", "total_bars", "total_length_m", "weight_kg"];
+  const q = (s: string) => `"${s.replace(/"/g, '""')}"`;
+  const lines = rows.map((r) => [r.mark, r.family, q(r.description.en), r.diaMm, r.shape, r.dimsMm[0] ?? "", r.dimsMm[1] ?? "", r.dimsMm[2] ?? "", r.cutLengthMm, r.barsPerMember, r.members, r.totalBars, r.totalLengthM.toFixed(2), r.weightKg.toFixed(1)].join(","));
+  return [head.join(","), ...lines].join("\n");
+}
+
+function download(name: string, text: string) {
+  const url = URL.createObjectURL(new Blob([text], { type: "text/csv;charset=utf-8" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function levelsText(levels: number[]): string {
+  if (levels.length <= 4) return levels.join(", ");
+  const contiguous = levels.every((l, i) => i === 0 || l === levels[i - 1] + 1);
+  return contiguous ? `${levels[0]}–${levels[levels.length - 1]}` : `${levels.slice(0, 4).join(", ")}…`;
 }
 
 export function RebarScheduleScreen() {
-  const { t, lang } = useI18n();
-  const [project] = useState<BuildingProject | null>(() => getActiveProject());
-  const [mesh, setMesh] = useState<MeshDocument | null>(null);
-  const [members, setMembers] = useState<MemberSchedule[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedMember, setSelectedMember] = useState<number | null>(null);
-  const [filterType, setFilterType] = useState<string>("all");
+  const { lang } = useI18n();
+  const bn = lang === "bn";
+  const { project } = useProject();
+  const [filter, setFilter] = useState<Filter>("all");
 
-  const concreteGrade = project?.customization?.concreteGrade ?? 25;
-  const steelGrade = project?.customization?.steelGrade ?? 415;
+  const built = useMemo(() => (project && project.plot && project.planId ? buildingForProject(project) : null), [project]);
+  const data = useMemo<{ bbs: BbsResult; assumptions: Array<{ id: string; en: string; bn: string }>; ok: boolean } | null>(() => {
+    if (!built || !built.ok) return null;
+    const res = analyzeStructure(built.model);
+    return { bbs: buildBbs(res, built.model), assumptions: res.assumptions, ok: res.ok };
+  }, [built]);
 
-  useEffect(() => {
-    if (!project) {
-      setError("No active project found");
-      setLoading(false);
-      return;
-    }
+  const title = bn ? "রিবার শিডিউল" : "Rebar schedule";
+  const subtitle = bn ? "কাঠামোর ফলাফল থেকে বার বেন্ডিং শিডিউল" : "Bar bending schedule from the structural results";
 
-    const loadData = () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const meshDoc = generateBuildingMesh(project, "final", project.customization);
-        setMesh(meshDoc);
-
-        const memberSchedules: MemberSchedule[] = [];
-        const custom = project.customization || {};
-
-        // Columns
-        const columns = meshDoc.objects.filter((o: MeshObject) => o.kind === "column");
-        const colWidth = custom.columnWidthMm ?? 250;
-        const colDepth = custom.columnDepthMm ?? 300;
-        for (const col of columns) {
-          const dx = col.bboxMaxMm[0] - col.bboxMinMm[0];
-          const dy = col.bboxMaxMm[1] - col.bboxMinMm[1];
-          const dz = col.bboxMaxMm[2] - col.bboxMinMm[2];
-          const bbs = generateRebarDetails(project.id, "column", {
-            width: dx || colWidth,
-            depth: dy || colDepth,
-            length: dz || 3000,
-          }, { axialLoad: 500000 }, concreteGrade, steelGrade, 40);
-          memberSchedules.push({
-            elementId: col.id,
-            label: col.label,
-            memberType: "column",
-            dimensions: { width: dx || colWidth, depth: dy || colDepth, length: dz || 3000 },
-            count: 1,
-            bbs,
-          });
-        }
-
-        // Beams
-        const beams = meshDoc.objects.filter((o: MeshObject) => o.kind === "beam");
-        for (const beam of beams) {
-          const dx = beam.bboxMaxMm[0] - beam.bboxMinMm[0];
-          const dy = beam.bboxMaxMm[1] - beam.bboxMinMm[1];
-          const dz = beam.bboxMaxMm[2] - beam.bboxMinMm[2];
-          // Determine orientation: longest dimension is the length
-          const dims = [dx, dy, dz].sort((a, b) => b - a);
-          const bbs = generateRebarDetails(project.id, "beam", {
-            width: dims[2] || 250,
-            depth: dims[1] || 450,
-            length: dims[0] || 4000,
-          }, { moment: 25000000 }, concreteGrade, steelGrade, 40);
-          memberSchedules.push({
-            elementId: beam.id,
-            label: beam.label,
-            memberType: "beam",
-            dimensions: { width: dims[2] || 250, depth: dims[1] || 450, length: dims[0] || 4000 },
-            count: 1,
-            bbs,
-          });
-        }
-
-        // Footings
-        const footings = meshDoc.objects.filter((o: MeshObject) => o.kind === "footing");
-        for (const ftg of footings) {
-          const dx = ftg.bboxMaxMm[0] - ftg.bboxMinMm[0];
-          const dy = ftg.bboxMaxMm[1] - ftg.bboxMinMm[1];
-          const dz = ftg.bboxMaxMm[2] - ftg.bboxMinMm[2];
-          const bbs = generateRebarDetails(project.id, "footing", {
-            width: dx || 1500,
-            depth: dz || 500,
-            length: dy || 1500,
-          }, { axialLoad: 500000 }, concreteGrade, steelGrade, 75);
-          memberSchedules.push({
-            elementId: ftg.id,
-            label: ftg.label,
-            memberType: "footing",
-            dimensions: { width: dx || 1500, depth: dz || 500, length: dy || 1500 },
-            count: 1,
-            bbs,
-          });
-        }
-
-        // Slabs (aggregate per floor)
-        const slabs = meshDoc.objects.filter((o: MeshObject) => o.kind === "slab");
-        const slabGroups = new Map<number, MeshObject[]>();
-        for (const slab of slabs) {
-          const floor = Math.round(slab.bboxMinMm[2] / 3000);
-          if (!slabGroups.has(floor)) slabGroups.set(floor, []);
-          slabGroups.get(floor)!.push(slab);
-        }
-        for (const [floor, floorSlabs] of slabGroups.entries()) {
-          const totalWidth = Math.max(...floorSlabs.map(s => s.bboxMaxMm[0] - s.bboxMinMm[0]));
-          const totalDepth = Math.max(...floorSlabs.map(s => s.bboxMaxMm[1] - s.bboxMinMm[1]));
-          const totalLength = Math.max(...floorSlabs.map(s => s.bboxMaxMm[0] - s.bboxMinMm[0]));
-          const bbs = generateRebarDetails(project.id, "slab", {
-            width: totalDepth || 6000,
-            depth: 150,
-            length: totalLength || 9000,
-          }, {}, concreteGrade, steelGrade, 25);
-          memberSchedules.push({
-            elementId: `slab-floor-${floor}`,
-            label: `${lang === "bn" ? "তলা" : "Floor"} ${floor + 1} ${lang === "bn" ? "স্ল্যাব" : "Slab"} (${floorSlabs.length} ${lang === "bn" ? "প্যানেল" : "panels"})`,
-            memberType: "slab",
-            dimensions: { width: totalDepth || 6000, depth: 150, length: totalLength || 9000 },
-            count: floorSlabs.length,
-            bbs,
-          });
-        }
-
-        setMembers(memberSchedules);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : String(err));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, [project]);
-
-  // Totals across all members
-  const totals = useMemo(() => {
-    let totalWeight = 0;
-    let totalBars = 0;
-    const byDiameter: Record<number, { count: number; weightKg: number }> = {};
-
-    for (const m of members) {
-      for (const item of m.bbs.items) {
-        const memberWeight = item.weightKg * (item.shape === "link" || item.role === "mesh" ? 1 : m.count);
-        // For mesh items, weight already accounts for count; for straight bars scale by member count
-        const weight = item.role === "mesh" || item.role === "link" ? item.weightKg : item.weightKg * m.count;
-        totalWeight += weight;
-        totalBars += (item.role === "mesh" || item.role === "link" ? item.count : item.count * m.count);
-
-        if (!byDiameter[item.diameterMm]) byDiameter[item.diameterMm] = { count: 0, weightKg: 0 };
-        byDiameter[item.diameterMm].count += (item.role === "mesh" || item.role === "link" ? item.count : item.count * m.count);
-        byDiameter[item.diameterMm].weightKg += weight;
-      }
-    }
-
-    return {
-      totalWeight: Math.round(totalWeight * 100) / 100,
-      totalTons: Math.round(totalWeight / 1000 * 100) / 100,
-      totalBars,
-      byDiameter,
-      estimatedCostBDT: Math.round(totalWeight * STEEL_COST_BDT_PER_KG),
-    };
-  }, [members]);
-
-  if (!project) {
+  if (!project || !built) {
     return (
       <div className="screen">
-        <PageHeader title={t("rebarTitle")} subtitle={t("rebarSubtitle")} />
-        <Card>
-          <p className="muted">{lang === "bn" ? "কোনো সক্রিয় প্রকল্প পাওয়া যায়নি" : "No active project found"}</p>
-        </Card>
+        <PageHeader title={title} subtitle={subtitle} />
+        <EmptyState title={bn ? "এখনো কোনো প্ল্যান বাছাই হয়নি" : "No plan chosen yet"}>
+          {bn ? "জমির মাপ দিয়ে একটি প্ল্যান বাছাই করুন, তারপর এখানে রিবার শিডিউল দেখা যাবে।" : "Enter the plot and pick a plan, then the schedule appears here."}
+        </EmptyState>
+      </div>
+    );
+  }
+  if (!built.ok || !data) {
+    return (
+      <div className="screen">
+        <PageHeader title={title} subtitle={project.name} />
+        <Callout tone="bad" title={bn ? "প্ল্যানটি এই জমিতে আঁটে না" : "The plan does not fit this plot"}>
+          {built.ok ? "" : bn ? built.reasons.map((r) => r.message.bn).join(" ") : built.reasons.map((r) => r.message.en).join(" ")}
+        </Callout>
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div className="screen">
-        <PageHeader title={t("rebarTitle")} subtitle={t("rebarSubtitle")} />
-        <Card>
-          <p className="muted">{error}</p>
-        </Card>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="screen">
-        <PageHeader title={t("rebarTitle")} subtitle={t("rebarSubtitle")} />
-        <div style={{ padding: "24px", textAlign: "center", opacity: 0.7 }}>
-          {lang === "bn" ? "BBS গণনা হচ্ছে..." : "Calculating Bar Bending Schedule..."}
-        </div>
-      </div>
-    );
-  }
-
-  const filteredMembers = members.filter((m) => filterType === "all" || m.memberType === filterType);
-  const memberTypes = ["all", "column", "beam", "footing", "slab"];
-
-  const handleDownloadCSV = () => {
-    const header = "Member,Element,Mark,Role,Shape,Dia (mm),Cut Length (mm),Bends,Count,Weight (kg)";
-    const rows: string[] = [];
-    for (const m of filteredMembers) {
-      for (const item of m.bbs.items) {
-        const count = (item.role === "mesh" || item.role === "link") ? item.count : item.count * m.count;
-        const weight = (item.role === "mesh" || item.role === "link") ? item.weightKg : Math.round(item.weightKg * m.count * 100) / 100;
-        rows.push(`"${m.label}","${m.elementId}","${item.mark}","${item.role}","${item.shape}",${item.diameterMm},${item.cutLengthMm},"${item.bendAngles.join("/")}°",${count},${weight}`);
-      }
-    }
-    const footer = `\n\nTotal Weight: ${totals.totalWeight} kg\nTotal Tons: ${totals.totalTons}\nEstimated Cost: BDT ${totals.estimatedCostBDT.toLocaleString()}`;
-    const csv = [header, ...rows, footer].join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${project.id}_rebar_bbs.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleDownloadMarkdown = () => {
-    let md = `# Bar Bending Schedule — ${project.name}\n\n`;
-    md += `**Project ID:** ${project.id}\n`;
-    md += `**Concrete:** M${concreteGrade} · **Steel:** Fe${steelGrade}\n`;
-    md += `**Standard:** BNBC 2020 / ACI 318-19\n`;
-    md += `**Generated:** ${new Date().toLocaleString("en-GB")}\n\n`;
-    md += `## Totals\n\n`;
-    md += `| Metric | Value |\n|--------|-------|\n`;
-    md += `| Total Steel | ${totals.totalWeight.toLocaleString()} kg (${totals.totalTons} t) |\n`;
-    md += `| Total Bars | ${totals.totalBars.toLocaleString()} |\n`;
-    md += `| Estimated Cost | ৳${totals.estimatedCostBDT.toLocaleString()} |\n\n`;
-    md += `### By Diameter\n\n| Dia (mm) | Count | Weight (kg) |\n|----------|-------|-------------|\n`;
-    for (const [dia, totalsDia] of Object.entries(totals.byDiameter)) {
-      md += `| ${dia} | ${totalsDia.count.toLocaleString()} | ${totalsDia.weightKg.toLocaleString()} |\n`;
-    }
-    md += `\n---\n\n## Member Details\n\n`;
-    for (const m of filteredMembers) {
-      md += `### ${m.label}\n`;
-      md += `*${m.dimensions.width} × ${m.dimensions.depth} × ${m.dimensions.length} mm (×${m.count})*\n\n`;
-      md += `| Mark | Role | Dia (mm) | Cut (mm) | Bends | Count | Weight (kg) |\n|------|------|----------|----------|-------|-------|-------------|\n`;
-      for (const item of m.bbs.items) {
-        md += `| ${item.mark} | ${item.role} | ${item.diameterMm} | ${item.cutLengthMm} | ${item.bendAngles.length ? item.bendAngles.join("°/") + "°" : "—"} | ${item.count} | ${item.weightKg} |\n`;
-      }
-      md += `\n`;
-      if (m.bbs.assumptions.length > 0) {
-        md += `Assumptions:\n`;
-        for (const a of m.bbs.assumptions) {
-          md += `- ${a.reason} (${a.codeRef})\n`;
-        }
-        md += `\n`;
-      }
-    }
-    const blob = new Blob([md], { type: "text/markdown" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${project.id}_rebar_bbs.md`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
+  const { bbs } = data;
+  const rows = filter === "all" ? bbs.rows : bbs.rows.filter((r) => r.family === filter);
+  const issues = [...bbs.issues].sort((a, b) => (a.severity === b.severity ? 0 : a.severity === "fail" ? -1 : 1));
+  const tabs: Array<{ value: Filter; label: string }> = [
+    { value: "all", label: `${bn ? "সব" : "All"} (${bbs.rows.length})` },
+    ...(["footing", "column", "beam", "slab"] as BbsFamily[]).map((f) => ({ value: f as Filter, label: `${bn ? FAMILY_LABEL[f].bn : FAMILY_LABEL[f].en} (${bbs.rows.filter((r) => r.family === f).length})` })),
+  ];
 
   return (
     <div className="screen">
-      <PageHeader
-        title={t("rebarTitle")}
-        subtitle={t("rebarSubtitle")}
-        actions={
-          <div className="row" style={{ gap: "8px" }}>
-            <Button variant="soft" onClick={handleDownloadCSV}>
-              {lang === "bn" ? "CSV এক্সপোর্ট" : "Export CSV"}
-            </Button>
-            <Button variant="soft" onClick={handleDownloadMarkdown}>
-              {lang === "bn" ? "রিপোর্ট ডাউনলোড" : "Download Report"}
-            </Button>
-          </div>
-        }
-      />
+      <PageHeader title={title} subtitle={subtitle} />
 
-      {/* Summary */}
-      <div className="row" style={{ gap: "16px", marginBottom: "16px", flexWrap: "wrap" }}>
-        <Stat label={lang === "bn" ? "মোট স্টিল" : "Total Steel"} value={`${totals.totalWeight.toLocaleString()} kg`} />
-        <Stat label={lang === "bn" ? "টন" : "Tons"} value={`${totals.totalTons}`} />
-        <Stat label={lang === "bn" ? "মোট রড" : "Total Bars"} value={totals.totalBars.toLocaleString()} />
-        <Stat label={lang === "bn" ? "অনুমানিত খরচ" : "Est. Cost"} value={`৳${totals.estimatedCostBDT.toLocaleString()}`} />
+      <Callout tone="warn" title={bn ? "প্রাথমিক রড বিন্যাস, চূড়ান্ত নকশা নয়" : "Screening-level detailing, not final design"}>
+        {bn
+          ? "রডের ব্যাস কেবল মজুদ মাপ (৮, ১০, ১২, ১৬, ২০, ২২, ২৫, ২৮, ৩২ মিমি)। বিমের নিচের রড কাটা হয়নি, ক্রসটাই ও কোণার রড ধরা হয়নি। দৈর্ঘ্য বিএনবিসি ধারা ৮.১ ও ৮.২ থেকে।"
+          : "Bars are stock diameters only (8, 10, 12, 16, 20, 22, 25, 28, 32 mm). Bottom beam bars are not curtailed; crossties and corner bars are not scheduled. Hook, development and lap lengths follow BNBC Sec 8.1 and 8.2."}
+      </Callout>
+
+      <div className="row" style={{ gap: 16, margin: "16px 0", flexWrap: "wrap" }}>
+        <Stat label={bn ? "মোট রড (কেজি)" : "Total steel (kg)"} value={kg(bbs.totals.weightKg)} />
+        <Stat label={bn ? "মোট রড (টন)" : "Total steel (t)"} value={(bbs.totals.weightKg / 1000).toFixed(2)} />
+        <Stat label={bn ? "কংক্রিটের প্রতি ঘনমিটারে (কেজি)" : "Steel per m³ concrete (kg)"} value={bbs.totals.kgPerM3.toFixed(0)} />
+        <Stat label={bn ? "শিডিউলের সারি" : "Schedule rows"} value={String(bbs.rows.length)} />
+        <Stat label={bn ? "সমস্যা" : "Issues"} value={String(issues.length)} />
       </div>
 
-      {/* By Diameter */}
-      <Card className="stack" style={{ marginBottom: "16px" }}>
-        <h3 style={{ marginBottom: "8px", fontSize: "14px", opacity: 0.7 }}>
-          {lang === "bn" ? "ডাইয়ামিটার অনুযায়ী" : "By Diameter"}
-        </h3>
-        <div className="row" style={{ gap: "12px", flexWrap: "wrap" }}>
-          {Object.entries(totals.byDiameter).map(([dia, d]) => (
-            <Badge key={dia} tone="lavender">
-              {dia}mm: {d.count.toLocaleString()} {lang === "bn" ? "পিস" : "pcs"} · {d.weightKg.toLocaleString()} kg
-            </Badge>
-          ))}
-        </div>
-      </Card>
-
-      {/* Filter */}
-      <div className="row" style={{ gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
-        {memberTypes.map((type) => (
-          <Button
-            key={type}
-            variant={filterType === type ? "primary" : "soft"}
-            onClick={() => setFilterType(type)}
-            style={{ textTransform: "capitalize" }}
-          >
-            {type === "all"
-              ? (lang === "bn" ? "সব" : "All")
-              : `${type} (${members.filter((m) => m.memberType === type).length})`}
-          </Button>
-        ))}
-      </div>
-
-      {/* Member Cards with Progressive Rendering */}
-      <Progressive
-        items={filteredMembers}
-        pageSize={20}
-        resetKey={filterType}
-        showCount={true}
-        renderItem={(m, idx) => {
-          const isSelected = selectedMember === idx;
-          const memberWeight = m.bbs.items.reduce((sum, item) => {
-            return sum + (item.role === "mesh" || item.role === "link" ? item.weightKg : item.weightKg * m.count);
-          }, 0);
-          return (
-            <Card
-              key={m.elementId}
-              className="stack"
-              style={{
-                cursor: "pointer",
-                border: isSelected ? "1.5px solid var(--primary)" : "1px solid var(--border)",
-              }}
-              onClick={() => setSelectedMember(isSelected ? null : idx)}
-            >
+      <section className="stack" style={{ gap: 12 }} aria-label={bn ? "সমস্যা" : "Issues"}>
+        <h3 style={{ margin: 0 }}>{bn ? "আগে সমস্যাগুলো" : "Issues first"}</h3>
+        {issues.length === 0 ? (
+          <Card><p className="muted" style={{ margin: 0 }}>{bn ? "কোনো সমস্যা নেই: সব রড বসে এবং অ্যাঙ্কর হয়।" : "No issues: every bar fits and anchors."}</p></Card>
+        ) : (
+          issues.slice(0, 12).map((i) => (
+            <Card key={i.en} className="stack">
               <div className="row-between">
-                <div>
-                  <h4 style={{ margin: "0 0 4px 0" }}>{m.label}</h4>
-                  <span className="faint small font-mono">
-                    {m.dimensions.width} × {m.dimensions.depth} × {m.dimensions.length} mm
-                    {m.count > 1 ? ` × ${m.count}` : ""}
-                  </span>
-                </div>
-                <div className="row" style={{ gap: "8px" }}>
-                  <Badge tone="sky">{m.memberType}</Badge>
-                  <Badge tone="sage">{Math.round(memberWeight * 100) / 100} kg</Badge>
-                </div>
+                <h4 style={{ margin: 0 }}>{bn ? i.bn : i.en}</h4>
+                <ResultChip result={i.severity === "fail" ? "fail" : "warn"} lang={lang} />
               </div>
-
-              {isSelected && (
-                <div style={{ marginTop: "8px" }}>
-                  <table className="table" style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
-                    <thead>
-                      <tr style={{ borderBottom: "1px solid var(--border)", opacity: 0.8, fontSize: "12px" }}>
-                        <th scope="col" style={{ padding: "8px" }}>{lang === "bn" ? "মার্ক" : "Mark"}</th>
-                        <th scope="col" style={{ padding: "8px" }}>{lang === "bn" ? "ভূমিকা" : "Role"}</th>
-                        <th scope="col" style={{ padding: "8px" }}>{lang === "bn" ? "ডায়া" : "Dia"}</th>
-                        <th scope="col" style={{ padding: "8px" }}>{lang === "bn" ? "কাট (মিমি)" : "Cut (mm)"}</th>
-                        <th scope="col" style={{ padding: "8px" }}>{lang === "bn" ? "ব্যান্ড" : "Bends"}</th>
-                        <th scope="col" style={{ padding: "8px" }}>{lang === "bn" ? "সংখ্যার" : "Count"}</th>
-                        <th scope="col" style={{ padding: "8px" }}>{lang === "bn" ? "ওজন (কেজি)" : "Weight (kg)"}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {m.bbs.items.map((item: RebarDetail) => (
-                        <tr key={item.mark} style={{ borderBottom: "1px solid var(--border)" }}>
-                          <td style={{ padding: "8px", fontFamily: "var(--font-mono)" }}>{item.mark}</td>
-                          <td style={{ padding: "8px" }}>
-                            <Badge tone="neutral">{item.role}</Badge>
-                          </td>
-                          <td style={{ padding: "8px", fontFamily: "var(--font-mono)" }}>
-                            ⌀{item.diameterMm}
-                          </td>
-                          <td style={{ padding: "8px", fontFamily: "var(--font-mono)" }}>
-                            {item.cutLengthMm.toLocaleString()}
-                          </td>
-                          <td style={{ padding: "8px", fontFamily: "var(--font-mono)" }}>
-                            {item.bendAngles.length > 0 ? item.bendAngles.map((a) => `${a}°`).join(" ") : "—"}
-                          </td>
-                          <td style={{ padding: "8px", fontFamily: "var(--font-mono)" }}>
-                            {item.role === "mesh" || item.role === "link" ? item.count : `${item.count} × ${m.count}`}
-                          </td>
-                          <td style={{ padding: "8px", fontFamily: "var(--font-mono)" }}>
-                            {Math.round((item.role === "mesh" || item.role === "link" ? item.weightKg : item.weightKg * m.count) * 100) / 100}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-
-                  {m.bbs.assumptions.length > 0 && (
-                    <div style={{ marginTop: "8px", padding: "8px", background: "var(--surface-2)", borderRadius: "var(--r-sm)", fontSize: "12px" }}>
-                      <strong>{lang === "bn" ? "অনুমান:" : "Assumptions:"}</strong>
-                      {m.bbs.assumptions.map((a, i) => (
-                        <div key={i} className="small muted" style={{ marginTop: "4px" }}>
-                          • {a.reason} <span className="font-mono">({a.codeRef})</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
+              <span className="small muted">{(bn ? "স্তর/তলা: " : "Levels or storeys: ") + levelsText([...i.levels].sort((a, b) => a - b))}</span>
             </Card>
-          );
-        }}
-      >
-        {({ items: visibleMembers }) => (
-          <div className="stack" style={{ gap: "12px" }}>
-            {visibleMembers.map((m, idx) => {
-              const isSelected = selectedMember === idx;
-              const memberWeight = m.bbs.items.reduce((sum, item) => {
-                return sum + (item.role === "mesh" || item.role === "link" ? item.weightKg : item.weightKg * m.count);
-              }, 0);
-              return (
-                <Card
-                  key={m.elementId}
-                  className="stack"
-                  style={{
-                    cursor: "pointer",
-                    border: isSelected ? "1.5px solid var(--primary)" : "1px solid var(--border)",
-                  }}
-                  onClick={() => setSelectedMember(isSelected ? null : idx)}
-                >
-                  <div className="row-between">
-                    <div>
-                      <h4 style={{ margin: "0 0 4px 0" }}>{m.label}</h4>
-                      <span className="faint small font-mono">
-                        {m.dimensions.width} × {m.dimensions.depth} × {m.dimensions.length} mm
-                        {m.count > 1 ? ` × ${m.count}` : ""}
-                      </span>
-                    </div>
-                    <div className="row" style={{ gap: "8px" }}>
-                      <Badge tone="sky">{m.memberType}</Badge>
-                      <Badge tone="sage">{Math.round(memberWeight * 100) / 100} kg</Badge>
-                    </div>
-                  </div>
-
-                  {isSelected && (
-                    <div style={{ marginTop: "8px" }}>
-                      <table className="table" style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
-                        <thead>
-                          <tr style={{ borderBottom: "1px solid var(--border)", opacity: 0.8, fontSize: "12px" }}>
-                            <th scope="col" style={{ padding: "8px" }}>{lang === "bn" ? "মার্ক" : "Mark"}</th>
-                            <th scope="col" style={{ padding: "8px" }}>{lang === "bn" ? "ভূমিকা" : "Role"}</th>
-                            <th scope="col" style={{ padding: "8px" }}>{lang === "bn" ? "ডায়া" : "Dia"}</th>
-                            <th scope="col" style={{ padding: "8px" }}>{lang === "bn" ? "কাট (মিমি)" : "Cut (mm)"}</th>
-                            <th scope="col" style={{ padding: "8px" }}>{lang === "bn" ? "ব্যান্ড" : "Bends"}</th>
-                            <th scope="col" style={{ padding: "8px" }}>{lang === "bn" ? "সংখ্যার" : "Count"}</th>
-                            <th scope="col" style={{ padding: "8px" }}>{lang === "bn" ? "ওজন (কেজি)" : "Weight (kg)"}</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {m.bbs.items.map((item: RebarDetail) => (
-                            <tr key={item.mark} style={{ borderBottom: "1px solid var(--border)" }}>
-                              <td style={{ padding: "8px", fontFamily: "var(--font-mono)" }}>{item.mark}</td>
-                              <td style={{ padding: "8px" }}>
-                                <Badge tone="neutral">{item.role}</Badge>
-                              </td>
-                              <td style={{ padding: "8px", fontFamily: "var(--font-mono)" }}>
-                                ⌀{item.diameterMm}
-                              </td>
-                              <td style={{ padding: "8px", fontFamily: "var(--font-mono)" }}>
-                                {item.cutLengthMm.toLocaleString()}
-                              </td>
-                              <td style={{ padding: "8px", fontFamily: "var(--font-mono)" }}>
-                                {item.bendAngles.length > 0 ? item.bendAngles.map((a) => `${a}°`).join(" ") : "—"}
-                              </td>
-                              <td style={{ padding: "8px", fontFamily: "var(--font-mono)" }}>
-                                {item.role === "mesh" || item.role === "link" ? item.count : `${item.count} × ${m.count}`}
-                              </td>
-                              <td style={{ padding: "8px", fontFamily: "var(--font-mono)" }}>
-                                {Math.round((item.role === "mesh" || item.role === "link" ? item.weightKg : item.weightKg * m.count) * 100) / 100}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-
-                      {m.bbs.assumptions.length > 0 && (
-                        <div style={{ marginTop: "8px", padding: "8px", background: "var(--surface-2)", borderRadius: "var(--r-sm)", fontSize: "12px" }}>
-                          <strong>{lang === "bn" ? "অনুমান:" : "Assumptions:"}</strong>
-                          {m.bbs.assumptions.map((a, i) => (
-                            <div key={i} className="small muted" style={{ marginTop: "4px" }}>
-                              • {a.reason} <span className="font-mono">({a.codeRef})</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </Card>
-              );
-            })}
-          </div>
+          ))
         )}
-      </Progressive>
+        {issues.length > 12 ? <p className="small muted">{(bn ? "আরও " : "and ") + (issues.length - 12) + (bn ? "টি" : " more")}</p> : null}
+        {issues.some((i) => i.severity === "warn") ? (
+          <Callout title={bn ? "হুকের দৈর্ঘ্য কলামে আঁটে না" : "Hooks longer than the column"}>
+            {bn
+              ? "প্রান্তের কলামে হুকের প্রয়োজনীয় দৈর্ঘ্য (ধারা ৮.২.৬.২) কলামের গভীরতার চেয়ে বেশি। ধারা ৮.২.৬.৩-এর ০.৭/০.৮ গুণক প্রয়োগ হয়নি; ছোট ব্যাসের রড বা বড় কলাম এটি সমাধান করে।"
+              : "At exterior columns the hook development length (Sec 8.2.6.2) is longer than the column. The 0.7 and 0.8 factors of Sec 8.2.6.3 are not applied; smaller bars or a deeper column cure it."}
+          </Callout>
+        ) : null}
+      </section>
+
+      <section className="stack" style={{ marginTop: 24, gap: 12 }} aria-label={bn ? "মোট" : "Totals"}>
+        <h3 style={{ margin: 0 }}>{bn ? "ব্যাস অনুযায়ী মোট" : "Totals by diameter"}</h3>
+        <div style={{ overflowX: "auto" }}>
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>{bn ? "ব্যাস (মিমি)" : "Diameter (mm)"}</th>
+                <th>{bn ? "দৈর্ঘ্য (মি)" : "Length (m)"}</th>
+                <th>{bn ? "ওজন (কেজি)" : "Weight (kg)"}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {STOCK_BARS.map((d) => {
+                const t = bbs.totals.byDia.find((x) => x.diaMm === d);
+                return t ? (
+                  <tr key={d}>
+                    <td>{d}</td>
+                    <td>{t.lengthM.toFixed(0)}</td>
+                    <td>{kg(t.weightKg)}</td>
+                  </tr>
+                ) : null;
+              })}
+            </tbody>
+          </table>
+        </div>
+        <p className="small muted" style={{ margin: 0 }}>
+          {bbs.totals.byFamily.map((f) => `${bn ? FAMILY_LABEL[f.family].bn : FAMILY_LABEL[f.family].en}: ${kg(f.weightKg)} kg`).join(" · ")}
+        </p>
+      </section>
+
+      <section className="stack" style={{ marginTop: 24, gap: 12 }} aria-label={bn ? "বার বেন্ডিং শিডিউল" : "Bar bending schedule"}>
+        <div className="row-between">
+          <h3 style={{ margin: 0 }}>{bn ? "বার বেন্ডিং শিডিউল" : "Bar bending schedule"}</h3>
+          <Button variant="ghost" onClick={() => download(`${project.name.replace(/[^\w-]+/g, "_") || "project"}-bbs.csv`, bbsToCsv(bbs.rows))}>
+            {bn ? "CSV ডাউনলোড" : "Download CSV"}
+          </Button>
+        </div>
+        <SegmentedControl<Filter> aria-label={bn ? "সদস্যের ধরন" : "Member type"} options={tabs} value={filter} onChange={setFilter} />
+        <div style={{ overflowX: "auto" }}>
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>{bn ? "মার্ক" : "Mark"}</th>
+                <th>{bn ? "বিবরণ" : "Description"}</th>
+                <th>{bn ? "ব্যাস" : "Dia"}</th>
+                <th>{bn ? "আকৃতি" : "Shape"}</th>
+                <th>{bn ? "মাপ A / B / C (মিমি)" : "A / B / C (mm)"}</th>
+                <th>{bn ? "কাটা দৈর্ঘ্য (মিমি)" : "Cut length (mm)"}</th>
+                <th>{bn ? "রড/সদস্য" : "Bars each"}</th>
+                <th>{bn ? "সদস্য" : "Members"}</th>
+                <th>{bn ? "মোট রড" : "Total bars"}</th>
+                <th>{bn ? "দৈর্ঘ্য (মি)" : "Length (m)"}</th>
+                <th>{bn ? "ওজন (কেজি)" : "Weight (kg)"}</th>
+                <th>{bn ? "স্তর" : "Levels"}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.mark}>
+                  <td>{r.mark}</td>
+                  <td>{bn ? r.description.bn : r.description.en}</td>
+                  <td>{r.diaMm}</td>
+                  <td title={bn ? SHAPE_NOTE[r.shape].bn : SHAPE_NOTE[r.shape].en}>{r.shape}</td>
+                  <td>{r.dimsMm.join(" / ")}</td>
+                  <td>{r.cutLengthMm}</td>
+                  <td>{r.barsPerMember}</td>
+                  <td>{r.members}</td>
+                  <td>{r.totalBars}</td>
+                  <td>{r.totalLengthM.toFixed(1)}</td>
+                  <td>{r.weightKg.toFixed(0)}</td>
+                  <td>{levelsText(r.levels)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="small muted" style={{ margin: 0 }}>
+          {bn
+            ? "আকৃতি কোড বিএস ৮৬৬৬ রীতি অনুযায়ী: ০০ সোজা, ১১ একটি ৯০° বাঁক, ২১ দুটি ৯০° বাঁক, ৫১ বন্ধ স্টিরাপ ১৩৫° হুকসহ। কাটা দৈর্ঘ্যে বাঁকের বিয়োজন ধরা আছে।"
+            : "Shape codes follow the BS 8666 convention: 00 straight, 11 one 90° bend, 21 two 90° bends, 51 closed link with 135° hooks. Cut lengths include the bend deductions."}
+        </p>
+      </section>
+
+      <section className="stack" style={{ marginTop: 24, gap: 8 }} aria-label={bn ? "অনুমান" : "Assumptions"}>
+        <h3 style={{ margin: 0 }}>{bn ? "অনুমান" : "Assumptions"}</h3>
+        <ul className="small muted" style={{ margin: 0, paddingLeft: 18 }}>
+          {data.assumptions.map((a) => <li key={a.id}>{bn ? a.bn : a.en}</li>)}
+        </ul>
+      </section>
     </div>
   );
 }

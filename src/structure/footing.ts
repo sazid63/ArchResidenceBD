@@ -24,6 +24,8 @@ export interface FootingInput {
   allowableKpa: number;
   /** Footing, backfill and slab on top as a fraction of the column service load (assumption). */
   selfWeightFraction?: number;
+  /** Depth the column starter bars need: development length in compression plus cover and the two mat layers, mm (Sec 8.2.4). */
+  minDepthMm?: number;
 }
 
 export interface FootingResult {
@@ -62,7 +64,8 @@ export function designFooting(inp: FootingInput): FootingResult {
   const beta = Math.max(inp.colBxMm, inp.colByMm) / Math.min(inp.colBxMm, inp.colByMm);
 
   let best: FootingResult | null = null;
-  for (let h = 300; h <= 2000; h += 50) {
+  const hStart = Math.max(300, Math.ceil((inp.minDepthMm ?? 0) / 50) * 50);
+  for (let h = hStart; h <= 2000; h += 50) {
     const d = h - COVER_MM - BAR_MM - BAR_MM / 2; // two bar layers: centroid of the upper layer
     // beam action: critical section d from the column face, the larger of the two directions
     const lever = (col: number) => Math.max(b / 2 - col / 2 - d, 0);

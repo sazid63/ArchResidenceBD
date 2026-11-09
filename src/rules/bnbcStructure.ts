@@ -128,3 +128,33 @@ export interface FootingSection {
 export function footingPack(): FootingSection {
   return (structurePack() as unknown as { footings: FootingSection }).footings;
 }
+
+export interface ReinforcementSection {
+  stockBarsMm: number[];
+  hooks: {
+    standard180: { extensionDb: number; extensionMinMm: number };
+    standard90: { extensionDb: number };
+    stirrup: { upTo16: { extensionDb: number }; closedTie135: { extensionDb: number; extensionMinMm: number } };
+  };
+  bendDiameter: { from10to25: number; from25to40: number; stirrupAndTieUpTo16: number };
+  development: {
+    divisorGoodSmall: number;
+    divisorGoodLarge: number;
+    divisorOtherLarge: number;
+    minMm: number;
+    psiT: { topBarsOver300mmConcrete: number; other: number };
+    psiE: { uncoated: number };
+    lambda: number;
+  };
+  compression: { coefficient: number; minCoefficient: number; minMm: number };
+  hookDevelopment: { coefficient: number; minDb: number; minMm: number };
+  lap: {
+    tension: { classA: number; classB: number; minMm: number };
+    compression: { coefficientFy420OrLess: number; minMm: number; lowStrengthFactor: { fcBelowMPa: number; multiplier: number } };
+  };
+  maxSpacing: { oneWaySlab: { timesThickness: number; maxMm: number }; twoWaySlab: { timesThickness: number; maxMm: number }; shrinkageSteel: { timesThickness: number; maxMm: number } };
+}
+
+export function reinforcementPack(): ReinforcementSection {
+  return (structurePack() as unknown as { reinforcement: ReinforcementSection }).reinforcement;
+}

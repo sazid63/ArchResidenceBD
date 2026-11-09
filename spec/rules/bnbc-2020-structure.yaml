@@ -42,6 +42,13 @@ citations:
   col-slender:    {gazettePage: "3492-3496", pdfPage: "911-915", note: "Part 6 Sec 6.3.10.1.2 r = 0.30 h; 6.3.10.4.1 I = 0.70 Ig columns, 0.35 Ig beams; 6.3.10.5-6.3.10.7 Eq 6.6.17-6.6.28 moment magnification"}
   phi-col:        {gazettePage: "3478", pdfPage: 897, note: "Part 6 Sec 6.2.3.2.2 phi = 0.65 compression-controlled tied, 0.90 tension-controlled, linear between"}
   punching:       {gazettePage: "3518-3519", pdfPage: "937-938", note: "Part 6 Sec 6.4.10 footings and slabs: critical section d/2 from the column; Eq 6.6.72-6.6.74 two-way Vc"}
+  hooks-bends:    {gazettePage: "3646-3647", pdfPage: "1065-1066", note: "Part 6 Sec 8.1.2 standard hooks, stirrup and tie hooks, seismic hook, Table 6.8.1 minimum bend diameters"}
+  spacing:        {gazettePage: "3649", pdfPage: 1068, note: "Part 6 Sec 8.1.6.5-8.1.6.6 maximum bar spacing in slabs"}
+  dev-tension:    {gazettePage: "3657-3659", pdfPage: "1076-1078", note: "Part 6 Sec 8.2.3 development of deformed bars in tension: Table in 8.2.3.2, Eq 6.8.1, factors psi_t, psi_e, psi_s, lambda"}
+  dev-compress:   {gazettePage: "3659", pdfPage: 1078, note: "Part 6 Sec 8.2.4 development in compression, ldc = max(0.24 fy db / (lambda sqrt(fc)), 0.043 fy db) >= 200 mm"}
+  dev-hook:       {gazettePage: "3660", pdfPage: 1079, note: "Part 6 Sec 8.2.6 development of standard hooks, ldh = 0.24 psi_e fy db / (lambda sqrt(fc)) >= 8 db and 150 mm"}
+  dev-flexural:   {gazettePage: "3661", pdfPage: 1080, note: "Part 6 Sec 8.2.7.3 flexural reinforcement extends d or 12 db beyond the point where it is no longer needed"}
+  lap-splices:    {gazettePage: "3664-3665", pdfPage: "1083-1084", note: "Part 6 Sec 8.2.13 tension lap Class A 1.0 ld, Class B 1.3 ld >= 300 mm; Sec 8.2.14 compression lap 0.071 fy db >= 300 mm, one-third longer when fc < 21 MPa"}
 
 # ---------------------------------------------------------------- dead loads
 unitWeights:                       # Table 6.2.1, kN/m3
@@ -356,7 +363,49 @@ footings:
   oneWayVc: "Vc = 0.17 sqrt(fc) b d, beam action (Sec 6.4.10.1.1)"
   coverAgainstEarth: 75
 
+# ---------------------------------------------------------------- reinforcement detailing (Sec 8.1, 8.2)
+reinforcement:
+  stockBarsMm: [8, 10, 12, 16, 20, 22, 25, 28, 32]   # project rule: stock bars only (Part 6 Sec 8.2.12.2 a forbids lap splices of 36 mm and larger)
+  hooks:
+    cite: hooks-bends
+    standard180: {bendDeg: 180, extensionDb: 4, extensionMinMm: 65}
+    standard90: {bendDeg: 90, extensionDb: 12}
+    stirrup: {upTo16: {bendDeg: 90, extensionDb: 6}, from19to25: {bendDeg: 90, extensionDb: 12}, closedTie135: {bendDeg: 135, extensionDb: 6, extensionMinMm: 75}}
+    seismicHook: "135 degree bend or more, 6 db (not less than 75 mm) extension that engages the longitudinal bar (Sec 8.1.2.1 d)"
+  bendDiameter:                      # inside diameter, Table 6.8.1 and Sec 8.1.2.2 b
+    cite: hooks-bends
+    from10to25: 6
+    from25to40: 8
+    stirrupAndTieUpTo16: 4
+  development:
+    cite: dev-tension
+    expr: "ld = (fy psi_t psi_e / (2.1 lambda sqrt(fc))) db for 19 mm and smaller, / (1.7 lambda sqrt(fc)) for 20 mm and larger, with clear spacing >= db, cover >= db and the code minimum stirrups (or spacing >= 2 db and cover >= db); other cases 20 mm and larger / (1.1 lambda sqrt(fc)); not less than 300 mm"
+    divisorGoodSmall: 2.1
+    divisorGoodLarge: 1.7
+    divisorOtherLarge: 1.1
+    minMm: 300
+    psiT: {topBarsOver300mmConcrete: 1.3, other: 1.0}
+    psiE: {uncoated: 1.0}
+    lambda: 1.0
+    psiS: {upTo19: 0.8, from20: 1.0}
+  compression: {cite: dev-compress, coefficient: 0.24, minCoefficient: 0.043, minMm: 200}
+  hookDevelopment: {cite: dev-hook, coefficient: 0.24, minDb: 8, minMm: 150, factorSideCover65: 0.7, factorTies3db: 0.8}
+  flexuralExtension: {cite: dev-flexural, beyondCutoff: "not less than d nor less than 12 db"}
+  lap:
+    cite: lap-splices
+    tension: {classA: 1.0, classB: 1.3, minMm: 300, classAConditions: "area provided at least twice that required over the whole lap and at most half of the bars spliced within the lap length"}
+    compression: {coefficientFy420OrLess: 0.071, minMm: 300, lowStrengthFactor: {fcBelowMPa: 21, multiplier: 1.3333333333}}
+  maxSpacing:                         # Sec 8.1.6.5-8.1.6.6, mm
+    cite: spacing
+    oneWaySlab: {timesThickness: 3, maxMm: 450}
+    twoWaySlab: {timesThickness: 2, maxMm: 450}
+    shrinkageSteel: {timesThickness: 5, maxMm: 450}
+  steelUnitWeightKnM3: 77.0           # Table 6.2.1 (7850 kg/m3)
+
 gaps:
+  - id: gap-detailing-not-transcribed
+    what: "Column tie spacing and the confinement zone length for special moment frames (Sec 8.3), minimum clear bar spacing (Sec 8.1.6), and the Sec 8.2.15 special splice rules for columns are not transcribed; the table in Sec 8.2.3.2 leaves the 19 mm and smaller 'other cases' cell blank."
+    why: "src/structure/rebar uses the first row of the table (spacing and cover good), ties at min(16 db, 48 dtie, smaller side) with 100 mm over the end zones, and clear spacing of at least max(25 mm, db) (ACI 318 practice); all are listed as assumptions."
   - id: gap-seismic-assumed-inputs
     what: "Site class, occupancy category and structural system are not known from the plot: Table 6.1.1 (occupancy categories) and Sec 2.5.3 site classification are not transcribed."
     why: "src/structure defaults to site class SD (soft alluvium typical of Dhaka), occupancy category II (flats, I = 1.00) and special RC moment frames (the only RC frame permitted in design category D); all three are inputs."

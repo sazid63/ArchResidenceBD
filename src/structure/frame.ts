@@ -14,6 +14,8 @@ import { columnPack, structurePack, type OccupancyGroup, type SiteClass } from "
 import type { LevelResult, MemberFailure } from "./analyze";
 import { analyseSpans } from "./continuousBeam";
 import { COLUMN_STOCK, checkColumn, lightestSteel, RHO_STEPS, type CaseResult, type ColSection, type ColumnCase } from "./column";
+import { ldCompression } from "./anchorage";
+import { pickColumnBars } from "./barSelect";
 import { designFooting, type ColumnPosition, type FootingResult } from "./footing";
 import { factoredLoad, liveReductionFactor } from "./loads";
 import { ecMPa, MATERIALS, UNIT_WEIGHTS } from "./materials";
@@ -413,6 +415,8 @@ export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: 
       colByMm: sections[0][ci].by,
       position: c.position,
       allowableKpa: o.allowableBearingKpa,
+      // starter bars of the ground column must be developed in the pad: ldc + 75 mm cover + two 16 mm mat layers
+      minDepthMm: ldCompression(pickColumnBars(g.astMm2, sections[0][ci].bx, sections[0][ci].by).dia) + 75 + 32,
     });
     if (footing.util > 1) failures.push({ level: -1, member: "footing", id: `${c.id}/footing`, util: footing.util, governs: footing.governs });
     return { id: c.id, ix: c.ix, iy: c.iy, xMm: c.x, yMm: c.y, position: c.position, storeys, footing, util: Math.max(footing.util, ...storeys.map((s) => s.util)) };
