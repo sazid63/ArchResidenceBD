@@ -448,3 +448,9 @@
   box-shadow: var(--shadow-lg);
   font-size: var(--fs-sm);
 }
+
+/* Data tables (Structure screen): tokens only */
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
+.data-table th { text-align: left; font-weight: 600; color: var(--ink-soft); padding: 6px 10px; border-bottom: 1px solid var(--line-strong); white-space: nowrap; }
+.data-table td { padding: 6px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.data-table tbody tr:hover { background: var(--surface-2); }

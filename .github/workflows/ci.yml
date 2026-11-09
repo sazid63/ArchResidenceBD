@@ -35,8 +35,9 @@ jobs:
       - name: Exporter tests (IFC, FreeCAD)
         run: npm run test:exporters
 
-      # Not run yet: audit:structural fails 17 of 36 cases on the current engine.
-      # It is rebuilt in milestone M4 (BUILD_PLAN.md) and added here then.
+      # Structure sweep (M4-2): invariants over every plan, height and site class; outcomes go to scripts/audits/audit-out.
+      - name: Structural audit
+        run: npm run audit:structural
 
       - name: Build
         run: npm run build

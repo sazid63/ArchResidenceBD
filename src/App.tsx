@@ -5,6 +5,7 @@ import { AboutScreen } from "./screens/AboutScreen";
 import { AssetsLibraryScreen } from "./screens/AssetsLibraryScreen";
 import { BoqScreen } from "./screens/BoqScreen";
 import { ComplianceScreen } from "./screens/ComplianceScreen";
+import { StructureScreen } from "./screens/StructureScreen";
 import { DocumentsScreen } from "./screens/DocumentsScreen";
 import { DrawingsScreen } from "./screens/DrawingsScreen";
 import { FormworkScaffoldScreen } from "./screens/FormworkScaffoldScreen";
@@ -38,6 +39,7 @@ const SCREEN_TITLES: Record<string, [string, string]> = {
   boq: ["Bill of Quantities", "বিল অব কোয়ান্টিটিজ"],
   assets: ["Asset Library", "অ্যাসেট লাইব্রেরি"],
   compliance: ["Code Compliance", "কোড কমপ্লায়েন্স"],
+  structure: ["Structure", "কাঠামো"],
   formwork: ["Formwork", "ফর্মওয়ার্ক"],
   pour: ["Pour Sequence", "পোর সিকোয়েন্স"],
   rebar: ["Rebar Schedule", "রিবার শিডিউল"],
@@ -172,6 +174,7 @@ function renderView(
   if (view === "boq") return <BoqScreen />;
   if (view === "assets") return <AssetsLibraryScreen />;
   if (view === "compliance") return <ComplianceScreen />;
+  if (view === "structure") return <StructureScreen />;
   if (view === "formwork") return <FormworkScaffoldScreen />;
   if (view === "pour") return <PourSequenceScreen />;
   if (view === "rebar") return <RebarScheduleScreen />;

@@ -102,6 +102,7 @@ export function Sidebar({ active, onNavigate, open = false }: Props) {
       bn: "প্রকৌশল",
       items: [
         { id: "compliance", icon: ShieldCheck, en: "Code compliance", bn: "বিধিমালা যাচাই" },
+        { id: "structure", icon: Building2, en: "Structure", bn: "কাঠামো" },
         { id: "column-grid", icon: Grid3x3, en: "Column grid", bn: "কলাম গ্রিড" },
         { id: "rebar", icon: Ruler, en: "Rebar schedule", bn: "রিবার শিডিউল" },
         { id: "connections", icon: Link2, en: "Connections", bn: "সংযোগ" },
