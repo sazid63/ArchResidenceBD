@@ -185,7 +185,7 @@ function renderView(
   if (view === "connections") return <ConnectionDetailingScreen />;
   if (view === "daylight") return <DaylightAnalysisScreen />;
   if (view === "unit-mix") return <UnitMixOptimizerScreen />;
-  if (view === "column-grid") return <ColumnGridOptimizerScreen />;
+  if (view === "column-grid") return <ColumnGridOptimizerScreen onNavigate={navigate} />;
   if (view === "settings") return <SettingsScreen />;
   if (view === "licences") return <LicencesScreen />;
   if (view === "help") return <HelpScreen />;
