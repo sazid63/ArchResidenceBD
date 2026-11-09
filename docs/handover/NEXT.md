@@ -4,15 +4,17 @@ Branch `v3`, all commits local; **never `git push` unless the owner types an exp
 Owner rules: no full `npm run verify` until all phases are done (targeted `npx vitest run <path>` and `npx tsc --noEmit` only); pick defaults and keep building; ≤ 5-line replies.
 
 ## Done
-M0, M1, M2-1..M2-5 (M2-3 only 5 of 8 extra plans), M3-1 BNBC pack, M3-2 RAJUK evaluators + setbacks, M3-3 Compliance screen. See `TICKETS.md` for hashes.
+M0, M1, M2-1..M2-5 (M2-3 only 5 of 8 extra plans), M3-1 BNBC pack, M3-2 RAJUK evaluators + setbacks, M3-3 Compliance screen, M4-1 loads/slabs/beams. See `TICKETS.md` for hashes.
 
 - **Rule packs:** `spec/rules/rajuk-2008.yaml` is `frozen`: the owner (a civil engineer) read it and confirmed it correct; no government-engineer review is wanted now. `spec/rules/bnbc-2020.yaml` is still `candidate` (the owner has not said the same for it: ask before changing).
 - **`src/rules/`:** `engine.ts` (exact ports of the Python evaluators), `pack.ts` (loads YAML via `?raw`), `setbacks.ts` (RAJUK setbacks in mm), `check.ts` (`check(model, {roadWidthM})`), `report.ts` (`buildReport(project)` used by the screen), `deviations.ts` (register helpers). Tests: `rules.test.ts`, `report.test.ts`.
 - `deriveBuilding` and `planChoices` default to RAJUK setbacks; the picker takes `storeys` so it matches the model (above 10 storeys or 33 m larger setbacks apply). `DEFAULT_SETBACKS_MM` is legacy, kept for tests.
 - Compliance screen: tabs All / Fails / Passes / Not checked; sections RAJUK, plan, fire, accessibility; deviation register stored in `BuildingProject.deviations`. Old `src/cad/codeCompliance.ts` deleted.
 
+- **`src/structure/`:** `materials.ts` (all assumptions, `ASSUMPTIONS` list), `loads.ts`, `section.ts`, `continuousBeam.ts`, `slab.ts`, `beam.ts`, `analyze.ts` (`analyzeStructure(model)` -> levels, panels, beam lines, failures). Test: `structure.test.ts`. `src/rules/bnbc.ts` loads the BNBC pack. Dead loads, fc 20 / fy 420, Ec, slab method (Rankine-Grashof share + ACI 6.5 coefficients), span/480 limit are assumptions: Tables 6.2.1-6.2.2, Ch 5, two-way coefficient table not transcribed.
+
 ## Next
-No fixed order (owner, 2026-11-09). Remaining tickets in TICKETS.md: M4-1, M4-2, M4-3, M5-1, M5-2, M6-1, M6-2, M7-1, DS-1, plus the 3 missing M2-3 plans. Do what the owner names; if nothing is named, ask which one. No mandatory code-review gate.
+No fixed order (owner, 2026-11-09). Remaining tickets in TICKETS.md: M4-2, M4-3, M5-1, M5-2, M6-1, M6-2, M7-1, DS-1, plus the 3 missing M2-3 plans. Do what the owner names; if nothing is named, ask which one. No mandatory code-review gate.
 
 Start prompt for a clean session:
 ```

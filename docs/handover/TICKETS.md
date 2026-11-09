@@ -51,7 +51,7 @@ Test: every `testVectors` entry passes.
 ## M3-3 Compliance screen · Sonnet medium · done 77564a4
 Do: `ComplianceScreen` reads `src/rules` results plus plan-validator issues: `ResultChip`, `Value`, citations, "Not checked"; tabs All / Fails / Passes / Not checked; deviation register (`Deviation` in `src/model/projectSpec.ts`); fire and accessibility as sections. Delete `src/cad/codeCompliance.ts` once unused.
 
-## M4-1 Loads, slabs, beams · Opus high · todo
+## M4-1 Loads, slabs, beams · Opus high · done 6f7bce6
 Do: `src/structure/`: loads from M3-1 citations (assumption-flagged where missing), BNBC strength and service combinations, one/two-way slabs (coefficient method), continuous beams (moments, flexure, shear, service deflection) on model spans. Never clamp utilisation.
 Test: one hand-worked example per module inside the test; property tests (longer span → larger moment, more storeys → larger column load).
 
