@@ -9,7 +9,8 @@
  *   - nothing is clamped: any member over its limit is listed as a failure with a ratio over 1;
  *   - a building with no listed failure has every member ratio at or below 1;
  *   - the bar schedule uses stock diameters only, provides at least the steel required by every member that fits,
- *     adds up, and stays between 50 and 200 kg of steel per m3 of concrete.
+ *     adds up, stays between 50 and 200 kg of steel per m3 of concrete, has no row longer than the 12 m stock bar,
+ *     and every flexural member, with the lever arm of its bars as placed, carries its design moment.
  *
  * The outcome per case (pass or the worst ratio) is written to scripts/audits/audit-out/structural-sweep.md; outcomes
  * are reported, not asserted, because tall frames legitimately fail drift without shear walls.
@@ -23,7 +24,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { analyzeStructure } from "../../src/structure/analyze";
 import { isStockBar } from "../../src/structure/barSelect";
-import { buildBbs } from "../../src/structure/bbs";
+import { buildBbs, STOCK_LENGTH_MM } from "../../src/structure/bbs";
 import { UNIT_WEIGHTS } from "../../src/structure/materials";
 import { DEFAULT_SETBACKS_MM, deriveBuilding } from "../../src/model/building";
 import { fitRange } from "../../src/plans/fit";
@@ -105,6 +106,12 @@ describe("structural sweep", () => {
             expect(bbs.totals.kgPerM3).toBeGreaterThan(50);
             expect(bbs.totals.kgPerM3).toBeLessThan(200);
             if (res.ok) expect(bbs.issues.filter((i) => i.severity === "fail")).toHaveLength(0);
+            // independent capacity of each flexural member as detailed: phi Mn = 0.9 As fy (d - a/2), a = As fy / (0.85 fc b)
+            for (const pk of bbs.picks.filter((q) => q.muKnM !== undefined && q.fits)) {
+              const a = (pk.providedMm2 * 420) / (0.85 * 20 * pk.widthMm!);
+              expect((0.9 * pk.providedMm2 * 420 * (pk.dMm! - a / 2)) / 1e6, pk.ref).toBeGreaterThanOrEqual(pk.muKnM! - 1e-6);
+            }
+            for (const r of bbs.rows) expect(r.cutLengthMm, r.description.en).toBeLessThanOrEqual(STOCK_LENGTH_MM);
 
             const c0 = fr.columns.reduce((a, c) => (c.storeys[0].section.bx * c.storeys[0].section.by > a.storeys[0].section.bx * a.storeys[0].section.by ? c : a));
             history.push({ n, load: fr.columns.reduce((a, c) => a + c.storeys[0].deadKn + c.storeys[0].liveKn, 0), shear: sx.baseShearKn, side: Math.max(...fr.columns.map((c) => c.footing.sideMm)) });

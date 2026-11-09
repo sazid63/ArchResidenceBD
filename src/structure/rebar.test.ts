@@ -5,7 +5,7 @@ import { DEFAULT_SETBACKS_MM, deriveBuilding } from "../model/building";
 import { bendDeduction, bendDiameter, hookTail, lapCompression, lapTension, ldCompression, ldHook, ldTension, tieHookTail } from "./anchorage";
 import { analyzeStructure } from "./analyze";
 import { barArea, isStockBar, layerCapacity, pickBeamBars, pickColumnBars, pickMatBars, STOCK_BARS, unitWeightKgM } from "./barSelect";
-import { buildBbs } from "./bbs";
+import { buildBbs, STOCK_LENGTH_MM } from "./bbs";
 
 const S = DEFAULT_SETBACKS_MM;
 
@@ -186,5 +186,50 @@ describe("bar bending schedule", () => {
     expect(JSON.stringify(buildBbs(res, m))).toBe(JSON.stringify(bbs));
     const m7 = model("p1-4b", 7);
     expect(buildBbs(analyzeStructure(m7), m7).totals.weightKg).toBeGreaterThan(bbs.totals.weightKg);
+  });
+});
+
+/** Independent capacity: phi Mn = 0.9 As fy (d - a/2), a = As fy / (0.85 fc b), from the bars as placed (not the design routine). */
+function phiMn(asMm2: number, widthMm: number, dMm: number): number {
+  const a = (asMm2 * 420) / (0.85 * 20 * widthMm);
+  return (0.9 * asMm2 * 420 * (dMm - a / 2)) / 1e6;
+}
+
+describe("audit of the bar bending schedule", () => {
+  const cases: Array<[string, number]> = [["p1-4b", 8], ["p1-4b-wide", 6], ["p2-3b-fb", 6], ["p2-2b-lr", 5]];
+  for (const [plan, n] of cases) {
+    const m = model(plan, n);
+    const res = analyzeStructure(m);
+    const bbs = buildBbs(res, m);
+
+    it(`${plan} x${n}: every flexural member, as detailed with its real lever arm, carries its moment`, () => {
+      const flexural = bbs.picks.filter((pk) => pk.muKnM !== undefined && pk.fits);
+      expect(flexural.length).toBeGreaterThan(100);
+      for (const pk of flexural) expect(phiMn(pk.providedMm2, pk.widthMm!, pk.dMm!), pk.ref).toBeGreaterThanOrEqual(pk.muKnM! - 1e-6);
+    });
+
+    it(`${plan} x${n}: no schedule row is longer than the 12 m stock bar`, () => {
+      for (const r of bbs.rows) expect(r.cutLengthMm, r.description.en).toBeLessThanOrEqual(STOCK_LENGTH_MM);
+    });
+
+    it(`${plan} x${n}: bars placed in two layers have a smaller lever arm than one layer`, () => {
+      for (const pk of bbs.picks.filter((q) => q.family === "beam" && q.dMm !== undefined)) expect(pk.dMm!).toBeLessThanOrEqual(m.input.floorToFloorMm);
+    });
+  }
+
+  it("a long beam line is split into lapped pieces whose centreline length covers the line plus the laps", () => {
+    const m = model("p1-4b-wide", 4);
+    const res = analyzeStructure(m);
+    const bbs = buildBbs(res, m);
+    const ends = bbs.rows.filter((r) => r.family === "beam" && r.description.en.includes("end pieces"));
+    expect(ends.length).toBeGreaterThan(0);
+    for (const r of ends) {
+      const pieces = Number(/([0-9]+) pieces lapped/.exec(r.description.en)![1]);
+      const lap = lapTension(12, "B", { topBar: true });
+      // the pieces carry total + (pieces - 1) laps between them
+      const total = (r.dimsMm[0] * pieces) - (pieces - 1) * lap;
+      expect(total).toBeGreaterThan(STOCK_LENGTH_MM - r.dimsMm[1]);
+      expect(r.dimsMm[0] + r.dimsMm[1]).toBeLessThanOrEqual(STOCK_LENGTH_MM + 1e-6);
+    }
   });
 });

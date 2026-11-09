@@ -40,6 +40,11 @@ export interface BeamBarOptions {
   maxLayers?: number;
   coverMm?: number;
   linkMm?: number;
+  /**
+   * Steel the member needs for bars of `dia` placed in `layers` layers, mm2. Two layers lower the lever arm, so the
+   * requirement grows; without this the single `asReq` is used for every layout.
+   */
+  asReqFor?: (layers: number, dia: number) => number;
 }
 
 /** Beam bars for `asReq` mm2: scanning from the smallest diameter, a bigger bar replaces the pick only when it saves 2 % of the steel; at most two layers. */
@@ -50,20 +55,28 @@ export function pickBeamBars(asReq: number, widthMm: number, o: BeamBarOptions =
   const layersMax = o.maxLayers ?? 2;
   const cover = o.coverMm ?? DESIGN.coverBeamMm;
   const link = o.linkMm ?? DESIGN.stirrupMm;
+  const need = (layers: number, dia: number) => (o.asReqFor ? o.asReqFor(layers, dia) : asReq);
   let best: BarPick | null = null;
   for (const dia of dias) {
-    if (!Number.isFinite(asReq)) break;
     const cap = layerCapacity(widthMm, dia, cover, link);
-    const nMax = layersMax * cap - occupied;
-    const n = Math.max(minN, Math.ceil(asReq / barArea(dia)));
-    if (n > nMax || cap === 0) continue;
-    const cand: BarPick = { dia, n, layers: n + occupied > cap ? 2 : 1, areaMm2: n * barArea(dia), fits: true };
-    if (!best || cand.areaMm2 < best.areaMm2 * 0.98) best = cand; // smaller bars win unless a bigger bar saves at least 2 % steel
+    if (cap === 0) continue;
+    for (let layers = 1; layers <= layersMax; layers++) {
+      const req = need(layers, dia);
+      if (!Number.isFinite(req)) continue;
+      const n = Math.max(minN, Math.ceil(req / barArea(dia)));
+      // one layer holds cap bars; a second layer is used only when one is not enough
+      if (n + occupied > layers * cap) continue;
+      if (layers === 1 && n + occupied > cap) continue;
+      if (layers === 2 && n + occupied <= cap) continue;
+      const cand: BarPick = { dia, n, layers, areaMm2: n * barArea(dia), fits: true };
+      if (!best || cand.areaMm2 < best.areaMm2 * 0.98) best = cand; // smaller bars win unless a bigger bar saves at least 2 % steel
+      break;
+    }
   }
   if (best) return best;
   const dia = dias[dias.length - 1];
   const cap = layerCapacity(widthMm, dia, cover, link);
-  const n = Number.isFinite(asReq) ? Math.max(minN, Math.ceil(asReq / barArea(dia))) : Math.max(layersMax * cap - occupied, minN);
+  const n = Number.isFinite(need(layersMax, dia)) ? Math.max(minN, Math.ceil(need(layersMax, dia) / barArea(dia))) : Math.max(layersMax * cap - occupied, minN);
   return { dia, n, layers: layersMax, areaMm2: n * barArea(dia), fits: false };
 }
 
