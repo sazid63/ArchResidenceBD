@@ -70,6 +70,11 @@ describe("buildReport", () => {
     for (const i of ready(project()).items) if (i.citation) expect(i.citation.en, i.id).not.toMatch(/[ঀ-৿]/);
   });
 
+  it("gives every item a unique id (deviations are keyed by it)", () => {
+    const ids = ready(project()).items.map((i) => i.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
   it("is bilingual: every item has English and Bangla titles", () => {
     for (const i of ready(project()).items) {
       expect(i.title.en.length, i.id).toBeGreaterThan(0);

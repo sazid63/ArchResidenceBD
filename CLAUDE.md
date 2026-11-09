@@ -2,11 +2,11 @@
 
 Bilingual EN/BN app: Dhaka plot → floor plan → 3D → structure → RAJUK/BNBC checks → BOQ → drawings. React 19 + TS + Vite 8, Tauri shell, all logic in the browser.
 
-Your task: one ticket. Read only your section: `grep -n -A14 "^## <ID>" docs/handover/TICKETS.md`. Background only if the ticket needs it: `docs/BUILD_PLAN.md`.
+Start with `docs/handover/NEXT.md` (current state, next step, open decisions). Your task: one ticket. Read only your section: `grep -n -A14 "^## <ID>" docs/handover/TICKETS.md`. Background only if the ticket needs it: `docs/BUILD_PLAN.md`.
 
 Settled (don't revisit): no AI models · Civic style, Monsoon indigo tokens (`src/theme/tokens.css`) · RAJUK 2008 now; BNBC/DAP values only with citations, else "not checked" · original plans only · Windows + web · Dhaka only.
 
-Map: `src/plans` grid floor plans (fit, geometry, validate, render, library) · `src/model` project format v3, migration, store · `src/model` also has `building.ts` (plot + plan → BuildingModel), `toMesh.ts` (model → 3D), `projectMesh.ts` (project → mesh), `planChoices.ts` (which plans fit) · `src/cad` v2 engines (`parametricBuildingGenerator.ts` is now a thin wrapper; structural/compliance/rebar known-wrong) · `src/engine/projectState.ts` v2 store the UI still uses · `src/ui/kit.tsx` components. Old reports in `docs/` (audits, KNOWLEDGE_BASE, MODEL_CARD, docs/plan, docs/work) are outdated: skip.
+Map: `src/plans` grid floor plans (fit, geometry, validate, render, library) · `src/model` project format v3, migration, store · `src/model` also has `building.ts` (plot + plan → BuildingModel), `toMesh.ts` (model → 3D), `projectMesh.ts` (project → mesh), `planChoices.ts` (which plans fit) · `src/rules` RAJUK pack loader, evaluators, `check()`, `buildReport()` (Compliance screen), deviations · `src/cad` v2 engines (`parametricBuildingGenerator.ts` is now a thin wrapper; structural/rebar known-wrong) · `src/engine/projectState.ts` v2 store the UI still uses · `src/ui/kit.tsx` components. Old reports in `docs/` (audits, KNOWLEDGE_BASE, MODEL_CARD, docs/plan, docs/work) are outdated: skip.
 
 Rules:
 - Grep, then read line ranges. Never read whole `parametricBuildingGenerator.ts`, `NativeCadScreen.tsx`, `i18n.tsx`.

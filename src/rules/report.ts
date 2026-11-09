@@ -65,10 +65,17 @@ export function citationText(s: CheckSource): Bilingual {
   };
 }
 
+/** Short stable hash so two issues on the same room get different ids (deviations are keyed by id). */
+function hash(text: string): string {
+  let h = 5381;
+  for (let i = 0; i < text.length; i++) h = ((h * 33) ^ text.charCodeAt(i)) >>> 0;
+  return h.toString(36);
+}
+
 function fromIssue(issue: Issue, section: ReportSection, floors: Set<"ground" | "typical">): ReportItem {
   const where = floors.size === 2 ? "" : floors.has("ground") ? " (ground floor)" : " (upper floors)";
   return {
-    id: `plan.${issue.code}.${issue.roomId ?? "all"}.${section}`,
+    id: `plan.${issue.code}.${issue.roomId ?? "all"}.${hash(issue.message)}`,
     section,
     status: issue.severity === "error" ? "fail" : "warn",
     title: ISSUE_TITLE[issue.code],

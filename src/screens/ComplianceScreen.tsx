@@ -47,6 +47,8 @@ export function ComplianceScreen() {
   const { items, summary } = report;
   const shown = filterItems(items, tab);
   const deviations = project.deviations ?? [];
+  // A deviation whose rule no longer fails (the plot or plan changed) is shown as resolved, not silently kept.
+  const failingIds = new Set(items.filter((i) => i.status === "fail" || i.status === "warn").map((i) => i.id));
 
   const onRecord = (item: ReportItem) => {
     saveProject({ ...project, deviations: recordDeviation(project.deviations, item, reason), updatedAt: new Date().toISOString() });
@@ -117,7 +119,9 @@ export function ComplianceScreen() {
                     {item.citation ? (bn ? item.citation.bn : item.citation.en) : bn ? "জ্যামিতিক তথ্য" : "Geometry fact"}
                     {item.basis === "assumption" ? (bn ? " · অনুমান" : " · assumption") : ""}
                   </span>
-                  {(item.status === "fail" || item.status === "warn") && !isRecorded(project.deviations, item) ? (
+                  {isRecorded(project.deviations, item) ? (
+                    <span className="small muted">{bn ? "বিচ্যুতি নথিভুক্ত" : "Deviation recorded"}</span>
+                  ) : (item.status === "fail" || item.status === "warn") ? (
                     <Button variant="ghost" onClick={() => { setReasonFor(item.id); setReason(""); }}>
                       {bn ? "বিচ্যুতি হিসেবে নথিভুক্ত করুন" : "Record as deviation"}
                     </Button>
@@ -163,7 +167,10 @@ export function ComplianceScreen() {
               </div>
               <div className="small muted">{bn ? "প্রয়োজন" : "Required"}: {d.expected} · {bn ? "আছে" : "Actual"}: {d.actual}</div>
               {d.rationale ? <p className="small" style={{ margin: 0 }}>{d.rationale}</p> : null}
-              <span className="faint small font-mono">{d.recordedAt.slice(0, 10)} · {d.ruleRef}</span>
+              <span className="faint small font-mono">
+                {d.recordedAt.slice(0, 10)} · {d.ruleRef}
+                {failingIds.has(d.ruleRef) ? "" : bn ? " · এখন আর অনুত্তীর্ণ নয়" : " · no longer failing"}
+              </span>
             </Card>
           ))
         )}
