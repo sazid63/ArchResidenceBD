@@ -80,8 +80,8 @@ export function BoqScreen() {
 
       <Callout tone="warn" title={bn ? "রেট কার্ড এখনো যাচাই হয়নি, মোট একটি নিম্নসীমা" : "Rate card not yet verified; the total is a lower bound"}>
         {bn
-          ? `দাম "${c.source.name}" থেকে (অবস্থা: ${c.status}, কার্যকর ${c.effectiveFrom}, তথ্য ${c.asOf ?? "—"})। কার্ডে নেই এমন আইটেম (পাথর ইত্যাদি) এবং শ্রম, যন্ত্র, সার্ভিস, দরজা-জানালা, টাইলস ও রং ধরা হয়নি।`
-          : `Prices are from "${c.source.name}" (status ${c.status}, effective ${c.effectiveFrom}, as of ${c.asOf ?? "n/a"}). Items the card lacks (stone chips), and labour, machinery, services, joinery, tiles and paint, are not in the total.`}
+          ? `দাম "${c.source.name}" থেকে (অবস্থা: ${c.status}, কার্যকর ${c.effectiveFrom}, তথ্য ${c.asOf ?? "—"})। শ্রম, যন্ত্র, সার্ভিস, দরজা-জানালা, টাইলস ও রং ধরা হয়নি।`
+          : `Prices are from "${c.source.name}" (status ${c.status}, effective ${c.effectiveFrom}, as of ${c.asOf ?? "n/a"}). Labour, machinery, services, joinery, tiles and paint, are not in the total.`}
       </Callout>
 
       <div className="row" style={{ gap: 16, margin: "16px 0", flexWrap: "wrap" }}>

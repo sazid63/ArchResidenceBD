@@ -184,7 +184,10 @@ describe("pricing", () => {
     expect(cem.amountBdt).toBeCloseTo(cem.quantity * 520, 6);
     expect(boq.totalBdt).toBeCloseTo(boq.lines.reduce((s, l) => s + (l.amountBdt ?? 0), 0), 4);
     expect(boq.byCategory.reduce((s, c) => s + c.amountBdt, 0)).toBeCloseTo(boq.totalBdt, 4);
-    expect(boq.unpriced).toContain("concrete-stone");
+    const stone = boq.lines.find((l) => l.id === "concrete-stone")!;
+    expect(stone.rateBdt).toBe(218.04);
+    expect(stone.amountBdt).toBeCloseTo(stone.quantity * 218.04, 6);
+    expect(boq.unpriced).not.toContain("concrete-stone");
     expect(boq.unpriced).not.toContain("steel");
     expect(boq.card.status).toBe("candidate");
   });
@@ -196,12 +199,19 @@ describe("pricing", () => {
     expect(boq.unpriced).toContain("steel");
   });
 
+  it("a card without a stone line leaves stone chips unpriced and says so", () => {
+    const card: RateCard = { ...DEFAULT_RATE_CARD, lines: DEFAULT_RATE_CARD.lines.filter((l) => l.key !== "stone-chips") };
+    const boq = priceTakeoff(takeoff(m, bbs), card);
+    expect(boq.unpriced).toContain("concrete-stone");
+    expect(boqToCsv(boq).split("\n").at(-1)).toMatch(/excludes unpriced items: concrete-stone/);
+  });
+
   it("CSV has a header, one row per item and the card and total rows", () => {
     const boq = buildBoq(m, bbs);
     const rows = boqToCsv(boq).split("\n");
     expect(rows[0]).toMatch(/^item,category,description,unit,quantity,rate_bdt,amount_bdt,basis$/);
     expect(rows.length).toBe(1 + boq.lines.length + 2);
     expect(rows.some((r) => r.startsWith("rate_card,pwd-sor-2022-civil-works"))).toBe(true);
-    expect(rows[rows.length - 1]).toMatch(/excludes unpriced items: concrete-stone/);
+    expect(rows[rows.length - 1]).toMatch(/all items priced/);
   });
 });
