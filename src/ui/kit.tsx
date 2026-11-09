@@ -146,12 +146,38 @@ export function Callout({
   );
 }
 
-export function Stat({ label, value }: { label: string; value: string }) {
+/** The outcome a figure reports. Only result tiles take one; plain facts stay neutral. */
+export type ResultTone = "ok" | "warn" | "bad";
+
+export function Stat({ label, value, tone }: { label: string; value: string; tone?: ResultTone }) {
   return (
-    <div className="stat">
+    <div className={cx("stat", tone && `stat--${tone}`)}>
       <span className="stat-value">{value}</span>
       <span className="stat-label">{label}</span>
     </div>
+  );
+}
+
+export interface VerdictItem {
+  /** Result colour; omit for a count that is not a result (for example "not checked"). */
+  tone?: ResultTone;
+  /** The figure: a count or a ratio. */
+  value: string | number;
+  /** The word that says what it counts. Colour never carries the meaning alone. */
+  label: string;
+}
+
+/** One line that answers "can I build this?": the counts of fails, warnings and passes, each in its result colour with its word. */
+export function VerdictStrip({ items, "aria-label": ariaLabel }: { items: VerdictItem[]; "aria-label": string }) {
+  return (
+    <ul className="verdict" aria-label={ariaLabel}>
+      {items.map((it) => (
+        <li key={it.label} className={cx("verdict-item", it.tone && `verdict-item--${it.tone}`)}>
+          <span className="verdict-value">{it.value}</span>
+          <span className="verdict-label">{it.label}</span>
+        </li>
+      ))}
+    </ul>
   );
 }
 

@@ -7,7 +7,7 @@ import { seismicPack } from "../rules/bnbcStructure";
 import { analyzeStructure, type LevelResult, type MemberFailure } from "../structure/analyze";
 import type { SeismicResult } from "../structure/seismic";
 import type { CheckResult } from "../theme/tokens";
-import { Callout, Card, EmptyState, PageHeader, ResultChip, Stat, Value } from "../ui/kit";
+import { Callout, Card, EmptyState, PageHeader, ResultChip, Stat, Value, VerdictStrip } from "../ui/kit";
 
 const SITE_CLASSES: SiteClass[] = ["SA", "SB", "SC", "SD", "SE"];
 
@@ -21,7 +21,7 @@ const MEMBER_LABEL: Record<MemberFailure["member"], { en: string; bn: string }> 
 
 /** Demand / capacity as a percentage, never clamped (130 % stays 130 %). */
 export function ratioText(u: number): string {
-  return Number.isFinite(u) ? `${Math.round(u * 100)}%` : "∞";
+  return Number.isFinite(u) ? `${(u * 100).toFixed(1)}%` : "∞";
 }
 
 /** Within the limit, close to it (over 90 %), or over it. */
@@ -153,9 +153,15 @@ export function StructureScreen() {
           : "A licensed structural engineer must design and sign the structure. Torsion, wind, dynamic analysis and soil tests are not considered here. A ratio over 100 % is a failure and is never clamped to 100 %."}
       </Callout>
 
+      <VerdictStrip
+        aria-label={bn ? "ফলাফল" : "Result"}
+        items={[
+          { tone: result.util > 1 ? "bad" : result.util > 0.9 ? "warn" : "ok", value: ratioText(result.util), label: bn ? "সর্বোচ্চ অনুপাত (সীমা ১০০%)" : "worst ratio (limit 100%)" },
+          { tone: failures.length > 0 ? "bad" : "ok", value: failures.length, label: bn ? "সদস্য সীমা ছাড়িয়েছে" : failures.length === 1 ? "member over its limit" : "members over their limit" },
+        ]}
+      />
+
       <div className="row" style={{ gap: 16, margin: "16px 0", flexWrap: "wrap" }}>
-        <Stat label={bn ? "সবচেয়ে খারাপ অনুপাত" : "Worst ratio"} value={ratioText(result.util)} />
-        <Stat label={bn ? "অনুত্তীর্ণ সদস্য" : "Failing members"} value={String(failures.length)} />
         <Stat label={bn ? "পর্যায়কাল (সেকেন্ড)" : "Period (s)"} value={fr.seismicX.periodS.toFixed(2)} />
         <Stat label={bn ? "বেস শিয়ার (কিনি)" : "Base shear (kN)"} value={fr.seismicX.baseShearKn.toFixed(0)} />
         <Stat label={bn ? "ভূকম্পন ডিজাইন ক্যাটাগরি" : "Seismic design category"} value={fr.seismicX.category} />

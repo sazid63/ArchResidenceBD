@@ -449,6 +449,29 @@
   font-size: var(--fs-sm);
 }
 
+/* Result tone on a stat tile, and the verdict strip: result colours only ever describe a result, and the word is always printed */
+.stat--ok { background: var(--ok-soft); border-color: transparent; }
+.stat--ok .stat-value, .stat--ok .stat-label { color: var(--ok-ink); }
+.stat--warn { background: var(--warn-soft); border-color: transparent; }
+.stat--warn .stat-value, .stat--warn .stat-label { color: var(--warn-ink); }
+.stat--bad { background: var(--bad-soft); border-color: transparent; }
+.stat--bad .stat-value, .stat--bad .stat-label { color: var(--bad-ink); }
+
+.verdict { display: flex; flex-wrap: wrap; gap: var(--s-2); list-style: none; margin: var(--s-4) 0; padding: 0; }
+.verdict-item {
+  display: inline-flex; align-items: baseline; gap: 6px;
+  padding: 6px 14px; border-radius: var(--r-md);
+  background: var(--surface-2); border: 1px solid var(--line); color: var(--ink-soft);
+  font-size: var(--fs-sm);
+}
+.verdict-value { font-size: var(--fs-lg); font-weight: 600; font-variant-numeric: tabular-nums; color: var(--ink); }
+.verdict-item--ok { background: var(--ok-soft); border-color: transparent; color: var(--ok-ink); }
+.verdict-item--ok .verdict-value { color: var(--ok-ink); }
+.verdict-item--warn { background: var(--warn-soft); border-color: transparent; color: var(--warn-ink); }
+.verdict-item--warn .verdict-value { color: var(--warn-ink); }
+.verdict-item--bad { background: var(--bad-soft); border-color: transparent; color: var(--bad-ink); }
+.verdict-item--bad .verdict-value { color: var(--bad-ink); }
+
 /* Data tables (Structure screen): tokens only */
 .data-table { width: 100%; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
 .data-table th { text-align: left; font-weight: 600; color: var(--ink-soft); padding: 6px 10px; border-bottom: 1px solid var(--line-strong); white-space: nowrap; }

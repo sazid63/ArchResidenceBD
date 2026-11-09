@@ -3,7 +3,7 @@ import { useProject } from "../context/ProjectContext";
 import { useI18n } from "../i18n";
 import { isRecorded, recordDeviation, removeDeviation } from "../rules/deviations";
 import { buildReport, filterItems, type ReportItem, type ReportSection, type ReportTab } from "../rules/report";
-import { Button, Callout, Card, EmptyState, PageHeader, ResultChip, SegmentedControl, Stat, Value } from "../ui/kit";
+import { Button, Callout, Card, EmptyState, PageHeader, ResultChip, SegmentedControl, Value, VerdictStrip } from "../ui/kit";
 
 const SECTIONS: Array<{ id: ReportSection; en: string; bn: string }> = [
   { id: "rajuk", en: "RAJUK 2008: plot and building", bn: "রাজউক ২০০৮: জমি ও ভবন" },
@@ -11,6 +11,9 @@ const SECTIONS: Array<{ id: ReportSection; en: string; bn: string }> = [
   { id: "fire", en: "Fire and egress", bn: "অগ্নি নিরাপত্তা ও বহির্গমন" },
   { id: "access", en: "Accessibility", bn: "প্রবেশগম্যতা" },
 ];
+
+/** Failures first, then warnings, then what is not checked, then passes. */
+const SEVERITY: Record<string, number> = { fail: 0, warn: 1, not_checked: 2, not_applicable: 3, pass: 4 };
 
 export function ComplianceScreen() {
   const { lang } = useI18n();
@@ -78,17 +81,20 @@ export function ComplianceScreen() {
           : "A rule the model or the pack cannot decide is shown as Not checked and never assumed to pass. DAP land-use is not checked yet."}
       </Callout>
 
-      <div className="row" style={{ gap: 16, marginBottom: 16 }}>
-        <Stat label={bn ? "অনুত্তীর্ণ" : "Fails"} value={String(summary.fail)} />
-        <Stat label={bn ? "সতর্কতা" : "Warnings"} value={String(summary.warn)} />
-        <Stat label={bn ? "উত্তীর্ণ" : "Passes"} value={String(summary.pass)} />
-        <Stat label={bn ? "যাচাই হয়নি" : "Not checked"} value={String(summary.notChecked)} />
-      </div>
+      <VerdictStrip
+        aria-label={bn ? "ফলাফলের সারসংক্ষেপ" : "Result summary"}
+        items={[
+          { tone: summary.fail > 0 ? "bad" : "ok", value: summary.fail, label: bn ? "অনুত্তীর্ণ" : summary.fail === 1 ? "fail" : "fails" },
+          { tone: summary.warn > 0 ? "warn" : "ok", value: summary.warn, label: bn ? "সতর্কতা" : summary.warn === 1 ? "warning" : "warnings" },
+          { tone: "ok", value: summary.pass, label: bn ? "উত্তীর্ণ" : summary.pass === 1 ? "pass" : "passes" },
+          { value: summary.notChecked, label: bn ? "যাচাই হয়নি" : "not checked" },
+        ]}
+      />
 
       <SegmentedControl<ReportTab> aria-label={bn ? "ফলাফল ফিল্টার" : "Filter results"} options={tabs} value={tab} onChange={setTab} />
 
       {SECTIONS.map((sec) => {
-        const rows = shown.filter((i) => i.section === sec.id);
+        const rows = shown.filter((i) => i.section === sec.id).sort((a, b) => SEVERITY[a.status] - SEVERITY[b.status]); // failures first inside every section
         if (!rows.length) return null;
         return (
           <section key={sec.id} className="stack" style={{ marginTop: 20, gap: 12 }} aria-label={bn ? sec.bn : sec.en}>

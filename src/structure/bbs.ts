@@ -62,6 +62,8 @@ export interface PickCheck {
 
 export interface BbsIssue {
   ref: string;
+  /** Why it happened, so the screen can group the repeats: a hook longer than its column, no stock bar that fits, or a footing too shallow for the starter bars. */
+  cause: "hook" | "no_bars" | "embed";
   en: string;
   bn: string;
   /** fail: the steel cannot be fitted or anchored; warn: a reduction factor or a bigger member would cure it. */
@@ -126,7 +128,7 @@ class Builder {
 
   pick(c: PickCheck): void {
     this.picks.push(c);
-    if (!c.fits) this.issue({ ref: c.ref, severity: "fail", en: `${c.ref}: no stock bars fit the ${Number.isFinite(c.requiredMm2) ? c.requiredMm2.toFixed(0) : "required"} mm2 required; enlarge the member.`, bn: `${c.ref}: প্রয়োজনীয় রড বসে না; সদস্য বড় করুন।` }, c.level);
+    if (!c.fits) this.issue({ ref: c.ref, cause: "no_bars", severity: "fail", en: `${c.ref}: no stock bars fit the ${Number.isFinite(c.requiredMm2) ? c.requiredMm2.toFixed(0) : "required"} mm2 required; enlarge the member.`, bn: `${c.ref}: প্রয়োজনীয় রড বসে না; সদস্য বড় করুন।` }, c.level);
   }
 
   rows(): BbsRow[] {
@@ -215,7 +217,7 @@ function beamLine(line: BeamLinePlaced, k: number, colAt: (k: number, x: number,
     const straight = ln + embed(i, cl) + embed(i + 1, cr);
     const bend = { deg: 90, bendDia: bendDiameter(p.dia) };
     for (const [j, col] of [[i, cl], [i + 1, cr]] as const)
-      if (exterior(j) && ldHook(p.dia) > col - COVER) bld.issue({ ref: `B ${ref}`, severity: "warn", en: `B ${ref}: the hook of the ${p.dia} mm bottom bar needs ${ldHook(p.dia).toFixed(0)} mm of column but only ${(col - COVER).toFixed(0)} mm is available.`, bn: `B ${ref}: ${p.dia} মিমি নিচের রডের হুকের জন্য ${ldHook(p.dia).toFixed(0)} মিমি কলাম লাগে, আছে ${(col - COVER).toFixed(0)} মিমি।` }, k);
+      if (exterior(j) && ldHook(p.dia) > col - COVER) bld.issue({ ref: `B ${ref}`, cause: "hook", severity: "warn", en: `B ${ref}: the hook of the ${p.dia} mm bottom bar needs ${ldHook(p.dia).toFixed(0)} mm of column but only ${(col - COVER).toFixed(0)} mm is available.`, bn: `B ${ref}: ${p.dia} মিমি নিচের রডের হুকের জন্য ${ldHook(p.dia).toFixed(0)} মিমি কলাম লাগে, আছে ${(col - COVER).toFixed(0)} মিমি।` }, k);
     const shape: ShapeCode = hooks === 0 ? "00" : hooks === 1 ? "11" : "21";
     const dims = hooks === 0 ? [straight] : hooks === 1 ? [straight, leg] : [leg, straight, leg];
     bld.add({ family: "beam", description: bi(`Beam ${ref}, bottom bars, span ${i + 1}`, `বিম ${ref}, নিচের রড, স্প্যান ${i + 1}`), dia: p.dia, shape, dims, cut: cutLength(dims, p.dia, Array(hooks).fill(bend)), bars: p.n, level: k });
@@ -261,7 +263,7 @@ function beamLine(line: BeamLinePlaced, k: number, colAt: (k: number, x: number,
     if (exterior(j)) {
       const inner = spans[j === 0 ? 0 : n - 1].lengthMm;
       const leg = hookTail(p.dia, "90");
-      if (ldHook(p.dia) > col - COVER) bld.issue({ ref: `B ${ref}`, severity: "warn", en: `B ${ref}: the hook of the ${p.dia} mm top bar needs ${ldHook(p.dia).toFixed(0)} mm of column but only ${(col - COVER).toFixed(0)} mm is available.`, bn: `B ${ref}: ${p.dia} মিমি উপরের রডের হুকের জন্য ${ldHook(p.dia).toFixed(0)} মিমি কলাম লাগে, আছে ${(col - COVER).toFixed(0)} মিমি।` }, k);
+      if (ldHook(p.dia) > col - COVER) bld.issue({ ref: `B ${ref}`, cause: "hook", severity: "warn", en: `B ${ref}: the hook of the ${p.dia} mm top bar needs ${ldHook(p.dia).toFixed(0)} mm of column but only ${(col - COVER).toFixed(0)} mm is available.`, bn: `B ${ref}: ${p.dia} মিমি উপরের রডের হুকের জন্য ${ldHook(p.dia).toFixed(0)} মিমি কলাম লাগে, আছে ${(col - COVER).toFixed(0)} মিমি।` }, k);
       const dims = [cutOff(inner) + col - COVER, leg];
       bld.add({ family: "beam", description: bi(`Beam ${ref}, extra top bars at end support`, `বিম ${ref}, প্রান্ত অবলম্বনে বাড়তি উপরের রড`), dia: p.dia, shape: "11", dims, cut: cutLength(dims, p.dia, [{ deg: 90, bendDia: bendDiameter(p.dia) }]), bars: p.n, level: k });
     } else {
@@ -377,7 +379,7 @@ function detailColumns(res: StructureResult, model: BuildingModel, b: Builder): 
       let bends: typeof bend[] = [];
       if (i === 0) {
         const embed = col.footing.depthMm - 75 - 2 * 16;
-        if (embed < ldCompression(p.dia)) b.issue({ ref: `${col.id} footing`, severity: "fail", en: `${col.id}: the footing is ${col.footing.depthMm} mm deep; the ${p.dia} mm starter bars need ${ldCompression(p.dia).toFixed(0)} mm of embedment.`, bn: `${col.id}: ফুটিং ${col.footing.depthMm} মিমি গভীর; ${p.dia} মিমি স্টার্টার রডের জন্য ${ldCompression(p.dia).toFixed(0)} মিমি এমবেডমেন্ট লাগে।` }, 0);
+        if (embed < ldCompression(p.dia)) b.issue({ ref: `${col.id} footing`, cause: "embed", severity: "fail", en: `${col.id}: the footing is ${col.footing.depthMm} mm deep; the ${p.dia} mm starter bars need ${ldCompression(p.dia).toFixed(0)} mm of embedment.`, bn: `${col.id}: ফুটিং ${col.footing.depthMm} মিমি গভীর; ${p.dia} মিমি স্টার্টার রডের জন্য ${ldCompression(p.dia).toFixed(0)} মিমি এমবেডমেন্ট লাগে।` }, 0);
         dims = [hMm + (n > 1 ? lap : 0) + embed, toe];
         shape = "11";
         bends = [bend];

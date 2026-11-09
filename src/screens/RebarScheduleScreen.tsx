@@ -3,10 +3,10 @@ import { useProject } from "../context/ProjectContext";
 import { useI18n } from "../i18n";
 import { buildingForProject } from "../model/projectMesh";
 import { analyzeStructure } from "../structure/analyze";
-import { buildBbs, type BbsFamily, type BbsResult } from "../structure/bbs";
+import { buildBbs, type BbsFamily, type BbsIssue, type BbsResult } from "../structure/bbs";
 import { bbsToCsv } from "../structure/bbsCsv";
 import { STOCK_BARS } from "../structure/barSelect";
-import { Button, Callout, Card, EmptyState, PageHeader, ResultChip, SegmentedControl, Stat } from "../ui/kit";
+import { Button, Callout, Card, EmptyState, PageHeader, ResultChip, SegmentedControl, Stat, VerdictStrip } from "../ui/kit";
 
 type Filter = "all" | BbsFamily;
 
@@ -22,6 +22,22 @@ const SHAPE_NOTE: Record<string, { en: string; bn: string }> = {
   "11": { en: "one 90° bend", bn: "একটি ৯০° বাঁক" },
   "21": { en: "two 90° bends (U)", bn: "দুটি ৯০° বাঁক (U)" },
   "51": { en: "closed link, 135° hooks", bn: "বন্ধ স্টিরাপ, ১৩৫° হুক" },
+};
+
+/** One card per cause: the repeats are the same problem on different members, and the cure belongs beside it. */
+const CAUSES: Record<BbsIssue["cause"], { title: { en: string; bn: string }; cure: { en: string; bn: string } }> = {
+  hook: {
+    title: { en: "Hooks longer than the column", bn: "হুকের দৈর্ঘ্য কলামে আঁটে না" },
+    cure: { en: "At exterior columns the hook development length (Sec 8.2.6.2) is longer than the column. The 0.7 and 0.8 factors of Sec 8.2.6.3 are not applied. Smaller bars or a deeper column cure it.", bn: "প্রান্তের কলামে হুকের প্রয়োজনীয় দৈর্ঘ্য (ধারা ৮.২.৬.২) কলামের গভীরতার চেয়ে বেশি। ধারা ৮.২.৬.৩-এর ০.৭/০.৮ গুণক প্রয়োগ হয়নি। ছোট ব্যাসের রড বা বড় কলাম এটি সমাধান করে।" },
+  },
+  no_bars: {
+    title: { en: "No stock bar fits the steel required", bn: "প্রয়োজনীয় রডের জন্য কোনো মজুদ মাপ বসে না" },
+    cure: { en: "The section is too small for the steel it needs. Enlarge the member on the Structure screen.", bn: "সদস্যটি প্রয়োজনীয় রডের জন্য ছোট। স্ট্রাকচার স্ক্রিনে সদস্যটি বড় করুন।" },
+  },
+  embed: {
+    title: { en: "Footing too shallow for the starter bars", bn: "স্টার্টার রডের জন্য ফুটিং যথেষ্ট গভীর নয়" },
+    cure: { en: "The column starter bars need more embedment than the footing depth gives. Deepen the footing or use smaller bars.", bn: "কলামের স্টার্টার রডের জন্য ফুটিংয়ের গভীরতার চেয়ে বেশি এমবেডমেন্ট লাগে। ফুটিং গভীর করুন বা ছোট রড নিন।" },
+  },
 };
 
 const kg = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 0 });
@@ -81,6 +97,12 @@ export function RebarScheduleScreen() {
   const { bbs } = data;
   const rows = filter === "all" ? bbs.rows : bbs.rows.filter((r) => r.family === filter);
   const issues = [...bbs.issues].sort((a, b) => (a.severity === b.severity ? 0 : a.severity === "fail" ? -1 : 1));
+  const groups = (["no_bars", "embed", "hook"] as BbsIssue["cause"][])
+    .map((cause) => {
+      const items = issues.filter((i) => i.cause === cause);
+      return { cause, items, severity: items.some((i) => i.severity === "fail") ? ("fail" as const) : ("warn" as const), levels: [...new Set(items.flatMap((i) => i.levels))].sort((x, y) => x - y) };
+    })
+    .filter((g) => g.items.length > 0);
   const tabs: Array<{ value: Filter; label: string }> = [
     { value: "all", label: `${bn ? "সব" : "All"} (${bbs.rows.length})` },
     ...(["footing", "column", "beam", "slab"] as BbsFamily[]).map((f) => ({ value: f as Filter, label: `${bn ? FAMILY_LABEL[f].bn : FAMILY_LABEL[f].en} (${bbs.rows.filter((r) => r.family === f).length})` })),
@@ -101,32 +123,40 @@ export function RebarScheduleScreen() {
         <Stat label={bn ? "মোট রড (টন)" : "Total steel (t)"} value={(bbs.totals.weightKg / 1000).toFixed(2)} />
         <Stat label={bn ? "কংক্রিটের প্রতি ঘনমিটারে (কেজি)" : "Steel per m³ concrete (kg)"} value={bbs.totals.kgPerM3.toFixed(0)} />
         <Stat label={bn ? "শিডিউলের সারি" : "Schedule rows"} value={String(bbs.rows.length)} />
-        <Stat label={bn ? "সমস্যা" : "Issues"} value={String(issues.length)} />
       </div>
+
+      <VerdictStrip
+        aria-label={bn ? "রডের সমস্যার সারসংক্ষেপ" : "Rebar issue summary"}
+        items={[
+          { tone: issues.some((i) => i.severity === "fail") ? "bad" : "ok", value: issues.filter((i) => i.severity === "fail").length, label: bn ? "রড বসে না বা অ্যাঙ্কর হয় না" : "bars that do not fit or anchor" },
+          { tone: issues.some((i) => i.severity === "warn") ? "warn" : "ok", value: issues.filter((i) => i.severity === "warn").length, label: bn ? "যাচাই করুন (হুক)" : "to review (hooks)" },
+        ]}
+      />
 
       <section className="stack" style={{ gap: 12 }} aria-label={bn ? "সমস্যা" : "Issues"}>
         <h3 style={{ margin: 0 }}>{bn ? "আগে সমস্যাগুলো" : "Issues first"}</h3>
         {issues.length === 0 ? (
           <Card><p className="muted" style={{ margin: 0 }}>{bn ? "কোনো সমস্যা নেই: সব রড বসে এবং অ্যাঙ্কর হয়।" : "No issues: every bar fits and anchors."}</p></Card>
         ) : (
-          issues.slice(0, 12).map((i) => (
-            <Card key={i.en} className="stack">
+          groups.map((g) => (
+            <Card key={g.cause} className="stack">
               <div className="row-between">
-                <h4 style={{ margin: 0 }}>{bn ? i.bn : i.en}</h4>
-                <ResultChip result={i.severity === "fail" ? "fail" : "warn"} lang={lang} />
+                <h4 style={{ margin: 0 }}>{bn ? CAUSES[g.cause].title.bn : CAUSES[g.cause].title.en}</h4>
+                <ResultChip result={g.severity === "fail" ? "fail" : "warn"} lang={lang} />
               </div>
-              <span className="small muted">{(bn ? "স্তর/তলা: " : "Levels or storeys: ") + levelsText([...i.levels].sort((a, b) => a - b))}</span>
+              <span className="small muted">
+                {bn ? `${g.items.length}টি স্থানে, স্তর/তলা ${levelsText(g.levels)}` : `${g.items.length} ${g.items.length === 1 ? "place" : "places"}, levels ${levelsText(g.levels)}`}
+              </span>
+              <p className="small" style={{ margin: 0 }}>{bn ? CAUSES[g.cause].cure.bn : CAUSES[g.cause].cure.en}</p>
+              <details>
+                <summary className="small muted" style={{ cursor: "pointer" }}>{bn ? "স্থানগুলো দেখুন" : "Show the places"}</summary>
+                <ul className="small" style={{ margin: "8px 0 0", paddingLeft: 20 }}>
+                  {g.items.map((i) => <li key={i.en}>{bn ? i.bn : i.en}</li>)}
+                </ul>
+              </details>
             </Card>
           ))
         )}
-        {issues.length > 12 ? <p className="small muted">{(bn ? "আরও " : "and ") + (issues.length - 12) + (bn ? "টি" : " more")}</p> : null}
-        {issues.some((i) => i.severity === "warn") ? (
-          <Callout title={bn ? "হুকের দৈর্ঘ্য কলামে আঁটে না" : "Hooks longer than the column"}>
-            {bn
-              ? "প্রান্তের কলামে হুকের প্রয়োজনীয় দৈর্ঘ্য (ধারা ৮.২.৬.২) কলামের গভীরতার চেয়ে বেশি। ধারা ৮.২.৬.৩-এর ০.৭/০.৮ গুণক প্রয়োগ হয়নি; ছোট ব্যাসের রড বা বড় কলাম এটি সমাধান করে।"
-              : "At exterior columns the hook development length (Sec 8.2.6.2) is longer than the column. The 0.7 and 0.8 factors of Sec 8.2.6.3 are not applied; smaller bars or a deeper column cure it."}
-          </Callout>
-        ) : null}
       </section>
 
       <section className="stack" style={{ marginTop: 24, gap: 12 }} aria-label={bn ? "মোট" : "Totals"}>
