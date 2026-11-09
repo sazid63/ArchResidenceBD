@@ -55,7 +55,7 @@ Do: `ComplianceScreen` reads `src/rules` results plus plan-validator issues: `Re
 Do: `src/structure/`: loads from M3-1 citations (assumption-flagged where missing), BNBC strength and service combinations, one/two-way slabs (coefficient method), continuous beams (moments, flexure, shear, service deflection) on model spans. Never clamp utilisation.
 Test: one hand-worked example per module inside the test; property tests (longer span → larger moment, more storeys → larger column load).
 
-## M4-2 Columns, footings, seismic, Structure screen · Opus high · todo
+## M4-2 Columns, footings, seismic, Structure screen · Opus high · done ef247f6 (engine 534ae41)
 Do: column load takedown by tributary area per storey, minimum eccentricity, slenderness, axial + bending; footing area from service load ÷ allowable bearing, depth from punching at d/2 and one-way shear; equivalent static base shear and drift; section sizing from stock lists. Structure screen (grid, members, failures first, "screening, not final design"). Rebuild `audit:structural` on the model and add it to CI.
 
 ## M4-3 Rebar / BBS · Sonnet high · todo
