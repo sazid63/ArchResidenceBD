@@ -131,6 +131,13 @@ export function siteScene(model: BuildingModel, opts: SheetOptions = {}): Scene 
   return sb.scene("site", T(lang, "Site plan", "সাইট প্ল্যান"));
 }
 
+/** Half the thickness of the exterior walls: building faces sit this far outside the wall centre lines (x = 0, W; y = 0, D). */
+export function faceInset(model: BuildingModel): number {
+  let t = 0;
+  for (const st of model.storeys) for (const w of st.geometry.walls) if (w.exterior) t = Math.max(t, w.thicknessMm);
+  return t / 2;
+}
+
 /** Where the section cuts: through the stair cover when there is one, else the middle of the building. */
 export function sectionCutY(model: BuildingModel): number {
   const c = model.roof.stairCover;
@@ -141,33 +148,46 @@ export function sectionScene(model: BuildingModel, slabMm: number, opts: SheetOp
   const lang = opts.lang ?? "en";
   const W = model.widthMm;
   const cutY = sectionCutY(model);
+  const inset = faceInset(model);
+  const xL = -inset;
+  const xR = W + inset;
   const sb = new SceneBuilder();
   const roofL = model.roof.levelMm;
   const stub = ELEVATION.groundStubMm;
-  sb.line("GROUND", -stub, 0, W + stub, 0);
+  sb.line("GROUND", xL - stub, 0, xR + stub, 0);
 
-  // Slabs: the plinth at level 0 and one at each storey top (the last is the roof).
+  // Slabs run face to face: the plinth at level 0 and one at each storey top (the last is the roof).
   const slabLevels = [...model.storeys.map((s) => s.levelMm), roofL];
   slabLevels.forEach((lv) => {
-    sb.rect("CUT", 0, lv - slabMm, W, lv, "#9aa3b5");
+    sb.rect("CUT", xL, lv - slabMm, xR, lv, "#9aa3b5");
   });
-  // Walls cut by the plane: vertical walls (running along y) whose span holds cutY.
+  // Walls cut by the plane: vertical walls (running along y) whose span holds cutY. A door or window of the wall
+  // that spans the cut leaves a gap from its sill to its head, so only the wall above (and below, for a window) is cut.
   for (const st of model.storeys) {
     const lo = st.levelMm;
     const hi = st.levelMm + st.heightMm - slabMm;
+    const openings = [
+      ...st.geometry.doors.map((o) => ({ o, sill: 0, head: BOQ.doorHeightMm })),
+      ...st.geometry.windows.map((o) => ({ o, sill: ELEVATION.sillMm, head: ELEVATION.sillMm + ELEVATION.windowHeightMm })),
+    ];
     for (const w of st.geometry.walls) {
       if (w.orientation !== "v" || !(w.from < cutY && cutY < w.to)) continue;
-      const x0 = Math.max(w.at - w.thicknessMm / 2, 0);
-      const x1 = Math.min(w.at + w.thicknessMm / 2, W);
-      sb.rect("CUT", x0, lo, x1, hi, "#4e5668");
+      const x0 = w.at - w.thicknessMm / 2;
+      const x1 = w.at + w.thicknessMm / 2;
+      const gap = openings.find(({ o }) => o.orientation === "v" && o.at === w.at && o.from < cutY && cutY < o.to);
+      if (!gap) {
+        sb.rect("CUT", x0, lo, x1, hi, "#4e5668");
+      } else {
+        if (gap.sill > 0) sb.rect("CUT", x0, lo, x1, lo + gap.sill, "#4e5668");
+        if (lo + gap.head < hi) sb.rect("CUT", x0, lo + gap.head, x1, hi, "#4e5668");
+      }
     }
-    // Exterior walls at the left and right faces when the cut passes between window openings: drawn as the wall faces.
-    sb.text("TEXT", W + stub + 200, lo + st.heightMm / 2, 170, st.index === 0 ? T(lang, "Ground", "নিচতলা") : T(lang, `Floor ${st.index}`, `${st.index} তলা`));
+    sb.text("TEXT", xR + stub + 200, lo + st.heightMm / 2, 170, st.index === 0 ? T(lang, "Ground", "নিচতলা") : T(lang, `Floor ${st.index}`, `${st.index} তলা`));
   }
   // Parapet, then the stair cover and lift room when the cut passes through them.
   const par = model.roof.parapetMm;
-  sb.rect("CUT", 0, roofL, 125, roofL + par, "#4e5668");
-  sb.rect("CUT", W - 125, roofL, W, roofL + par, "#4e5668");
+  sb.rect("CUT", xL, roofL, xL + 125, roofL + par, "#4e5668");
+  sb.rect("CUT", xR - 125, roofL, xR, roofL + par, "#4e5668");
   for (const r of [model.roof.stairCover, model.roof.liftRoom]) {
     if (!r || !(r.y0 < cutY && cutY < r.y1)) continue;
     const top = roofL + model.roof.coverHeightMm;
@@ -177,10 +197,10 @@ export function sectionScene(model: BuildingModel, slabMm: number, opts: SheetOp
   }
   // Levels and total height.
   for (const lv of slabLevels) {
-    sb.line("LEVELS", -stub, lv, W + stub, lv);
-    sb.text("TEXT", -stub - 150, lv + 40, 170, levelLabel(lv), "end");
+    sb.line("LEVELS", xL - stub, lv, xR + stub, lv);
+    sb.text("TEXT", xL - stub - 150, lv + 40, 170, levelLabel(lv), "end");
   }
-  sb.dimension(-stub - 1300, 0, -stub - 1300, roofL, `${roofL}`);
+  sb.dimension(xL - stub - 1300, 0, xL - stub - 1300, roofL, `${roofL}`);
   sb.text("TEXT", W / 2, -700, 190, T(lang, `Section A-A (cut ${metres(cutY)} m from the road side, looking toward the back)`, `সেকশন এ-এ (রাস্তার দিক থেকে ${metres(cutY)} মি, পেছনের দিকে তাকিয়ে)`), "middle");
   return sb.scene("section-a-a", T(lang, "Section A-A", "সেকশন এ-এ"));
 }
@@ -208,10 +228,11 @@ export function elevationScene(model: BuildingModel, side: ElevationSide, opts: 
   const roofL = model.roof.levelMm;
   const stub = ELEVATION.groundStubMm;
   const sb = new SceneBuilder();
-  sb.line("GROUND", -stub, 0, across + stub, 0);
-  sb.rect("OUTLINE", 0, 0, across, roofL + model.roof.parapetMm);
-  for (const st of model.storeys) if (st.index > 0) sb.line("LEVELS", 0, st.levelMm, across, st.levelMm);
-  sb.line("LEVELS", 0, roofL, across, roofL);
+  const inset = faceInset(model);
+  sb.line("GROUND", -inset - stub, 0, across + inset + stub, 0);
+  sb.rect("OUTLINE", -inset, 0, across + inset, roofL + model.roof.parapetMm);
+  for (const st of model.storeys) if (st.index > 0) sb.line("LEVELS", -inset, st.levelMm, across + inset, st.levelMm);
+  sb.line("LEVELS", -inset, roofL, across + inset, roofL);
   // Roof structures behind the parapet.
   for (const r of [model.roof.stairCover, model.roof.liftRoom]) {
     if (!r) continue;

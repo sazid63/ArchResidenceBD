@@ -17,7 +17,11 @@ function save(name: string, data: BlobPart, type: string) {
   URL.revokeObjectURL(url);
 }
 
-const today = () => new Date().toISOString().slice(0, 10);
+/** Local calendar date (Dhaka is UTC+6, so the UTC date is a day behind in the early morning). */
+const today = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
 const slug = (s: string) => s.replace(/[^\w-]+/g, "_") || "project";
 
 export function DrawingsScreen() {
@@ -32,7 +36,7 @@ export function DrawingsScreen() {
     if (!project || !built || !built.ok) return null;
     const res = analyzeStructure(built.model);
     const date = today();
-    return { model: built.model, sheets: buildSheets(built.model, res, project.name, date, lang), date };
+    return { model: built.model, res, sheets: buildSheets(built.model, res, project.name, date, lang), date };
   }, [project, built, lang]);
 
   const title = bn ? "ড্রয়িং ও পারমিট প্যাকেজ" : "Drawings and permit package";
@@ -93,7 +97,7 @@ export function DrawingsScreen() {
             ))}
           </select>
           <Button variant="ghost" onClick={() => save(`${base}.svg`, svg, "image/svg+xml")}>{bn ? "এসভিজি ডাউনলোড" : "Download SVG"}</Button>
-          <Button variant="ghost" onClick={() => save(`${base}.dxf`, sceneToDxf(buildSheets(data.model, analyzeStructure(data.model), project.name, data.date, "en").find((s) => s.id === sheet.id)!.scene), "application/dxf")}>
+          <Button variant="ghost" onClick={() => save(`${base}.dxf`, sceneToDxf(buildSheets(data.model, data.res, project.name, data.date, "en").find((s) => s.id === sheet.id)!.scene), "application/dxf")}>
             {bn ? "ডিএক্সএফ ডাউনলোড" : "Download DXF"}
           </Button>
         </div>

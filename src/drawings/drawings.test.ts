@@ -6,7 +6,7 @@ import { PLAN_LIBRARY } from "../plans/library";
 import { analyzeStructure } from "../structure/analyze";
 import { buildPermitPackage, buildSheets, packageToZip, reportToMarkdown } from "./permit";
 import { bounds, SceneBuilder, sceneToDxf, sceneToSvg } from "./scene";
-import { elevationScene, elevationU, planScene, sectionCutY, sectionScene, siteScene, withTitleBlock } from "./sheets";
+import { elevationScene, elevationU, faceInset, planScene, sectionCutY, sectionScene, siteScene, withTitleBlock } from "./sheets";
 import { crc32, makeZip } from "./zip";
 
 function project(storeys = 4): BuildingProject {
@@ -112,6 +112,19 @@ describe("sheets from the model", () => {
     const col = sized.entities.find((e) => e.kind === "poly" && e.layer === "COLUMNS")!;
     if (col.kind !== "poly") throw new Error("poly");
     expect(col.pts[1][0] - col.pts[0][0]).toBeGreaterThanOrEqual(250);
+    // every marker is exactly the section the structure gives that column in that storey, centred on the column
+    const frame = new Map(res.frame.columns.map((c) => [`${c.xMm},${c.yMm}`, c]));
+    const markers = sized.entities.filter((e) => e.kind === "poly" && e.layer === "COLUMNS");
+    expect(markers.length).toBe(geo.columns.length);
+    geo.columns.forEach((c, i) => {
+      const e = markers[i];
+      if (e.kind !== "poly") throw new Error("poly");
+      const sec = frame.get(`${c.x},${c.y}`)!.storeys[Math.min(1, frame.get(`${c.x},${c.y}`)!.storeys.length - 1)].section;
+      expect(e.pts[1][0] - e.pts[0][0]).toBe(sec.bx);
+      expect(e.pts[2][1] - e.pts[1][1]).toBe(sec.by);
+      expect((e.pts[0][0] + e.pts[1][0]) / 2).toBe(c.x);
+      expect((e.pts[0][1] + e.pts[2][1]) / 2).toBe(c.y);
+    });
   });
 
   it("site plan holds the plot, the setback line and the building footprint", () => {
@@ -125,13 +138,47 @@ describe("sheets from the model", () => {
 
   it("section: a slab at every storey top and the roof, levels labelled, cut through the stair cover", () => {
     const sc = sectionScene(m, 150);
-    const slabs = sc.entities.filter((e) => e.kind === "poly" && e.layer === "CUT" && e.pts.length === 4 && e.pts[1][0] - e.pts[0][0] === m.widthMm);
+    const slabs = sc.entities.filter((e) => e.kind === "poly" && e.layer === "CUT" && e.pts.length === 4 && e.pts[1][0] - e.pts[0][0] === m.widthMm + 2 * faceInset(m));
     expect(slabs.length).toBe(m.storeys.length + 1);
     const labels = sc.entities.filter((e) => e.kind === "text" && /^[+-]\d+\.\d{2}$/.test(e.text)).map((e) => (e.kind === "text" ? e.text : ""));
     expect(labels).toContain("+0.00");
     expect(labels).toContain(`+${(m.roof.levelMm / 1000).toFixed(2)}`);
     const c = m.roof.stairCover!;
     expect(sectionCutY(m)).toBe(Math.round((c.y0 + c.y1) / 2));
+  });
+
+  it("section: slabs and the elevation outline run face to face, half an exterior wall outside the wall centre lines", () => {
+    const inset = faceInset(m);
+    expect(inset).toBe(125);
+    const slab = sectionScene(m, 150).entities.find((e) => e.kind === "poly" && e.layer === "CUT" && e.pts[0][1] === -150 + m.storeys[0].levelMm + 0 && e.pts.length === 4);
+    if (!slab || slab.kind !== "poly") throw new Error("slab");
+    expect(slab.pts[0][0]).toBe(-125);
+    expect(slab.pts[1][0]).toBe(m.widthMm + 125);
+    const out = elevationScene(m, "front").entities.find((e) => e.kind === "poly" && e.layer === "OUTLINE")!;
+    if (out.kind !== "poly") throw new Error("poly");
+    expect(out.pts[0][0]).toBe(-125);
+    expect(out.pts[1][0]).toBe(m.widthMm + 125);
+  });
+
+  it("section: a door or window of a cut wall leaves a gap (the wall is cut only above the head and below the sill)", () => {
+    const cutY = sectionCutY(m);
+    const sc = sectionScene(m, 150);
+    // find a storey where an opening spans the cut on a vertical wall
+    let checked = 0;
+    for (const st of m.storeys) {
+      for (const w of st.geometry.walls) {
+        if (w.orientation !== "v" || !(w.from < cutY && cutY < w.to)) continue;
+        const door = st.geometry.doors.find((o) => o.orientation === "v" && o.at === w.at && o.from < cutY && cutY < o.to);
+        if (!door) continue;
+        const x0 = w.at - w.thicknessMm / 2;
+        const pieces = sc.entities.filter((e) => e.kind === "poly" && e.layer === "CUT" && e.pts[0][0] === x0 && e.pts[0][1] >= st.levelMm && e.pts[2][1] <= st.levelMm + st.heightMm);
+        // no cut piece covers the door height from the floor
+        for (const e of pieces) if (e.kind === "poly") expect(e.pts[0][1] >= st.levelMm + 2100 || e.pts[2][1] <= st.levelMm).toBe(true);
+        checked++;
+      }
+    }
+    // the stair cover is cut through a core whose doors may or may not span the cut; the test is vacuous only if none do
+    expect(checked).toBeGreaterThan(0);
   });
 
   it("elevations: the four faces together show every window of the building", () => {
