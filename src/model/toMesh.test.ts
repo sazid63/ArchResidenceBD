@@ -15,7 +15,7 @@ function plotFor(planId: string) {
 }
 
 function mesh(planId: string, storeys = 4) {
-  const r = deriveBuilding({ planId, storeys, ...plotFor(planId) });
+  const r = deriveBuilding({ planId, storeys, setbacksMm: S, ...plotFor(planId) });
   if (!r.ok) throw new Error(r.reasons.map((x) => x.message.en).join("; "));
   return { model: r.model, doc: buildMesh(r.model) };
 }

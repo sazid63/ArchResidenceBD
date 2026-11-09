@@ -6,7 +6,8 @@
 import { fitPlan, type Envelope } from "../plans/fit";
 import { PLAN_LIBRARY } from "../plans/library";
 import type { FitRejection, FitResult, PlanDefinition } from "../plans/types";
-import { DEFAULT_SETBACKS_MM, type Setbacks } from "./building";
+import { rajukSetbacks } from "../rules/setbacks";
+import type { Setbacks } from "./building";
 import { sqmToLandArea } from "./units";
 
 export const FEET_TO_M = 0.3048;
@@ -37,8 +38,8 @@ export function summarisePlot(frontageM: number, depthM: number): PlotSummary {
   };
 }
 
-/** The buildable rectangle: the plot less the setbacks (assumption values until M3-2 brings RAJUK's). */
-export function envelopeFor(frontageM: number, depthM: number, setbacks: Setbacks = DEFAULT_SETBACKS_MM): Envelope {
+/** The buildable rectangle: the plot less the RAJUK 2008 setbacks (ground-up to 10 storeys; taller buildings need more). */
+export function envelopeFor(frontageM: number, depthM: number, setbacks: Setbacks = rajukSetbacks(frontageM * depthM, 1).setbacksMm): Envelope {
   return {
     widthMm: mToMm(frontageM) - setbacks.left - setbacks.right,
     depthMm: mToMm(depthM) - setbacks.front - setbacks.rear,

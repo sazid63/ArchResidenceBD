@@ -13,6 +13,7 @@ import { deriveGeometry, type FloorGeometry } from "../plans/geometry";
 import { getPlan } from "../plans/library";
 import type { CellRect, FitRejection, PlanDefinition, Rect, RoomDef } from "../plans/types";
 import { validateFloor, type Issue } from "../plans/validate";
+import { rajukSetbacks } from "../rules/setbacks";
 
 export interface Setbacks {
   front: number;
@@ -22,8 +23,8 @@ export interface Setbacks {
 }
 
 /**
- * ASSUMPTION: the values the v2 app used. Replaced by the RAJUK 2008 setback schedule (by plot
- * area, road width and height) in ticket M3-2; until then results say so.
+ * LEGACY: the values the v2 app used. No longer the default: deriveBuilding now takes the RAJUK
+ * 2008 schedule (src/rules/setbacks.ts). Kept for tests that pin an explicit envelope.
  */
 export const DEFAULT_SETBACKS_MM: Setbacks = { front: 1500, rear: 2000, left: 1000, right: 1000 };
 
@@ -131,7 +132,7 @@ export function deriveBuilding(input: BuildingInput): BuildingResult {
   const floorToFloorMm = input.floorToFloorMm ?? 3000;
   if (!(floorToFloorMm >= 2700 && floorToFloorMm <= 5500))
     return reject("Floor-to-floor height must be between 2.7 m and 5.5 m.", "তল থেকে তলার উচ্চতা ২.৭ থেকে ৫.৫ মিটারের মধ্যে হতে হবে।");
-  const setbacksMm = input.setbacksMm ?? DEFAULT_SETBACKS_MM;
+  const setbacksMm = input.setbacksMm ?? rajukSetbacks((input.plotWidthMm * input.plotDepthMm) / 1e6, input.storeys, floorToFloorMm).setbacksMm;
   const mirror = !!input.mirror;
 
   const plot: Rect = { x0: 0, y0: 0, x1: input.plotWidthMm, y1: input.plotDepthMm };

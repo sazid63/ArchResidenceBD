@@ -1,0 +1,220 @@
+/**
+ * RAJUK 2008 checks on a BuildingModel: setbacks, FAR, ground coverage, parking.
+ * `check(model, ctx)` returns one result per rule with expected, actual and the gazette source.
+ * Anything the model cannot decide is "not_checked" - never guessed (CLAUDE.md, settled rules).
+ */
+
+import type { BuildingModel } from "../model/building";
+import { farRow, farRowByArea, parkingSpaces, type FarResult, type ParkingRow } from "./engine";
+import { rajukPack } from "./pack";
+import { rajukSetbacks } from "./setbacks";
+
+export type CheckStatus = "pass" | "fail" | "not_checked";
+
+export interface CheckValue {
+  value: number | string;
+  unit: string;
+}
+
+export interface CheckSource {
+  pack: string;
+  cite: string;
+  clause: string;
+  gazettePage: string;
+  pdfPage: string;
+}
+
+export interface Bilingual {
+  en: string;
+  bn: string;
+}
+
+export interface CheckResult {
+  ruleId: string;
+  status: CheckStatus;
+  title: Bilingual;
+  expected: CheckValue | null;
+  actual: CheckValue | null;
+  source: CheckSource;
+  /** Why it is not checked, or an assumption behind the number. */
+  note?: Bilingual;
+}
+
+export interface CheckContext {
+  /** Width of the adjoining road. FAR, coverage and parking-free rules need it. */
+  roadWidthM?: number;
+  /** Pack use class; default A1-A4 (residential building). */
+  useClass?: string;
+}
+
+const ROAD_STEPS = [6, 9, 12, 18, 24];
+
+function source(cite: string, clause: string): CheckSource {
+  const pack = rajukPack();
+  const c = pack.citations[cite];
+  return { pack: pack.id, cite, clause, gazettePage: c?.gazettePage ?? "", pdfPage: c?.pdfPage ?? "" };
+}
+
+const round2 = (v: number) => Math.round(v * 100) / 100;
+
+/** Largest printed road step not above the road; null under 6 m (narrow-road rows are not modelled). */
+export function roadStep(roadWidthM: number): number | null {
+  const steps = ROAD_STEPS.filter((s) => s <= roadWidthM);
+  return steps.length ? steps[steps.length - 1] : null;
+}
+
+function farFor(model: BuildingModel, ctx: CheckContext): { hit: FarResult | null; note?: Bilingual; reason?: Bilingual } {
+  const pack = rajukPack();
+  const cls = ctx.useClass ?? "A1-A4";
+  const area = model.plotAreaM2;
+  if (ctx.roadWidthM === undefined) {
+    return { hit: null, reason: { en: "Road width not entered.", bn: "রাস্তার প্রস্থ দেওয়া হয়নি।" } };
+  }
+  const step = roadStep(ctx.roadWidthM);
+  if (step === null) {
+    return { hit: null, reason: { en: "Roads under 6 m use a separate rule (section 51(9)-(10)) that is not modelled yet.", bn: "৬ মিটারের কম প্রস্থের রাস্তার জন্য আলাদা বিধি (ধারা ৫১(৯)-(১০)) আছে, যা এখনো মডেল করা হয়নি।" } };
+  }
+  const exact = farRow(pack.farTables, cls, area, step);
+  if (exact) return { hit: exact };
+  const byArea = farRowByArea(pack.farTables, cls, area);
+  if (byArea) {
+    return {
+      hit: byArea,
+      note: {
+        en: `The table row for this plot area was used (section 51(14)); the road-width bonus of section 51(11) is not applied.`,
+        bn: "এই জমির আকারের সারণি-সারি ব্যবহার করা হয়েছে (ধারা ৫১(১৪)); ধারা ৫১(১১) অনুযায়ী রাস্তা-প্রস্থ বোনাস যোগ করা হয়নি।",
+      },
+    };
+  }
+  return { hit: null, reason: { en: "No table row applies to this use class, plot area and road.", bn: "এই ব্যবহার-শ্রেণী, জমির আকার ও রাস্তার জন্য কোনো সারি প্রযোজ্য নয়।" } };
+}
+
+/** FAR-counted floor area in mm2: every storey's footprint, less the parking rooms (section 51(5): parking is exempt). */
+function farAreaMm2(model: BuildingModel): number {
+  const footprint = model.widthMm * model.depthMm;
+  let total = 0;
+  for (const s of model.storeys) {
+    let a = footprint;
+    for (const r of s.geometry.fitted.rooms) if (r.def.kind === "parking") a -= r.grossAreaMm2;
+    total += a;
+  }
+  return total;
+}
+
+function notChecked(ruleId: string, title: Bilingual, src: CheckSource, reason: Bilingual, expected: CheckValue | null = null): CheckResult {
+  return { ruleId, status: "not_checked", title, expected, actual: null, source: src, note: reason };
+}
+
+function setbackResults(model: BuildingModel): CheckResult[] {
+  const req = rajukSetbacks(model.plotAreaM2, model.input.storeys, model.input.floorToFloorMm);
+  const left = model.origin.x;
+  const right = model.plot.x1 - (model.origin.x + model.widthMm);
+  const front = model.origin.y;
+  const rear = model.plot.y1 - (model.origin.y + model.depthMm);
+  const src = source(req.cite, "§46(1)-(2)");
+  const mk = (id: string, en: string, bn: string, need: number, got: number): CheckResult => ({
+    ruleId: `rajuk.setback.${id}`,
+    status: got >= need ? "pass" : "fail",
+    title: { en: `${en} setback`, bn: `${bn} সেটব্যাক` },
+    expected: { value: need, unit: "mm" },
+    actual: { value: got, unit: "mm" },
+    source: src,
+    note: req.row.beyond ? { en: "Taller than 33 m or 10 storeys: the larger setbacks apply.", bn: "৩৩ মিটার বা ১০ তলার বেশি উঁচু: বড় সেটব্যাক প্রযোজ্য।" } : undefined,
+  });
+  return [
+    mk("front", "Front", "সামনের", req.setbacksMm.front, front),
+    mk("rear", "Rear", "পিছনের", req.setbacksMm.rear, rear),
+    mk("side", "Side", "পাশের", req.setbacksMm.left, Math.min(left, right)),
+  ];
+}
+
+function farAndCoverage(model: BuildingModel, ctx: CheckContext): CheckResult[] {
+  const farTitle = { en: "Floor area ratio (FAR)", bn: "ফ্লোর এরিয়া রেশিও (FAR)" };
+  const mgcTitle = { en: "Maximum ground coverage", bn: "সর্বোচ্চ ভূমি আচ্ছাদন" };
+  const farSrc = source("far-3ka", "সারণি-৩(ক)");
+  const { hit, note, reason } = farFor(model, ctx);
+  if (!hit) {
+    const r = reason as Bilingual;
+    return [notChecked("rajuk.far", farTitle, farSrc, r), notChecked("rajuk.mgc", mgcTitle, farSrc, r)];
+  }
+  if (hit.prohibited) {
+    const n = { en: "This use is not approved on a plot of this size.", bn: "এই আকারের জমিতে এই ব্যবহার অনুমোদিত নয়।" };
+    return [
+      { ruleId: "rajuk.far", status: "fail", title: farTitle, expected: { value: "not permitted", unit: "" }, actual: null, source: farSrc, note: n },
+      { ruleId: "rajuk.mgc", status: "fail", title: mgcTitle, expected: { value: "not permitted", unit: "" }, actual: null, source: farSrc, note: n },
+    ];
+  }
+  const plotMm2 = model.plotAreaM2 * 1e6;
+  const farActual = farAreaMm2(model) / plotMm2;
+  const results: CheckResult[] = [];
+  const farCap = hit.far;
+  results.push({
+    ruleId: "rajuk.far",
+    status: farCap === "NR" || farActual <= farCap ? "pass" : "fail",
+    title: farTitle,
+    expected: { value: farCap === "NR" ? "no cap" : farCap, unit: farCap === "NR" ? "" : "x plot" },
+    actual: { value: round2(farActual), unit: "x plot" },
+    source: farSrc,
+    note,
+  });
+  const mgcActual = ((model.widthMm * model.depthMm) / plotMm2) * 100;
+  results.push({
+    ruleId: "rajuk.mgc",
+    status: mgcActual <= hit.mgcPercent ? "pass" : "fail",
+    title: mgcTitle,
+    expected: { value: hit.mgcPercent, unit: "%" },
+    actual: { value: round2(mgcActual), unit: "%" },
+    source: farSrc,
+    note,
+  });
+  return results;
+}
+
+/** Cars (and motorcycles) required by Schedule 4 for the flats. Fractions are summed, then rounded up once (note s4-n-fraction). */
+export function requiredParking(model: BuildingModel): { cars: number; motorcycles: number } | null {
+  const pack = rajukPack();
+  const typical = model.storeys.find((s) => s.use === "typical");
+  if (!typical) return null;
+  const areas = new Map<string, number>();
+  for (const r of typical.geometry.fitted.rooms) {
+    if (r.def.unit) areas.set(r.def.unit, (areas.get(r.def.unit) ?? 0) + r.grossAreaMm2 / 1e6);
+  }
+  if (!areas.size) return null;
+  const floors = model.storeys.filter((s) => s.use === "typical").length;
+  const LCD = 120;
+  let carFractions = 0;
+  let moto = 0;
+  const flatRows = pack.parkingSchedule.rows.filter((r: ParkingRow) => r.spaces.basis === "unit");
+  for (const sqm of areas.values()) {
+    for (const row of flatRows) {
+      const lo = row.unitAreaMinExclusiveSqm ?? 0;
+      const hi = row.unitAreaMaxSqm ?? Infinity;
+      if (!(sqm > lo && sqm <= hi)) continue;
+      if (row.additive) moto += floors * row.spaces.numerator * (LCD / row.spaces.denominator);
+      else carFractions += floors * row.spaces.numerator * (LCD / row.spaces.denominator);
+    }
+  }
+  const singleCar = pack.parkingSchedule.rows.find((r) => r.id === "park-single-family-up-to-200") as ParkingRow;
+  return { cars: Math.max(parkingSpaces(singleCar, 1), Math.ceil(carFractions / LCD)), motorcycles: Math.ceil(moto / LCD) };
+}
+
+function parkingResult(model: BuildingModel): CheckResult {
+  const title = { en: "Car parking", bn: "গাড়ি পার্কিং" };
+  const src = source("schedule4", "Schedule 4");
+  const need = requiredParking(model);
+  if (!need) return notChecked("rajuk.parking", title, src, { en: "No dwellings in the plan.", bn: "প্ল্যানে কোনো ফ্ল্যাট নেই।" });
+  return notChecked(
+    "rajuk.parking",
+    title,
+    src,
+    {
+      en: `Needs ${need.cars} cars and ${need.motorcycles} motorcycle spaces. The model does not lay out stalls yet, so the supply is not checked. Flat size is taken as the sum of its room areas (assumption).`,
+      bn: `${need.cars}টি গাড়ি ও ${need.motorcycles}টি মোটরসাইকেলের জায়গা লাগবে। মডেলে এখনো পার্কিং স্টল সাজানো হয়নি, তাই সরবরাহ যাচাই করা হয়নি। ফ্ল্যাটের আকার কক্ষগুলির ক্ষেত্রফলের যোগফল ধরা হয়েছে (অনুমান)।`,
+    },
+    { value: need.cars, unit: "cars" },
+  );
+}
+
+export function check(model: BuildingModel, ctx: CheckContext = {}): CheckResult[] {
+  return [...setbackResults(model), ...farAndCoverage(model, ctx), parkingResult(model)];
+}

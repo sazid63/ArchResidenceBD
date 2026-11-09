@@ -13,7 +13,7 @@ function plotFor(planId: string, extraW = 0, extraD = 0): Pick<BuildingInput, "p
 }
 
 function build(over: Partial<BuildingInput> & { planId: string }) {
-  const r = deriveBuilding({ storeys: 4, ...plotFor(over.planId), ...over });
+  const r = deriveBuilding({ storeys: 4, setbacksMm: S, ...plotFor(over.planId), ...over });
   if (!r.ok) throw new Error(r.reasons.map((x) => x.message.en).join("; "));
   return r;
 }
