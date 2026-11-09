@@ -81,7 +81,7 @@ export interface ProjectSpec {
   design: DesignChoices;
   phases: PhaseRecord[];
   activePhaseId?: string;
-  pricing?: { rateCardId?: string };
+  pricing?: { rateCardId?: string; /** From the interview: the user has prices ("user") or wants them fetched ("fetched"). */ source?: "user" | "fetched" };
   assumptions: Assumption[];
   deviations: Deviation[];
   /** Where each value came from, keyed by JSON pointer (e.g. "/site/plot/areaSqm"). */

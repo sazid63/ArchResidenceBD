@@ -67,7 +67,7 @@ Do: takeoff from the model and BBS; rate card from `git show origin/v0-pipeline-
 ## M5-2 Drawings + permit package · Sonnet high · done (see git log)
 Do: drawings from the model (`renderPlanSvg` per storey, section, elevations, DXF via `drawingEngine`); permit package = drawings + BOQ + compliance report + assumptions as downloads.
 
-## M6-1 Interview from the flow book · Sonnet high · todo
+## M6-1 Interview from the flow book · Sonnet high · done (see git log)
 Do: runner for `spec/flows/phase-flow-book.yaml`; port the v0 parser (`core/src/archres_core/interview/parse.py`, `seam.py`) with its test cases (`core/tests/test_interview_parser.py`); answers write to the project with provenance.
 
 ## M6-2 Cleanup · Sonnet medium · todo
