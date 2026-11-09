@@ -323,8 +323,8 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
   if (!project) {
     return (
       <div className="screen">
-        <PageHeader title="Native CAD" subtitle="No active project found" />
-        <Card>Please create or load a project first.</Card>
+        <PageHeader title={lang === "bn" ? "নেটিভ ক্যাড" : "Native CAD"} subtitle={lang === "bn" ? "কোনো সক্রিয় প্রকল্প পাওয়া যায়নি" : "No active project found"} />
+        <Card>{lang === "bn" ? "আগে একটি প্রকল্প তৈরি বা খুলুন।" : "Please create or load a project first."}</Card>
       </div>
     );
   }
@@ -555,7 +555,7 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
                   variant="soft"
                   onClick={() => setHidden({})}
                   style={{ padding: "4px 8px", fontSize: "11px" }}
-                  title="Show all building solids"
+                  title={lang === "bn" ? "ভবনের সব অংশ দেখান" : "Show all building solids"}
                 >
                   👁 {lang === "bn" ? "সব দেখান" : "Show All"}
                 </Button>
@@ -569,7 +569,7 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
                     setHidden(newHidden);
                   }}
                   style={{ padding: "4px 8px", fontSize: "11px", background: "var(--surface-active)" }}
-                  title="Hide floor slabs to look inside rooms"
+                  title={lang === "bn" ? "ঘরের ভেতর দেখতে মেঝের স্ল্যাব লুকান" : "Hide floor slabs to look inside rooms"}
                 >
                   🏠 {lang === "bn" ? "রুমের ভেতর দেখুন (Hide Slabs)" : "Look Inside Rooms"}
                 </Button>
@@ -585,27 +585,27 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
                     setHidden(newHidden);
                   }}
                   style={{ padding: "4px 8px", fontSize: "11px" }}
-                  title="Show RCC Columns, Beams & Footings only"
+                  title={lang === "bn" ? "শুধু আরসিসি কলাম, বিম ও ফুটিং দেখান" : "Show RCC Columns, Beams & Footings only"}
                 >
                   🏛 {lang === "bn" ? "শুধুমাত্র আরসিসি ফ্রেম" : "RCC Frame Only"}
                 </Button>
               </div>
 
               <div className="row" style={{ gap: "4px" }}>
-                <Button variant="ghost" onClick={() => handleZoom(0.85)} style={{ padding: "4px 8px", fontSize: "11px" }} title="Zoom In">
+                <Button variant="ghost" onClick={() => handleZoom(0.85)} style={{ padding: "4px 8px", fontSize: "11px" }} title={lang === "bn" ? "বড় করুন" : "Zoom In"}>
                   +
                 </Button>
-                <Button variant="ghost" onClick={() => handleZoom(1.18)} style={{ padding: "4px 8px", fontSize: "11px" }} title="Zoom Out">
+                <Button variant="ghost" onClick={() => handleZoom(1.18)} style={{ padding: "4px 8px", fontSize: "11px" }} title={lang === "bn" ? "ছোট করুন" : "Zoom Out"}>
                   −
                 </Button>
-                <Button variant="ghost" onClick={handleResetCamera} style={{ padding: "4px 8px", fontSize: "11px" }} title="Reset Camera">
+                <Button variant="ghost" onClick={handleResetCamera} style={{ padding: "4px 8px", fontSize: "11px" }} title={lang === "bn" ? "ক্যামেরা রিসেট" : "Reset Camera"}>
                   ⟲
                 </Button>
                 <Button
                   variant={measureMode ? "primary" : "ghost"}
                   onClick={toggleMeasure}
                   style={{ padding: "4px 8px", fontSize: "11px" }}
-                  title={measureMode ? "Exit measurement mode" : "Enter measurement mode — click on model to measure distances"}
+                  title={lang === "bn" ? (measureMode ? "মাপার মোড বন্ধ করুন" : "মাপার মোড চালু করুন — দূরত্ব মাপতে মডেলে ক্লিক করুন") : (measureMode ? "Exit measurement mode" : "Enter measurement mode — click on model to measure distances")}
                 >
                   📏 {measureMode ? (lang === "bn" ? "মাপ বন্ধ" : "Stop") : (lang === "bn" ? "মাপুন" : "Measure")}
                 </Button>

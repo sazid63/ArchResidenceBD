@@ -19,7 +19,7 @@ export function PourSequenceScreen() {
 
   useEffect(() => {
     if (!project) {
-      setError("No active project found");
+      setError(lang === "bn" ? "কোনো সক্রিয় প্রকল্প পাওয়া যায়নি" : "No active project found");
       setLoading(false);
       return;
     }

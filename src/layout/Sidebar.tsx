@@ -93,7 +93,7 @@ export function Sidebar({ active, onNavigate, open = false }: Props) {
         { id: "design:final", icon: Box, en: "3D model", bn: "৩ডি মডেল", gated: true },
         { id: "unit-mix", icon: Users, en: "Unit mix", bn: "ইউনিট মিক্স" },
         { id: "daylight", icon: SunMedium, en: "Daylight", bn: "দিবালোক" },
-        { id: "templates", icon: LayoutTemplate, en: "Templates", bn: "টেমপ্লেট" },
+        { id: "templates", icon: LayoutTemplate, en: "Plan library", bn: "প্ল্যান লাইব্রেরি" },
         { id: "assets", icon: Library, en: "Asset library", bn: "অ্যাসেট লাইব্রেরি" },
       ],
     },

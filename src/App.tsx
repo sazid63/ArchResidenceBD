@@ -51,7 +51,7 @@ const SCREEN_TITLES: Record<string, [string, string]> = {
   "column-grid": ["Column Grid", "কলাম গ্রিড"],
   settings: ["Settings", "সেটিংস"],
   units: ["Land Units", "জমির একক"],
-  templates: ["Templates", "টেমপ্লেট"],
+  templates: ["Plan library", "প্ল্যান লাইব্রেরি"],
   about: ["About", "সম্পর্কে"],
   help: ["Help", "সহায়তা"],
   licences: ["Licences", "লাইসেন্স"],
