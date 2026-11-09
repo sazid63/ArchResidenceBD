@@ -12,6 +12,8 @@ import type { Bay, PlanDefinition, RoomDef, Text } from "./types";
 const bay = (min: number, pref: number, max: number): Bay => ({ min, pref, max });
 const t = (en: string, bn: string): Text => ({ en, bn });
 
+// Bedroom and living bays are at least 3050 mm (inner) or 3100 mm (outer wall) so their net width reaches
+// the BNBC 2020 minimum of 2.90 m (Part 3 Sec 1.14.2.2); the fitter widens them or rejects the plot.
 // Shared column widths: bedroom column, corridor spine, two service/living columns.
 const X4: Bay[] = [bay(3300, 3600, 3900), bay(1330, 1350, 1500), bay(2700, 3000, 3600), bay(2700, 3000, 3600)];
 
@@ -170,7 +172,7 @@ export const P1_3B: PlanDefinition = {
 };
 
 // Five columns for the wide plans: bedroom edge, three inner bays, bedroom/service edge.
-const X5: Bay[] = [bay(3300, 3600, 3900), bay(2700, 2900, 3000), bay(2700, 2900, 3000), bay(3000, 3100, 3300), bay(3000, 3300, 3600)];
+const X5: Bay[] = [bay(3300, 3600, 3900), bay(2700, 2900, 3000), bay(2700, 2900, 3000), bay(3050, 3100, 3300), bay(3100, 3300, 3600)];
 
 /** One flat per floor, four bedrooms, horizontal corridor, for wide plots. */
 export const P1_4B_WIDE: PlanDefinition = {
@@ -284,9 +286,9 @@ export const P2_3B_FB: PlanDefinition = {
 };
 
 // Left and right flats with the core in a central strip.
-const XLR: Bay[] = [bay(3000, 3200, 3600), bay(3000, 3000, 3600), bay(2450, 2550, 2700), bay(3000, 3000, 3600), bay(3000, 3200, 3600)];
+const XLR: Bay[] = [bay(3100, 3200, 3600), bay(3050, 3100, 3600), bay(2450, 2550, 2700), bay(3050, 3100, 3600), bay(3100, 3200, 3600)];
 // Three-bedroom version: a wider outer column so the middle bedrooms reach 9.5 m².
-const XLR3: Bay[] = [bay(3200, 3300, 3600), bay(3000, 3000, 3600), bay(2450, 2550, 2700), bay(3000, 3000, 3600), bay(3200, 3300, 3600)];
+const XLR3: Bay[] = [bay(3200, 3300, 3600), bay(3050, 3100, 3600), bay(2450, 2550, 2700), bay(3050, 3100, 3600), bay(3200, 3300, 3600)];
 
 /** Two 2-bedroom flats side by side, stair/lobby/lift in a central strip. For wide plots. */
 export const P2_2B_LR: PlanDefinition = {

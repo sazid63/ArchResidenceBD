@@ -6,7 +6,7 @@
 import { planStair } from "../cad/stairBuilder";
 import { checkDefinition } from "./fit";
 import { deriveGeometry, OUTSIDE, type FloorGeometry } from "./geometry";
-import { MAX_SPAN_MM, ROOM_RULES, RULES_SOURCE, WALL_MM } from "./rules";
+import { MAX_SPAN_MM, ROOM_RULES, RULES_SOURCE, WALL_MM, roomRuleBasis } from "./rules";
 import type { FittedPlan } from "./types";
 
 export type IssueCode =
@@ -27,8 +27,8 @@ export interface Issue {
   severity: "error" | "warning";
   roomId?: string;
   message: string;
-  /** "assumption" until the threshold is sourced from BNBC 2020 (T3.0). */
-  basis: "assumption" | "geometry";
+  /** "cited" = BNBC 2020 figure, "assumption" = working value, "geometry" = a pure geometry fact. */
+  basis: "cited" | "assumption" | "geometry";
 }
 
 export interface ValidateOptions {
@@ -50,10 +50,11 @@ export function validateFloor(geo: FloorGeometry, opts: ValidateOptions = {}): I
     const rule = ROOM_RULES[room.def.kind];
     const met = geo.metrics[i];
     const id = room.def.id;
+    const sized = roomRuleBasis(room.def.kind);
     if (rule?.minAreaM2 !== undefined && met.netAreaM2 < rule.minAreaM2)
-      add({ code: "room_too_small", severity: "error", roomId: id, basis: RULES_SOURCE.status, message: `${room.def.name.en} is ${met.netAreaM2.toFixed(1)} m² net; working minimum ${rule.minAreaM2} m².` });
+      add({ code: "room_too_small", severity: "error", roomId: id, basis: sized, message: `${room.def.name.en} is ${met.netAreaM2.toFixed(1)} m² net; ${sized === "cited" ? "BNBC minimum" : "working minimum"} ${rule.minAreaM2} m².` });
     if (rule?.minWidthMm !== undefined && met.netWidthMm < rule.minWidthMm)
-      add({ code: "room_too_narrow", severity: "error", roomId: id, basis: RULES_SOURCE.status, message: `${room.def.name.en} is ${m(met.netWidthMm)} m wide net; working minimum ${m(rule.minWidthMm)} m.` });
+      add({ code: "room_too_narrow", severity: "error", roomId: id, basis: sized, message: `${room.def.name.en} is ${m(met.netWidthMm)} m wide net; ${sized === "cited" ? "BNBC minimum" : "working minimum"} ${m(rule.minWidthMm)} m.` });
     if (rule?.needs === "exterior" && met.exteriorMm === 0)
       add({ code: "no_daylight", severity: "error", roomId: id, basis: RULES_SOURCE.status, message: `${room.def.name.en} has no outside wall for a window.` });
     if (rule?.needs === "exterior_or_shaft" && met.exteriorMm === 0 && met.shaftMm === 0)

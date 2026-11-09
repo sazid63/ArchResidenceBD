@@ -24,8 +24,8 @@ One YAML document (`sources-v0`) with 12 entries covering all nine data types:
 | `labour-rate` | `bbs-price-wage`, `pwd-schedule-of-rates`, `bwdb-schedule-of-rates`, `market-survey-manual` |
 | `machinery-rate` | `pwd-schedule-of-rates`, `bwdb-schedule-of-rates`, `market-survey-manual`, `vendor-quotes-manual` |
 | `subcontract-rate` | `market-survey-manual`, `vendor-quotes-manual` |
-| `rule-source` | `rajuk-bidhimala-2008` (pinned, active), `hbri-bnbc`, `city-authority-rules` |
-| `seismic-zone` | `hbri-bnbc` |
+| `rule-source` | `rajuk-bidhimala-2008` (pinned, active), `bnbc-2020-gazette (was hbri-bnbc)`, `city-authority-rules` |
+| `seismic-zone` | `bnbc-2020-gazette (was hbri-bnbc)` |
 | `flood-reference` | `ffwc-flood` (active) |
 | `water-table` | `bwdb-groundwater` |
 | `soil-reference` | `srdi-soil`, `soil-area-defaults` |
@@ -88,7 +88,7 @@ The mechanism is `archres_core.sources` (stdlib only): `fetch_source(entry, cach
 
 - `ffwc-flood` and `bwdb-schedule-of-rates`: **fetched and confirmed live** from the build machine (BWDB's SoR page is linked from its budget/procurement menu).
 - `rajuk-bidhimala-2008`: **hash-pinned artifact** (byte-identical across two independent downloads; backs `rajuk@2008.1`). Its download URL was not recorded at the 2026-10-17 retrieval — the recipe says to record it on the next run (process gap, not silent).
-- `bbs-price-wage`, `pwd-schedule-of-rates`, `hbri-bnbc`, `srdi-soil`: the domains did **not resolve from the build machine's network** on 2026-10-18 (transport errors). They stay `candidate` with that note — confirm from a browser before first use.
+- `bbs-price-wage`, `pwd-schedule-of-rates`, `bnbc-2020-gazette (was hbri-bnbc)`, `srdi-soil`: the domains did **not resolve from the build machine's network** on 2026-10-18 (transport errors). They stay `candidate` with that note — confirm from a browser before first use.
 - No invented URLs, no invented vendors, no invented APIs.
 
 ## Soil honesty (plan §5.10)

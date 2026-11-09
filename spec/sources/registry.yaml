@@ -42,24 +42,77 @@ sources:
       pages: 199
     notes: "Backs rule pack rajuk@2008.1 (spec/rules/rajuk-2008.yaml). A second independent download (mirror) was byte-identical."
 
-  - id: hbri-bnbc
+  - id: bnbc-2020-gazette
     dataTypes: [rule-source, seismic-zone]
-    status: candidate
-    authority: "HBRI (Housing and Building Research Institute), Ministry of Housing and Public Works"
+    status: active
+    authority: "Ministry of Housing and Public Works (published by HBRI); gazetted by the Bangladesh Government Press"
     title:
-      bn: "বাংলাদেশ জাতীয় ইমারত নির্মাণ বিধিমালা (বিএনবিসি) ২০২০"
-      en: "Bangladesh National Building Code (BNBC) 2020"
+      bn: "বাংলাদেশ জাতীয় ইমারত নির্মাণ বিধিমালা (বিএনবিসি) ২০২০ — এস.আর.ও. নং ৫৫-আইন/২০২০"
+      en: "Bangladesh National Building Code (BNBC) 2020 - S.R.O. No. 55-Law/2020, Bangladesh Gazette, extra issue, 11 February 2021"
     kind: pdf-document
-    url: "https://hbri.gov.bd/"
+    url: "http://www.dpp.gov.bd/upload_file/gazettes/39201_96302.pdf"
     language: [en]
-    licence: "Government code publication; numbers used as facts with citations once a pack exists; acquisition path to confirm."
+    licence: "Government gazette publication; numbers are used as facts with per-rule citations; no text bundled."
     fetch:
       method: GET
       parser: manual-review
-      recipe: "Acquire the official BNBC 2020 volumes, hash and pin as an artifact (like the gazette), then extract rule numbers per ADR-0003 into a 'bnbc@2020.x' pack. The seismic zoning map is read from the relevant BNBC part (zones become a rule-pack table, never a guessed polygon)."
+      recipe: "Download the gazette PDF from the Department of Printing and Publications (landing page https://www.dpp.gov.bd/bgpress/index.php/document/get_extraordinary/39201), check the pinned sha256, then read tables from rendered page images (the text layer scrambles table columns). Gazette page = PDF page + 2581 or 2582 (record both). Extract per ADR-0003 into spec/rules/bnbc-2020.yaml."
+    cadence: static
+    lastVerified: "2026-11-09"
+    artifact:
+      fileName: "bnbc-2020-gazette-39201.pdf"
+      sizeBytes: 59673170
+      sha256: "b4a1efbcaa6654951ac7801829dfd23db2a45257fdfea9887b88515c1a0a6dd0"
+      pages: 2461
+    notes: "Notification dated 05-11-1426 / 18-02-2020, repealing BNBC 2006 (Building Construction Act 1952, s.18A). HBRI (https://hbri.gov.bd/) lists BNBC 2020 as a three-volume printed set; its site pages link only front-matter PDFs (checked 2026-11-09), not the full text. The gazette is therefore the pinned official source. Backs rule pack bnbc@2020.1 (spec/rules/bnbc-2020.yaml). Held copy (owner download, hash and size verified identical 2026-11-09): C:/1_SAJID/ArchResidenceBD/_backup/sources/bnbc-2020-gazette-39201.pdf; not committed to git (59.7 MB)."
+
+  - id: rajuk-dap-2022-2035
+    dataTypes: [rule-source]
+    status: candidate
+    authority: "RAJUK (Rajdhani Unnayan Kartripakkha)"
+    title:
+      bn: "বিস্তারিত এলাকা পরিকল্পনা (ড্যাপ) ২০২২-২০৩৫, ঢাকা"
+      en: "Detailed Area Plan (DAP) 2022-2035, Dhaka"
+    kind: pdf-document
+    url: "https://rajuk.gov.bd/pages/miscellaneous-infos"
+    language: [bn, en]
+    licence: "Government publication; confirm the reuse terms before extraction."
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: "Obtain the DAP 2022-2035 gazette text (gazette dated 23-24 Aug 2022) and the per-plot land-use map index, hash and pin both, then extract the land-use zone rules with citations."
     cadence: ad-hoc
     cacheTtlDays: 180
-    notes: "Domain did not resolve from the build machine on 2026-10-18 (transport error) - confirm from a browser before first use. Nothing enters a rule pack until the pinned copy exists."
+    artifact:
+      fileName: "rajuk-dap-2022-sro-282-notice.pdf"
+      sizeBytes: 356584
+      sha256: "d2cc49cf485e1ff82ca7f86c6abd424d3916618f43eb21d657c8bc243fcd8db5"
+      pages: 2
+    notes: "Pinned so far: ONLY the 2-page gazette notice S.R.O. No. 282-Law/2022 (Bangladesh Gazette extra issue, 23 Aug 2022, Ministry of Housing and Public Works, Planning Branch-3), supplied by the owner 2026-11-09, a scan with no text layer. It approves the Master Plan (Detailed Area Plan for Dhaka, 2016-2035 draft title; the approved plan is the DAP 2022-2035), repeals the 22 June 2010 DAP (S.R.O. 232-Law/2010), and says the schedule, 'Master Plan, Volume 1 and Volume 2', is printed separately. Those two volumes hold the rules and land-use zones and are NOT yet held. Source URL of the notice file was not given (file name fa2e80425b544fd99e78c9632a8900fc.pdf, PDF dated 23 Aug 2022). Held copy: C:/1_SAJID/ArchResidenceBD/_backup/sources/rajuk-dap-2022-sro-282-notice.pdf (not in git). rajuk.gov.bd publishes the map-index pages (A to I). The 2016-2035 DRAFT PDF linked from the home page (sha256 87fabf69f16c3af0b2bb...) is not the approved plan and was not used. Nothing from DAP enters a rule pack until Volume 1 and 2 are pinned (see spec/rules/bnbc-2020.yaml gaps). A 2025 TOD guideline under the DAP is entry rajuk-dap-tod-guideline-2025. Also held (owner download 2026-11-09): one official map sheet, 'Integrated Detailed Area Plan (2022-2035) Map on RS Mauza', sheet I13-3, scale 1:1980, citing SRO 282-Law/2022 (RAJUK, consultants Sheltech, The Decode, DDC; 6230571 bytes, 1 page, sha256 0fe47f133b9d467017a3be728ef4a3589cdbd34e83e70abf8ce88862c54d7851), a land-use map for part of Dhaka City Corporation wards near Joar Sahara (C:/1_SAJID/ArchResidenceBD/_backup/sources/rajuk-dap-2022-map-sheet-I13-3.pdf, not in git). It shows land-use zones per plot but the legend does not give each zone's permitted uses; those are in Volume 1 and 2. One sheet of a large sheet index, so it covers a small part of Dhaka only."
+
+  - id: rajuk-dap-tod-guideline-2025
+    dataTypes: [rule-source]
+    status: candidate
+    authority: "Ministry of Housing and Public Works for RAJUK"
+    title:
+      bn: "ট্রানজিট ওরিয়েন্টেড ডেভেলপমেন্ট (টিওডি) গাইডলাইন, ড্যাপ (২০২২-২০৩৫) এলাকা — এস.আর.ও. নং ১৮৭-আইন/২০২৫"
+      en: "Transit Oriented Development (TOD) Guideline for the DAP (2022-2035) area - S.R.O. No. 187-Law/2025, Bangladesh Gazette extra issue, 28 May 2025"
+    kind: pdf-document
+    url: "https://www.dpp.gov.bd/upload_file/gazettes/57681_57582.pdf"
+    language: [bn]
+    licence: "Government gazette publication; confirm the reuse terms before extraction."
+    fetch:
+      method: GET
+      parser: manual-review
+      recipe: "30-page scan with no text layer; read from rendered page images (ADR-0003). Not a rule source for plot-level checks until someone decides TOD zones matter to the app."
+    cadence: static
+    lastVerified: "2026-11-09"
+    artifact:
+      fileName: "rajuk-dap-tod-guideline-2025-57681.pdf"
+      sizeBytes: 23870865
+      sha256: "794efe1d529337aa117455874753bbbbbf86c6dfb05d177390c352cb8dc86a8d"
+      pages: 30
+    notes: "Supplied by the owner 2026-11-09 as the DAP gazette. It is the TOD guideline issued under DAP 2022-2035, not the DAP text. Its preamble names the DAP gazette itself: S.R.O. No. 282-Law/2022 dated 22 August 2022 - that is the document still needed (entry rajuk-dap-2022-2035). Held copy: C:/1_SAJID/ArchResidenceBD/_backup/sources/rajuk-dap-tod-guideline-2025-57681.pdf (not in git). Nothing extracted."
 
   - id: chattogram-cda-building-rules
     dataTypes:

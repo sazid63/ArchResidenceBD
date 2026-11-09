@@ -1,0 +1,332 @@
+# BNBC 2020 rule pack v0 - source of truth (BUILD_PLAN T3.0, ticket M3-1).
+# Same shape as spec/rules/rajuk-2008.yaml: id scheme <authority>@<regime>.<revision>, every value cites the
+# gazette page it was read from, `testVectors` pin the numbers, `gaps` list everything not found (never estimated).
+# status: candidate - engineer validation pending.
+# Source: Bangladesh National Building Code 2020, S.R.O. No. 55-Law/2020, Bangladesh Gazette extra issue 11 Feb 2021
+# (registry id bnbc-2020-gazette). Section numbers below are the Code's own (Part 3 = Architecture, Part 4 = Fire,
+# Part 6 = Structural design, Part 8 = Building services).
+# Tables were read from rendered page images; the PDF text layer scrambles table columns and was used for prose only.
+
+packVersion: "0.1.0"
+id: "bnbc@2020.1"
+authority: "bnbc"
+regime: "2020"
+revision: 1
+status: "candidate"
+langs: [en]
+title:
+  en: "BNBC 2020 rule pack - Bangladesh National Building Code 2020 (status: candidate)"
+
+source:
+  registryId: "bnbc-2020-gazette"
+  document:
+    en: "Bangladesh National Building Code (BNBC) 2020, S.R.O. No. 55-Law/2020 dated 18-02-2020, Bangladesh Gazette extra issue 11 February 2021"
+  url: "http://www.dpp.gov.bd/upload_file/gazettes/39201_96302.pdf"
+  fileName: "bnbc-2020-gazette-39201.pdf"
+  sha256: "b4a1efbcaa6654951ac7801829dfd23db2a45257fdfea9887b88515c1a0a6dd0"
+  pdfPages: 2461
+  retrievedAt: "2026-11-09"
+
+verification:
+  tiers: [page-image]
+  method: >-
+    Every number below was read from a rendered page image of the gazette PDF. The text layer was used only to
+    locate pages. Second pass 2026-11-09: values first read from the text layer (room sizes, bathroom/shaft/opening
+    tables, stair limits, lift clauses, occupancy table, live-load notes, partition rule) were re-read from the
+    page images and matched; Table 4.3.8 was also compared with the owner's copy. Part numbers were confirmed from
+    the gazette's own headings: Part III Architecture (PDF pages 40-276), IV Fire (277-375), VI Structural design
+    (512 on, loads in Ch. 2), VIII Building services (1930 on, lifts in Ch. 4).
+    Gazette page = printed page number in the page header; pdfPage = page index in the PDF file. The offset between
+    them is 2581 or 2582, so both are recorded.
+
+review:
+  label: "owner-reviewed 2026-11-09 (civil engineering student); formal engineer validation pending"
+  ownerConfirmed: ["corridor 36 in = 915 mm", "dining room kept as an assumption, not treated as habitable", "toilet floor = smallest Table 3.1.10 row", "wall thicknesses 250/125 mm behind the bay minimums"]
+  openItems: 10
+  openItemsFile: "gaps below"
+
+# Residential classes used by the checks (Table 3.1.1).
+occupancy:
+  A1: "Single family dwelling"
+  A2: "Two families dwelling"
+  A3: "Flats or apartments"
+  A4: "Mess, boarding houses, dormitories and hostels"
+  A5: "Hotels and lodging houses"
+  cite: occ
+
+citations:
+  occ:        {gazettePage: "2629", pdfPage: 47,  tier: page-image, note: "Table 3.1.1 Summary of Occupancy Classification (Part 3, Sec 1.4)"}
+  ceil:       {gazettePage: "2648", pdfPage: 66,  tier: page-image, note: "Part 3 Sec 1.14.2.1 ceiling heights; 1.14.2.2 room sizes"}
+  kitchen:    {gazettePage: "2649", pdfPage: 67,  tier: page-image, note: "Part 3 Sec 1.14.3 kitchen; 1.14.4 bathrooms; Table 3.1.10 Bathroom Space Standards"}
+  shaft:      {gazettePage: "2650", pdfPage: 68,  tier: page-image, note: "Part 3 Sec 1.14.4.4-1.14.4.5; Table 3.1.11 lighting and ventilation shaft"}
+  stair-dims: {gazettePage: "2651", pdfPage: 69,  tier: page-image, note: "Part 3 Sec 1.14.5.1-1.14.5.6 stairway limits, handrail height"}
+  vent:       {gazettePage: "2655-2656", pdfPage: "73-74", tier: page-image, note: "Part 3 Sec 1.19.1, 1.19.6; Table 3.1.12 opening areas"}
+  egress-w:   {gazettePage: "2886", pdfPage: 304, tier: page-image, note: "Part 4 Table 4.3.2 Required Width per Occupant; Sec 3.7 corridors"}
+  stair-3-10: {gazettePage: "2891-2896", pdfPage: "309-314", tier: page-image, note: "Part 4 Sec 3.10 stairways; Table 4.3.5 risers and treads"}
+  stair-w:    {gazettePage: "2893", pdfPage: 311, tier: page-image, note: "Part 4 Table 4.3.6 Minimum Width of Stairways in Egress System"}
+  travel:     {gazettePage: "2900-2902", pdfPage: "318-320", tier: page-image, note: "Sec 3.15 travel path; Table 4.3.8 Determination of Exit and Access Requirements (rows on 2901, notes 1-6 on 2902); also checked against the owner's own copy of the table, 2026-11-09"}
+  lift:       {gazettePage: "4763-4764", pdfPage: "2182-2183", tier: page-image, note: "Part 8 Sec 4.2.1.1-4.2.1.3 lifts"}
+  live-udl:   {gazettePage: "3114-3118", pdfPage: "533-537", tier: page-image, note: "Part 6 Sec 2.3.3-2.3.5; Table 6.2.3 Minimum Uniformly Distributed and Concentrated Live Loads"}
+  live-notes: {gazettePage: "3118-3119", pdfPage: "537-538", tier: page-image, note: "Part 6 Table 6.2.3 notes a-l; Sec 2.3.6 partition walls"}
+  combos:     {gazettePage: "3265-3267", pdfPage: "684-686", tier: page-image, note: "Part 6 Sec 2.7.3 strength design combinations; Sec 2.7.5 serviceability"}
+  seis-zone:  {gazettePage: "3192", pdfPage: 611, tier: page-image, note: "Part 6 Sec 2.5.4.2 seismic zones: Dhaka Z=0.2"}
+  seis-table: {gazettePage: "3196", pdfPage: 615, tier: page-image, note: "Part 6 Table 6.2.14 description of seismic zones; Table 6.2.15 zone coefficient Z for towns"}
+
+# ---------------------------------------------------------------- rooms (Part 3)
+roomRules:
+  - id: habitable-room
+    kinds: [bedroom, living]
+    clause: "Part 3 Sec 1.14.2.2"
+    cite: ceil
+    minAreaM2: 9.5
+    minWidthM: 2.9
+    note: "Net floor area; applies to all habitable rooms (sleeping and other purposes) of a dwelling unit."
+  - id: non-habitable-room
+    kinds: [store]
+    clause: "Part 3 Sec 1.14.2.2"
+    cite: ceil
+    minAreaM2: 5.0
+    minWidthM: 2.0
+    note: "'Other non-habitable rooms in the dwelling unit'. Kitchens and bathrooms have their own rows below. Whether a small store falls under this row is not stated; src/plans/rules.ts does not apply it to stores."
+  - id: kitchen
+    kinds: [kitchen]
+    clause: "Part 3 Sec 1.14.3.2"
+    cite: kitchen
+    minAreaM2: 4.0
+    minWidthM: 1.5
+    variants:
+      - {id: kitchen-with-dining, minAreaM2: 7.5, minWidthM: 2.2, note: "Kitchen intended to provide dining or occasional sleeping space."}
+    windowMinAreaM2: 1.0
+  - id: ceiling-habitable
+    clause: "Part 3 Sec 1.14.2.1(a)"
+    cite: ceil
+    minHeightM: 2.75
+    exceptions: "Up to one third of the floor area may be 2.44 m; air-conditioned rooms 2.44 m; kitchen, store, utility, box room and garage excluded."
+  - id: ceiling-beam-soffit
+    clause: "Part 3 Sec 1.14.2.1(b)"
+    cite: ceil
+    minClearFloorToBeamM: 2.15
+    minClearHeadroomM: 2.44
+  - id: kitchen-height
+    clause: "Part 3 Sec 1.14.3.1"
+    cite: kitchen
+    minHeightM: 2.75
+    exceptions: "2.15 m where mechanical exhaust is installed."
+  - id: bathroom-height
+    clause: "Part 3 Sec 1.14.4.1"
+    cite: kitchen
+    minHeightM: 2.15
+
+bathroomTable:   # Table 3.1.10, minimum width (m) and floor area (m2)
+  cite: kitchen
+  rows:
+    - {facility: "Water closet + bathing + hand washing", minWidthM: 1.25, minAreaM2: 3.00}
+    - {facility: "Water closet + bathing",               minWidthM: 1.00, minAreaM2: 2.80}
+    - {facility: "Bathing only",                         minWidthM: 1.00, minAreaM2: 1.50}
+    - {facility: "Water closet only",                    minWidthM: 1.00, minAreaM2: 1.20}
+    - {facility: "Adaptable toilets",                    minWidthM: 1.50, minAreaM2: null, note: "Area as per Appendix D (not transcribed, see gaps)"}
+
+shaftTable:      # Table 3.1.11 lighting and ventilation shaft (toilets/baths not on an outside wall)
+  cite: shaft
+  note: "Bathrooms and toilets must be against an exterior wall or interior open space, or be ventilated through such a shaft (Sec 1.14.4.5). Shafts above 6 storeys or 20 m are mechanically ventilated."
+  rows:
+    - {storeysUpTo: 3,    heightUpToM: 11, minNetAreaM2: 1.50, minWidthM: 1.00}
+    - {storeysUpTo: 4,    heightUpToM: 14, minNetAreaM2: 3.00, minWidthM: 1.20}
+    - {storeysUpTo: 5,    heightUpToM: 17, minNetAreaM2: 4.00, minWidthM: 1.50}
+    - {storeysUpTo: 6,    heightUpToM: 20, minNetAreaM2: 5.00, minWidthM: 2.00}
+    - {storeysOver: 6,    heightOverM: 20, minNetAreaM2: 6.50, minWidthM: 2.50}
+
+openingTable:    # Table 3.1.12, aggregate window/ventilator area as % of net floor area (Sec 1.19.6)
+  cite: vent
+  rows:
+    - {space: "Habitable rooms (sleeping, living, study, dining)", percent: 15}
+    - {space: "Kitchens", percent: 18}
+    - {space: "Non-habitable (bathrooms, store, staircase, utility)", percent: 10}
+
+# ---------------------------------------------------------------- egress, stairs, lifts (Parts 3, 4, 8)
+egress:
+  unitWidthMm: 560
+  cite: travel
+  # Table 4.3.8, residential rows. N.R. = not required by the Code.
+  rows:
+    - {classes: [A1, A2], travelPathUnsprinkleredM: null, travelPathSprinkleredM: null, note: "N.R. in every column"}
+    - {classes: [A3], travelPathUnsprinkleredM: 45, travelPathSprinkleredM: 60,
+       occupantsPerUnitWidth: {doorsToOutdoors: 50, otherDoors: 40, stairs: 30, rampsCorridors: 50},
+       corridorMinWidthAsPrinted: "36", corridorMinWidthMm: 915, corridorMaxDeadEndMm: 12190}
+    - {classes: [A4, A5], travelPathUnsprinkleredM: 45, travelPathSprinkleredM: 60,
+       occupantsPerUnitWidth: {doorsToOutdoors: 50, otherDoors: 40, stairs: 30, rampsCorridors: 50},
+       corridorMinWidthAsPrinted: "36", corridorMinWidthMm: 915, corridorMaxDeadEndMm: 12190}
+  requiredWidthPerOccupantMm:    # Table 4.3.2, row "A Residential", buildings without sprinklers / thoroughly sprinklered
+    cite: egress-w
+    unsprinklered: {stairways: 8, rampsCorridors: 5, doors: 4}
+    sprinklered:   {stairways: 5, rampsCorridors: 4, doors: 4}
+  tableNotes:     # Notes 1-6 under Table 4.3.8, printed on gazette page 2902. No row or column carries a marker in the table body.
+    - "1. Hazardous occupancy (J): travel path performance based, not above 15240 mm."
+    - "2. N.P. = Not permitted."
+    - "3. N.R. = No requirement, (except as provided in Table 4.3.5b)."
+    - "4. Capacity of ramp reduced by 25 percent when slope is steeper than 1 in 10."
+    - "5. Corridors serving classroom area of an educational building [width as in the B row]. Other corridors shall have a minimum width of 1120 mm."
+    - "6. Applies to corridors to patient area. Staff corridors shall have a minimum width of 1120 mm."
+  corridorWidthNote: "A3-A5 corridor minimum is printed '36'; confirmed as inches by the owner (civil engineering student, from the printed manual), 2026-11-09. 36 in = 914.4 mm, rounded to 915 mm as the neighbouring rows print it. Still to be confirmed by an engineer."
+  corridorCeilingMinM: 2.4
+  corridorFireRating: "1 hour or more for exit corridors and passages (Sec 3.7.4)"
+
+stairs:
+  - id: stair-min-width
+    clause: "Part 4 Table 4.3.6"
+    cite: stair-w
+    byClass:
+      A3: 1120
+      A4: 1120
+      A5: 1120
+      A1: null   # printed "As per Table 4.3.6" (self-referencing) - see gaps
+      A2: null
+    unit: mm
+  - id: stair-geometry
+    clause: "Part 3 Sec 1.14.5.2-1.14.5.6"
+    cite: stair-dims
+    twoRisersPlusTreadMm: {min: 610, max: 648}
+    maxRiserTreadDifferenceMm: 5
+    maxFlightRiseMm: 3660
+    minHeadroomM: 2.15
+    minHeadroomReducedM: 2.03      # for not more than three flights
+    handrailMinHeightM: 0.9
+  - id: stair-landing
+    clause: "Part 4 Sec 3.10.2"
+    cite: stair-3-10
+    note: "Landing at least the stair width; a landing between two straight flights need not exceed 1.2 m in the direction of travel."
+  - id: stair-risers-treads
+    clause: "Part 4 Table 4.3.5"
+    cite: stair-3-10
+    note: "Combination table (tread 206-406 mm against riser 229-127 mm); not transcribed row by row (see gaps). Use the two-risers-plus-tread rule above."
+
+lifts:
+  - id: lift-required
+    clause: "Part 8 Sec 4.2.1.1"
+    cite: lift
+    rule: "Lifts shall be provided in buildings of more than six storeys or 20 m in height."
+    storeysOver: 6
+    heightOverM: 20
+  - id: lift-stretcher
+    clause: "Part 8 Sec 4.2.1.2"
+    cite: lift
+    rule: "More than ten storeys or 32 m: each floor served needs at least one lift with stretcher facility, inside platform at least 1275 x 2000 mm, clear opening width 1050 mm."
+    storeysOver: 10
+    heightOverM: 32
+    platformMm: {width: 1275, length: 2000}
+    clearOpeningMm: 1050
+  - id: lift-standby-power
+    clause: "Part 8 Sec 4.2.1.3"
+    cite: lift
+    rule: "More than ten storeys or 32 m (and hospitals): one or more lifts on standby power."
+
+# ---------------------------------------------------------------- structural (Part 6)
+liveLoads:       # Table 6.2.3, kN/m2 uniform and kN concentrated
+  cite: live-udl
+  notesCite: live-notes
+  rows:
+    - {id: residential-private, use: "Residential: hotels and multifamily houses - private rooms and corridors serving them", uniformKnM2: 2.00, cite: live-udl}
+    - {id: residential-public,  use: "Residential: hotels and multifamily houses - public rooms and corridors serving them",  uniformKnM2: 4.80, cite: live-udl}
+    - {id: dwelling-other,      use: "Residential: one- and two-family dwellings - all other areas except stairs and balconies", uniformKnM2: 2.00, cite: live-udl}
+    - {id: dwelling-habitable-attic, use: "One- and two-family dwellings - habitable attics and sleeping areas", uniformKnM2: 1.50, cite: live-udl}
+    - {id: corridor-first-floor, use: "Corridors, first floor", uniformKnM2: 4.80, cite: live-udl}
+    - {id: corridor-other,      use: "Corridors, other floors", uniformKnM2: "same as occupancy served except as indicated", cite: live-udl}
+    - {id: balcony,             use: "Balconies (exterior)", uniformKnM2: 4.80, cite: live-udl}
+    - {id: balcony-dwelling,    use: "Balconies on one- and two-family residences only, not exceeding 19.3 m2", uniformKnM2: 2.90, cite: live-udl}
+    - {id: stairs-exitways,     use: "Stairs and exit ways", uniformKnM2: 4.80, concentratedKn: 1.33, concentratedNote: "on a stair tread, area 2,580 mm2 (note l)", cite: live-udl}
+    - {id: stairs-dwelling,     use: "Stairs, one- and two-family residences only", uniformKnM2: 2.00, cite: live-udl}
+    - {id: roof-flat,           use: "Roofs: ordinary flat roof", uniformKnM2: 1.00, concentratedKn: 1.33, concentratedNote: "all roof surfaces subject to maintenance workers", noteRef: h, cite: live-udl}
+    - {id: roof-promenade,      use: "Roofs used for promenade purposes", uniformKnM2: 2.90, cite: live-udl}
+    - {id: roof-garden,         use: "Roofs used for roof gardens or assembly purposes", uniformKnM2: 4.80, cite: live-udl}
+    - {id: garage-passenger,    use: "Garages (passenger vehicles only)", uniformKnM2: 2.00, concentratedKn: 13.35, concentratedNote: "13.35 kN on a 114 mm x 114 mm jack footprint, or 10 kN per wheel for mechanical parking without slab or deck (note b)", cite: live-udl}
+    - {id: yards-terraces,      use: "Yards and terraces, pedestrian", uniformKnM2: 4.80, cite: live-udl}
+    - {id: sidewalk-driveway,   use: "Sidewalks, vehicular driveways and yards subject to trucking", uniformKnM2: 12.00, concentratedKn: 35.60, noteRef: "j, k", cite: live-udl}
+    - {id: partition-allowance, use: "Light partitions not shown on plans (up to 5.5 kN per metre run): uniform allowance", uniformKnM2: 1.2, note: "At least 33% of the weight per metre run, minimum 1.2 kN/m2 (Sec 2.3.6).", cite: live-notes}
+
+loadCombinations:
+  cite: combos
+  symbols: "D dead, F fluid, T self-straining, L live, Lr roof live, H earth/hydrostatic pressure, W wind, E earthquake, R rain, Fa flood"
+  strength:      # Sec 2.7.3.1
+    - {n: 1, expr: "1.4(D + F)"}
+    - {n: 2, expr: "1.2(D + F + T) + 1.6(L + H) + 0.5(Lr or R)"}
+    - {n: 3, expr: "1.2D + 1.6(Lr or R) + (L or 0.8W)"}
+    - {n: 4, expr: "1.2D + 1.6W + L + 0.5(Lr or R)"}
+    - {n: 5, expr: "1.2D + 1.0E + 1.0L"}
+    - {n: 6, expr: "0.9D + 1.6W + 1.6H"}
+    - {n: 7, expr: "0.9D + 1.0E + 1.6H"}
+  strengthExceptions:
+    - "Load factor on L in combinations 3, 4 and 5 may be reduced to 0.5 where the minimum specified uniformly distributed live load is 5.0 kN/m2 or less (garages and places of public assembly excepted)."
+    - "Factor on H is zero in combinations 6 and 7 if H counteracts W or E."
+    - "For reinforced concrete structures designed under Chapter 6 Part 6, 1.3W may replace 1.6W in combinations 4 and 6 where W has not been reduced by a directionality factor."
+  serviceability:   # Sec 2.7.5
+    - {id: vertical-deflection, expr: "D + L"}
+    - {id: long-term,           expr: "D + 0.5L", note: "Elastic deflection multiplied by a creep factor of 1.5 to 2.0 for long-term effect."}
+    - {id: lateral-wind,        expr: "D + 0.5L + 0.7W"}
+
+seismic:
+  cite: seis-table
+  zones:    # Table 6.2.14
+    - {zone: 1, intensity: "Low",         z: 0.12}
+    - {zone: 2, intensity: "Moderate",    z: 0.20}
+    - {zone: 3, intensity: "Severe",      z: 0.28}
+    - {zone: 4, intensity: "Very Severe", z: 0.36}
+  towns:    # Table 6.2.15 (only the town this app serves)
+    - {town: "Dhaka", z: 0.20, zone: 2, cite: seis-table, supportCite: seis-zone}
+
+# ---------------------------------------------------------------- test vectors
+testVectors:
+  - {id: corridor-a3, kind: corridor-min, given: {occupancy: A3}, expect: {minWidthMm: 915}}
+  - {id: room-bedroom, kind: room-min, given: {roomKind: bedroom}, expect: {minAreaM2: 9.5, minWidthM: 2.9}}
+  - {id: room-living,  kind: room-min, given: {roomKind: living},  expect: {minAreaM2: 9.5, minWidthM: 2.9}}
+  - {id: room-store,   kind: room-min, given: {roomKind: store},   expect: {minAreaM2: 5.0, minWidthM: 2.0}}
+  - {id: room-kitchen, kind: room-min, given: {roomKind: kitchen}, expect: {minAreaM2: 4.0, minWidthM: 1.5}}
+  - {id: bath-wc-only, kind: bathroom-min, given: {facility: "Water closet only"}, expect: {minAreaM2: 1.20, minWidthM: 1.00}}
+  - {id: bath-full,    kind: bathroom-min, given: {facility: "Water closet + bathing + hand washing"}, expect: {minAreaM2: 3.00, minWidthM: 1.25}}
+  - {id: shaft-3,      kind: shaft-min, given: {storeys: 3}, expect: {minNetAreaM2: 1.50, minWidthM: 1.00}}
+  - {id: shaft-6,      kind: shaft-min, given: {storeys: 6}, expect: {minNetAreaM2: 5.00, minWidthM: 2.00}}
+  - {id: shaft-8,      kind: shaft-min, given: {storeys: 8}, expect: {minNetAreaM2: 6.50, minWidthM: 2.50}}
+  - {id: lift-6,       kind: lift-required, given: {storeys: 6, heightM: 19.5}, expect: {required: false}}
+  - {id: lift-7,       kind: lift-required, given: {storeys: 7, heightM: 21}, expect: {required: true}}
+  - {id: lift-height,  kind: lift-required, given: {storeys: 6, heightM: 20.5}, expect: {required: true}}
+  - {id: stair-a3,     kind: stair-min-width, given: {occupancy: A3}, expect: {minWidthMm: 1120}}
+  - {id: travel-a3,    kind: travel-path, given: {occupancy: A3, sprinklered: false}, expect: {maxM: 45}}
+  - {id: travel-a3-s,  kind: travel-path, given: {occupancy: A3, sprinklered: true}, expect: {maxM: 60}}
+  - {id: live-apartment, kind: live-load, given: {use: residential-private}, expect: {uniformKnM2: 2.00}}
+  - {id: live-corridor1, kind: live-load, given: {use: corridor-first-floor}, expect: {uniformKnM2: 4.80}}
+  - {id: live-stair,     kind: live-load, given: {use: stairs-exitways}, expect: {uniformKnM2: 4.80, concentratedKn: 1.33}}
+  - {id: live-roof,      kind: live-load, given: {use: roof-flat}, expect: {uniformKnM2: 1.00}}
+  - {id: seismic-dhaka,  kind: seismic-zone, given: {town: Dhaka}, expect: {zone: 2, z: 0.20}}
+  - {id: combo-5,        kind: load-combination, given: {n: 5}, expect: {expr: "1.2D + 1.0E + 1.0L"}}
+
+# ---------------------------------------------------------------- gaps (never estimated)
+gaps:
+  - id: gap-xref-4-3-4
+    what: "Part III Sec 1.14.5.2 sends the reader to 'Table 4.3.4 Chapter 3, Part 4' for riser and tread combinations; the table that holds them is printed as Table 4.3.5 (Part IV page 2892)."
+    why: "Internal cross-reference inconsistency in the gazette. The two-risers-plus-tread rule (610-648 mm) is used; the combination table is not transcribed."
+  - id: gap-table-4-3-5b
+    what: "Note 3 of Table 4.3.8 says N.R. applies 'except as provided in Table 4.3.5b'. No table with that label exists in the gazette text (the string occurs only in that note)."
+    why: "Dangling reference. The A1/A2 'N.R.' cells are recorded as printed; an engineer should say what the reference was meant to point at."
+  - id: gap-dining
+    what: "Whether a separate dining room is a 'habitable room' for the 9.5 m2 / 2.9 m minimum. Sec 1.14.2.2 says 'sleeping and other purposes'; only Table 3.1.12 (window areas) lists dining among habitable uses."
+    why: "Interpretation, not stated. Owner agreed (2026-11-09) that it should not be treated as habitable. src/plans/rules.ts keeps the working dining width (2100 mm) as an assumption."
+  - id: gap-stair-a1-a2
+    what: "Stair minimum width for A1 and A2 (single and two-family): Table 4.3.6 says 'As per Table 4.3.6' (self-reference)."
+    why: "No value is stated; left null."
+  - id: gap-lift-car-size
+    what: "Lift car and shaft dimensions for passenger lifts (Part 8 Sec 4.2.3 and Tables 8.4.x) not transcribed; only the stretcher platform (1275 x 2000 mm) is."
+    why: "src/plans/rules.ts keeps its lift-bay working width (1500 mm) flagged as an assumption."
+  - id: gap-risers-treads
+    what: "Table 4.3.5 combination rows, door and window widths (Part 3 Sec 1.15-1.17), Appendix D accessible dimensions, Table 6.2.4 pitched roofs, Sec 2.3.11 handrail loads, Sec 2.3.13 live load reduction."
+    why: "Not needed by the current checks; transcribe when a check needs them."
+  - id: gap-dead-loads
+    what: "Tables 6.2.1 and 6.2.2 (unit weights of materials and constructions) not transcribed; the two-column table layout scrambles in the text layer and needs a careful image pass."
+    why: "M4-1 needs them: transcribe from pdfPages 529-531 (gazette 3110-3112) before use, otherwise flag as assumption."
+  - id: gap-seismic-parameters
+    what: "Soil classes, importance factors, response modification R, spectrum parameters (Sec 2.5.4.3-2.5.8) not transcribed; only zone and Z are."
+    why: "Needed by M4-2 base-shear work."
+  - id: gap-wind
+    what: "Basic wind speed for Dhaka and exposure rules (Sec 2.4) not transcribed."
+    why: "Not needed until a wind check exists."
+  - id: gap-dap-2022
+    what: "DAP 2022-2035 (Dhaka Detailed Area Plan): only the 2-page gazette notice S.R.O. 282-Law/2022 is held; the plan itself (Master Plan Volume 1 and Volume 2, printed separately) is not. rajuk.gov.bd publishes map-index pages and only the 2016-2035 DRAFT."
+    why: "Not used. Registry entry rajuk-dap-2022-2035 stays candidate. Land-use zone rules from DAP are 'not checked' in the app."

@@ -19,10 +19,10 @@ describe("validator catches problems", () => {
     expect(codes(P1_4B)).toEqual([]);
   });
 
-  it("a corridor narrower than 1.2 m clear", () => {
+  it("a corridor narrower than the BNBC 915 mm minimum", () => {
     const p = clone(P1_4B);
-    p.baysX[1] = { min: 1200, pref: 1200, max: 1200 };
-    expect(codes(p, { widthMm: 10800, depthMm: 16650 })).toContain("room_too_narrow:a-corridor");
+    p.baysX[1] = { min: 1000, pref: 1000, max: 1000 };
+    expect(codes(p, { widthMm: 10600, depthMm: 16650 })).toContain("room_too_narrow:a-corridor");
   });
 
   it("a toilet with no outside wall and no shaft", () => {
