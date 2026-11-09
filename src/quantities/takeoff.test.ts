@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_SETBACKS_MM, deriveBuilding, type BuildingModel } from "../model/building";
 import { fitRange } from "../plans/fit";
 import { PLAN_LIBRARY } from "../plans/library";
+import { slabOpeningAreaM2 } from "../model/openings";
 import { analyzeStructure } from "../structure/analyze";
 import { buildBbs } from "../structure/bbs";
+import { buildMesh } from "../model/toMesh";
 import { BAG_M3, BOQ, boqToCsv, buildBoq, CFT_PER_M3, DEFAULT_RATE_CARD, envelopeQuantities, priceTakeoff, takeoff, type RateCard } from "./takeoff";
 
 const S = DEFAULT_SETBACKS_MM;
@@ -135,7 +137,10 @@ describe("takeoff", () => {
   });
 
   it("screed covers every storey plus the roof", () => {
-    expect(get("screed").quantity).toBeCloseTo((m.storeys.length + 1) * m.footprintAreaM2, 6);
+    // every storey slab and the roof, less the stair, lift and shaft openings of the floors above the ground
+    const holes = m.storeys.slice(1).reduce((q, st) => q + slabOpeningAreaM2(st.geometry, m), 0) + slabOpeningAreaM2(m.storeys[Math.min(1, m.storeys.length - 1)].geometry, m);
+    expect(holes).toBeGreaterThan(0);
+    expect(get("screed").quantity).toBeCloseTo((m.storeys.length + 1) * m.footprintAreaM2 - holes, 6);
   });
 
   it("mortar cement equals the 1:4 share of brickwork + plaster + screed mortar", () => {
@@ -244,4 +249,27 @@ describe("pricing", () => {
     expect(rows.some((r) => r.startsWith("rate_card,pwd-sor-2022-civil-works"))).toBe(true);
     expect(rows[rows.length - 1]).toMatch(/all items priced/);
   });
+});
+
+describe("the bill of quantities agrees with the 3D model", () => {
+  for (const [plan, storeys] of [["p1-4b", 4], ["p2-2b-fb", 6], ["p3-2b", 6], ["p2-3b-lr", 4]] as const) {
+    it(`${plan} ${storeys} storeys: masonry within 12 % of the walls in the mesh, slab concrete less the openings`, () => {
+      const m = model(plan, storeys);
+      const res = analyzeStructure(m);
+      const mesh = buildMesh(m, res);
+      const vol = (kinds: string[]) => mesh.objects.filter((o) => kinds.includes(o.kind)).reduce((a, o) => a + o.volumeMm3, 0) / 1e9;
+      const ratio = envelopeQuantities(m).wallM3 / vol(["wall", "partition"]);
+      // the BOQ takes a flat 500 mm off the storey height; the mesh cuts each wall by the real beam above it, so the BOQ runs a little high
+      expect(ratio, `${plan} wall ratio`).toBeGreaterThan(0.95);
+      expect(ratio, `${plan} wall ratio`).toBeLessThan(1.12);
+      // slab concrete: panel volume minus the holes
+      const bbs = buildBbs(res, m);
+      const panelM3 = res.levels.reduce((a, lv) => a + lv.panels.reduce((q, p) => q + ((p.x1 - p.x0) * (p.y1 - p.y0) * lv.slabThicknessMm) / 1e9, 0), 0);
+      let holesM3 = 0;
+      res.levels.forEach((lv) => { holesM3 += (slabOpeningAreaM2(m.storeys[lv.index + 1 < m.storeys.length ? lv.index + 1 : Math.min(1, m.storeys.length - 1)].geometry, m) * lv.slabThicknessMm) / 1000; });
+      expect(holesM3).toBeGreaterThan(0);
+      const members = bbs.totals.concreteM3 - (panelM3 - holesM3);
+      expect(members).toBeGreaterThan(0); // beams, columns and footings on top of the slabs
+    });
+  }
 });

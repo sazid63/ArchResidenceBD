@@ -12,6 +12,7 @@
  */
 
 import type { BuildingModel } from "../model/building";
+import { slabOpeningAreaM2 } from "../model/openings";
 import { bendDeduction, bendDiameter, hookTail, lapCompression, lapTension, ldCompression, ldHook, ldTension, tieHookTail } from "./anchorage";
 import type { BeamLinePlaced, PanelResult, StructureResult } from "./analyze";
 import { barArea, pickBeamBars, pickColumnBars, pickMatBars, unitWeightKgM, type BarPick, type SlabBarPick } from "./barSelect";
@@ -469,10 +470,17 @@ function detailFootings(res: StructureResult, b: Builder): void {
   }
 }
 
+/** Area of the holes (stair flights, lift and light shafts) in the slab above storey `level`; the roof slab uses the typical floor. */
+function holesAboveM2(model: BuildingModel, level: number): number {
+  const n = model.storeys.length;
+  return slabOpeningAreaM2(model.storeys[level + 1 < n ? level + 1 : Math.min(1, n - 1)].geometry, model);
+}
+
 function concreteM3(res: StructureResult, model: BuildingModel): number {
   let m3 = 0;
   for (const lv of res.levels) {
     for (const p of lv.panels) m3 += ((p.x1 - p.x0) * (p.y1 - p.y0) * lv.slabThicknessMm) / 1e9;
+    m3 -= (holesAboveM2(model, lv.index) * lv.slabThicknessMm) / 1000; // the slab is cut where the stair, lift and shafts pass
     for (const line of lv.beamLines) for (const sp of line.result.spans) m3 += (line.result.section.bMm * Math.max(line.result.section.hMm - lv.slabThicknessMm, 0) * sp.lengthMm) / 1e9;
   }
   for (const col of res.frame.columns) {
@@ -492,6 +500,7 @@ function formworkM2(res: StructureResult, model: BuildingModel): { footing: numb
   const f = { footing: 0, column: 0, beam: 0, slab: 0 };
   for (const lv of res.levels) {
     for (const p of lv.panels) f.slab += ((p.x1 - p.x0) * (p.y1 - p.y0)) / 1e6;
+    f.slab -= holesAboveM2(model, lv.index);
     for (const line of lv.beamLines)
       for (const sp of line.result.spans) f.beam += ((line.result.section.bMm + 2 * Math.max(line.result.section.hMm - lv.slabThicknessMm, 0)) * sp.lengthMm) / 1e6;
   }

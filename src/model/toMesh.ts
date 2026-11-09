@@ -21,7 +21,10 @@ import { buildDogLegStair, planStair, type StairPlacement } from "../cad/stairBu
 import { OUTSIDE, type FloorGeometry } from "../plans/geometry";
 import type { Rect } from "../plans/types";
 import type { StructureResult } from "../structure/analyze";
+import { slabOpeningRects, stairPlacement } from "./openings";
 import { TANK_HEIGHT_MM, TANK_INSET_MM } from "./roofEquipment";
+
+export { stairPlacement };
 import type { BuildingModel } from "./building";
 
 /** Placeholder sections (mm) until M4 sizes them. */
@@ -42,8 +45,6 @@ const WINDOW_SILL = 900;
 const WINDOW_HEIGHT = 1200;
 const VENT_SILL = 1800;
 const VENT_HEIGHT = 600;
-/** Clear space at the foot of the stair inside the stair room (arrival landing). */
-const STAIR_ARRIVAL = 1000;
 
 const meshPhase = (index: number) => (index === 0 ? "ground_floor" : `floor_${index}`);
 
@@ -263,19 +264,6 @@ function beamRect(bm: { orientation: "v" | "h"; at: number; from: number; to: nu
     : { x0: ox + bm.from, y0: oy + bm.at - half, x1: ox + bm.to, y1: oy + bm.at + half };
 }
 
-/**
- * The stair sits inside its room (clear of the wall faces), flights along the room's long side,
- * with the arrival landing at the start. A room edge at 0 is an outside wall (250 mm), else 125 mm.
- */
-export function stairPlacement(rect: Rect, ox: number, oy: number): StairPlacement {
-  const insetX = rect.x0 === 0 ? 125 : 63;
-  const insetY = rect.y0 === 0 ? 125 : 63;
-  const alongX = rect.x1 - rect.x0 >= rect.y1 - rect.y0;
-  return alongX
-    ? { originX: ox + rect.x0 + insetX + STAIR_ARRIVAL, originY: oy + rect.y0 + insetY, axis: "X", uDir: 1, vDir: 1 }
-    : { originX: ox + rect.x0 + insetX, originY: oy + rect.y0 + insetY + STAIR_ARRIVAL, axis: "Y", uDir: 1, vDir: 1 };
-}
-
 /** Holes in a floor or roof slab: the stair flights, the lift shaft and any light shafts. */
 function slabOpenings(
   geo: FloorGeometry,
@@ -289,20 +277,6 @@ function slabOpenings(
   isSlab: (o: MeshObject) => boolean,
 ) {
   const applies = (o: MeshObject) => isSlab(o) && (o.id === slabId || o.parentId === slabId);
-  for (const room of geo.fitted.rooms) {
-    const kind = room.def.kind;
-    const r = room.rects[0];
-    if (kind === "stair") {
-      const pl = stairPlacement(r, ox, oy);
-      const layout = planStair(model.input.floorToFloorMm);
-      const len = layout.lengthMm;
-      const wid = layout.widthMm;
-      const [x0, y0, x1, y1] = pl.axis === "X"
-        ? [pl.originX, pl.originY, pl.originX + len, pl.originY + wid]
-        : [pl.originX, pl.originY, pl.originX + wid, pl.originY + len];
-      voidBox(`${slabId}_stair_hole`, { min: [x0, y0, z0 - 1], max: [x1, y1, z1 + 1] }, applies);
-    } else if (kind === "lift" || kind === "shaft") {
-      voidBox(`${slabId}_${room.def.id}_hole`, { min: [ox + r.x0 + 125, oy + r.y0 + 125, z0 - 1], max: [ox + r.x1 - 125, oy + r.y1 - 125, z1 + 1] }, applies);
-    }
-  }
+  for (const op of slabOpeningRects(geo, model))
+    voidBox(`${slabId}_${op.id}`, { min: [ox + op.rect.x0, oy + op.rect.y0, z0 - 1], max: [ox + op.rect.x1, oy + op.rect.y1, z1 + 1] }, applies);
 }

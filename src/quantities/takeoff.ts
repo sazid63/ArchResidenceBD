@@ -9,6 +9,7 @@
 
 import cardText from "../../spec/rates/pwd-sor-2022-civil-works-candidate.json?raw";
 import type { BuildingModel } from "../model/building";
+import { slabOpeningAreaM2 } from "../model/openings";
 import type { BbsResult } from "../structure/bbs";
 
 export interface Bilingual {
@@ -147,8 +148,10 @@ export function envelopeQuantities(model: BuildingModel) {
   for (const r of [model.roof.stairCover, model.roof.liftRoom]) {
     if (r) roofRing(2 * (r.x1 - r.x0 + (r.y1 - r.y0)), model.roof.coverHeightMm);
   }
-  const floors = model.storeys.length + 1; // every storey slab plus the roof
-  const screedM2 = floors * model.footprintAreaM2;
+  // Screed on every floor slab and the roof, less the stair, lift and shaft openings (the ground slab has none).
+  const typical = model.storeys[Math.min(1, model.storeys.length - 1)].geometry;
+  let screedM2 = model.footprintAreaM2 - slabOpeningAreaM2(typical, model); // the roof
+  model.storeys.forEach((st, i) => { screedM2 += model.footprintAreaM2 - (i > 0 ? slabOpeningAreaM2(st.geometry, model) : 0); });
   return { wallM3: Math.max(wallM3, 0), plasterM2, screedM2 };
 }
 
