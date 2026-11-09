@@ -192,6 +192,36 @@ describe("pricing", () => {
     expect(boq.card.status).toBe("candidate");
   });
 
+  it("formwork is priced by member family and rebar fixing by bar weight", () => {
+    const res = analyzeStructure(m);
+    const fw = bbs.totals.formworkM2;
+    // independent: columns are 2 (bx + by) x storey height, footings are four sides, slabs the panel areas
+    let col = 0;
+    let foot = 0;
+    for (const c of res.frame.columns) {
+      for (const st of c.storeys) col += (2 * (st.section.bx + st.section.by) * m.input.floorToFloorMm) / 1e6;
+      foot += (4 * c.footing.sideMm * c.footing.depthMm) / 1e6;
+    }
+    expect(fw.column).toBeCloseTo(col, 6);
+    expect(fw.footing).toBeCloseTo(foot, 6);
+    expect(fw.slab).toBeGreaterThan(0.7 * m.footprintAreaM2 * (m.storeys.length + 1));
+    expect(fw.slab).toBeLessThanOrEqual(m.footprintAreaM2 * (m.storeys.length + 1));
+    expect(fw.beam).toBeGreaterThan(0);
+    const boq = buildBoq(m, bbs);
+    const rate: Record<string, number> = { "formwork-footing": 582, "formwork-column": 522, "formwork-beam": 574, "formwork-slab": 597 };
+    for (const [id, r] of Object.entries(rate)) {
+      const l = boq.lines.find((x) => x.id === id)!;
+      expect(l.rateBdt).toBe(r);
+      expect(l.amountBdt).toBeCloseTo(l.quantity * r, 6);
+    }
+    expect(boq.lines.find((x) => x.id === "formwork-slab")!.quantity).toBeCloseTo(fw.slab, 6);
+    const fix = boq.lines.find((x) => x.id === "rebar-fixing")!;
+    expect(fix.quantity).toBeCloseTo(bbs.totals.weightKg, 6);
+    expect(fix.amountBdt).toBeCloseTo(bbs.totals.weightKg * 32, 4);
+    expect(boq.byCategory.some((c) => c.category === "formwork")).toBe(true);
+    expect(boq.unpriced).toEqual([]);
+  });
+
   it("a rate in another unit is not used silently", () => {
     const card: RateCard = { ...DEFAULT_RATE_CARD, lines: DEFAULT_RATE_CARD.lines.map((l) => (l.key === "rod-60g" ? { ...l, unit: "kg" } : l)) };
     const boq = priceTakeoff(takeoff(m, bbs), card);

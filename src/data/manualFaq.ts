@@ -54,7 +54,7 @@ export const MANUAL_FAQ: ManualEntry[] = [
     id: "boq", topic: "BOQ", sourceKind: "app", source: "App behaviour (src/quantities)",
     question: { en: "How is the BOQ calculated and what is assumed?", bn: "BOQ কীভাবে হিসাব হয় এবং কী ধরে নেওয়া হয়?" },
     answer: {
-      en: "Concrete volume and steel weight come from the structure and the bar schedule; brickwork, plaster and screed from the walls and floors of the plan. Prices come from a rate card (the PWD Schedule of Rates 2022 candidate card, with source and date shown on the screen). The card is not yet verified, items it lacks (labour, machinery, joinery, tiles, paint) are left unpriced, so the total is a lower bound. The mix ratios and wall heights are listed on the screen.",
+      en: "Concrete volume and steel weight come from the structure and the bar schedule; brickwork, plaster and screed from the walls and floors of the plan. Prices come from a rate card (the PWD Schedule of Rates 2022 candidate card, with source and date shown on the screen). The card is not yet verified, items it lacks (labour for concrete, brickwork and plaster, machinery, joinery, tiles, paint) are left unpriced, so the total is a lower bound. The mix ratios and wall heights are listed on the screen.",
       bn: "কংক্রিটের আয়তন ও রডের ওজন স্ট্রাকচার ও রিবার শিডিউল থেকে; ইটের গাঁথুনি, প্লাস্টার ও স্ক্রিড প্ল্যানের দেয়াল ও মেঝে থেকে। দাম একটি রেট কার্ড থেকে (পিডব্লিউডি রেট শিডিউল ২০২২ ক্যান্ডিডেট কার্ড; উৎস ও তারিখ স্ক্রিনে দেখানো)। কার্ডটি এখনো যাচাই হয়নি, কার্ডে না থাকা আইটেম (পাথর, শ্রম, যন্ত্র) দামহীন থাকে, তাই মোট একটি নিম্নসীমা। মিশ্রণের অনুপাত ও দেয়ালের উচ্চতা স্ক্রিনে তালিকাভুক্ত।",
     },
     keywords: ["boq", "cost", "rate", "quantity", "estimate", "price", "বিওকিউ", "খরচ", "রেট", "পরিমাণ"],

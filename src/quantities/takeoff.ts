@@ -74,11 +74,12 @@ export const BOQ_ASSUMPTIONS: Array<{ id: string; en: string; bn: string }> = [
   { id: "mortar", en: "Mortar 1 : 4 for brickwork, plaster and screed, dry volume 1.27 x wet; brickwork takes 0.25 m3 mortar per m3 of wall and 500 bricks per m3.", bn: "ইটের গাঁথুনি, প্লাস্টার ও স্ক্রিডে মর্টার ১ : ৪, শুকনো আয়তন ভেজার ১.২৭ গুণ; গাঁথুনিতে প্রতি ঘনমিটারে ০.২৫ ঘনমিটার মর্টার ও ৫০০টি ইট।" },
   { id: "wall-height", en: "Wall height = storey height - 500 mm (beam or slab above); doors 2.1 m and windows 1.2 m high are deducted from wall and plaster at the thickness of the wall they sit in. The roof parapet (1 m) and the stair and lift cover walls are 125 mm.", bn: "দেয়ালের উচ্চতা = তলার উচ্চতা - ৫০০ মিমি; ২.১ মিটার দরজা ও ১.২ মিটার জানালা নিজ দেয়ালের পুরুত্বে বাদ। ছাদের ১ মিটার প্যারাপেট এবং সিঁড়ি ও লিফট ঘরের দেয়াল ১২৫ মিমি।" },
   { id: "finishes", en: "Plaster 12 mm on both wall faces; 50 mm screed on every floor and the roof. Slab soffit plaster, tiles, paint, doors, windows, services and earthwork are not taken off.", bn: "দেয়ালের দুই পাশে ১২ মিমি প্লাস্টার; প্রতি তলা ও ছাদে ৫০ মিমি স্ক্রিড। সিলিং প্লাস্টার, টাইলস, রং, দরজা-জানালা, সার্ভিস ও মাটির কাজ ধরা হয়নি।" },
+  { id: "formwork", en: "Formwork is the contact area of slab soffits, beam bottoms and sides below the slab, column faces and footing sides, priced at the book's steel-form rates; nothing is deducted where members meet and slab edges and stair flights are not counted. Rebar fixing is derived from the book (item 08.1.2 minus the bar).", bn: "ফর্মওয়ার্ক হলো স্ল্যাবের নিচ, বিমের তলা ও স্ল্যাবের নিচের দুই পাশ, কলামের চার পাশ ও ফুটিংয়ের পাশের সংস্পর্শ ক্ষেত্রফল, বইয়ের স্টিল ফর্মের দরে; সংযোগস্থলে বাদ দেওয়া হয়নি, স্ল্যাবের কিনারা ও সিঁড়ি ধরা হয়নি। রড বাঁধার দাম বই থেকে হিসাবকৃত (আইটেম ০৮.১.২ থেকে রডের দাম বাদ)।" },
   { id: "steel", en: "Steel is the bar bending schedule total, no wastage or binding wire added; the card's rod line (Schedule of Rates item 289) covers Grade 400/420.", bn: "রড বার বেন্ডিং শিডিউলের মোট, অপচয় বা বাইন্ডিং তার যোগ করা হয়নি; কার্ডের রডের লাইন (রেট শিডিউল আইটেম ২৮৯) গ্রেড ৪০০/৪২০ দুটোই ধরে।" },
-  { id: "rates", en: "Prices come from the rate card (source and date shown). Cement, sand, stone chips, rods and bricks are priced; labour, machinery, joinery, tiles, paint and services have no line in the card, so the total is a lower bound.", bn: "দাম রেট কার্ড থেকে (উৎস ও তারিখ দেখানো)। সিমেন্ট, বালি, পাথর, রড ও ইটের দাম ধরা হয়েছে; শ্রম, যন্ত্র, দরজা-জানালা, টাইলস, রং ও সার্ভিসের লাইন কার্ডে নেই, তাই মোট একটি নিম্নসীমা।" },
+  { id: "rates", en: "Prices come from the rate card (source and date shown). Cement, sand, stone chips, rods and bricks are priced; labour for concrete, brickwork and plaster, machinery, joinery, tiles, paint and services have no line in the card (the book has no man-day norms), so the total is a lower bound.", bn: "দাম রেট কার্ড থেকে (উৎস ও তারিখ দেখানো)। সিমেন্ট, বালি, পাথর, রড ও ইটের দাম ধরা হয়েছে; কংক্রিট, গাঁথুনি ও প্লাস্টারের শ্রম, যন্ত্র, দরজা-জানালা, টাইলস, রং ও সার্ভিসের লাইন কার্ডে নেই (বইয়ে জনদিবসের হার নেই), তাই মোট একটি নিম্নসীমা।" },
 ];
 
-export type BoqCategory = "concrete" | "steel" | "masonry" | "finishes";
+export type BoqCategory = "concrete" | "formwork" | "steel" | "masonry" | "finishes";
 
 export interface TakeoffItem {
   id: string;
@@ -165,12 +166,20 @@ export function takeoff(model: BuildingModel, bbs: BbsResult): TakeoffItem[] {
   const screedMortarM3 = (env.screedM2 * BOQ.screedMm) / 1000;
   const mortarM3 = brickMortarM3 + plasterMortarM3 + screedMortarM3;
 
+  const fw = bbs.totals.formworkM2;
+  const formwork = (id: string, en: string, bnText: string, quantity: number, rateKey: string): TakeoffItem => ({ id, category: "formwork", description: bi(`Formwork, ${en}`, `ফর্মওয়ার্ক, ${bnText}`), unit: "m2", quantity, rateKey, basis: bi("form contact area, steel forms (SoR item 07.12)", "ফর্মের সংস্পর্শ ক্ষেত্রফল, স্টিল ফর্ম (এসওআর আইটেম ০৭.১২)") });
+
   return [
     { id: "concrete", category: "concrete", description: bi("Structural concrete, 1:1.5:3 (footings, columns, beams, slabs)", "কাঠামোগত কংক্রিট ১:১.৫:৩ (ফুটিং, কলাম, বিম, স্ল্যাব)"), unit: "m3", quantity: conc, basis: bi("from the bar schedule volumes", "বার শিডিউলের আয়তন থেকে") },
     { id: "concrete-cement", category: "concrete", description: bi("Cement in concrete", "কংক্রিটে সিমেন্ট"), unit: "bag", quantity: cementConcM3 / BAG_M3, rateKey: "cement-opc-43", basis: bi("dry volume / 0.0347 m3 per bag", "শুকনো আয়তন / প্রতি ব্যাগ ০.০৩৪৭ ঘনমিটার") },
     { id: "concrete-sand", category: "concrete", description: bi("Sand in concrete", "কংক্রিটে বালি"), unit: "cft", quantity: sandConcM3 * CFT_PER_M3, rateKey: "sand-fine", basis: bi("m3 x 35.31", "ঘনমিটার × ৩৫.৩১") },
     { id: "concrete-stone", category: "concrete", description: bi("Stone chips in concrete", "কংক্রিটে পাথর"), unit: "cft", quantity: stoneConcM3 * CFT_PER_M3, rateKey: "stone-chips", basis: bi("m3 x 35.31", "ঘনমিটার × ৩৫.৩১") },
+    formwork("formwork-footing", "footings", "ফুটিং", fw.footing, "formwork-footing"),
+    formwork("formwork-column", "columns", "কলাম", fw.column, "formwork-column"),
+    formwork("formwork-beam", "beams", "বিম", fw.beam, "formwork-beam"),
+    formwork("formwork-slab", "slabs", "স্ল্যাব", fw.slab, "formwork-slab"),
     { id: "steel", category: "steel", description: bi("Reinforcement bars, Grade 420 (bar schedule total; priced at the card's B400 rod line)", "রড গ্রেড ৪২০ (বার শিডিউলের মোট; কার্ডের বি৪০০ রডের দরে)"), unit: "ton", quantity: bbs.totals.weightKg / 1000, rateKey: "rod-60g", basis: bi("kg / 1000", "কেজি / ১০০০") },
+    { id: "rebar-fixing", category: "steel", description: bi("Rebar cutting, bending and fixing (labour and binding wire)", "রড কাটা, বাঁকানো ও বাঁধা (শ্রম ও জিআই তার)"), unit: "kg", quantity: bbs.totals.weightKg, rateKey: "rebar-fixing", basis: bi("bar schedule kg; SoR item 08.1.2 minus the bar (derived)", "বার শিডিউলের কেজি; এসওআর ০৮.১.২ থেকে রডের দাম বাদ (হিসাবকৃত)") },
     { id: "brickwork", category: "masonry", description: bi("Brick masonry, 250 mm and 125 mm walls, openings deducted", "ইটের গাঁথুনি ২৫০ ও ১২৫ মিমি দেয়াল, খোলা অংশ বাদে"), unit: "m3", quantity: env.wallM3, basis: bi("wall length x height x thickness", "দেয়ালের দৈর্ঘ্য × উচ্চতা × পুরুত্ব") },
     { id: "bricks", category: "masonry", description: bi("First-class bricks", "প্রথম শ্রেণির ইট"), unit: "each", quantity: env.wallM3 * BOQ.bricksPerM3, rateKey: "brick-1st", basis: bi("500 per m3 of wall", "প্রতি ঘনমিটারে ৫০০টি") },
     { id: "plaster", category: "finishes", description: bi("Cement plaster 12 mm, both wall faces", "সিমেন্ট প্লাস্টার ১২ মিমি, দেয়ালের দুই পাশ"), unit: "m2", quantity: env.plasterM2, basis: bi("area less openings, both faces", "খোলা অংশ বাদে দুই পাশের ক্ষেত্রফল") },

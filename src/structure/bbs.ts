@@ -82,6 +82,8 @@ export interface BbsResult {
     weightKg: number;
     concreteM3: number;
     kgPerM3: number;
+    /** Form contact areas by member family, m2 (simplified, see formworkM2). */
+    formworkM2: { footing: number; column: number; beam: number; slab: number };
   };
 }
 
@@ -443,6 +445,25 @@ function concreteM3(res: StructureResult, model: BuildingModel): number {
   return m3;
 }
 
+/**
+ * Form contact area by member family, m2: slab soffit, beam bottom and both sides below the slab, all four faces of each column
+ * storey, the four sides of each footing (its base sits on blinding, not on a form). Simplified: nothing is deducted where
+ * members meet, slab edges and stair flights are not counted, and the columns use the typical storey height.
+ */
+function formworkM2(res: StructureResult, model: BuildingModel): { footing: number; column: number; beam: number; slab: number } {
+  const f = { footing: 0, column: 0, beam: 0, slab: 0 };
+  for (const lv of res.levels) {
+    for (const p of lv.panels) f.slab += ((p.x1 - p.x0) * (p.y1 - p.y0)) / 1e6;
+    for (const line of lv.beamLines)
+      for (const sp of line.result.spans) f.beam += ((line.result.section.bMm + 2 * Math.max(line.result.section.hMm - lv.slabThicknessMm, 0)) * sp.lengthMm) / 1e6;
+  }
+  for (const col of res.frame.columns) {
+    for (const st of col.storeys) f.column += (2 * (st.section.bx + st.section.by) * model.input.floorToFloorMm) / 1e6;
+    f.footing += (4 * col.footing.sideMm * col.footing.depthMm) / 1e6;
+  }
+  return f;
+}
+
 /** The bar bending schedule of the whole building from its structural result. */
 export function buildBbs(res: StructureResult, model: BuildingModel): BbsResult {
   const colMap = new Map(res.frame.columns.map((c) => [`${c.xMm},${c.yMm}`, c]));
@@ -478,6 +499,7 @@ export function buildBbs(res: StructureResult, model: BuildingModel): BbsResult 
       weightKg: weight,
       concreteM3: concrete,
       kgPerM3: concrete > 0 ? weight / concrete : 0,
+      formworkM2: formworkM2(res, model),
     },
   };
 }
