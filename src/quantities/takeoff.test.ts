@@ -200,8 +200,8 @@ describe("pricing", () => {
     let foot = 0;
     for (const c of res.frame.columns) {
       for (const st of c.storeys) col += (2 * (st.section.bx + st.section.by) * m.input.floorToFloorMm) / 1e6;
-      foot += (4 * c.footing.sideMm * c.footing.depthMm) / 1e6;
     }
+    for (const fo of res.foundation.footings) foot += (2 * (fo.x1 - fo.x0 + (fo.y1 - fo.y0)) * fo.depthMm) / 1e6;
     expect(fw.column).toBeCloseTo(col, 6);
     expect(fw.footing).toBeCloseTo(foot, 6);
     expect(fw.slab).toBeGreaterThan(0.7 * m.footprintAreaM2 * (m.storeys.length + 1));

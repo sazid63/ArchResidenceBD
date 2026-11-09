@@ -15,6 +15,7 @@ import { liveLoadForKind, partitionAllowanceKnM2, roofLiveKnM2 } from "./loads";
 import { designSlab, type Continuity, type SlabInput, type SlabResult } from "./slab";
 import { alphaF, tBeamInertia } from "./tbeam";
 import { analyzeFrame, type FrameOptions, type FrameResult } from "./frame";
+import { planFoundation, type FoundationResult } from "./foundation";
 import { sizeBeamLine, type BeamLineResult, type BeamSection, type BeamSpanInput } from "./beam";
 
 export interface PanelResult {
@@ -65,6 +66,8 @@ export interface StructureResult {
   util: number;
   ok: boolean;
   assumptions: Assumption[];
+  /** The footings as they can be built: isolated pads, merged where pads would overlap. */
+  foundation: FoundationResult;
 }
 
 interface Panel {
@@ -294,5 +297,6 @@ export function analyzeStructure(model: BuildingModel, frameOptions: FrameOption
   failures.push(...frame.failures);
   failures.sort((a, b) => b.util - a.util);
   const util = Math.max(0, ...levels.map((l) => l.util), frame.util);
-  return { levels, frame, failures, util, ok: failures.length === 0, assumptions: ASSUMPTIONS };
+  const foundation = planFoundation(frame.columns, n);
+  return { levels, frame, failures, util, ok: failures.length === 0, assumptions: ASSUMPTIONS, foundation };
 }

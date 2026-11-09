@@ -112,6 +112,12 @@ export function StructureScreen() {
     [built, siteClass, systemId, bearing],
   );
 
+  const footingText = (colId: string, side: number, depth: number, util: number): string => {
+    const fo = result?.foundation.footings.find((f) => f.columnIds.includes(colId));
+    if (fo && fo.kind !== "isolated") return `${fo.id}: ${fo.x1 - fo.x0} × ${fo.y1 - fo.y0} × ${fo.depthMm}`;
+    return `${side} × ${depth} (${ratioText(util)})`;
+  };
+
   const title = bn ? "কাঠামো" : "Structure";
   const subtitle = bn ? "বিএনবিসি ২০২০ পার্ট ৬: লোড, সদস্য, কলাম ও ভূমিকম্প" : "BNBC 2020 Part 6: loads, members, columns and seismic";
 
@@ -284,10 +290,17 @@ export function StructureScreen() {
               st.puKn.toFixed(0),
               <ResultChip key="r" result={ratioResult(st.util)} lang={lang}>{ratioText(st.util)}</ResultChip>,
               st.governs,
-              sIdx === 0 ? `${c.footing.sideMm} × ${c.footing.depthMm} (${ratioText(c.footing.util)})` : "–",
+              sIdx === 0 ? footingText(c.id, c.footing.sideMm, c.footing.depthMm, c.footing.util) : "–",
             ];
           })}
         />
+        {result.foundation.mergedCount > 0 ? (
+          <Callout tone="warn" title={bn ? "কিছু ফুটিং একসঙ্গে করা হয়েছে" : "Some footings are merged"}>
+            {bn
+              ? `${result.foundation.mergedCount}টি ফুটিং একাধিক কলাম ধরে, কারণ আলাদা প্যাড একটি আরেকটির ওপর পড়ত। মাপ নির্ধারণ হয়েছে ক্ষেত্রফল ও গভীরতার সহজ নিয়মে; কলামের মাঝের বেঁকে যাওয়া, প্রতিটি কলামের পাঞ্চিং ও র‍্যাফটের কঠিনতা যাচাই হয়নি। নির্মাণের আগে বিস্তারিত নকশা দরকার।`
+              : `${result.foundation.mergedCount} footing${result.foundation.mergedCount === 1 ? " carries" : "s carry"} more than one column, because separate pads would have overlapped. They are sized by area and a simple depth rule only: bending between the columns, punching of each column and raft stiffness are not checked. Detailed design is needed before building.`}
+          </Callout>
+        ) : null}
         <p className="small muted" style={{ margin: 0 }}>
           {bn ? "ফুটিং কেবল নিচের তলায় (তলা ০) দেখানো হয়।" : "Footings are shown for storey 0 only."}
           {fr.converged ? "" : bn ? " সাইজিং লুপ সীমায় পৌঁছেছে।" : " The sizing loop reached its iteration limit."}

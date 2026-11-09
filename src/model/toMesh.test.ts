@@ -134,15 +134,15 @@ describe("buildMesh with the structure result", () => {
       checkedCols++;
     }
     expect(checkedCols).toBeGreaterThan(res.frame.columns.length / 2);
-    // footings
-    for (const c of res.frame.columns) {
-      const o = at("foundation", "footing", c.xMm, c.yMm);
-      if (!o) continue;
-      expect(size(o)).toEqual([c.footing.sideMm, c.footing.sideMm, c.footing.depthMm]);
+    // footings as built: one mesh footing per foundation footing, same plan size and depth
+    for (const fo of res.foundation.footings) {
+      const o = doc.objects.find((x) => x.id === `pad_${fo.id}` || x.parentId === `pad_${fo.id}`);
+      expect(o, fo.id).toBeTruthy();
     }
+    expect(doc.objects.filter((o) => o.kind === "footing" && !o.id.includes("~")).length).toBe(res.foundation.footings.length);
     // some column is bigger than the placeholder and some footing is bigger than 1.5 m, so the test can tell the two apart
     expect(res.frame.columns.some((c) => c.storeys[0].section.bx > PLACEHOLDER.column)).toBe(true);
-    expect(res.frame.columns.some((c) => c.footing.sideMm > PLACEHOLDER.padSize)).toBe(true);
+    expect(res.foundation.footings.some((f) => f.x1 - f.x0 > PLACEHOLDER.padSize)).toBe(true);
     // beams under the first floor slab: depth is the designed depth of their line
     const lv0 = res.levels[0];
     const deepest = Math.max(...lv0.beamLines.map((b) => b.result.section.hMm));

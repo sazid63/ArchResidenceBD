@@ -100,13 +100,20 @@ export function buildMesh(model: BuildingModel, design?: StructureResult): MeshD
     const x = ox + col.x;
     const y = oy + col.y;
     const tag = `${col.gridX}_${col.gridY}`;
-    const pad = S.pad(col.x, col.y);
-    box(`pad_${tag}`, tagOf("Isolated Footing"), "footing", "foundation", {
-      x0: x - pad.side / 2, y0: y - pad.side / 2, z0: padTop - pad.depth, x1: x + pad.side / 2, y1: y + pad.side / 2, z1: padTop,
-    });
+    if (!design) {
+      const pad = S.pad(col.x, col.y);
+      box(`pad_${tag}`, tagOf("Isolated Footing"), "footing", "foundation", {
+        x0: x - pad.side / 2, y0: y - pad.side / 2, z0: padTop - pad.depth, x1: x + pad.side / 2, y1: y + pad.side / 2, z1: padTop,
+      });
+    }
     // Stub from the pad to the ground-floor finish (z = 0).
     const c0 = S.column(col.x, col.y, 0);
     box(`stub_${tag}`, "Column Stub", "column", "foundation", { x0: x - c0.bx / 2, y0: y - c0.by / 2, z0: padTop, x1: x + c0.bx / 2, y1: y + c0.by / 2, z1: 0 });
+  }
+  // Designed footings: isolated pads, and combined footings or a raft where pads would have overlapped.
+  for (const fo of design?.foundation.footings ?? []) {
+    const label = fo.kind === "isolated" ? "Isolated Footing" : fo.kind === "combined" ? "Combined Footing" : "Raft Foundation";
+    box(`pad_${fo.id}`, label, "footing", "foundation", { x0: ox + fo.x0, y0: oy + fo.y0, z0: padTop - fo.depthMm, x1: ox + fo.x1, y1: oy + fo.y1, z1: padTop });
   }
   typical.beams.forEach((bm, k) => {
     const r = beamRect(bm, ox, oy, S.beam(bm.orientation, bm.at, 0).b / 2);

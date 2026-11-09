@@ -380,8 +380,9 @@ function detailColumns(res: StructureResult, model: BuildingModel, b: Builder): 
       let shape: ShapeCode;
       let bends: typeof bend[] = [];
       if (i === 0) {
-        const embed = col.footing.depthMm - 75 - 2 * 16;
-        if (embed < ldCompression(p.dia)) b.issue({ ref: `${col.id} footing`, cause: "embed", severity: "fail", en: `${col.id}: the footing is ${col.footing.depthMm} mm deep; the ${p.dia} mm starter bars need ${ldCompression(p.dia).toFixed(0)} mm of embedment.`, bn: `${col.id}: ফুটিং ${col.footing.depthMm} মিমি গভীর; ${p.dia} মিমি স্টার্টার রডের জন্য ${ldCompression(p.dia).toFixed(0)} মিমি এমবেডমেন্ট লাগে।` }, 0);
+        const footDepth = res.foundation.footings.find((x) => x.columnIds.includes(col.id))?.depthMm ?? col.footing.depthMm;
+        const embed = footDepth - 75 - 2 * 16;
+        if (embed < ldCompression(p.dia)) b.issue({ ref: `${col.id} footing`, cause: "embed", severity: "fail", en: `${col.id}: the footing is ${footDepth} mm deep; the ${p.dia} mm starter bars need ${ldCompression(p.dia).toFixed(0)} mm of embedment.`, bn: `${col.id}: ফুটিং ${footDepth} মিমি গভীর; ${p.dia} মিমি স্টার্টার রডের জন্য ${ldCompression(p.dia).toFixed(0)} মিমি এমবেডমেন্ট লাগে।` }, 0);
         dims = [hMm + (n > 1 ? lap : 0) + embed, toe];
         shape = "11";
         bends = [bend];
@@ -413,8 +414,44 @@ function detailColumns(res: StructureResult, model: BuildingModel, b: Builder): 
   }
 }
 
+/**
+ * Bars of a merged footing (combined or raft): a bottom mat each way sized per metre from the heaviest member pad it replaces
+ * (moment per metre of width), and a top mat of minimum steel each way. Bars longer than the stock length are lapped.
+ * Screening level: bending between the columns is not designed (see foundation.ts).
+ */
+function detailMergedFooting(res: StructureResult, fo: StructureResult["foundation"]["footings"][number], b: Builder): void {
+  const members = res.frame.columns.filter((c) => fo.columnIds.includes(c.id));
+  const perM = Math.max(...members.map((c) => c.footing.muKnM / (c.footing.sideMm / 1000))); // kN.m per metre of width
+  const w = fo.x1 - fo.x0;
+  const l = fo.y1 - fo.y0;
+  const name = fo.kind === "raft" ? "Raft" : "Combined footing";
+  const nameBn = fo.kind === "raft" ? "র‍্যাফট" : "যৌথ ফুটিং";
+  const bottom = pickMat(perM, 1000, fo.depthMm, 75, true, 300, [12, 16, 20, 25]);
+  const top = pickMat(0, 1000, fo.depthMm, 75, false, 300, [12, 16, 20]);
+  b.pick({ family: "footing", ref: `${fo.id} (${members.map((c) => c.id).join(", ")})`, requiredMm2: bottom.reqMm2, providedMm2: bottom.pick.areaPerM, fits: bottom.pick.fits, level: 0, muKnM: perM, widthMm: 1000, dMm: bottom.d });
+  const mats: Array<[string, string, string, string, number, number, number]> = [
+    ["bottom bars along x", "নিচের রড x দিকে", "bottom", "x", w, l, bottom.pick.dia],
+    ["bottom bars along y", "নিচের রড y দিকে", "bottom", "y", l, w, bottom.pick.dia],
+    ["top bars along x", "উপরের রড x দিকে", "top", "x", w, l, top.pick.dia],
+    ["top bars along y", "উপরের রড y দিকে", "top", "y", l, w, top.pick.dia],
+  ];
+  for (const [en, bnLabel, layer, , run, across, dia] of mats) {
+    const spacing = layer === "bottom" ? bottom.pick.spacingMm : top.pick.spacingMm;
+    const total = run - 150;
+    const lap = lapTension(dia);
+    let pieces = 1;
+    while ((pieces === 1 ? total : (total + (pieces - 1) * lap) / pieces) > STOCK_LENGTH_MM) pieces += 1;
+    const len = pieces === 1 ? total : Math.round((total + (pieces - 1) * lap) / pieces);
+    const count = (Math.floor((across - 150) / spacing) + 1) * pieces;
+    b.add({ family: "footing", description: bi(`${name} ${fo.id}, ${w} x ${l} x ${fo.depthMm}: ${en}, ${dia} mm at ${spacing}${pieces > 1 ? `, lapped in ${pieces} pieces` : ""}`, `${nameBn} ${fo.id}, ${w} × ${l} × ${fo.depthMm}: ${bnLabel}, ${dia} মিমি @ ${spacing}`), dia, shape: "00", dims: [len], cut: len, bars: count, level: 0 });
+  }
+}
+
 function detailFootings(res: StructureResult, b: Builder): void {
+  for (const fo of res.foundation.footings) if (fo.kind !== "isolated") detailMergedFooting(res, fo, b);
+  const merged = new Set(res.foundation.footings.filter((f) => f.kind !== "isolated").flatMap((f) => f.columnIds));
   for (const col of res.frame.columns) {
+    if (merged.has(col.id)) continue;
     const f = col.footing;
     const st = col.storeys[0];
     // two mats cross in the bottom of the pad: the upper one sits one bar higher, so its lever arm is the smaller
@@ -440,8 +477,9 @@ function concreteM3(res: StructureResult, model: BuildingModel): number {
   }
   for (const col of res.frame.columns) {
     for (const st of col.storeys) m3 += (st.section.bx * st.section.by * model.input.floorToFloorMm) / 1e9;
-    m3 += (col.footing.sideMm ** 2 * col.footing.depthMm) / 1e9;
   }
+  // Footings as built: merged footings once, never the overlapping pads they replace.
+  for (const fo of res.foundation.footings) m3 += ((fo.x1 - fo.x0) * (fo.y1 - fo.y0) * fo.depthMm) / 1e9;
   return m3;
 }
 
@@ -459,8 +497,8 @@ function formworkM2(res: StructureResult, model: BuildingModel): { footing: numb
   }
   for (const col of res.frame.columns) {
     for (const st of col.storeys) f.column += (2 * (st.section.bx + st.section.by) * model.input.floorToFloorMm) / 1e6;
-    f.footing += (4 * col.footing.sideMm * col.footing.depthMm) / 1e6;
   }
+  for (const fo of res.foundation.footings) f.footing += (2 * (fo.x1 - fo.x0 + (fo.y1 - fo.y0)) * fo.depthMm) / 1e6;
   return f;
 }
 

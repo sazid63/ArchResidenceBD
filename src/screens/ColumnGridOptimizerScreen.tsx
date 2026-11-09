@@ -153,7 +153,7 @@ export function ColumnGridOptimizerScreen({ onNavigate }: { onNavigate?: (id: st
                     <td style={{ textAlign: "right" }}>{sizeAt(c, 0)}</td>
                     <td style={{ textAlign: "right" }}>{sizeAt(c, top)}</td>
                     <td style={{ textAlign: "right" }}>{(u * 100).toFixed(1)}%</td>
-                    <td style={{ textAlign: "right" }}>{c.footing.sideMm}</td>
+                    <td style={{ textAlign: "right" }}>{(() => { const fo = result.foundation.footings.find((f) => f.columnIds.includes(c.id)); return fo && fo.kind !== "isolated" ? fo.id : c.footing.sideMm; })()}</td>
                   </tr>
                 );
               })}

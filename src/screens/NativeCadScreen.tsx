@@ -95,13 +95,14 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
     const top = uniq(cols.map((c) => { const st = c.storeys[c.storeys.length - 1]; return `${st.section.bx}×${st.section.by}`; }));
     const beams = uniq(design.levels.flatMap((l) => l.beamLines.map((b) => `${b.result.section.bMm}×${b.result.section.hMm}`)));
     const slabs = uniq(design.levels.map((l) => String(l.slabThicknessMm)));
-    const sides = cols.map((c) => c.footing.sideMm);
+    const foot = design.foundation.footings;
+    const merged = design.foundation.mergedCount;
     return [
       ["Columns, ground storey (mm)", "কলাম, নিচতলা (মিমি)", ground],
       ["Columns, top storey (mm)", "কলাম, সবচেয়ে উপরের তলা (মিমি)", top],
       ["Beams, width × depth (mm)", "বিম, প্রস্থ × গভীরতা (মিমি)", beams],
       ["Slab thickness (mm)", "স্ল্যাবের পুরুত্ব (মিমি)", slabs],
-      ["Footing sides (mm)", "ফুটিংয়ের বাহু (মিমি)", `${Math.min(...sides)} to ${Math.max(...sides)}`],
+      ["Footings (mm)", "ফুটিং (মিমি)", `${Math.min(...foot.map((f) => Math.min(f.x1 - f.x0, f.y1 - f.y0)))} to ${Math.max(...foot.map((f) => Math.max(f.x1 - f.x0, f.y1 - f.y0)))}${merged ? ` (${merged} merged)` : ""}`],
     ];
   }, [design]);
 
