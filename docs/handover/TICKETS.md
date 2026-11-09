@@ -46,7 +46,7 @@ Read: `spec/rules/rajuk-2008.yaml`; `git show origin/v0-pipeline-complete:core/s
 Do: `src/rules/`: pack loader (`js-yaml`), exact ports of `far_row`, `setback_row`, `parking_spaces`, `in_band`; `check(model)` → `{ruleId, status, expected, actual, source}`. Envelope uses RAJUK setbacks instead of `DEFAULT_SETBACKS_MM`.
 Test: every `testVectors` entry passes.
 
-## M3-3 Compliance screen · Sonnet medium · todo
+## M3-3 Compliance screen · Sonnet medium · done 77564a4
 Do: `ComplianceScreen` reads `src/rules` results plus plan-validator issues: `ResultChip`, `Value`, citations, "Not checked"; tabs All / Fails / Passes / Not checked; deviation register (`Deviation` in `src/model/projectSpec.ts`); fire and accessibility as sections. Delete `src/cad/codeCompliance.ts` once unused.
 
 ## M4-1 Loads, slabs, beams · Opus high · todo
