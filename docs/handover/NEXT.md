@@ -4,10 +4,10 @@ Branch `v3`, all commits local (head `3742fda`); **never `git push` unless the o
 Owner rules: no full `npm run verify` until all phases are done (targeted `npx vitest run <path>`, `npx tsc --noEmit`, `npm run audit:structural` only); pick defaults and keep building; ≤ 5-line replies; no fixed ticket order: do what the owner names, otherwise ask.
 
 ## Done
-M0, M1, M2-1..M2-5 (M2-3 only 5 of 8 extra plans), M3-1..M3-3 (rule packs, RAJUK evaluators, Compliance screen), **M4-1** loads/slabs/beams, **M4-2** columns/footings/seismic/Structure screen, **M4-3** rebar and BBS, **M5-1** quantities + BOQ (`src/quantities/takeoff.ts`, card in `spec/rates/`, BOQ screen + CSV; card is `candidate`, stone chips and labour have no rate so the total is a lower bound). Each of M4-1 and M4-3 was audited and fixed afterwards; hashes in `TICKETS.md`. Last checks (3742fda): `tsc` clean, 556 vitest tests, `npm run audit:structural` 85 checks over 70 cases.
+M0, M1, M2-1..M2-5 (M2-3 only 5 of 8 extra plans), M3-1..M3-3 (rule packs, RAJUK evaluators, Compliance screen), **M4-1** loads/slabs/beams, **M4-2** columns/footings/seismic/Structure screen, **M4-3** rebar and BBS, **M5-1** quantities + BOQ (`src/quantities/takeoff.ts`, card in `spec/rates/`, BOQ screen + CSV; card is `candidate`, stone chips and labour have no rate so the total is a lower bound), **M5-2** drawings + permit package (`src/drawings/`: scene.ts SVG+DXF R12 writers, sheets.ts site/plans/section/elevations, permit.ts + zip.ts package; Drawings screen at `#/docs/drawings`). M5-1 was audited and fixed (ef04cac). Each of M4-1 and M4-3 was audited and fixed afterwards; hashes in `TICKETS.md`. Last checks (3742fda): `tsc` clean, 556 vitest tests, `npm run audit:structural` 85 checks over 70 cases.
 
 ## Next
-Remaining in `TICKETS.md`: M5-2 drawings + permit package, M6-1, M6-2, M7-1, DS-1, and the 3 missing M2-3 plans.
+Remaining in `TICKETS.md`: M6-1, M6-2, M7-1, DS-1, and the 3 missing M2-3 plans.
 Start prompt for a clean session:
 ```
 Ticket <ID>. Follow CLAUDE.md. Read docs/handover/NEXT.md first. Do only this ticket, run its checks, commit, reply in 5 lines.
@@ -28,6 +28,8 @@ The owner (a civil engineer) confirmed the structural assumptions as correct: fc
 - Rebar: stock bars only (8, 10, 12, 16, 20, 22, 25, 28, 32 mm), no row longer than 12 m (top bars are cut into lapped pieces); bottom beam bars not curtailed; extra top bars stop 0.25 L + max(d, 12 db) from the support; ties 10 mm at 100 mm in the end zones (Sec 8.3 confinement not transcribed); no crossties or corner bars; slab bars assume 250 mm beams; first row of the Sec 8.2.3.2 table for ld; shape codes follow BS 8666 (not in the gazette). Exterior hooks longer than the column are reported as warnings (the 0.7/0.8 factors of Sec 8.2.6.3 are not applied).
 
 ## Open items for the owner
+- **Sand rate in the rate card looks wrong.** `spec/rates/pwd-sor-2022-civil-works-candidate.json` has sand at 1,900 BDT per cft, probably the per-100-cft price; it makes sand the biggest BOQ line (about 9.9 M BDT on a 5-storey test). Verify against the SoR PDF before using the total. Also the card has only a B400 rod rate (used for Grade 420 bars) and no stone chips.
+- **Drawings are schematic:** the section and elevations show walls, slabs, windows and levels only (sill 900 / height 1200 assumed, no doors on elevations, no stair or beam detail). DXF is R12 ASCII, English text only. The old v2 `src/cad/drawingEngine.ts` is no longer used by the Drawings screen.
 - **Plan picker ignores ground coverage.** A plan can fit inside the setbacks yet exceed the table's maximum ground coverage (seen: 71.67 % vs 60 % on a 15 × 25 m plot, road 9 m). The Compliance screen reports it as a fail; the picker still offers the plan.
 - **Road width bonus not applied** (§51(11)): conservative. **Parking supply not checked** (stalls are not laid out).
 - **Fire and accessibility mostly "not checked":** no occupancy class for Table 4.3.8, no cited accessibility figures. **DAP** land-use is parked.

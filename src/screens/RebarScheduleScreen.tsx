@@ -3,7 +3,8 @@ import { useProject } from "../context/ProjectContext";
 import { useI18n } from "../i18n";
 import { buildingForProject } from "../model/projectMesh";
 import { analyzeStructure } from "../structure/analyze";
-import { buildBbs, type BbsFamily, type BbsResult, type BbsRow } from "../structure/bbs";
+import { buildBbs, type BbsFamily, type BbsResult } from "../structure/bbs";
+import { bbsToCsv } from "../structure/bbsCsv";
 import { STOCK_BARS } from "../structure/barSelect";
 import { Button, Callout, Card, EmptyState, PageHeader, ResultChip, SegmentedControl, Stat } from "../ui/kit";
 
@@ -24,14 +25,6 @@ const SHAPE_NOTE: Record<string, { en: string; bn: string }> = {
 };
 
 const kg = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 0 });
-
-/** The schedule as CSV text: one line per row, dimensions in separate columns. */
-export function bbsToCsv(rows: BbsRow[]): string {
-  const head = ["mark", "member", "description", "dia_mm", "shape", "A_mm", "B_mm", "C_mm", "cut_length_mm", "bars_per_member", "members", "total_bars", "total_length_m", "weight_kg"];
-  const q = (s: string) => `"${s.replace(/"/g, '""')}"`;
-  const lines = rows.map((r) => [r.mark, r.family, q(r.description.en), r.diaMm, r.shape, r.dimsMm[0] ?? "", r.dimsMm[1] ?? "", r.dimsMm[2] ?? "", r.cutLengthMm, r.barsPerMember, r.members, r.totalBars, r.totalLengthM.toFixed(2), r.weightKg.toFixed(1)].join(","));
-  return [head.join(","), ...lines].join("\n");
-}
 
 function download(name: string, text: string) {
   const url = URL.createObjectURL(new Blob([text], { type: "text/csv;charset=utf-8" }));

@@ -1,229 +1,116 @@
-import { useState, useEffect, useMemo } from "react";
+import { useMemo, useState } from "react";
+import { useProject } from "../context/ProjectContext";
 import { useI18n } from "../i18n";
-import { Badge, Button, Callout, Card, PageHeader } from "../ui/kit";
-import { useActiveProject } from "../context/ProjectContext";
-import { generateFloorPlanFromMesh, generateSection, generateElevation, exportDrawingAsSVG } from "../cad/drawingEngine";
-import { generateBuildingMesh } from "../cad/parametricBuildingGenerator";
-import type { MeshDocument } from "../cad/mesh";
+import { buildSheets, buildPermitPackage, packageToZip, type Sheet } from "../drawings/permit";
+import { sceneToDxf, sceneToSvg } from "../drawings/scene";
+import { buildingForProject } from "../model/projectMesh";
+import { renderPlanSvg } from "../plans/render";
+import { analyzeStructure } from "../structure/analyze";
+import { Button, Callout, Card, EmptyState, PageHeader } from "../ui/kit";
 
-interface DrawingOptions {
-  scale: number;
-  project: string;
-  drawingNo: string;
-  direction?: string;
+function save(name: string, data: BlobPart, type: string) {
+  const url = URL.createObjectURL(new Blob([data], { type }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
-interface DrawingData {
-  [key: string]: {
-    type: string;
-    title: string;
-    svg: string;
-  };
-}
+const today = () => new Date().toISOString().slice(0, 10);
+const slug = (s: string) => s.replace(/[^\w-]+/g, "_") || "project";
 
 export function DrawingsScreen() {
-  const { t, lang } = useI18n();
-  const project = useActiveProject();
-  const [mesh, setMesh] = useState<MeshDocument | null>(null);
-  const [drawings, setDrawings] = useState<Record<string, { type: string; title: string; svg: string }>>({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [activeView, setActiveView] = useState<string>("floor1");
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const { lang } = useI18n();
+  const bn = lang === "bn";
+  const { project } = useProject();
+  const [sheetId, setSheetId] = useState("site");
+  const [busy, setBusy] = useState(false);
 
-  const options: DrawingOptions = {
-    scale: 100,
-    project: project?.name ?? "Project",
-    drawingNo: "A-101",
-  };
+  const built = useMemo(() => (project && project.plot && project.planId ? buildingForProject(project) : null), [project]);
+  const data = useMemo(() => {
+    if (!project || !built || !built.ok) return null;
+    const res = analyzeStructure(built.model);
+    const date = today();
+    return { model: built.model, sheets: buildSheets(built.model, res, project.name, date, lang), date };
+  }, [project, built, lang]);
 
-  useEffect(() => {
-    const updateMobile = () => setIsMobile(window.innerWidth < 768);
-    updateMobile();
-    window.addEventListener("resize", updateMobile);
-    return () => window.removeEventListener("resize", updateMobile);
-  }, []);
+  const title = bn ? "ড্রয়িং ও পারমিট প্যাকেজ" : "Drawings and permit package";
+  const subtitle = bn ? "মডেল থেকে সাইট প্ল্যান, প্ল্যান, সেকশন ও এলিভেশন" : "Site plan, floor plans, section and elevations from the model";
 
-  useEffect(() => {
-    if (!project) {
-      setError(t("documentsNeedsPack"));
-      return;
-    }
-    
-    const loadDrawings = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const meshDoc = generateBuildingMesh(project, "final", project.customization);
-        setMesh(meshDoc);
-        
-        const drawingData: DrawingData = {};
-        
-        // Floor plans
-        for (let i = 0; i < project.stories; i++) {
-          const phase = i === 0 ? "ground_floor" : `floor-${i + 1}`;
-          try {
-            const plan = generateFloorPlanFromMesh(meshDoc, phase, options);
-            drawingData[`floor${i + 1}`] = {
-              type: "plan",
-              title: `${lang === "bn" ? "তলা" : "Floor"} ${i + 1}`,
-              svg: exportDrawingAsSVG(plan),
-            };
-          } catch (e) {
-            console.warn(`Could not generate floor plan for ${phase}`);
-          }
-        }
-        
-        // Section
-        const storyHeights = Array.from({ length: project.stories }, (_, i) => i === 0 ? 4500 : 3000);
-        const section = generateSection(storyHeights, project.plotSqm * 0.7, options);
-        drawingData["section"] = {
-          type: "section",
-          title: `${lang === "bn" ? "এককটু" : "Section"}`,
-          svg: exportDrawingAsSVG(section),
-        };
-        
-        // Elevations
-        const elevOptions = { scale: 100, project: project.name, direction: "front" };
-        const elevations = {
-          front: generateElevation(project.plotSqm * 0.7, storyHeights, [], elevOptions),
-          rear: generateElevation(project.plotSqm * 0.7, storyHeights, [], { ...elevOptions, direction: "rear" }),
-          left: generateElevation(project.plotSqm * 0.7, storyHeights, [], { ...elevOptions, direction: "left" }),
-          right: generateElevation(project.plotSqm * 0.7, storyHeights, [], { ...elevOptions, direction: "right" }),
-        };
-        
-        for (const [dir, elev] of Object.entries(elevations)) {
-          drawingData[`elevation_${dir}`] = {
-            type: "elevation",
-            title: `${lang === "bn" ? "উচ্চতা" : "Elevation"} ${dir}`,
-            svg: exportDrawingAsSVG(elev),
-          };
-        }
-        
-        setDrawings(drawingData);
-        setActiveView(Object.keys(drawingData)[0] || "floor1");
-      } catch (err) {
-        setError(err instanceof Error ? err.message : String(err));
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    loadDrawings();
-  }, [project, t, lang]);
-  // Hooks must run on every render, so they live above the early returns below.
-  const views = useMemo(() => 
-    Object.entries(drawings ?? {}).map(([id, data]) => ({
-      id,
-      title: data.title,
-      type: data.type,
-    })),
-  [drawings]
-);
-
-
-  if (error) {
+  if (!project || !built) {
     return (
       <div className="screen">
-        <PageHeader title={t("documentsTitle")} subtitle={t("documentsSubtitle")} />
-        <Callout title={t("documentsFailed")}>
-          <span className="small">{error}</span>
+        <PageHeader title={title} subtitle={subtitle} />
+        <EmptyState title={bn ? "এখনো কোনো প্ল্যান বাছাই হয়নি" : "No plan chosen yet"}>
+          {bn ? "জমির মাপ দিয়ে একটি প্ল্যান বাছাই করুন, তারপর এখানে ড্রয়িং দেখা যাবে।" : "Enter the plot and pick a plan, then the drawings appear here."}
+        </EmptyState>
+      </div>
+    );
+  }
+  if (!built.ok || !data) {
+    return (
+      <div className="screen">
+        <PageHeader title={title} subtitle={project.name} />
+        <Callout tone="bad" title={bn ? "প্ল্যানটি এই জমিতে আঁটে না" : "The plan does not fit this plot"}>
+          {built.ok ? "" : bn ? built.reasons.map((r) => r.message.bn).join(" ") : built.reasons.map((r) => r.message.en).join(" ")}
         </Callout>
       </div>
     );
   }
 
-  if (loading || !drawings) {
-    return (
-      <div className="screen">
-        <PageHeader title={t("documentsTitle")} subtitle={t("documentsSubtitle")} />
-        <div style={{ padding: "24px", textAlign: "center", opacity: 0.7 }}>
-          {lang === "bn" ? "ড্রয়িং তৈরি হচ্ছে..." : "Generating drawings..."}
-        </div>
-      </div>
-    );
-  }
+  const sheet: Sheet = data.sheets.find((s) => s.id === sheetId) ?? data.sheets[0];
+  const planMatch = /^plan-(\d+)$/.exec(sheet.id);
+  const svg = planMatch ? renderPlanSvg(data.model.storeys[Number(planMatch[1])].geometry, { lang }) : sceneToSvg(sheet.scene);
+  const base = `${slug(project.name)}-${sheet.sheetNo}-${sheet.id}`;
+
+  const downloadPackage = () => {
+    setBusy(true);
+    try {
+      const files = buildPermitPackage(project, data.model, data.date, lang);
+      save(`${slug(project.name)}-permit-package.zip`, new Uint8Array(packageToZip(files, data.date)), "application/zip");
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <div className="screen">
-      <PageHeader title={t("documentsTitle")} subtitle={t("documentsSubtitle")} />
-      
-      {/* Mobile View Selector */}
-      {isMobile && (
-        <div className="row" style={{ gap: "8px", marginBottom: "16px", overflowX: "auto" }}>
-          {views.map(({ id, title, type }) => (
-            <Button
-              key={id}
-              variant={activeView === id ? "primary" : "soft"}
-              onClick={() => setActiveView(id)}
-              style={{ padding: "8px 12px", fontSize: "13px" }}
-            >
-              {title}
-            </Button>
-          ))}
-        </div>
-      )}
+      <PageHeader title={title} subtitle={subtitle} />
 
-      {/* Drawing Viewer */}
-      <div className="drawing-viewer" style={{ 
-        position: "relative", 
-        height: isMobile ? "70vh" : "80vh", 
-        maxHeight: "800px",
-        background: "var(--paper)",
-        borderRadius: "var(--r-lg)",
-        overflow: "hidden",
-        border: "1px solid var(--line)"
-      }}>
-        <div style={{ position: "relative", width: "100%", height: "100%", overflow: "auto", touchAction: "manipulation" }}>
-          <div
-            dangerouslySetInnerHTML={{ __html: drawings[activeView].svg }}
-            style={{ width: "100%", height: "100%", display: "block", objectFit: "contain" }}
-          />
-        </div>
-      </div>
+      <Callout tone="warn" title={bn ? "প্রাথমিক নকশা, নির্মাণ বা জমার জন্য নয়" : "Screening drawings, not for construction or submission"}>
+        {bn
+          ? "সেকশন ও এলিভেশন প্রাথমিক (জানালার সিল ৯০০ মিমি, উচ্চতা ১২০০ মিমি ধরা)। রাজউকে জমার আগে লাইসেন্সপ্রাপ্ত স্থপতি ও প্রকৌশলীর যাচাই ও স্বাক্ষর প্রয়োজন। ডিএক্সএফে লেখা কেবল ইংরেজিতে।"
+          : "Section and elevations are schematic (window sill 900 mm, height 1200 mm assumed). Licensed architects and engineers must check and sign before anything goes to RAJUK. DXF text is English only."}
+      </Callout>
 
-      /* Controls */
-      <div className="row" style={{ gap: "8px", marginTop: "16px", justifyContent: "center" }}>
-        <Button variant="soft" onClick={() => {
-          const blob = new Blob([drawings[activeView].svg], { type: "image/svg+xml" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `${project!.id}_${activeView}.svg`;
-          a.click();
-          URL.revokeObjectURL(url);
-        }}>
-          {lang === "bn" ? "SVG ডাউনলোড" : "Download SVG"}
-        </Button>
-        <Button variant="soft" onClick={() => {
-          const blob = new Blob([drawings[activeView].svg], { type: "image/svg+xml" });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = `${project!.id}_${activeView}.dxf`;
-          a.click();
-          URL.revokeObjectURL(url);
-        }}>
-          {lang === "bn" ? "DXF ডাউনলোড" : "Download DXF"}
-        </Button>
-        <Button variant="primary" onClick={() => {
-          // Download all drawings individually (browser can't ZIP easily without JSZip)
-          Object.entries(drawings).forEach(([id, data]) => {
-            const blob = new Blob([data.svg], { type: "image/svg+xml" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `${project!.id}_${id}.svg`;
-            a.style.display = "none";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-          });
-        }}>
-          {lang === "bn" ? "সব ড্রয়িং প্যাকেট" : "All Drawings Package"}
-        </Button>
-      </div>
+      <Card className="stack" style={{ marginTop: 16 }}>
+        <div className="row" style={{ gap: 12, alignItems: "center", flexWrap: "wrap" }}>
+          <label htmlFor="sheet-pick" style={{ fontWeight: 600 }}>{bn ? "শিট" : "Sheet"}</label>
+          <select id="sheet-pick" value={sheet.id} onChange={(e) => setSheetId(e.target.value)} style={{ padding: "6px 10px" }}>
+            {data.sheets.map((s) => (
+              <option key={s.id} value={s.id}>{s.sheetNo} {s.title}</option>
+            ))}
+          </select>
+          <Button variant="ghost" onClick={() => save(`${base}.svg`, svg, "image/svg+xml")}>{bn ? "এসভিজি ডাউনলোড" : "Download SVG"}</Button>
+          <Button variant="ghost" onClick={() => save(`${base}.dxf`, sceneToDxf(buildSheets(data.model, analyzeStructure(data.model), project.name, data.date, "en").find((s) => s.id === sheet.id)!.scene), "application/dxf")}>
+            {bn ? "ডিএক্সএফ ডাউনলোড" : "Download DXF"}
+          </Button>
+        </div>
+        <div style={{ overflow: "auto", background: "#fff", border: "1px solid var(--line)", borderRadius: 8, padding: 8 }} aria-label={sheet.title} dangerouslySetInnerHTML={{ __html: svg }} />
+      </Card>
+
+      <Card className="stack" style={{ marginTop: 16 }}>
+        <h3 style={{ margin: 0 }}>{bn ? "পারমিট প্যাকেজ" : "Permit package"}</h3>
+        <p className="muted" style={{ margin: 0 }}>
+          {bn
+            ? "সব ড্রয়িং (এসভিজি ও ডিএক্সএফ), বিওকিউ, রিবার শিডিউল, কমপ্লায়েন্স রিপোর্ট ও অনুমানের তালিকা একটি জিপ ফাইলে।"
+            : "All drawings (SVG and DXF), the BOQ, the bar schedule, the compliance report and the assumptions in one zip file."}
+        </p>
+        <div>
+          <Button onClick={downloadPackage} disabled={busy}>{bn ? "প্যাকেজ ডাউনলোড (.zip)" : "Download package (.zip)"}</Button>
+        </div>
+      </Card>
     </div>
   );
 }

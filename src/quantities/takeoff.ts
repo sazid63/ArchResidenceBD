@@ -76,6 +76,7 @@ export const BOQ_ASSUMPTIONS: Array<{ id: string; en: string; bn: string }> = [
   { id: "finishes", en: "Plaster 12 mm on both wall faces; 50 mm screed on every floor and the roof. Slab soffit plaster, tiles, paint, doors, windows, services and earthwork are not taken off.", bn: "দেয়ালের দুই পাশে ১২ মিমি প্লাস্টার; প্রতি তলা ও ছাদে ৫০ মিমি স্ক্রিড। সিলিং প্লাস্টার, টাইলস, রং, দরজা-জানালা, সার্ভিস ও মাটির কাজ ধরা হয়নি।" },
   { id: "steel", en: "Steel is the bar bending schedule total, no wastage or binding wire added; the card has only a B400 (60 grade) rod rate, used for the Grade 420 bars.", bn: "রড বার বেন্ডিং শিডিউলের মোট, অপচয় বা বাইন্ডিং তার যোগ করা হয়নি; কার্ডে কেবল বি৪০০ (৬০ গ্রেড) রডের দর আছে, ৪২০ গ্রেডে তা-ই ধরা হয়েছে।" },
   { id: "rates", en: "Prices come from the rate card (source and date shown). Items with no line in the card (stone chips, labour, machinery output) are listed without a price, so the total is a lower bound.", bn: "দাম রেট কার্ড থেকে (উৎস ও তারিখ দেখানো)। কার্ডে যে আইটেমের লাইন নেই (পাথর, শ্রম, যন্ত্র) সেগুলোর দাম নেই, তাই মোট একটি নিম্নসীমা।" },
+  { id: "sand-rate", en: "Check the sand rate before relying on the total: the card gives 1,900 BDT per cft, which looks like a per-100-cft price. Sand is the largest priced line because of it.", bn: "মোট ধরার আগে বালির দর যাচাই করুন: কার্ডে প্রতি ঘনফুট ১,৯০০ টাকা, যা প্রতি ১০০ ঘনফুটের দর মনে হয়। এ কারণে বালিই সবচেয়ে বড় দামি লাইন।" },
 ];
 
 export type BoqCategory = "concrete" | "steel" | "masonry" | "finishes";
