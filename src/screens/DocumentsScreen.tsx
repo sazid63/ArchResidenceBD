@@ -1,188 +1,129 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useProject } from "../context/ProjectContext";
 import { useI18n } from "../i18n";
-import { Badge, Button, Callout, Card, PageHeader } from "../ui/kit";
-import { useActiveProject, useProject } from "../context/ProjectContext";
+import { buildPermitPackage, packageToZip, type PackageFile } from "../drawings/permit";
+import { buildingForProject } from "../model/projectMesh";
+import { Badge, Button, Callout, Card, EmptyState, PageHeader } from "../ui/kit";
 
-interface DocumentsReply {
-  pack: string;
-  projectName: string;
-  created: string;
-  groups: Record<string, string[]>;
-  count: number;
-}
-
-/** The engineer pack's own roles ✓ (the pack's manifest names them ✓ ✓). */
-const GROUP_KEY: Record<
-  string,
-  | "documentsProject"
-  | "documentsDrawings"
-  | "documentsBbs"
-  | "documentsBoq"
-  | "documentsReports"
-  | "documentsOutputs"
-> = {
-  spec: "documentsProject",
-  drawing: "documentsDrawings",
-  bbs: "documentsBbs",
-  boq: "documentsBoq",
-  compliance: "documentsReports",
-  output: "documentsOutputs",
+/** Local calendar date (Dhaka is UTC+6, so the UTC date is a day behind in the early morning). */
+const today = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
 
+const GROUPS: Array<{ prefix: string; en: string; bn: string }> = [
+  { prefix: "drawings/", en: "Drawings (SVG and DXF)", bn: "ড্রয়িং (এসভিজি ও ডিএক্সএফ)" },
+  { prefix: "boq/", en: "Bill of quantities", bn: "বিল অব কোয়ান্টিটিজ" },
+  { prefix: "structure/", en: "Bar schedule", bn: "রিবার শিডিউল" },
+  { prefix: "compliance/", en: "Compliance report", bn: "কমপ্লায়েন্স রিপোর্ট" },
+];
+
+function save(name: string, data: BlobPart, type: string) {
+  const url = URL.createObjectURL(new Blob([data], { type }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 /**
- * Documents screen with RAJUK Permit Package Generator.
- * Generates a complete permit package ZIP for RAJUK DAP 2022 submission.
+ * Documents: the permit package this project would produce, listed file by file, with one zip download.
+ * Same package as the Drawings screen. It is a screening package, not a signed submission.
  */
 export function DocumentsScreen() {
-  const { t, lang } = useI18n();
-  const project = useActiveProject();
-  const [pack, setPack] = useState("");
-  const [documents, setDocuments] = useState<DocumentsReply | null>(null);
+  const { lang } = useI18n();
+  const bn = lang === "bn";
+  const { project } = useProject();
+  const [files, setFiles] = useState<PackageFile[] | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
-  const [generatingPermit, setGeneratingPermit] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const date = today();
 
-  const load = async () => {
-    if (!project) return;
-    if (!pack.trim()) {
-      setProblem(t("documentsNeedsPack"));
-      return;
-    }
-    try {
-      // In web mode, we load from localStorage
-      const reply = await loadPackFromStorage(pack.trim());
-      setDocuments(reply);
-      setProblem(null);
-    } catch (error) {
-      setProblem(error instanceof Error ? error.message : String(error));
-    }
-  };
+  const built = useMemo(() => (project && project.plot && project.planId ? buildingForProject(project) : null), [project]);
+  const title = bn ? "ডকুমেন্ট" : "Documents";
+  const subtitle = bn ? "এই প্রকল্পের পারমিট প্যাকেজ" : "The permit package for this project";
 
-  const loadPackFromStorage = async (packId: string): Promise<DocumentsReply> => {
-    // Mock implementation for web mode
-    if (!project || project.id !== packId) {
-      throw new Error(t("documentsFailed"));
-    }
-    
-    // Create mock documents reply
-    return {
-      pack: packId,
-      projectName: project.name,
-      created: project.createdAt,
-      groups: {
-        spec: ["project-spec.pdf"],
-        drawing: ["floor-plans.pdf", "elevations.pdf", "sections.pdf"],
-        bbs: ["bar-bending-schedule.pdf"],
-        boq: ["bill-of-quantities.pdf"],
-        compliance: ["compliance-report.pdf"],
-        output: ["ifc-model.ifc", "freecad-macro.FCMacro"],
-      },
-      count: 8,
-    };
-  };
+  if (!project || !built) {
+    return (
+      <div className="screen">
+        <PageHeader title={title} subtitle={subtitle} />
+        <EmptyState title={bn ? "এখনো কোনো প্ল্যান বাছাই হয়নি" : "No plan chosen yet"}>
+          {bn ? "জমির মাপ দিয়ে একটি প্ল্যান বাছাই করুন, তারপর এখানে ডকুমেন্ট তৈরি হবে।" : "Enter the plot and pick a plan, then the documents are prepared here."}
+        </EmptyState>
+      </div>
+    );
+  }
+  if (!built.ok) {
+    return (
+      <div className="screen">
+        <PageHeader title={title} subtitle={project.name} />
+        <Callout tone="bad" title={bn ? "প্ল্যানটি এই জমিতে আঁটে না" : "The plan does not fit this plot"}>
+          {bn ? built.reasons.map((r) => r.message.bn).join(" ") : built.reasons.map((r) => r.message.en).join(" ")}
+        </Callout>
+      </div>
+    );
+  }
+  const model = built.model;
 
-  const generatePermitPackage = async () => {
-    if (!project) return;
-    
-    setGeneratingPermit(true);
+  const prepare = () => {
+    setBusy(true);
     setProblem(null);
-    
     try {
-      // Create permit package using batch export logic
-      const { batchExport } = await import("../../scripts/tests/batch-export");
-      await batchExport({ 
-        projectId: project.id,
-        formats: ["ifc", "freecad", "svg", "dxf", "csv", "json", "md"],
-        includeCompliance: true,
-        includeDrawings: true,
-      });
-      
-      alert(t("permitPackageGenerated"));
+      setFiles(buildPermitPackage(project, model, date, lang));
     } catch (error) {
       setProblem(error instanceof Error ? error.message : String(error));
     } finally {
-      setGeneratingPermit(false);
+      setBusy(false);
     }
   };
 
-  const groups = documents ? Object.entries(documents.groups) : [];
+  const slug = project.name.replace(/[^\w-]+/g, "_") || "project";
 
   return (
     <div className="screen">
-      <PageHeader title={t("documentsTitle")} subtitle={t("documentsSubtitle")} />
-      
-      {/* Permit Package Generator */}
-      <Card style={{ marginBottom: "24px" }}>
-        <h3 style={{ marginBottom: "12px" }}>
-          {lang === "bn" ? "রাজউক অনুমতি প্যাকেজ" : "RAJUK Permit Package Generator"}
-        </h3>
-        <p style={{ marginBottom: "16px", opacity: 0.7, fontSize: "14px" }}>
-          {lang === "bn"
-            ? "RAJUK DAP 2022 অনুমতির জন্য সম্পূর্ণ প্যাকেজ তৈরি করুন। সব ড্রয়িং, BOQ, কমপ্লায়েন্স রিপোর্ট এবং 3D মডেল অন্তর্ভুক্ত থাকবে।"
-            : "Generate complete permit package for RAJUK DAP 2022 submission. Includes all drawings, BOQ, compliance reports, and 3D models."}
-        </p>
-        <Button 
-          variant="primary" 
-          onClick={generatePermitPackage}
-          disabled={generatingPermit || !project}
-          style={{ minWidth: "280px" }}
-        >
-          {generatingPermit
-            ? lang === "bn" ? "তৈরি হচ্ছে..." : "Generating..."
-            : lang === "bn" ? "অনুমতি প্যাকেজ তৈরি করুন" : "Generate Permit Package"}
-        </Button>
-        {problem && (
-          <div style={{ marginTop: "16px" }}>
-            <Callout title={t("documentsFailed")}>
-              <span className="small">{problem}</span>
-            </Callout>
-          </div>
-        )}
+      <PageHeader title={title} subtitle={subtitle} />
+
+      <Callout tone="warn" title={bn ? "প্রাথমিক প্যাকেজ, স্বাক্ষরিত জমা নয়" : "A screening package, not a signed submission"}>
+        {bn
+          ? "রাজউকে জমার আগে ড্রয়িং ও হিসাব লাইসেন্সপ্রাপ্ত স্থপতি ও প্রকৌশলীর যাচাই ও স্বাক্ষর লাগে। বিওকিউর রেট কার্ড এখনো যাচাই হয়নি।"
+          : "Drawings and calculations must be checked and signed by licensed architects and engineers before they go to RAJUK. The BOQ rate card is not yet verified."}
+      </Callout>
+
+      <Card className="stack" style={{ marginTop: 16 }}>
+        <div className="row" style={{ gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+          <Button onClick={prepare} disabled={busy}>{bn ? "প্যাকেজ তৈরি করুন" : "Prepare the package"}</Button>
+          {files ? (
+            <>
+              <Button variant="soft" onClick={() => save(`${slug}-permit-package.zip`, new Uint8Array(packageToZip(files, date)), "application/zip")}>
+                {bn ? "জিপ ডাউনলোড" : "Download .zip"}
+              </Button>
+              <Badge tone="lavender">{bn ? `${files.length}টি ফাইল` : `${files.length} files`}</Badge>
+            </>
+          ) : null}
+        </div>
+        {problem ? <Callout tone="bad" title={bn ? "প্যাকেজ তৈরি হয়নি" : "The package could not be made"}>{problem}</Callout> : null}
       </Card>
 
-      {/* Existing Documents Pack Browser */}
-      <div className="row" style={{ marginBottom: "16px" }}>
-        <label htmlFor="documents-pack-input" className="visually-hidden">
-          {t("documentsPackPlaceholder")}
-        </label>
-        <input
-          className="input grow"
-           id="documents-pack-input"
-          value={pack}
-          placeholder={t("documentsPackPlaceholder")}
-          onChange={(event) => setPack(event.target.value)}
-        />
-        <Button variant="soft" onClick={() => void load()}>
-          {t("documentsOpen")}
-        </Button>
-      </div>
-      {problem && !generatingPermit && (
-        <Callout title={t("documentsFailed")}>
-          <span className="small">{problem}</span>
-        </Callout>
-      )}
-      {documents ? (
-        <div className="row">
-          <Badge tone="sky">{documents.projectName}</Badge>
-          <Badge tone="lavender">
-            {t("documentsCount").replace("{n}", String(documents.count))}
-          </Badge>
-        </div>
-      ) : null}
-      {groups.map(([group, files]) => (
-        <Card key={group} className="stack">
-          <div className="row-between">
-            <h3>{t(GROUP_KEY[group] ?? "documentsOutputs")}</h3>
-            <Badge tone="neutral">{files.length}</Badge>
-          </div>
-          <div className="row">
-            {files.map((file) => (
-              <Badge key={file} tone="neutral">
-                {file.split("/").pop()}
-              </Badge>
-            ))}
-          </div>
-        </Card>
-      ))}
+      {files
+        ? GROUPS.map((g) => {
+            const list = files.filter((f) => f.path.startsWith(g.prefix));
+            if (!list.length) return null;
+            return (
+              <Card key={g.prefix} className="stack" style={{ marginTop: 12 }}>
+                <div className="row-between">
+                  <h3 style={{ margin: 0 }}>{bn ? g.bn : g.en}</h3>
+                  <Badge tone="neutral">{list.length}</Badge>
+                </div>
+                <div className="row" style={{ gap: 6, flexWrap: "wrap" }}>
+                  {list.map((f) => (
+                    <Badge key={f.path} tone="neutral">{f.path.slice(g.prefix.length)}</Badge>
+                  ))}
+                </div>
+              </Card>
+            );
+          })
+        : null}
     </div>
   );
 }

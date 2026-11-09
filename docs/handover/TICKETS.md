@@ -70,7 +70,7 @@ Do: drawings from the model (`renderPlanSvg` per storey, section, elevations, DX
 ## M6-1 Interview from the flow book · Sonnet high · done (see git log)
 Do: runner for `spec/flows/phase-flow-book.yaml`; port the v0 parser (`core/src/archres_core/interview/parse.py`, `seam.py`) with its test cases (`core/tests/test_interview_parser.py`); answers write to the project with provenance.
 
-## M6-2 Cleanup · Sonnet medium · todo
+## M6-2 Cleanup · Sonnet medium · done (see git log)
 Do: UI on the v3 store (`src/model/projectStore`, migrate on first load); remaining screens (formwork, pour, daylight, unit mix, connections, column grid) read the model; delete unused v2 state, `/api/cad`, `src/server` (dev via Vite), `isomorphicCore` stubs; README and Help honest (no AI claims).
 
 ## M7-1 Packaging · Sonnet medium · todo

@@ -6,6 +6,11 @@
  * design generation state, and dynamic PWD BOQ pricing.
  */
 
+import { applyLegacy, specToLegacy } from "../model/legacyAdapter";
+import type { V2Project } from "../model/legacyV2";
+import { migrateV2 } from "../model/migrate";
+import type { ProjectSpec } from "../model/projectSpec";
+import { getActiveProjectId, loadProjects, saveProjects, setActiveProjectId, STORAGE_KEYS, upsertProject, type KeyValueStore } from "../model/projectStore";
 import type { Deviation } from "../spec.gen";
 import type { BuildingCustomization } from "../types/customization";
 import { FEET_TO_M, planChoices } from "../model/planChoices";
@@ -69,8 +74,6 @@ export interface BuildingProject {
   deviations?: Deviation[];
 }
 
-const STORAGE_KEY = "archres_v2_active_project";
-
 /** Time-ordered and unique even when two projects are created in the same millisecond. */
 function uniqueSuffix(): string {
   const rand =
@@ -79,7 +82,6 @@ function uniqueSuffix(): string {
       : Math.random().toString(36).slice(2, 10);
   return `${Date.now()}-${rand}`;
 }
-const ALL_PROJECTS_KEY = "archres_v2_all_projects";
 
 export function plotToSqm(size: number, unit: string): number {
   switch (unit) {
@@ -219,16 +221,6 @@ export function createNewProject(params: {
   };
 
   saveActiveProject(project);
-
-  // Add to all projects history
-  const all = getSavedProjects();
-  if (typeof localStorage !== "undefined") {
-    const existingIdx = all.findIndex((p) => p.id === project.id);
-    if (existingIdx >= 0) all[existingIdx] = project;
-    else all.unshift(project);
-    localStorage.setItem(ALL_PROJECTS_KEY, JSON.stringify(all));
-  }
-
   return project;
 }
 
@@ -376,59 +368,68 @@ export function create4StoryBuildingProject(): BuildingProject {
   return project;
 }
 
-export function create6StoryBuildingProject(): BuildingProject {
-  const name = "Jamuna Crown Residence (6-Storey)";
-  const address = "Sector 4, Road 12, Uttara, Dhaka";
-  const stories = 6;
-  const plotSize = 4.0;
-  const id = `project-6story-${uniqueSuffix()}`;
-  const plotSqm = plotToSqm(plotSize, "katha");
-  const phases = generatePhasesForStories(stories);
-  const now = new Date().toISOString();
-  const timeStr = "10:01 AM";
+// ─── Storage Operations ─────────────────────────────────────────────────
+//
+// The screens still read and write the project shape above, but the data lives in the v3 store
+// (src/model/projectStore.ts): every call below goes through the legacy adapter. A browser that
+// still holds v2 saves is migrated once, on first load, and the v2 keys are left untouched as a backup.
 
-  const populatedPhases = phases.map((p) => {
-    const populated = populatePhaseMetrics(p, stories, plotSqm, plotSize, "preset-dual-3bed", name, 2, now, timeStr);
-    return makeCompletedPhase(
-      p, populated.metrics, populated.preset, populated.timestamp,
-      `[Phase Planner]\nPlanned ${p.nameEn} for ${name} (${stories} storeys, ${plotSize} Katha plot) in accordance with BNBC 2020 & RAJUK 2008 by-laws. 3D solid geometry recomputed.`,
-      `Plan ${p.nameEn} for ${name}.`,
-    );
-  });
-
-  const project: BuildingProject = {
-    id, name, address, stories, plotSize, plotUnit: "katha",
-    plotSqm: Math.round(plotSqm * 100) / 100, unitsPerFloor: 2,
-    createdAt: now, updatedAt: now,
-    phases: populatedPhases, designStarted: true, activePhaseId: "final",
-    customization: createDefaultCustomization(),
-  };
-
-  saveActiveProject(project);
-  return project;
+function browserStore(): KeyValueStore | null {
+  try {
+    return typeof localStorage === "undefined" ? null : localStorage;
+  } catch {
+    return null; // blocked storage (private window, denied site data)
+  }
 }
 
-// ─── Storage Operations ─────────────────────────────────────────────────
+/** Storage can throw (private window, denied site data, quota): reads give the fallback, writes are dropped. */
+function guard<T>(fn: () => T, fallback: T): T {
+  try {
+    return fn();
+  } catch {
+    return fallback;
+  }
+}
+
+/** The v3 projects, migrating v2 saves into the v3 keys the first time. */
+function loadSpecs(store: KeyValueStore): ProjectSpec[] {
+  const loaded = loadProjects(store);
+  if (loaded.source === "v2") {
+    saveProjects(store, loaded.projects);
+    let active: string | null = null;
+    try {
+      const v2 = JSON.parse(store.getItem(STORAGE_KEYS.v2Active) ?? "null") as { id?: unknown } | null;
+      if (v2 && typeof v2.id === "string") active = v2.id;
+    } catch {
+      /* a damaged v2 active key: fall through to the most recent */
+    }
+    const pick = loaded.projects.find((s) => s.project.id === active) ?? [...loaded.projects].sort((x, y) => y.updatedAt.localeCompare(x.updatedAt))[0];
+    if (pick) setActiveProjectId(store, pick.project.id);
+  }
+  return loaded.projects;
+}
 
 export function getActiveProject(): BuildingProject | null {
-  if (typeof localStorage === "undefined") return null;
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) {
-    try { return JSON.parse(saved) as BuildingProject; } catch { return null; }
-  }
-  return null;
+  const store = browserStore();
+  if (!store) return null;
+  return guard(() => {
+    const specs = loadSpecs(store); // first: a first load migrates v2 saves and sets the active id
+    const id = getActiveProjectId(store);
+    const spec = specs.find((s) => s.project.id === id);
+    return spec ? specToLegacy(spec) : null;
+  }, null);
 }
 
 export function saveActiveProject(project: BuildingProject): void {
   project.updatedAt = new Date().toISOString();
-  if (typeof localStorage !== "undefined") {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(project));
-    const all = getSavedProjects();
-    const existingIdx = all.findIndex((p) => p.id === project.id);
-    if (existingIdx >= 0) all[existingIdx] = project;
-    else all.unshift(project);
-    localStorage.setItem(ALL_PROJECTS_KEY, JSON.stringify(all));
-  }
+  const store = browserStore();
+  if (!store) return;
+  guard(() => {
+    const existing = loadSpecs(store).find((s) => s.project.id === project.id);
+    const base = existing ?? migrateV2(project as unknown as V2Project, project.updatedAt);
+    const saved = upsertProject(store, applyLegacy(base, project), project.updatedAt);
+    setActiveProjectId(store, saved.project.id);
+  }, undefined);
 }
 
 /**
@@ -436,40 +437,38 @@ export function saveActiveProject(project: BuildingProject): void {
  * recently changed. Returns it, or null when nothing is saved.
  */
 export function activateSavedProject(id?: string): BuildingProject | null {
-  if (typeof localStorage === "undefined") return null;
-  const all = getSavedProjects();
-  const pick = id
-    ? all.find((p) => p.id === id)
-    : [...all].sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""))[0];
-  if (!pick) return null;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(pick));
-  return pick;
+  const store = browserStore();
+  if (!store) return null;
+  return guard(() => {
+    const all = loadSpecs(store);
+    const pick = id ? all.find((s) => s.project.id === id) : [...all].sort((x, y) => (y.updatedAt || "").localeCompare(x.updatedAt || ""))[0];
+    if (!pick) return null;
+    setActiveProjectId(store, pick.project.id);
+    return specToLegacy(pick);
+  }, null);
 }
 
 export function getSavedProjects(): BuildingProject[] {
-  if (typeof localStorage === "undefined") return [];
-  const saved = localStorage.getItem(ALL_PROJECTS_KEY);
-  if (saved) {
-    try { return JSON.parse(saved) as BuildingProject[]; } catch { return []; }
-  }
-  return [];
+  const store = browserStore();
+  return store ? guard(() => loadSpecs(store).map(specToLegacy), []) : [];
 }
 
 export function deleteSavedProject(id: string): void {
-  if (typeof localStorage === "undefined") return;
-  const all = getSavedProjects().filter((p) => p.id !== id);
-  localStorage.setItem(ALL_PROJECTS_KEY, JSON.stringify(all));
-  const active = getActiveProject();
-  if (active && active.id === id) {
-    localStorage.removeItem(STORAGE_KEY);
-  }
+  const store = browserStore();
+  if (!store) return;
+  guard(() => {
+    saveProjects(store, loadSpecs(store).filter((s) => s.project.id !== id));
+    if (getActiveProjectId(store) === id) store.removeItem(STORAGE_KEYS.activeId);
+  }, undefined);
 }
 
 export function clearAllProjects(): void {
-  if (typeof localStorage === "undefined") return;
-  localStorage.removeItem(STORAGE_KEY);
-  localStorage.removeItem(ALL_PROJECTS_KEY);
-  localStorage.removeItem("archres_projects_v1");
+  const store = browserStore();
+  if (!store) return;
+  guard(() => {
+    saveProjects(store, []);
+    store.removeItem(STORAGE_KEYS.activeId);
+  }, undefined);
 }
 
 /**
@@ -478,53 +477,6 @@ export function clearAllProjects(): void {
 export function areAllPhasesCompleted(project: BuildingProject): boolean {
   if (!project.phases || project.phases.length === 0) return false;
   return project.phases.every((p) => p.status === "completed");
-}
-
-/**
- * Calculate dynamic BOQ for a given project.
- * Produces price estimates based on PWD SOR 2022 rates.
- */
-export function calculateDynamicBoq(project: BuildingProject) {
-  const stories = project.stories || 2;
-  const floorAreaSqm = project.plotSqm * 0.65; // 65% MGC
-  const totalFloorAreaSqm = floorAreaSqm * stories;
-  const totalFloorAreaSqft = totalFloorAreaSqm * 10.7639;
-
-  const concreteVolumeM3 = Math.round(totalFloorAreaSqm * 0.38);
-  const cementBags = Math.round(concreteVolumeM3 * 8.5);
-  const rebarTons = Math.round((concreteVolumeM3 * 0.12) * 100) / 100;
-  const sylhetSandM3 = Math.round(concreteVolumeM3 * 0.45);
-  const stoneChipsM3 = Math.round(concreteVolumeM3 * 0.9);
-  const brickCount = Math.round(totalFloorAreaSqft * 14);
-  const masonDays = Math.round(stories * 45);
-  const rodBinderDays = Math.round(stories * 35);
-  const mixerDays = Math.round(stories * 12);
-
-  const lines = [
-    { key: "cement", label: { bn: "OPC সিমেন্ট (৫০ কেজি ব্যাগ)", en: "OPC Cement (50kg bag)" }, phase: "foundation", costType: "material" as const, unit: "bag", quantity: cementBags, rateBdt: 640, amountBdt: cementBags * 640, priced: true, provenance: "PWD SOR 2022" },
-    { key: "rebar", label: { bn: "বি৫০০ রড / ৬০-গ্রেড রিবার (৭২.৫জি)", en: "Rebar B500 / 60-Grade (72.5G)" }, phase: "foundation", costType: "material" as const, unit: "ton", quantity: rebarTons, rateBdt: 94000, amountBdt: Math.round(rebarTons * 94000), priced: true, provenance: "PWD SOR 2022" },
-    { key: "sylhet_sand", label: { bn: "সিলেট বালু (এফএম ২.৫)", en: "Sylhet Sand (FM 2.5)" }, phase: "foundation", costType: "material" as const, unit: "m³", quantity: sylhetSandM3, rateBdt: 2800, amountBdt: sylhetSandM3 * 2800, priced: true, provenance: "PWD SOR 2022" },
-    { key: "stone_chips", label: { bn: "পাথর কুচি (২০ মিমি ডাউন)", en: "Stone Chips (20mm down)" }, phase: "foundation", costType: "material" as const, unit: "m³", quantity: stoneChipsM3, rateBdt: 3400, amountBdt: stoneChipsM3 * 3400, priced: true, provenance: "PWD SOR 2022" },
-    { key: "bricks", label: { bn: "১ম শ্রেণীর ইট (গাঁথুনি ও খোঁয়া)", en: "1st Class Bricks (Walls & Khoa)" }, phase: "floor", costType: "material" as const, unit: "pcs", quantity: brickCount, rateBdt: 14.5, amountBdt: Math.round(brickCount * 14.5), priced: true, provenance: "PWD SOR 2022" },
-    { key: "mason", label: { bn: "রাজমিস্ত্রি (প্রতি দিন)", en: "Head Mason / Mason (daily wage)" }, phase: "floor", costType: "labour" as const, unit: "day", quantity: masonDays, rateBdt: 950, amountBdt: masonDays * 950, priced: true, provenance: "PWD SOR Labour Schedule" },
-    { key: "rod_binder", label: { bn: "রড মিস্ত্রি / বাইন্ডার", en: "Rod Binder (daily wage)" }, phase: "floor", costType: "labour" as const, unit: "day", quantity: rodBinderDays, rateBdt: 900, amountBdt: rodBinderDays * 900, priced: true, provenance: "PWD SOR Labour Schedule" },
-    { key: "concrete_mixer", label: { bn: "কংক্রিট মিক্সার মেশিন ও ভাইব্রেটর", en: "Concrete Mixer & Needle Vibrator" }, phase: "floor", costType: "machinery" as const, unit: "day", quantity: mixerDays, rateBdt: 2200, amountBdt: mixerDays * 2200, priced: true, provenance: "Machinery Hire Schedule" },
-  ];
-
-  const totalAmountBdt = lines.reduce((sum, line) => sum + line.amountBdt, 0);
-  const byPhase: Record<string, number> = {};
-  const byCostType: Record<string, number> = {};
-  for (const line of lines) {
-    byPhase[line.phase] = (byPhase[line.phase] || 0) + line.amountBdt;
-    byCostType[line.costType] = (byCostType[line.costType] || 0) + line.amountBdt;
-  }
-
-  return {
-    lines,
-    totals: { amountBdt: totalAmountBdt, pricedLines: lines.length, unpricedLines: [] },
-    subtotals: { byPhase, byCostType },
-    rateCard: { cardId: "pwd-sor-2022-civil-works", region: "Dhaka & Major Metros", effectiveFrom: "2026-01-01" },
-  };
 }
 
 // Re-export from the shared types module so existing imports from projectState still work

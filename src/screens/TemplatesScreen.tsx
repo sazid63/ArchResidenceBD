@@ -1,6 +1,6 @@
 import { useI18n } from "../i18n";
 import { Badge, Button, Card, PageHeader } from "../ui/kit";
-import { generateRandomBuildingProject, createNewProject } from "../engine/projectState";
+import { generateRandomBuildingProject, createNewProject, saveActiveProject } from "../engine/projectState";
 
 interface DesignTemplate {
   id: string;
@@ -162,7 +162,7 @@ export function TemplatesScreen({ onPick }: { onPick: (id: string) => void }) {
     }));
 
     const finalProject = { ...project, phases: updatedPhases, designStarted: true };
-    localStorage.setItem("archres_v2_active_project", JSON.stringify(finalProject));
+    saveActiveProject(finalProject);
 
     onPick("design:final");
   };

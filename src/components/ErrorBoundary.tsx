@@ -1,4 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
+import { getActiveProject } from "../engine/projectState";
 
 interface Props {
   children: ReactNode;
@@ -65,9 +66,8 @@ export class ErrorBoundary extends Component<Props, State> {
 
   private getProjectInfo = () => {
     try {
-      // Try to get project data from localStorage
-      const projectData = localStorage.getItem("archres_v2_active_project");
-      return projectData ? JSON.parse(projectData) : null;
+      // The open project, from the v3 store
+      return getActiveProject();
     } catch {
       return null;
     }

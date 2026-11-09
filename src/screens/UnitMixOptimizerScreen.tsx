@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useI18n } from "../i18n";
 import { Badge, Button, Card, PageHeader, Stat } from "../ui/kit";
-import { getActiveProject, type BuildingProject } from "../engine/projectState";
+import { useActiveProject } from "../context/ProjectContext";
 import { generateBuildingMesh } from "../cad/parametricBuildingGenerator";
 import type { MeshDocument } from "../cad/mesh";
 
@@ -128,7 +128,7 @@ const ROOM_KIND_MAP: Record<string, string> = {
 
 export function UnitMixOptimizerScreen() {
   const { t, lang } = useI18n();
-  const [project] = useState<BuildingProject | null>(() => getActiveProject());
+  const project = useActiveProject();
   const [mesh, setMesh] = useState<MeshDocument | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -136,7 +136,7 @@ export function UnitMixOptimizerScreen() {
   // Start from the project: units/floor x residential floors, flat type chosen from the area per unit.
   const [unitMix, setUnitMix] = useState<Record<string, number>>(() => {
     const base: Record<string, number> = { studio: 0, "1bed": 0, "2bed": 0, "3bed": 0 };
-    const p = getActiveProject();
+    const p = project;
     if (!p) return base;
     const perUnit = ((p.plotSqm || 200) * 0.65) / Math.max(1, p.unitsPerFloor || 1);
     const type = perUnit < 35 ? "studio" : perUnit < 55 ? "1bed" : perUnit < 68 ? "2bed" : "3bed";

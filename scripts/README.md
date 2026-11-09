@@ -30,7 +30,6 @@ Generated output goes to `audits/audit-out/` and `tests/exporter-out/` (both git
 | `check-png.ts` / `check-png2.ts` / `quick-png-check.ts` | PNG render validation |
 | `verify-pngs.mjs` | PNG batch verification |
 | `compliance-test.ts` | BNBC/RAJUK compliance check |
-| `batch-export.ts` | Batch export CLI |
 | `model-quality.ts` | **Stairs, section sizing and BOQ unit/measurement gates** (`npm run test:quality`) |
 | `ui/ui-shell.mjs`, `ui/ui-screens.mjs` | **Browser checks**: routing/back button, phone drawer, dialogs, crashes, Help, tree (`npm run test:ui`; needs `puppeteer-core` + `@sparticuz/chromium`, see file header) |
 | `manual-search.ts` | Help search quality (`npm run test:manual`) |

@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useI18n } from "../i18n";
 import { Badge, Button, Card, PageHeader, Stat } from "../ui/kit";
-import { getActiveProject, type BuildingProject } from "../engine/projectState";
+import { useActiveProject } from "../context/ProjectContext";
 import { generateBuildingMesh } from "../cad/parametricBuildingGenerator";
 import type { MeshDocument, MeshObject } from "../cad/mesh";
 import {
@@ -45,7 +45,7 @@ const BNBC_MAX_SPAN_LIVE_MM = 6000; // 6.0m for live load residential
 
 export function ColumnGridOptimizerScreen() {
   const { t, lang } = useI18n();
-  const [project] = useState<BuildingProject | null>(() => getActiveProject());
+  const project = useActiveProject();
   const [mesh, setMesh] = useState<MeshDocument | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

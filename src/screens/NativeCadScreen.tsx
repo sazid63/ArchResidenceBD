@@ -19,16 +19,6 @@ import {
   DEFAULT_VALUE_ENGINEERING,
   DEFAULT_CONSTRUCTION_MGMT,
 } from "../types/customization";
-import {
-  analyzeBeam,
-  analyzeColumn,
-  designFooting,
-  seismicAnalysis,
-  CONCRETE_GRADES,
-  STEEL_GRADES,
-  BNBC_DEFAULT,
-  type RectSection,
-} from "../cad/structuralEngine";
 import { buildIfcStep, buildFreeCadMacro, orderedPhases } from "../cad/exporters";
 import type { Vec3 } from "../cad/viewer";
 import "../cad/workspace.css";
@@ -104,7 +94,7 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
     drawingNumber: "A-101",
     drawingTitle: "Ground Floor Plan",
     scale: "1:100",
-    drawnBy: "ArchResidenceBD AI",
+    drawnBy: "ArchResidenceBD",
     checkedBy: "",
     approvedBy: "",
     date: new Date().toLocaleDateString("en-GB"),
@@ -184,14 +174,14 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
   }, [mesh, treeFilter]);
 
 
-  // Parametric copilot chatbox state (deterministic local parameter parser)
+  // Parametric tweak box state (deterministic local parameter parser)
   const [designChat, setDesignChat] = useState<Array<{ who: "ai" | "user"; text: string }>>([
     {
       who: "ai",
       text:
         lang === "bn"
-          ? `[ক্যাড কোপাইলট] আপনার ${project?.stories ?? 6} তলা ভবনের ৩D মডেল প্রস্তুত। কলামের মাপ, ফুটিং বা ব্যালকনির প্রক্ষেপণ পরিবর্তন করতে নিচে লিখুন।`
-          : `[CAD Copilot] 3D parametric model loaded for your ${project?.stories ?? 6}-storey building. Type a modification below (e.g. "resize columns to 400mm", "extend balcony to 1.5m", "change footing pad to 2.2m") to recompute the 3D solids.`,
+          ? `[প্যারামেট্রিক ক্যাড] আপনার ${project?.stories ?? 6} তলা ভবনের ৩D মডেল প্রস্তুত। কলামের মাপ, ফুটিং বা ব্যালকনির প্রক্ষেপণ পরিবর্তন করতে নিচে লিখুন।`
+          : `[Parametric CAD] 3D parametric model loaded for your ${project?.stories ?? 6}-storey building. Type a modification below (e.g. "resize columns to 400mm", "extend balcony to 1.5m", "change footing pad to 2.2m") to recompute the 3D solids.`,
     },
   ]);
   const [chatInput, setChatInput] = useState("");
@@ -319,91 +309,6 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
     }
   }, [hidden, mesh]);
 
-  // Live structural engineering analysis (BNBC 2020 / ACI 318)
-  const structural = useMemo(() => {
-    if (!project) return null;
-    try {
-      const concrete = CONCRETE_GRADES[25];
-      const steel = STEEL_GRADES[415];
-
-      const colSection: RectSection = {
-        width: customParams.columnWidthMm ?? 300,
-        depth: customParams.columnDepthMm ?? 300,
-        cover: 40,
-        mainBarDia: (customParams.columnWidthMm ?? 300) >= 350 ? 16 : 12,
-        numMainBars: 8,
-        linkDia: 8,
-      };
-
-      // With a building model, spans, columns, footprint and storey height come from it. Older saves
-      // (no plot shape) keep the rough v2 estimates until the plot shape is entered.
-      const built = buildingForProject(project);
-      const model = built?.ok ? built.model : null;
-      const footprintSqm = project.plotSqm;
-      const floorAreaPerStory = model ? model.footprintAreaM2 : footprintSqm * 0.7;
-      // Factored gravity: 24 kN/m² (1.4D + 1.6L, D=13, L=4.5 typical residential + walls)
-      const gravityPerStory = floorAreaPerStory * 24; // kN
-      const columnCount = model
-        ? model.storeys[model.storeys.length > 1 ? 1 : 0].geometry.columns.length
-        : Math.max(9, Math.round(Math.sqrt(footprintSqm) / 3.6) * 4);
-      const columnLoad = (gravityPerStory * project.stories) / columnCount; // kN each
-      const storyHeight = model ? model.input.floorToFloorMm / 1000 : 3.0;
-
-      const column = analyzeColumn(colSection, {
-        axialLoad: columnLoad,
-        momentMajor: columnLoad * 0.12, // e = 0.12h typical first-order
-        momentMinor: columnLoad * 0.08,
-        unbracedLength: storyHeight,
-      }, concrete, steel);
-
-      const beamSpan = model
-        ? Math.max(...model.storeys[model.storeys.length > 1 ? 1 : 0].geometry.beams.map((b) => b.spanMm)) / 1000
-        : 4.5; // m typical grid (older saves)
-      const beamSection: RectSection = {
-        width: PLACEHOLDER.beamWidth,
-        depth: PLACEHOLDER.beamDepth,
-        cover: 40,
-        mainBarDia: 16,
-        numMainBars: 6,
-        linkDia: 8,
-      };
-      const wallLoad = 1.2 * 3 * 14; // 3m wall, 14 kN/m²
-      const beam = analyzeBeam(beamSection, beamSpan, {
-        selfWeight: 0.25 * 0.45 * 24,
-        superimposedDead: 2.0,
-        liveLoad: 2.5,
-        wallLoad,
-      }, concrete, steel);
-
-      const soil = {
-        qu: 200,
-        ad: 120, // kN/m² typical Dhaka stiff clay (SPT N 10-15)
-        cohesion: 50,
-        frictionAngle: 20,
-        unitWeight: 18,
-        sptN: 12,
-      };
-      const footing = designFooting(
-        customParams.columnWidthMm ?? 300,
-        customParams.columnDepthMm ?? 300,
-        columnLoad,
-        soil,
-        concrete,
-      );
-
-      // Seismic (BNBC 2020 Ch 2.5, Dhaka Zone 3)
-      const totalWeight = floorAreaPerStory * project.stories * 12; // kN seismic weight (dead+0.25LL)
-      const heights: number[] = [];
-      for (let i = 1; i <= project.stories; i++) heights.push(i * storyHeight);
-      const storyStiffness = heights.map(() => 1.8e7); // kN/mm frame lateral stiffness (conservative)
-      const seismic = seismicAnalysis(totalWeight, heights, BNBC_DEFAULT, storyStiffness);
-
-      return { concrete, steel, column, beam, footing, seismic, columnLoad, columnCount, floorAreaPerStory, beamSpan };
-    } catch {
-      return null;
-    }
-  }, [customParams, project]);
-
   const totals = useMemo(() => {
     const objects = mesh?.objects ?? [];
     const triangles = objects.reduce((sum, object) => sum + object.indices.length / 3, 0);
@@ -460,8 +365,8 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
         updated.columnDepthMm = colDim;
         reply =
           lang === "bn"
-            ? `[ক্যাড কোপাইলট] কলাম সাইজ পরিবর্তন করে ${colDim}মিমি × ${colDim}মিমি করা হয়েছে। ৩D ফ্রেম পুনর্গণনা সম্পন্ন।`
-            : `[CAD Copilot] Structural columns resized to ${colDim}mm x ${colDim}mm. 3D solid mesh recomputed.`;
+            ? `[প্যারামেট্রিক ক্যাড] কলাম সাইজ পরিবর্তন করে ${colDim}মিমি × ${colDim}মিমি করা হয়েছে। ৩D ফ্রেম পুনর্গণনা সম্পন্ন।`
+            : `[Parametric CAD] Structural columns resized to ${colDim}mm x ${colDim}mm. 3D solid mesh recomputed.`;
       } else if (lower.includes("footing") || lower.includes("ফুটিং") || lower.includes("গভীর")) {
         const matchNum = lower.match(/\d+(\.\d+)?/);
         const val = matchNum ? parseFloat(matchNum[0]) : 2.2;
@@ -471,8 +376,8 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
         updated.footingDepthMm = Math.round(sizeMm * 0.9);
         reply =
           lang === "bn"
-            ? `[ক্যাড কোপাইলট] ফুটিং প্যাড ${sizeMm}মিমি করা হয়েছে। বেয়ারিং প্রেশার হালনাগাদ করা হলো।`
-            : `[CAD Copilot] Footing pad expanded to ${sizeMm}mm x ${sizeMm}mm. Recomputed soil bearing.`;
+            ? `[প্যারামেট্রিক ক্যাড] ফুটিং প্যাড ${sizeMm}মিমি করা হয়েছে। বেয়ারিং প্রেশার হালনাগাদ করা হলো।`
+            : `[Parametric CAD] Footing pad expanded to ${sizeMm}mm x ${sizeMm}mm. Recomputed soil bearing.`;
       } else if (lower.includes("balcony") || lower.includes("বারান্দা")) {
         const matchNum = lower.match(/\d+(\.\d+)?/);
         const val = matchNum ? parseFloat(matchNum[0]) : 1.5;
@@ -480,13 +385,13 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
         updated.balconyDepthMm = depthMm;
         reply =
           lang === "bn"
-            ? `[ক্যাড কোপাইলট] ক্যান্টিলিভার বারান্দার প্রক্ষেপণ ${depthMm}মিমি করা হয়েছে। সেফটি রেলিং আপডেট হলো।`
-            : `[CAD Copilot] Extended cantilever balconies to ${depthMm}mm with updated safety railings.`;
+            ? `[প্যারামেট্রিক ক্যাড] ক্যান্টিলিভার বারান্দার প্রক্ষেপণ ${depthMm}মিমি করা হয়েছে। সেফটি রেলিং আপডেট হলো।`
+            : `[Parametric CAD] Extended cantilever balconies to ${depthMm}mm with updated safety railings.`;
       } else {
         reply =
           lang === "bn"
-            ? `[ক্যাড কোপাইলট] আপনার নির্দেশনা ("${prompt}") অনুযায়ী ৩D মডেল প্যারামিটার আপডেট করা হয়েছে।`
-            : `[CAD Copilot] Applied parameter modification: "${prompt}". Recomputed 3D solids.`;
+            ? `[প্যারামেট্রিক ক্যাড] আপনার নির্দেশনা ("${prompt}") অনুযায়ী ৩D মডেল প্যারামিটার আপডেট করা হয়েছে।`
+            : `[Parametric CAD] Applied parameter modification: "${prompt}". Recomputed 3D solids.`;
       }
 
       setCustomAndSave(updated);
@@ -885,14 +790,14 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
           </Card>
         </div>
 
-        {/* Right Column: Parametric Copilot & Controls */}
+        {/* Right Column: Parametric tweaks & controls */}
         <div className="stack">
-          {/* Parametric Copilot Box */}
+          {/* Parametric tweak box */}
           <Card className="stack">
             <div className="row-between">
               <div>
                 <h3 style={{ margin: 0 }}>
-                  {lang === "bn" ? "প্যারামেট্রিক ক্যাড কোপাইলট" : "Parametric CAD Copilot"}
+                  {lang === "bn" ? "প্যারামেট্রিক ক্যাড পরিবর্তন" : "Parametric CAD tweaks"}
                 </h3>
                 <span className="small muted">
                   {lang === "bn"
@@ -945,7 +850,7 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
                     color: "var(--ink-soft)",
                   }}
                 >
-                  {lang === "bn" ? "আর্চি ৩D মডেল পুনর্গণনা করছে..." : "Archie is recomputing 3D geometry..."}
+                  {lang === "bn" ? "৩D জ্যামিতি পুনর্গণনা চলছে..." : "Recomputing 3D geometry..."}
                 </div>
               )}
             </div>
@@ -1039,167 +944,17 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
             </div>
           </Card>
 
-          {/* Structural Engineering Analysis — BNBC 2020 */}
-          {structural && (
-            <Card className="stack">
-              <div className="row-between">
-                <div>
-                  <h3 style={{ margin: 0 }}>
-                    {lang === "bn" ? "স্ট্রাকচারাল এনজিনিয়ারিং" : "Structural Engineering"}
-                  </h3>
-                  <span className="small muted">
-                    BNBC 2020 · M25 · Fe415 · {lang === "bn" ? "সম্মিলিত ধ্বস নকশা" : "Strength Design (LRFD)"}
-                  </span>
-                </div>
-                <Badge tone="sage">{lang === "bn" ? "লাইভ" : "LIVE"}</Badge>
-              </div>
-
-              {/* Column */}
-              <div className="stack" style={{ gap: "4px", padding: "8px", background: "var(--surface-2)", borderRadius: "var(--r-md)" }}>
-                <div className="row-between">
-                  <span className="small muted">🏛 {lang === "bn" ? "কলাম (প্রতিটি)" : "Column (each)"}</span>
-                  <span className="mono small">{Math.round(structural.columnLoad)} kN {lang === "bn" ? "অক্ষীয়" : "axial"}</span>
-                </div>
-                <div className="row-between">
-                  <span className="small muted">{lang === "bn" ? "সক্ষমতা (Pn)" : "Capacity (Pn)"}</span>
-                  <span className="mono small">{structural.column.Pu_capacity.toFixed(0)} kN</span>
-                </div>
-                <div className="row-between">
-                  <span className="small muted">{lang === "bn" ? "ইউটিলাইজেশন" : "Utilization"}</span>
-                  <span className={`mono small ${structural.column.utilization > 0.9 ? "tone-danger" : structural.column.utilization > 0.7 ? "tone-warn" : "tone-success"}`}>
-                    {(structural.column.utilization * 100).toFixed(0)}%
-                  </span>
-                </div>
-                <div className="row-between">
-                  <span className="small muted">{lang === "bn" ? "স্লেন্ডার রেশিও (λ)" : "Slenderness (λ)"}</span>
-                  <span className="mono small">
-                    {structural.column.slendernessRatioX.toFixed(1)} / {structural.column.slendernessRatioY.toFixed(1)}{" "}
-                    {structural.column.isSlender && "⚠"}
-                  </span>
-                </div>
-                <div className="row-between">
-                  <span className="small muted">{lang === "bn" ? "ল্যাপ স্প্লাইস" : "Lap Splice"}</span>
-                  <span className="mono small">
-                    {structural.column.lapSpliceRequired ? `${structural.column.lapLength} mm (Class B)` : "—"}
-                  </span>
-                </div>
-                <div className="row-between">
-                  <span className="small muted">{lang === "bn" ? "লিংক ডিটেইলিং" : "Link Detailing"}</span>
-                  <span className="mono small">{structural.column.detail.mainBarArrangement} @100/S</span>
-                </div>
-              </div>
-
-              {/* Beam */}
-              <div className="stack" style={{ gap: "4px", padding: "8px", background: "var(--surface-2)", borderRadius: "var(--r-md)" }}>
-                <div className="row-between">
-                  <span className="small muted">〰 {lang === "bn" ? "বিম (৪.৫ মি স্প্যান)" : "Beam (4.5m span)"}</span>
-                  <span className="mono small">{structural.beam.maxMoment} kN·m</span>
-                </div>
-                <div className="row-between">
-                  <span className="small muted">{lang === "bn" ? "শিয়ার (V_u)" : "Shear (V_u)"}</span>
-                  <span className="mono small">{structural.beam.maxShear} kN</span>
-                </div>
-                <div className="row-between">
-                  <span className="small muted">{lang === "bn" ? "মোমেন্ট ইউটিলাইজেশন" : "Moment Util."}</span>
-                  <span className={`mono small ${structural.beam.utilizationMoment > 0.9 ? "tone-danger" : structural.beam.utilizationMoment > 0.7 ? "tone-warn" : "tone-success"}`}>
-                    {(structural.beam.utilizationMoment * 100).toFixed(0)}%
-                  </span>
-                </div>
-                <div className="row-between">
-                  <span className="small muted">{lang === "bn" ? "ডিফ্লেকশন" : "Deflection"}</span>
-                  <span className={`mono small ${structural.beam.maxDeflection > structural.beam.allowableDeflection ? "tone-danger" : "tone-success"}`}>
-                    {structural.beam.maxDeflection} mm (≤ {structural.beam.allowableDeflection})
-                  </span>
-                </div>
-                <div className="row-between">
-                  <span className="small muted">{lang === "bn" ? "শিয়ার লিংক" : "Shear Links"}</span>
-                  <span className="mono small">{structural.beam.detail.stirrupCage}</span>
-                </div>
-              </div>
-
-              {/* Foundation */}
-              <div className="stack" style={{ gap: "4px", padding: "8px", background: "var(--surface-2)", borderRadius: "var(--r-md)" }}>
-                <div className="row-between">
-                  <span className="small muted">⬇ {lang === "bn" ? "ফুটিং ডিজাইন" : "Footing Design"}</span>
-                  <span className="mono small">{structural.footing.footingWidth} × {structural.footing.footingWidth} × {structural.footing.footingDepth} m</span>
-                </div>
-                <div className="row-between">
-                  <span className="small muted">{lang === "bn" ? "বেয়ারিং ইউটিলাইজেশন" : "Bearing Util."}</span>
-                  <span className={`mono small ${structural.footing.bearingCapacityUtil > 1.0 ? "tone-danger" : "tone-success"}`}>
-                    {(structural.footing.bearingCapacityUtil * 100).toFixed(0)}% (q_a=120 kN/m²)
-                  </span>
-                </div>
-                <div className="row-between">
-                  <span className="small muted">{lang === "bn" ? "ম্যাট ফুটিং" : "Mat Footing"}</span>
-                  <span className={`small ${structural.footing.matFootingRequired ? "tone-danger" : "tone-success"}`}>
-                    {structural.footing.matFootingRequired ? "⚠ " + (lang === "bn" ? "প্রয়োজন" : "Required") : "✓ OK"}
-                  </span>
-                </div>
-                <div className="row-between">
-                  <span className="small muted">{lang === "bn" ? "রেবার" : "Rebar"}</span>
-                  <span className="mono small">T{structural.footing.rebarSize} @ {structural.footing.rebarSpacing} mm</span>
-                </div>
-              </div>
-
-              {/* Seismic */}
-              <div className="stack" style={{ gap: "4px", padding: "8px", background: "var(--surface-2)", borderRadius: "var(--r-md)" }}>
-                <div className="row-between">
-                  <span className="small muted">🌊 {lang === "bn" ? "সিসমিক (জোন ৩)" : "Seismic (Zone 3)"}</span>
-                  <span className="mono small">T = {structural.seismic.naturalPeriod}s</span>
-                </div>
-                <div className="row-between">
-                  <span className="small muted">{lang === "bn" ? "বেস শিয়ার (V)" : "Base Shear (V)"}</span>
-                  <span className="mono small">{structural.seismic.baseShear} kN (V/W={structural.seismic.baseShearCoeff})</span>
-                </div>
-                <div className="row-between">
-                  <span className="small muted">{lang === "bn" ? "সর্বোচ্চ ড্রিফট" : "Max Drift"}</span>
-                  <span className={`mono small ${structural.seismic.maxDrift > structural.seismic.allowableDrift ? "tone-danger" : "tone-success"}`}>
-                    {structural.seismic.maxDrift} mm (H/500 = {structural.seismic.allowableDrift} mm)
-                  </span>
-                </div>
-              </div>
-
-              <div className="row" style={{ gap: "6px" }}>
-                <Button
-                  variant="soft"
-                  style={{ flex: 1 }}
-                  onClick={() => {
-                    const text = [
-                      `Structural Analysis — ${project.name} (${project.stories} storeys)`,
-                      `Materials: M25 concrete / Fe415 steel | Code: BNBC 2020, ACI 318`,
-                      ``,
-                      `Columns: ${structural.columnLoad.toFixed(0)} kN axial each (${structural.columnCount} cols)`,
-                      `  Capacity Pn = ${structural.column.Pu_capacity.toFixed(0)} kN | Utilization = ${(structural.column.utilization * 100).toFixed(0)}%`,
-                      `  Slenderness λx=${structural.column.slendernessRatioX} λy=${structural.column.slendernessRatioY} ${structural.column.isSlender ? "(SLENDER — apply 2nd order)" : "(short column)"}`,
-                      `  Mains: ${structural.column.detail.mainBarArrangement} | Links: 8mm @100/S plastic hinge, @150/S elsewhere`,
-                      ``,
-                      `Beams: ${structural.beamSpan} m span | M_u = ${structural.beam.maxMoment} kN·m | V_u = ${structural.beam.maxShear} kN`,
-                      `  Moment utilization = ${(structural.beam.utilizationMoment * 100).toFixed(0)}% | Δ = ${structural.beam.maxDeflection} mm (allow ${structural.beam.allowableDeflection} mm)`,
-                      `  Stirrups: ${structural.beam.detail.stirrupCage}`,
-                      ``,
-                      `Footings: ${structural.footing.footingWidth} m square × ${structural.footing.footingDepth} m deep | q_a = 120 kN/m² (SPT N=12)`,
-                      `  Bearing utilization = ${(structural.footing.bearingCapacityUtil * 100).toFixed(0)}% | Mesh: T${structural.footing.rebarSize} @ ${structural.footing.rebarSpacing} mm c/c`,
-                      ``,
-                      `Seismic (BNBC 2020 Ch 2.5, Zone 3, Dhaka):`,
-                      `  W = ${structural.seismic.seismicWeight} kN | T = ${structural.seismic.naturalPeriod} s | V = ${structural.seismic.baseShear} kN (V/W = ${structural.seismic.baseShearCoeff})`,
-                      `  Max story drift = ${structural.seismic.maxDrift} mm ≤ H/500 = ${structural.seismic.allowableDrift} mm`,
-                      ``,
-                      `Generated by ArchResidenceBD structural engine`,
-                    ].join("\n");
-                    const blob = new Blob([text], { type: "text/plain" });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url;
-                    a.download = `${project.name.replace(/[^a-zA-Z0-9]/g, "_")}_structural_analysis.txt`;
-                    a.click();
-                    URL.revokeObjectURL(url);
-                  }}
-                >
-                  📄 {lang === "bn" ? "এনালিসিস রিপোর্ট (.txt)" : "Analysis Report (.txt)"}
-                </Button>
-              </div>
-            </Card>
-          )}
+          <Card className="stack">
+            <h3 style={{ margin: 0 }}>{lang === "bn" ? "স্ট্রাকচারাল ফলাফল" : "Structural results"}</h3>
+            <p className="small muted" style={{ margin: 0 }}>
+              {lang === "bn"
+                ? "লোড, মাপ, ভূমিকম্প ও ফুটিং যাচাই বিএনবিসি ২০২০ পার্ট ৬ অনুযায়ী স্ট্রাকচার স্ক্রিনে, অনুমানের তালিকাসহ।"
+                : "Loads, member sizes, seismic and footing checks to BNBC 2020 Part 6 are on the Structure screen, with the assumptions listed."}
+            </p>
+            <Button variant="soft" onClick={() => onNavigate?.("structure")}>
+              {lang === "bn" ? "স্ট্রাকচার স্ক্রিন খুলুন" : "Open the Structure screen"}
+            </Button>
+          </Card>
         </div>
       </div>
 

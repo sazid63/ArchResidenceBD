@@ -190,7 +190,7 @@ export function AssetsLibraryScreen() {
               <div style={{ marginTop: "8px", paddingTop: "8px", borderTop: "1px solid var(--line)", fontSize: "12px", color: "var(--ink-soft)" }}>
                 {lang === "bn"
                   ? "এই অ্যাসেটটি আপনার ভবনের ৩D মডেলের প্রতিটি ফ্লোর প্ল্যান ও ফ্রেমে স্বয়ংক্রিয়ভাবে সংযুক্ত করা হয়। এআই ফ্রিল্যান্সার বা ইউজার কোপাইলট এর কোনো পরিবর্তন চাইলে এটি সলিড ওপেনক্যাসকেড মেস পুনর্গণনা করে।"
-                  : "This asset is automatically bound into your building's 3D OpenCASCADE model. When the AI copilot executes modifications, it recomputes these precise solids."}
+                  : "This asset is automatically bound into your building's 3D OpenCASCADE model. When you change a parameter, these solids are recomputed."}
               </div>
             </div>
           </Card>
