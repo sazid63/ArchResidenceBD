@@ -6,6 +6,7 @@
  * design generation state, and dynamic PWD BOQ pricing.
  */
 
+import type { Deviation } from "../spec.gen";
 import type { BuildingCustomization } from "../types/customization";
 import { FEET_TO_M, planChoices } from "../model/planChoices";
 import {
@@ -64,6 +65,8 @@ export interface BuildingProject {
   planId?: string;
   /** Flip the plan left-right. */
   mirror?: boolean;
+  /** Known deviations the owner recorded on the Compliance screen (a note, never a pass). */
+  deviations?: Deviation[];
 }
 
 const STORAGE_KEY = "archres_v2_active_project";

@@ -20,6 +20,8 @@ export interface CheckSource {
   pack: string;
   cite: string;
   clause: string;
+  /** The clause in Bangla numerals/words, for the Bangla UI. */
+  clauseBn: string;
   gazettePage: string;
   pdfPage: string;
 }
@@ -49,10 +51,10 @@ export interface CheckContext {
 
 const ROAD_STEPS = [6, 9, 12, 18, 24];
 
-function source(cite: string, clause: string): CheckSource {
+function source(cite: string, clause: string, clauseBn: string): CheckSource {
   const pack = rajukPack();
   const c = pack.citations[cite];
-  return { pack: pack.id, cite, clause, gazettePage: c?.gazettePage ?? "", pdfPage: c?.pdfPage ?? "" };
+  return { pack: pack.id, cite, clause, clauseBn, gazettePage: c?.gazettePage ?? "", pdfPage: c?.pdfPage ?? "" };
 }
 
 const round2 = (v: number) => Math.round(v * 100) / 100;
@@ -111,7 +113,7 @@ function setbackResults(model: BuildingModel): CheckResult[] {
   const right = model.plot.x1 - (model.origin.x + model.widthMm);
   const front = model.origin.y;
   const rear = model.plot.y1 - (model.origin.y + model.depthMm);
-  const src = source(req.cite, "§46(1)-(2)");
+  const src = source(req.cite, "§46(1)-(2)", "§৪৬(১)-(২)");
   const mk = (id: string, en: string, bn: string, need: number, got: number): CheckResult => ({
     ruleId: `rajuk.setback.${id}`,
     status: got >= need ? "pass" : "fail",
@@ -131,7 +133,7 @@ function setbackResults(model: BuildingModel): CheckResult[] {
 function farAndCoverage(model: BuildingModel, ctx: CheckContext): CheckResult[] {
   const farTitle = { en: "Floor area ratio (FAR)", bn: "ফ্লোর এরিয়া রেশিও (FAR)" };
   const mgcTitle = { en: "Maximum ground coverage", bn: "সর্বোচ্চ ভূমি আচ্ছাদন" };
-  const farSrc = source("far-3ka", "সারণি-৩(ক)");
+  const farSrc = source("far-3ka", "Table 3(ka)", "সারণি-৩(ক)");
   const { hit, note, reason } = farFor(model, ctx);
   if (!hit) {
     const r = reason as Bilingual;
@@ -200,7 +202,7 @@ export function requiredParking(model: BuildingModel): { cars: number; motorcycl
 
 function parkingResult(model: BuildingModel): CheckResult {
   const title = { en: "Car parking", bn: "গাড়ি পার্কিং" };
-  const src = source("schedule4", "Schedule 4");
+  const src = source("schedule4", "Schedule 4", "তফসিল-৪");
   const need = requiredParking(model);
   if (!need) return notChecked("rajuk.parking", title, src, { en: "No dwellings in the plan.", bn: "প্ল্যানে কোনো ফ্ল্যাট নেই।" });
   return notChecked(

@@ -26,7 +26,6 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 import { getActiveProject, getSavedProjects, BuildingProject } from "../../src/engine/projectState.js";
 import { generateBuildingMesh } from "../../src/cad/parametricBuildingGenerator.js";
 import { generateBOQ, exportBOQCSV, generateBOQReport, generateBoqFromProject } from "../../src/cad/boqGenerator.js";
-import { runComplianceCheck, buildComplianceContext, DeviationItem } from "../../src/cad/codeCompliance.js";
 import { generateFloorPlanFromMesh, generateSection, generateElevation, exportDrawingAsSVG, exportDrawingAsDXF } from "../../src/cad/drawingEngine.js";
 import { buildIfcStep, buildFreeCadMacro, ExportMeta } from "../../src/cad/exporters.js";
 import type { MeshDocument } from "../../src/cad/mesh.js";
@@ -234,67 +233,7 @@ async function batchExport(options: ExportOptions = {}): Promise<void> {
     }
   }
   
-  // 5. Export Compliance Report
-  if (config.includeCompliance && config.formats.some(f => ["json", "md"].includes(f))) {
-    console.log("\n✅ Running compliance checks...");
-    const ctx = buildComplianceContext(
-      {
-        stories: project.stories,
-        plotSqm: project.plotSqm,
-        plotUnit: project.plotUnit,
-        unitsPerFloor: project.unitsPerFloor,
-        location: "dhaka",
-      },
-      mesh,
-      { concreteGrade: 25, steelGrade: 415, brickStrength: 10 }
-    );
-    const complianceResult = runComplianceCheck(ctx);
-    
-    const deviations = complianceResult.deviations || [];
-    const summary = complianceResult.summary || { compliant: 0, deviation: 0, info: 0 };
-    
-    // Calculate compliant, warning, deviation, critical from deviations
-    const compliant = summary.compliant || deviations.filter((d: DeviationItem) => d.pass).length;
-    const warning = summary.info || deviations.filter((d: DeviationItem) => d.severity === "info" && !d.pass).length;
-    const deviation = summary.deviation || deviations.filter((d: DeviationItem) => d.severity === "minor" && !d.pass).length;
-    const critical = deviations.filter((d: DeviationItem) => d.severity === "critical" && !d.pass).length;
-    
-    console.log(`   Passed: ${compliant}`);
-    console.log(`   Warnings: ${warning}`);
-    console.log(`   Deviations: ${deviation}`);
-    console.log(`   Critical: ${critical}`);
-    
-    if (config.formats.includes("json")) {
-      const complianceReport = {
-        projectId: project.id,
-        projectName: project.name,
-        generatedAt: new Date().toISOString(),
-        summary,
-        deviations,
-      };
-      writeFileSync(join(projectDir, `${project.id}_compliance.json`), JSON.stringify(complianceReport, null, 2));
-      console.log(`   ✅ ${project.id}_compliance.json`);
-    }
-    
-    if (config.formats.includes("md")) {
-      let mdContent = `# Compliance Report — ${project.name}\n\n`;
-      mdContent += `**Project ID:** ${project.id}  \n`;
-      mdContent += `**Generated:** ${new Date().toLocaleString("en-GB")}  \n\n`;
-      mdContent += `## Summary\n\n`;
-      mdContent += `| Status | Count |\n|--------|-------|\n`;
-      mdContent += `| Compliant | ${summary.compliant} |\n`;
-      mdContent += `| Warnings | ${summary.warning} |\n`;
-      mdContent += `| Deviations | ${summary.deviation} |\n`;
-      mdContent += `| Critical | ${summary.critical} |\n\n`;
-      mdContent += `## Deviations\n\n`;
-      mdContent += `| Rule | Severity | Message |\n|------|----------|---------|\n`;
-      for (const d of deviations.filter((d: DeviationItem) => !d.pass)) {
-        mdContent += `| ${d.ruleId} | ${d.severity} | ${d.message.replace(/\|/g, "\\|")} |\n`;
-      }
-      writeFileSync(join(projectDir, `${project.id}_compliance.md`), mdContent);
-      console.log(`   ✅ ${project.id}_compliance.md`);
-    }
-  }
+  // 5. Compliance: exported by the Compliance screen now (src/rules/report.ts); the old v2 checker is gone.
   
   // 6. Export Project Summary
   if (config.formats.includes("json")) {

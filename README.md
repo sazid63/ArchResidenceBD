@@ -77,7 +77,6 @@ ArchResidenceBD/
 │   │   ├── stairBuilder.ts                # Dog-leg stairs with slab openings
 │   │   ├── exporters.ts                   # IFC, FreeCAD, OBJ, GLTF
 │   │   ├── boqGenerator.ts                # PWD SOR 2022 BOQ
-│   │   ├── codeCompliance.ts              # BNBC/RAJUK checks
 │   │   └── ... (drawingEngine, formwork, rebar, etc.)
 │   ├── data/
 │   │   ├── floorplanLibrary.ts      # 50 verified 2D templates (1/2/2+ unit)

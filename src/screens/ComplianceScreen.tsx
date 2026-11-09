@@ -1,200 +1,173 @@
-import { useEffect, useMemo, useState } from "react";
-import verdictData from "../data/compliance/verdict-set.json";
+import { useMemo, useState } from "react";
+import { useProject } from "../context/ProjectContext";
 import { useI18n } from "../i18n";
-import { Badge, Button, Callout, Card, PageHeader, Stat } from "../ui/kit";
-import { useActiveProject } from "../context/ProjectContext";
-import { generateBuildingMesh } from "../cad/parametricBuildingGenerator";
-import { runComplianceCheck, buildComplianceContext, type DeviationItem } from "../cad/codeCompliance";
-import { DEFAULT_CONCRETE, DEFAULT_STEEL_EXPORT } from "../cad/structuralEngine";
-import type { MeshDocument } from "../cad/mesh";
-import { useAccessibilityReader } from "../hooks/useTextToSpeech";
+import { isRecorded, recordDeviation, removeDeviation } from "../rules/deviations";
+import { buildReport, filterItems, type ReportItem, type ReportSection, type ReportTab } from "../rules/report";
+import { Button, Callout, Card, EmptyState, PageHeader, ResultChip, SegmentedControl, Stat, Value } from "../ui/kit";
+
+const SECTIONS: Array<{ id: ReportSection; en: string; bn: string }> = [
+  { id: "rajuk", en: "RAJUK 2008: plot and building", bn: "রাজউক ২০০৮: জমি ও ভবন" },
+  { id: "plan", en: "Plan: rooms, light and access", bn: "প্ল্যান: কক্ষ, আলো ও প্রবেশপথ" },
+  { id: "fire", en: "Fire and egress", bn: "অগ্নি নিরাপত্তা ও বহির্গমন" },
+  { id: "access", en: "Accessibility", bn: "প্রবেশগম্যতা" },
+];
 
 export function ComplianceScreen() {
-  const { t, lang } = useI18n();
-  const project = useActiveProject();
-  const [filter, setFilter] = useState<"all" | "passed" | "deviation">("all");
-  const [mesh, setMesh] = useState<MeshDocument | null>(null);
-  const [deviations, setDeviations] = useState<DeviationItem[]>([]);
-  const [summary, setSummary] = useState<{ compliant: number; deviation: number; info: number }>({ compliant: 0, deviation: 0, info: 0 });
-  const { readComplianceStatus, stop: stopReading, speaking } = useAccessibilityReader();
+  const { lang } = useI18n();
+  const bn = lang === "bn";
+  const { project, saveProject } = useProject();
+  const [tab, setTab] = useState<ReportTab>("all");
+  const [reasonFor, setReasonFor] = useState<string | null>(null);
+  const [reason, setReason] = useState("");
 
-  // Memoize filtered deviations — depends on project being present, but hook must run unconditionally
-  const filtered = useMemo(() => {
-    if (!project) return [];
-    if (filter === "passed") return deviations.filter((v) => v.pass);
-    if (filter === "deviation") return deviations.filter((v) => !v.pass);
-    return deviations;
-  }, [deviations, filter, project]);
+  const report = useMemo(() => (project ? buildReport(project) : null), [project]);
 
-  // Load mesh + run compliance checks when project is available
-  useEffect(() => {
-    if (!project) return;
-    try {
-      const doc = generateBuildingMesh(project, "final", project.customization);
-      setMesh(doc);
-      const ctx = buildComplianceContext(
-        {
-          stories: project.stories,
-          plotSqm: project.plotSqm,
-          plotUnit: project.plotUnit,
-          unitsPerFloor: project.unitsPerFloor,
-          location: "dhaka",
-        },
-        doc,
-        {
-          concreteGrade: DEFAULT_CONCRETE.fck,
-          steelGrade: DEFAULT_STEEL_EXPORT.fy,
-          brickStrength: 7.5, // typical brick masonry
-        }
-      );
-      const result = runComplianceCheck(ctx);
-      setDeviations(result.deviations);
-      setSummary({ compliant: result.summary.compliant, deviation: result.summary.deviation, info: result.summary.info });
-    } catch (e) {
-      console.error("Compliance check failed:", e);
-    }
-  }, [project]);
-
-  // Early return — all hooks above are now unconditional
-  if (!project) {
+  if (!project || !report || report.state === "no_plan") {
     return (
       <div className="screen">
-        <PageHeader title="Compliance Check" subtitle="No active project found" />
-        <Card>Please create or load a project first.</Card>
+        <PageHeader title={bn ? "বিধিমালা যাচাই" : "Compliance"} subtitle={bn ? "রাজউক ২০০৮ ও বিএনবিসি ২০২০" : "RAJUK 2008 and BNBC 2020"} />
+        <EmptyState title={bn ? "এখনো কোনো প্ল্যান বাছাই হয়নি" : "No plan chosen yet"}>
+          {bn ? "জমির মাপ দিয়ে একটি প্ল্যান বাছাই করুন, তারপর এখানে যাচাই দেখা যাবে।" : "Enter the plot and pick a plan, then the checks appear here."}
+        </EmptyState>
       </div>
     );
   }
 
+  if (report.state === "no_fit") {
+    return (
+      <div className="screen">
+        <PageHeader title={bn ? "বিধিমালা যাচাই" : "Compliance"} subtitle={project.name} />
+        <Callout tone="bad" title={bn ? "প্ল্যানটি এই জমিতে আঁটে না" : "The plan does not fit this plot"}>
+          {bn ? report.reasons.bn : report.reasons.en}
+        </Callout>
+      </div>
+    );
+  }
+
+  const { items, summary } = report;
+  const shown = filterItems(items, tab);
+  const deviations = project.deviations ?? [];
+
+  const onRecord = (item: ReportItem) => {
+    saveProject({ ...project, deviations: recordDeviation(project.deviations, item, reason), updatedAt: new Date().toISOString() });
+    setReasonFor(null);
+    setReason("");
+  };
+  const onRemove = (ruleRef: string) =>
+    saveProject({ ...project, deviations: removeDeviation(project.deviations, ruleRef), updatedAt: new Date().toISOString() });
+
+  const tabs: Array<{ value: ReportTab; label: string }> = [
+    { value: "all", label: `${bn ? "সব" : "All"} (${items.length})` },
+    { value: "fails", label: `${bn ? "অনুত্তীর্ণ" : "Fails"} (${summary.fail + summary.warn})` },
+    { value: "passes", label: `${bn ? "উত্তীর্ণ" : "Passes"} (${summary.pass})` },
+    { value: "not_checked", label: `${bn ? "যাচাই হয়নি" : "Not checked"} (${summary.notChecked})` },
+  ];
+
   return (
     <div className="screen">
       <PageHeader
-        title={lang === "bn" ? "কোড কমপ্লায়েন্স চেকার" : "Code Compliance Checker"}
-        subtitle={`${lang === "bn" ? "আর্চি কমপ্লায়েন্স এনজিন v2.4" : "ArchResidenceBD Compliance Engine v2.4"} · BNBC 2020 & RAJUK DAP 2022`}
-        actions={
-          <div className="row">
-            <Button variant={filter === "all" ? "primary" : "soft"} onClick={() => setFilter("all")}>
-              {lang === "bn" ? `সব (${filtered.length})` : `All (${filtered.length})`}
-            </Button>
-            <Button variant={filter === "deviation" ? "primary" : "soft"} onClick={() => setFilter("deviation")}>
-              ⚠ {lang === "bn" ? "অমিল" : "Deviations"} ({summary.deviation})
-            </Button>
-            <Button variant={filter === "passed" ? "primary" : "soft"} onClick={() => setFilter("passed")}>
-              ✓ {lang === "bn" ? "সম্মত" : "Compliant"} ({summary.compliant})
-            </Button>
-            <Button 
-              variant="ghost" 
-              onClick={() => {
-                if (speaking) {
-                  stopReading();
-                } else {
-                  deviations.forEach(item => {
-                    readComplianceStatus(item.pass ? 'pass' : 'fail', `${item.title}. ${item.message}`);
-                  });
-                }
-              }}
-              style={{ padding: '4px 8px', fontSize: '11px' }}
-              title={speaking ? (lang === 'bn' ? 'বন্ধ' : 'Stop') : (lang === 'bn' ? 'সব পড়ুন' : 'Read All')}
-            >
-              {speaking ? '🔇' : '🔊'} {speaking ? (lang === 'bn' ? 'বন্ধ' : 'Stop') : (lang === 'bn' ? 'সব পড়ুন' : 'Read All')}
-            </Button>
-          </div>
-        }
+        title={bn ? "বিধিমালা যাচাই" : "Compliance"}
+        subtitle={bn ? "রাজউক ২০০৮ (পর্যালোচিত) ও বিএনবিসি ২০২০ অনুযায়ী" : "Against RAJUK 2008 (reviewed) and BNBC 2020"}
       />
 
-      <Callout title={`${lang === "bn" ? "প্রযোজ্য আইন" : "Applicable Standards"}: BNBC 2020 & RAJUK DAP 2022`}>
-        <span>
-          {lang === "bn"
-            ? "বাংলাদেশ জাতীয় নির্মাণ বিধমালা ২০২০ এবং রাজউক ডেভেলপমেন্ট অ্যাপ্রুভাল প্ল্যান ২০২২ এর নিয়মাবলী অনুযাযয় পরীক্ষা করা হযেছ।"
-            : "Evaluated against Bangladesh National Building Code 2020 and RAJUK Development Approval Plan 2022 for Residential occupancy."}
-        </span>
+      <Callout title={bn ? "যা যাচাই হয়নি তা দেখানো হয়" : "What is not checked is shown, not hidden"}>
+        {bn
+          ? "যে নিয়মের মান মডেল বা নিয়ম-প্যাক থেকে নিশ্চিতভাবে পাওয়া যায় না, সেটি “যাচাই হয়নি” দেখানো হয়, কখনো অনুমানে উত্তীর্ণ ধরা হয় না। ডিএপি (ভূমি-ব্যবহার) এখনো যাচাই হয় না।"
+          : "A rule the model or the pack cannot decide is shown as Not checked and never assumed to pass. DAP land-use is not checked yet."}
       </Callout>
 
-      <div className="row" style={{ gap: "16px", marginBottom: "16px" }}>
-        <Stat label={lang === "bn" ? "মোট বিধি" : "Total Rules"} value={String(deviations.length)} />
-        <Stat label={lang === "bn" ? "সম্মত" : "Compliant"} value={String(summary.compliant)} />
-        <Stat label={lang === "bn" ? "অমিল" : "Deviations"} value={String(summary.deviation)} />
-        <Stat label={lang === "bn" ? "তথ্য" : "Info"} value={String(summary.info)} />
+      <div className="row" style={{ gap: 16, marginBottom: 16 }}>
+        <Stat label={bn ? "অনুত্তীর্ণ" : "Fails"} value={String(summary.fail)} />
+        <Stat label={bn ? "সতর্কতা" : "Warnings"} value={String(summary.warn)} />
+        <Stat label={bn ? "উত্তীর্ণ" : "Passes"} value={String(summary.pass)} />
+        <Stat label={bn ? "যাচাই হয়নি" : "Not checked"} value={String(summary.notChecked)} />
       </div>
 
-      {/* Deviation Register */}
-      <div className="stack" style={{ gap: "12px" }}>
-        {filtered.length === 0 && (
-          <Card>
-            <p className="muted">{lang === "bn" ? "কোনো বিচ্যুতি নেই। সব বিধি সম্পূর্ণ সম্মত।" : "No deviations found. All rules pass."}</p>
-          </Card>
-        )}
-        {filtered.map((item, idx) => {
-          const isPassed = item.pass;
-          const severityColor = item.severity === "critical" ? "blush" : item.severity === "major" ? "amber" : "neutral";
-          return (
-            <Card key={idx} className="stack">
-              <div className="row-between">
-                <div>
-                  <h4 style={{ margin: "0 0 4px 0" }}>{item.title}</h4>
-                  <span className="faint small font-mono">{item.clause} · {item.category}</span>
-                </div>
-                <div className="row" style={{ gap: "8px", alignItems: "center" }}>
-                  <Badge tone={isPassed ? "sage" : severityColor}>
-                    {isPassed ? "✓ PASS" : "⚠ FAIL"}
-                  </Badge>
-                  <Button
-                    variant="ghost"
-                    onClick={() => readComplianceStatus(isPassed ? 'pass' : 'fail', `${item.title}. ${item.message}`)}
-                    title={lang === 'bn' ? 'পড়ে শোনান' : 'Read aloud'}
-                    style={{ padding: '4px 8px', fontSize: '11px', minWidth: 'auto' }}
-                  >
-                    🔊
-                  </Button>
-                </div>
-              </div>
-              <p style={{ margin: "8px 0", fontSize: "14px", lineHeight: "1.5" }}>{item.message}</p>
-              {!isPassed && item.recommendation && (
-                <div style={{ padding: "8px", background: "var(--surface-2)", borderRadius: "var(--r-sm)", fontSize: "13px" }}>
-                  <strong>{lang === "bn" ? "সুপারিশ:" : "Recommendation:"}</strong> {item.recommendation}
-                </div>
-              )}
-              {!isPassed && item.measured != null && item.required && (
-                <div className="row" style={{ gap: "8px", marginTop: "4px" }}>
-                  <span className="small muted">Measured: <strong>{item.measured}</strong> {item.required.replace("≤ ", "").replace("≥ ", "")}</span>
-                  <span className="small muted">Required: <strong>{item.required}</strong></span>
-                </div>
-              )}
-            </Card>
-          );
-        })}
-      </div>
+      <SegmentedControl<ReportTab> aria-label={bn ? "ফলাফল ফিল্টার" : "Filter results"} options={tabs} value={tab} onChange={setTab} />
 
-      {/* RAJUK DAP 2008 Legacy Report */}
-      <Card style={{ marginTop: "16px" }}>
-        <h4>{lang === "bn" ? "RAJUK DAP 2008 বিস্তারিত প্রতিবেদন" : "RAJUK DAP 2008 Detailed Report"}</h4>
-        <p className="small muted">
-          {lang === "bn"
-            ? "এই প্রতিবেদনটি RAJUK Mohanogor Imarat Nirman Bidhimala 2008 এর উপর ভিত্তি করে তৈরি। মূল বিচারের জন্য §2.4 দেখুন।"
-            : "This report is based on RAJUK Dhaka Mohanogor Imarat Nirman Bidhimala 2008. See §2.4 for primary adjudication."}
+      {SECTIONS.map((sec) => {
+        const rows = shown.filter((i) => i.section === sec.id);
+        if (!rows.length) return null;
+        return (
+          <section key={sec.id} className="stack" style={{ marginTop: 20, gap: 12 }} aria-label={bn ? sec.bn : sec.en}>
+            <h3 style={{ margin: 0 }}>{bn ? sec.bn : sec.en}</h3>
+            {rows.map((item) => (
+              <Card key={item.id} className="stack">
+                <div className="row-between">
+                  <h4 style={{ margin: 0 }}>{bn ? item.title.bn : item.title.en}</h4>
+                  <ResultChip result={item.status} lang={lang} />
+                </div>
+                {item.expected || item.actual ? (
+                  <div className="row" style={{ gap: 24 }}>
+                    {item.expected ? (
+                      <span className="small muted">
+                        {bn ? "প্রয়োজন" : "Required"}: <strong><Value unit={item.expected.unit}>{item.expected.value}</Value></strong>
+                      </span>
+                    ) : null}
+                    {item.actual ? (
+                      <span className="small muted">
+                        {bn ? "আছে" : "Actual"}: <strong><Value unit={item.actual.unit}>{item.actual.value}</Value></strong>
+                      </span>
+                    ) : null}
+                  </div>
+                ) : null}
+                {item.note ? <p className="small muted" style={{ margin: 0 }}>{bn ? item.note.bn : item.note.en}</p> : null}
+                <div className="row-between">
+                  <span className="faint small font-mono">
+                    {item.citation ? (bn ? item.citation.bn : item.citation.en) : bn ? "জ্যামিতিক তথ্য" : "Geometry fact"}
+                    {item.basis === "assumption" ? (bn ? " · অনুমান" : " · assumption") : ""}
+                  </span>
+                  {(item.status === "fail" || item.status === "warn") && !isRecorded(project.deviations, item) ? (
+                    <Button variant="ghost" onClick={() => { setReasonFor(item.id); setReason(""); }}>
+                      {bn ? "বিচ্যুতি হিসেবে নথিভুক্ত করুন" : "Record as deviation"}
+                    </Button>
+                  ) : null}
+                </div>
+                {reasonFor === item.id ? (
+                  <div className="row" style={{ gap: 8 }}>
+                    <input
+                      className="input"
+                      style={{ flex: 1 }}
+                      value={reason}
+                      onChange={(e) => setReason(e.target.value)}
+                      placeholder={bn ? "কারণ (ঐচ্ছিক)" : "Reason (optional)"}
+                      aria-label={bn ? "বিচ্যুতির কারণ" : "Deviation reason"}
+                    />
+                    <Button variant="primary" onClick={() => onRecord(item)}>{bn ? "সংরক্ষণ" : "Save"}</Button>
+                    <Button variant="ghost" onClick={() => setReasonFor(null)}>{bn ? "বাতিল" : "Cancel"}</Button>
+                  </div>
+                ) : null}
+              </Card>
+            ))}
+          </section>
+        );
+      })}
+
+      {shown.length === 0 ? (
+        <Card><p className="muted">{bn ? "এই ট্যাবে কিছু নেই।" : "Nothing in this tab."}</p></Card>
+      ) : null}
+
+      <section className="stack" style={{ marginTop: 28, gap: 12 }} aria-label={bn ? "বিচ্যুতি তালিকা" : "Deviation register"}>
+        <h3 style={{ margin: 0 }}>{bn ? "বিচ্যুতি তালিকা" : "Deviation register"}</h3>
+        <p className="small muted" style={{ margin: 0 }}>
+          {bn ? "নথিভুক্ত বিচ্যুতি একটি তারিখসহ নোট মাত্র; এতে অনুত্তীর্ণ ফলাফল উত্তীর্ণ হয়ে যায় না।" : "A recorded deviation is a dated note. It does not turn a failure into a pass."}
         </p>
-        <div className="row" style={{ gap: "12px" }}>
-          <Stat label={lang === "bn" ? "সম্মত (RAJUK)" : "Compliant (RAJUK)"} value={String(verdictData.summary.compliant)} />
-          <Stat label={lang === "bn" ? "অমিল (RAJUK)" : "Deviations (RAJUK)"} value={String(verdictData.summary.deviation)} />
-          <Stat label={lang === "bn" ? "প্যাক গ্যাপ" : "Pack Gaps"} value={String(verdictData.unevaluated.length)} />
-        </div>
-        <Button
-          variant="soft"
-          style={{ marginTop: "8px" }}
-          onClick={() => {
-            const text = `${lang === "bn" ? "কোড কমপ্লায়েন্স প্রতিবেদন" : "Code Compliance Report"} — ${project.name}\nGenerated: ${new Date().toISOString()}\n\n` +
-              deviations.map(d => `${d.pass ? "✓" : "✗"} [${d.severity.toUpperCase()}] ${d.ruleId}: ${d.message}`).join("\n");
-            const blob = new Blob([text], { type: "text/plain" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `${project.name.replace(/[^a-zA-Z0-9]/g, "_")}_compliance_report.txt`;
-            a.click();
-            URL.revokeObjectURL(url);
-          }}
-        >
-          📄 {lang === "bn" ? "রিপোর্ট ডাউনলোড (.txt)" : "Download Report (.txt)"}
-        </Button>
-      </Card>
+        {deviations.length === 0 ? (
+          <Card><p className="muted">{bn ? "কোনো বিচ্যুতি নথিভুক্ত নেই।" : "No deviations recorded."}</p></Card>
+        ) : (
+          deviations.map((d) => (
+            <Card key={d.id} className="stack">
+              <div className="row-between">
+                <h4 style={{ margin: 0 }}>{d.ruleTitle ?? d.ruleRef}</h4>
+                <Button variant="ghost" onClick={() => onRemove(d.ruleRef)}>{bn ? "সরান" : "Remove"}</Button>
+              </div>
+              <div className="small muted">{bn ? "প্রয়োজন" : "Required"}: {d.expected} · {bn ? "আছে" : "Actual"}: {d.actual}</div>
+              {d.rationale ? <p className="small" style={{ margin: 0 }}>{d.rationale}</p> : null}
+              <span className="faint small font-mono">{d.recordedAt.slice(0, 10)} · {d.ruleRef}</span>
+            </Card>
+          ))
+        )}
+      </section>
     </div>
   );
 }
