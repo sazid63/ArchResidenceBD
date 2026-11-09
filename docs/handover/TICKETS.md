@@ -61,7 +61,7 @@ Do: column load takedown by tributary area per storey, minimum eccentricity, sle
 ## M4-3 Rebar / BBS · Sonnet high · done 6e11cbc
 Do: rebar from M4 member results; stock bars only (8, 10, 12, 16, 20, 22, 25, 28, 32 mm); development and lap lengths; BBS rows with shape codes and weights; Rebar screen reads it. Delete `rebarDetailer.ts` once unused.
 
-## M5-1 Quantities + BOQ · Sonnet high · todo
+## M5-1 Quantities + BOQ · Sonnet high · done (see git log)
 Do: takeoff from the model and BBS; rate card from `git show origin/v0-pipeline-complete:data/prices/cards/pwd-sor-2022-civil-works-candidate.json` in `spec/schemas/rate-card.schema.json` shape, with date and source shown; BOQ screen and CSV.
 
 ## M5-2 Drawings + permit package · Sonnet high · todo

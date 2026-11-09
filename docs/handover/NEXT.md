@@ -4,15 +4,14 @@ Branch `v3`, all commits local (head `3742fda`); **never `git push` unless the o
 Owner rules: no full `npm run verify` until all phases are done (targeted `npx vitest run <path>`, `npx tsc --noEmit`, `npm run audit:structural` only); pick defaults and keep building; ≤ 5-line replies; no fixed ticket order: do what the owner names, otherwise ask.
 
 ## Done
-M0, M1, M2-1..M2-5 (M2-3 only 5 of 8 extra plans), M3-1..M3-3 (rule packs, RAJUK evaluators, Compliance screen), **M4-1** loads/slabs/beams, **M4-2** columns/footings/seismic/Structure screen, **M4-3** rebar and BBS. Each of M4-1 and M4-3 was audited and fixed afterwards; hashes in `TICKETS.md`. Last checks (3742fda): `tsc` clean, 556 vitest tests, `npm run audit:structural` 85 checks over 70 cases.
+M0, M1, M2-1..M2-5 (M2-3 only 5 of 8 extra plans), M3-1..M3-3 (rule packs, RAJUK evaluators, Compliance screen), **M4-1** loads/slabs/beams, **M4-2** columns/footings/seismic/Structure screen, **M4-3** rebar and BBS, **M5-1** quantities + BOQ (`src/quantities/takeoff.ts`, card in `spec/rates/`, BOQ screen + CSV; card is `candidate`, stone chips and labour have no rate so the total is a lower bound). Each of M4-1 and M4-3 was audited and fixed afterwards; hashes in `TICKETS.md`. Last checks (3742fda): `tsc` clean, 556 vitest tests, `npm run audit:structural` 85 checks over 70 cases.
 
 ## Next
-Remaining in `TICKETS.md`: M5-1 quantities + BOQ, M5-2 drawings + permit package, M6-1, M6-2, M7-1, DS-1, and the 3 missing M2-3 plans.
+Remaining in `TICKETS.md`: M5-2 drawings + permit package, M6-1, M6-2, M7-1, DS-1, and the 3 missing M2-3 plans.
 Start prompt for a clean session:
 ```
 Ticket <ID>. Follow CLAUDE.md. Read docs/handover/NEXT.md first. Do only this ticket, run its checks, commit, reply in 5 lines.
 ```
-M5-1 hints: concrete volumes and steel weights already exist (`buildBbs(...).totals`, `concreteM3` inside `bbs.ts` is not exported yet); rate card source is in the ticket.
 
 ## Owner decisions confirmed (2026-11-09)
 The owner (a civil engineer) confirmed the structural assumptions as correct: fc' 20 MPa and Grade 420 bars, 40 mm beam cover and 20 mm slab cover, 50 mm screed and 12 mm plaster, 250/125 mm brick walls, frame concrete with 2 % steel (24.06 kN/m3), discontinuous-edge negative moment = 1/3 positive, T-beam flange overhang rule, la/lb centre to centre, no roof live-load reduction, seismic defaults (Dhaka Z 0.20, site class SD, occupancy category II with I = 1.00, special RC moment frames R 8 / Cd 5.5, soil bearing 150 kPa), and the rebar detailing simplifications below. `spec/rules/rajuk-2008.yaml` is `frozen` (owner-read). `spec/rules/bnbc-2020.yaml` and `spec/rules/bnbc-2020-structure.yaml` stay `candidate`: ask before changing their values.

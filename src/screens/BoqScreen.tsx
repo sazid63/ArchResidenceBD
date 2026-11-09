@@ -1,241 +1,147 @@
-import { useState, useMemo, useCallback } from "react";
-import { fmtBdt, fmtNum, useI18n } from "../i18n";
-import { Badge, Button, Card, PageHeader, Stat, cx } from "../ui/kit";
-import { useActiveProject } from "../context/ProjectContext";
-import { generateBoqFromProject, exportBOQCSV } from "../cad/boqGenerator";
-import { useAccessibilityReader } from "../hooks/useTextToSpeech";
+import { useMemo } from "react";
+import { useProject } from "../context/ProjectContext";
+import { useI18n } from "../i18n";
+import { buildingForProject } from "../model/projectMesh";
+import { BOQ_ASSUMPTIONS, boqToCsv, buildBoq, type Boq, type BoqCategory } from "../quantities/takeoff";
+import { analyzeStructure } from "../structure/analyze";
+import { buildBbs } from "../structure/bbs";
+import { Button, Callout, Card, EmptyState, PageHeader, Stat } from "../ui/kit";
 
-const CATEGORY_TONE: Record<string, "sky" | "sage" | "amber" | "lavender" | "blush" | "neutral"> = {
-  "Excavation & Site Works": "amber",
-  "Concrete Works": "sky",
-  "Masonry Works": "sage",
-  "Reinforcement": "lavender",
-  "Joinery": "blush",
-  "Finishes": "neutral",
-  "Plumbing & Sanitary": "sky",
-  "Electrical": "amber",
-  "Metal Works": "lavender",
-  "Site Works": "sage",
-  "Fire Protection": "blush",
-  "Vertical Transportation": "amber",
-  "Sustainability": "sage",
-  "Temporary Works": "neutral",
+const CATEGORY_LABEL: Record<BoqCategory, { en: string; bn: string }> = {
+  concrete: { en: "Concrete", bn: "কংক্রিট" },
+  steel: { en: "Reinforcement", bn: "রড" },
+  masonry: { en: "Masonry", bn: "গাঁথুনি" },
+  finishes: { en: "Finishes", bn: "ফিনিশ" },
 };
+
+const UNIT_LABEL: Record<string, { en: string; bn: string }> = {
+  m3: { en: "m³", bn: "ঘনমি" },
+  m2: { en: "m²", bn: "বর্গমি" },
+  bag: { en: "bag", bn: "ব্যাগ" },
+  cft: { en: "cft", bn: "ঘনফুট" },
+  ton: { en: "ton", bn: "টন" },
+  each: { en: "nos", bn: "টি" },
+};
+
+const num = (n: number, d = 0) => n.toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: d });
+
+function download(name: string, text: string) {
+  const url = URL.createObjectURL(new Blob([text], { type: "text/csv;charset=utf-8" }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(url);
+}
 
 export function BoqScreen() {
   const { lang } = useI18n();
-  const project = useActiveProject();
-  const [activeCategory, setActiveCategory] = useState<string>("all");
-  const { readBOQItem, stop: stopReading, speaking } = useAccessibilityReader();
+  const bn = lang === "bn";
+  const { project } = useProject();
 
-  const boqData = useMemo(() => {
-    if (!project) return null;
-    return generateBoqFromProject(project);
-  }, [project]);
+  const built = useMemo(() => (project && project.plot && project.planId ? buildingForProject(project) : null), [project]);
+  const boq = useMemo<Boq | null>(() => {
+    if (!built || !built.ok) return null;
+    return buildBoq(built.model, buildBbs(analyzeStructure(built.model), built.model));
+  }, [built]);
 
-  if (!project || !boqData) {
+  const title = bn ? "বিল অব কোয়ান্টিটিজ" : "Bill of quantities";
+  const subtitle = bn ? "মডেল ও রিবার শিডিউল থেকে পরিমাণ, রেট কার্ড থেকে দাম" : "Quantities from the model and the bar schedule, prices from the rate card";
+
+  if (!project || !built) {
     return (
       <div className="screen">
-        <PageHeader title="Bill of Quantities (BOQ)" subtitle="No active project found" />
-        <div className="empty">
-          <span className="empty-icon" aria-hidden="true">📊</span>
-          <p className="empty-text">Please complete the phase interviews and design to calculate BOQ.</p>
-        </div>
+        <PageHeader title={title} subtitle={subtitle} />
+        <EmptyState title={bn ? "এখনো কোনো প্ল্যান বাছাই হয়নি" : "No plan chosen yet"}>
+          {bn ? "জমির মাপ দিয়ে একটি প্ল্যান বাছাই করুন, তারপর এখানে বিওকিউ দেখা যাবে।" : "Enter the plot and pick a plan, then the bill appears here."}
+        </EmptyState>
+      </div>
+    );
+  }
+  if (!built.ok || !boq) {
+    return (
+      <div className="screen">
+        <PageHeader title={title} subtitle={project.name} />
+        <Callout tone="bad" title={bn ? "প্ল্যানটি এই জমিতে আঁটে না" : "The plan does not fit this plot"}>
+          {built.ok ? "" : bn ? built.reasons.map((r) => r.message.bn).join(" ") : built.reasons.map((r) => r.message.en).join(" ")}
+        </Callout>
       </div>
     );
   }
 
-  const filteredItems = activeCategory === "all"
-    ? boqData.items
-    : boqData.items.filter((item) => item.category === activeCategory);
-
-  const allCategories = ["all", ...Object.keys(boqData.totals.totalsByCategory).sort()];
-
-  const exportCsv = () => {
-    const csvContent = exportBOQCSV(boqData);
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${project.name.replace(/[^a-zA-Z0-9]/g, "_")}_BOQ.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
+  const u = (unit: string) => (UNIT_LABEL[unit] ? (bn ? UNIT_LABEL[unit].bn : UNIT_LABEL[unit].en) : unit);
+  const c = boq.card;
+  const crore = boq.totalBdt / 1e7;
+  const csvName = `${project.name.replace(/[^\w-]+/g, "_") || "project"}-boq.csv`;
 
   return (
     <div className="screen">
-      <PageHeader
-        title={lang === "bn" ? "প্রাক্কলন ও খরচের হিসাব (BOQ)" : "Bill of Quantities (BOQ)"}
-        subtitle={`${project.name} · ${project.stories} ${lang === "bn" ? "তলা" : "Stories"} (${project.plotSize} ${project.plotUnit})`}
-        actions={
-          <div className="row" style={{ gap: "8px" }}>
-            <Button variant="primary" onClick={exportCsv}>
-              {lang === "bn" ? "CSV ডাউনলোড" : "Export BOQ (CSV)"}
-            </Button>
-          </div>
-        }
-      />
+      <PageHeader title={title} subtitle={subtitle} />
 
-      {/* Top Cost Statistics */}
-      <div className="row stats-row" style={{ marginBottom: "16px", flexWrap: "wrap" }}>
-        <Stat
-          label={lang === "bn" ? "সর্বমোট আনুমানিক ব্যয়" : "Grand Total"}
-          value={fmtBdt(boqData.totals.totalBDT, lang)}
-        />
-        <Stat
-          label={lang === "bn" ? "সাবটোটাল" : "Subtotal"}
-          value={fmtBdt(boqData.totals.subtotalBDT, lang)}
-        />
-        <Stat
-          label={lang === "bn" ? "ভ্যাট" : `VAT (${boqData.totals.taxRate * 100}%)`}
-          value={fmtBdt(boqData.totals.taxBDT, lang)}
-        />
-        <Stat
-          label={lang === "bn" ? "মোট আইটেম" : "Total Items"}
-          value={boqData.totals.totalItems.toString()}
-        />
+      <Callout tone="warn" title={bn ? "রেট কার্ড এখনো যাচাই হয়নি, মোট একটি নিম্নসীমা" : "Rate card not yet verified; the total is a lower bound"}>
+        {bn
+          ? `দাম "${c.source.name}" থেকে (অবস্থা: ${c.status}, কার্যকর ${c.effectiveFrom}, তথ্য ${c.asOf ?? "—"})। কার্ডে নেই এমন আইটেম (পাথর ইত্যাদি) এবং শ্রম, যন্ত্র, সার্ভিস, দরজা-জানালা, টাইলস ও রং ধরা হয়নি।`
+          : `Prices are from "${c.source.name}" (status ${c.status}, effective ${c.effectiveFrom}, as of ${c.asOf ?? "n/a"}). Items the card lacks (stone chips), and labour, machinery, services, joinery, tiles and paint, are not in the total.`}
+      </Callout>
+
+      <div className="row" style={{ gap: 16, margin: "16px 0", flexWrap: "wrap" }}>
+        <Stat label={bn ? "মোট (টাকা, কোটি)" : "Priced total (BDT crore)"} value={crore.toFixed(2)} />
+        <Stat label={bn ? "কংক্রিট (ঘনমি)" : "Concrete (m³)"} value={num(boq.quantities.concreteM3, 1)} />
+        <Stat label={bn ? "রড (টন)" : "Steel (t)"} value={(boq.quantities.steelKg / 1000).toFixed(2)} />
+        <Stat label={bn ? "ইট (টি)" : "Bricks (nos)"} value={num(boq.quantities.brickCount)} />
+        <Stat label={bn ? "প্লাস্টার (বর্গমি)" : "Plaster (m²)"} value={num(boq.quantities.plasterM2)} />
       </div>
 
-      {/* Category Filter Tabs */}
-      <div className="row-between" style={{ marginBottom: "14px", flexWrap: "wrap", alignItems: "center" }}>
-        <div className="tabs" role="tablist" aria-label={lang === "bn" ? "বিওকিউ ক্যাটাগরি" : "BOQ Categories"}>
-          {allCategories.map((cat) => (
-            <button
-              key={cat}
-              role="tab"
-              id={`boq-tab-${cat}`}
-              aria-selected={activeCategory === cat}
-              aria-controls={`boq-panel-${cat}`}
-              tabIndex={activeCategory === cat ? 0 : -1}
-              className={cx("tab", activeCategory === cat && "tab--active")}
-              onClick={() => setActiveCategory(cat)}
-              onKeyDown={(e) => {
-                if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
-                  e.preventDefault();
-                  const idx = allCategories.indexOf(cat);
-                  const next = e.key === "ArrowRight" ? (idx + 1) % allCategories.length : (idx - 1 + allCategories.length) % allCategories.length;
-                  setActiveCategory(allCategories[next]);
-                }
-              }}
-            >
-              {cat === "all"
-                ? lang === "bn"
-                  ? "সকল ক্যাটাগরি"
-                  : "All Categories"
-                : cat}
-            </button>
-          ))}
-        </div>
-        <Button 
-          variant="ghost" 
-          onClick={() => {
-            if (speaking) {
-              stopReading();
-            } else {
-              filteredItems.forEach(item => {
-                readBOQItem(item.description, fmtNum(item.quantity, lang), item.unit, fmtBdt(item.rateBDT, lang));
-              });
-            }
-          }}
-          className="btn-read-all"
-          title={speaking ? (lang === 'bn' ? 'পড়া বন্ধ করুন' : 'Stop reading') : (lang === 'bn' ? 'সব পড়ে শোনান' : 'Read all')}
-        >
-          {speaking ? '🔇' : '🔊'} {speaking ? (lang === 'bn' ? 'বন্ধ' : 'Stop') : (lang === 'bn' ? 'সব পড়ুন' : 'Read All')}
-        </Button>
-      </div>
-
-      {/* Tab Panels */}
-      <div role="tabpanel" id={`boq-panel-${activeCategory}`} aria-labelledby={`boq-tab-${activeCategory}`} tabIndex={0}>
-
-      {/* Category Subtotals */}
-      {Object.keys(boqData.totals.totalsByCategory).length > 0 && (
-        <Card className="stack" style={{ marginBottom: "16px" }}>
-          <h3 style={{ marginBottom: "8px", fontSize: "14px", opacity: 0.7 }}>
-            {lang === "bn" ? "ক্যাটাগরি অনুযায়ী সাবটোটাল" : "Totals by Category"}
-          </h3>
-          <div className="row" style={{ gap: "12px", flexWrap: "wrap" }}>
-            {Object.entries(boqData.totals.totalsByCategory).map(([cat, totals]) => (
-              <Badge key={cat} tone={CATEGORY_TONE[cat] || "neutral"}>
-                {cat}: {fmtBdt(totals.amount, lang)}
-              </Badge>
-            ))}
-          </div>
-        </Card>
-      )}
-
-      {/* BOQ Table */}
       <Card className="stack">
-        <table className="table" style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
-          <thead>
-            <tr style={{ borderBottom: "1px solid var(--border)", opacity: 0.8 }}>
-              <th scope="col" style={{ padding: "10px" }}>#</th>
-              <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "বিবরণ" : "Description"}</th>
-              <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "ধরন" : "Category"}</th>
-              <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "একক" : "Unit"}</th>
-              <th scope="col" style={{ padding: "10px", textAlign: "right" }}>{lang === "bn" ? "পরিমাণ" : "Quantity"}</th>
-              <th scope="col" style={{ padding: "10px", textAlign: "right" }}>{lang === "bn" ? "দর (BDT)" : "Rate (BDT)"}</th>
-              <th scope="col" style={{ padding: "10px", textAlign: "right" }}>{lang === "bn" ? "মোট টাকা" : "Amount (BDT)"}</th>
-              <th scope="col" style={{ padding: "10px", textAlign: "center" }}>{lang === "bn" ? "পড়ুন" : "Read"}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredItems.map((item) => (
-              <tr key={item.itemNo} style={{ borderBottom: "1px solid var(--border)" }}>
-                <td style={{ padding: "10px", fontFamily: "var(--font-mono)", opacity: 0.6 }}>
-                  {item.itemNo}
-                </td>
-                <td style={{ padding: "10px" }}>
-                  <strong>{item.description}</strong>
-                  {item.assumptions && item.assumptions.length > 0 && (
-                    <div className="faint small">{item.assumptions.join(" · ")}</div>
-                  )}
-                </td>
-                <td style={{ padding: "10px" }}>
-                  <Badge tone={CATEGORY_TONE[item.category] || "neutral"}>{item.category}</Badge>
-                </td>
-                <td style={{ padding: "10px" }}>{item.unit}</td>
-                <td style={{ padding: "10px", textAlign: "right", fontFamily: "var(--font-mono)" }}>
-                  {fmtNum(item.quantity, lang)}
-                </td>
-                <td style={{ padding: "10px", textAlign: "right", fontFamily: "var(--font-mono)" }}>
-                  {fmtBdt(item.rateBDT, lang)}
-                </td>
-                <td
-                  style={{
-                    padding: "10px",
-                    textAlign: "right",
-                    fontFamily: "var(--font-mono)",
-                    fontWeight: 600,
-                  }}
-                >
-                  {fmtBdt(item.amountBDT, lang)}
-                </td>
-                <td style={{ padding: "10px", textAlign: "center" }}>
-                  <Button
-                    variant="ghost"
-                    onClick={() => readBOQItem(item.description, fmtNum(item.quantity, lang), item.unit, fmtBdt(item.rateBDT, lang))}
-                    title={lang === 'bn' ? 'পড়ে শোনান' : 'Read aloud'}
-                    style={{ padding: '2px 6px', fontSize: '11px', minWidth: 'auto' }}
-                  >
-                    🔊
-                  </Button>
-                </td>
+        <div className="row" style={{ justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+          <h3 style={{ margin: 0 }}>{bn ? "আইটেম" : "Items"}</h3>
+          <Button variant="ghost" onClick={() => download(csvName, boqToCsv(boq))}>{bn ? "সিএসভি ডাউনলোড" : "Download CSV"}</Button>
+        </div>
+        <div style={{ overflowX: "auto" }}>
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>{bn ? "বিভাগ" : "Group"}</th>
+                <th>{bn ? "বিবরণ" : "Description"}</th>
+                <th>{bn ? "একক" : "Unit"}</th>
+                <th style={{ textAlign: "right" }}>{bn ? "পরিমাণ" : "Quantity"}</th>
+                <th style={{ textAlign: "right" }}>{bn ? "দর (৳)" : "Rate (৳)"}</th>
+                <th style={{ textAlign: "right" }}>{bn ? "টাকা (৳)" : "Amount (৳)"}</th>
               </tr>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr style={{ borderTop: "2px solid var(--border)", fontWeight: 700 }}>
-              <td colSpan={6} style={{ padding: "12px", textAlign: "right" }}>
-                {lang === "bn" ? "মোট প্রাক্কলিত বাজেট:" : "Grand Total:"}
-              </td>
-              <td style={{ padding: "12px", textAlign: "right", fontFamily: "var(--font-mono)", fontSize: "16px" }}>
-                {fmtBdt(boqData.totals.totalBDT, lang)}
-              </td>
-            </tr>
-          </tfoot>
-        </table>
+            </thead>
+            <tbody>
+              {boq.lines.map((l) => (
+                <tr key={l.id}>
+                  <td>{bn ? CATEGORY_LABEL[l.category].bn : CATEGORY_LABEL[l.category].en}</td>
+                  <td>
+                    {bn ? l.description.bn : l.description.en}
+                    <div className="muted" style={{ fontSize: 12 }}>{bn ? l.basis.bn : l.basis.en}</div>
+                  </td>
+                  <td>{u(l.unit)}</td>
+                  <td style={{ textAlign: "right" }}>{num(l.quantity, l.quantity < 100 ? 2 : 0)}</td>
+                  <td style={{ textAlign: "right" }}>{l.rateBdt === null ? "" : num(l.rateBdt)}</td>
+                  <td style={{ textAlign: "right" }}>
+                    {l.amountBdt !== null ? num(l.amountBdt) : l.rateKey ? (bn ? "কার্ডে দাম নেই" : "no rate in card") : <span className="muted">{bn ? "পরিমাণ মাত্র" : "quantity only"}</span>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan={5}><strong>{bn ? "দামসহ আইটেমের মোট" : "Total of priced items"}</strong></td>
+                <td style={{ textAlign: "right" }}><strong>{num(boq.totalBdt)}</strong></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </Card>
+
+      <Card className="stack" style={{ marginTop: 16 }}>
+        <h3 style={{ margin: 0 }}>{bn ? "ধরে নেওয়া বিষয়" : "Assumptions"}</h3>
+        <ul style={{ margin: 0, paddingLeft: 20 }}>
+          {BOQ_ASSUMPTIONS.map((a) => <li key={a.id}>{bn ? a.bn : a.en}</li>)}
+        </ul>
       </Card>
     </div>
-  </div>
-);
+  );
 }

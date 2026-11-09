@@ -1,0 +1,168 @@
+{
+  "asOf": "2026-10-21",
+  "cardId": "pwd-sor-2022-civil-works",
+  "currency": "BDT",
+  "effectiveFrom": "2023-02-23",
+  "lines": [
+    {
+      "costType": "material",
+      "key": "cement-opc-43",
+      "label": {
+        "bn": "সিমেন্ট (ওপিসি ৪৩ গ্রেড, ৫০ কেজি ব্যাগ)",
+        "en": "Cement (OPC 43, 50 kg bag)"
+      },
+      "note": "BDS-EN 197-1 CEM-I, 52.5 N; the book's own description names the bag size. Source: PWD SoR 2022 (Revised) Part A, item 187, PDF page 20.",
+      "rateBdt": 520.0,
+      "regionalMultipliers": {
+        "chattogram": 1.0,
+        "khulna": 1.0,
+        "rajshahi": 1.0
+      },
+      "unit": "bag"
+    },
+    {
+      "costType": "material",
+      "key": "rod-60g",
+      "label": {
+        "bn": "রড (৬০ গ্রেড, B400)",
+        "en": "Rebar (60 grade, B400)"
+      },
+      "note": "BDS 6935-2006, B400; the book prices it per M. ton. Source: PWD SoR 2022 (Revised) Part A, item 289, PDF page 23.",
+      "rateBdt": 89000.0,
+      "regionalMultipliers": {
+        "chattogram": 1.0,
+        "khulna": 1.0,
+        "rajshahi": 1.0
+      },
+      "unit": "ton"
+    },
+    {
+      "costType": "material",
+      "key": "sand-fine",
+      "label": {
+        "bn": "বালি (এফএম ১.২)",
+        "en": "Sand (F.M. 1.2)"
+      },
+      "note": "the book's F.M. 1.2 sand, per cft. Source: PWD SoR 2022 (Revised) Part A, item 225, PDF page 21.",
+      "rateBdt": 1900.0,
+      "regionalMultipliers": {
+        "chattogram": 1.007895,
+        "khulna": 0.971053,
+        "rajshahi": 0.971053
+      },
+      "unit": "cft"
+    },
+    {
+      "costType": "material",
+      "key": "brick-1st",
+      "label": {
+        "bn": "ইট (প্রথম শ্রেণি)",
+        "en": "Brick (1st class)"
+      },
+      "note": "the book prices it per 1,000 nos; one brick is that rate divided by 1,000. (the book's per-1,000 rate divided by 1,000 to reach one brick). Source: PWD SoR 2022 (Revised) Part A, item 165, PDF page 19.",
+      "rateBdt": 13.0,
+      "regionalMultipliers": {
+        "chattogram": 1.0,
+        "khulna": 0.961538,
+        "rajshahi": 0.961538
+      },
+      "unit": "each"
+    },
+    {
+      "costType": "labour",
+      "key": "mason",
+      "label": {
+        "bn": "রাজমিস্ত্রি (দৈনিক)",
+        "en": "Mason (daily)"
+      },
+      "note": "C1 labour and man-power, per day; the book also lists a head mason at item 1. Source: PWD SoR 2022 (Revised) Part A, item 2, PDF page 14.",
+      "rateBdt": 700.0,
+      "regionalMultipliers": {
+        "chattogram": 1.0,
+        "khulna": 0.928571,
+        "rajshahi": 0.928571
+      },
+      "unit": "day"
+    },
+    {
+      "costType": "labour",
+      "key": "rod-binder",
+      "label": {
+        "bn": "রড বাইন্ডার (দৈনিক)",
+        "en": "Rod binder (daily)"
+      },
+      "note": "C1 labour and man-power, per day. Source: PWD SoR 2022 (Revised) Part A, item 11, PDF page 14.",
+      "rateBdt": 700.0,
+      "regionalMultipliers": {
+        "chattogram": 1.0,
+        "khulna": 0.928571,
+        "rajshahi": 0.928571
+      },
+      "unit": "day"
+    },
+    {
+      "costType": "labour",
+      "key": "machine-operator",
+      "label": {
+        "bn": "মেশিন অপারেটর (দৈনিক)",
+        "en": "Machine operator (daily)"
+      },
+      "note": "C1 labour and man-power, per day. Source: PWD SoR 2022 (Revised) Part A, item 19, PDF page 14.",
+      "rateBdt": 700.0,
+      "regionalMultipliers": {
+        "chattogram": 1.0,
+        "khulna": 0.928571,
+        "rajshahi": 0.928571
+      },
+      "unit": "day"
+    },
+    {
+      "costType": "machinery",
+      "fuelIncluded": false,
+      "key": "mixer-diesel",
+      "label": {
+        "bn": "কনক্রিট মিক্সার (ভাড়া)",
+        "en": "Concrete mixer (hire)"
+      },
+      "note": "the hire charge per day; the operator is a separate line in the book (C1, item 19), so it is not included, and the row does not mention fuel. Source: PWD SoR 2022 (Revised) Part A, item 43, PDF page 15.",
+      "operatorIncluded": false,
+      "rateBdt": 1200.0,
+      "regionalMultipliers": {
+        "chattogram": 1.0,
+        "khulna": 1.0,
+        "rajshahi": 1.0
+      },
+      "unit": "day"
+    },
+    {
+      "costType": "machinery",
+      "fuelIncluded": false,
+      "key": "vibrator",
+      "label": {
+        "bn": "কনক্রিট ভাইব্রেটর (ভাড়া)",
+        "en": "Concrete vibrator (hire)"
+      },
+      "note": "the hire charge per day; the operator is a separate line in the book (C1, item 19), so it is not included, and the row does not mention fuel. Source: PWD SoR 2022 (Revised) Part A, item 44, PDF page 15.",
+      "operatorIncluded": false,
+      "rateBdt": 550.0,
+      "regionalMultipliers": {
+        "chattogram": 0.981818,
+        "khulna": 0.909091,
+        "rajshahi": 0.909091
+      },
+      "unit": "day"
+    }
+  ],
+  "notes": "Transcribed from the PWD Schedule of Rates 2022 (Revised), Part A: Civil Works (16th edition, revised, effective 23 February 2023) on 2026-10-21. The four official price zones (Dhaka and Mymensingh / Chattogram and Sylhet / Khulna, Barisal and Gopalgonj / Rajshahi and Rangpur) become each line's regional multipliers. These are works rates: the contractor's profit, overhead and VAT are listed separately in the book and are not included. A candidate card until a human marks it active.",
+  "region": "dhaka",
+  "schemaVersion": "0.1.0",
+  "source": {
+    "kind": "official_list",
+    "name": "PWD Schedule of Rates 2022 (Revised), Part A: Civil Works (16th edition, revised)",
+    "note": "the fetched artefact is 10435417 bytes; the hash is the provenance record (plan section 5.10).",
+    "retrievedAt": "2026-10-21",
+    "sha256": "bf7524a24d20a5b1d9f4b345a9ca6fa3bbeccebf6dabe44d84cb06fc3b82b47f",
+    "url": "https://ss.pwd.gov.bd/document/sor/PWDSoR2022-Revised-2.3.23-Website.pdf"
+  },
+  "status": "candidate"
+}
