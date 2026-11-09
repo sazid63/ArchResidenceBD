@@ -439,7 +439,7 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
     viewerRef.current?.resetCamera();
   };
 
-  // Handle AI Design Copilot Chat
+  // Plain-language tweaks ("column 400", "balcony 1.5 m"): a deterministic keyword parse, no model and no server.
   const handleDesignChatSend = async (customPrompt?: string) => {
     const prompt = (customPrompt || chatInput).trim();
     if (!prompt || aiTyping) return;
@@ -447,32 +447,6 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
     setChatInput("");
     setDesignChat((prev) => [...prev, { who: "user", text: prompt }]);
     setAiTyping(true);
-
-    try {
-      const res = await fetch("/api/cad", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          project,
-          modificationPrompt: prompt,
-          lang,
-        }),
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.reply) {
-          setDesignChat((prev) => [...prev, { who: "ai", text: data.reply }]);
-        }
-        if (data.params && Object.keys(data.params).length > 0) {
-          setCustomAndSave(data.params);
-        }
-        setAiTyping(false);
-        return;
-      }
-    } catch {
-      // Local fallback
-    }
 
     setTimeout(() => {
       let reply = "";

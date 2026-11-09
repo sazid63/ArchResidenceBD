@@ -1,9 +1,8 @@
 import { useState } from "react";
 
-import { ask, isDesktopShell } from "../ipc/core";
 import { useI18n } from "../i18n";
 import { Badge, Button, Callout, Card, PageHeader } from "../ui/kit";
-import { MANUAL_FAQ } from "../data/manualFaq";
+import { MANUAL_FAQ, searchManual } from "../data/manualFaq";
 
 interface Answer {
   entry: {
@@ -31,27 +30,14 @@ export function HelpScreen() {
   const [answers, setAnswers] = useState<Answer[] | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
 
-  const search = async (override?: string) => {
+  const search = (override?: string) => {
     const query = override ?? queryText;
     if (!query.trim()) {
       setAnswers(null);
       return;
     }
-    if (!isDesktopShell()) {
-      setProblem(t("helpNeedsShell"));
-      return;
-    }
-    try {
-      const reply = await ask("manual.search", { query, lang });
-      if (reply.error) {
-        setProblem(String(reply.error.message));
-        return;
-      }
-      setAnswers((reply.result as { answers: Answer[] }).answers);
-      setProblem(null);
-    } catch (error) {
-      setProblem(error instanceof Error ? error.message : String(error));
-    }
+    setAnswers(searchManual(query) as unknown as Answer[]);
+    setProblem(null);
   };
 
   return (
