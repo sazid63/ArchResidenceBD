@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { distribute, fitPlan, fitRange } from "./fit";
 import { deriveGeometry } from "./geometry";
-import { PLAN_LIBRARY, P1_4B } from "./library";
+import { PLAN_LIBRARY, P1_4B, getPlan } from "./library";
+import { availableUnitCounts } from "../model/planChoices";
 import { validateFitted } from "./validate";
 
 describe("distribute", () => {
@@ -89,4 +90,57 @@ describe("plan library", () => {
       expect(Math.max(...geo.beams.map((b) => b.spanMm))).toBeLessThanOrEqual(6000);
     });
   }
+});
+
+describe("the three- and four-flat plans (M2-3)", () => {
+  const ids = ["p3-2b", "p4-2b", "p4-1b"];
+
+  it("are in the library, offer 3 and 4 flats per floor, and have the expected flats", () => {
+    expect(PLAN_LIBRARY.length).toBe(10);
+    expect(new Set(PLAN_LIBRARY.map((p) => p.id)).size).toBe(10);
+    expect(availableUnitCounts()).toEqual([1, 2, 3, 4]);
+    expect(getPlan("p3-2b")).toMatchObject({ unitsPerFloor: 3, bedroomsPerUnit: 2 });
+    expect(getPlan("p4-2b")).toMatchObject({ unitsPerFloor: 4, bedroomsPerUnit: 2 });
+    expect(getPlan("p4-1b")).toMatchObject({ unitsPerFloor: 4, bedroomsPerUnit: 1 });
+  });
+
+  for (const id of ids) {
+    const plan = getPlan(id)!;
+    const range = fitRange(plan);
+    const r = fitPlan(plan, { widthMm: range.widthMm.pref, depthMm: range.depthMm.pref });
+    if (!r.ok) throw new Error(`${id} does not fit its preferred size`);
+    const geo = deriveGeometry(r.fitted);
+
+    it(`${id}: every bedroom, living room, kitchen and toilet has an outside wall (no light shaft is relied on)`, () => {
+      r.fitted.rooms.forEach((room, i) => {
+        if (["bedroom", "living", "kitchen", "toilet"].includes(room.def.kind)) expect(geo.metrics[i].exteriorMm, `${id} ${room.def.id}`).toBeGreaterThan(0);
+      });
+    });
+
+    it(`${id}: every flat has exactly one entrance, and all of them open onto the one lobby`, () => {
+      const mains = geo.doors.filter((d) => d.main);
+      expect(mains.length).toBe(plan.unitsPerFloor);
+      const lobby = r.fitted.rooms.findIndex((room) => room.def.id === "lobby");
+      for (const d of mains) expect([d.a, d.b]).toContain(lobby);
+    });
+
+    it(`${id}: the structural grid has a column at every grid crossing and the columns line up with the walls`, () => {
+      expect(geo.columns.length).toBe(plan.structuralX.length * plan.structuralY.length);
+      expect(plan.structuralX).toEqual(Array.from({ length: plan.baysX.length + 1 }, (_, i) => i));
+      expect(plan.structuralY).toEqual(Array.from({ length: plan.baysY.length + 1 }, (_, i) => i));
+    });
+  }
+
+  it("p4-2b is symmetric: the four flats have the same rooms and areas", () => {
+    const plan = getPlan("p4-2b")!;
+    const range = fitRange(plan);
+    const r = fitPlan(plan, { widthMm: range.widthMm.pref, depthMm: range.depthMm.pref });
+    if (!r.ok) throw new Error("fit");
+    const geo = deriveGeometry(r.fitted);
+    const area = (id: string) => geo.metrics[r.fitted.rooms.findIndex((room) => room.def.id === id)].netAreaM2;
+    for (const k of ["bed1", "living", "toilet", "dining", "bed2", "kitchen"]) {
+      const a = area(`a-${k}`);
+      for (const u of ["b", "c", "d"]) expect(area(`${u}-${k}`)).toBeCloseTo(a, 6);
+    }
+  });
 });

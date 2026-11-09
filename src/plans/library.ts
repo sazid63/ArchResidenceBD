@@ -389,7 +389,195 @@ export const P2_3B_LR: PlanDefinition = {
   ],
 };
 
-export const PLAN_LIBRARY: PlanDefinition[] = [P1_4B, P1_3B, P1_4B_WIDE, P2_2B_FB, P2_2B_LR, P2_3B_LR, P2_3B_FB];
+// ---------------------------------------------------------------------------
+// M2-3, three and four flats per floor. The light-shaft question was settled by default (owner rule: pick
+// defaults and keep building): the flats sit on the four corners of a central core strip, so every bedroom,
+// living room, kitchen and toilet has an outside wall and no toilet or kitchen needs a shaft. The strip holds,
+// front to back: stair, a long lobby every entrance opens onto, the lift, and a service duct (kind "shaft",
+// sized for a building of up to six storeys, BNBC 2020 Part 3 Table 3.1.11).
+// ---------------------------------------------------------------------------
+
+// Five columns: outer, inner, core strip, inner, outer. The core bay is at least 2650 mm so the stair is 2.15 m wide net.
+const X4F: Bay[] = [bay(3100, 3200, 3600), bay(3050, 3100, 3600), bay(2650, 2800, 3000), bay(3050, 3100, 3600), bay(3100, 3200, 3600)];
+
+type Tmpl = { id: string; kind: RoomDef["kind"]; en: string; bn: string; cells: RoomDef["cells"][number] };
+type Corner = { unit: string; bn: string; flipX: boolean; flipY: boolean };
+
+/** A flat template drawn in the front-left corner, placed in another corner by flipping its cells. */
+function flatRooms(tmpl: Tmpl[], c: Corner, nx: number, ny: number): RoomDef[] {
+  const fx = (x: number) => (c.flipX ? nx - 1 - x : x);
+  const fy = (y: number) => (c.flipY ? ny - 1 - y : y);
+  return tmpl.map((r) => {
+    const [x0, y0, x1, y1] = r.cells;
+    const cell = [Math.min(fx(x0), fx(x1)), Math.min(fy(y0), fy(y1)), Math.max(fx(x0), fx(x1)), Math.max(fy(y0), fy(y1))] as const;
+    return room(`${c.unit.toLowerCase()}-${r.id}`, r.kind, c.unit, `${c.unit} ${r.en}`, `${c.bn} ${r.bn}`, cell);
+  });
+}
+
+/** Doors of one flat: living and bedroom, living and hall, bedroom and toilet, hall to toilet, bedroom 2, kitchen and the entrance onto the lobby. */
+function flatDoors(unit: string, hasBed2: boolean): DoorsOf {
+  const u = unit.toLowerCase();
+  return [
+    { between: [`${u}-living`, `${u}-bed1`] },
+    { between: [`${u}-living`, `${u}-dining`] },
+    { between: [`${u}-bed1`, `${u}-toilet`] },
+    { between: [`${u}-dining`, `${u}-toilet`] },
+    ...(hasBed2 ? [{ between: [`${u}-dining`, `${u}-bed2`] as const }] : []),
+    { between: [`${u}-dining`, `${u}-kitchen`] },
+    { between: [`${u}-dining`, "lobby"], main: true },
+  ];
+}
+type DoorsOf = PlanDefinition["doors"];
+
+const CORNERS: Corner[] = [
+  { unit: "A", bn: "এ", flipX: false, flipY: false },
+  { unit: "B", bn: "বি", flipX: true, flipY: false },
+  { unit: "C", bn: "সি", flipX: false, flipY: true },
+  { unit: "D", bn: "ডি", flipX: true, flipY: true },
+];
+
+// Eight rows, front to back: living/bedroom, toilet, bedroom, kitchen, then the mirror image for the back flats.
+const Y4F2: Bay[] = [
+  bay(3600, 3900, 4200),
+  bay(1500, 1800, 2100),
+  bay(3400, 3500, 3800),
+  bay(2300, 2400, 2700),
+  bay(2300, 2400, 2700),
+  bay(3400, 3500, 3800),
+  bay(1500, 1800, 2100),
+  bay(3600, 3900, 4200),
+];
+
+/** A two-bedroom flat in the front-left corner of the 5 x 8 grid: bedroom 1 and living on the front, toilet, bedroom 2 and kitchen down the left wall, a hall between. */
+const FLAT_2B: Tmpl[] = [
+  { id: "bed1", kind: "bedroom", en: "master bedroom", bn: "মাস্টার বেডরুম", cells: [0, 0, 0, 0] },
+  { id: "living", kind: "living", en: "living room", bn: "বসার ঘর", cells: [1, 0, 1, 0] },
+  { id: "toilet", kind: "toilet", en: "toilet", bn: "টয়লেট", cells: [0, 1, 0, 1] },
+  { id: "dining", kind: "dining", en: "dining hall", bn: "খাবার হল", cells: [1, 1, 1, 3] },
+  { id: "bed2", kind: "bedroom", en: "bedroom 2", bn: "বেডরুম ২", cells: [0, 2, 0, 2] },
+  { id: "kitchen", kind: "kitchen", en: "kitchen", bn: "রান্নাঘর", cells: [0, 3, 0, 3] },
+];
+
+/** Stair, a three-cell lobby, lift and duct down the middle column of the 8-row plans. */
+const STRIP_8: RoomDef[] = [
+  room("stair", "stair", undefined, "Stair", "সিঁড়ি", [2, 0, 2, 1]),
+  room("lobby", "lobby", undefined, "Lobby", "লবি", [2, 2, 2, 4]),
+  room("lift", "lift", undefined, "Lift", "লিফট", [2, 5, 2, 5]),
+  room("duct", "shaft", undefined, "Service duct", "সার্ভিস ডাক্ট", [2, 6, 2, 7]),
+];
+const STRIP_DOORS: DoorsOf = [{ between: ["lobby", "stair"] }, { between: ["lobby", "lift"] }];
+
+/** Four two-bedroom flats, one in each corner of a central core strip. For large plots (about 7 katha and up). */
+export const P4_2B: PlanDefinition = {
+  id: "p4-2b",
+  name: t("Four flats per floor, 2 bedrooms", "প্রতি তলায় চারটি ফ্ল্যাট, ২ বেডরুম"),
+  description: t(
+    "A flat in each corner of the plot around a central core strip (stair, lobby, lift, duct); every bedroom, living room, kitchen and toilet has an outside wall, so no light shafts are needed.",
+    "প্লটের চার কোণে চারটি ফ্ল্যাট, মাঝখানে কোর স্ট্রিপ (সিঁড়ি, লবি, লিফট, ডাক্ট); প্রতিটি বেডরুম, বসার ঘর, রান্নাঘর ও টয়লেটের বাইরের দেয়াল আছে, তাই আলাদা লাইট শ্যাফট লাগে না।",
+  ),
+  unitsPerFloor: 4,
+  bedroomsPerUnit: 2,
+  baysX: X4F,
+  baysY: Y4F2,
+  structuralX: [0, 1, 2, 3, 4, 5],
+  structuralY: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+  rooms: [...CORNERS.flatMap((c) => flatRooms(FLAT_2B, c, 5, 8)), ...STRIP_8],
+  doors: [...CORNERS.flatMap((c) => flatDoors(c.unit, true)), ...STRIP_DOORS],
+};
+
+/** The big flat B of the three-flat plan: the whole right half of the plot, entered from the lobby. */
+const BIG_FLAT: RoomDef[] = [
+  room("b-living", "living", "B", "B living room", "বি বসার ঘর", [3, 0, 3, 0]),
+  room("b-bed1", "bedroom", "B", "B master bedroom", "বি মাস্টার বেডরুম", [4, 0, 4, 0]),
+  room("b-toilet", "toilet", "B", "B toilet 1", "বি টয়লেট ১", [4, 1, 4, 1]),
+  room("b-dining", "dining", "B", "B dining hall", "বি খাবার হল", [3, 1, 3, 6]),
+  room("b-bed2", "bedroom", "B", "B bedroom 2", "বি বেডরুম ২", [4, 2, 4, 2]),
+  room("b-kitchen", "kitchen", "B", "B kitchen", "বি রান্নাঘর", [4, 3, 4, 3]),
+  room("b-store", "store", "B", "B store", "বি স্টোর", [4, 4, 4, 4]),
+  room("b-bed3", "bedroom", "B", "B bedroom 3", "বি বেডরুম ৩", [4, 5, 4, 5]),
+  room("b-toilet2", "toilet", "B", "B toilet 2", "বি টয়লেট ২", [4, 6, 4, 6]),
+  room("b-lounge", "living", "B", "B family lounge", "বি পারিবারিক বসার ঘর", [3, 7, 3, 7]),
+  room("b-bed4", "bedroom", "B", "B bedroom 4", "বি বেডরুম ৪", [4, 7, 4, 7]),
+];
+
+/** Two 2-bedroom flats on the left (front and back) and one large flat down the whole right side. */
+export const P3_2B: PlanDefinition = {
+  id: "p3-2b",
+  name: t("Three flats per floor (two 2-bedroom, one large)", "প্রতি তলায় তিনটি ফ্ল্যাট (দুটি ২ বেডরুম, একটি বড়)"),
+  description: t(
+    "Like the four-flat plan, but the two right-hand flats are one large flat with four bedrooms; the other two flats have two bedrooms each. Same central core strip, no light shafts.",
+    "চার ফ্ল্যাটের প্ল্যানের মতো, তবে ডানের দুটি ফ্ল্যাট মিলে চার বেডরুমের একটি বড় ফ্ল্যাট; বাকি দুটিতে দুটি করে বেডরুম। একই কোর স্ট্রিপ, লাইট শ্যাফট নেই।",
+  ),
+  unitsPerFloor: 3,
+  bedroomsPerUnit: 2,
+  baysX: X4F,
+  baysY: Y4F2,
+  structuralX: [0, 1, 2, 3, 4, 5],
+  structuralY: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+  rooms: [...CORNERS.filter((c) => !c.flipX).flatMap((c) => flatRooms(FLAT_2B, c, 5, 8)), ...BIG_FLAT, ...STRIP_8],
+  doors: [
+    ...CORNERS.filter((c) => !c.flipX).flatMap((c) => flatDoors(c.unit, true)),
+    { between: ["b-living", "b-bed1"] },
+    { between: ["b-living", "b-dining"] },
+    { between: ["b-bed1", "b-toilet"] },
+    { between: ["b-dining", "b-toilet"] },
+    { between: ["b-dining", "b-bed2"] },
+    { between: ["b-dining", "b-kitchen"] },
+    { between: ["b-dining", "b-store"] },
+    { between: ["b-dining", "b-bed3"] },
+    { between: ["b-bed3", "b-toilet2"] },
+    { between: ["b-dining", "b-toilet2"] },
+    { between: ["b-dining", "b-lounge"] },
+    { between: ["b-lounge", "b-bed4"] },
+    { between: ["b-bed4", "b-toilet2"] },
+    { between: ["b-dining", "lobby"], main: true },
+    ...STRIP_DOORS,
+  ],
+};
+
+// Six rows for the one-bedroom plan: bedroom/living, toilet, kitchen, then the mirror image.
+const Y4F1: Bay[] = [
+  bay(4200, 4300, 4500),
+  bay(1500, 1800, 2100),
+  bay(2500, 2700, 3000),
+  bay(2500, 2700, 3000),
+  bay(1500, 1800, 2100),
+  bay(4200, 4300, 4500),
+];
+
+/** A one-bedroom flat in the front-left corner of the 5 x 6 grid. */
+const FLAT_1B: Tmpl[] = [
+  { id: "bed1", kind: "bedroom", en: "bedroom", bn: "বেডরুম", cells: [0, 0, 0, 0] },
+  { id: "living", kind: "living", en: "living room", bn: "বসার ঘর", cells: [1, 0, 1, 0] },
+  { id: "toilet", kind: "toilet", en: "toilet", bn: "টয়লেট", cells: [0, 1, 0, 1] },
+  { id: "dining", kind: "dining", en: "dining hall", bn: "খাবার হল", cells: [1, 1, 1, 2] },
+  { id: "kitchen", kind: "kitchen", en: "kitchen", bn: "রান্নাঘর", cells: [0, 2, 0, 2] },
+];
+
+/** Four one-bedroom flats around a central core strip; the stair needs the long front and back bays. */
+export const P4_1B: PlanDefinition = {
+  id: "p4-1b",
+  name: t("Four flats per floor, 1 bedroom", "প্রতি তলায় চারটি ফ্ল্যাট, ১ বেডরুম"),
+  description: t(
+    "Four compact one-bedroom flats in the corners of the plot around a central core strip (stair in front, long lobby, lift behind); every habitable room, kitchen and toilet has an outside wall.",
+    "প্লটের চার কোণে চারটি ছোট ১ বেডরুমের ফ্ল্যাট, মাঝখানে কোর স্ট্রিপ (সামনে সিঁড়ি, লম্বা লবি, পেছনে লিফট); প্রতিটি ঘর, রান্নাঘর ও টয়লেটের বাইরের দেয়াল আছে।",
+  ),
+  unitsPerFloor: 4,
+  bedroomsPerUnit: 1,
+  baysX: X4F,
+  baysY: Y4F1,
+  structuralX: [0, 1, 2, 3, 4, 5],
+  structuralY: [0, 1, 2, 3, 4, 5, 6],
+  rooms: [
+    ...CORNERS.flatMap((c) => flatRooms(FLAT_1B, c, 5, 6)),
+    room("stair", "stair", undefined, "Stair", "সিঁড়ি", [2, 0, 2, 0]),
+    room("lobby", "lobby", undefined, "Lobby", "লবি", [2, 1, 2, 4]),
+    room("lift", "lift", undefined, "Lift", "লিফট", [2, 5, 2, 5]),
+  ],
+  doors: [...CORNERS.flatMap((c) => flatDoors(c.unit, false)), ...STRIP_DOORS],
+};
+
+export const PLAN_LIBRARY: PlanDefinition[] = [P1_4B, P1_3B, P1_4B_WIDE, P2_2B_FB, P2_2B_LR, P2_3B_LR, P2_3B_FB, P3_2B, P4_2B, P4_1B];
 
 export function getPlan(id: string): PlanDefinition | undefined {
   return PLAN_LIBRARY.find((p) => p.id === id);
