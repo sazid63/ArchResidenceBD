@@ -241,3 +241,41 @@ onto dining, living at least 14 m2 and master at least 12 m2 on plans for 4 kath
 RAJUK FAR and coverage for roads under 6 m, or an explicit "enter the road width" gate.
 
 Re-run: `npm run audit:structural` (the scenario script) and the checks listed here when each item closes.
+
+## 7. Phase A status (2026-11-09)
+
+Done and committed on `v3`, each with tests (886 tests, `npm run audit:structural` green):
+
+| Item | Result | Commit |
+|---|---|---|
+| A1 | The 3D model is drawn from the designed columns, beams, slabs and footings (`buildMesh(model, structure)`). The fake 3D tweak chat is removed and replaced by a "Designed members" panel. | c3ef9cd |
+| A2 | `structure/foundation.ts`: pads that would overlap are merged into combined footings (up to 4 columns) or a raft; bars, concrete, formwork and 3D use the footings as built. Merged footings are sized by area and a depth rule only and the screen says so. | 9611f66 |
+| A3 | Roof carries the stair cover, lift machine room (100 kN machine allowance) and a full water tank (171 kN on a 3 x 6 m cover); stair flights add 3.0 kN/m2 on stair panels. | 7313945 |
+| A7 | The ground floor geometry is open stilt parking (no wall to the outside), matching the 3D, drawings and BOQ. | 2e9b8db |
+| A8 | Walls on a slab with no beam are spread over their panel. | b730a5d |
+| A9 | Slab concrete, slab formwork and screed subtract the stair, lift and shaft openings (shared `model/openings.ts`); BOQ masonry is within 5 to 12 percent of the 3D walls. | 7a1c6b3 |
+| A10 | Impossible plots, unsupported site class and absurd bearing give a message instead of crashing or being accepted. | (this series) |
+| A4 | Stairs, plinth beams and column stubs are now in the concrete and bar schedule; 3 percent cutting wastage on bars bought. | aa25194 |
+| A6 | `engineering-scenarios.audit.ts` now fails on overlapping footings, 3D not matching the design, steel outside 60 to 140 kg per m3 and bad BOQ quantities. | aa25194 |
+
+Not done, and why:
+
+- **A5 (edge-column hooks).** The warnings remain (4 to 30 per building). The fix is the confinement factors of Sec 8.2.6.3 (0.7 and
+  0.8), which are not transcribed from the gazette, and they apply only when the side cover and tie spacing allow. That is a
+  transcription task for the owner's source PDF, not a code change.
+- **A4 steel calibration.** Steel now runs 2.2 to 2.5 kg per sft for 4 storeys, 2.6 to 3.0 for 6 storeys and 3.0 to 4.7 above, which
+  is the low end of what I would expect. I do not claim calibration: that needs the hand-calculated reference buildings of D1. RC lift
+  core walls and Sec 8.3 confinement are still not in the schedule.
+
+### Corrections to the findings above
+
+An error in this report, found while doing Phase A:
+
+- **F19.** The 3D model already left the parking open to the road; it was only the plan geometry, drawings and BOQ that walled it in.
+  Fixed by A7. The part that remains true is that there are no stalls, ramp or gate (B4).
+- **F3.** The parapet is loaded (roof beams carry it as a wall load). The missing loads were the tank, the stair cover, the lift room
+  and the stair flights; all four are now in.
+- **F6.** "30 to 40 percent light" was my estimate from memory of rules of thumb, not a measured fact. Treat the steel quantity as
+  unverified until D1.
+- **F25.** The 14 to 21 percent masonry gap was mostly the ground-floor walls around the parking that the 3D left open and the BOQ
+  counted; the rest is the BOQ taking a flat 500 mm off the storey height where the mesh cuts walls by the real beam.
