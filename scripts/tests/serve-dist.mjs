@@ -8,7 +8,7 @@
  */
 import { createServer } from "node:http";
 import { existsSync, readFileSync, statSync } from "node:fs";
-import { dirname, extname, join, normalize, resolve } from "node:path";
+import { dirname, extname, join, normalize, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
@@ -21,7 +21,7 @@ const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", "
 createServer((req, res) => {
   const path = decodeURIComponent((req.url ?? "/").split("?")[0]);
   let file = normalize(join(dist, path));
-  if (!file.startsWith(dist)) {
+  if (file !== dist && !file.startsWith(dist + sep)) {
     res.writeHead(403).end();
     return;
   }

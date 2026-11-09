@@ -9,17 +9,34 @@ const PRECACHE = /*__PRECACHE__*/ [];
 const CACHE = "archresidencebd-" + VERSION;
 
 // Install: cache the whole build in one step. If any file is missing the install fails and is retried on the
-// next visit, so a half-cached app is never activated.
+// next visit, so a half-cached app is never activated. The build time is kept so activate can tell builds apart.
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(PRECACHE)).then(() => self.skipWaiting()));
+  event.waitUntil(
+    caches
+      .open(CACHE)
+      .then((cache) => cache.addAll(PRECACHE).then(() => cache.put("/__built_at", new Response(String(Date.now())))))
+      .then(() => self.skipWaiting()),
+  );
 });
 
-// Activate: drop the caches of older builds.
+// Activate: drop old builds, but keep the newest older one. A page that is still running the previous build
+// loads its screens lazily by hashed file name; deleting that build now would break the page until it reloads.
+// (caches.match in the fetch handler looks in every cache, so the old files keep answering.)
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((names) => Promise.all(names.filter((n) => n.startsWith("archresidencebd-") && n !== CACHE).map((n) => caches.delete(n))))
+      .then(async (names) => {
+        const older = names.filter((n) => n.startsWith("archresidencebd-") && n !== CACHE);
+        const stamped = await Promise.all(
+          older.map(async (n) => {
+            const hit = await (await caches.open(n)).match("/__built_at");
+            return { n, t: hit ? Number(await hit.text()) : 0 };
+          }),
+        );
+        stamped.sort((a, b) => b.t - a.t);
+        await Promise.all(stamped.slice(1).map((s) => caches.delete(s.n)));
+      })
       .then(() => self.clients.claim()),
   );
 });

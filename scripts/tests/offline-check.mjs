@@ -48,6 +48,9 @@ for (const f of chunks) for (const m of readFileSync(join(dist, f.slice(1)), "ut
 const unreachable = [...lazyRefs].filter((f) => !list.includes(f));
 check(unreachable.length === 0, `every lazily imported chunk is precached (${lazyRefs.size} references)${unreachable.length ? ": " + unreachable.slice(0, 5).join(", ") : ""}`);
 
+const evalUsers = chunks.filter((f) => /new Function\(|[^\w.]eval\(/.test(readFileSync(join(dist, f.slice(1)), "utf8")));
+check(evalUsers.length === 0, "no built script uses eval or new Function (the desktop CSP forbids it)" + (evalUsers.length ? ": " + evalUsers.join(", ") : ""));
+
 const manifest = JSON.parse(readFileSync(join(dist, "manifest.json"), "utf8"));
 const iconMissing = manifest.icons.filter((i) => !existsSync(join(dist, i.src.slice(1))));
 check(iconMissing.length === 0, `every manifest icon exists (${manifest.icons.length})${iconMissing.length ? ": " + iconMissing.map((i) => i.src).join(", ") : ""}`);

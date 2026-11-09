@@ -28,6 +28,9 @@ class FakeResponse {
   clone() {
     return new FakeResponse(this.body, this.status);
   }
+  async text() {
+    return String(this.body);
+  }
 }
 
 function makeWorker({ missing = [] } = {}) {
@@ -57,6 +60,9 @@ function makeWorker({ missing = [] } = {}) {
       async put(req, res) {
         m.set(urlOf(req), res);
       },
+      async match(req) {
+        return m.get(urlOf(req));
+      },
     };
   };
   const caches = {
@@ -74,7 +80,7 @@ function makeWorker({ missing = [] } = {}) {
     skipWaiting: () => void state.skipWaiting++,
     clients: { claim: async () => void state.claimed++ },
   };
-  vm.runInNewContext(code, { self, caches, fetch: network, URL, Promise, console, JSON, Response: FakeResponse }, { filename: "dist/sw.js" });
+  vm.runInNewContext(code, { self, caches, fetch: network, URL, Promise, console, JSON, Date, Number, String, Response: FakeResponse }, { filename: "dist/sw.js" });
 
   const dispatchLifecycle = async (type) => {
     const waits = [];
@@ -102,7 +108,7 @@ await t("install caches the whole build under this build's version and takes ove
   const w = makeWorker();
   await w.install();
   assert.deepEqual([...w.store.keys()], [`archresidencebd-${version}`]);
-  assert.equal(w.store.get(`archresidencebd-${version}`).size, precache.length);
+  assert.equal(w.store.get(`archresidencebd-${version}`).size, precache.length + 1); // the whole build plus its build-time stamp
   assert.equal(w.state.skipWaiting, 1);
 });
 
@@ -112,14 +118,26 @@ await t("install fails as a whole when one file is missing, so a half-cached app
   assert.equal(w.state.skipWaiting, 0);
 });
 
-await t("activate removes the caches of older builds and keeps this one", async () => {
+await t("activate keeps this build and the newest older one, drops the rest, and leaves other apps alone", async () => {
   const w = makeWorker();
   await w.install();
-  w.store.set("archresidencebd-old", new Map([["x", 1]]));
+  const built = (t) => new Map([["http://app.test/__built_at", new FakeResponse(String(t))]]);
+  w.store.set("archresidencebd-oldest", built(1));
+  w.store.set("archresidencebd-previous", built(2));
   w.store.set("another-app", new Map());
   await w.activate();
-  assert.deepEqual([...w.store.keys()].sort(), [`archresidencebd-${version}`, "another-app"].sort());
+  assert.deepEqual([...w.store.keys()].sort(), [`archresidencebd-${version}`, "archresidencebd-previous", "another-app"].sort());
   assert.equal(w.state.claimed, 1);
+});
+
+await t("a page still running the previous build can load its lazy chunk after the new worker takes over", async () => {
+  const w = makeWorker();
+  await w.install();
+  const oldChunk = ORIGIN + "/assets/OldScreen-aaaaaaaa.js";
+  w.store.set("archresidencebd-previous", new Map([[oldChunk, new FakeResponse("old chunk")], ["http://app.test/__built_at", new FakeResponse("2")]]));
+  await w.activate();
+  w.state.online = false; // the server no longer has the old file
+  assert.equal(String((await w.request(oldChunk)).body), "old chunk");
 });
 
 await t("offline: every precached file still answers from the cache, without touching the network", async () => {
