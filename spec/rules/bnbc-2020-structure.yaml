@@ -30,6 +30,18 @@ citations:
   coeff-shear:    {gazettePage: "3546", pdfPage: 965, note: "Part 6 Table 6.6.11 ratio of load in la and lb directions for shear and load on supports"}
   shrinkage:      {gazettePage: "3655", pdfPage: 1075, note: "Part 6 Sec 8.1.11.2 shrinkage and temperature reinforcement"}
   cover:          {gazettePage: "3650", pdfPage: 1069, note: "Part 6 Sec 8.1.7.2 cover for cast-in-place concrete"}
+  spectrum:       {gazettePage: "3193-3194", pdfPage: "612-613", note: "Part 6 Sec 2.5.4.3 Eq 6.2.34, 6.2.35a-d, 6.2.36 design response spectrum"}
+  site-soil:      {gazettePage: "3197", pdfPage: 616, note: "Part 6 Table 6.2.16 site factor S, TB, TC, TD; Table 6.2.17 importance factors"}
+  sdc:            {gazettePage: "3198", pdfPage: 617, note: "Part 6 Sec 2.5.5.2 Table 6.2.18 seismic design category"}
+  systems:        {gazettePage: "3202-3204", pdfPage: "621-623", note: "Part 6 Table 6.2.19 R, Omega, Cd and height limits (reinforced-concrete rows)"}
+  base-shear:     {gazettePage: "3207-3210", pdfPage: "626-629", note: "Part 6 Sec 2.5.6-2.5.7.5: static procedure limits, Eq 6.2.37 V = Sa W, Eq 6.2.38 period, Table 6.2.20, Sec 2.5.7.3 seismic weight, Eq 6.2.41 vertical distribution"}
+  drift:          {gazettePage: "3212-3213, 3229", pdfPage: "631-632, 648", note: "Part 6 Sec 2.5.7.7 Eq 6.2.45-6.2.46, Sec 2.5.7.9 Eq 6.2.48-6.2.49 P-delta, Sec 2.5.14 and Table 6.2.21 allowable storey drift"}
+  bearing-seismic: {gazettePage: "3309", pdfPage: 728, note: "Part 6 Ch 3 Sec 3.9.3.2: 33 % increase of allowable bearing pressure with wind or earthquake"}
+  col-axial:      {gazettePage: "3487", pdfPage: 906, note: "Part 6 Sec 6.3.3.6 Eq 6.6.9 maximum design axial strength, tied columns"}
+  col-steel:      {gazettePage: "3491", pdfPage: 910, note: "Part 6 Sec 6.3.9 limits of reinforcement; Sec 6.3.10.1 Eq 6.6.13-6.6.14 slenderness limits"}
+  col-slender:    {gazettePage: "3492-3496", pdfPage: "911-915", note: "Part 6 Sec 6.3.10.1.2 r = 0.30 h; 6.3.10.4.1 I = 0.70 Ig columns, 0.35 Ig beams; 6.3.10.5-6.3.10.7 Eq 6.6.17-6.6.28 moment magnification"}
+  phi-col:        {gazettePage: "3478", pdfPage: 897, note: "Part 6 Sec 6.2.3.2.2 phi = 0.65 compression-controlled tied, 0.90 tension-controlled, linear between"}
+  punching:       {gazettePage: "3518-3519", pdfPage: "937-938", note: "Part 6 Sec 6.4.10 footings and slabs: critical section d/2 from the column; Eq 6.6.72-6.6.74 two-way Vc"}
 
 # ---------------------------------------------------------------- dead loads
 unitWeights:                       # Table 6.2.1, kN/m3
@@ -263,7 +275,97 @@ coefficients:
       - {m: 0.50, v: [0.06, 0.06, 0.24, 0.06, 0.01, 0.03, 0.14, 0.11, 0.03]}
   loadOnSupports: "Beam on a long edge (length lb) carries w_a la / 2 per unit length; beam on a short edge (length la) carries w_b lb / 2 (ACI 318-63 reading of Table 6.6.11; the gazette gives the table only, Sec 6.5.8.3.1 says 'loads on the supporting beams shall be computed from Table 6.6.11')."
 
+# ---------------------------------------------------------------- seismic, equivalent static (Sec 2.5)
+seismic:
+  zoneDhaka: {z: 0.20, note: "Dhaka, zone 2; see spec/rules/bnbc-2020.yaml seismicZones"}
+  spectrum:
+    cite: spectrum
+    sa: "Sa = (2/3)(Z I / R) Cs, not less than 0.67 beta Z I S, beta = 0.11 (Eq 6.2.34); I/R cannot exceed 1"
+    beta: 0.11
+    cs: ["S (1 + (T/TB)(2.5 eta - 1))  for 0 <= T <= TB", "2.5 S eta  for TB <= T <= TC", "2.5 S eta (TC/T)  for TC <= T <= TD", "2.5 S eta (TC TD / T^2)  for TD <= T <= 4 s"]
+    eta: {expr: "sqrt(10 / (5 + xi)) >= 0.55", xiPercentReference: 5}
+  siteClasses:                      # Table 6.2.16
+    cite: site-soil
+    SA: {s: 1.0,  tb: 0.15, tc: 0.40, td: 2.0}
+    SB: {s: 1.2,  tb: 0.15, tc: 0.50, td: 2.0}
+    SC: {s: 1.15, tb: 0.20, tc: 0.60, td: 2.0}
+    SD: {s: 1.35, tb: 0.20, tc: 0.80, td: 2.0}
+    SE: {s: 1.4,  tb: 0.15, tc: 0.50, td: 2.0}
+  importance: {cite: site-soil, I_II: 1.00, III: 1.25, IV: 1.50}
+  designCategory:                   # Table 6.2.18, zones 1..4
+    cite: sdc
+    I_II_III: {SA: [B, C, C, D], SB: [B, C, D, D], SC: [B, C, D, D], SD: [C, D, D, D], SE: [D, D, D, D]}
+    IV:       {SA: [C, D, D, D], SB: [C, D, D, D], SC: [C, D, D, D], SD: [D, D, D, D], SE: [D, D, D, D]}
+  systems:                          # Table 6.2.19, reinforced-concrete rows. height: limit in m for categories B, C, D (null = NL, "NP" = not permitted)
+    cite: systems
+    rows:
+    - {id: special-rc-mrf,           label: "Special reinforced concrete moment frames", r: 8,   omega: 3,   cd: 5.5, height: [null, null, null]}
+    - {id: intermediate-rc-mrf,      label: "Intermediate reinforced concrete moment frames", r: 5, omega: 3, cd: 4.5, height: [null, null, "NP"]}
+    - {id: ordinary-rc-mrf,          label: "Ordinary reinforced concrete moment frames", r: 3, omega: 3, cd: 2.5, height: [null, "NP", "NP"]}
+    - {id: dual-special-rc-walls,    label: "Dual system: special RC moment frames with special RC shear walls", r: 7, omega: 2.5, cd: 5.5, height: [null, null, null]}
+    - {id: dual-ordinary-rc-walls,   label: "Dual system: special RC moment frames with ordinary RC shear walls", r: 6, omega: 2.5, cd: 5, height: [null, null, "NP"]}
+  period:                           # Table 6.2.20, T = Ct h^m (h in m)
+    cite: base-shear
+    concreteMomentFrame: {ct: 0.0466, m: 0.9}
+    otherSystems: {ct: 0.0488, m: 0.75}
+  staticProcedureApplies: "T < 4 Tc and T < 2 s, and no irregularity in elevation (Sec 2.5.6)"
+  weight:                           # Sec 2.5.7.3
+    cite: base-shear
+    liveUpTo3KnM2: 0.25
+    liveAbove3KnM2: 0.50
+  baseShear: "V = Sa W (Eq 6.2.37)"
+  verticalDistribution: {expr: "Fx = V wx hx^k / sum(wi hi^k)", kAtOrBelow0_5s: 1, kAtOrAbove2_5s: 2, cite: base-shear}
+  drift:
+    cite: drift
+    deflection: "delta_x = Cd delta_xe / I (Eq 6.2.45); drift = delta_x - delta_(x-1) (Eq 6.2.46)"
+    limits: {allOther: {I_II: 0.020, III: 0.015, IV: 0.010}, upTo4StoreysAccommodating: {I_II: 0.025, III: 0.020, IV: 0.015}, note: "times the storey height h_sx (Table 6.2.21)"}
+    pDelta: {exemptBelowTheta: 0.10, thetaExpr: "theta = Px Delta / (Vx hsx Cd)", thetaMax: "0.5 / (beta Cd) <= 0.25", cite: drift}
+  overturning: {foundationFraction: 0.75, cite: drift, note: "Sec 2.5.7.8: foundations may be designed for 3/4 of the overturning moment of Eq 6.2.47"}
+  bearingIncrease: {fraction: 0.33, cite: bearing-seismic}
+
+# ---------------------------------------------------------------- columns (Sec 6.3)
+columns:
+  phi: {compressionControlledTied: 0.65, tensionControlled: 0.90, cite: phi-col, note: "linear between the compression-controlled limit strain (fy/Es = 0.002 for Grade 420) and 0.005"}
+  pnMaxTied: {factor: 0.80, expr: "Pn,max = 0.80 (0.85 fc (Ag - Ast) + fy Ast)", cite: col-axial}
+  steel: {minRatio: 0.01, maxRatio: 0.06, preferredMaxRatio: 0.04, minBarsRectangularTies: 4, cite: col-steel}
+  slenderness:
+    cite: col-steel
+    neglectUnbracedBelow: 22
+    neglectBraced: "34 - 12 (M1/M2) <= 40"
+    radiusOfGyration: "r = 0.30 h for rectangular members (Sec 6.3.10.1.2)"
+  stiffness: {columnIg: 0.70, beamIg: 0.35, cite: col-slender}
+  magnification:
+    cite: col-slender
+    nonsway: "delta_ns = Cm / (1 - Pu / (0.75 Pc)) >= 1 (Eq 6.6.19), Pc = pi^2 EI / (k lu)^2 (Eq 6.6.20), k = 1.0 (Sec 6.3.10.6.3)"
+    ei: "EI = 0.4 Ec Ig / (1 + beta_dns) (Eq 6.6.22)"
+    cm: "Cm = 0.6 + 0.4 M1/M2 (Eq 6.6.23)"
+    minMoment: "M2,min = Pu (15 + 0.03 h), h in mm, Pu in N (Eq 6.6.24)"
+    sway: "delta_s = 1 / (1 - sum Pu / (0.75 sum Pc)) >= 1 (Eq 6.6.28), k >= 1.0 from the alignment chart (Sec 6.3.10.7.2)"
+    totalLimit: "Total moment including second-order effects not above 1.4 times the first-order moment (Sec 6.3.10.2.1)"
+    nonswayStorey: "Q = sum Pu Delta0 / (Vus lc) <= 0.05 (Eq 6.6.17)"
+
+# ---------------------------------------------------------------- footings (Sec 6.4.10, 6.8)
+footings:
+  cite: punching
+  twoWayVc:
+    - "Vc = 0.17 (1 + 2/beta) sqrt(fc) b0 d  (Eq 6.6.72), beta = long / short side of the column"
+    - "Vc = 0.083 (alpha_s d / b0 + 2) sqrt(fc) b0 d  (Eq 6.6.73), alpha_s = 40 interior, 30 edge, 20 corner columns"
+    - "Vc = 0.33 sqrt(fc) b0 d  (Eq 6.6.74); Vc is the smallest of the three"
+  alphaS: {interior: 40, edge: 30, corner: 20}
+  criticalPerimeter: "b0 at d/2 from the column face (Sec 6.4.10.1.2)"
+  oneWayVc: "Vc = 0.17 sqrt(fc) b d, beam action (Sec 6.4.10.1.1)"
+  coverAgainstEarth: 75
+
 gaps:
+  - id: gap-seismic-assumed-inputs
+    what: "Site class, occupancy category and structural system are not known from the plot: Table 6.1.1 (occupancy categories) and Sec 2.5.3 site classification are not transcribed."
+    why: "src/structure defaults to site class SD (soft alluvium typical of Dhaka), occupancy category II (flats, I = 1.00) and special RC moment frames (the only RC frame permitted in design category D); all three are inputs."
+  - id: gap-seismic-limited
+    what: "Torsion (Sec 2.5.7.6), dynamic analysis (Sec 2.5.8-2.5.9) and vertical or plan irregularity checks are not evaluated; wind (Sec 2.4) is not transcribed."
+    why: "The Structure screen says screening, not final design; combination 5 (1.2D + 1.0E + 1.0L) is the only lateral combination checked."
+  - id: gap-footing-moments-and-soil
+    what: "Allowable bearing pressure is a site input (the gazette gives only presumptive values for light structures, Table 6.3.7); minimum footing depth above steel is not located in the pages read."
+    why: "Default 150 kPa is an assumption; footing depth above bottom steel is taken as at least 150 mm (ACI 318 practice)."
   - id: gap-discontinuous-edge-negative
     what: "The gazette's coefficient method (Sec 6.5.8.3) says nothing about negative moment at a discontinuous edge (cases 1, 3, 5, 6, 7 have blank Ca,neg or Cb,neg cells)."
     why: "src/structure/slab.ts uses one third of the positive moment there (ACI 318-63 rule, not in the gazette) and says so in its assumptions list."

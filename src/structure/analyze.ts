@@ -13,6 +13,8 @@ import type { RoomKind } from "../plans/types";
 import { ASSUMPTIONS, UNIT_WEIGHTS, type Assumption } from "./materials";
 import { liveLoadForKind, partitionAllowanceKnM2, roofLiveKnM2 } from "./loads";
 import { designSlab, type Continuity, type SlabInput, type SlabResult } from "./slab";
+import { alphaF, tBeamInertia } from "./tbeam";
+import { analyzeFrame, type FrameOptions, type FrameResult } from "./frame";
 import { sizeBeamLine, type BeamLineResult, type BeamSection, type BeamSpanInput } from "./beam";
 
 export interface PanelResult {
@@ -49,7 +51,7 @@ export interface LevelResult {
 
 export interface MemberFailure {
   level: number;
-  member: "slab" | "beam";
+  member: "slab" | "beam" | "column" | "footing" | "seismic";
   id: string;
   util: number;
   governs: string;
@@ -57,6 +59,7 @@ export interface MemberFailure {
 
 export interface StructureResult {
   levels: LevelResult[];
+  frame: FrameResult;
   failures: MemberFailure[];
   /** Worst demand/capacity ratio anywhere (never clamped). */
   util: number;
@@ -76,22 +79,7 @@ interface Panel {
 
 const TOL = 1;
 
-/** Second moment of area (mm4) of a T-beam: web bw x h with flange overhangs of min(h - hf, 4 hf) on each adjoining side (ACI 318 rule). */
-export function tBeamInertia(bwMm: number, hMm: number, hfMm: number, sides: number): number {
-  const overhang = Math.min(hMm - hfMm, 4 * hfMm);
-  const bf = bwMm + sides * overhang;
-  const aF = bf * hfMm;
-  const aW = bwMm * (hMm - hfMm);
-  const yF = hfMm / 2;
-  const yW = hfMm + (hMm - hfMm) / 2;
-  const yBar = (aF * yF + aW * yW) / (aF + aW);
-  return (bf * hfMm ** 3) / 12 + aF * (yF - yBar) ** 2 + (bwMm * (hMm - hfMm) ** 3) / 12 + aW * (yW - yBar) ** 2;
-}
-
-/** Beam-to-slab stiffness ratio alpha_f (Sec 6.2.5.3.3): Ib / Is, with Is the slab strip bounded by the adjoining panel centrelines. */
-export function alphaF(sec: BeamSection, hfMm: number, sides: number, stripWidthMm: number): number {
-  return tBeamInertia(sec.bMm, sec.hMm, hfMm, sides) / ((stripWidthMm * hfMm ** 3) / 12);
-}
+export { alphaF, tBeamInertia };
 
 function panelsOf(geo: FloorGeometry, loadsGeo: FloorGeometry): Panel[] {
   const f = geo.fitted;
@@ -280,7 +268,7 @@ function computeLevel(model: BuildingModel, k: number): Omit<LevelResult, "index
   return { kind: roof ? "roof" : "floor", slabThicknessMm: slabMm, panels: panelResults, beamLines, util };
 }
 
-export function analyzeStructure(model: BuildingModel): StructureResult {
+export function analyzeStructure(model: BuildingModel, frameOptions: FrameOptions = {}): StructureResult {
   const n = model.storeys.length;
   const cache = new Map<string, Omit<LevelResult, "index" | "levelMm">>();
   const levels: LevelResult[] = [];
@@ -302,7 +290,9 @@ export function analyzeStructure(model: BuildingModel): StructureResult {
         failures.push({ level: lv.index, member: "beam", id: `B-${b.orientation}${b.at}`, util: b.result.util, governs: worst.governs });
       }
   }
+  const frame = analyzeFrame(model, levels, frameOptions);
+  failures.push(...frame.failures);
   failures.sort((a, b) => b.util - a.util);
-  const util = Math.max(0, ...levels.map((l) => l.util));
-  return { levels, failures, util, ok: failures.length === 0, assumptions: ASSUMPTIONS };
+  const util = Math.max(0, ...levels.map((l) => l.util), frame.util);
+  return { levels, frame, failures, util, ok: failures.length === 0, assumptions: ASSUMPTIONS };
 }

@@ -26,7 +26,7 @@ export interface StructurePack {
     appliesWhenKllAtAtLeastM2: number;
     minFraction: { oneFloor: number; twoOrMoreFloors: number };
     noReductionAboveKnM2: number;
-    kll: { interiorBeams: number; edgeBeamsNoCantilever: number; other: number };
+    kll: { interiorColumns: number; exteriorColumnsNoCantilever: number; interiorBeams: number; edgeBeamsNoCantilever: number; other: number };
   };
   minThickness: { table_6_6_1: { solidOneWaySlab: { divisors: number[] } } };
   approxCoefficients: { momentDivisors: Record<string, number> };
@@ -71,4 +71,60 @@ export function coefficient(key: CoefficientKey, caseNo: number, m: number): num
   if (hi.m === lo.m) return a;
   const t = (mm - lo.m) / (hi.m - lo.m);
   return b + (a - b) * t;
+}
+
+// ---------------------------------------------------------------- seismic, column and footing sections
+
+export type SiteClass = "SA" | "SB" | "SC" | "SD" | "SE";
+export type OccupancyGroup = "I_II" | "III" | "IV";
+
+export interface SeismicSystem {
+  id: string;
+  label: string;
+  r: number;
+  omega: number;
+  cd: number;
+  /** Height limits in m for design categories B, C, D: null = no limit, "NP" = not permitted. */
+  height: Array<number | null | "NP">;
+}
+
+interface SeismicSection {
+  spectrum: { beta: number };
+  siteClasses: Record<SiteClass, { s: number; tb: number; tc: number; td: number }>;
+  importance: Record<OccupancyGroup, number>;
+  designCategory: { I_II_III: Record<SiteClass, string[]>; IV: Record<SiteClass, string[]> };
+  systems: { rows: SeismicSystem[] };
+  period: { concreteMomentFrame: { ct: number; m: number }; otherSystems: { ct: number; m: number } };
+  weight: { liveUpTo3KnM2: number; liveAbove3KnM2: number };
+  verticalDistribution: { kAtOrBelow0_5s: number; kAtOrAbove2_5s: number };
+  drift: {
+    limits: { allOther: Record<OccupancyGroup, number>; upTo4StoreysAccommodating: Record<OccupancyGroup, number> };
+    pDelta: { exemptBelowTheta: number };
+  };
+  bearingIncrease: { fraction: number };
+}
+
+export function seismicPack(): SeismicSection {
+  return (structurePack() as unknown as { seismic: SeismicSection }).seismic;
+}
+
+export interface ColumnSection {
+  phi: { compressionControlledTied: number; tensionControlled: number };
+  pnMaxTied: { factor: number };
+  steel: { minRatio: number; maxRatio: number; preferredMaxRatio: number };
+  slenderness: { neglectUnbracedBelow: number };
+  stiffness: { columnIg: number; beamIg: number };
+}
+
+export function columnPack(): ColumnSection {
+  return (structurePack() as unknown as { columns: ColumnSection }).columns;
+}
+
+export interface FootingSection {
+  alphaS: { interior: number; edge: number; corner: number };
+  coverAgainstEarth: number;
+}
+
+export function footingPack(): FootingSection {
+  return (structurePack() as unknown as { footings: FootingSection }).footings;
 }

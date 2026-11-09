@@ -76,6 +76,9 @@ export interface BeamSpanResult {
   /** Service line loads used, kN/m: dead and (reduced) live. */
   dKnM: number;
   lKnM: number;
+  /** Unreduced live line load: the Table 6.2.3 part and the partition allowance, kN/m (columns take their own reduction). */
+  lTableKnM: number;
+  lPartitionKnM: number;
   /** L / L0 from Sec 2.3.13 (1 when no reduction applies). */
   liveFactor: number;
   util: number;
@@ -168,6 +171,8 @@ export function designBeamLine(input: BeamLineInput, sec: BeamSection): BeamLine
       deflection: defl,
       dKnM: dead[i],
       lKnM: live[i],
+      lTableKnM: s.slabLiveTable,
+      lPartitionKnM: s.slabLivePartition,
       liveFactor: factor[i],
       util,
       governs,

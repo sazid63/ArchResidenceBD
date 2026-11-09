@@ -20,13 +20,13 @@ export const beamSelfWeightKnM = (bMm: number, hMm: number, slabMm: number): num
 
 /**
  * Sec 2.3.13 live-load reduction factor L / L0 for a member with tributary area `atM2` and element factor `kll`
- * (Eq 6.2.1): 1 below K_LL A_T = 37.16 m2; never below 0.5 for a member carrying one floor. Loads above 4.8 kN/m2
+ * (Eq 6.2.1): 1 below K_LL A_T = 37.16 m2; never below 0.5 for a member carrying one floor, 0.4 for two or more. Loads above 4.8 kN/m2
  * are not reduced (Sec 2.3.13.2).
  */
-export function liveReductionFactor(l0KnM2: number, atM2: number, kll: number): number {
+export function liveReductionFactor(l0KnM2: number, atM2: number, kll: number, floors = 1): number {
   const red = structurePack().liveLoadReduction;
   if (l0KnM2 > red.noReductionAboveKnM2 || kll * atM2 < red.appliesWhenKllAtAtLeastM2) return 1;
-  return Math.max(0.25 + 4.57 / Math.sqrt(kll * atM2), red.minFraction.oneFloor);
+  return Math.max(0.25 + 4.57 / Math.sqrt(kll * atM2), floors >= 2 ? red.minFraction.twoOrMoreFloors : red.minFraction.oneFloor);
 }
 
 /** BNBC Table 6.2.3 row used for a room (flats: private rooms 2.0, public rooms and corridors 4.8). */
