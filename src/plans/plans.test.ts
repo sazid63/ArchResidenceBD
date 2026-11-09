@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { distribute, fitPlan, fitRange } from "./fit";
 import { deriveGeometry } from "./geometry";
 import { PLAN_LIBRARY, P1_4B, getPlan } from "./library";
-import { availableUnitCounts } from "../model/planChoices";
+import { availableUnitCounts, planChoices } from "../model/planChoices";
 import { validateFitted } from "./validate";
 
 describe("distribute", () => {
@@ -96,8 +96,8 @@ describe("the three- and four-flat plans (M2-3)", () => {
   const ids = ["p3-2b", "p4-2b", "p4-1b"];
 
   it("are in the library, offer 3 and 4 flats per floor, and have the expected flats", () => {
-    expect(PLAN_LIBRARY.length).toBe(10);
-    expect(new Set(PLAN_LIBRARY.map((p) => p.id)).size).toBe(10);
+    expect(PLAN_LIBRARY.length).toBe(14);
+    expect(new Set(PLAN_LIBRARY.map((p) => p.id)).size).toBe(14);
     expect(availableUnitCounts()).toEqual([1, 2, 3, 4]);
     expect(getPlan("p3-2b")).toMatchObject({ unitsPerFloor: 3, bedroomsPerUnit: 2 });
     expect(getPlan("p4-2b")).toMatchObject({ unitsPerFloor: 4, bedroomsPerUnit: 2 });
@@ -143,4 +143,49 @@ describe("the three- and four-flat plans (M2-3)", () => {
       for (const u of ["b", "c", "d"]) expect(area(`${u}-${k}`)).toBeCloseTo(a, 6);
     }
   });
+});
+
+describe("narrow-plot plans (Phase B1)", () => {
+  const narrow = ["pn-2b", "pn-2b-f", "pn-3b", "pn-2f"];
+
+  it("at least 3 plans fit a 3 katha, 10 x 20 m plot within the RAJUK ground coverage", () => {
+    for (const storeys of [4, 6]) {
+      const ok = planChoices(10, 20, { roadWidthM: 6, storeys }).filter((c) => c.fit.ok && c.coverage?.status === "pass");
+      expect(ok.length, "plans that fit within coverage at " + storeys + " storeys").toBeGreaterThanOrEqual(3);
+      for (const id of ["pn-2b", "pn-2b-f", "pn-3b"]) expect(ok.map((c) => c.plan.id)).toContain(id);
+    }
+  });
+
+  it("a 2-flat plan fits a 4 katha plot (11 x 25 m) within coverage", () => {
+    const c = planChoices(11, 25, { roadWidthM: 6, storeys: 5, unitsPerFloor: 2 }).find((x) => x.plan.id === "pn-2f")!;
+    expect(c.fit.ok).toBe(true);
+    expect(c.coverage?.status).toBe("pass");
+  });
+
+  for (const id of narrow) {
+    const plan = getPlan(id)!;
+    const range = fitRange(plan);
+    it(id + " is under 7.8 m wide and every habitable room, kitchen and toilet reaches daylight or a light well", () => {
+      expect(range.widthMm.max).toBeLessThanOrEqual(7800);
+      const r = fitPlan(plan, { widthMm: range.widthMm.pref, depthMm: range.depthMm.pref });
+      if (!r.ok) throw new Error("fit");
+      const geo = deriveGeometry(r.fitted);
+      r.fitted.rooms.forEach((room, i) => {
+        if (["bedroom", "living", "kitchen", "toilet", "dining"].includes(room.def.kind))
+          expect(geo.metrics[i].exteriorMm + geo.metrics[i].shaftMm, id + " " + room.def.id).toBeGreaterThan(0);
+      });
+    });
+
+    it(id + " has a light well of at least 4 m² net (BNBC 2020 Part 3 Table 3.1.11, up to 5 storeys)", () => {
+      const r = fitPlan(plan, { widthMm: fitRange(plan).widthMm.min, depthMm: fitRange(plan).depthMm.min });
+      if (!r.ok) throw new Error("fit");
+      const geo = deriveGeometry(r.fitted);
+      const wells = r.fitted.rooms.map((room, i) => ({ room, i })).filter((x) => x.room.def.kind === "shaft");
+      expect(wells.length).toBeGreaterThan(0);
+      for (const w of wells) {
+        expect(geo.metrics[w.i].netAreaM2).toBeGreaterThanOrEqual(4);
+        expect(geo.metrics[w.i].netWidthMm).toBeGreaterThanOrEqual(1500);
+      }
+    });
+  }
 });

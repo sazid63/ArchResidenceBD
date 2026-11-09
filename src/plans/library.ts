@@ -621,7 +621,211 @@ export const P4_1B: PlanDefinition = {
   doors: [...CORNERS.flatMap((c) => flatDoors(c.unit, false)), ...STRIP_DOORS],
 };
 
-export const PLAN_LIBRARY: PlanDefinition[] = [P1_4B, P1_3B, P1_4B_WIDE, P2_2B_FB, P2_2B_LR, P2_3B_LR, P2_3B_FB, P3_2B, P4_2B, P4_1B];
+// ---------------------------------------------------------------------------
+// Phase B1: narrow-plot plans (about 3 to 5 katha, buildable width 7.4 to 7.7 m). Original grids.
+//  - Three columns: bedroom column, a 1.4 m corridor spine, a service/living column. Stair and corridor are
+//    sized as in the other plans (stair room 4.06 x 2.66 m net or more).
+//  - No lift: a lift does not fit a 7.5 m frontage. The Compliance screen reports a missing lift as a fail
+//    above six storeys (BNBC 2020 Part 8 Sec 4.2.1.1), so taller buildings are not silently accepted.
+//  - Light well ("shaft" cell on the right wall): sized for buildings up to 5 storeys (Table 3.1.11: 4.0 m2,
+//    1.5 m); the two-flat plan has a 6.5 m2 well for taller buildings.
+//  - The footprint is capped by the bay maxima so a 3 katha (200 m2) plot stays within the 65 % coverage row.
+// ---------------------------------------------------------------------------
+
+const XN: Bay[] = [bay(3150, 3250, 3300), bay(1400, 1400, 1450), bay(2850, 2900, 2950)];
+const XN_TIGHT: Bay[] = [bay(3150, 3250, 3250), bay(1400, 1400, 1400), bay(2850, 2900, 2950)];
+
+/** One flat per floor, two bedrooms, stair at the back, light well beside the dining room. */
+export const PN_2B: PlanDefinition = {
+  id: "pn-2b",
+  name: t("Narrow plot, one flat per floor, 2 bedrooms", "সরু প্লট, প্রতি তলায় একটি ফ্ল্যাট, ২ বেডরুম"),
+  description: t(
+    "Two bedrooms with attached toilets down the left wall, a corridor spine, living room at the road side, dining room and a side light well on the right, kitchen and stair at the back. For plots about 9.5 m wide (3 katha and up). No lift.",
+    "বাম দেয়ালে দুটি বেডরুম ও টয়লেট, মাঝখানে করিডোর, রাস্তার দিকে বসার ঘর, ডানে খাবার ঘর ও পাশের আলোক-কূপ, পেছনে রান্নাঘর ও সিঁড়ি। প্রায় ৯.৫ মিটার চওড়া প্লটের জন্য (৩ কাঠা থেকে)। লিফট নেই।",
+  ),
+  unitsPerFloor: 1,
+  bedroomsPerUnit: 2,
+  baysX: XN,
+  baysY: [bay(3600, 3800, 3900), bay(1500, 1600, 1700), bay(3350, 3400, 3500), bay(1800, 2000, 2100), bay(2450, 2450, 2450), bay(1800, 1800, 1800)],
+  structuralX: [0, 2, 3],
+  structuralY: [0, 2, 3, 5, 6],
+  rooms: [
+    room("a-bed1", "bedroom", "A", "Master bedroom", "মাস্টার বেডরুম", [0, 0, 0, 0]),
+    room("a-living", "living", "A", "Living room", "বসার ঘর", [1, 0, 2, 0]),
+    room("a-toilet1", "toilet", "A", "Master toilet", "মাস্টার টয়লেট", [0, 1, 0, 1]),
+    room("a-corridor", "corridor", "A", "Corridor", "করিডোর", [1, 1, 1, 4]),
+    room("a-dining", "dining", "A", "Dining", "খাবার ঘর", [2, 1, 2, 2]),
+    room("a-bed2", "bedroom", "A", "Bedroom 2", "বেডরুম ২", [0, 2, 0, 2]),
+    room("a-toilet2", "toilet", "A", "Common toilet", "কমন টয়লেট", [0, 3, 0, 3]),
+    room("well", "shaft", undefined, "Light well", "আলোক-কূপ", [2, 3, 2, 3]),
+    room("a-kitchen", "kitchen", "A", "Kitchen", "রান্নাঘর", [0, 4, 0, 5]),
+    room("lobby", "lobby", undefined, "Stair lobby", "সিঁড়ির লবি", [1, 5, 1, 5]),
+    room("stair", "stair", undefined, "Stair", "সিঁড়ি", [2, 4, 2, 5]),
+  ],
+  doors: [
+    { between: ["a-living", "a-bed1"] },
+    { between: ["a-bed1", "a-toilet1"] },
+    { between: ["a-living", "a-corridor"] },
+    { between: ["a-living", "a-dining"] },
+    { between: ["a-corridor", "a-dining"] },
+    { between: ["a-corridor", "a-bed2"] },
+    { between: ["a-corridor", "a-toilet2"] },
+    { between: ["a-corridor", "a-kitchen"] },
+    { between: ["a-corridor", "lobby"], main: true },
+    { between: ["lobby", "stair"] },
+  ],
+};
+
+/** One flat per floor, two bedrooms, stair at the road side and the living room at the back. */
+export const PN_2B_F: PlanDefinition = {
+  id: "pn-2b-f",
+  name: t("Narrow plot, stair at the front, 2 bedrooms", "সরু প্লট, সামনে সিঁড়ি, ২ বেডরুম"),
+  description: t(
+    "Stair and lobby at the road side, a large master bedroom beside them, a corridor spine with a second bedroom and two toilets on the left, dining room and light well on the right, and a wide living room across the back. No lift.",
+    "রাস্তার দিকে সিঁড়ি ও লবি, পাশে বড় মাস্টার বেডরুম, বামে করিডোর ঘেঁষে দ্বিতীয় বেডরুম ও দুটি টয়লেট, ডানে খাবার ঘর ও আলোক-কূপ, পেছনে প্রশস্ত বসার ঘর। লিফট নেই।",
+  ),
+  unitsPerFloor: 1,
+  bedroomsPerUnit: 2,
+  baysX: XN,
+  baysY: [bay(2450, 2450, 2450), bay(1800, 1800, 1800), bay(1800, 2000, 2100), bay(3350, 3400, 3500), bay(1800, 1800, 1900), bay(3300, 3500, 3700)],
+  structuralX: [0, 2, 3],
+  structuralY: [0, 2, 4, 6],
+  rooms: [
+    room("a-bed1", "bedroom", "A", "Master bedroom", "মাস্টার বেডরুম", [0, 0, 0, 1]),
+    room("lobby", "lobby", undefined, "Stair lobby", "সিঁড়ির লবি", [1, 0, 1, 0]),
+    room("stair", "stair", undefined, "Stair", "সিঁড়ি", [2, 0, 2, 1]),
+    room("a-corridor", "corridor", "A", "Corridor", "করিডোর", [1, 1, 1, 4]),
+    room("a-toilet1", "toilet", "A", "Master toilet", "মাস্টার টয়লেট", [0, 2, 0, 2]),
+    room("well", "shaft", undefined, "Light well", "আলোক-কূপ", [2, 2, 2, 2]),
+    room("a-bed2", "bedroom", "A", "Bedroom 2", "বেডরুম ২", [0, 3, 0, 3]),
+    room("a-dining", "dining", "A", "Dining", "খাবার ঘর", [2, 3, 2, 3]),
+    room("a-toilet2", "toilet", "A", "Common toilet", "কমন টয়লেট", [0, 4, 0, 4]),
+    room("a-kitchen", "kitchen", "A", "Kitchen", "রান্নাঘর", [2, 4, 2, 4]),
+    room("a-living", "living", "A", "Living room", "বসার ঘর", [0, 5, 2, 5]),
+  ],
+  doors: [
+    { between: ["lobby", "stair"] },
+    { between: ["a-corridor", "lobby"], main: true },
+    { between: ["a-corridor", "a-bed1"] },
+    { between: ["a-bed1", "a-toilet1"] },
+    { between: ["a-corridor", "a-bed2"] },
+    { between: ["a-corridor", "a-toilet2"] },
+    { between: ["a-corridor", "a-dining"] },
+    { between: ["a-dining", "a-kitchen"] },
+    { between: ["a-corridor", "a-living"] },
+    { between: ["a-kitchen", "a-living"] },
+  ],
+};
+
+/** One flat per floor, three bedrooms, stair at the back, light well between dining and kitchen. */
+export const PN_3B: PlanDefinition = {
+  id: "pn-3b",
+  name: t("Narrow plot, one flat per floor, 3 bedrooms", "সরু প্লট, প্রতি তলায় একটি ফ্ল্যাট, ৩ বেডরুম"),
+  description: t(
+    "Three bedrooms down the left wall, a corridor spine, living room at the road side, dining room, kitchen and a side light well on the right, stair at the back. For plots about 9.5 m wide and 20 m deep or more. No lift.",
+    "বাম দেয়ালে তিনটি বেডরুম, মাঝখানে করিডোর, রাস্তার দিকে বসার ঘর, ডানে খাবার ঘর, রান্নাঘর ও পাশের আলোক-কূপ, পেছনে সিঁড়ি। প্রায় ৯.৫ মিটার চওড়া ও ২০ মিটার বা বেশি গভীর প্লটের জন্য। লিফট নেই।",
+  ),
+  unitsPerFloor: 1,
+  bedroomsPerUnit: 3,
+  baysX: XN_TIGHT,
+  baysY: [bay(3600, 3800, 3800), bay(1500, 1600, 1600), bay(3350, 3400, 3400), bay(1800, 1800, 1800), bay(1800, 2000, 2000), bay(2450, 2450, 2450), bay(1800, 1800, 1800)],
+  structuralX: [0, 2, 3],
+  structuralY: [0, 2, 3, 5, 7],
+  rooms: [
+    room("a-bed1", "bedroom", "A", "Master bedroom", "মাস্টার বেডরুম", [0, 0, 0, 0]),
+    room("a-living", "living", "A", "Living room", "বসার ঘর", [1, 0, 2, 0]),
+    room("a-toilet1", "toilet", "A", "Master toilet", "মাস্টার টয়লেট", [0, 1, 0, 1]),
+    room("a-corridor", "corridor", "A", "Corridor", "করিডোর", [1, 1, 1, 4]),
+    room("a-dining", "dining", "A", "Dining", "খাবার ঘর", [2, 1, 2, 2]),
+    room("a-bed2", "bedroom", "A", "Bedroom 2", "বেডরুম ২", [0, 2, 0, 2]),
+    room("a-toilet2", "toilet", "A", "Common toilet", "কমন টয়লেট", [0, 3, 0, 3]),
+    room("a-kitchen", "kitchen", "A", "Kitchen", "রান্নাঘর", [2, 3, 2, 3]),
+    room("a-bed3", "bedroom", "A", "Bedroom 3", "বেডরুম ৩", [0, 4, 0, 5]),
+    room("well", "shaft", undefined, "Light well", "আলোক-কূপ", [2, 4, 2, 4]),
+    room("lobby", "lobby", undefined, "Stair lobby", "সিঁড়ির লবি", [1, 5, 1, 6]),
+    room("stair", "stair", undefined, "Stair", "সিঁড়ি", [2, 5, 2, 6]),
+    room("meter", "store", undefined, "Meter room", "মিটার রুম", [0, 6, 0, 6]),
+  ],
+  doors: [
+    { between: ["a-living", "a-bed1"] },
+    { between: ["a-bed1", "a-toilet1"] },
+    { between: ["a-living", "a-corridor"] },
+    { between: ["a-living", "a-dining"] },
+    { between: ["a-corridor", "a-dining"] },
+    { between: ["a-corridor", "a-bed2"] },
+    { between: ["a-corridor", "a-toilet2"] },
+    { between: ["a-corridor", "a-kitchen"] },
+    { between: ["a-dining", "a-kitchen"] },
+    { between: ["a-corridor", "a-bed3"] },
+    { between: ["a-corridor", "lobby"], main: true },
+    { between: ["lobby", "stair"] },
+    { between: ["lobby", "meter"] },
+  ],
+};
+
+/** A narrow two-flat plan for about 4 to 5 katha: two 2-bedroom flats, front and back, sharing a stair and a light well. */
+export const PN_2F: PlanDefinition = {
+  id: "pn-2f",
+  name: t("Narrow plot, two flats per floor, 2 bedrooms", "সরু প্লট, প্রতি তলায় দুটি ফ্ল্যাট, ২ বেডরুম"),
+  description: t(
+    "Flat A faces the road and flat B the back; the stair and a lobby sit between them, with a 6.5 m² light well and a meter room beside the stair. Each flat has two bedrooms, a toilet, a kitchen and a dining room, all on an outside wall. For plots about 9.5 m wide and 24 m deep or more. No lift.",
+    "ফ্ল্যাট এ রাস্তার দিকে, ফ্ল্যাট বি পেছনে; মাঝখানে সিঁড়ি ও লবি, পাশে ৬.৫ বর্গমিটার আলোক-কূপ ও মিটার রুম। প্রতিটি ফ্ল্যাটে দুটি বেডরুম, টয়লেট, রান্নাঘর ও খাবার ঘর, সবকটির বাইরের দেয়াল আছে। প্রায় ৯.৫ মিটার চওড়া ও ২৪ মিটার বা বেশি গভীর প্লটের জন্য। লিফট নেই।",
+  ),
+  unitsPerFloor: 2,
+  bedroomsPerUnit: 2,
+  baysX: XN,
+  baysY: [
+    bay(3450, 3700, 3700),
+    bay(1800, 1800, 1800),
+    bay(3350, 3350, 3350),
+    bay(2450, 2450, 2450),
+    bay(1800, 1800, 1800),
+    bay(3350, 3350, 3350),
+    bay(1800, 1800, 1800),
+    bay(3450, 3700, 3700),
+  ],
+  structuralX: [0, 2, 3],
+  structuralY: [0, 2, 3, 5, 6, 8],
+  rooms: [
+    // Flat A (front)
+    room("a-bed1", "bedroom", "A", "A master bedroom", "এ মাস্টার বেডরুম", [0, 0, 0, 0]),
+    room("a-living", "living", "A", "A living room", "এ বসার ঘর", [1, 0, 2, 0]),
+    room("a-toilet", "toilet", "A", "A toilet", "এ টয়লেট", [0, 1, 0, 1]),
+    room("a-corridor", "corridor", "A", "A corridor", "এ করিডোর", [1, 1, 1, 2]),
+    room("a-kitchen", "kitchen", "A", "A kitchen", "এ রান্নাঘর", [2, 1, 2, 1]),
+    room("a-bed2", "bedroom", "A", "A bedroom 2", "এ বেডরুম ২", [0, 2, 0, 2]),
+    room("a-dining", "dining", "A", "A dining", "এ খাবার ঘর", [2, 2, 2, 2]),
+    // Core band
+    room("well", "shaft", undefined, "Light well", "আলোক-কূপ", [0, 3, 0, 3]),
+    room("meter", "store", undefined, "Meter room", "মিটার রুম", [0, 4, 0, 4]),
+    room("lobby", "lobby", undefined, "Stair lobby", "সিঁড়ির লবি", [1, 3, 1, 4]),
+    room("stair", "stair", undefined, "Stair", "সিঁড়ি", [2, 3, 2, 4]),
+    // Flat B (back), the mirror image of A in depth
+    room("b-bed2", "bedroom", "B", "B bedroom 2", "বি বেডরুম ২", [0, 5, 0, 5]),
+    room("b-dining", "dining", "B", "B dining", "বি খাবার ঘর", [2, 5, 2, 5]),
+    room("b-corridor", "corridor", "B", "B corridor", "বি করিডোর", [1, 5, 1, 6]),
+    room("b-toilet", "toilet", "B", "B toilet", "বি টয়লেট", [0, 6, 0, 6]),
+    room("b-kitchen", "kitchen", "B", "B kitchen", "বি রান্নাঘর", [2, 6, 2, 6]),
+    room("b-bed1", "bedroom", "B", "B master bedroom", "বি মাস্টার বেডরুম", [0, 7, 0, 7]),
+    room("b-living", "living", "B", "B living room", "বি বসার ঘর", [1, 7, 2, 7]),
+  ],
+  doors: [
+    ...(["a", "b"] as const).flatMap((u) => [
+      { between: [`${u}-living`, `${u}-bed1`] as const },
+      { between: [`${u}-bed1`, `${u}-toilet`] as const },
+      { between: [`${u}-living`, `${u}-corridor`] as const },
+      { between: [`${u}-corridor`, `${u}-toilet`] as const },
+      { between: [`${u}-corridor`, `${u}-bed2`] as const },
+      { between: [`${u}-corridor`, `${u}-dining`] as const },
+      { between: [`${u}-dining`, `${u}-kitchen`] as const },
+      { between: [`${u}-corridor`, "lobby"] as const, main: true },
+    ]),
+    { between: ["lobby", "stair"] },
+    { between: ["lobby", "meter"] },
+  ],
+};
+
+export const PLAN_LIBRARY: PlanDefinition[] = [P1_4B, P1_3B, P1_4B_WIDE, P2_2B_FB, P2_2B_LR, P2_3B_LR, P2_3B_FB, P3_2B, P4_2B, P4_1B, PN_2B, PN_2B_F, PN_3B, PN_2F];
 
 export function getPlan(id: string): PlanDefinition | undefined {
   return PLAN_LIBRARY.find((p) => p.id === id);
