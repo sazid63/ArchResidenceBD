@@ -152,7 +152,7 @@ describe("bar bending schedule", () => {
   });
 
   it("hand example, a closed stirrup of a 250 x 450 beam: 2 x 370 + 2 x 170 + 2 x 75 less three 90 and two 135 degree bends = 996 mm", () => {
-    const stirrups = bbs.rows.filter((r) => r.shape === "51" && r.family === "beam" && r.dimsMm[0] === 370 && r.dimsMm[1] === 170);
+    const stirrups = bbs.rows.filter((r) => r.shape === "51" && r.family === "beam" && r.diaMm === 10 && r.dimsMm[0] === 370 && r.dimsMm[1] === 170);
     expect(stirrups.length).toBeGreaterThan(0);
     const bd = 40;
     const want = 740 + 340 + 150 - 3 * bendDeduction(10, bd, 90) - 2 * bendDeduction(10, bd, 135);

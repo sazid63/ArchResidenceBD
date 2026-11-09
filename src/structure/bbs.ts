@@ -16,6 +16,8 @@ import { slabOpeningAreaM2 } from "../model/openings";
 import { bendDeduction, bendDiameter, hookTail, lapCompression, lapTension, ldCompression, ldHook, ldTension, tieHookTail } from "./anchorage";
 import type { BeamLinePlaced, PanelResult, StructureResult } from "./analyze";
 import { barArea, pickBeamBars, pickColumnBars, pickMatBars, unitWeightKgM, type BarPick, type SlabBarPick } from "./barSelect";
+import { planStair, DEFAULT_STAIR } from "../cad/stairBuilder";
+import { PAD_TOP_BELOW_FINISH_MM, PLINTH_BEAM_DEPTH_MM, PLINTH_BEAM_WIDTH_MM } from "./foundation";
 import { DESIGN } from "./materials";
 import { beamMinAs, flexure, slabMinAs } from "./section";
 
@@ -476,6 +478,67 @@ function holesAboveM2(model: BuildingModel, level: number): number {
   return slabOpeningAreaM2(model.storeys[level + 1 < n ? level + 1 : Math.min(1, n - 1)].geometry, model);
 }
 
+/** Stair flights and landing of one storey: waist slab 150 mm, the steps on top, and the landing. Concrete in m3 and the flight geometry. */
+function stairGeometry(model: BuildingModel) {
+  const hasStair = model.storeys[0].geometry.fitted.rooms.some((r) => r.def.kind === "stair");
+  if (!hasStair) return null;
+  const lay = planStair(model.input.floorToFloorMm);
+  const w = DEFAULT_STAIR.flightWidthMm / 1000;
+  const tread = DEFAULT_STAIR.treadMm / 1000;
+  const run = (lay.risersPerFlight - 1) * tread;
+  const rise = (lay.risersPerFlight * lay.riserMm) / 1000;
+  const incl = Math.hypot(run, rise);
+  const flightM3 = 0.15 * incl * w + lay.risersPerFlight * 0.5 * (lay.riserMm / 1000) * tread * w;
+  const landingM3 = (DEFAULT_STAIR.landingMm / 1000) * (lay.widthMm / 1000) * 0.15;
+  return { lay, incl, perStoreyM3: 2 * flightM3 + landingM3, soffitM2: 2 * incl * w + (DEFAULT_STAIR.landingMm / 1000) * (lay.widthMm / 1000) };
+}
+
+/** Stair steel per storey: main bars 12 mm at 150 along the flight, distribution bars 10 mm at 200, landing mat 10 mm at 150 each way. */
+function detailStairs(model: BuildingModel, b: Builder): void {
+  const g = stairGeometry(model);
+  if (!g) return;
+  const w = DEFAULT_STAIR.flightWidthMm;
+  const mainLen = Math.round(g.incl * 1000) + 800; // along the flight, with anchorage into the landing and the floor
+  const nMain = 2 * (Math.floor(w / 150) + 1);
+  for (let i = 0; i < model.storeys.length; i++) {
+    b.add({ family: "slab", description: bi(`Stair flights, main bars 12 mm at 150`, `সিঁড়ির ফ্লাইট, প্রধান রড ১২ মিমি @ ১৫০`), dia: 12, shape: "00", dims: [mainLen], cut: mainLen, bars: nMain, level: i });
+    const nDist = 2 * (Math.floor((g.incl * 1000) / 200) + 1);
+    b.add({ family: "slab", description: bi("Stair flights, distribution bars 10 mm at 200", "সিঁড়ির ফ্লাইট, বণ্টন রড ১০ মিমি @ ২০০"), dia: 10, shape: "00", dims: [w - 100], cut: w - 100, bars: nDist, level: i });
+    const landW = g.lay.widthMm;
+    const landL = DEFAULT_STAIR.landingMm;
+    b.add({ family: "slab", description: bi("Stair landing, bars 10 mm at 150 across", "সিঁড়ির ল্যান্ডিং, আড়াআড়ি রড ১০ মিমি @ ১৫০"), dia: 10, shape: "00", dims: [landW - 100], cut: landW - 100, bars: Math.floor(landL / 150) + 1, level: i });
+    b.add({ family: "slab", description: bi("Stair landing, bars 10 mm at 150 along", "সিঁড়ির ল্যান্ডিং, লম্বালম্বি রড ১০ মিমি @ ১৫০"), dia: 10, shape: "00", dims: [landL - 100], cut: landL - 100, bars: Math.floor(landW / 150) + 1, level: i });
+  }
+}
+
+/**
+ * Plinth (tie) beams on every structural line at the foundation: 250 x 450, four 16 mm bars and 8 mm stirrups at 150, a nominal tie
+ * between the footings (they carry no designed load). Their concrete is in concreteM3.
+ */
+function detailPlinthBeams(model: BuildingModel, b: Builder): void {
+  const typical = model.storeys[Math.min(1, model.storeys.length - 1)].geometry;
+  const COV = 40;
+  const dt = 8;
+  const a = PLINTH_BEAM_DEPTH_MM - 2 * COV;
+  const bb = PLINTH_BEAM_WIDTH_MM - 2 * COV;
+  const tail = tieHookTail(dt);
+  const bd = bendDiameter(dt, true);
+  const tieCut = 2 * a + 2 * bb + 2 * tail - 3 * bendDeduction(dt, bd, 90) - 2 * bendDeduction(dt, bd, 135);
+  let stirrups = 0;
+  let bars = 0;
+  const lens: number[] = [];
+  for (const bm of typical.beams) {
+    const len = bm.spanMm;
+    stirrups += Math.floor(len / 150) + 1;
+    bars += 4;
+    lens.push(len);
+  }
+  if (!lens.length) return;
+  const avg = Math.round(lens.reduce((x, y) => x + y, 0) / lens.length);
+  b.add({ family: "beam", description: bi("Plinth beams, 4 bars 16 mm (average span)", "প্লিন্থ বিম, ৪টি রড ১৬ মিমি (গড় স্প্যান)"), dia: 16, shape: "00", dims: [avg + 300], cut: avg + 300, bars, level: -1 });
+  b.add({ family: "beam", description: bi("Plinth beams, stirrups 8 mm at 150", "প্লিন্থ বিম, স্টিরাপ ৮ মিমি @ ১৫০"), dia: dt, shape: "51", dims: [a, bb, tail], cut: tieCut, bars: stirrups, level: -1 });
+}
+
 function concreteM3(res: StructureResult, model: BuildingModel): number {
   let m3 = 0;
   for (const lv of res.levels) {
@@ -486,6 +549,12 @@ function concreteM3(res: StructureResult, model: BuildingModel): number {
   for (const col of res.frame.columns) {
     for (const st of col.storeys) m3 += (st.section.bx * st.section.by * model.input.floorToFloorMm) / 1e9;
   }
+  // Column stubs from the pad top to the ground-floor finish, plinth beams, and the stair flights and landings of every storey.
+  for (const col of res.frame.columns) m3 += (col.storeys[0].section.bx * col.storeys[0].section.by * PAD_TOP_BELOW_FINISH_MM) / 1e9;
+  const typicalGeo = model.storeys[Math.min(1, model.storeys.length - 1)].geometry;
+  for (const bm of typicalGeo.beams) m3 += (PLINTH_BEAM_WIDTH_MM * PLINTH_BEAM_DEPTH_MM * bm.spanMm) / 1e9;
+  const sg = stairGeometry(model);
+  if (sg) m3 += sg.perStoreyM3 * model.storeys.length;
   // Footings as built: merged footings once, never the overlapping pads they replace.
   for (const fo of res.foundation.footings) m3 += ((fo.x1 - fo.x0) * (fo.y1 - fo.y0) * fo.depthMm) / 1e9;
   return m3;
@@ -508,6 +577,12 @@ function formworkM2(res: StructureResult, model: BuildingModel): { footing: numb
     for (const st of col.storeys) f.column += (2 * (st.section.bx + st.section.by) * model.input.floorToFloorMm) / 1e6;
   }
   for (const fo of res.foundation.footings) f.footing += (2 * (fo.x1 - fo.x0 + (fo.y1 - fo.y0)) * fo.depthMm) / 1e6;
+  // column stubs below the ground floor, plinth beam sides (the bottom is on the ground) and the stair soffits and landings
+  for (const col of res.frame.columns) f.column += (2 * (col.storeys[0].section.bx + col.storeys[0].section.by) * PAD_TOP_BELOW_FINISH_MM) / 1e6;
+  const typicalGeo = model.storeys[Math.min(1, model.storeys.length - 1)].geometry;
+  for (const bm of typicalGeo.beams) f.beam += (2 * PLINTH_BEAM_DEPTH_MM * bm.spanMm) / 1e6;
+  const sg = stairGeometry(model);
+  if (sg) f.slab += sg.soffitM2 * model.storeys.length;
   return f;
 }
 
@@ -523,6 +598,8 @@ export function buildBbs(res: StructureResult, model: BuildingModel): BbsResult 
   detailColumns(res, model, b);
   detailBeams(res, colAt, b);
   detailSlabs(res, b);
+  detailStairs(model, b);
+  detailPlinthBeams(model, b);
   const rows = b.rows();
   const byDia = new Map<number, { lengthM: number; weightKg: number }>();
   const byFam = new Map<BbsFamily, number>();

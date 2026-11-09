@@ -21,6 +21,7 @@ import { buildDogLegStair, planStair, type StairPlacement } from "../cad/stairBu
 import { OUTSIDE, type FloorGeometry } from "../plans/geometry";
 import type { Rect } from "../plans/types";
 import type { StructureResult } from "../structure/analyze";
+import { PAD_TOP_BELOW_FINISH_MM, PLINTH_BEAM_DEPTH_MM, PLINTH_BEAM_WIDTH_MM } from "../structure/foundation";
 import { slabOpeningRects, stairPlacement } from "./openings";
 import { TANK_HEIGHT_MM, TANK_INSET_MM } from "./roofEquipment";
 
@@ -97,7 +98,7 @@ export function buildMesh(model: BuildingModel, design?: StructureResult): MeshD
   const P = PLACEHOLDER;
   const tagOf = (what: string) => (S.designed ? what : `${what} (placeholder size)`);
   // The top of every pad sits at one level; a deeper pad reaches further down.
-  const padTop = -P.foundationDepth + P.padDepth;
+  const padTop = -PAD_TOP_BELOW_FINISH_MM;
   for (const col of typical.columns) {
     const x = ox + col.x;
     const y = oy + col.y;
@@ -118,8 +119,8 @@ export function buildMesh(model: BuildingModel, design?: StructureResult): MeshD
     box(`pad_${fo.id}`, label, "footing", "foundation", { x0: ox + fo.x0, y0: oy + fo.y0, z0: padTop - fo.depthMm, x1: ox + fo.x1, y1: oy + fo.y1, z1: padTop });
   }
   typical.beams.forEach((bm, k) => {
-    const r = beamRect(bm, ox, oy, S.beam(bm.orientation, bm.at, 0).b / 2);
-    box(`plinth_${k}`, "Plinth Beam", "beam", "foundation", { ...r, z0: -P.plinthDepth, z1: 0 });
+    const r = beamRect(bm, ox, oy, PLINTH_BEAM_WIDTH_MM / 2);
+    box(`plinth_${k}`, "Plinth Beam", "beam", "foundation", { ...r, z0: -PLINTH_BEAM_DEPTH_MM, z1: 0 });
   });
 
   // ---- Storeys ---------------------------------------------------------------------------

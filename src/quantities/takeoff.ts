@@ -60,6 +60,8 @@ export const BOQ = {
   mortarInBrickworkM3PerM3: 0.25,
   /** Bricks per m3 of wall (standard 240 x 115 x 70 with 10 mm joints). */
   bricksPerM3: 500,
+  /** Cutting and bending offcuts on the bars bought, as a fraction of the schedule weight (assumption; BD practice 3 to 5 percent). */
+  steelWastage: 0.03,
   /** Wall height lost to the beam or slab above, mm. */
   wallDeductMm: 500,
   doorHeightMm: 2100,
@@ -76,7 +78,7 @@ export const BOQ_ASSUMPTIONS: Array<{ id: string; en: string; bn: string }> = [
   { id: "wall-height", en: "Wall height = storey height - 500 mm (beam or slab above); doors 2.1 m and windows 1.2 m high are deducted from wall and plaster at the thickness of the wall they sit in. The roof parapet (1 m) and the stair and lift cover walls are 125 mm.", bn: "দেয়ালের উচ্চতা = তলার উচ্চতা - ৫০০ মিমি; ২.১ মিটার দরজা ও ১.২ মিটার জানালা নিজ দেয়ালের পুরুত্বে বাদ। ছাদের ১ মিটার প্যারাপেট এবং সিঁড়ি ও লিফট ঘরের দেয়াল ১২৫ মিমি।" },
   { id: "finishes", en: "Plaster 12 mm on both wall faces; 50 mm screed on every floor and the roof. Slab soffit plaster, tiles, paint, doors, windows, services and earthwork are not taken off.", bn: "দেয়ালের দুই পাশে ১২ মিমি প্লাস্টার; প্রতি তলা ও ছাদে ৫০ মিমি স্ক্রিড। সিলিং প্লাস্টার, টাইলস, রং, দরজা-জানালা, সার্ভিস ও মাটির কাজ ধরা হয়নি।" },
   { id: "formwork", en: "Formwork is the contact area of slab soffits, beam bottoms and sides below the slab, column faces and footing sides, priced at the book's steel-form rates; nothing is deducted where members meet and slab edges and stair flights are not counted. Rebar fixing is derived from the book (item 08.1.2 minus the bar).", bn: "ফর্মওয়ার্ক হলো স্ল্যাবের নিচ, বিমের তলা ও স্ল্যাবের নিচের দুই পাশ, কলামের চার পাশ ও ফুটিংয়ের পাশের সংস্পর্শ ক্ষেত্রফল, বইয়ের স্টিল ফর্মের দরে; সংযোগস্থলে বাদ দেওয়া হয়নি, স্ল্যাবের কিনারা ও সিঁড়ি ধরা হয়নি। রড বাঁধার দাম বই থেকে হিসাবকৃত (আইটেম ০৮.১.২ থেকে রডের দাম বাদ)।" },
-  { id: "steel", en: "Steel is the bar bending schedule total, no wastage or binding wire added; the card's rod line (Schedule of Rates item 289) covers Grade 400/420.", bn: "রড বার বেন্ডিং শিডিউলের মোট, অপচয় বা বাইন্ডিং তার যোগ করা হয়নি; কার্ডের রডের লাইন (রেট শিডিউল আইটেম ২৮৯) গ্রেড ৪০০/৪২০ দুটোই ধরে।" },
+  { id: "steel", en: "Steel is the bar bending schedule total plus 3 % cutting wastage (assumption); binding wire is in the fixing rate; the card's rod line (Schedule of Rates item 289) covers Grade 400/420.", bn: "রড বার বেন্ডিং শিডিউলের মোট ও ৩% কাটার অপচয় (অনুমান); বাইন্ডিং তার বাঁধার দরে ধরা; কার্ডের রডের লাইন (রেট শিডিউল আইটেম ২৮৯) গ্রেড ৪০০/৪২০ দুটোই ধরে।" },
   { id: "rates", en: "Prices come from the rate card (source and date shown). Cement, sand, stone chips, rods and bricks are priced; labour for concrete, brickwork and plaster, machinery, joinery, tiles, paint and services have no line in the card (the book has no man-day norms), so the total is a lower bound.", bn: "দাম রেট কার্ড থেকে (উৎস ও তারিখ দেখানো)। সিমেন্ট, বালি, পাথর, রড ও ইটের দাম ধরা হয়েছে; কংক্রিট, গাঁথুনি ও প্লাস্টারের শ্রম, যন্ত্র, দরজা-জানালা, টাইলস, রং ও সার্ভিসের লাইন কার্ডে নেই (বইয়ে জনদিবসের হার নেই), তাই মোট একটি নিম্নসীমা।" },
 ];
 
@@ -181,7 +183,7 @@ export function takeoff(model: BuildingModel, bbs: BbsResult): TakeoffItem[] {
     formwork("formwork-column", "columns", "কলাম", fw.column, "formwork-column"),
     formwork("formwork-beam", "beams", "বিম", fw.beam, "formwork-beam"),
     formwork("formwork-slab", "slabs", "স্ল্যাব", fw.slab, "formwork-slab"),
-    { id: "steel", category: "steel", description: bi("Reinforcement bars, Grade 420 (bar schedule total; priced at the card's B400 rod line)", "রড গ্রেড ৪২০ (বার শিডিউলের মোট; কার্ডের বি৪০০ রডের দরে)"), unit: "ton", quantity: bbs.totals.weightKg / 1000, rateKey: "rod-60g", basis: bi("kg / 1000", "কেজি / ১০০০") },
+    { id: "steel", category: "steel", description: bi("Reinforcement bars, Grade 420 (bar schedule total; priced at the card's B400 rod line)", "রড গ্রেড ৪২০ (বার শিডিউলের মোট; কার্ডের বি৪০০ রডের দরে)"), unit: "ton", quantity: (bbs.totals.weightKg * (1 + BOQ.steelWastage)) / 1000, rateKey: "rod-60g", basis: bi("schedule kg x 1.03 (cutting wastage) / 1000", "শিডিউলের কেজি × ১.০৩ (কাটার অপচয়) / ১০০০") },
     { id: "rebar-fixing", category: "steel", description: bi("Rebar cutting, bending and fixing (labour and binding wire)", "রড কাটা, বাঁকানো ও বাঁধা (শ্রম ও জিআই তার)"), unit: "kg", quantity: bbs.totals.weightKg, rateKey: "rebar-fixing", basis: bi("bar schedule kg; SoR item 08.1.2 minus the bar (derived)", "বার শিডিউলের কেজি; এসওআর ০৮.১.২ থেকে রডের দাম বাদ (হিসাবকৃত)") },
     { id: "brickwork", category: "masonry", description: bi("Brick masonry, 250 mm and 125 mm walls, openings deducted", "ইটের গাঁথুনি ২৫০ ও ১২৫ মিমি দেয়াল, খোলা অংশ বাদে"), unit: "m3", quantity: env.wallM3, basis: bi("wall length x height x thickness", "দেয়ালের দৈর্ঘ্য × উচ্চতা × পুরুত্ব") },
     { id: "bricks", category: "masonry", description: bi("First-class bricks", "প্রথম শ্রেণির ইট"), unit: "each", quantity: env.wallM3 * BOQ.bricksPerM3, rateKey: "brick-1st", basis: bi("500 per m3 of wall", "প্রতি ঘনমিটারে ৫০০টি") },

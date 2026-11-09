@@ -4,7 +4,8 @@
  * Reported, not asserted: it feeds docs/audit/production-readiness-2026-11.md. Run: npm run audit:structural
  */
 import { createRequire } from "node:module";
-import { it } from "vitest";
+import { expect, it } from "vitest";
+import { footingsOverlap } from "../../src/structure/foundation";
 import { deriveBuilding } from "../../src/model/building";
 import { planChoices } from "../../src/model/planChoices";
 import { analyzeStructure } from "../../src/structure/analyze";
@@ -33,6 +34,7 @@ const SCEN: Array<{ w: number; d: number; storeys: number; units: number; road: 
 
 it("audit", () => {
   const out: any[] = [];
+  const violations: string[] = [];
   for (const s of SCEN) {
     const choices = planChoices(s.w, s.d, { unitsPerFloor: s.units, storeys: s.storeys, roadWidthM: s.road });
     for (const c of choices) {
@@ -81,7 +83,16 @@ it("audit", () => {
       };
       const boq = buildBoq(m, bbs);
       row.boq = { totalBdt: Math.round(boq.totalBdt), perSft: Math.round(boq.totalBdt / (gfa * 10.7639)), unpriced: boq.unpriced };
-      const mesh = buildMesh(m);
+      const mesh = buildMesh(m, res);
+      const tag = `${s.w}x${s.d} ${s.storeys}st ${c.plan.id}`;
+      // A6 assertions: what this audit exists to hold
+      if (footingsOverlap(res.foundation.footings)) violations.push(`${tag}: footings overlap`);
+      if (!(bbs.totals.kgPerM3 >= 60 && bbs.totals.kgPerM3 <= 140)) violations.push(`${tag}: steel ${Math.round(bbs.totals.kgPerM3)} kg/m3 outside 60 to 140`);
+      const meshCols = mesh.objects.filter((o) => o.kind === "column");
+      const biggest = Math.max(...res.frame.columns.flatMap((q) => q.storeys.map((st) => Math.max(st.section.bx, st.section.by))));
+      const meshBiggest = Math.max(...meshCols.map((o) => Math.max(o.bboxMaxMm[0] - o.bboxMinMm[0], o.bboxMaxMm[1] - o.bboxMinMm[1])));
+      if (meshBiggest !== biggest) violations.push(`${tag}: 3D columns are not the designed sizes (3D ${Math.round(meshBiggest)}, designed ${biggest})`);
+      if (!boq.lines.every((l) => Number.isFinite(l.quantity) && l.quantity >= 0)) violations.push(`${tag}: BOQ has a bad quantity`);
       const kinds: Record<string, number> = {};
       for (const o of mesh.objects) kinds[o.kind] = (kinds[o.kind] ?? 0) + 1;
       row.mesh = { n: mesh.objects.length, kinds };
@@ -119,4 +130,5 @@ it("audit", () => {
     }
   }
   require("node:fs").writeFileSync("scripts/audits/audit-out/engineering-scenarios.json", JSON.stringify(out, null, 1));
+  expect(violations).toEqual([]);
 }, 600000);

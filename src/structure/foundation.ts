@@ -14,6 +14,11 @@
 
 import type { ColumnResult } from "./frame";
 
+/** The top of every pad sits this far below the ground-floor finish; the column stub rises from it. Plinth (tie) beams are this deep, below the finish. */
+export const PAD_TOP_BELOW_FINISH_MM = 1050;
+export const PLINTH_BEAM_DEPTH_MM = 450;
+export const PLINTH_BEAM_WIDTH_MM = 250;
+
 export interface FoundationFooting {
   id: string;
   kind: "isolated" | "combined" | "raft";

@@ -4,6 +4,7 @@ import { fitRange } from "../plans/fit";
 import { PLAN_LIBRARY } from "../plans/library";
 import { slabOpeningAreaM2 } from "../model/openings";
 import { analyzeStructure } from "../structure/analyze";
+import { PAD_TOP_BELOW_FINISH_MM } from "../structure/foundation";
 import { buildBbs } from "../structure/bbs";
 import { buildMesh } from "../model/toMesh";
 import { BAG_M3, BOQ, boqToCsv, buildBoq, CFT_PER_M3, DEFAULT_RATE_CARD, envelopeQuantities, priceTakeoff, takeoff, type RateCard } from "./takeoff";
@@ -110,7 +111,7 @@ describe("takeoff", () => {
 
   it("concrete and steel are exactly the bar-schedule totals", () => {
     expect(get("concrete").quantity).toBe(bbs.totals.concreteM3);
-    expect(get("steel").quantity).toBeCloseTo(bbs.totals.weightKg / 1000, 9);
+    expect(get("steel").quantity).toBeCloseTo((bbs.totals.weightKg * (1 + BOQ.steelWastage)) / 1000, 9);
   });
 
   it("concrete materials: dry volume 1.54 x wet split 1 : 1.5 : 3, hand check on 10 m3", () => {
@@ -184,7 +185,7 @@ describe("pricing", () => {
     const boq = buildBoq(m, bbs);
     const steel = boq.lines.find((l) => l.id === "steel")!;
     expect(steel.rateBdt).toBe(89000);
-    expect(steel.amountBdt).toBeCloseTo((bbs.totals.weightKg / 1000) * 89000, 4);
+    expect(steel.amountBdt).toBeCloseTo(((bbs.totals.weightKg * (1 + BOQ.steelWastage)) / 1000) * 89000, 4);
     const cem = boq.lines.find((l) => l.id === "concrete-cement")!;
     expect(cem.amountBdt).toBeCloseTo(cem.quantity * 520, 6);
     expect(boq.totalBdt).toBeCloseTo(boq.lines.reduce((s, l) => s + (l.amountBdt ?? 0), 0), 4);
@@ -207,10 +208,12 @@ describe("pricing", () => {
       for (const st of c.storeys) col += (2 * (st.section.bx + st.section.by) * m.input.floorToFloorMm) / 1e6;
     }
     for (const fo of res.foundation.footings) foot += (2 * (fo.x1 - fo.x0 + (fo.y1 - fo.y0)) * fo.depthMm) / 1e6;
+    // plus the column stubs under the ground floor (four faces, 1.05 m) and the plinth beam sides
+    for (const c of res.frame.columns) col += (2 * (c.storeys[0].section.bx + c.storeys[0].section.by) * PAD_TOP_BELOW_FINISH_MM) / 1e6;
     expect(fw.column).toBeCloseTo(col, 6);
     expect(fw.footing).toBeCloseTo(foot, 6);
     expect(fw.slab).toBeGreaterThan(0.7 * m.footprintAreaM2 * (m.storeys.length + 1));
-    expect(fw.slab).toBeLessThanOrEqual(m.footprintAreaM2 * (m.storeys.length + 1));
+    expect(fw.slab).toBeLessThanOrEqual(m.footprintAreaM2 * (m.storeys.length + 1) + 8 * m.storeys.length); // plus the stair soffits, less the openings
     expect(fw.beam).toBeGreaterThan(0);
     const boq = buildBoq(m, bbs);
     const rate: Record<string, number> = { "formwork-footing": 582, "formwork-column": 522, "formwork-beam": 574, "formwork-slab": 597 };
