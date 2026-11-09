@@ -1,7 +1,7 @@
 # RAJUK rule pack v0 - source of truth (plan 5.6, ADR-0003).
 # One pack = one authority regime edition; id scheme <authority>@<regime>.<revision>.
 # Every table/rule/footnote cites the gazette pages it was read from and the verification tier.
-# status: candidate - engineer validation pending (Launch Plan, ADR-0001).
+# status: frozen - read and confirmed correct by the owner (a civil engineer), 2026-11-09; no further government-engineer review is planned for now.
 # Open items live in spec/rules/rajuk-2008-candidates.md and are listed under `gaps` below - never silently dropped.
 # Rendered for reading: docs/rules/rajuk-pack-v0.md (regenerate with tools/rules/render_pack.py).
 
@@ -10,11 +10,11 @@ id: "rajuk@2008.1"
 authority: "rajuk"
 regime: "2008"
 revision: 1
-status: "candidate"
+status: "frozen"
 langs: [bn, en]
 title:
-  bn: "রাজউক নিয়ন্ত্রক প্যাক — ইমারত নির্মাণ বিধিমালা ২০০৮ শাসনামল (অবস্থা: candidate)"
-  en: "RAJUK rule pack - Imarat Nirman Bidhimala 2008 regime (status: candidate)"
+  bn: "রাজউক নিয়ন্ত্রক প্যাক — ইমারত নির্মাণ বিধিমালা ২০০৮ শাসনামল (অবস্থা: পর্যালোচিত)"
+  en: "RAJUK rule pack - Imarat Nirman Bidhimala 2008 regime (status: reviewed)"
 
 source:
   document:
@@ -35,7 +35,7 @@ verification:
     Bangla wording in this pack uses modern orthography normalised from the legacy glyphs.
 
 review:
-  label: "engineer validation pending — Launch Plan"
+  label: "reviewed and confirmed by the owner (civil engineer), 2026-11-09"
   openItems: 12
   openItemsFile: "spec/rules/rajuk-2008-candidates.md"
 

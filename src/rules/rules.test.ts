@@ -118,3 +118,18 @@ describe("check()", () => {
     expect(p.expected!.value).toBeGreaterThanOrEqual(1);
   });
 });
+
+describe("plan picker and building model agree on setbacks", () => {
+  it("envelopeFor matches the model envelope at a band edge and for tall buildings", async () => {
+    const { envelopeFor } = await import("../model/planChoices");
+    for (const [wM, dM, storeys] of [[10, 13.4, 4], [10, 13.4, 11], [12, 25, 6], [8.2, 16.3, 12]] as const) {
+      const plan = PLAN_LIBRARY[0];
+      const res = deriveBuilding({ plotWidthMm: Math.round(wM * 1000), plotDepthMm: Math.round(dM * 1000), storeys, planId: plan.id });
+      const env = envelopeFor(wM, dM, undefined, storeys);
+      const sb = rajukSetbacks(wM * dM, storeys).setbacksMm;
+      expect(env.widthMm).toBe(Math.round(wM * 1000) - sb.left - sb.right);
+      expect(env.depthMm).toBe(Math.round(dM * 1000) - sb.front - sb.rear);
+      if (res.ok) expect(res.model.envelope.x1 - res.model.envelope.x0).toBe(env.widthMm);
+    }
+  });
+});

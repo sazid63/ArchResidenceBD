@@ -245,7 +245,7 @@ export function generateRandomBuildingProject(): BuildingProject {
   const frontageM = Math.round(selected.frontageFt * FEET_TO_M * 100) / 100;
   const depthM = Math.round(selected.depthFt * FEET_TO_M * 100) / 100;
   const roadWidthM = Math.round(selected.roadFt * FEET_TO_M * 100) / 100;
-  const planId = planChoices(frontageM, depthM, { unitsPerFloor }).find((c) => c.fit.ok)?.plan.id;
+  const planId = planChoices(frontageM, depthM, { unitsPerFloor, storeys: stories }).find((c) => c.fit.ok)?.plan.id;
   const id = `project-rand-${uniqueSuffix()}`;
   const plotSqm = frontageM * depthM;
   const plotSize = Math.round((plotSqm / 66.89) * 100) / 100;

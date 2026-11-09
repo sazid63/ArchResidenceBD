@@ -25,8 +25,8 @@ export function PlotShapeCallout({ project }: { project: BuildingProject }) {
   const roadM = Number(road) * FEET_TO_M;
   const ready = plotProblems({ frontageM, depthM, roadWidthM: roadM }).length === 0;
   const fitting = useMemo(
-    () => (ready ? planChoices(frontageM, depthM, { unitsPerFloor: project.unitsPerFloor }).filter((c) => c.fit.ok) : []),
-    [ready, frontageM, depthM, project.unitsPerFloor],
+    () => (ready ? planChoices(frontageM, depthM, { unitsPerFloor: project.unitsPerFloor, storeys: project.stories }).filter((c) => c.fit.ok) : []),
+    [ready, frontageM, depthM, project.unitsPerFloor, project.stories],
   );
   const chosen = fitting.find((c) => c.plan.id === planId)?.plan.id ?? fitting[0]?.plan.id ?? null;
 

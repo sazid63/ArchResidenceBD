@@ -39,10 +39,12 @@ export function summarisePlot(frontageM: number, depthM: number): PlotSummary {
 }
 
 /** The buildable rectangle: the plot less the RAJUK 2008 setbacks (ground-up to 10 storeys; taller buildings need more). */
-export function envelopeFor(frontageM: number, depthM: number, setbacks: Setbacks = rajukSetbacks(frontageM * depthM, 1).setbacksMm): Envelope {
+export function envelopeFor(frontageM: number, depthM: number, setbacks?: Setbacks, storeys = 1): Envelope {
+  // Same integer-mm area the building model uses, so both pick the same setback row at a band edge.
+  const sb = setbacks ?? rajukSetbacks((mToMm(frontageM) * mToMm(depthM)) / 1e6, storeys).setbacksMm;
   return {
-    widthMm: mToMm(frontageM) - setbacks.left - setbacks.right,
-    depthMm: mToMm(depthM) - setbacks.front - setbacks.rear,
+    widthMm: mToMm(frontageM) - sb.left - sb.right,
+    depthMm: mToMm(depthM) - sb.front - sb.rear,
   };
 }
 
@@ -56,11 +58,13 @@ export interface ChoiceOptions {
   unitsPerFloor?: number;
   mirror?: boolean;
   setbacks?: Setbacks;
+  /** Storeys including ground; above 10 the larger RAJUK setbacks apply. Default 1. */
+  storeys?: number;
 }
 
 /** Every library plan (optionally one unit count) with the result of fitting it to the plot. Fitting plans first. */
 export function planChoices(frontageM: number, depthM: number, opts: ChoiceOptions = {}): PlanChoice[] {
-  const env = envelopeFor(frontageM, depthM, opts.setbacks);
+  const env = envelopeFor(frontageM, depthM, opts.setbacks, opts.storeys);
   const list = PLAN_LIBRARY.filter((p) => opts.unitsPerFloor === undefined || p.unitsPerFloor === opts.unitsPerFloor);
   const choices = list.map((plan) => ({ plan, fit: fitPlan(plan, env, { mirror: opts.mirror }) }));
   return choices.sort((a, b) => Number(b.fit.ok) - Number(a.fit.ok));

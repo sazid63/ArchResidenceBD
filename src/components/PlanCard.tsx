@@ -30,8 +30,8 @@ export function PlanCard({ project, switchable, onChanged }: { project: Building
   }, [key, lang]);
 
   const options = useMemo(
-    () => (switchable && plot ? planChoices(plot.frontageM, plot.depthM, { unitsPerFloor: project.unitsPerFloor, mirror: !!project.mirror }).filter((c) => c.fit.ok) : []),
-    [switchable, plot, project.unitsPerFloor, project.mirror],
+    () => (switchable && plot ? planChoices(plot.frontageM, plot.depthM, { unitsPerFloor: project.unitsPerFloor, mirror: !!project.mirror, storeys: project.stories }).filter((c) => c.fit.ok) : []),
+    [switchable, plot, project.unitsPerFloor, project.mirror, project.stories],
   );
 
   if (!view || !project.planId) return null;

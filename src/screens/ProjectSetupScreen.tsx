@@ -61,8 +61,8 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
   const summary = problems.includes("frontage") || problems.includes("depth") ? null : summarisePlot(frontageM, depthM);
 
   const choices = useMemo(
-    () => (summary ? planChoices(frontageM, depthM, { unitsPerFloor, mirror }) : []),
-    [summary, frontageM, depthM, unitsPerFloor, mirror],
+    () => (summary ? planChoices(frontageM, depthM, { unitsPerFloor, mirror, storeys: stories }) : []),
+    [summary, frontageM, depthM, unitsPerFloor, mirror, stories],
   );
   const previews = useMemo(() => {
     const out: Record<string, string> = {};
