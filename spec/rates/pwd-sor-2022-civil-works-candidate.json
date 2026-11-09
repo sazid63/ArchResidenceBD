@@ -43,8 +43,8 @@
         "bn": "বালি (এফএম ১.২)",
         "en": "Sand (F.M. 1.2)"
       },
-      "note": "the book's F.M. 1.2 sand, per cft. Source: PWD SoR 2022 (Revised) Part A, item 225, PDF page 21.",
-      "rateBdt": 1900.0,
+      "note": "the book's F.M. 1.2 sand. The book prices it per 100 cft (BDT 1,900), converted here to per cft (BDT 19), the unit this card uses. Cross-check, market 2026: local sand BDT 17 to 27 per cft (bdstall.com); coarse Sylhet sand for RCC BDT 37 to 112 per cft. Source: PWD SoR 2022 (Revised) Part A, item 225, PDF page 21.",
+      "rateBdt": 19.0,
       "regionalMultipliers": {
         "chattogram": 1.007895,
         "khulna": 0.971053,

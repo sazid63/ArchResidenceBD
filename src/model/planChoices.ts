@@ -7,7 +7,8 @@ import { fitPlan, type Envelope } from "../plans/fit";
 import { PLAN_LIBRARY } from "../plans/library";
 import type { FitRejection, FitResult, PlanDefinition } from "../plans/types";
 import { rajukSetbacks } from "../rules/setbacks";
-import type { Setbacks } from "./building";
+import { check } from "../rules/check";
+import { deriveBuilding, type Setbacks } from "./building";
 import { sqmToLandArea } from "./units";
 
 export const FEET_TO_M = 0.3048;
@@ -48,9 +49,18 @@ export function envelopeFor(frontageM: number, depthM: number, setbacks?: Setbac
   };
 }
 
+/** The RAJUK ground-coverage result for a plan that fits: a plan can fit inside the setbacks and still cover too much of the plot. */
+export interface CoverageResult {
+  status: "pass" | "fail" | "not_checked";
+  actualPercent?: number;
+  maxPercent?: number;
+}
+
 export interface PlanChoice {
   plan: PlanDefinition;
   fit: FitResult;
+  /** Only for a plan that fits, and only when the road width is known (the coverage table needs it). */
+  coverage: CoverageResult | null;
 }
 
 export interface ChoiceOptions {
@@ -60,14 +70,29 @@ export interface ChoiceOptions {
   setbacks?: Setbacks;
   /** Storeys including ground; above 10 the larger RAJUK setbacks apply. Default 1. */
   storeys?: number;
+  /** Width of the access road in metres; with it the picker can say which plans break the ground-coverage limit. */
+  roadWidthM?: number;
 }
 
-/** Every library plan (optionally one unit count) with the result of fitting it to the plot. Fitting plans first. */
+function coverageOf(frontageM: number, depthM: number, plan: PlanDefinition, opts: ChoiceOptions): CoverageResult | null {
+  if (opts.roadWidthM === undefined) return null;
+  const built = deriveBuilding({ plotWidthMm: mToMm(frontageM), plotDepthMm: mToMm(depthM), storeys: opts.storeys ?? 1, planId: plan.id, mirror: opts.mirror, ...(opts.setbacks ? { setbacksMm: opts.setbacks } : {}) });
+  if (!built.ok) return null;
+  const mgc = check(built.model, { roadWidthM: opts.roadWidthM }).find((r) => r.ruleId === "rajuk.mgc");
+  if (!mgc || mgc.status === "not_checked" || typeof mgc.actual?.value !== "number" || typeof mgc.expected?.value !== "number") return { status: "not_checked" };
+  return { status: mgc.status === "pass" ? "pass" : "fail", actualPercent: mgc.actual.value, maxPercent: mgc.expected.value };
+}
+
+/** Every library plan (optionally one unit count) with the result of fitting it to the plot. Plans that fit and keep to the coverage limit first, then plans that fit but exceed it, then the rest. */
 export function planChoices(frontageM: number, depthM: number, opts: ChoiceOptions = {}): PlanChoice[] {
   const env = envelopeFor(frontageM, depthM, opts.setbacks, opts.storeys);
   const list = PLAN_LIBRARY.filter((p) => opts.unitsPerFloor === undefined || p.unitsPerFloor === opts.unitsPerFloor);
-  const choices = list.map((plan) => ({ plan, fit: fitPlan(plan, env, { mirror: opts.mirror }) }));
-  return choices.sort((a, b) => Number(b.fit.ok) - Number(a.fit.ok));
+  const choices: PlanChoice[] = list.map((plan) => {
+    const fit = fitPlan(plan, env, { mirror: opts.mirror });
+    return { plan, fit, coverage: fit.ok ? coverageOf(frontageM, depthM, plan, opts) : null };
+  });
+  const rank = (c: PlanChoice) => (!c.fit.ok ? 2 : c.coverage?.status === "fail" ? 1 : 0);
+  return choices.sort((a, b) => rank(a) - rank(b));
 }
 
 /** Dwellings-per-floor counts the library has plans for, ascending. */

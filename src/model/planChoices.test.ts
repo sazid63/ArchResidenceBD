@@ -61,3 +61,42 @@ describe("plotProblems", () => {
     expect(plotProblems({ frontageM: 10, depthM: 20, roadWidthM: 6 })).toEqual([]);
   });
 });
+
+describe("ground coverage in the picker", () => {
+  const choices = planChoices(15, 25, { roadWidthM: 9, storeys: 4 });
+
+  it("says which fitting plans break the RAJUK ground-coverage limit, with the numbers", () => {
+    const fitting = choices.filter((c) => c.fit.ok);
+    expect(fitting.length).toBeGreaterThan(0);
+    for (const c of fitting) {
+      expect(c.coverage, c.plan.id).not.toBeNull();
+      if (c.coverage?.status === "fail") expect(c.coverage.actualPercent!).toBeGreaterThan(c.coverage.maxPercent!);
+      if (c.coverage?.status === "pass") expect(c.coverage.actualPercent!).toBeLessThanOrEqual(c.coverage.maxPercent!);
+    }
+    expect(fitting.some((c) => c.coverage?.status === "fail")).toBe(true); // the known case: a plan fits the setbacks yet covers too much
+  });
+
+  it("lists plans that fit and keep within the limit first, then plans over the limit, then plans that do not fit", () => {
+    const rank = (c: (typeof choices)[number]) => (!c.fit.ok ? 2 : c.coverage?.status === "fail" ? 1 : 0);
+    const ranks = choices.map(rank);
+    expect(ranks).toEqual([...ranks].sort((a, b) => a - b));
+  });
+
+  it("the coverage figure is the one the Compliance screen reports for the same plan", async () => {
+    const { deriveBuilding } = await import("./building");
+    const { check } = await import("../rules/check");
+    for (const c of choices.filter((x) => x.fit.ok).slice(0, 3)) {
+      const b = deriveBuilding({ plotWidthMm: 15000, plotDepthMm: 25000, storeys: 4, planId: c.plan.id });
+      if (!b.ok) throw new Error("fit");
+      const mgc = check(b.model, { roadWidthM: 9 }).find((r) => r.ruleId === "rajuk.mgc")!;
+      expect(c.coverage?.actualPercent).toBe(mgc.actual?.value);
+      expect(c.coverage?.maxPercent).toBe(mgc.expected?.value);
+    }
+  });
+
+  it("without a road width there is no coverage verdict (the table needs it), and nothing else changes", () => {
+    const a = planChoices(15, 25, { storeys: 4 });
+    expect(a.every((c) => c.coverage === null)).toBe(true);
+    expect(a.filter((c) => c.fit.ok).length).toBe(choices.filter((c) => c.fit.ok).length);
+  });
+});

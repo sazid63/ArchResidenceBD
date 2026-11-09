@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useI18n, fmtNum } from "../i18n";
-import { Button, Card, PageHeader, Callout } from "../ui/kit";
+import { Button, Card, PageHeader, Callout, ResultChip } from "../ui/kit";
+import { rajukSetbacks } from "../rules/setbacks";
 import { createNewProject, generateRandomBuildingProject } from "../engine/projectState";
 import { useProject } from "../context/ProjectContext";
 import { deriveGeometry } from "../plans/geometry";
@@ -8,6 +9,7 @@ import { renderPlanSvg } from "../plans/render";
 import {
   FEET_TO_M,
   availableUnitCounts,
+  mToMm,
   planChoices,
   plotProblems,
   rejectionText,
@@ -61,8 +63,8 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
   const summary = problems.includes("frontage") || problems.includes("depth") ? null : summarisePlot(frontageM, depthM);
 
   const choices = useMemo(
-    () => (summary ? planChoices(frontageM, depthM, { unitsPerFloor, mirror, storeys: stories }) : []),
-    [summary, frontageM, depthM, unitsPerFloor, mirror, stories],
+    () => (summary ? planChoices(frontageM, depthM, { unitsPerFloor, mirror, storeys: stories, roadWidthM: problems.includes("roadWidth") ? undefined : roadWidthM }) : []),
+    [summary, frontageM, depthM, unitsPerFloor, mirror, stories, roadWidthM, problems],
   );
   const previews = useMemo(() => {
     const out: Record<string, string> = {};
@@ -75,6 +77,7 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
     setPlanId((current) => {
       const fits = choices.filter((c) => c.fit.ok);
       if (current && fits.some((c) => c.plan.id === current)) return current;
+      // Prefer a plan that keeps to the ground-coverage limit (the list is already sorted that way).
       return fits[0]?.plan.id ?? null;
     });
   }, [choices]);
@@ -119,6 +122,11 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
 
   const unitLabel = unit === "ft" ? (bn ? "ফুট" : "ft") : bn ? "মিটার" : "m";
   const fitCount = choices.filter((c) => c.fit.ok).length;
+  const sbM = (() => {
+    const sb = rajukSetbacks((mToMm(frontageM) * mToMm(depthM)) / 1e6, stories).setbacksMm;
+    return { front: sb.front / 1000, rear: sb.rear / 1000, side: sb.left / 1000 };
+  })();
+  const chosen = choices.find((c) => c.plan.id === planId);
 
   const lengthField = (id: string, label: string, value: number, set: (n: number) => void) => (
     <div className="field" style={{ flex: 1, minWidth: 120 }}>
@@ -232,8 +240,8 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
           <p className="muted small" style={{ margin: 0 }}>
             {summary
               ? bn
-                ? `${fmtNum(fitCount, lang)}টি নকশা এই প্লটে বসে। সেটব্যাক ধরা হয়েছে সামনে ১.৫ মি, পেছনে ২ মি, দুই পাশে ১ মি (অনুমান — RAJUK সারণি যোগ হলে বদলাবে)।`
-                : `${fitCount} of ${choices.length} plans fit this plot. Setbacks assumed: 1.5 m front, 2 m rear, 1 m each side (an assumption until the RAJUK table is added).`
+                ? `${fmtNum(fitCount, lang)}টি নকশা এই প্লটে বসে। সেটব্যাক রাজউক ২০০৮ অনুযায়ী: সামনে ${fmtNum(sbM.front, lang)} মি, পেছনে ${fmtNum(sbM.rear, lang)} মি, পাশে ${fmtNum(sbM.side, lang)} মি।`
+                : `${fitCount} of ${choices.length} plans fit this plot. RAJUK 2008 setbacks for this plot: ${sbM.front} m front, ${sbM.rear} m rear, ${sbM.side} m sides.`
               : bn ? "প্লটের মাপ দিলে নকশা দেখা যাবে।" : "Enter the plot size to see which plans fit."}
           </p>
 
@@ -271,10 +279,23 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
                   <div className="faint" style={{ fontSize: 11 }}>
                     {fmtNum(c.plan.unitsPerFloor, lang)} × {fmtNum(c.plan.bedroomsPerUnit, lang)} {bn ? "বেডরুম" : "bed"}
                   </div>
+                  {c.coverage?.status === "fail" ? (
+                    <div style={{ marginTop: 4 }}>
+                      <ResultChip result="fail" lang={lang}>{bn ? "ভূমি আচ্ছাদন সীমা ছাড়ায়" : "over the coverage limit"}</ResultChip>
+                    </div>
+                  ) : null}
                 </button>
               );
             })}
           </div>
+
+          {chosen?.coverage?.status === "fail" ? (
+            <Callout tone="bad" title={bn ? "এই নকশা ভূমি আচ্ছাদনের সীমা ছাড়ায়" : "This plan exceeds the ground-coverage limit"}>
+              {bn
+                ? `নকশাটি প্লটের ${fmtNum(chosen.coverage.actualPercent ?? 0, lang)}% ঢাকে; রাজউকের সীমা ${fmtNum(chosen.coverage.maxPercent ?? 0, lang)}%। কমপ্লায়েন্স স্ক্রিনে এটি অনুত্তীর্ণ দেখাবে। সীমার মধ্যে থাকা নকশা বা কম তলা বেছে নিন।`
+                : `It covers ${chosen.coverage.actualPercent}% of the plot; RAJUK allows ${chosen.coverage.maxPercent}%. The Compliance screen will show a fail. Pick a plan that keeps within the limit, or a smaller one.`}
+            </Callout>
+          ) : null}
 
           <Callout title={bn ? "নকশা কীভাবে বসে" : "How the plan is fitted"}>
             {bn

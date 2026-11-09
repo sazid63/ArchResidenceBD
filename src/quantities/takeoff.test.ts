@@ -152,6 +152,25 @@ describe("takeoff", () => {
   });
 });
 
+describe("sand rate (checked against the market)", () => {
+  it("the card prices sand per cft at the SoR figure per 100 cft divided by 100, inside the local market range", () => {
+    const sand = DEFAULT_RATE_CARD.lines.find((l) => l.key === "sand-fine")!;
+    expect(sand.unit).toBe("cft");
+    expect(sand.rateBdt).toBe(1900 / 100);
+    expect(sand.rateBdt).toBeGreaterThanOrEqual(17); // local sand, market 2026: BDT 17 to 27 per cft
+    expect(sand.rateBdt).toBeLessThanOrEqual(27);
+  });
+
+  it("sand is no longer the biggest priced line: cement and steel are", () => {
+    const m = model("p1-4b", 5);
+    const boq = buildBoq(m, buildBbs(analyzeStructure(m), m));
+    const priced = boq.lines.filter((l) => l.amountBdt !== null).sort((a, b) => (b.amountBdt as number) - (a.amountBdt as number));
+    expect(priced[0].id).not.toMatch(/sand/);
+    const sand = boq.lines.filter((l) => /sand/.test(l.id)).reduce((s, l) => s + (l.amountBdt ?? 0), 0);
+    expect(sand).toBeLessThan(0.1 * boq.totalBdt);
+  });
+});
+
 describe("pricing", () => {
   const m = model("p1-4b", 4);
   const bbs = buildBbs(analyzeStructure(m), m);
