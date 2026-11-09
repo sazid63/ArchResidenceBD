@@ -102,7 +102,7 @@ const out = {
   meta: {
     source: "github",
     repo: "sazid63/ArchResidenceBD",
-    ref: "v3 (milestone M1: Civic style, Monsoon indigo)",
+    ref: "v3 (Civic style, Monsoon indigo)",
     package: ".",
     paths: { tokens: ["src/theme/tokens.css", "src/theme/tokens.ts", "src/theme/base.css"], fonts: ["public/assets/fonts"], assets: ["src-tauri/icons"] },
     components: {
@@ -111,7 +111,7 @@ const out = {
       ResultChip: "src/ui/kit.tsx", Value: "src/ui/kit.tsx", SegmentedControl: "src/ui/kit.tsx", EmptyState: "src/ui/kit.tsx", Toast: "src/ui/kit.tsx",
       Tabs: "src/ui/kit.css", Slider: "src/ui/kit.css", Modal: "src/ui/kit.css",
     },
-    synced: "2026-11-08",
+    synced: new Date().toISOString().slice(0, 10), // the day of the sync, not a fixed date
   },
   color: {
     themes: [
