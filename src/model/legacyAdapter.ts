@@ -11,6 +11,7 @@
  */
 
 import type { BuildingProject } from "../engine/projectState";
+import { withBasicsPhase } from "../interview/chat";
 import { getPlan } from "../plans/library";
 import type { ConcreteGradeMpa, ProjectSpec, SteelGradeMpa } from "./projectSpec";
 import { landAreaToSqm, normaliseLandUnit, sqmToLandArea, type LandUnit } from "./units";
@@ -61,7 +62,7 @@ export function specToLegacy(spec: ProjectSpec): BuildingProject {
     unitsPerFloor: spec.building.unitsPerFloor ?? 1,
     createdAt: spec.createdAt,
     updatedAt: spec.updatedAt,
-    phases: spec.phases as BuildingProject["phases"],
+    phases: withBasicsPhase(spec.phases) as BuildingProject["phases"],
     designStarted: typeof base.designStarted === "boolean" ? base.designStarted : spec.phases.length > 0,
     ...(spec.activePhaseId ? { activePhaseId: spec.activePhaseId } : {}),
     customization: customization as unknown as BuildingProject["customization"],

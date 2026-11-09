@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { migrateV2 } from "../model/migrate";
 import type { ProjectSpec } from "../model/projectSpec";
 import { generatePhasesForStories } from "../engine/projectState";
-import { chatSend, chatStart, chatView, flowForPhase } from "./chat";
+import { BASICS_PHASE_ID, BASICS_QUESTIONS, chatSend, chatStart, chatView, flowForPhase, withBasicsPhase } from "./chat";
 
 const NOW = "2026-11-09T10:00:00.000Z";
 
@@ -18,6 +18,7 @@ describe("which flow a phase runs", () => {
     const phases = generatePhasesForStories(4);
     const got = phases.map((p) => [p.id, flowForPhase(p)]);
     expect(got).toEqual([
+      ["phase-basics", { flowId: "setup", only: BASICS_QUESTIONS }],
       ["phase-site", { flowId: "site-excavation" }],
       ["phase-foundation", { flowId: "foundation" }],
       ["phase-ground-floor", { flowId: "floor", storey: 0 }],
@@ -165,5 +166,58 @@ describe("assumptions", () => {
     expect(chatView(s, "phase-foundation", "en").assumptions).toEqual([{ id: "asm-foundation-system", statement: "Raft assumed", verifyOnSite: true }]);
     // plain defaults record no assumption of their own
     expect(chatView(chatSend(chatStart(spec(), "phase-utilities", "en", NOW), "phase-utilities", { skip: true }, "en", NOW), "phase-utilities", "en").assumptions).toEqual([]);
+  });
+});
+
+describe("the Project basics phase", () => {
+  const keysOf = (s0: ProjectSpec, script: Record<string, string>) => {
+    let s = chatStart(s0, BASICS_PHASE_ID, "en", NOW);
+    const asked: string[] = [];
+    for (let i = 0; i < 30; i++) {
+      const v = chatView(s, BASICS_PHASE_ID, "en");
+      if (!v.step) break;
+      asked.push(v.step.key);
+      s = chatSend(s, BASICS_PHASE_ID, { text: script[v.step.key] ?? "jani na" }, "en", NOW);
+    }
+    return { s, asked };
+  };
+
+  it("is the first phase of a new project, and is added to an older project that lacks it", () => {
+    expect(generatePhasesForStories(3)[0]).toMatchObject({ id: "phase-basics", kind: "setup" });
+    const older = withBasicsPhase([{ kind: "site" }, { kind: "foundation" }]);
+    expect(older.map((p) => p.kind)).toEqual(["setup", "site", "foundation"]);
+    expect(withBasicsPhase(older)).toBe(older);
+    const s0 = spec();
+    const stripped = { ...s0, phases: s0.phases.filter((p) => p.id !== BASICS_PHASE_ID) };
+    const started = chatStart(stripped, BASICS_PHASE_ID, "en", NOW);
+    expect(started.phases[0].id).toBe(BASICS_PHASE_ID);
+    expect(started.phases[0].messages.length).toBe(2);
+  });
+
+  it("asks only the setup questions the setup form does not ask", () => {
+    const { asked } = keysOf(spec(), { "soil-has-report": "no" });
+    expect(asked.length).toBeGreaterThan(5);
+    for (const k of asked) expect(BASICS_QUESTIONS).toContain(k);
+    for (const form of ["project-name", "plot-area", "plot-frontage", "road-width", "storeys-count", "division"]) expect(asked).not.toContain(form);
+  });
+
+  it("a soil report answer reaches the project: status, bearing and provenance, and the follow-ups are asked only on yes", () => {
+    const yes = keysOf(spec(), { "soil-has-report": "yes", "soil-report-file": "soil.pdf", "soil-sbc": "120 kPa", "soil-groundwater": "3 m" });
+    expect(yes.asked).toEqual(expect.arrayContaining(["soil-report-file", "soil-sbc", "soil-groundwater"]));
+    expect(yes.s.site.soil).toMatchObject({ status: "user_report", sbcKpa: 120, groundwaterDepthM: 3, reportRef: "soil.pdf" });
+    expect(yes.s.provenance["/site/soil/sbcKpa"]).toMatchObject({ source: "user", detail: expect.stringContaining("soil-sbc") });
+    const no = keysOf(spec(), { "soil-has-report": "no" });
+    expect(no.asked).not.toContain("soil-sbc");
+    expect(no.s.site.soil.status).toBe("area_default");
+    expect(no.s.assumptions.some((a) => a.id === "asm-soil-has-report" && a.verifyOnSite)).toBe(true);
+  });
+
+  it("the phase completes, and basement and ground-floor use land in the building", () => {
+    const { s } = keysOf(spec(), { "has-basement": "no", "ground-floor-usage": "parking", authority: "rajuk" });
+    expect(chatView(s, BASICS_PHASE_ID, "en").done).toBe(true);
+    expect(s.phases.find((p) => p.id === BASICS_PHASE_ID)?.status).toBe("completed");
+    expect(s.building.storeys.hasBasement).toBe(false);
+    expect(s.building.groundFloorUsage).toBe("parking");
+    expect(s.site.jurisdiction.authority).toBe("rajuk");
   });
 });

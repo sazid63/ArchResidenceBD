@@ -156,7 +156,7 @@ function renderView(
   navigate: (id: string) => void,
 ) {
   if (view === "setup") {
-    return <ProjectSetupScreen onNavigate={navigate} onProjectCreated={() => navigate("phase:phase-site")} />;
+    return <ProjectSetupScreen onNavigate={navigate} onProjectCreated={() => navigate("phase:phase-basics")} />;
   }
   if (view.startsWith("phase:")) {
     return (
@@ -197,5 +197,5 @@ function renderView(
     if (docType === "drawings") return <DrawingsScreen />;
     return <DocumentsScreen />;
   }
-  return <ProjectSetupScreen onNavigate={navigate} onProjectCreated={() => navigate("phase:phase-site")} />;
+  return <ProjectSetupScreen onNavigate={navigate} onProjectCreated={() => navigate("phase:phase-basics")} />;
 }

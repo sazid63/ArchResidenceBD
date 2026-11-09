@@ -97,10 +97,11 @@ function SeismicTable({ s, dir, bn }: { s: SeismicResult; dir: "x" | "y"; bn: bo
 export function StructureScreen() {
   const { lang } = useI18n();
   const bn = lang === "bn";
-  const { project } = useProject();
+  const { project, spec } = useProject();
   const [siteClass, setSiteClass] = useState<SiteClass>("SD");
   const [systemId, setSystemId] = useState("special-rc-mrf");
-  const [bearing, setBearing] = useState(150);
+  // The soil report's allowable bearing, when the project basics have it; otherwise the screening default.
+  const [bearing, setBearing] = useState(spec?.site.soil.sbcKpa ?? 150);
   const [levelIdx, setLevelIdx] = useState(0);
   const [storeyIdx, setStoreyIdx] = useState(0);
   const group: OccupancyGroup = "I_II";

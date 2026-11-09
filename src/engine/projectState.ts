@@ -6,6 +6,7 @@
  * design generation state, and dynamic PWD BOQ pricing.
  */
 
+import { basicsPhase } from "../interview/chat";
 import { applyLegacy, specToLegacy } from "../model/legacyAdapter";
 import type { V2Project } from "../model/legacyV2";
 import { migrateV2 } from "../model/migrate";
@@ -26,7 +27,7 @@ export interface PhaseItem {
   id: string;
   nameEn: string;
   nameBn: string;
-  kind: "site" | "foundation" | "ground_floor" | "floor" | "roof" | "utility";
+  kind: "setup" | "site" | "foundation" | "ground_floor" | "floor" | "roof" | "utility";
   storeyIndex?: number;
   status: "not_started" | "in_progress" | "completed";
   data: Record<string, unknown>;
@@ -149,6 +150,7 @@ export function generatePhasesForStories(stories: number): PhaseItem[] {
   const phases: PhaseItem[] = [];
   const now = new Date().toISOString();
 
+  phases.push(basicsPhase() as PhaseItem);
   phases.push({
     id: "phase-site", nameEn: "Site & Excavation", nameBn: "সাইট ও মাটি খনন",
     kind: "site", status: "not_started", data: {}, messages: [],

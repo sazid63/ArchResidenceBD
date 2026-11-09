@@ -14,9 +14,25 @@ import { answer, describeStep, displayValue, progressOf, readPointer, skip, star
 
 type Lang = "en" | "bn";
 
-/** The flow-book flow (and storey) a phase runs, or null for a phase the book has no questions for. */
-export function flowForPhase(phase: Pick<PhaseRecord, "id" | "kind" | "storeyIndex">): { flowId: string; storey?: number } | null {
+/** The setup-flow questions the Project setup form does not ask: the "Project basics" phase asks these. */
+export const BASICS_QUESTIONS = ["area-name", "authority", "has-basement", "ground-floor-usage", "typical-unit-area", "material-prices", "soil-has-report", "soil-report-file", "soil-sbc", "soil-groundwater"];
+
+export const BASICS_PHASE_ID = "phase-basics";
+
+export function basicsPhase(): PhaseRecord {
+  return { id: BASICS_PHASE_ID, nameEn: "Project basics", nameBn: "প্রকল্পের মূল তথ্য", kind: "setup", status: "not_started", data: {}, messages: [] };
+}
+
+/** A project made before the basics phase existed gets it first in its list. */
+export function withBasicsPhase<T extends { kind: string }>(phases: T[]): T[] {
+  return phases.some((p) => p.kind === "setup") ? phases : [basicsPhase() as unknown as T, ...phases];
+}
+
+/** The flow-book flow (and storey, and question subset) a phase runs, or null for a phase the book has no questions for. */
+export function flowForPhase(phase: Pick<PhaseRecord, "id" | "kind" | "storeyIndex">): { flowId: string; storey?: number; only?: string[] } | null {
   switch (phase.kind) {
+    case "setup":
+      return { flowId: "setup", only: BASICS_QUESTIONS };
     case "site":
       return { flowId: "site-excavation" };
     case "foundation":
@@ -57,7 +73,7 @@ function stateFor(spec: ProjectSpec, phase: PhaseRecord): InterviewState | null 
       .filter((l) => l.key.includes("@") && !l.key.endsWith(`@${f.storey}`));
     progress = { done: [], open: [], pending: [], ...(progress ?? {}), log: [...(progress?.log ?? []), ...foreign] };
   }
-  return startInterview(spec, f.flowId, { storey: f.storey, progress });
+  return startInterview(spec, f.flowId, { storey: f.storey, only: f.only, progress });
 }
 
 /** The progress to save: only this phase's own entries (the other floors' entries are theirs to keep). */
@@ -88,6 +104,7 @@ function finishText(state: InterviewState, lang: Lang): string {
 
 /** Open a phase: the goal and the first question. Does nothing when the phase already has messages. */
 export function chatStart(spec: ProjectSpec, phaseId: string, lang: Lang, now: string): ProjectSpec {
+  if (phaseId === BASICS_PHASE_ID && !spec.phases.some((p) => p.id === phaseId)) spec = { ...spec, phases: withBasicsPhase(spec.phases) };
   const phase = phaseOf(spec, phaseId);
   if (!phase || phase.messages.length > 0) return spec;
   const f = flowForPhase(phase);

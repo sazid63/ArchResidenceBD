@@ -43,7 +43,9 @@ describe("specToLegacy / applyLegacy", () => {
       designStarted: true, activePhaseId: "phase-site", planId: plan.id, mirror: true,
     });
     expect(back.plot).toEqual(src.plot); // frontage, depth, road width, road side and corner flag all survive
-    expect(back.phases).toEqual(src.phases);
+    // the setup-basics phase is added in front of a project that predates it; the rest is unchanged
+    expect(back.phases[0]).toMatchObject({ id: "phase-basics", kind: "setup" });
+    expect(back.phases.slice(1)).toEqual(src.phases);
     expect(back.customization).toMatchObject({ concreteGrade: 30, steelGrade: 500, accessibility: { lift: true } });
     expect(back.deviations).toEqual(src.deviations);
   });

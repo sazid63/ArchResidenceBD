@@ -57,7 +57,7 @@ export interface PhaseRecord {
   id: string;
   nameEn: string;
   nameBn: string;
-  kind: "site" | "foundation" | "ground_floor" | "floor" | "roof" | "utility";
+  kind: "setup" | "site" | "foundation" | "ground_floor" | "floor" | "roof" | "utility";
   storeyIndex?: number;
   status: "not_started" | "in_progress" | "completed";
   data: Record<string, unknown>;
