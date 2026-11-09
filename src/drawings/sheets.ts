@@ -9,7 +9,7 @@
 
 import type { BuildingModel } from "../model/building";
 import { BOQ } from "../quantities/takeoff";
-import { OUTSIDE, type WallSegment } from "../plans/geometry";
+import { doorLeaf, OUTSIDE, type WallSegment } from "../plans/geometry";
 import { bounds, SceneBuilder, type Entity, type Scene } from "./scene";
 
 export type Lang = "en" | "bn";
@@ -83,6 +83,27 @@ export function planScene(model: BuildingModel, storey: number, opts: SheetOptio
     const t = 260;
     if (d.orientation === "v") sb.rect("DOORS", d.at - t / 2, d.from, d.at + t / 2, d.to);
     else sb.rect("DOORS", d.from, d.at - t / 2, d.to, d.at + t / 2);
+    // The leaf swung open and its arc (8 chords), always into the room the door protects.
+    const leaf = doorLeaf(d);
+    if (leaf) {
+      const [hx, hy] = leaf.hinge;
+      const a0 = Math.atan2(leaf.closed[1] - hy, leaf.closed[0] - hx);
+      const a1 = Math.atan2(leaf.open[1] - hy, leaf.open[0] - hx);
+      let da = a1 - a0;
+      if (da > Math.PI) da -= 2 * Math.PI;
+      if (da < -Math.PI) da += 2 * Math.PI;
+      sb.line("DOORS", hx, hy, leaf.open[0], leaf.open[1]);
+      let px = leaf.closed[0];
+      let py = leaf.closed[1];
+      for (let k = 1; k <= 8; k++) {
+        const ang = a0 + (da * k) / 8;
+        const nx = hx + leaf.lengthMm * Math.cos(ang);
+        const ny = hy + leaf.lengthMm * Math.sin(ang);
+        sb.line("DOORS", px, py, nx, ny);
+        px = nx;
+        py = ny;
+      }
+    }
   }
   for (const wn of geo.windows) {
     const t = 250;

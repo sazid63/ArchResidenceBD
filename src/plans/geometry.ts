@@ -34,6 +34,47 @@ export interface Opening {
   a: Owner;
   b: Owner;
   main?: boolean;
+  /** Doors only: the leaf swings 90 degrees into `into` (a room, never the room it serves from), see opensInto. */
+  swing?: DoorSwing;
+}
+
+/** How a hinged door opens. `side` is the direction of the room it opens into, along the axis across the wall (+1 = towards larger x or y). */
+export interface DoorSwing {
+  into: Owner;
+  side: 1 | -1;
+  /** Which end of the opening carries the hinge. */
+  hinge: "from" | "to";
+}
+
+/** The three points of an open door in plan (mm): the hinge, the free end of the closed leaf, and the free end of the leaf swung open. */
+export function doorLeaf(d: Opening): { hinge: [number, number]; closed: [number, number]; open: [number, number]; lengthMm: number } | null {
+  if (!d.swing) return null;
+  const len = d.to - d.from;
+  const h = d.swing.hinge === "from" ? d.from : d.to;
+  const o = d.swing.hinge === "from" ? d.to : d.from;
+  const s = d.swing.side * len;
+  return d.orientation === "v"
+    ? { hinge: [d.at, h], closed: [d.at, o], open: [d.at + s, h], lengthMm: len }
+    : { hinge: [h, d.at], closed: [o, d.at], open: [h, d.at + s], lengthMm: len };
+}
+
+/** Higher = more private or more enclosed; a door opens into the room with the higher rank. */
+const PRIVACY: Partial<Record<RoomKind, number>> = { toilet: 7, store: 6.5, bedroom: 6, kitchen: 5, stair: 4, dining: 3, living: 2, corridor: 1, lobby: 1 };
+
+/**
+ * The room a door between `a` and `b` opens into: doors open inwards, into the room they protect. A door between a dwelling and
+ * the shared core (the entrance) opens into the dwelling. Otherwise the more private room wins (toilet, dressing or store, bedroom,
+ * kitchen, stair, dining, living, corridor, lobby); equal ranks go to the smaller room. Lift doors slide and have no swing (returns null).
+ */
+export function opensInto(rooms: FittedRoom[], a: number, b: number): number | null {
+  const ra = rooms[a];
+  const rb = rooms[b];
+  if (ra.def.kind === "lift" || rb.def.kind === "lift") return null;
+  if (!!ra.def.unit !== !!rb.def.unit) return ra.def.unit ? a : b;
+  const pa = PRIVACY[ra.def.kind] ?? 0;
+  const pb = PRIVACY[rb.def.kind] ?? 0;
+  if (pa !== pb) return pa > pb ? a : b;
+  return ra.grossAreaMm2 <= rb.grossAreaMm2 ? a : b;
 }
 
 export interface Column {
@@ -222,7 +263,9 @@ export function deriveGeometry(f: FittedPlan): FloorGeometry {
       continue;
     }
     const mid = Math.round((best.room.from + best.room.to) / 2);
-    doors.push({ kind: "door", orientation: best.seg.orientation, at: best.seg.at, from: mid - width / 2, to: mid + width / 2, a, b, main: d.main });
+    const into = opensInto(f.rooms, a, b);
+    const swing: DoorSwing | undefined = into === null ? undefined : { into, side: best.seg.b === into ? 1 : -1, hinge: "from" };
+    doors.push({ kind: "door", orientation: best.seg.orientation, at: best.seg.at, from: mid - width / 2, to: mid + width / 2, a, b, main: d.main, ...(swing ? { swing } : {}) });
   }
 
   const windows: Opening[] = [];

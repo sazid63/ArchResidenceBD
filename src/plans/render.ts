@@ -8,7 +8,7 @@
  */
 
 import type { FloorGeometry, Opening, WallSegment } from "./geometry";
-import { OUTSIDE } from "./geometry";
+import { doorLeaf, OUTSIDE } from "./geometry";
 import type { RoomKind } from "./types";
 
 export interface RenderOptions {
@@ -103,15 +103,15 @@ export function renderPlanSvg(geo: FloorGeometry, opts: RenderOptions = {}): str
   for (const d of geo.doors) {
     const c = cut(d, 260);
     out.push(`<rect x="${c.x}" y="${c.y}" width="${c.w}" height="${c.h}" fill="var(--paper, #ffffff)"/>`);
-    const len = (d.to - d.from) * s;
-    if (d.orientation === "v") {
-      const x = X(d.at);
-      const y0 = Y(d.from);
-      out.push(`<path d="M${x} ${y0} L${x + len} ${y0} A${len} ${len} 0 0 0 ${x} ${y0 - len}" fill="none" stroke="var(--ink-soft, #4e5668)" stroke-width="0.8"/>`);
-    } else {
-      const y = Y(d.at);
-      const x0 = X(d.from);
-      out.push(`<path d="M${x0} ${y} L${x0} ${y - len} A${len} ${len} 0 0 1 ${x0 + len} ${y}" fill="none" stroke="var(--ink-soft, #4e5668)" stroke-width="0.8"/>`);
+    // A hinged door swings into the room it protects (see opensInto); a lift door slides and has no leaf.
+    const leaf = doorLeaf(d);
+    if (leaf) {
+      const r = leaf.lengthMm * s;
+      const [hx, hy] = [X(leaf.hinge[0]), Y(leaf.hinge[1])];
+      const [cx, cy] = [X(leaf.closed[0]), Y(leaf.closed[1])];
+      const [tx, ty] = [X(leaf.open[0]), Y(leaf.open[1])];
+      const sweep = (cx - hx) * (ty - hy) - (cy - hy) * (tx - hx) > 0 ? 1 : 0;
+      out.push(`<path d="M${hx} ${hy} L${tx} ${ty} M${cx} ${cy} A${r} ${r} 0 0 ${sweep} ${tx} ${ty}" fill="none" stroke="var(--ink-soft, #4e5668)" stroke-width="0.8"/>`);
     }
     if (d.main) {
       const mx = d.orientation === "v" ? X(d.at) : X((d.from + d.to) / 2);
