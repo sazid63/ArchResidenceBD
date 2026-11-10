@@ -261,7 +261,8 @@ describe("the bill of quantities agrees with the 3D model", () => {
       const res = analyzeStructure(m);
       const mesh = buildMesh(m, res);
       const vol = (kinds: string[]) => mesh.objects.filter((o) => kinds.includes(o.kind)).reduce((a, o) => a + o.volumeMm3, 0) / 1e9;
-      const ratio = envelopeQuantities(m).wallM3 / vol(["wall", "partition"]);
+      const env = envelopeQuantities(m);
+      const ratio = (env.wallM3 + env.liftWallM3) / vol(["wall", "partition"]); // the mesh still draws the shaft walls as walls; the BOQ counts them as concrete
       // the BOQ takes a flat 500 mm off the storey height; the mesh cuts each wall by the real beam above it, so the BOQ runs a little high
       expect(ratio, `${plan} wall ratio`).toBeGreaterThan(0.95);
       expect(ratio, `${plan} wall ratio`).toBeLessThan(1.12);

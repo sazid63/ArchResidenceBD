@@ -124,4 +124,15 @@ describe("deviation register", () => {
     recordDeviation([], { ...failing }, "x");
     expect(r.items.map((i) => i.status)).toEqual(before);
   });
+
+});
+
+describe("B5 lift size row", () => {
+  it("is present with the class, the shaft and the overhead, and says the sizes are assumptions", () => {
+    const row = ready(project({ stories: 8 })).items.find((i) => i.id === "access.lift-size")!;
+    expect(row).toBeTruthy();
+    expect(["pass", "fail"]).toContain(row.status);
+    expect(String((row.expected as { value: string }).value)).toMatch(/kg, shaft [0-9]+ x [0-9]+ mm, overhead 4200 mm/);
+    expect(row.note!.en).toMatch(/assumptions/);
+  });
 });

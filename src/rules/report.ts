@@ -8,6 +8,7 @@
 
 import { buildingForProject } from "../model/projectMesh";
 import { liftRequired } from "../plans/rules";
+import { LIFT_ASSUMPTIONS, liftSpec } from "../model/lift";
 import type { Issue, IssueCode } from "../plans/validate";
 import type { BuildingProject } from "../engine/projectState";
 import type { CheckResult as ResultKind } from "../theme/tokens";
@@ -169,6 +170,25 @@ export function buildReport(project: BuildingProject): Report {
     citation: { en: "BNBC 2020 Part 8 Sec 4.2.1.1", bn: "বিএনবিসি ২০২০ পার্ট ৮ ধারা ৪.২.১.১" },
     note: { en: "Required above six storeys or 20 m.", bn: "ছয় তলার বেশি বা ২০ মিটারের বেশি উচ্চতায় বাধ্যতামূলক।" },
   });
+  const lift = liftSpec(model);
+  if (lift) {
+    const [cw, cd] = lift.cls.carMm;
+    const [sw, sd] = lift.cls.shaftMm;
+    const ok = lift.fitsShaft && lift.fitsOverhead && lift.enoughLifts;
+    items.push({
+      id: "access.lift-size",
+      section: "access",
+      status: ok ? "pass" : "fail",
+      title: { en: "Lift size, pit and overrun", bn: "লিফটের মাপ, পিট ও ওভাররান" },
+      expected: { value: `${lift.liftsNeeded} x ${lift.cls.kg} kg, shaft ${sw} x ${sd} mm, overhead ${LIFT_ASSUMPTIONS.overheadMm} mm`, unit: "" },
+      actual: { value: `1 lift cell ${lift.netMm[0]} x ${lift.netMm[1]} mm, overhead ${Math.round(lift.overheadMm)} mm`, unit: "" },
+      citation: lift.stretcher ? { en: "BNBC 2020 Part 8 Sec 4.2.1: stretcher platform 1275 x 2000 mm above ten storeys or 32 m", bn: "বিএনবিসি ২০২০ পার্ট ৮ ধারা ৪.২.১: দশ তলা বা ৩২ মিটারের বেশিতে স্ট্রেচার প্ল্যাটফর্ম ১২৭৫ x ২০০০ মিমি" } : null,
+      note: {
+        en: `${lift.flatsServed} flats on ${lift.floorsServed - 1} floors (${lift.persons} people at ${LIFT_ASSUMPTIONS.personsPerFlat} per flat) need ${lift.liftsNeeded} lift(s) at one per ${LIFT_ASSUMPTIONS.flatsPerLift} flats; a ${lift.cls.kg} kg car of ${cw} x ${cd} mm. Car and shaft sizes, pit ${lift.pitMm} mm and the overhead are assumptions (the pack has no passenger-lift tables): confirm with the supplier. The plan has one lift cell${lift.enoughLifts ? "" : ", so a second lift must be added to the plan"}.`,
+        bn: `${lift.flatsServed}টি ফ্ল্যাট (${lift.persons} জন, প্রতি ফ্ল্যাটে ${LIFT_ASSUMPTIONS.personsPerFlat} জন) ধরে ${lift.liftsNeeded}টি লিফট লাগে (প্রতি ${LIFT_ASSUMPTIONS.flatsPerLift} ফ্ল্যাটে একটি); ${lift.cls.kg} কেজির কার ${cw} x ${cd} মিমি। কার ও শাফটের মাপ, ${lift.pitMm} মিমি পিট ও ওভারহেড অনুমান (প্যাকে যাত্রীবাহী লিফটের সারণি নেই): সরবরাহকারীর সঙ্গে নিশ্চিত করুন। প্ল্যানে একটি লিফট ঘর আছে${lift.enoughLifts ? "" : ", তাই দ্বিতীয় লিফট যোগ করতে হবে"}।`,
+      },
+    });
+  }
   items.push({
     id: "access.route",
     section: "access",

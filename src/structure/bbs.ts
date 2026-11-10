@@ -20,10 +20,11 @@ import { barArea, pickBeamBars, pickColumnBars, pickMatBars, unitWeightKgM, type
 import { planStair, DEFAULT_STAIR } from "../cad/stairBuilder";
 import { PAD_TOP_BELOW_FINISH_MM, PLINTH_BEAM_DEPTH_MM, PLINTH_BEAM_WIDTH_MM } from "./foundation";
 import { DESIGN } from "./materials";
+import { LIFT_ASSUMPTIONS, liftCore } from "../model/lift";
 import { beamMinAs, flexure, slabMinAs } from "./section";
 
 export type ShapeCode = "00" | "11" | "21" | "51";
-export type BbsFamily = "beam" | "column" | "slab" | "footing";
+export type BbsFamily = "beam" | "column" | "slab" | "footing" | "core";
 
 /** The longest bar a supplier delivers; rows are cut to fit (BD stock bars are 40 ft = 12.2 m). */
 export const STOCK_LENGTH_MM = 12000;
@@ -87,7 +88,7 @@ export interface BbsResult {
     concreteM3: number;
     kgPerM3: number;
     /** Form contact areas by member family, m2 (simplified, see formworkM2). */
-    formworkM2: { footing: number; column: number; beam: number; slab: number };
+    formworkM2: { footing: number; column: number; beam: number; slab: number; core: number };
   };
 }
 
@@ -138,9 +139,9 @@ class Builder {
   }
 
   rows(): BbsRow[] {
-    const letter: Record<BbsFamily, string> = { beam: "B", column: "C", slab: "S", footing: "F" };
-    const seq: Record<BbsFamily, number> = { beam: 0, column: 0, slab: 0, footing: 0 };
-    const order: BbsFamily[] = ["footing", "column", "beam", "slab"];
+    const letter: Record<BbsFamily, string> = { beam: "B", column: "C", slab: "S", footing: "F", core: "L" };
+    const seq: Record<BbsFamily, number> = { beam: 0, column: 0, slab: 0, footing: 0, core: 0 };
+    const order: BbsFamily[] = ["footing", "column", "beam", "slab", "core"];
     const all = [...this.map.values()].sort((a, b) => order.indexOf(a.family) - order.indexOf(b.family) || Math.min(...a.levels) - Math.min(...b.levels));
     return all.map((r) => {
       seq[r.family] += 1;
@@ -588,6 +589,28 @@ function detailPlinthBeams(model: BuildingModel, b: Builder): void {
   b.add({ family: "beam", description: bi("Plinth beams, stirrups 8 mm at 150", "প্লিন্থ বিম, স্টিরাপ ৮ মিমি @ ১৫০"), dia: dt, shape: "51", dims: [a, bb, tail], cut: tieCut, bars: stirrups, level: -1 });
 }
 
+/** Lift shaft: 150 mm RC walls with 10 mm bars at 200 mm each way on both faces (0.52 percent, above the 0.25 percent assumed minimum), and the pit slab with 12 mm at 150 each way. */
+function detailLiftCore(model: BuildingModel, b: Builder): void {
+  const core = liftCore(model);
+  if (!core) return;
+  const dia = 10;
+  const sp = 200;
+  const lap = lapTension(dia, "B", {});
+  const pieces = Math.max(1, Math.ceil(core.heightMm / (STOCK_LENGTH_MM - lap)));
+  const pieceLen = Math.round((core.heightMm + (pieces - 1) * lap) / pieces);
+  b.add({ family: "core", description: bi("Lift shaft wall, vertical 10 mm at 200, both faces", "লিফট শাফটের দেয়াল, খাড়া ১০ মিমি @ ২০০, দুই পাশে"), dia, shape: "00", dims: [pieceLen], cut: pieceLen, bars: 2 * Math.ceil(core.perimeterMm / sp) * pieces, level: -1 });
+  // the ring is cut into lapped pieces when it is longer than the stock bar
+  const ring = core.perimeterMm - 2 * COVER;
+  const ringPieces = Math.max(1, Math.ceil((ring + lap) / (STOCK_LENGTH_MM - lap)));
+  const ringLen = Math.round((ring + ringPieces * lap) / ringPieces);
+  b.add({ family: "core", description: bi("Lift shaft wall, horizontal 10 mm at 200, both faces", "লিফট শাফটের দেয়াল, আনুভূমিক ১০ মিমি @ ২০০, দুই পাশে"), dia, shape: "00", dims: [ringLen], cut: ringLen, bars: 2 * Math.ceil(core.heightMm / sp) * ringPieces, level: -1 });
+  const cell = core.spec.cell;
+  const sx = cell.x1 - cell.x0 + LIFT_ASSUMPTIONS.shaftWallMm;
+  const sy = cell.y1 - cell.y0 + LIFT_ASSUMPTIONS.shaftWallMm;
+  b.add({ family: "core", description: bi("Lift pit slab, bottom 12 mm at 150, along x", "লিফট পিট স্ল্যাব, নিচে ১২ মিমি @ ১৫০, x বরাবর"), dia: 12, shape: "00", dims: [sx - 2 * COVER], cut: sx - 2 * COVER, bars: Math.ceil(sy / 150) + 1, level: -1 });
+  b.add({ family: "core", description: bi("Lift pit slab, bottom 12 mm at 150, along y", "লিফট পিট স্ল্যাব, নিচে ১২ মিমি @ ১৫০, y বরাবর"), dia: 12, shape: "00", dims: [sy - 2 * COVER], cut: sy - 2 * COVER, bars: Math.ceil(sx / 150) + 1, level: -1 });
+}
+
 function concreteM3(res: StructureResult, model: BuildingModel): number {
   let m3 = 0;
   for (const lv of res.levels) {
@@ -605,6 +628,8 @@ function concreteM3(res: StructureResult, model: BuildingModel): number {
   for (const bm of typicalGeo.beams) m3 += (PLINTH_BEAM_WIDTH_MM * PLINTH_BEAM_DEPTH_MM * bm.spanMm) / 1e9;
   const sg = stairGeometry(model);
   if (sg) m3 += sg.perStoreyM3 * model.storeys.length;
+  const lc = liftCore(model);
+  if (lc) m3 += lc.wallM3 + lc.pitSlabM3;
   // Footings as built: merged footings once, never the overlapping pads they replace.
   for (const fo of res.foundation.footings) m3 += ((fo.x1 - fo.x0) * (fo.y1 - fo.y0) * fo.depthMm) / 1e9;
   return m3;
@@ -615,8 +640,8 @@ function concreteM3(res: StructureResult, model: BuildingModel): number {
  * storey, the four sides of each footing (its base sits on blinding, not on a form). Simplified: nothing is deducted where
  * members meet, slab edges and stair flights are not counted, and the columns use the typical storey height.
  */
-function formworkM2(res: StructureResult, model: BuildingModel): { footing: number; column: number; beam: number; slab: number } {
-  const f = { footing: 0, column: 0, beam: 0, slab: 0 };
+function formworkM2(res: StructureResult, model: BuildingModel): { footing: number; column: number; beam: number; slab: number; core: number } {
+  const f = { footing: 0, column: 0, beam: 0, slab: 0, core: 0 };
   for (const lv of res.levels) {
     for (const p of lv.panels) f.slab += ((p.x1 - p.x0) * (p.y1 - p.y0)) / 1e6;
     for (const c of lv.cantilevers) f.slab += ((c.x1 - c.x0) * (c.y1 - c.y0)) / 1e6;
@@ -634,6 +659,8 @@ function formworkM2(res: StructureResult, model: BuildingModel): { footing: numb
   for (const bm of typicalGeo.beams) f.beam += (2 * PLINTH_BEAM_DEPTH_MM * bm.spanMm) / 1e6;
   const sg = stairGeometry(model);
   if (sg) f.slab += sg.soffitM2 * model.storeys.length;
+  const lc = liftCore(model);
+  if (lc) f.core += (2 * lc.perimeterMm * lc.heightMm) / 1e6; // both faces of the shaft walls (priced at the column form rate)
   return f;
 }
 
@@ -652,6 +679,7 @@ export function buildBbs(res: StructureResult, model: BuildingModel): BbsResult 
   detailCantilevers(res, b);
   detailStairs(model, b);
   detailPlinthBeams(model, b);
+  detailLiftCore(model, b);
   const rows = b.rows();
   const byDia = new Map<number, { lengthM: number; weightKg: number }>();
   const byFam = new Map<BbsFamily, number>();

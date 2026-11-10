@@ -32,6 +32,12 @@ describe("members the first schedule left out: stairs, plinth beams, column stub
     const stairPerStorey = 2 * (0.15 * 2.5 + 9 * 0.5 * (3 / 18) * 0.25) + 1.0 * 2.15 * 0.15;
     expect(stairPerStorey).toBeCloseTo(1.4475, 4);
     want += stairPerStorey * model.storeys.length;
+    // lift shaft: 150 mm walls from the 1.5 m pit to the machine-room roof less one 0.9 x 2.1 m door per storey, and the 250 mm pit slab
+    const lr = model.roof.liftRoom!;
+    const lw = lr.x1 - lr.x0;
+    const ld = lr.y1 - lr.y0;
+    const lh = 1500 + model.roof.levelMm + model.roof.coverHeightMm;
+    want += (2 * (lw + ld) * lh * 150) / 1e9 - (model.storeys.length * 0.9 * 2.1 * 0.15) + ((lw + 150) * (ld + 150) * 250) / 1e9;
     expect(bbs.totals.concreteM3).toBeCloseTo(want, 6);
   });
 

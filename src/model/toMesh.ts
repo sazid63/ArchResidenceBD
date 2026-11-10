@@ -14,6 +14,7 @@
  * `filterMeshByPhase`, the viewer, BOQ and exporters keep working.
  */
 
+import { LIFT_ASSUMPTIONS, liftSpec } from "./lift";
 import type { MeshDocument, MeshObject } from "../cad/mesh";
 import { createDoor3DMesh, createWindow3DMesh } from "../cad/meshParts";
 import { createBoxMesh, resolveSolids, type Box, type Void } from "../cad/solidKernel";
@@ -123,6 +124,20 @@ export function buildMesh(model: BuildingModel, design?: StructureResult): MeshD
     const r = beamRect(bm, ox, oy, PLINTH_BEAM_WIDTH_MM / 2);
     box(`plinth_${k}`, "Plinth Beam", "beam", "foundation", { ...r, z0: -PLINTH_BEAM_DEPTH_MM, z1: 0 });
   });
+
+  // Lift pit (B5): a pit slab and four walls of reinforced concrete under the lift cell, down to the pit depth (assumption in model/lift.ts).
+  const lift = liftSpec(model);
+  if (lift) {
+    const c = lift.cell;
+    const t = LIFT_ASSUMPTIONS.shaftWallMm;
+    const pit = -lift.pitMm;
+    const r = { x0: ox + c.x0, y0: oy + c.y0, x1: ox + c.x1, y1: oy + c.y1 };
+    box("lift_pit_slab", "Lift Pit Slab", "pit", "foundation", { x0: r.x0 - t / 2, y0: r.y0 - t / 2, z0: pit - LIFT_ASSUMPTIONS.pitSlabMm, x1: r.x1 + t / 2, y1: r.y1 + t / 2, z1: pit });
+    box("lift_pit_wall_s", "Lift Pit Wall", "pit", "foundation", { x0: r.x0 - t / 2, y0: r.y0 - t / 2, z0: pit, x1: r.x1 + t / 2, y1: r.y0 + t / 2, z1: 0 });
+    box("lift_pit_wall_n", "Lift Pit Wall", "pit", "foundation", { x0: r.x0 - t / 2, y0: r.y1 - t / 2, z0: pit, x1: r.x1 + t / 2, y1: r.y1 + t / 2, z1: 0 });
+    box("lift_pit_wall_w", "Lift Pit Wall", "pit", "foundation", { x0: r.x0 - t / 2, y0: r.y0 + t / 2, z0: pit, x1: r.x0 + t / 2, y1: r.y1 - t / 2, z1: 0 });
+    box("lift_pit_wall_e", "Lift Pit Wall", "pit", "foundation", { x0: r.x1 - t / 2, y0: r.y0 + t / 2, z0: pit, x1: r.x1 + t / 2, y1: r.y1 - t / 2, z1: 0 });
+  }
 
   // ---- Storeys ---------------------------------------------------------------------------
   model.storeys.forEach((storey, i) => {

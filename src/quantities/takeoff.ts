@@ -122,12 +122,15 @@ export function envelopeQuantities(model: BuildingModel) {
   let wallM3 = 0;
   let plasterM2 = 0;
   let railingM = 0;
+  let liftWallM3 = 0; // masonry-equivalent volume of the shaft walls that are concrete instead
   for (const st of model.storeys) {
     const h = Math.max(st.heightMm - BOQ.wallDeductMm, 0);
     const g = st.geometry;
     let wallAreaM2 = 0;
+    const isLift = (o: number) => o >= 0 && g.fitted.rooms[o]?.def.kind === "lift";
     for (const w of g.walls) {
       const len = w.to - w.from;
+      if (isLift(w.a) || isLift(w.b)) { wallAreaM2 += (len * h) / 1e6; liftWallM3 += (len * h * w.thicknessMm) / 1e9; continue; } // shaft walls are reinforced concrete (liftCore), plastered but not brick
       if (w.railing) { railingM += len / 1000; continue; } // balcony railing: counted in metres, not as masonry
       wallAreaM2 += (len * h) / 1e6;
       wallM3 += (len * h * w.thicknessMm) / 1e9;
@@ -139,6 +142,7 @@ export function envelopeQuantities(model: BuildingModel) {
       const host = g.walls.find((w) => w.orientation === o.orientation && w.at === o.at && w.from <= o.from && w.to >= o.to);
       const area = ((o.to - o.from) * oh) / 1e6;
       openingM2 += area;
+      if (host && (isLift(host.a) || isLift(host.b))) { liftWallM3 -= (area * host.thicknessMm) / 1000; continue; }
       wallM3 -= (area * (host?.thicknessMm ?? BOQ.partitionMm)) / 1000;
     }
     plasterM2 += 2 * Math.max(wallAreaM2 - openingM2, 0);
@@ -156,7 +160,7 @@ export function envelopeQuantities(model: BuildingModel) {
   const typical = model.storeys[Math.min(1, model.storeys.length - 1)].geometry;
   let screedM2 = model.footprintAreaM2 - slabOpeningAreaM2(typical, model); // the roof
   model.storeys.forEach((st, i) => { screedM2 += model.footprintAreaM2 - (i > 0 ? slabOpeningAreaM2(st.geometry, model) : 0); });
-  return { wallM3: Math.max(wallM3, 0), plasterM2, screedM2, railingM };
+  return { wallM3: Math.max(wallM3, 0), liftWallM3, plasterM2, screedM2, railingM };
 }
 
 export function takeoff(model: BuildingModel, bbs: BbsResult): TakeoffItem[] {
@@ -188,6 +192,7 @@ export function takeoff(model: BuildingModel, bbs: BbsResult): TakeoffItem[] {
     formwork("formwork-column", "columns", "কলাম", fw.column, "formwork-column"),
     formwork("formwork-beam", "beams", "বিম", fw.beam, "formwork-beam"),
     formwork("formwork-slab", "slabs", "স্ল্যাব", fw.slab, "formwork-slab"),
+    ...(fw.core > 0 ? [formwork("formwork-core", "lift shaft walls (priced at the column form rate)", "লিফট শাফটের দেয়াল (কলাম ফর্মের দরে)", fw.core, "formwork-column")] : []),
     { id: "steel", category: "steel", description: bi("Reinforcement bars, Grade 420 (bar schedule total; priced at the card's B400 rod line)", "রড গ্রেড ৪২০ (বার শিডিউলের মোট; কার্ডের বি৪০০ রডের দরে)"), unit: "ton", quantity: (bbs.totals.weightKg * (1 + BOQ.steelWastage)) / 1000, rateKey: "rod-60g", basis: bi("schedule kg x 1.03 (cutting wastage) / 1000", "শিডিউলের কেজি × ১.০৩ (কাটার অপচয়) / ১০০০") },
     { id: "rebar-fixing", category: "steel", description: bi("Rebar cutting, bending and fixing (labour and binding wire)", "রড কাটা, বাঁকানো ও বাঁধা (শ্রম ও জিআই তার)"), unit: "kg", quantity: bbs.totals.weightKg, rateKey: "rebar-fixing", basis: bi("bar schedule kg; SoR item 08.1.2 minus the bar (derived)", "বার শিডিউলের কেজি; এসওআর ০৮.১.২ থেকে রডের দাম বাদ (হিসাবকৃত)") },
     { id: "brickwork", category: "masonry", description: bi("Brick masonry, 250 mm and 125 mm walls, openings deducted", "ইটের গাঁথুনি ২৫০ ও ১২৫ মিমি দেয়াল, খোলা অংশ বাদে"), unit: "m3", quantity: env.wallM3, basis: bi("wall length x height x thickness", "দেয়ালের দৈর্ঘ্য × উচ্চতা × পুরুত্ব") },

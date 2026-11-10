@@ -80,6 +80,7 @@ export function getColorForObject(object?: MeshObject): Vec3 {
   if (object.kind === "footing") return [0.82, 0.50, 0.20]; // Earthy Footing Pad
   if (object.kind === "balcony") return [0.94, 0.78, 0.38]; // Cantilever Balcony
   if (object.kind === "parapet") return [0.82, 0.28, 0.22]; // Terracotta Parapet
+  if (object.kind === "pit") return [0.70, 0.70, 0.74]; // Lift pit concrete
   if (object.kind === "tank") return [0.05, 0.50, 0.82]; // Water Reservoir Blue
   if (object.kind === "excavation") return [0.60, 0.50, 0.40]; // Earth Pit
   if (object.kind === "canopy") return [0.32, 0.42, 0.52]; // Portico Canopy

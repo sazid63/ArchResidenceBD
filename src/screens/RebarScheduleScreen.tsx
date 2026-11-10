@@ -16,6 +16,7 @@ const FAMILY_LABEL: Record<BbsFamily, { en: string; bn: string }> = {
   column: { en: "Columns", bn: "কলাম" },
   beam: { en: "Beams", bn: "বিম" },
   slab: { en: "Slabs", bn: "স্ল্যাব" },
+  core: { en: "Lift core", bn: "লিফট কোর" },
 };
 
 const SHAPE_NOTE: Record<string, { en: string; bn: string }> = {
@@ -106,7 +107,7 @@ export function RebarScheduleScreen() {
     .filter((g) => g.items.length > 0);
   const tabs: Array<{ value: Filter; label: string }> = [
     { value: "all", label: `${bn ? "সব" : "All"} (${bbs.rows.length})` },
-    ...(["footing", "column", "beam", "slab"] as BbsFamily[]).map((f) => ({ value: f as Filter, label: `${bn ? FAMILY_LABEL[f].bn : FAMILY_LABEL[f].en} (${bbs.rows.filter((r) => r.family === f).length})` })),
+    ...(["footing", "column", "beam", "slab", "core"] as BbsFamily[]).map((f) => ({ value: f as Filter, label: `${bn ? FAMILY_LABEL[f].bn : FAMILY_LABEL[f].en} (${bbs.rows.filter((r) => r.family === f).length})` })),
   ];
 
   return (
