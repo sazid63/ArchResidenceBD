@@ -8,6 +8,7 @@
  */
 
 import type { Bay, PlanDefinition, RoomDef, Text } from "./types";
+import { VERANDAH_SUFFIX, baseIdOf, isVerandahId, withFrontVerandah } from "./balcony";
 
 const bay = (min: number, pref: number, max: number): Bay => ({ min, pref, max });
 const t = (en: string, bn: string): Text => ({ en, bn });
@@ -829,6 +830,23 @@ export const PN_2F: PlanDefinition = {
 
 export const PLAN_LIBRARY: PlanDefinition[] = [P1_4B, P1_3B, P1_4B_WIDE, P2_2B_FB, P2_2B_LR, P2_3B_LR, P2_3B_FB, P3_2B, P4_2B, P4_1B, PN_2B, PN_2B_F, PN_3B, PN_2F];
 
+const variantCache = new Map<string, PlanDefinition | null>();
+
+/** A library plan, or a library plan with its front verandah ("<id>+v"); the variant is built once and reused. */
 export function getPlan(id: string): PlanDefinition | undefined {
-  return PLAN_LIBRARY.find((p) => p.id === id);
+  const direct = PLAN_LIBRARY.find((p) => p.id === id);
+  if (direct || !isVerandahId(id)) return direct;
+  if (!variantCache.has(id)) {
+    const base = PLAN_LIBRARY.find((p) => p.id === baseIdOf(id));
+    variantCache.set(id, base ? withFrontVerandah(base) : null);
+  }
+  return variantCache.get(id) ?? undefined;
+}
+
+/** The front-verandah variants of every plan that can take one (B2 phase 1). */
+export function verandahVariants(): PlanDefinition[] {
+  return PLAN_LIBRARY.flatMap((p) => {
+    const v = getPlan(`${p.id}${VERANDAH_SUFFIX}`);
+    return v ? [v] : [];
+  });
 }

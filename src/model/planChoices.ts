@@ -4,7 +4,7 @@
  */
 
 import { fitPlan, type Envelope } from "../plans/fit";
-import { PLAN_LIBRARY } from "../plans/library";
+import { PLAN_LIBRARY, verandahVariants } from "../plans/library";
 import type { FitRejection, FitResult, PlanDefinition } from "../plans/types";
 import { rajukSetbacks } from "../rules/setbacks";
 import { check } from "../rules/check";
@@ -89,10 +89,11 @@ export function planChoices(frontageM: number, depthM: number, opts: ChoiceOptio
   if (!sideOk(frontageM) || !sideOk(depthM)) {
     // An impossible plot fits nothing; say so instead of failing inside the setback lookup.
     const why = { code: "invalid_plan" as const, message: { en: "Plot sides must be between 3 m and 300 m.", bn: "প্লটের পাশ ৩ মিটার থেকে ৩০০ মিটারের মধ্যে হতে হবে।" } };
-    return PLAN_LIBRARY.filter((p) => opts.unitsPerFloor === undefined || p.unitsPerFloor === opts.unitsPerFloor).map((plan) => ({ plan, fit: { ok: false as const, reasons: [why] }, coverage: null }));
+    return [...PLAN_LIBRARY, ...verandahVariants()].filter((p) => opts.unitsPerFloor === undefined || p.unitsPerFloor === opts.unitsPerFloor).map((plan) => ({ plan, fit: { ok: false as const, reasons: [why] }, coverage: null }));
   }
   const env = envelopeFor(frontageM, depthM, opts.setbacks, opts.storeys);
-  const list = PLAN_LIBRARY.filter((p) => opts.unitsPerFloor === undefined || p.unitsPerFloor === opts.unitsPerFloor);
+  // Every plan, then the same plans with a front verandah where the front row belongs to one flat (B2).
+  const list = [...PLAN_LIBRARY, ...verandahVariants()].filter((p) => opts.unitsPerFloor === undefined || p.unitsPerFloor === opts.unitsPerFloor);
   const choices: PlanChoice[] = list.map((plan) => {
     const fit = fitPlan(plan, env, { mirror: opts.mirror });
     return { plan, fit, coverage: fit.ok ? coverageOf(frontageM, depthM, plan, opts) : null };

@@ -157,7 +157,7 @@ function computeLevel(model: BuildingModel, k: number): Omit<LevelResult, "index
   const equipment = roof ? roofLoads(model) : [];
   // Walls that stand on the slab (not on a structural line) are spread over their panel; walls on a line load that beam instead.
   const structuralLines = new Set<string>([...f.structuralX.map((g) => lineKey("v", f.xLines[g])), ...f.structuralY.map((g) => lineKey("h", f.yLines[g]))]);
-  const slabWalls = roof ? new Map<string, number>() : slabWallKn(model.storeys[k + 1].geometry.walls, structuralLines, panels, model.storeys[k + 1].heightMm - 125);
+  const slabWalls = roof ? new Map<string, number>() : slabWallKn(model.storeys[k + 1].geometry.walls.filter((w) => !w.railing), structuralLines, panels, model.storeys[k + 1].heightMm - 125);
   const extraDead = (p: Panel): number => {
     let q = p.kinds.includes("stair") ? STAIR_DEAD_KN_M2 : 0;
     const panelAreaM2 = ((p.x1 - p.x0) * (p.y1 - p.y0)) / 1e6;
@@ -199,7 +199,7 @@ function computeLevel(model: BuildingModel, k: number): Omit<LevelResult, "index
 
   // Walls that sit on this level's beams: the storey above (floors) or the parapet (roof).
   const wallGeo = roof ? geo : loadsGeo;
-  const walls = wallGeo.walls.filter((w) => (roof ? w.exterior : true));
+  const walls = wallGeo.walls.filter((w) => !w.railing && (roof ? w.exterior : true)); // a balcony railing is not a masonry wall load (its ~1 kN/m is within the partition allowance)
   const wallHeightMm = roof ? model.roof.parapetMm : model.storeys[k + 1].heightMm;
 
   const buildLines = (slabs: Array<{ p: Panel; r: SlabResult }>, slabMm: number): BeamLinePlaced[] => {

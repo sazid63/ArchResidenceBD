@@ -4,7 +4,7 @@
  * structural lines. Pure functions over a FittedPlan; all lengths in mm.
  */
 
-import { DOOR_JAMB_MM, DOOR_MM, WALL_MM, WINDOW_MM } from "./rules";
+import { DOOR_JAMB_MM, DOOR_MM, RAILING, WALL_MM, WINDOW_MM } from "./rules";
 import type { FittedPlan, FittedRoom, RoomKind } from "./types";
 
 /** Room index, or -1 for outside the building. */
@@ -22,6 +22,8 @@ export interface WallSegment {
   b: Owner;
   exterior: boolean;
   thicknessMm: number;
+  /** The open edge of a balcony: a railing, not a brick wall (no masonry, no wall load). */
+  railing?: boolean;
 }
 
 export interface Opening {
@@ -137,7 +139,8 @@ function wallsOf(f: FittedPlan, owner: Owner[][]): WallSegment[] {
       prev.to = seg.to;
       return;
     }
-    out.push({ ...seg, exterior, thicknessMm: exterior ? WALL_MM.exterior : WALL_MM.interior });
+    const open = exterior && [seg.a, seg.b].some((o) => o !== OUTSIDE && f.rooms[o].def.kind === "balcony");
+    out.push({ ...seg, exterior, thicknessMm: open ? RAILING.thicknessMm : exterior ? WALL_MM.exterior : WALL_MM.interior, ...(open ? { railing: true } : {}) });
   };
   for (let k = 0; k <= nx; k++)
     for (let j = 0; j < ny; j++) {
@@ -213,6 +216,8 @@ function metricsOf(f: FittedPlan, room: FittedRoom, index: number, walls: WallSe
     lost += len * (w.thicknessMm / 2);
     const o = other(w, index);
     if (o === OUTSIDE) exteriorMm += len;
+    // Assumption: a room that opens onto an open balcony or verandah is lit and aired through it (BNBC 2020 gives no depth limit we could cite).
+    else if (rooms[o].def.kind === "balcony") exteriorMm += len;
     else if (rooms[o].def.kind === "shaft") shaftMm += len;
   }
   const main = [...room.rects].sort((p, q) => (q.x1 - q.x0) * (q.y1 - q.y0) - (p.x1 - p.x0) * (p.y1 - p.y0))[0];

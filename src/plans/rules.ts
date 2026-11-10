@@ -51,6 +51,8 @@ export const ROOM_RULES: Partial<Record<RoomKind, RoomRule>> = {
   lift: { minWidthMm: 1500 },
   // Table 3.1.11, row "up to 3 storeys" (1.00 m); taller buildings need more, see SHAFT_TABLE.
   shaft: { minWidthMm: 1000 },
+  // Assumption: BNBC 2020 gives no balcony size; 1.0 m clear depth and 3 m2 are working values (a person can stand and turn).
+  balcony: { minAreaM2: 3, minWidthMm: 1000 },
 };
 
 /** Per-kind source of the minimum area/width. Kinds missing here are assumptions. */
@@ -114,3 +116,6 @@ export const WINDOW_MM: Partial<Record<RoomKind, number>> = {
   toilet: 600,
   stair: 1200,
 };
+
+/** Balcony railing: thickness drawn in plan and height. RAJUK 2008 §46(5)(gha) exempts front balconies only with a railing of at most 1,200 mm; 1,000 mm is the working height (assumption, to confirm). */
+export const RAILING = { thicknessMm: 100, heightMm: 1000, maxHeightRajukMm: 1200 } as const;

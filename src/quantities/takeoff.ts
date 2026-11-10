@@ -121,12 +121,14 @@ const mortarSand = (m3: number) => (m3 * BOQ.mortarDryFactor * BOQ.mortarMix.san
 export function envelopeQuantities(model: BuildingModel) {
   let wallM3 = 0;
   let plasterM2 = 0;
+  let railingM = 0;
   for (const st of model.storeys) {
     const h = Math.max(st.heightMm - BOQ.wallDeductMm, 0);
     const g = st.geometry;
     let wallAreaM2 = 0;
     for (const w of g.walls) {
       const len = w.to - w.from;
+      if (w.railing) { railingM += len / 1000; continue; } // balcony railing: counted in metres, not as masonry
       wallAreaM2 += (len * h) / 1e6;
       wallM3 += (len * h * w.thicknessMm) / 1e9;
     }
@@ -154,7 +156,7 @@ export function envelopeQuantities(model: BuildingModel) {
   const typical = model.storeys[Math.min(1, model.storeys.length - 1)].geometry;
   let screedM2 = model.footprintAreaM2 - slabOpeningAreaM2(typical, model); // the roof
   model.storeys.forEach((st, i) => { screedM2 += model.footprintAreaM2 - (i > 0 ? slabOpeningAreaM2(st.geometry, model) : 0); });
-  return { wallM3: Math.max(wallM3, 0), plasterM2, screedM2 };
+  return { wallM3: Math.max(wallM3, 0), plasterM2, screedM2, railingM };
 }
 
 export function takeoff(model: BuildingModel, bbs: BbsResult): TakeoffItem[] {
@@ -174,6 +176,9 @@ export function takeoff(model: BuildingModel, bbs: BbsResult): TakeoffItem[] {
   const fw = bbs.totals.formworkM2;
   const formwork = (id: string, en: string, bnText: string, quantity: number, rateKey: string): TakeoffItem => ({ id, category: "formwork", description: bi(`Formwork, ${en}`, `ফর্মওয়ার্ক, ${bnText}`), unit: "m2", quantity, rateKey, basis: bi("form contact area, steel forms (SoR item 07.12)", "ফর্মের সংস্পর্শ ক্ষেত্রফল, স্টিল ফর্ম (এসওআর আইটেম ০৭.১২)") });
 
+  const railing: TakeoffItem[] = env.railingM > 0
+    ? [{ id: "balcony-railing", category: "finishes", description: bi("Balcony railing, 1.0 m high (MS or aluminium, supply and fix)", "বারান্দার রেলিং, ১.০ মিটার উঁচু (এমএস বা অ্যালুমিনিয়াম, সরবরাহ ও স্থাপন)"), unit: "m", quantity: env.railingM, basis: bi("running metres of balcony edge on every floor; no rate on the card yet", "প্রতি তলায় বারান্দার কিনারার চলমান মিটার; কার্ডে এখনো দর নেই") }]
+    : [];
   return [
     { id: "concrete", category: "concrete", description: bi("Structural concrete, 1:1.5:3 (footings, columns, beams, slabs)", "কাঠামোগত কংক্রিট ১:১.৫:৩ (ফুটিং, কলাম, বিম, স্ল্যাব)"), unit: "m3", quantity: conc, basis: bi("from the bar schedule volumes", "বার শিডিউলের আয়তন থেকে") },
     { id: "concrete-cement", category: "concrete", description: bi("Cement in concrete", "কংক্রিটে সিমেন্ট"), unit: "bag", quantity: cementConcM3 / BAG_M3, rateKey: "cement-opc-43", basis: bi("dry volume / 0.0347 m3 per bag", "শুকনো আয়তন / প্রতি ব্যাগ ০.০৩৪৭ ঘনমিটার") },
@@ -190,6 +195,7 @@ export function takeoff(model: BuildingModel, bbs: BbsResult): TakeoffItem[] {
     { id: "plaster", category: "finishes", description: bi("Cement plaster 12 mm, both wall faces", "সিমেন্ট প্লাস্টার ১২ মিমি, দেয়ালের দুই পাশ"), unit: "m2", quantity: env.plasterM2, basis: bi("area less openings, both faces", "খোলা অংশ বাদে দুই পাশের ক্ষেত্রফল") },
     { id: "screed", category: "finishes", description: bi("Cement-sand screed 50 mm, floors and roof", "সিমেন্ট-বালি স্ক্রিড ৫০ মিমি, মেঝে ও ছাদ"), unit: "m2", quantity: env.screedM2, basis: bi("footprint x (storeys + roof)", "ফুটপ্রিন্ট × (তলা + ছাদ)") },
     { id: "mortar-cement", category: "masonry", description: bi("Cement in mortar (brickwork, plaster, screed)", "মর্টারে সিমেন্ট (গাঁথুনি, প্লাস্টার, স্ক্রিড)"), unit: "bag", quantity: mortarCement(mortarM3) / BAG_M3, rateKey: "cement-opc-43", basis: bi("1:4 mortar, dry volume / 0.0347", "১:৪ মর্টার, শুকনো আয়তন / ০.০৩৪৭") },
+    ...railing,
     { id: "mortar-sand", category: "masonry", description: bi("Sand in mortar", "মর্টারে বালি"), unit: "cft", quantity: mortarSand(mortarM3) * CFT_PER_M3, rateKey: "sand-fine", basis: bi("m3 x 35.31", "ঘনমিটার × ৩৫.৩১") },
   ];
 }

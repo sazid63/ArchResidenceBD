@@ -35,7 +35,8 @@ export type RoomKind =
   | "shaft"
   | "parking"
   | "driveway"
-  | "guard";
+  | "guard"
+  | "balcony";
 
 export interface Text {
   en: string;

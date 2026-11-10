@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PLAN_LIBRARY } from "../plans/library";
+import { PLAN_LIBRARY, verandahVariants } from "../plans/library";
 import { availableUnitCounts, envelopeFor, planChoices, plotProblems, rejectionText, summarisePlot } from "./planChoices";
 
 describe("summarisePlot", () => {
@@ -20,7 +20,7 @@ describe("envelopeFor", () => {
 describe("planChoices", () => {
   it("lists every library plan, fitting ones first", () => {
     const c = planChoices(13, 20);
-    expect(c).toHaveLength(PLAN_LIBRARY.length);
+    expect(c).toHaveLength(PLAN_LIBRARY.length + verandahVariants().length);
     const firstMiss = c.findIndex((x) => !x.fit.ok);
     expect(firstMiss).toBeGreaterThan(0);
     expect(c.slice(firstMiss).every((x) => !x.fit.ok)).toBe(true);

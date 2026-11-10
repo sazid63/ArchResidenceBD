@@ -19,6 +19,7 @@ import { createDoor3DMesh, createWindow3DMesh } from "../cad/meshParts";
 import { createBoxMesh, resolveSolids, type Box, type Void } from "../cad/solidKernel";
 import { buildDogLegStair, planStair, type StairPlacement } from "../cad/stairBuilder";
 import { OUTSIDE, type FloorGeometry } from "../plans/geometry";
+import { RAILING } from "../plans/rules";
 import type { Rect } from "../plans/types";
 import type { StructureResult } from "../structure/analyze";
 import { PAD_TOP_BELOW_FINISH_MM, PLINTH_BEAM_DEPTH_MM, PLINTH_BEAM_WIDTH_MM } from "../structure/foundation";
@@ -156,11 +157,12 @@ export function buildMesh(model: BuildingModel, design?: StructureResult): MeshD
       const sides = [w.a, w.b].map((s) => (s === OUTSIDE ? "outside" : rooms[s].def.kind));
       if (storey.use === "ground" && sides.includes("outside") && sides.includes("parking")) return;
       const t = w.thicknessMm;
+      const railTop = w.railing ? L + RAILING.heightMm : top - slabTop;
       const r = w.orientation === "v"
         ? { x0: ox + w.at - t / 2, y0: oy + w.from, x1: ox + w.at + t / 2, y1: oy + w.to }
         : { x0: ox + w.from, y0: oy + w.at - t / 2, x1: ox + w.to, y1: oy + w.at + t / 2 };
-      box(`${pre}_wall_${k}`, w.exterior ? "Brick Wall 250" : "Brick Partition 125", w.exterior ? "wall" : "partition", phase, {
-        ...r, z0: L, z1: top - slabTop,
+      box(`${pre}_wall_${k}`, w.railing ? "Balcony Railing" : w.exterior ? "Brick Wall 250" : "Brick Partition 125", w.exterior ? "wall" : "partition", phase, {
+        ...r, z0: L, z1: railTop,
       });
     });
 
