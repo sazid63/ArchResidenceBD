@@ -32,3 +32,24 @@ describe("balcony loads", () => {
     expect(RAILING.heightMm).toBeLessThanOrEqual(RAILING.maxHeightRajukMm);
   });
 });
+
+describe("torsion steel in the bar schedule", () => {
+  it("a balcony edge beam gets closed stirrups at no more than ph/8 and torsion side bars; a plan without balcony gets none", async () => {
+    const { deriveBuilding } = await import("../model/building");
+    const { analyzeStructure } = await import("./analyze");
+    const { buildBbs } = await import("./bbs");
+    const mk = (planId: string) => {
+      const b = deriveBuilding({ plotWidthMm: 20000, plotDepthMm: 30000, storeys: 4, planId });
+      if (!b.ok) throw new Error("fit");
+      return buildBbs(analyzeStructure(b.model), b.model);
+    };
+    const withB = mk("p4-2b+v");
+    const without = mk("p4-2b");
+    const torsionRows = (s: ReturnType<typeof mk>) => s.rows.filter((r) => /torsion bars/.test(r.description.en));
+    expect(torsionRows(withB).length).toBeGreaterThan(0);
+    expect(torsionRows(without).length).toBe(0);
+    const row = torsionRows(withB)[0];
+    expect(row.barsPerMember).toBeGreaterThanOrEqual(4);
+    expect(withB.rows.some((r) => /stirrups at (50|75|100|125|150) mm/.test(r.description.en))).toBe(true);
+  });
+});

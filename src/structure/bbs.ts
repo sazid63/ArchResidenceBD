@@ -14,6 +14,7 @@
 import type { BuildingModel } from "../model/building";
 import { slabOpeningAreaM2 } from "../model/openings";
 import { bendDeduction, bendDiameter, hookTail, lapCompression, lapTension, ldCompression, ldHook, ldTension, tieHookTail } from "./anchorage";
+import type { TorsionResult } from "./torsion";
 import type { BeamLinePlaced, PanelResult, StructureResult } from "./analyze";
 import { barArea, pickBeamBars, pickColumnBars, pickMatBars, unitWeightKgM, type BarPick, type SlabBarPick } from "./barSelect";
 import { planStair, DEFAULT_STAIR } from "../cad/stairBuilder";
@@ -188,11 +189,15 @@ function pickMat(mu: number, widthMm: number, hMm: number, coverMm: number, seco
 function detailBeams(res: StructureResult, colAt: (k: number, x: number, y: number) => { bx: number; by: number } | null, b: Builder): void {
   for (const lv of res.levels) {
     const k = lv.index;
-    for (const line of lv.beamLines) beamLine(line, k, colAt, b);
+    for (const line of lv.beamLines) {
+      // Edge beam under a balcony strip: the torsion of cantilever.ts adds closed stirrups and side bars.
+      const tors = lv.cantilevers.filter((c) => c.torsion?.needsDesign && line.orientation === "h" && Math.abs(c.y1 - line.at) <= 1);
+      beamLine(line, k, colAt, b, tors.map((c) => ({ x0: c.x0, x1: c.x1, t: c.torsion! })));
+    }
   }
 }
 
-function beamLine(line: BeamLinePlaced, k: number, colAt: (k: number, x: number, y: number) => { bx: number; by: number } | null, bld: Builder): void {
+function beamLine(line: BeamLinePlaced, k: number, colAt: (k: number, x: number, y: number) => { bx: number; by: number } | null, bld: Builder, torsion: Array<{ x0: number; x1: number; t: TorsionResult }> = []): void {
   const sec = line.result.section;
   const d = line.result.dMm;
   const spans = line.result.spans;
@@ -287,8 +292,24 @@ function beamLine(line: BeamLinePlaced, k: number, colAt: (k: number, x: number,
     const dims = [a, bb, tail];
     const cut = 2 * a + 2 * bb + 2 * tail - 3 * bendDeduction(ds, bd, 90) - 2 * bendDeduction(ds, bd, 135);
     const ln = sp.lengthMm - depthAt(i) / 2 - depthAt(i + 1) / 2;
-    const count = Math.ceil(Math.max(ln - 100, 0) / sp.stirrupSpacingMm) + 1;
-    bld.add({ family: "beam", description: bi(`Beam ${ref}, stirrups at ${sp.stirrupSpacingMm} mm, span ${i + 1}`, `বিম ${ref}, স্টিরাপ ${sp.stirrupSpacingMm} মিমি, স্প্যান ${i + 1}`), dia: ds, shape: "51", dims, cut, bars: count, level: k });
+    // Torsion under a balcony strip: Av/s + 2 At/s must fit the 2-leg stirrup, spacing at most min(ph/8, 300) mm.
+    const tors = torsion.filter((q) => Math.min(q.x1, line.stations[i + 1]) - Math.max(q.x0, line.stations[i]) > 0).map((q) => q.t);
+    let spacing = sp.stirrupSpacingMm;
+    if (tors.length) {
+      const at = Math.max(...tors.map((t) => t.atPerMm));
+      const cap = Math.floor(Math.min(...tors.map((t) => t.maxStirrupSpacingMm)) / 25) * 25;
+      spacing = Math.min(spacing, cap, Math.floor((2 * Math.PI * (ds / 2) ** 2) / (sp.shear.avPerMm + 2 * at) / 25) * 25);
+      if (spacing < 50) bld.issue({ ref: `B ${ref}`, cause: "no_bars", severity: "fail", en: `B ${ref}: torsion plus shear needs 10 mm stirrups closer than 50 mm; make the edge beam larger.`, bn: `B ${ref}: টরশন ও শিয়ারের জন্য ১০ মিমি স্টিরাপ ৫০ মিমির কম ব্যবধানে লাগে; প্রান্ত-বিম বড় করুন।` }, k);
+      spacing = Math.max(spacing, 50);
+      // Side bars for torsion, Al = (At/s) ph, at least four, spread round the stirrup; they run the span and lap into the columns.
+      const al = Math.max(...tors.map((t) => t.alMm2));
+      const dia = al / barArea(12) > 8 ? 16 : 12;
+      const nBars = Math.max(4, Math.ceil(al / barArea(dia)));
+      const len = ln + 2 * ldTension(dia);
+      bld.add({ family: "beam", description: bi(`Beam ${ref}, torsion bars, span ${i + 1}`, `বিম ${ref}, টরশন রড, স্প্যান ${i + 1}`), dia, shape: "00", dims: [len], cut: len, bars: nBars, level: k });
+    }
+    const count = Math.ceil(Math.max(ln - 100, 0) / spacing) + 1;
+    bld.add({ family: "beam", description: bi(`Beam ${ref}, stirrups at ${spacing} mm, span ${i + 1}`, `বিম ${ref}, স্টিরাপ ${spacing} মিমি, স্প্যান ${i + 1}`), dia: ds, shape: "51", dims, cut, bars: count, level: k });
   });
 }
 

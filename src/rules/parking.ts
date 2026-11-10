@@ -2,12 +2,12 @@
  * B4: lay out the ground-floor parking so the Schedule 4 count can be checked against stalls that really fit.
  *
  * The ground floor is open stilts (columns and the core only). One drive aisle runs from the front face of the building
- * towards the back, or along the front setback; stalls sit on one or both sides. Figures come from RAJUK 2008 section 56(1)-(3) (spec/rules/rajuk-2008.yaml,
+ * towards the back, or from a setback lane (front or a side one open to the road) into the outer row of bays; stalls sit on one or both sides. Figures come from RAJUK 2008 section 56(1)-(3) (spec/rules/rajuk-2008.yaml,
  * parkingGeometry): car stall 2.40 x 4.60 m, motorcycle 1.00 x 2.00 m, driveway widths by stall angle (90 degrees: 4.25 m;
  * 0 degrees single loaded 3.50 m, double loaded 4.00 m).
  *
  * Assumptions (stated on the Compliance screen): each column blocks a square of COLUMN_BLOCK_MM; stalls are counted inside the
- * building footprint only (no surface parking in the setbacks); the aisle must be clear from the front face to the last stall;
+ * building footprint only (no stalls in the setbacks, only the lane); the aisle must be clear from the front face to the last stall;
  * 45 degree stalls are not tried. Everything is mm in the building frame (origin: front-left corner).
  */
 
@@ -155,21 +155,35 @@ function compute(model: BuildingModel): ParkingLayout {
     }
   }
 
-  // Stilt bays are about as wide as a car, so the usual Dhaka arrangement has no aisle inside: cars drive along the front setback and park
-  // in the front row of bays, nose in (perpendicular, setback at least 4.25 m) or parallel to the front (setback at least 3.50 m).
-  const front = model.origin.y - model.plot.y0;
-  for (const perp of [true, false]) {
-    const need = Math.round((perp ? w90.singleLoadedM : w0.singleLoadedM) * 1000);
-    if (front < need) continue;
-    const ext = perp ? carL : carW;
-    const pitch = perp ? carW : carL;
-    const stalls: Rect[] = [];
-    for (let x = 0; x + pitch <= W; ) {
-      const r = { x0: x, y0: 0, x1: x + pitch, y1: ext };
-      if (free(r, stalls)) { stalls.push(r); x += pitch; } else x += STEP;
+  // Stilt bays are about as wide as a car, so the usual Dhaka arrangement has no aisle inside: cars drive along a setback (the front one, or a
+  // side one that opens to the road) and park in the outer row of bays, nose in (perpendicular, setback at least 4.25 m) or parallel to the
+  // face (setback at least 3.50 m). Front and side rows add up.
+  const lane = (setbackMm: number): "perp" | "par" | null => (setbackMm >= Math.round(w90.singleLoadedM * 1000) ? "perp" : setbackMm >= Math.round(w0.singleLoadedM * 1000) ? "par" : null);
+  const faces = [
+    { id: "front", setback: model.origin.y - model.plot.y0 },
+    { id: "left", setback: model.origin.x - model.plot.x0 },
+    { id: "right", setback: model.plot.x1 - (model.origin.x + W) },
+  ] as const;
+  const laneStalls: Rect[] = [];
+  let laneAisle: Rect | null = null;
+  for (const face of faces) {
+    const kind = lane(face.setback);
+    if (!kind) continue;
+    const across = kind === "perp" ? carL : carW; // stall extent away from the face
+    const along = kind === "perp" ? carW : carL; // stall extent along the face
+    const horizontal = face.id === "front";
+    const length = horizontal ? W : D;
+    for (let t = 0; t + along <= length; ) {
+      const r: Rect = horizontal
+        ? { x0: t, y0: 0, x1: t + along, y1: across }
+        : face.id === "left"
+          ? { x0: 0, y0: t, x1: across, y1: t + along }
+          : { x0: W - across, y0: t, x1: W, y1: t + along };
+      if (free(r, laneStalls)) { laneStalls.push(r); t += along; } else t += STEP;
     }
-    if (stalls.length) cands.push({ option: "front-setback", aisle: { x0: 0, y0: -front, x1: W, y1: 0 }, cars: stalls, motorcycles: [] });
+    if (laneStalls.length && !laneAisle) laneAisle = horizontal ? { x0: 0, y0: -face.setback, x1: W, y1: 0 } : face.id === "left" ? { x0: -face.setback, y0: 0, x1: 0, y1: D } : { x0: W, y0: 0, x1: W + face.setback, y1: D };
   }
+  if (laneStalls.length) cands.push({ option: "front-setback", aisle: laneAisle, cars: laneStalls, motorcycles: [] });
 
   const best = cands.reduce<ParkingLayout>((b, c) => (c.cars.length > b.cars.length ? c : b), { option: "none", aisle: null, cars: [], motorcycles: [] });
 

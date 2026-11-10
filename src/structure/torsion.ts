@@ -35,6 +35,12 @@ export interface TorsionResult {
   util: number;
   /** Closed-stirrup area per mm of beam for torsion alone, one leg, mm2/mm (0 when neglected). */
   atPerMm: number;
+  /** Perimeter of the stirrup centre line, mm. */
+  phMm: number;
+  /** Extra longitudinal steel for torsion, Al = (At/s) ph (fyt/fy), mm2 (cot 45 degrees). */
+  alMm2: number;
+  /** Largest stirrup spacing allowed with torsion, min(ph/8, 300) mm. */
+  maxStirrupSpacingMm: number;
 }
 
 export function edgeBeamTorsion(inp: { muKnMPerM: number; stripWidthMm: number /* the loaded length L above, mm */; vuKn: number; bMm: number; hMm: number }): TorsionResult {
@@ -61,5 +67,5 @@ export function edgeBeamTorsion(inp: { muKnMPerM: number; stripWidthMm: number /
   const limit = phi * (0.17 * Math.sqrt(fc) + 0.66 * Math.sqrt(fc));
   const util = Math.hypot(shearStress, torsionStress) / limit;
   const atPerMm = needsDesign ? (tu * 1e6) / (2 * phi * 0.85 * aoh * fyt) : 0;
-  return { tuKnM: tu, equilibriumKnM: eq, crackingKnM: cracking, backSlabMomentKnMPerM: back, thresholdKnM: threshold, needsDesign, util, atPerMm };
+  return { phMm: ph, alMm2: atPerMm * ph * (fyt / MATERIALS.fyMPa), maxStirrupSpacingMm: Math.min(ph / 8, 300), tuKnM: tu, equilibriumKnM: eq, crackingKnM: cracking, backSlabMomentKnMPerM: back, thresholdKnM: threshold, needsDesign, util, atPerMm };
 }

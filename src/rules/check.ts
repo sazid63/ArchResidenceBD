@@ -219,7 +219,7 @@ function parkingResult(model: BuildingModel): CheckResult {
   const motos = lay.motorcycles.length;
   const ok = cars >= need.cars && motos + (cars - need.cars) * 0 >= need.motorcycles;
   const layoutEn = lay.option === "none" ? "no stall fits" : lay.option.replace("-", " ");
-  const layoutBn = lay.option === "none" ? "কোনো স্টল বসে না" : { "perpendicular-double": "লম্ব, দুই পাশে", "perpendicular-single": "লম্ব, এক পাশে", "parallel-double": "সমান্তরাল, দুই পাশে", "parallel-single": "সমান্তরাল, এক পাশে", "front-setback": "সামনের সেটব্যাক থেকে সামনের সারিতে" }[lay.option];
+  const layoutBn = lay.option === "none" ? "কোনো স্টল বসে না" : { "perpendicular-double": "লম্ব, দুই পাশে", "perpendicular-single": "লম্ব, এক পাশে", "parallel-double": "সমান্তরাল, দুই পাশে", "parallel-single": "সমান্তরাল, এক পাশে", "front-setback": "সেটব্যাকের লেন থেকে বাইরের সারিতে" }[lay.option];
   return {
     ruleId: "rajuk.parking",
     status: ok ? "pass" : "fail",
