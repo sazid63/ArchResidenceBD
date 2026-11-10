@@ -77,6 +77,8 @@ export interface PlanDefinition {
   structuralY: number[];
   /** The row on the road side (y = 0) cantilevers from the first structural y line: no columns on the front edge (balcony, B2). */
   cantileverFront?: boolean;
+  /** Cells that are not built (open to the sky, no slab, no room): a notch in the footprint, e.g. the stretch in front of a core between two balconies. */
+  voids?: CellRect[];
   rooms: RoomDef[];
   doors: DoorDef[];
 }
@@ -107,6 +109,8 @@ export interface FittedPlan {
   widthMm: number;
   depthMm: number;
   rooms: FittedRoom[];
+  /** Unbuilt notches (plan.voids), centre-line rectangles after mirroring. */
+  voidRects?: Rect[];
   /** Bay order and cell indices after mirroring (rooms[i].def.cells are already mirrored). */
   baysX: Bay[];
   structuralX: number[];

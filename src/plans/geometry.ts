@@ -221,9 +221,12 @@ function metricsOf(f: FittedPlan, room: FittedRoom, index: number, walls: WallSe
     else if (rooms[o].def.kind === "shaft") shaftMm += len;
   }
   const main = [...room.rects].sort((p, q) => (q.x1 - q.x0) * (q.y1 - q.y0) - (p.x1 - p.x0) * (p.y1 - p.y0))[0];
+  // A side is an outside wall when it lies on the building edge or faces a notch (void): the walls list knows which.
+  const ext = (orientation: "v" | "h", at: number, from: number, to: number) =>
+    walls.some((w) => touches(w, index) && w.exterior && !w.railing && w.orientation === orientation && w.at === at && Math.min(w.to, to) - Math.max(w.from, from) > 0);
   const half = (onEdge: boolean) => (onEdge ? WALL_MM.exterior / 2 : WALL_MM.interior / 2);
-  const netW = main.x1 - main.x0 - half(main.x0 === 0) - half(main.x1 === f.widthMm);
-  const netD = main.y1 - main.y0 - half(main.y0 === 0) - half(main.y1 === f.depthMm);
+  const netW = main.x1 - main.x0 - half(main.x0 === 0 || ext("v", main.x0, main.y0, main.y1)) - half(main.x1 === f.widthMm || ext("v", main.x1, main.y0, main.y1));
+  const netD = main.y1 - main.y0 - half(main.y0 === 0 || ext("h", main.y0, main.x0, main.x1)) - half(main.y1 === f.depthMm || ext("h", main.y1, main.x0, main.x1));
   return {
     netAreaM2: (room.grossAreaMm2 - lost) / 1e6,
     netWidthMm: Math.min(netW, netD),

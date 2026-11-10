@@ -3,6 +3,7 @@ import { buildBbs } from "../structure/bbs";
 import { analyzeStructure } from "../structure/analyze";
 import { deriveBuilding } from "../model/building";
 import { buildMesh } from "../model/toMesh";
+import { slabOpeningRects } from "../model/openings";
 import { buildBoq, envelopeQuantities } from "../quantities/takeoff";
 import { baseIdOf, frontUnit, isVerandahId, withFrontVerandah } from "./balcony";
 import { fitPlan, fitRange } from "./fit";
@@ -14,11 +15,25 @@ import { validateFitted } from "./validate";
 describe("front verandah (B2: balcony cantilevered off the old front beam line)", () => {
   const variants = verandahVariants();
 
-  it("is offered for every plan whose front row belongs to one flat", () => {
-    expect(variants.map((v) => baseIdOf(v.id)).sort()).toEqual(["p1-3b", "p1-4b", "p1-4b-wide", "p2-2b-fb", "p2-3b-fb", "pn-2b", "pn-2f", "pn-3b"]);
-    // Plans with a core or two flats on the front are not offered one yet (they need the cantilever balcony, phase 2).
-    for (const id of ["p2-2b-lr", "p2-3b-lr", "p3-2b", "p4-2b", "p4-1b", "pn-2b-f"]) expect(frontUnit(getPlan(id)!), id).toBeNull();
-    expect(withFrontVerandah(getPlan("p4-2b")!)).toBeNull();
+  it("is offered for every plan in the library", () => {
+    expect(variants.map((v) => baseIdOf(v.id)).sort()).toEqual(PLAN_LIBRARY.map((p) => p.id).sort());
+    expect(withFrontVerandah(getPlan("p4-2b")!)).not.toBeNull();
+  });
+
+  it("a plan with one flat on the front gets one full-width verandah; plans with a core or several flats get a balcony per flat and a notch in front of the core", () => {
+    const rooms = (id: string) => getPlan(id + "+v")!.rooms.filter((r) => r.kind === "balcony");
+    expect(frontUnit(getPlan("pn-2b")!)).toBe("A");
+    expect(rooms("pn-2b")).toHaveLength(1);
+    expect(getPlan("pn-2b+v")!.voids ?? []).toHaveLength(0);
+    for (const id of ["p2-2b-lr", "p2-3b-lr", "p3-2b", "p4-2b", "p4-1b"]) {
+      expect(frontUnit(getPlan(id)!), id).toBeNull();
+      expect(rooms(id).length, id).toBeGreaterThanOrEqual(2);
+      expect(getPlan(id + "+v")!.voids, id).toHaveLength(1); // the stretch in front of the stair
+    }
+    // pn-2b-f has the stair and lobby on the front: one balcony beside them, off the master bedroom, and a notch.
+    expect(rooms("pn-2b-f")).toHaveLength(1);
+    expect(getPlan("pn-2b-f+v")!.voids).toHaveLength(1);
+    expect(getPlan("p4-2b+v")!.rooms.filter((r) => r.kind === "balcony").map((r) => r.unit).sort()).toEqual(["A", "B"]);
   });
 
   it("resolves by id and keeps the base plan untouched", () => {
@@ -26,7 +41,6 @@ describe("front verandah (B2: balcony cantilevered off the old front beam line)"
     expect(isVerandahId(v.id)).toBe(true);
     expect(getPlan("pn-2b+v")).toBe(v);
     expect(getPlan("nope+v")).toBeUndefined();
-    expect(getPlan("p4-2b+v")).toBeUndefined();
     expect(getPlan("pn-2b")!.baysY).toHaveLength(6);
     expect(v.baysY).toHaveLength(7);
   });
@@ -45,21 +59,26 @@ describe("front verandah (B2: balcony cantilevered off the old front beam line)"
             expect(validateFitted(r.fitted).issues.filter((i) => i.severity === "error").map((i) => i.message)).toEqual([]);
           });
 
-    it(`${plan.id}: the balcony is open to the outside, reached by a door from the living room, and has railings, not walls`, () => {
+    it(`${plan.id}: every balcony is open to the outside, reached by a door from a room of its flat, and has railings, not walls`, () => {
       const r = fitPlan(plan, { widthMm: range.widthMm.pref, depthMm: range.depthMm.pref });
       if (!r.ok) throw new Error("fit");
       const geo = deriveGeometry(r.fitted);
-      const bi = r.fitted.rooms.findIndex((x) => x.def.kind === "balcony");
-      expect(bi).toBeGreaterThanOrEqual(0);
-      const edges = geo.walls.filter((w) => w.a === bi || w.b === bi);
-      const rails = edges.filter((w) => w.exterior);
-      expect(rails.length).toBeGreaterThan(0);
-      expect(rails.every((w) => w.railing && w.thicknessMm === RAILING.thicknessMm)).toBe(true);
-      expect(edges.filter((w) => !w.exterior).every((w) => !w.railing)).toBe(true);
-      const living = r.fitted.rooms.findIndex((x) => x.def.kind === "living");
-      expect(geo.doors.some((d) => [d.a, d.b].includes(bi) && [d.a, d.b].includes(living))).toBe(true);
-      expect(geo.metrics[bi].netAreaM2).toBeGreaterThanOrEqual(3);
-      expect(geo.metrics[bi].netWidthMm).toBeGreaterThanOrEqual(1000);
+      const balconies = r.fitted.rooms.map((x, i) => ({ x, i })).filter((q) => q.x.def.kind === "balcony");
+      expect(balconies.length).toBeGreaterThan(0);
+      for (const { x, i: bi } of balconies) {
+        const edges = geo.walls.filter((w) => w.a === bi || w.b === bi);
+        const rails = edges.filter((w) => w.exterior);
+        expect(rails.length).toBeGreaterThan(0);
+        expect(rails.every((w) => w.railing && w.thicknessMm === RAILING.thicknessMm)).toBe(true);
+        expect(edges.filter((w) => !w.exterior).every((w) => !w.railing)).toBe(true);
+        const door = geo.doors.find((d) => [d.a, d.b].includes(bi));
+        expect(door, x.def.id).toBeDefined();
+        const other = r.fitted.rooms[door!.a === bi ? door!.b : door!.a];
+        expect(other.def.unit).toBe(x.def.unit);
+        expect(["living", "dining", "bedroom"]).toContain(other.def.kind);
+        expect(geo.metrics[bi].netAreaM2).toBeGreaterThanOrEqual(3);
+        expect(geo.metrics[bi].netWidthMm).toBeGreaterThanOrEqual(1000);
+      }
     });
   }
 
@@ -132,8 +151,38 @@ describe("front verandah (B2: balcony cantilevered off the old front beam line)"
     expect(bbs.totals.kgPerM3).toBeLessThan(140);
   });
 
-  it("every library plan keeps its count: 14 plans, 8 variants", () => {
+  for (const plan of variants) {
+    it(`${plan.id}: designs, prices and builds in 3D with no column on the front edge and a slab hole at each notch`, () => {
+      const range = fitRange(plan);
+      const S = { front: 1500, rear: 2000, left: 1000, right: 1000 };
+      const built = deriveBuilding({ planId: plan.id, storeys: 4, setbacksMm: S, plotWidthMm: range.widthMm.pref + 2000, plotDepthMm: range.depthMm.pref + 3500 });
+      if (!built.ok) throw new Error(built.reasons.map((x) => x.message.en).join("; "));
+      const m = built.model;
+      const res = analyzeStructure(m);
+      const nBalcony = plan.rooms.filter((r) => r.kind === "balcony").length;
+      for (const l of res.levels) {
+        expect(l.cantilevers, plan.id).toHaveLength(nBalcony);
+        for (const c of l.cantilevers) expect(c.result.util).toBeLessThanOrEqual(1);
+      }
+      expect(res.failures.filter((f) => f.governs.startsWith("cantilever"))).toEqual([]);
+      const yFront = m.storeys[1].geometry.fitted.yLines[1];
+      expect(Math.min(...res.frame.columns.map((q) => q.yMm))).toBe(yFront);
+      expect(res.frame.columns.every((q) => Number.isFinite(q.footing.sideMm) && Number.isFinite(q.footing.pressureKpa))).toBe(true);
+      const bbs = buildBbs(res, m);
+      const boq = buildBoq(m, bbs);
+      expect(boq.lines.every((l) => Number.isFinite(l.quantity) && l.quantity >= 0)).toBe(true);
+      expect(Number.isFinite(bbs.totals.weightKg)).toBe(true);
+      expect(bbs.totals.kgPerM3).toBeGreaterThan(55);
+      expect(bbs.totals.kgPerM3).toBeLessThan(150);
+      const holes = slabOpeningRects(m.storeys[1].geometry, m).filter((o) => o.id.startsWith("notch_"));
+      expect(holes).toHaveLength(plan.voids?.length ?? 0);
+      const doc = buildMesh(m, res);
+      expect(doc.objects.some((o) => o.label === "Balcony Railing")).toBe(true);
+    });
+  }
+
+  it("every library plan has a variant: 14 plans, 14 variants", () => {
     expect(PLAN_LIBRARY).toHaveLength(14);
-    expect(variants).toHaveLength(8);
+    expect(variants).toHaveLength(14);
   });
 });

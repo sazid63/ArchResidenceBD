@@ -95,6 +95,13 @@ export function checkDefinition(plan: PlanDefinition): string[] {
   }
   const owner: (string | null)[][] = Array.from({ length: nx }, () => Array(ny).fill(null));
   const ids = new Set<string>();
+  for (const [x0, y0, x1, y1] of plan.voids ?? []) {
+    if (x0 > x1 || y0 > y1 || x0 < 0 || y0 < 0 || x1 >= nx || y1 >= ny) {
+      errs.push(`void [${x0},${y0},${x1},${y1}] is outside the ${nx}x${ny} grid`);
+      continue;
+    }
+    for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) owner[x][y] = "void";
+  }
   for (const room of plan.rooms) {
     if (ids.has(room.id)) errs.push(`duplicate room id ${room.id}`);
     ids.add(room.id);
@@ -106,7 +113,7 @@ export function checkDefinition(plan: PlanDefinition): string[] {
       }
       for (let x = x0; x <= x1; x++)
         for (let y = y0; y <= y1; y++) {
-          if (owner[x][y]) errs.push(`cell ${x},${y} belongs to both ${owner[x][y]} and ${room.id}`);
+          if (owner[x][y]) errs.push(`cell ${x},${y} belongs to both ${owner[x][y] === "void" ? "a void" : owner[x][y]} and ${room.id}`);
           owner[x][y] = room.id;
         }
     }
@@ -176,6 +183,8 @@ export function fitPlan(plan: PlanDefinition, env: Envelope, opts: FitOptions = 
   const xLines = lines(fx.sizes);
   const yLines = lines(fy.sizes);
   const structuralX = opts.mirror ? plan.structuralX.map((i) => nx - i).sort((a, b) => a - b) : [...plan.structuralX].sort((a, b) => a - b);
+  const voidCells = opts.mirror ? mirrorCells(plan.voids ?? [], nx) : plan.voids ?? [];
+  const voidRects = voidCells.map(([x0, y0, x1, y1]) => ({ x0: xLines[x0], y0: yLines[y0], x1: xLines[x1 + 1], y1: yLines[y1 + 1] }));
   const rooms = plan.rooms.map((def) => {
     const cells = opts.mirror ? mirrorCells(def.cells, nx) : def.cells;
     const rects = cells.map(([x0, y0, x1, y1]) => ({ x0: xLines[x0], y0: yLines[y0], x1: xLines[x1 + 1], y1: yLines[y1 + 1] }));
@@ -193,6 +202,7 @@ export function fitPlan(plan: PlanDefinition, env: Envelope, opts: FitOptions = 
     widthMm: fx.total,
     depthMm: fy.total,
     rooms,
+    ...(voidRects.length ? { voidRects } : {}),
     baysX,
     structuralX,
     structuralY: [...plan.structuralY].sort((a, b) => a - b),

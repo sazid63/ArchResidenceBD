@@ -93,6 +93,7 @@ export function groundFloorPlan(plan: PlanDefinition): PlanDefinition {
   const core: RoomDef[] = plan.rooms.filter((r) => !r.unit);
   const taken = Array.from({ length: nx }, () => Array<boolean>(ny).fill(false));
   for (const r of core) for (const [x0, y0, x1, y1] of r.cells) for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) taken[x][y] = true;
+  for (const [x0, y0, x1, y1] of plan.voids ?? []) for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) taken[x][y] = true; // notches stay unbuilt on the ground floor too
   // Runs along x per row keep the cell list short.
   const cells: CellRect[] = [];
   for (let y = 0; y < ny; y++) {

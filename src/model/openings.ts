@@ -48,6 +48,8 @@ export function slabOpeningRects(geo: FloorGeometry, model: BuildingModel): Slab
       out.push({ id: `${room.def.id}_hole`, rect: { x0: r.x0 + 125, y0: r.y0 + 125, x1: r.x1 - 125, y1: r.y1 - 125 } });
     }
   }
+  // Notches in the footprint (plan.voids) have no slab at all.
+  (geo.fitted?.voidRects ?? []).forEach((r, i) => out.push({ id: `notch_${i}_hole`, rect: r }));
   return out;
 }
 
