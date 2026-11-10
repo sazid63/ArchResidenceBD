@@ -30,6 +30,13 @@ const SCEN: Array<{ w: number; d: number; storeys: number; units: number; road: 
   { w: 18, d: 28, storeys: 14, units: 2, road: 12 },
   { w: 16, d: 24, storeys: 1, units: 1, road: 6 },
   { w: 16, d: 24, storeys: 2, units: 2, road: 6 },
+  // Phase B1 narrow plots (3 to 5 katha)
+  { w: 10, d: 20, storeys: 4, units: 1, road: 6 },
+  { w: 10, d: 20, storeys: 6, units: 1, road: 6 },
+  { w: 10, d: 20, storeys: 7, units: 1, road: 6 },
+  { w: 9.5, d: 22, storeys: 5, units: 1, road: 6 },
+  { w: 11, d: 25, storeys: 5, units: 2, road: 6 },
+  { w: 11, d: 25, storeys: 7, units: 2, road: 9 },
 ];
 
 it("audit", () => {

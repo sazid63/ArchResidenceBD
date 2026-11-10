@@ -658,7 +658,8 @@ export const PN_2B: PlanDefinition = {
     room("a-bed2", "bedroom", "A", "Bedroom 2", "বেডরুম ২", [0, 2, 0, 2]),
     room("a-toilet2", "toilet", "A", "Common toilet", "কমন টয়লেট", [0, 3, 0, 3]),
     room("well", "shaft", undefined, "Light well", "আলোক-কূপ", [2, 3, 2, 3]),
-    room("a-kitchen", "kitchen", "A", "Kitchen", "রান্নাঘর", [0, 4, 0, 5]),
+    room("a-kitchen", "kitchen", "A", "Kitchen", "রান্নাঘর", [0, 4, 0, 4]),
+    room("meter", "store", undefined, "Meter room", "মিটার রুম", [0, 5, 0, 5]),
     room("lobby", "lobby", undefined, "Stair lobby", "সিঁড়ির লবি", [1, 5, 1, 5]),
     room("stair", "stair", undefined, "Stair", "সিঁড়ি", [2, 4, 2, 5]),
   ],
@@ -673,6 +674,7 @@ export const PN_2B: PlanDefinition = {
     { between: ["a-corridor", "a-kitchen"] },
     { between: ["a-corridor", "lobby"], main: true },
     { between: ["lobby", "stair"] },
+    { between: ["lobby", "meter"] },
   ],
 };
 
