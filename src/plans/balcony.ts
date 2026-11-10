@@ -1,9 +1,9 @@
 /**
- * Front verandah (Phase B2, recessed balcony): a plan variant with one extra bay along the road side, holding a balcony the full
- * width of the building. The balcony is inside the buildable envelope (RAJUK 2008 §46(5)(gha): a balcony must not extend into the
+ * Front verandah (Phase B2): a plan variant with one extra bay along the road side, holding a balcony the full
+ * width of the building. The balcony is inside the buildable envelope and cantilevers from the beam on the old front line (no tip columns; structure/cantilever.ts) (RAJUK 2008 §46(5)(gha): a balcony must not extend into the
  * setback). It is a normal room of the plan: a slab on the beams, a railing in place of an outside wall, and doors from the living
- * room and the first bedroom on the front. Only plans whose whole front row belongs to one dwelling can take one; plans with a core
- * or two dwellings on the front need the cantilever balcony (B2 phase 2).
+ * room and the first bedroom on the front. It has no columns at its tip: it cantilevers from the beam on the old front line. Only plans whose whole front row belongs to one dwelling can take one; plans with a core
+ * or two dwellings on the front need a balcony that projects from their own front wall (not built yet).
  */
 
 import type { Bay, CellRect, PlanDefinition, RoomDef } from "./types";
@@ -57,7 +57,9 @@ export function withFrontVerandah(plan: PlanDefinition): PlanDefinition | null {
       bn: `${plan.description.bn} রাস্তার দিকে ভবনের পুরো প্রস্থজুড়ে একটি বারান্দা যোগ হয়েছে, বসার ঘর${bedroom ? " ও মাস্টার বেডরুম" : ""} থেকে যাওয়া যায়; গভীরতা প্রায় ${(VERANDAH_BAY.pref / 1000).toFixed(1)} মিটার বাড়ে।`,
     },
     baysY: [VERANDAH_BAY, ...plan.baysY],
-    structuralY: [0, ...plan.structuralY.map((i) => i + 1)],
+    // No columns on the front edge: the balcony is a cantilever off the old front beam line (structure/cantilever.ts).
+    structuralY: plan.structuralY.map((i) => i + 1),
+    cantileverFront: true,
     rooms: [balcony, ...plan.rooms.map((r) => ({ ...r, cells: r.cells.map(shift) }))],
     doors: [...plan.doors, { between: [living.id, balcony.id] }, ...(bedroom ? [{ between: [bedroom.id, balcony.id] as const }] : [])],
   };

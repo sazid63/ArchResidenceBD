@@ -363,6 +363,34 @@ function detailSlabs(res: StructureResult, b: Builder): void {
   }
 }
 
+/**
+ * Balcony cantilever strips: top main bars across the support (hooked down at the tip, anchored past the beam by a top-bar
+ * development length) and distribution bars along the strip. The adjacent slab's own top bars over that beam are scheduled
+ * separately, so the steel over the support is counted twice there: conservative.
+ */
+function detailCantilevers(res: StructureResult, b: Builder): void {
+  for (const lv of res.levels) {
+    const k = lv.index;
+    for (const c of lv.cantilevers) {
+      const r = c.result;
+      const h = r.thicknessMm;
+      const width = c.x1 - c.x0;
+      const m = pickMat(r.muKnMPerM, 1000, h, SLAB_COVER, false, Math.min(3 * h, 450), [10, 12, 16]);
+      b.pick({ family: "slab", ref: `cantilever ${c.id} top`, requiredMm2: m.reqMm2, providedMm2: m.pick.areaPerM, fits: m.pick.fits, level: k, muKnM: r.muKnMPerM, widthMm: 1000, dMm: m.d });
+      const ld = ldTension(m.pick.dia, { topBar: true });
+      const leg = h - 2 * SLAB_COVER;
+      const dims = [r.lengthMm - SLAB_COVER + BEAM_W_FOR_SLAB / 2 + ld, leg];
+      const count = Math.floor((width - 2 * SLAB_COVER) / m.pick.spacingMm) + 1;
+      b.add({ family: "slab", description: bi(`Balcony cantilever, top bars ${m.pick.dia} mm at ${m.pick.spacingMm}`, `বারান্দার ক্যান্টিলিভার, উপরের রড ${m.pick.dia} মিমি @ ${m.pick.spacingMm}`), dia: m.pick.dia, shape: "11", dims, cut: cutLength(dims, m.pick.dia, [{ deg: 90, bendDia: bendDiameter(m.pick.dia) }]), bars: count, level: k });
+      const dist = pickMatBars(slabMinAs(1000, h), Math.min(5 * h, 450), [8, 10]);
+      b.pick({ family: "slab", ref: `cantilever ${c.id} distribution`, requiredMm2: slabMinAs(1000, h), providedMm2: dist.areaPerM, fits: dist.fits, level: k, widthMm: 1000, dMm: h });
+      const dl = width - 2 * SLAB_COVER;
+      const dcount = Math.floor((r.lengthMm - SLAB_COVER) / dist.spacingMm) + 1;
+      b.add({ family: "slab", description: bi(`Balcony cantilever, distribution bars ${dist.dia} mm at ${dist.spacingMm}`, `বারান্দার ক্যান্টিলিভার, বণ্টন রড ${dist.dia} মিমি @ ${dist.spacingMm}`), dia: dist.dia, shape: "00", dims: [dl], cut: dl, bars: dcount, level: k });
+    }
+  }
+}
+
 function detailColumns(res: StructureResult, model: BuildingModel, b: Builder): void {
   const hMm = model.input.floorToFloorMm;
   const n = model.storeys.length;
@@ -543,6 +571,7 @@ function concreteM3(res: StructureResult, model: BuildingModel): number {
   let m3 = 0;
   for (const lv of res.levels) {
     for (const p of lv.panels) m3 += ((p.x1 - p.x0) * (p.y1 - p.y0) * lv.slabThicknessMm) / 1e9;
+    for (const c of lv.cantilevers) m3 += ((c.x1 - c.x0) * (c.y1 - c.y0) * c.result.thicknessMm) / 1e9; // the balcony strips are slab too
     m3 -= (holesAboveM2(model, lv.index) * lv.slabThicknessMm) / 1000; // the slab is cut where the stair, lift and shafts pass
     for (const line of lv.beamLines) for (const sp of line.result.spans) m3 += (line.result.section.bMm * Math.max(line.result.section.hMm - lv.slabThicknessMm, 0) * sp.lengthMm) / 1e9;
   }
@@ -569,6 +598,7 @@ function formworkM2(res: StructureResult, model: BuildingModel): { footing: numb
   const f = { footing: 0, column: 0, beam: 0, slab: 0 };
   for (const lv of res.levels) {
     for (const p of lv.panels) f.slab += ((p.x1 - p.x0) * (p.y1 - p.y0)) / 1e6;
+    for (const c of lv.cantilevers) f.slab += ((c.x1 - c.x0) * (c.y1 - c.y0)) / 1e6;
     f.slab -= holesAboveM2(model, lv.index);
     for (const line of lv.beamLines)
       for (const sp of line.result.spans) f.beam += ((line.result.section.bMm + 2 * Math.max(line.result.section.hMm - lv.slabThicknessMm, 0)) * sp.lengthMm) / 1e6;
@@ -598,6 +628,7 @@ export function buildBbs(res: StructureResult, model: BuildingModel): BbsResult 
   detailColumns(res, model, b);
   detailBeams(res, colAt, b);
   detailSlabs(res, b);
+  detailCantilevers(res, b);
   detailStairs(model, b);
   detailPlinthBeams(model, b);
   const rows = b.rows();

@@ -11,7 +11,7 @@ import { PLAN_LIBRARY, getPlan, verandahVariants } from "./library";
 import { RAILING } from "./rules";
 import { validateFitted } from "./validate";
 
-describe("front verandah (B2 phase 1, recessed balcony)", () => {
+describe("front verandah (B2: balcony cantilevered off the old front beam line)", () => {
   const variants = verandahVariants();
 
   it("is offered for every plan whose front row belongs to one flat", () => {
@@ -86,16 +86,50 @@ describe("front verandah (B2 phase 1, recessed balcony)", () => {
     const rails = doc.objects.filter((o) => o.label === "Balcony Railing");
     expect(rails.length).toBeGreaterThan(0);
     for (const o of rails) expect(o.bboxMaxMm[2] - o.bboxMinMm[2]).toBe(RAILING.heightMm);
-    expect(doc.objects.filter((o) => o.label === "Brick Wall 250").every((o) => o.bboxMaxMm[2] - o.bboxMinMm[2] > RAILING.heightMm)).toBe(true);
   });
 
-  it("the balcony slab carries the public-room live load and is part of a designed panel", () => {
-    const r = deriveBuilding({ plotWidthMm: 10000, plotDepthMm: 22000, storeys: 3, planId: "pn-2b+v" });
-    if (!r.ok) throw new Error("fit");
+  it("the balcony is a designed cantilever with no columns at its tip, and the edge beam carries its reaction", () => {
+    const r = deriveBuilding({ plotWidthMm: 10000, plotDepthMm: 22000, storeys: 4, planId: "pn-2b+v" });
+    const base = deriveBuilding({ plotWidthMm: 10000, plotDepthMm: 22000, storeys: 4, planId: "pn-2b" });
+    if (!r.ok || !base.ok) throw new Error("fit");
     const res = analyzeStructure(r.model);
-    const front = res.levels[0].panels.filter((p) => p.y0 === 0);
-    expect(front.length).toBeGreaterThan(0);
-    expect(front.every((p) => p.result.lBaseKnM2 >= 4.8)).toBe(true);
+    const resBase = analyzeStructure(base.model);
+    expect(res.ok).toBe(true);
+    expect(res.levels.every((l) => l.cantilevers.length === 1)).toBe(true);
+    for (const l of res.levels) {
+      const c = l.cantilevers[0].result;
+      expect(c.util).toBeLessThanOrEqual(1);
+      expect(c.thicknessMm).toBeGreaterThanOrEqual(c.minThicknessMm);
+      expect(l.slabThicknessMm).toBeGreaterThanOrEqual(c.thicknessMm);
+    }
+    // No column on the front edge: the column grid is the same size as the plan without the verandah.
+    expect(res.frame.columns.length).toBe(resBase.frame.columns.length);
+    const yFront = r.model.storeys[1].geometry.fitted.yLines[1];
+    expect(Math.min(...res.frame.columns.map((q) => q.yMm))).toBe(yFront);
+    expect(res.frame.columns.every((q) => Number.isFinite(q.footing.sideMm) && q.footing.sideMm > 0)).toBe(true);
+    // The front beam line carries more than the same line of the plan without a verandah.
+    const front = (rr: typeof res, at: number) => rr.levels[0].beamLines.find((b) => b.orientation === "h" && Math.abs(b.at - at) < 2)!.result;
+    expect(front(res, yFront).spans[0].mPosKnM).toBeGreaterThan(front(resBase, resBase.levels[0].beamLines.find((b) => b.orientation === "h")!.at).spans[0].mPosKnM);
+  });
+
+  it("the cantilever steel, concrete and formwork are in the bar schedule", () => {
+    const r = deriveBuilding({ plotWidthMm: 10000, plotDepthMm: 22000, storeys: 3, planId: "pn-2b+v" });
+    const base = deriveBuilding({ plotWidthMm: 10000, plotDepthMm: 22000, storeys: 3, planId: "pn-2b" });
+    if (!r.ok || !base.ok) throw new Error("fit");
+    const res = analyzeStructure(r.model);
+    const bbs = buildBbs(res, r.model);
+    const bbsBase = buildBbs(analyzeStructure(base.model), base.model);
+    for (const prefix of ["Balcony cantilever, top bars", "Balcony cantilever, distribution"]) {
+      const rows = bbs.rows.filter((x) => x.description.en.startsWith(prefix));
+      expect(rows.length, prefix).toBeGreaterThan(0);
+      expect([...new Set(rows.flatMap((x) => x.levels))].sort(), prefix).toEqual([0, 1, 2]); // the slab over the ground floor, the first floor and the roof
+    }
+    const strip = res.levels[0].cantilevers[0];
+    const stripM3 = ((strip.x1 - strip.x0) * (strip.y1 - strip.y0) * strip.result.thicknessMm) / 1e9;
+    expect(bbs.totals.concreteM3 - bbsBase.totals.concreteM3).toBeGreaterThan(3 * stripM3 * 0.9);
+    expect(bbs.totals.formworkM2.slab).toBeGreaterThan(bbsBase.totals.formworkM2.slab);
+    expect(bbs.totals.kgPerM3).toBeGreaterThan(60);
+    expect(bbs.totals.kgPerM3).toBeLessThan(140);
   });
 
   it("every library plan keeps its count: 14 plans, 8 variants", () => {

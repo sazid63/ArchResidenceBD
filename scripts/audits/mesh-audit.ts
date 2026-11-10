@@ -32,7 +32,7 @@ import { fileURLToPath } from "node:url";
 import { deriveBuilding, DEFAULT_SETBACKS_MM, type BuildingInput } from "../../src/model/building";
 import { buildMesh } from "../../src/model/toMesh";
 import { fitRange } from "../../src/plans/fit";
-import { PLAN_LIBRARY } from "../../src/plans/library";
+import { PLAN_LIBRARY, verandahVariants } from "../../src/plans/library";
 import type { BuildingCustomization } from "../../src/cad/parametricBuildingGenerator";
 import { getColorForObject } from "../../src/cad/viewer";
 import type { MeshDocument, MeshObject } from "../../src/cad/mesh";
@@ -845,7 +845,7 @@ function writeReports(
 /** New path (M2-2): every library plan at its min / preferred / max size × 2, 6, 10 storeys. */
 function modelCases(): Array<{ caseId: string; input: BuildingInput }> {
   const out: Array<{ caseId: string; input: BuildingInput }> = [];
-  for (const plan of PLAN_LIBRARY) {
+  for (const plan of [...PLAN_LIBRARY, ...verandahVariants()]) {
     const r = fitRange(plan);
     const sizes = (["min", "pref", "max"] as const).map((k) => [k, r.widthMm[k], r.depthMm[k]] as const);
     for (const [k, w, d] of sizes)

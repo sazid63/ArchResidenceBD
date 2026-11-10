@@ -87,8 +87,10 @@ export function checkDefinition(plan: PlanDefinition): string[] {
       if ([b.min, b.pref, b.max].some((v) => v % ROUND_MM !== 0)) errs.push(`bay ${axis}${i}: sizes must be multiples of ${ROUND_MM} mm`);
     });
   }
+  // A cantilevered front row (balcony): the first structural y line is the line behind it.
   for (const [axis, idx, n] of [["x", plan.structuralX, nx], ["y", plan.structuralY, ny]] as const) {
-    if (!idx.includes(0) || !idx.includes(n)) errs.push(`structural ${axis} lines must include 0 and ${n}`);
+    const needStart = axis === "y" && plan.cantileverFront ? 1 : 0;
+    if (!idx.includes(needStart) || !idx.includes(n)) errs.push(`structural ${axis} lines must include ${needStart} and ${n}`);
     if (idx.some((i) => i < 0 || i > n || !Number.isInteger(i))) errs.push(`structural ${axis} line out of range`);
   }
   const owner: (string | null)[][] = Array.from({ length: nx }, () => Array(ny).fill(null));

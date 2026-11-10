@@ -18,6 +18,7 @@ import { analyzeFrame, type FrameOptions, type FrameResult } from "./frame";
 import { planFoundation, type FoundationResult } from "./foundation";
 import { roofLoads } from "../model/roofEquipment";
 import { slabWallKn } from "./slabWalls";
+import { cantileverMinThicknessMm, cantileverStrips, designCantilever, type CantileverResult, type CantileverStrip } from "./cantilever";
 import { sizeBeamLine, type BeamLineResult, type BeamSection, type BeamSpanInput } from "./beam";
 
 export interface PanelResult {
@@ -41,6 +42,11 @@ export interface BeamLinePlaced {
   result: BeamLineResult;
 }
 
+/** A cantilever balcony strip with its design (see cantilever.ts). */
+export interface CantileverPlaced extends CantileverStrip {
+  result: CantileverResult;
+}
+
 export interface LevelResult {
   /** Slab above storey `index`; the last level is the roof. */
   index: number;
@@ -49,6 +55,8 @@ export interface LevelResult {
   slabThicknessMm: number;
   panels: PanelResult[];
   beamLines: BeamLinePlaced[];
+  /** Balcony strips that cantilever from the first structural line (none when the plan has no such balcony). */
+  cantilevers: CantileverPlaced[];
   util: number;
 }
 
@@ -202,7 +210,8 @@ function computeLevel(model: BuildingModel, k: number): Omit<LevelResult, "index
   const walls = wallGeo.walls.filter((w) => !w.railing && (roof ? w.exterior : true)); // a balcony railing is not a masonry wall load (its ~1 kN/m is within the partition allowance)
   const wallHeightMm = roof ? model.roof.parapetMm : model.storeys[k + 1].heightMm;
 
-  const buildLines = (slabs: Array<{ p: Panel; r: SlabResult }>, slabMm: number): BeamLinePlaced[] => {
+  const strips = cantileverStrips(loadsGeo);
+  const buildLines = (slabs: Array<{ p: Panel; r: SlabResult }>, slabMm: number, cants: CantileverPlaced[]): BeamLinePlaced[] => {
     const lines: BeamLinePlaced[] = [];
     const lineFor = (orientation: "v" | "h", lineIdx: number): BeamLinePlaced | null => {
       const vertical = orientation === "v";
@@ -238,6 +247,15 @@ function computeLevel(model: BuildingModel, k: number): Omit<LevelResult, "index
           area += lineLoad * (len / 1000);
           base = Math.max(base, r.lBaseKnM2);
         }
+        // The cantilever strip hangs off this beam: its reaction is a line load along the strip's width.
+        if (orientation === "h")
+          for (const c of cants)
+            if (Math.abs(c.y1 - atPos) <= TOL && Math.min(c.x1, to) - Math.max(c.x0, from) > 0) {
+              dead += c.result.beamDeadKnM;
+              liveTable += c.result.beamLiveKnM;
+              area += ((c.y1 - c.y0) / 1000) * (len / 1000);
+              base = Math.max(base, c.result.liveKnM2);
+            }
         let wallLen = 0;
         let wallMass = 0;
         for (const w of walls) {
@@ -279,11 +297,14 @@ function computeLevel(model: BuildingModel, k: number): Omit<LevelResult, "index
   let slabMm = 125;
   let slabs: Array<{ p: Panel; r: SlabResult }> = [];
   let beamLines: BeamLinePlaced[] = [];
+  let cants: CantileverPlaced[] = [];
   for (let pass = 0; pass < 6; pass++) {
     const first = panels.map((p) => designSlab(slabIn(p, sections)));
-    slabMm = Math.max(125, slabMm, ...first.map((r) => r.thicknessMm));
+    // A cantilever cannot be thinner than L/10; the floor is one slab, so the whole level takes that thickness.
+    slabMm = Math.max(125, slabMm, ...first.map((r) => r.thicknessMm), ...strips.map((c) => cantileverMinThicknessMm(c.y1 - c.y0)));
     slabs = panels.map((p) => ({ p, r: designSlab(slabIn(p, sections, slabMm)) }));
-    beamLines = buildLines(slabs, slabMm);
+    cants = strips.map((c) => ({ ...c, result: designCantilever({ lengthMm: c.y1 - c.y0, thicknessMm: slabMm, roof, parapetMm: model.roof.parapetMm }) }));
+    beamLines = buildLines(slabs, slabMm, cants);
     const next = new Map(beamLines.map((b) => [lineKey(b.orientation, b.at), b.result.section]));
     for (const [key, sec] of trial) if (!next.has(key)) next.set(key, sec);
     const same = [...next].every(([key, sec]) => sections.get(key)?.hMm === sec.hMm && sections.get(key)?.bMm === sec.bMm);
@@ -291,8 +312,8 @@ function computeLevel(model: BuildingModel, k: number): Omit<LevelResult, "index
     if (same) break;
   }
   const panelResults: PanelResult[] = slabs.map(({ p, r }) => ({ px: p.px, py: p.py, x0: p.x0, y0: p.y0, x1: p.x1, y1: p.y1, result: r }));
-  const util = Math.max(0, ...panelResults.map((p) => p.result.util), ...beamLines.map((b) => b.result.util));
-  return { kind: roof ? "roof" : "floor", slabThicknessMm: slabMm, panels: panelResults, beamLines, util };
+  const util = Math.max(0, ...panelResults.map((p) => p.result.util), ...beamLines.map((b) => b.result.util), ...cants.map((c) => c.result.util));
+  return { kind: roof ? "roof" : "floor", slabThicknessMm: slabMm, panels: panelResults, beamLines, cantilevers: cants, util };
 }
 
 const SITE_CLASSES: readonly string[] = ["SA", "SB", "SC", "SD", "SE"];
@@ -318,6 +339,7 @@ export function analyzeStructure(model: BuildingModel, frameOptions: FrameOption
   const failures: MemberFailure[] = [];
   for (const lv of levels) {
     for (const p of lv.panels) if (p.result.util > 1) failures.push({ level: lv.index, member: "slab", id: `S${p.px + 1}-${p.py + 1}`, util: p.result.util, governs: p.result.governs });
+    for (const c of lv.cantilevers) if (c.result.util > 1) failures.push({ level: lv.index, member: "slab", id: `C-${c.id}`, util: c.result.util, governs: `cantilever ${c.result.governs}` });
     for (const b of lv.beamLines)
       if (b.result.util > 1) {
         const worst = b.result.spans.reduce((a, c) => (c.util > a.util ? c : a));

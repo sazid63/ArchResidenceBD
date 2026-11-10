@@ -75,6 +75,8 @@ export interface PlanDefinition {
   structuralX: number[];
   /** Indices of the y grid lines (0..baysY.length) that carry columns. Must include both ends. */
   structuralY: number[];
+  /** The row on the road side (y = 0) cantilevers from the first structural y line: no columns on the front edge (balcony, B2). */
+  cantileverFront?: boolean;
   rooms: RoomDef[];
   doors: DoorDef[];
 }
