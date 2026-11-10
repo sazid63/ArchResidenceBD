@@ -9,6 +9,7 @@
 
 import type { Bay, PlanDefinition, RoomDef, Text } from "./types";
 import { VERANDAH_SUFFIX, baseIdOf, isVerandahId, withFrontVerandah } from "./balcony";
+import { openInteriorDining } from "./dining";
 
 const bay = (min: number, pref: number, max: number): Bay => ({ min, pref, max });
 const t = (en: string, bn: string): Text => ({ en, bn });
@@ -828,7 +829,7 @@ export const PN_2F: PlanDefinition = {
   ],
 };
 
-export const PLAN_LIBRARY: PlanDefinition[] = [P1_4B, P1_3B, P1_4B_WIDE, P2_2B_FB, P2_2B_LR, P2_3B_LR, P2_3B_FB, P3_2B, P4_2B, P4_1B, PN_2B, PN_2B_F, PN_3B, PN_2F];
+export const PLAN_LIBRARY: PlanDefinition[] = [P1_4B, P1_3B, P1_4B_WIDE, P2_2B_FB, P2_2B_LR, P2_3B_LR, P2_3B_FB, P3_2B, P4_2B, P4_1B, PN_2B, PN_2B_F, PN_3B, PN_2F].map(openInteriorDining);
 
 const variantCache = new Map<string, PlanDefinition | null>();
 

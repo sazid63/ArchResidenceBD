@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { groundBuiltAreaMm2 } from "../rules/check";
 import { buildBbs } from "../structure/bbs";
 import { analyzeStructure } from "../structure/analyze";
 import { deriveBuilding } from "../model/building";
@@ -184,5 +185,13 @@ describe("front verandah (B2: balcony cantilevered off the old front beam line)"
   it("every library plan has a variant: 14 plans, 14 variants", () => {
     expect(PLAN_LIBRARY).toHaveLength(14);
     expect(variants).toHaveLength(14);
+  });
+
+  it("ground coverage leaves out the unbuilt notch", () => {
+    const r = deriveBuilding({ plotWidthMm: 20000, plotDepthMm: 30000, storeys: 4, planId: "p4-2b+v" });
+    if (!r.ok) throw new Error("fit");
+    const notch = (r.model.storeys[0].geometry.fitted.voidRects ?? []).reduce((a, q) => a + (q.x1 - q.x0) * (q.y1 - q.y0), 0);
+    expect(notch).toBeGreaterThan(0);
+    expect(groundBuiltAreaMm2(r.model)).toBe(r.model.widthMm * r.model.depthMm - notch);
   });
 });

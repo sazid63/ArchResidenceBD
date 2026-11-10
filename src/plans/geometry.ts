@@ -4,7 +4,7 @@
  * structural lines. Pure functions over a FittedPlan; all lengths in mm.
  */
 
-import { DOOR_JAMB_MM, DOOR_MM, RAILING, WALL_MM, WINDOW_MM } from "./rules";
+import { DOOR_JAMB_MM, DOOR_MM, RAILING, WALL_MM, WINDOW_MM, windowWidthForAreaMm } from "./rules";
 import type { FittedPlan, FittedRoom, RoomKind } from "./types";
 
 /** Room index, or -1 for outside the building. */
@@ -285,12 +285,16 @@ export function deriveGeometry(f: FittedPlan): FloorGeometry {
       .filter((w) => w.exterior && touches(w, i))
       .flatMap((seg) => clearStretches(seg, columns).map((st) => ({ seg, st })))
       .sort((p, q) => q.st.to - q.st.from - (p.st.to - p.st.from));
-    const best = stretches[0];
-    if (!best) return;
-    const width = Math.min(want, best.st.to - best.st.from - 2 * 300);
-    if (width < 600) return;
-    const mid = Math.round((best.st.from + best.st.to) / 2);
-    windows.push({ kind: "window", orientation: best.seg.orientation, at: best.seg.at, from: mid - width / 2, to: mid + width / 2, a: i, b: OUTSIDE });
+    // One window per stretch, longest stretch first, until the width needed for Table 3.1.12 is reached (at least the usual width).
+    let remaining = Math.max(want, windowWidthForAreaMm(room.def.kind, metricsOf(f, room, i, walls, f.rooms).netAreaM2));
+    for (const best of stretches) {
+      if (remaining <= 0) break;
+      const width = Math.min(remaining, best.st.to - best.st.from - 2 * 300);
+      if (width < 600) continue;
+      const mid = Math.round((best.st.from + best.st.to) / 2);
+      windows.push({ kind: "window", orientation: best.seg.orientation, at: best.seg.at, from: mid - Math.floor(width / 2), to: mid - Math.floor(width / 2) + width, a: i, b: OUTSIDE });
+      remaining -= width;
+    }
   });
 
   const beams: Beam[] = [];

@@ -6,7 +6,7 @@
 import { planStair } from "../cad/stairBuilder";
 import { checkDefinition } from "./fit";
 import { deriveGeometry, OUTSIDE, type FloorGeometry } from "./geometry";
-import { MAX_SPAN_MM, ROOM_RULES, RULES_SOURCE, WALL_MM, roomRuleBasis } from "./rules";
+import { MAX_SPAN_MM, OPENING_PERCENT, ROOM_RULES, RULES_SOURCE, WALL_MM, WINDOW_HEIGHT_MM, roomRuleBasis } from "./rules";
 import type { FittedPlan } from "./types";
 
 export type IssueCode =
@@ -15,6 +15,7 @@ export type IssueCode =
   | "room_too_narrow"
   | "no_daylight"
   | "no_ventilation"
+  | "window_area_low"
   | "stair_too_small"
   | "door_not_placeable"
   | "unreachable"
@@ -64,6 +65,18 @@ export function validateFloor(geo: FloorGeometry, opts: ValidateOptions = {}): I
       add({ code: "no_daylight", severity: "error", roomId: id, basis: RULES_SOURCE.status, message: `${room.def.name.en} has no outside wall for a window.`, messageBn: `${room.def.name.bn}-এর জানালার জন্য বাইরের দেয়াল নেই।` });
     if (rule?.needs === "exterior_or_shaft" && met.exteriorMm === 0 && met.shaftMm === 0)
       add({ code: "no_ventilation", severity: "error", roomId: id, basis: RULES_SOURCE.status, message: `${room.def.name.en} has neither an outside wall nor a light shaft.`, messageBn: `${room.def.name.bn}-এর বাইরের দেয়ালও নেই, আলো-বাতাসের শাফটও নেই।` });
+  });
+
+  // Window area (Table 3.1.12): a room with a window needs 15 % (habitable) or 18 % (kitchen) of its net floor area.
+  f.rooms.forEach((room, i) => {
+    const pct = OPENING_PERCENT[room.def.kind];
+    if (pct === undefined) return;
+    const wins = geo.windows.filter((w) => w.a === i);
+    if (!wins.length) return;
+    const have = (wins.reduce((a, w) => a + (w.to - w.from), 0) * WINDOW_HEIGHT_MM) / 1e6;
+    const need = (pct / 100) * geo.metrics[i].netAreaM2;
+    if (have + 1e-9 < need)
+      add({ code: "window_area_low", severity: "warning", roomId: room.def.id, basis: "cited", message: `${room.def.name.en} window is ${have.toFixed(2)} m²; BNBC Table 3.1.12 needs ${pct} % of ${geo.metrics[i].netAreaM2.toFixed(1)} m² = ${need.toFixed(2)} m².`, messageBn: `${room.def.name.bn}-এর জানালা ${bn(have.toFixed(2))} বর্গমিটার; বিএনবিসি সারণি ৩.১.১২ অনুযায়ী ${bn(geo.metrics[i].netAreaM2.toFixed(1))} বর্গমিটারের ${bn(pct)} % = ${bn(need.toFixed(2))} বর্গমিটার দরকার।` });
   });
 
   // Stair: must hold a dog-leg stair for this floor height plus an arrival landing.

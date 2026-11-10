@@ -103,6 +103,12 @@ function farAreaMm2(model: BuildingModel): number {
   return total;
 }
 
+/** Ground-floor built area in mm2: the bounding box less the unbuilt notches (balcony gaps open to the sky). */
+export function groundBuiltAreaMm2(model: BuildingModel): number {
+  const notch = (model.storeys[0]?.geometry.fitted.voidRects ?? []).reduce((a, r) => a + (r.x1 - r.x0) * (r.y1 - r.y0), 0);
+  return model.widthMm * model.depthMm - notch;
+}
+
 function notChecked(ruleId: string, title: Bilingual, src: CheckSource, reason: Bilingual, expected: CheckValue | null = null): CheckResult {
   return { ruleId, status: "not_checked", title, expected, actual: null, source: src, note: reason };
 }
@@ -159,7 +165,7 @@ function farAndCoverage(model: BuildingModel, ctx: CheckContext): CheckResult[] 
     source: farSrc,
     note,
   });
-  const mgcActual = ((model.widthMm * model.depthMm) / plotMm2) * 100;
+  const mgcActual = (groundBuiltAreaMm2(model) / plotMm2) * 100;
   results.push({
     ruleId: "rajuk.mgc",
     status: mgcActual <= hit.mgcPercent ? "pass" : "fail",

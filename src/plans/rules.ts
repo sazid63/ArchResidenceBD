@@ -40,7 +40,7 @@ export const ROOM_RULES: Partial<Record<RoomKind, RoomRule>> = {
   bedroom: HABITABLE,
   living: HABITABLE,
   // Assumption: BNBC does not say whether a separate dining room is "habitable" (pack gap-dining).
-  dining: { minWidthMm: 2100 },
+  dining: { minWidthMm: 2100, needs: "exterior_or_shaft" },
   kitchen: { minAreaM2: 4, minWidthMm: 1500, needs: "exterior_or_shaft" },
   // Owner-confirmed 2026-11-09. Table 3.1.10: the smallest bathroom row (water closet only). The plan data does not say which
   // fixtures a toilet holds, so the smallest cited row is the floor.
@@ -116,6 +116,18 @@ export const WINDOW_MM: Partial<Record<RoomKind, number>> = {
   toilet: 600,
   stair: 1200,
 };
+
+/** Window height assumed for opening areas, mm (same as the BOQ and the 3D model). */
+export const WINDOW_HEIGHT_MM = 1200;
+
+/** Aggregate window area as a percent of net floor area, BNBC 2020 Part 3 Table 3.1.12 (Sec 1.19.6): habitable rooms incl. dining 15, kitchens 18. */
+export const OPENING_PERCENT: Partial<Record<RoomKind, number>> = { bedroom: 15, living: 15, dining: 15, kitchen: 18 };
+
+/** Window width that gives the Table 3.1.12 area for a room of this net area (rounded up to 50 mm), or 0 if the kind has no row. */
+export function windowWidthForAreaMm(kind: RoomKind, netAreaM2: number): number {
+  const pct = OPENING_PERCENT[kind];
+  return pct === undefined ? 0 : Math.ceil(((pct / 100) * netAreaM2 * 1e6) / WINDOW_HEIGHT_MM / 50) * 50;
+}
 
 /** Balcony railing: thickness drawn in plan and height. RAJUK 2008 §46(5)(gha) exempts front balconies only with a railing of at most 1,200 mm; 1,000 mm is the working height (assumption, to confirm). */
 export const RAILING = { thicknessMm: 100, heightMm: 1000, maxHeightRajukMm: 1200 } as const;

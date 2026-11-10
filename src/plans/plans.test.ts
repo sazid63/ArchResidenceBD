@@ -138,10 +138,14 @@ describe("the three- and four-flat plans (M2-3)", () => {
     if (!r.ok) throw new Error("fit");
     const geo = deriveGeometry(r.fitted);
     const area = (id: string) => geo.metrics[r.fitted.rooms.findIndex((room) => room.def.id === id)].netAreaM2;
-    for (const k of ["bed1", "living", "toilet", "dining", "bed2", "kitchen"]) {
+    for (const k of ["bed1", "toilet", "bed2", "kitchen"]) {
       const a = area(`a-${k}`);
       for (const u of ["b", "c", "d"]) expect(area(`${u}-${k}`)).toBeCloseTo(a, 6);
     }
+    // The front flats (A, B) open their inside dining into the living room; the back flats (C, D) have a dining lit by the duct.
+    expect(area("b-living")).toBeCloseTo(area("a-living"), 6);
+    expect(area("d-living")).toBeCloseTo(area("c-living"), 6);
+    expect(area("d-dining")).toBeCloseTo(area("c-dining"), 6);
   });
 });
 

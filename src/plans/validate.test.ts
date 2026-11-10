@@ -1,6 +1,13 @@
+import { fitPlan, fitRange } from "./fit";
+import { deriveGeometry } from "./geometry";
+import { OPENING_PERCENT, WINDOW_HEIGHT_MM } from "./rules";
+import { validateFloor } from "./validate";
+import { openInteriorDining } from "./dining";
 import { describe, expect, it } from "vitest";
-import { fitPlan } from "./fit";
-import { P1_4B, P2_2B_FB } from "./library";
+import { P1_4B as P1_4B_RAW, P2_2B_FB, PLAN_LIBRARY, getPlan } from "./library";
+
+/** P1_4B as the library serves it (interior dining opened into the living room, B3). */
+const P1_4B = getPlan("p1-4b")!;
 import type { PlanDefinition } from "./types";
 import { validateFitted } from "./validate";
 
@@ -49,9 +56,9 @@ describe("validator catches problems", () => {
   it("a bedroom with no outside wall", () => {
     const p = clone(P1_4B);
     p.rooms.find((r) => r.id === "a-bed2")!.kind = "bedroom";
-    p.rooms.find((r) => r.id === "a-dining")!.kind = "bedroom";
+    p.rooms.find((r) => r.id === "a-store")!.kind = "bedroom";
     p.bedroomsPerUnit = 5;
-    expect(codes(p)).toContain("no_daylight:a-dining");
+    expect(codes(p)).toContain("no_daylight:a-store");
   });
 
   it("a room nobody can reach", () => {
@@ -121,5 +128,37 @@ describe("validator messages in Bangla", () => {
       expect(i.messageBn).toMatch(BANGLA);
       expect(i.messageBn).not.toMatch(/[0-9]/);
     }
+  });
+
+  it("B3: an inside dining room with no outside wall or shaft is an error; the library opens it into the living room", () => {
+    const p = clone(P1_4B);
+    expect(p.rooms.some((r) => r.kind === "dining")).toBe(false);
+    const raw = clone(P1_4B_RAW);
+    expect(codes(raw)).toContain("no_ventilation:a-dining");
+    const opened = openInteriorDining(raw);
+    expect(opened.rooms.some((r) => r.kind === "dining")).toBe(false);
+    expect(codes(opened)).toEqual([]);
+  });
+
+  it("B3: window area follows Table 3.1.12 where the wall allows, and a shortfall is reported with the figures", () => {
+    let met = 0;
+    for (const plan of PLAN_LIBRARY) {
+      const range = fitRange(plan);
+      const r = fitPlan(plan, { widthMm: range.widthMm.pref, depthMm: range.depthMm.pref });
+      if (!r.ok) throw new Error("fit " + plan.id);
+      const geo = deriveGeometry(r.fitted);
+      const issues = validateFloor(geo);
+      r.fitted.rooms.forEach((room, i) => {
+        const pct = OPENING_PERCENT[room.def.kind];
+        const wins = geo.windows.filter((w) => w.a === i);
+        if (pct === undefined || !wins.length) return;
+        const have = (wins.reduce((a, w) => a + (w.to - w.from), 0) * WINDOW_HEIGHT_MM) / 1e6;
+        const need = (pct / 100) * geo.metrics[i].netAreaM2;
+        const flagged = issues.some((x) => x.code === "window_area_low" && x.roomId === room.def.id);
+        expect(flagged, plan.id + " " + room.def.id).toBe(have + 1e-9 < need);
+        if (!flagged) met++;
+      });
+    }
+    expect(met).toBeGreaterThan(20);
   });
 });

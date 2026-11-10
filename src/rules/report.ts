@@ -48,6 +48,7 @@ const ISSUE_TITLE: Record<IssueCode, Bilingual> = {
   room_too_narrow: { en: "Room width", bn: "কক্ষের প্রস্থ" },
   no_daylight: { en: "Daylight", bn: "দিনের আলো" },
   no_ventilation: { en: "Ventilation", bn: "বায়ু চলাচল" },
+  window_area_low: { en: "Window area", bn: "জানালার ক্ষেত্রফল" },
   stair_too_small: { en: "Stair size", bn: "সিঁড়ির মাপ" },
   door_not_placeable: { en: "Door position", bn: "দরজার অবস্থান" },
   unreachable: { en: "Room access", bn: "কক্ষে প্রবেশপথ" },
