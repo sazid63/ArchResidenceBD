@@ -36,9 +36,10 @@ export function liveLoadRowFor(kind: RoomKind): string {
     case "corridor":
     case "stair":
     case "lift":
-    // Assumption: a balcony carries the public-room figure (4.8 kN/m2). BNBC 2020 Table 6.2.3 has a balcony row to confirm; this is the conservative reading.
-    case "balcony":
       return "residential-public";
+    // Table 6.2.3 row "Balconies (exterior)" 4.8 kN/m2; the 2.9 row is for one- and two-family houses only, not these flats.
+    case "balcony":
+      return "balcony";
     default:
       return "residential-private";
   }

@@ -7,6 +7,7 @@
 import type { BuildingModel } from "../model/building";
 import { farRow, farRowByArea, parkingSpaces, type FarResult, type ParkingRow } from "./engine";
 import { rajukPack } from "./pack";
+import { layoutParking } from "./parking";
 import { rajukSetbacks } from "./setbacks";
 
 export type CheckStatus = "pass" | "fail" | "not_checked";
@@ -47,6 +48,8 @@ export interface CheckContext {
   roadWidthM?: number;
   /** Pack use class; default A1-A4 (residential building). */
   useClass?: string;
+  /** Skip the parking layout (the plan picker only needs coverage). */
+  skipParking?: boolean;
 }
 
 const ROAD_STEPS = [6, 9, 12, 18, 24];
@@ -211,18 +214,26 @@ function parkingResult(model: BuildingModel): CheckResult {
   const src = source("schedule4", "Schedule 4", "তফসিল-৪");
   const need = requiredParking(model);
   if (!need) return notChecked("rajuk.parking", title, src, { en: "No dwellings in the plan.", bn: "প্ল্যানে কোনো ফ্ল্যাট নেই।" });
-  return notChecked(
-    "rajuk.parking",
+  const lay = layoutParking(model);
+  const cars = lay.cars.length;
+  const motos = lay.motorcycles.length;
+  const ok = cars >= need.cars && motos + (cars - need.cars) * 0 >= need.motorcycles;
+  const layoutEn = lay.option === "none" ? "no stall fits" : lay.option.replace("-", " ");
+  const layoutBn = lay.option === "none" ? "কোনো স্টল বসে না" : { "perpendicular-double": "লম্ব, দুই পাশে", "perpendicular-single": "লম্ব, এক পাশে", "parallel-double": "সমান্তরাল, দুই পাশে", "parallel-single": "সমান্তরাল, এক পাশে", "front-setback": "সামনের সেটব্যাক থেকে সামনের সারিতে" }[lay.option];
+  return {
+    ruleId: "rajuk.parking",
+    status: ok ? "pass" : "fail",
     title,
-    src,
-    {
-      en: `Needs ${need.cars} cars and ${need.motorcycles} motorcycle spaces. The model does not lay out stalls yet, so the supply is not checked. Flat size is taken as the sum of its room areas (assumption).`,
-      bn: `${need.cars}টি গাড়ি ও ${need.motorcycles}টি মোটরসাইকেলের জায়গা লাগবে। মডেলে এখনো পার্কিং স্টল সাজানো হয়নি, তাই সরবরাহ যাচাই করা হয়নি। ফ্ল্যাটের আকার কক্ষগুলির ক্ষেত্রফলের যোগফল ধরা হয়েছে (অনুমান)।`,
+    expected: { value: need.cars, unit: "cars" },
+    actual: { value: cars, unit: "cars" },
+    source: src,
+    note: {
+      en: `Needs ${need.cars} cars and ${need.motorcycles} motorcycles; the ground floor holds ${cars} car stalls (2.40 x 4.60 m, section 56(1)-(3); layout: ${layoutEn}) and ${motos} motorcycle stalls (1.00 x 2.00 m) inside the building footprint. Columns are taken as 600 mm squares, no parking in the setbacks, one drive aisle clear from the front face (assumptions). Flat size is the sum of its room areas (assumption). Ramp, gate and clearance (section 56(7)-(13)) are not checked: the ground floor is level with the road.`,
+      bn: `${need.cars}টি গাড়ি ও ${need.motorcycles}টি মোটরসাইকেল লাগবে; নিচতলায় ভবনের ভিতরে ${cars}টি গাড়ির স্টল (২.৪০ x ৪.৬০ মিটার, ধারা ৫৬(১)-(৩); সাজানো: ${layoutBn}) ও ${motos}টি মোটরসাইকেল স্টল (১.০০ x ২.০০ মিটার) আছে। কলাম ৬০০ মিমি বর্গ ধরা হয়েছে, সেটব্যাকে পার্কিং ধরা হয়নি, সামনের মুখ থেকে একটি ড্রাইভ আইল ফাঁকা (অনুমান)। ফ্ল্যাটের আকার কক্ষগুলির ক্ষেত্রফলের যোগফল (অনুমান)। র‍্যাম্প, গেট ও ক্লিয়ারেন্স (ধারা ৫৬(৭)-(১৩)) যাচাই করা হয়নি: নিচতলা রাস্তার সমতলে।`,
     },
-    { value: need.cars, unit: "cars" },
-  );
+  };
 }
 
 export function check(model: BuildingModel, ctx: CheckContext = {}): CheckResult[] {
-  return [...setbackResults(model), ...farAndCoverage(model, ctx), parkingResult(model)];
+  return [...setbackResults(model), ...farAndCoverage(model, ctx), ...(ctx.skipParking ? [] : [parkingResult(model)])];
 }

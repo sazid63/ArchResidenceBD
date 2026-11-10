@@ -18,6 +18,7 @@ import { analyzeFrame, type FrameOptions, type FrameResult } from "./frame";
 import { planFoundation, type FoundationResult } from "./foundation";
 import { roofLoads } from "../model/roofEquipment";
 import { slabWallKn } from "./slabWalls";
+import { edgeBeamTorsion, type TorsionResult } from "./torsion";
 import { cantileverMinThicknessMm, cantileverStrips, designCantilever, type CantileverResult, type CantileverStrip } from "./cantilever";
 import { sizeBeamLine, type BeamLineResult, type BeamSection, type BeamSpanInput } from "./beam";
 
@@ -45,6 +46,8 @@ export interface BeamLinePlaced {
 /** A cantilever balcony strip with its design (see cantilever.ts). */
 export interface CantileverPlaced extends CantileverStrip {
   result: CantileverResult;
+  /** Torsion of the edge beam the strip hangs off, at the column end (null if no beam line was found). */
+  torsion: TorsionResult | null;
 }
 
 export interface LevelResult {
@@ -303,7 +306,7 @@ function computeLevel(model: BuildingModel, k: number): Omit<LevelResult, "index
     // A cantilever cannot be thinner than L/10; the floor is one slab, so the whole level takes that thickness.
     slabMm = Math.max(125, slabMm, ...first.map((r) => r.thicknessMm), ...strips.map((c) => cantileverMinThicknessMm(c.y1 - c.y0)));
     slabs = panels.map((p) => ({ p, r: designSlab(slabIn(p, sections, slabMm)) }));
-    cants = strips.map((c) => ({ ...c, result: designCantilever({ lengthMm: c.y1 - c.y0, thicknessMm: slabMm, roof, parapetMm: model.roof.parapetMm }) }));
+    cants = strips.map((c) => ({ ...c, result: designCantilever({ lengthMm: c.y1 - c.y0, thicknessMm: slabMm, roof, parapetMm: model.roof.parapetMm }), torsion: null }));
     beamLines = buildLines(slabs, slabMm, cants);
     const next = new Map(beamLines.map((b) => [lineKey(b.orientation, b.at), b.result.section]));
     for (const [key, sec] of trial) if (!next.has(key)) next.set(key, sec);
@@ -311,8 +314,15 @@ function computeLevel(model: BuildingModel, k: number): Omit<LevelResult, "index
     sections = next;
     if (same) break;
   }
+  // Equilibrium torsion of the edge beam under each cantilever strip (torsion.ts).
+  cants = cants.map((c) => {
+    const line = beamLines.find((b) => b.orientation === "h" && Math.abs(b.at - c.y1) <= TOL);
+    if (!line) return c;
+    const vu = Math.max(...line.result.spans.map((sp) => sp.vuKn));
+    return { ...c, torsion: edgeBeamTorsion({ muKnMPerM: c.result.muKnMPerM, stripWidthMm: Math.min(c.x1 - c.x0, Math.max(...line.result.spans.map((sp) => sp.lengthMm))), vuKn: vu, bMm: line.result.section.bMm, hMm: line.result.section.hMm }) };
+  });
   const panelResults: PanelResult[] = slabs.map(({ p, r }) => ({ px: p.px, py: p.py, x0: p.x0, y0: p.y0, x1: p.x1, y1: p.y1, result: r }));
-  const util = Math.max(0, ...panelResults.map((p) => p.result.util), ...beamLines.map((b) => b.result.util), ...cants.map((c) => c.result.util));
+  const util = Math.max(0, ...panelResults.map((p) => p.result.util), ...beamLines.map((b) => b.result.util), ...cants.map((c) => Math.max(c.result.util, c.torsion?.util ?? 0)));
   return { kind: roof ? "roof" : "floor", slabThicknessMm: slabMm, panels: panelResults, beamLines, cantilevers: cants, util };
 }
 
@@ -340,6 +350,7 @@ export function analyzeStructure(model: BuildingModel, frameOptions: FrameOption
   for (const lv of levels) {
     for (const p of lv.panels) if (p.result.util > 1) failures.push({ level: lv.index, member: "slab", id: `S${p.px + 1}-${p.py + 1}`, util: p.result.util, governs: p.result.governs });
     for (const c of lv.cantilevers) if (c.result.util > 1) failures.push({ level: lv.index, member: "slab", id: `C-${c.id}`, util: c.result.util, governs: `cantilever ${c.result.governs}` });
+    for (const c of lv.cantilevers) if (c.torsion && c.torsion.util > 1) failures.push({ level: lv.index, member: "beam", id: `B-h${Math.round(c.y1)}-torsion`, util: c.torsion.util, governs: "torsion" });
     for (const b of lv.beamLines)
       if (b.result.util > 1) {
         const worst = b.result.spans.reduce((a, c) => (c.util > a.util ? c : a));

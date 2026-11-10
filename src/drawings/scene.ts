@@ -23,6 +23,7 @@ export const LAYERS: Record<string, Layer> = {
   CUT: { name: "CUT", aci: 7, stroke: "#171c29", weightMm: 45 },
   DOORS: { name: "DOORS", aci: 3, stroke: "#2f7d4f", weightMm: 20 },
   WINDOWS: { name: "WINDOWS", aci: 4, stroke: "#2e6fa3", weightMm: 20 },
+  PARKING: { name: "PARKING", aci: 8, stroke: "#4e5668", weightMm: 15 },
   COLUMNS: { name: "COLUMNS", aci: 1, stroke: "#b3402d", weightMm: 30 },
   OUTLINE: { name: "OUTLINE", aci: 7, stroke: "#171c29", weightMm: 35 },
   SITE: { name: "SITE", aci: 2, stroke: "#8a6a12", weightMm: 25 },

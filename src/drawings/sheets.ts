@@ -7,6 +7,7 @@
  * knows. Window sill and head heights are assumptions (`ELEVATION`), the same window height as the BOQ.
  */
 
+import { layoutParking } from "../rules/parking";
 import type { BuildingModel } from "../model/building";
 import { BOQ } from "../quantities/takeoff";
 import { doorLeaf, OUTSIDE, type WallSegment } from "../plans/geometry";
@@ -118,6 +119,16 @@ export function planScene(model: BuildingModel, storey: number, opts: SheetOptio
   for (const c of geo.columns) {
     const sz = opts.columnSize?.(c.x, c.y, storey) ?? { bx: 300, by: 300 };
     sb.rect("COLUMNS", c.x - sz.bx / 2, c.y - sz.by / 2, c.x + sz.bx / 2, c.y + sz.by / 2, "#b3402d");
+  }
+  if (st.index === 0) {
+    // B4: the car and motorcycle stalls the Compliance parking row counts.
+    const lay = layoutParking(model);
+    lay.cars.forEach((q, n) => {
+      sb.rect("PARKING", q.x0, q.y0, q.x1, q.y1);
+      sb.text("TEXT", (q.x0 + q.x1) / 2, (q.y0 + q.y1) / 2, 150, `P${n + 1}`, "middle");
+    });
+    lay.motorcycles.forEach((q) => sb.rect("PARKING", q.x0, q.y0, q.x1, q.y1));
+    if (lay.aisle && lay.aisle.y0 >= 0) sb.rect("PARKING", lay.aisle.x0, lay.aisle.y0, lay.aisle.x1, lay.aisle.y1);
   }
   f.rooms.forEach((room, i) => {
     const r = [...room.rects].sort((p, q) => (q.x1 - q.x0) * (q.y1 - q.y0) - (p.x1 - p.x0) * (p.y1 - p.y0))[0];

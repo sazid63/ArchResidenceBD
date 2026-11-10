@@ -112,10 +112,11 @@ describe("check()", () => {
     expect(mgc.actual!.unit).toBe("%");
   });
 
-  it("works out parking required but leaves supply unchecked", () => {
+  it("B4: parking is pass or fail against stalls that fit, never not_checked", () => {
     const p = check(model, { roadWidthM: 9 }).find((x) => x.ruleId === "rajuk.parking")!;
-    expect(p.status).toBe("not_checked");
+    expect(["pass", "fail"]).toContain(p.status);
     expect(p.expected!.value).toBeGreaterThanOrEqual(1);
+    expect(p.status).toBe((p.actual!.value as number) >= (p.expected!.value as number) ? "pass" : "fail");
   });
 });
 

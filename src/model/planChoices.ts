@@ -78,7 +78,7 @@ function coverageOf(frontageM: number, depthM: number, plan: PlanDefinition, opt
   if (opts.roadWidthM === undefined) return null;
   const built = deriveBuilding({ plotWidthMm: mToMm(frontageM), plotDepthMm: mToMm(depthM), storeys: opts.storeys ?? 1, planId: plan.id, mirror: opts.mirror, ...(opts.setbacks ? { setbacksMm: opts.setbacks } : {}) });
   if (!built.ok) return null;
-  const mgc = check(built.model, { roadWidthM: opts.roadWidthM }).find((r) => r.ruleId === "rajuk.mgc");
+  const mgc = check(built.model, { roadWidthM: opts.roadWidthM, skipParking: true }).find((r) => r.ruleId === "rajuk.mgc");
   if (!mgc || mgc.status === "not_checked" || typeof mgc.actual?.value !== "number" || typeof mgc.expected?.value !== "number") return { status: "not_checked" };
   return { status: mgc.status === "pass" ? "pass" : "fail", actualPercent: mgc.actual.value, maxPercent: mgc.expected.value };
 }
