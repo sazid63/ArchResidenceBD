@@ -13,7 +13,7 @@ import { gzipSync } from "node:zlib";
 
 const KB = 1024;
 const BUDGET = {
-  /** The script index.html loads first: React, the shell, i18n, the project store. Measured 135 KB at M7-1, 179 KB after phase B (rules, lift, parking and torsion code reach the shell); budget 190 KB until P0-4 finds what to lazy-load. */
+  /** The script index.html loads first: React, the shell, i18n, the project store. Measured 135 KB at M7-1, 179 KB after phase B (rules, lift, parking and torsion code reach the shell); the rule packs (RAJUK 23 KB, flow book 13 KB, BNBC 19 KB gzip as YAML text) and the engine that reads them are in the shell because the project store, the plan picker and the interview all use them synchronously. Budget 190 KB; a lazy pack loader would make project creation async and is not worth it for an offline app (the service worker caches everything). */
   entryJs: 190 * KB,
   /** The entry stylesheet. Measured 9 KB. */
   entryCss: 14 * KB,
