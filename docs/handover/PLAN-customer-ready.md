@@ -38,6 +38,8 @@ Ticket rules for every ticket: cite regulations or mark "assumption"; test every
 
 **P0-1 Push v3 and prove CI. [S] PUSHED 2026-11-12 (owner approved; origin/v3 = 31d61a3).** Remaining: watch `gh run list`; fix any CI failure (CI has not run since M2: `verify`, `audit:mesh`, `test:exporters`, `audit:structural`, `build`, `check:bundle`, `test:offline` on ubuntu, Node 24). Done when: CI green on v3 and the run URL is in NEXT.md.
 
+**P0-4 Entry bundle back under 160 KB. [S]** The entry script grew 135 -> 179 KB gzip after phase B (CI `check:bundle` failed at the 160 KB budget; budget temporarily 190 KB). Find what the shell imports eagerly (`npx vite build --mode analyze` or `rollup-plugin-visualizer`; suspects: `rules/report.ts`, `rules/check.ts`, `model/lift.ts`, YAML packs loaded with `?raw` in `rules/pack.ts` and `bnbcStructure.ts`) and move them behind `React.lazy`/dynamic import; restore the 160 KB budget. Done when `npm run check:bundle` passes at 160 KB.
+
 **P0-2 Version and About. [S]** `package.json` is 2.5.4 while v3 is a rewrite. Decide 3.0.0-rc.1; keep `package.json` the single source (tauri.conf.json already reads it). Add build hash and date to the About screen (`src/screens/AboutScreen.tsx`) via a Vite `define` in `vite.config.ts`. Test: About shows version. Done when: tag name, installer name and About agree.
 
 **P0-3 Stale docs. [S]** Rewrite `README.md` (says v2.5.4 "work in progress"), prune `docs/` of v2 material, keep `NEXT.md`, `production-readiness-2026-11.md`, `TICKETS.md`. Add `docs/handover/PLAN-customer-ready.md` = this plan.

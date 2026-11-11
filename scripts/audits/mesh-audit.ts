@@ -857,6 +857,7 @@ function modelCases(): Array<{ caseId: string; input: BuildingInput }> {
             storeys,
             plotWidthMm: w + DEFAULT_SETBACKS_MM.left + DEFAULT_SETBACKS_MM.right,
             plotDepthMm: d + DEFAULT_SETBACKS_MM.front + DEFAULT_SETBACKS_MM.rear,
+            setbacksMm: DEFAULT_SETBACKS_MM, // the plots above are sized with these, so the envelope must use them too
           },
         });
   }

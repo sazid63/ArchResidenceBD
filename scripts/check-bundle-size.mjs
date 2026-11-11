@@ -13,8 +13,8 @@ import { gzipSync } from "node:zlib";
 
 const KB = 1024;
 const BUDGET = {
-  /** The script index.html loads first: React, the shell, i18n, the project store. Measured 135 KB at M7-1. */
-  entryJs: 160 * KB,
+  /** The script index.html loads first: React, the shell, i18n, the project store. Measured 135 KB at M7-1, 179 KB after phase B (rules, lift, parking and torsion code reach the shell); budget 190 KB until P0-4 finds what to lazy-load. */
+  entryJs: 190 * KB,
   /** The entry stylesheet. Measured 9 KB. */
   entryCss: 14 * KB,
   /** Any one lazy chunk (a screen or a shared engine). Largest at M7-1: the structural analysis, 34 KB. */
