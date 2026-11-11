@@ -4,7 +4,7 @@ import { useI18n } from "../i18n";
 import { buildingForProject } from "../model/projectMesh";
 import type { OccupancyGroup, SiteClass } from "../rules/bnbcStructure";
 import { seismicPack } from "../rules/bnbcStructure";
-import { analyzeStructure, type LevelResult, type MemberFailure } from "../structure/analyze";
+import { SUPPORTED_MAX_STOREYS, analyzeStructure, type LevelResult, type MemberFailure } from "../structure/analyze";
 import type { SeismicResult } from "../structure/seismic";
 import type { CheckResult } from "../theme/tokens";
 import { Callout, Card, EmptyState, PageHeader, ResultChip, Stat, Value, VerdictStrip } from "../ui/kit";
@@ -143,6 +143,18 @@ export function StructureScreen() {
   }
 
   const model = built.model;
+  if (!result.supported) {
+    return (
+      <div className="screen">
+        <PageHeader title={title} subtitle={subtitle} />
+        <Callout tone="bad" title={bn ? `${SUPPORTED_MAX_STOREYS} তলার বেশি: কাঠামো নকশা করা হয়নি` : `Not designed above ${SUPPORTED_MAX_STOREYS} storeys`}>
+          {bn
+            ? `এই ভবন ${model.storeys.length} তলার। ${SUPPORTED_MAX_STOREYS} তলার বেশি ভবনে শুধু ফ্রেম অতিরিক্ত বিচ্যুত হয়; কোর শিয়ার ওয়াল বা গভীর বিম লাগে, যা এই সংস্করণে নেই। তাই এখানে কোনো অনুপাত বা পাস চিহ্ন দেখানো হয় না। কাঠামো প্রকৌশলীর নকশা করা কাঠামো দরকার। রড, কংক্রিট ও বিওকিউয়ের সংখ্যা কেবল আনুমানিক।`
+            : `This building has ${model.storeys.length} storeys. Above ${SUPPORTED_MAX_STOREYS} storeys a frame alone drifts too much and needs core shear walls or deeper members, which this version does not model, so no ratios or passes are shown. A structural engineer must design this structure. Steel, concrete and BOQ quantities are indicative only.`}
+        </Callout>
+      </div>
+    );
+  }
   const fr = result.frame;
   const level = result.levels[Math.min(levelIdx, result.levels.length - 1)];
   const sIdx = Math.min(storeyIdx, model.storeys.length - 1);

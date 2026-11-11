@@ -3,7 +3,7 @@ import { saveFile } from "../platform/saveFile";
 import { useProject } from "../context/ProjectContext";
 import { useI18n } from "../i18n";
 import { buildingForProject } from "../model/projectMesh";
-import { analyzeStructure } from "../structure/analyze";
+import { SUPPORTED_MAX_STOREYS, analyzeStructure, structureSupported } from "../structure/analyze";
 import { buildBbs, type BbsFamily, type BbsIssue, type BbsResult } from "../structure/bbs";
 import { bbsToCsv } from "../structure/bbsCsv";
 import { STOCK_BARS } from "../structure/barSelect";
@@ -110,6 +110,11 @@ export function RebarScheduleScreen() {
     <div className="screen">
       <PageHeader title={title} subtitle={subtitle} />
 
+      {built.ok && !structureSupported(built.model.storeys.length) && (
+        <Callout tone="bad" title={bn ? `${SUPPORTED_MAX_STOREYS} তলার বেশি: কাঠামো নকশা করা হয়নি` : `Not designed above ${SUPPORTED_MAX_STOREYS} storeys`}>
+          {bn ? "এই সংখ্যাগুলো কেবল আনুমানিক: এই ভবনের কাঠামো (কোর শিয়ার ওয়াল সহ) এই সংস্করণে নকশা করা হয় না। কাঠামো প্রকৌশলীর নকশা দরকার।" : "These quantities are indicative only: the structure of this building (with core shear walls) is not designed in this version. A structural engineer's design is needed."}
+        </Callout>
+      )}
       <Callout tone="warn" title={bn ? "প্রাথমিক রড বিন্যাস, চূড়ান্ত নকশা নয়" : "Screening-level detailing, not final design"}>
         {bn
           ? "রডের ব্যাস কেবল মজুদ মাপ (৮, ১০, ১২, ১৬, ২০, ২২, ২৫, ২৮, ৩২ মিমি)। বিমের নিচের রড কাটা হয়নি, ক্রসটাই ও কোণার রড ধরা হয়নি। দৈর্ঘ্য বিএনবিসি ধারা ৮.১ ও ৮.২ থেকে।"

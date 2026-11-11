@@ -71,6 +71,16 @@ export interface MemberFailure {
   governs: string;
 }
 
+/**
+ * The tallest building the structure engine designs (C3). A frame alone drifts too much above this height on the narrow plots the plans
+ * fit (see engineering-scenarios.audit.ts: 8 to 12 storeys fail drift), and core shear walls are not modelled yet (plan P2-2), so above it
+ * the screens say "not designed" instead of showing ratios.
+ */
+export const SUPPORTED_MAX_STOREYS = 7;
+
+/** True when the structure engine designs a building of this many storeys. */
+export const structureSupported = (storeys: number): boolean => storeys <= SUPPORTED_MAX_STOREYS;
+
 export interface StructureResult {
   levels: LevelResult[];
   frame: FrameResult;
@@ -78,6 +88,8 @@ export interface StructureResult {
   /** Worst demand/capacity ratio anywhere (never clamped). */
   util: number;
   ok: boolean;
+  /** False above SUPPORTED_MAX_STOREYS: the numbers are indicative and the screens must not present them as a design. */
+  supported: boolean;
   assumptions: Assumption[];
   /** The footings as they can be built: isolated pads, merged where pads would overlap. */
   foundation: FoundationResult;
@@ -362,5 +374,5 @@ export function analyzeStructure(model: BuildingModel, frameOptions: FrameOption
   failures.sort((a, b) => b.util - a.util);
   const util = Math.max(0, ...levels.map((l) => l.util), frame.util);
   const foundation = planFoundation(frame.columns, n);
-  return { levels, frame, failures, util, ok: failures.length === 0, assumptions: ASSUMPTIONS, foundation };
+  return { levels, frame, failures, util, ok: failures.length === 0, supported: structureSupported(n), assumptions: ASSUMPTIONS, foundation };
 }

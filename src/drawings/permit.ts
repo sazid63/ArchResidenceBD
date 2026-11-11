@@ -11,7 +11,7 @@ import type { BuildingModel } from "../model/building";
 import { renderPlanSvg } from "../plans/render";
 import { BOQ_ASSUMPTIONS, boqToCsv, buildBoq } from "../quantities/takeoff";
 import { buildReport, type Report, type ReportItem } from "../rules/report";
-import { analyzeStructure, type StructureResult } from "../structure/analyze";
+import { SUPPORTED_MAX_STOREYS, analyzeStructure, type StructureResult } from "../structure/analyze";
 import { buildBbs } from "../structure/bbs";
 import { bbsToCsv } from "../structure/bbsCsv";
 import { ASSUMPTIONS } from "../structure/materials";
@@ -101,10 +101,11 @@ export function reportToMarkdown(report: Report, projectName: string, date: stri
   return lines.join("\n");
 }
 
-export function assumptionsMarkdown(opts: { rateCard: { cardId: string; status: string; effectiveFrom: string; sourceName: string }; structureOk: boolean }): string {
+export function assumptionsMarkdown(opts: { rateCard: { cardId: string; status: string; effectiveFrom: string; sourceName: string }; structureOk: boolean; supported?: boolean; storeys?: number }): string {
   const L: string[] = ["# Assumptions and limits", "", "This is a screening package from ArchResidenceBD. It is not final design and is not a substitute for drawings and calculations signed by licensed architects and engineers.", ""];
   L.push("## Structure (EN)", "");
   for (const a of ASSUMPTIONS) L.push(`- ${a.en}`);
+  if (opts.supported === false) L.push("", `**NOT DESIGNED: this building has ${opts.storeys ?? "more than the supported number of"} storeys, above the ${SUPPORTED_MAX_STOREYS} the structure engine designs. A frame alone drifts too much and core shear walls are not modelled. Steel, concrete and BOQ quantities in this package are indicative only; a structural engineer must design the structure.**`);
   L.push("", `Structure result: ${opts.structureOk ? "every member passes the screening checks" : "some members FAIL the screening checks; see the Structure screen"}.`, "");
   L.push("## Quantities and prices (EN)", "");
   for (const a of BOQ_ASSUMPTIONS) L.push(`- ${a.en}`);
@@ -148,7 +149,7 @@ export function buildPermitPackage(project: BuildingProject, model: BuildingMode
   files.push({
     path: "assumptions.md",
     mime: "text/markdown",
-    text: assumptionsMarkdown({ rateCard: { cardId: boq.card.cardId, status: boq.card.status, effectiveFrom: boq.card.effectiveFrom, sourceName: boq.card.source.name }, structureOk: res.ok }),
+    text: assumptionsMarkdown({ rateCard: { cardId: boq.card.cardId, status: boq.card.status, effectiveFrom: boq.card.effectiveFrom, sourceName: boq.card.source.name }, structureOk: res.ok, supported: res.supported, storeys: model.storeys.length }),
   });
   files.unshift({ path: "README.md", mime: "text/markdown", text: indexMarkdown(name, date, files) });
   return files;

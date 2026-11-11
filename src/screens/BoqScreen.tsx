@@ -6,6 +6,7 @@ import { buildingForProject } from "../model/projectMesh";
 import { BOQ_ASSUMPTIONS, boqToCsv, buildBoq, type Boq, type BoqCategory } from "../quantities/takeoff";
 import { analyzeStructure } from "../structure/analyze";
 import { buildBbs } from "../structure/bbs";
+import { SUPPORTED_MAX_STOREYS, structureSupported } from "../structure/analyze";
 import { Button, Callout, Card, EmptyState, PageHeader, Stat } from "../ui/kit";
 
 const CATEGORY_LABEL: Record<BoqCategory, { en: string; bn: string }> = {
@@ -76,6 +77,11 @@ export function BoqScreen() {
     <div className="screen">
       <PageHeader title={title} subtitle={subtitle} />
 
+      {built.ok && !structureSupported(built.model.storeys.length) && (
+        <Callout tone="bad" title={bn ? `${SUPPORTED_MAX_STOREYS} তলার বেশি: কাঠামো নকশা করা হয়নি` : `Not designed above ${SUPPORTED_MAX_STOREYS} storeys`}>
+          {bn ? "এই সংখ্যাগুলো কেবল আনুমানিক: এই ভবনের কাঠামো (কোর শিয়ার ওয়াল সহ) এই সংস্করণে নকশা করা হয় না। কাঠামো প্রকৌশলীর নকশা দরকার।" : "These quantities are indicative only: the structure of this building (with core shear walls) is not designed in this version. A structural engineer's design is needed."}
+        </Callout>
+      )}
       <Callout tone="warn" title={bn ? "রেট কার্ড এখনো যাচাই হয়নি, মোট একটি নিম্নসীমা" : "Rate card not yet verified; the total is a lower bound"}>
         {bn
           ? `দাম "${c.source.name}" থেকে (অবস্থা: ${c.status}, কার্যকর ${c.effectiveFrom}, তথ্য ${c.asOf ?? "—"})। কংক্রিট, গাঁথুনি ও প্লাস্টারের শ্রম, যন্ত্র, সার্ভিস, দরজা-জানালা, টাইলস ও রং ধরা হয়নি।`
