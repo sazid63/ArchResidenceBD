@@ -59,3 +59,7 @@ scripts/design-system/out/
 # Playwright
 test-results/
 playwright-report/
+
+# Code-signing certificates
+*.pfx
+src-tauri/dev-certificate.pfx

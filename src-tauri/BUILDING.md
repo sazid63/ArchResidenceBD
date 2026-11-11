@@ -18,7 +18,7 @@ Output: `src-tauri/target/release/bundle/nsis/*.exe` (end users) and `bundle/msi
 
 ## Releases
 
-Push a tag that matches the version in `package.json` (`git tag v2.6.0 && git push origin v2.6.0`). The **Release** workflow (`.github/workflows/release.yml`) checks types and tests, builds the web app, runs the bundle-size and offline checks, builds both installers on `windows-latest` and attaches them to a **draft** GitHub release. The installers are not code-signed by the workflow (`sign-release.ps1` is for a local, signed build).
+Push a tag that matches the version in `package.json` (`git tag v2.6.0 && git push origin v2.6.0`). The **Release** workflow (`.github/workflows/release.yml`) checks types and tests, builds the web app, runs the bundle-size and offline checks, builds both installers on `windows-latest` and attaches them to a **draft** GitHub release. The workflow signs the installers when the repository secrets `WINDOWS_CERT_PFX_BASE64` and `WINDOWS_CERT_PASSWORD` are set (`sign-release.ps1` does the signing and verifies each signature); without them the build is unsigned and Windows SmartScreen warns on first run. `create-dev-cert.ps1` makes a throw-away self-signed certificate for local testing only.
 
 ## What the build enforces
 

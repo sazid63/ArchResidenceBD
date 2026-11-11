@@ -309,8 +309,8 @@ export function StructureScreen() {
         {result.foundation.mergedCount > 0 ? (
           <Callout tone="warn" title={bn ? "কিছু ফুটিং একসঙ্গে করা হয়েছে" : "Some footings are merged"}>
             {bn
-              ? `${result.foundation.mergedCount}টি ফুটিং একাধিক কলাম ধরে, কারণ আলাদা প্যাড একটি আরেকটির ওপর পড়ত। মাপ নির্ধারণ হয়েছে ক্ষেত্রফল ও গভীরতার সহজ নিয়মে; কলামের মাঝের বেঁকে যাওয়া, প্রতিটি কলামের পাঞ্চিং ও র‍্যাফটের কঠিনতা যাচাই হয়নি। নির্মাণের আগে বিস্তারিত নকশা দরকার।`
-              : `${result.foundation.mergedCount} footing${result.foundation.mergedCount === 1 ? " carries" : "s carry"} more than one column, because separate pads would have overlapped. They are sized by area and a simple depth rule only: bending between the columns, punching of each column and raft stiffness are not checked. Detailed design is needed before building.`}
+              ? `${result.foundation.mergedCount}টি ফুটিং একাধিক কলাম ধরে, কারণ আলাদা প্যাড একটি আরেকটির ওপর পড়ত। ক্ষেত্রফল ও গভীরতার সহজ নিয়মে মাপ নেওয়ার পর প্রতিটি কলামের পাঞ্চিং ও কলামের মাঝের বেঁকে যাওয়া (স্ট্রিপ হিসেবে) যাচাই হয়েছে এবং প্রয়োজনে গভীরতা বাড়ানো হয়েছে; র‍্যাফটের কঠিনতা, অসম বসে যাওয়া ও মাটির মডেল যাচাই হয়নি। নির্মাণের আগে বিস্তারিত নকশা দরকার।`
+              : `${result.foundation.mergedCount} footing${result.foundation.mergedCount === 1 ? " carries" : "s carry"} more than one column, because separate pads would have overlapped. They are sized by area and a simple depth rule, then checked for punching of each column and for bending between the columns (as a strip: column loads down, one uniform soil reaction up), and deepened when needed. Raft stiffness, uneven settlement and the soil model are not checked. Detailed design is needed before building.`}
           </Callout>
         ) : null}
         <p className="small muted" style={{ margin: 0 }}>

@@ -29,6 +29,8 @@ export interface FootingInput {
 }
 
 export interface FootingResult {
+  /** Largest factored column load the footing was designed for, kN (a merged footing sums these). */
+  puKn: number;
   sideMm: number;
   depthMm: number;
   dMm: number;
@@ -46,8 +48,8 @@ export interface FootingResult {
   governs: "bearing" | "one-way shear" | "punching" | "flexure";
 }
 
-const COVER_MM = footingPack().coverAgainstEarth;
-const BAR_MM = 16;
+export const COVER_MM = footingPack().coverAgainstEarth;
+export const BAR_MM = 16;
 
 export function designFooting(inp: FootingInput): FootingResult {
   const sw = inp.selfWeightFraction ?? 0.1;
@@ -87,7 +89,7 @@ export function designFooting(inp: FootingInput): FootingResult {
       { u: fl.util, g: "flexure" as const },
     ];
     const worst = parts.reduce((a, c) => (c.u > a.u ? c : a));
-    best = { sideMm: b, depthMm: h, dMm: d, pressureKpa: pressure, pressureSeismicKpa: pressureE, oneWayVuKn: vu1, oneWayPhiVcKn: phiVc1, punchVuKn: vu2, punchPhiVcKn: phiVc2, muKnM: mu, flexure: fl, bearingUtil, util: worst.u, governs: worst.g };
+    best = { puKn: inp.puKn, sideMm: b, depthMm: h, dMm: d, pressureKpa: pressure, pressureSeismicKpa: pressureE, oneWayVuKn: vu1, oneWayPhiVcKn: phiVc1, punchVuKn: vu2, punchPhiVcKn: phiVc2, muKnM: mu, flexure: fl, bearingUtil, util: worst.u, governs: worst.g };
     if (worst.u <= 1) return best;
   }
   return best as FootingResult;

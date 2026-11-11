@@ -2,7 +2,7 @@ name: Release
 
 # Builds the Windows installers when a version tag is pushed (git tag v2.6.0 && git push origin v2.6.0).
 # The tag must match "version" in package.json. The release is created as a draft for the owner to review and publish.
-# Installers are not code-signed here: signing needs the certificate (see src-tauri/sign-release.ps1).
+# Installers are signed only when the WINDOWS_CERT_PFX_BASE64 and WINDOWS_CERT_PASSWORD secrets are set (see the signing step).
 
 on:
   push:
@@ -16,6 +16,10 @@ jobs:
     name: Windows installer (NSIS and MSI)
     runs-on: windows-latest
     timeout-minutes: 60
+    # A step's own `if` cannot read a secret, so the certificate secrets are job-level environment variables.
+    env:
+      WINDOWS_CERT_PFX_BASE64: ${{ secrets.WINDOWS_CERT_PFX_BASE64 }}
+      WINDOWS_CERT_PASSWORD: ${{ secrets.WINDOWS_CERT_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
 
@@ -55,6 +59,21 @@ jobs:
 
       - name: Build the installers
         run: npx tauri build --bundles nsis,msi
+
+      # Signing runs only when the repository has the certificate secrets (Settings > Secrets > Actions):
+      #   WINDOWS_CERT_PFX_BASE64  the .pfx file, base64-encoded
+      #   WINDOWS_CERT_PASSWORD    its password
+      # Without them the release is built unsigned (Windows SmartScreen will warn on first run).
+      - name: Sign the installers
+        if: env.WINDOWS_CERT_PFX_BASE64 != ''
+        shell: pwsh
+        run: |
+          $pfx = Join-Path $env:RUNNER_TEMP "signing.pfx"
+          [IO.File]::WriteAllBytes($pfx, [Convert]::FromBase64String($env:WINDOWS_CERT_PFX_BASE64))
+          $pw = ConvertTo-SecureString -String $env:WINDOWS_CERT_PASSWORD -AsPlainText -Force
+          $cert = Import-PfxCertificate -FilePath $pfx -CertStoreLocation Cert:CurrentUserMy -Password $pw
+          Remove-Item $pfx
+          ./src-tauri/sign-release.ps1 -CertificateThumbprint $cert.Thumbprint
 
       - uses: actions/upload-artifact@v4
         with:

@@ -1,0 +1,285 @@
+{
+  "format": "archres",
+  "schemaVersion": 3,
+  "appVersion": "3.0.0",
+  "exportedAt": "2026-11-12T00:00:00.000Z",
+  "projects": [
+    {
+      "schemaVersion": 3,
+      "revision": 1,
+      "createdAt": "2026-11-12T00:00:00.000Z",
+      "updatedAt": "2026-11-12T00:00:00.000Z",
+      "project": {
+        "id": "project-1794437591149-f2100f5e",
+        "name": "Sample block (4 storeys)",
+        "language": "en",
+        "displayUnits": {
+          "length": "m",
+          "area": "katha",
+          "currency": "BDT"
+        }
+      },
+      "site": {
+        "address": {
+          "division": "Dhaka",
+          "district": "Dhaka",
+          "addressLine": "Dhaka"
+        },
+        "plot": {
+          "areaSqm": 501.68,
+          "frontageM": 18,
+          "depthM": 28,
+          "roadWidthM": 9,
+          "roadSide": "south"
+        },
+        "soil": {
+          "status": "not_provided"
+        },
+        "jurisdiction": {
+          "authority": "rajuk",
+          "rulePack": "rajuk-2008"
+        }
+      },
+      "building": {
+        "occupancy": "residential",
+        "structureType": "rcc_frame",
+        "storeys": {
+          "count": 4
+        },
+        "unitsPerFloor": 2,
+        "groundFloorUsage": "parking"
+      },
+      "design": {
+        "planByUnits": {
+          "2": "p2-2b-fb"
+        },
+        "concreteGradeMpa": 25,
+        "steelGradeMpa": 415
+      },
+      "phases": [
+        {
+          "id": "phase-basics",
+          "nameEn": "Project basics",
+          "nameBn": "প্রকল্পের মূল তথ্য",
+          "kind": "setup",
+          "status": "not_started",
+          "data": {},
+          "messages": []
+        },
+        {
+          "id": "phase-site",
+          "nameEn": "Site & Excavation",
+          "nameBn": "সাইট ও মাটি খনন",
+          "kind": "site",
+          "status": "not_started",
+          "data": {},
+          "messages": []
+        },
+        {
+          "id": "phase-foundation",
+          "nameEn": "Foundation & Footings",
+          "nameBn": "ফাউন্ডেশন ও ফুটিং",
+          "kind": "foundation",
+          "status": "not_started",
+          "data": {},
+          "messages": []
+        },
+        {
+          "id": "phase-ground-floor",
+          "nameEn": "Ground Floor (Parking & Entry)",
+          "nameBn": "নিচতলা (পার্কিং ও প্রবেশদ্বার)",
+          "kind": "ground_floor",
+          "storeyIndex": 0,
+          "status": "not_started",
+          "data": {},
+          "messages": []
+        },
+        {
+          "id": "phase-floor-1",
+          "nameEn": "1st Floor (Residential Unit)",
+          "nameBn": "১ম তলা (আবাসিক ইউনিট)",
+          "kind": "floor",
+          "storeyIndex": 1,
+          "status": "not_started",
+          "data": {},
+          "messages": []
+        },
+        {
+          "id": "phase-floor-2",
+          "nameEn": "2nd Floor (Residential Unit)",
+          "nameBn": "২য় তলা (আবাসিক ইউনিট)",
+          "kind": "floor",
+          "storeyIndex": 2,
+          "status": "not_started",
+          "data": {},
+          "messages": []
+        },
+        {
+          "id": "phase-floor-3",
+          "nameEn": "3rd Floor (Residential Unit)",
+          "nameBn": "৩য় তলা (আবাসিক ইউনিট)",
+          "kind": "floor",
+          "storeyIndex": 3,
+          "status": "not_started",
+          "data": {},
+          "messages": []
+        },
+        {
+          "id": "phase-rooftop",
+          "nameEn": "Rooftop & Boundary Wall",
+          "nameBn": "ছাদ ও সীমানা প্রাচীর",
+          "kind": "roof",
+          "status": "not_started",
+          "data": {},
+          "messages": []
+        },
+        {
+          "id": "phase-utilities",
+          "nameEn": "Utilities (Water, Sewage, Gas, Power)",
+          "nameBn": "ইউটিলিটি (পানি, স্যায়ারেজ, গ্যাস, বিদ্যুৎ)",
+          "kind": "utility",
+          "status": "not_started",
+          "data": {},
+          "messages": []
+        }
+      ],
+      "activePhaseId": "phase-basics",
+      "assumptions": [
+        {
+          "id": "v2-region",
+          "subject": "Location",
+          "statement": "Division and district were set to Dhaka because v3 covers the RAJUK area only.",
+          "basis": "conservative_default",
+          "verifyOnSite": false,
+          "relatedPath": "/site/address"
+        }
+      ],
+      "deviations": [],
+      "provenance": {
+        "/site/plot/areaSqm": {
+          "source": "imported",
+          "detail": "migrated from a v2 save",
+          "at": "2026-11-12T00:00:00.000Z"
+        },
+        "/site/plot/frontageM": {
+          "source": "user",
+          "detail": "entered in project setup",
+          "at": "2026-11-12T00:00:00.000Z"
+        },
+        "/site/plot/depthM": {
+          "source": "user",
+          "detail": "entered in project setup",
+          "at": "2026-11-12T00:00:00.000Z"
+        },
+        "/site/plot/roadWidthM": {
+          "source": "user",
+          "detail": "entered in project setup",
+          "at": "2026-11-12T00:00:00.000Z"
+        },
+        "/site/plot/roadSide": {
+          "source": "user",
+          "detail": "entered in project setup",
+          "at": "2026-11-12T00:00:00.000Z"
+        },
+        "/building/storeys/count": {
+          "source": "imported",
+          "detail": "migrated from a v2 save",
+          "at": "2026-11-12T00:00:00.000Z"
+        },
+        "/building/unitsPerFloor": {
+          "source": "imported",
+          "detail": "migrated from a v2 save",
+          "at": "2026-11-12T00:00:00.000Z"
+        },
+        "/design/concreteGradeMpa": {
+          "source": "imported",
+          "detail": "migrated from a v2 save",
+          "at": "2026-11-12T00:00:00.000Z"
+        },
+        "/design/steelGradeMpa": {
+          "source": "imported",
+          "detail": "migrated from a v2 save",
+          "at": "2026-11-12T00:00:00.000Z"
+        },
+        "/design/planByUnits/2": {
+          "source": "user",
+          "detail": "chosen in project setup",
+          "at": "2026-11-12T00:00:00.000Z"
+        }
+      },
+      "pendingInputs": [],
+      "legacy": {
+        "v2": {
+          "id": "project-1794437591149-f2100f5e",
+          "name": "Sample block (4 storeys)",
+          "address": "Dhaka",
+          "stories": 4,
+          "plotSize": 7.5,
+          "plotUnit": "katha",
+          "plotSqm": 501.68,
+          "unitsPerFloor": 2,
+          "createdAt": "2026-11-12T00:00:00.000Z",
+          "updatedAt": "2026-11-12T00:00:00.000Z",
+          "designStarted": false,
+          "activePhaseId": "phase-basics",
+          "customization": {
+            "concreteGrade": 25,
+            "steelGrade": 415,
+            "accessibility": {
+              "rampSlope": 12,
+              "rampWidthMm": 1200,
+              "doorClearWidthMm": 900,
+              "wcClearMm": [
+                1500,
+                1500
+              ],
+              "tactilePathWidthMm": 300,
+              "elevatorRequired": true,
+              "elevatorPitMm": 1200,
+              "elevatorWellMm": [
+                1400,
+                1100,
+                2100
+              ],
+              "grabRailHeightMm": 700,
+              "brailleSignage": true
+            },
+            "sustainability": {
+              "annualRainfallMm": 2000,
+              "tankEfficiency": 0.85,
+              "roofUValue": 0.8,
+              "wallUValue": 1.2,
+              "windowUValue": 3.5,
+              "coolingLoadFactor": 12,
+              "windowToFloorRatioMin": 0.15,
+              "daylightFactorTarget": 2
+            },
+            "fireSafety": {
+              "enabled": false,
+              "stairWidthMm": 1000,
+              "corridorWidthMm": 1200,
+              "travelDistanceMaxM": 30,
+              "fireRatingHours": 2,
+              "sprinklerSystem": false,
+              "smokeDetector": true
+            },
+            "valueEngineering": {
+              "enabled": false,
+              "autoApply": false
+            },
+            "constructionMgmt": {
+              "enabled": false
+            }
+          },
+          "plot": {
+            "frontageM": 18,
+            "depthM": 28,
+            "roadWidthM": 9,
+            "roadSide": "south"
+          },
+          "planId": "p2-2b-fb"
+        }
+      }
+    }
+  ]
+}

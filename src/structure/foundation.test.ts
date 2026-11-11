@@ -84,3 +84,28 @@ describe("foundation", () => {
     expect(rows.every((r) => r.cutLengthMm <= 12000)).toBe(true); // lapped within the stock length
   });
 });
+
+describe("merged footing: punching and bending between columns", () => {
+  it("strip moment, hand-worked: two 1000 kN loads at 1 m and 5 m on a 6 m strip give 500 kN.m at mid-span; one 600 kN load at the centre gives 450", async () => {
+    const { stripMaxMomentKnM } = await import("./foundation");
+    expect(stripMaxMomentKnM([{ x: 1000, p: 1000 }, { x: 5000, p: 1000 }], 0, 6000)).toBeCloseTo(500, 6);
+    expect(stripMaxMomentKnM([{ x: 3000, p: 600 }], 0, 6000)).toBeCloseTo(450, 6);
+    expect(stripMaxMomentKnM([], 0, 6000)).toBe(0);
+  });
+
+  it("every merged footing carries its check; it passes unless it reached the 2000 mm limit, and the depth never shrinks below the pad rule", async () => {
+    const { deriveBuilding } = await import("../model/building");
+    const { analyzeStructure } = await import("./analyze");
+    const b = deriveBuilding({ plotWidthMm: 12000, plotDepthMm: 22000, storeys: 7, planId: "pn-3b" });
+    if (!b.ok) throw new Error("fit");
+    const res = analyzeStructure(b.model);
+    const merged = res.foundation.footings.filter((f) => f.kind !== "isolated");
+    expect(merged.length).toBeGreaterThan(0);
+    for (const f of merged) {
+      expect(f.mergedCheck, f.id).toBeTruthy();
+      if (f.depthMm < 2000) expect(f.mergedCheck!.util, f.id).toBeLessThanOrEqual(1);
+      else if (f.mergedCheck!.util > 1) expect(res.failures.some((x) => x.id === f.id && x.member === "footing")).toBe(true);
+      expect(f.depthMm % 50).toBe(0);
+    }
+  });
+});

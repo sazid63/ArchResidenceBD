@@ -374,5 +374,8 @@ export function analyzeStructure(model: BuildingModel, frameOptions: FrameOption
   failures.sort((a, b) => b.util - a.util);
   const util = Math.max(0, ...levels.map((l) => l.util), frame.util);
   const foundation = planFoundation(frame.columns, n);
-  return { levels, frame, failures, util, ok: failures.length === 0, supported: structureSupported(n), assumptions: ASSUMPTIONS, foundation };
+  for (const fo of foundation.footings)
+    if (fo.mergedCheck && fo.mergedCheck.util > 1) failures.push({ level: 0, member: "footing", id: fo.id, util: fo.mergedCheck.util, governs: `merged footing ${fo.mergedCheck.governs}` });
+  failures.sort((a, b) => b.util - a.util);
+  return { levels, frame, failures, util: Math.max(util, ...foundation.footings.map((f) => f.mergedCheck?.util ?? 0)), ok: failures.length === 0, supported: structureSupported(n), assumptions: ASSUMPTIONS, foundation };
 }

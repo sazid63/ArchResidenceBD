@@ -15,6 +15,7 @@
     "clean": "rm -rf dist",
     "audit:mesh": "tsx --import ./scripts/loaders/raw.mjs scripts/audits/mesh-audit.ts",
     "audit:solid": "tsx --import ./scripts/loaders/raw.mjs scripts/audits/solid-audit.ts",
+    "make:sample": "tsx --import ./scripts/loaders/raw.mjs scripts/make-sample.ts",
     "audit:reference": "vitest run --config vitest.audit.config.ts scripts/audits/reference.audit.ts",
     "audit:structural": "vitest run --config vitest.audit.config.ts",
     "test:exporters": "tsx --import ./scripts/loaders/raw.mjs scripts/tests/test-exporters.ts",

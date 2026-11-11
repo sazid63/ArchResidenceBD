@@ -79,3 +79,13 @@ describe(".archres project file", () => {
     expect(projectFileName("মিরপুর প্লট")).toBe("মিরপুর-প্লট.archres");
   });
 });
+
+describe("the shipped sample", () => {
+  it("samples/sample-4-storey.archres opens", async () => {
+    const { readFileSync } = await import("node:fs");
+    const text = readFileSync(new URL("../../samples/sample-4-storey.archres", import.meta.url), "utf8");
+    const r = importProjectFile(text, NOW);
+    expect(r).toMatchObject({ ok: true, skipped: 0 });
+    if (r.ok) expect(r.projects[0].project.name).toBe("Sample block (4 storeys)");
+  });
+});

@@ -7,12 +7,18 @@
  * - the merged footing is the bounding rectangle of its pads, grown evenly if that is smaller than the sum of the pad areas, so
  *   it keeps at least the bearing area the separate pads needed;
  * - its depth is the deepest member pad, or span / 6 (capped at 300 mm + 100 mm per storey), rounded up to 50 mm, whichever is more;
- * - bending between columns, punching of each column in a shared footing and the stiffness of a raft are NOT checked: a merged
- *   footing needs a detailed design before it is built.
+ * - a merged footing is checked for punching of every column (Eq 6.6.72-6.6.74 at d/2, with the alpha_s of the column position) and for
+ *   bending along each axis as a strip: column loads down, one uniform soil reaction up (resultant taken at the footing centre). The
+ *   depth grows by 50 mm until both pass, up to 2000 mm. The stiffness of a raft, uneven settlement and the soil model are NOT
+ *   checked: a merged footing still needs a detailed design before it is built.
  * Units: mm, mm2.
  */
 
 import type { ColumnResult } from "./frame";
+import { BAR_MM, COVER_MM } from "./footing";
+import { footingPack } from "../rules/bnbcStructure";
+import { DESIGN, MATERIALS } from "./materials";
+import { flexure, slabMinAs } from "./section";
 
 /** The top of every pad sits this far below the ground-floor finish; the column stub rises from it. Plinth (tie) beams are this deep, below the finish. */
 export const PAD_TOP_BELOW_FINISH_MM = 1050;
@@ -31,6 +37,18 @@ export interface FoundationFooting {
   depthMm: number;
   /** Bearing area, m2. */
   areaM2: number;
+  /** Merged footings only: demand / capacity of the worst column punching and of bending between the columns, and what governs. */
+  mergedCheck?: MergedFootingCheck;
+}
+
+export interface MergedFootingCheck {
+  punchUtil: number;
+  bendingUtil: number;
+  util: number;
+  governs: "punching" | "bending";
+  /** Largest bending moment along either axis, kN.m, and the factored soil pressure, kPa. */
+  muKnM: number;
+  quKpa: number;
 }
 
 export interface FoundationResult {
@@ -53,6 +71,63 @@ interface Rect {
 
 const up50 = (v: number) => Math.ceil(v / 50) * 50;
 const overlaps = (a: Rect, b: Rect) => Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0) > 0 && Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0) > 0;
+
+/**
+ * Bending moment envelope of a footing strip: point loads `loads` (kN at positions along the strip, mm) held up by one uniform
+ * reaction w = sum / length. Returns the largest absolute moment, kN.m, scanning every 10 mm.
+ */
+export function stripMaxMomentKnM(loads: Array<{ x: number; p: number }>, from: number, to: number): number {
+  const L = (to - from) / 1000;
+  const total = loads.reduce((a, l) => a + l.p, 0);
+  if (L <= 0 || total <= 0) return 0;
+  const w = total / L; // kN/m upward
+  let max = 0;
+  for (let x = from; x <= to; x += 10) {
+    const xm = (x - from) / 1000;
+    let m = (w * xm * xm) / 2; // reaction to the left of the cut, taking moments about the cut
+    for (const l of loads) if (l.x <= x) m -= l.p * ((x - l.x) / 1000);
+    max = Math.max(max, Math.abs(m));
+  }
+  return max;
+}
+
+/** Punching and bending checks of one merged footing at depth `hMm`. */
+export function checkMergedFooting(f: FoundationFooting, cols: ColumnResult[], hMm: number): MergedFootingCheck {
+  const fc = MATERIALS.fcMPa;
+  const d = hMm - COVER_MM - BAR_MM - BAR_MM / 2;
+  const B = f.x1 - f.x0;
+  const L = f.y1 - f.y0;
+  const total = cols.reduce((a, c) => a + c.footing.puKn, 0);
+  const qu = (total * 1000) / (B * L); // N/mm2
+  let punch = 0;
+  for (const c of cols) {
+    const s = c.storeys[0].section;
+    const b0 = 2 * (s.bx + d) + 2 * (s.by + d);
+    const beta = Math.max(s.bx, s.by) / Math.min(s.bx, s.by);
+    const alphaS = footingPack().alphaS[c.position];
+    const vu = c.footing.puKn - (qu * (s.bx + d) * (s.by + d)) / 1000;
+    const vc = (Math.min(0.17 * (1 + 2 / beta), 0.083 * ((alphaS * d) / b0 + 2), 0.33) * Math.sqrt(fc) * b0 * d) / 1000;
+    punch = Math.max(punch, vu / (DESIGN.phiShear * vc));
+  }
+  // Bending: the strip along x (width = footing depth in y) and along y, each carrying every column load.
+  const mx = stripMaxMomentKnM(cols.map((c) => ({ x: c.xMm, p: c.footing.puKn })), f.x0, f.x1);
+  const my = stripMaxMomentKnM(cols.map((c) => ({ x: c.yMm, p: c.footing.puKn })), f.y0, f.y1);
+  const bendX = flexure(mx, L, d, slabMinAs(L, hMm)).util;
+  const bendY = flexure(my, B, d, slabMinAs(B, hMm)).util;
+  const bending = Math.max(bendX, bendY);
+  return { punchUtil: punch, bendingUtil: bending, util: Math.max(punch, bending), governs: punch >= bending ? "punching" : "bending", muKnM: Math.max(mx, my), quKpa: qu * 1000 };
+}
+
+/** The smallest depth (50 mm steps up to 2000) at which the merged footing passes its checks, or 2000 with the failing check. */
+function designMerged(f: FoundationFooting, cols: ColumnResult[]): { depthMm: number; check: MergedFootingCheck } {
+  let h = f.depthMm;
+  let check = checkMergedFooting(f, cols, h);
+  while (check.util > 1 && h < 2000) {
+    h += 50;
+    check = checkMergedFooting(f, cols, h);
+  }
+  return { depthMm: h, check };
+}
 
 export function planFoundation(columns: ColumnResult[], storeys: number): FoundationResult {
   let rects: Rect[] = columns.map((c) => {
@@ -95,7 +170,11 @@ export function planFoundation(columns: ColumnResult[], storeys: number): Founda
     const depth = merged ? Math.min(2000, Math.max(r.depthMm, up50(Math.min(span / 6, 300 + 100 * storeys)))) : r.depthMm;
     const kind: FoundationFooting["kind"] = !merged ? "isolated" : r.ids.length <= 4 ? "combined" : "raft";
     const id = merged ? `${kind === "raft" ? "FR" : "FC"}${++n}` : `F-${r.ids[0]}`;
-    return { id, kind, columnIds: r.ids, x0, y0, x1, y1, depthMm: depth, areaM2: ((x1 - x0) * (y1 - y0)) / 1e6 };
+    const base: FoundationFooting = { id, kind, columnIds: r.ids, x0, y0, x1, y1, depthMm: depth, areaM2: ((x1 - x0) * (y1 - y0)) / 1e6 };
+    if (!merged) return base;
+    const cols = columns.filter((c) => r.ids.includes(c.id));
+    const done = designMerged(base, cols);
+    return { ...base, depthMm: done.depthMm, mergedCheck: done.check };
   });
   footings.sort((p, q) => p.y0 - q.y0 || p.x0 - q.x0);
   return { footings, mergedCount: footings.filter((f) => f.kind !== "isolated").length, overlappingPads };
