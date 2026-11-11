@@ -1,518 +1,100 @@
-import { useState, useEffect, useMemo } from "react";
 import { useI18n } from "../i18n";
-import { Badge, Button, Card, PageHeader, Stat } from "../ui/kit";
-import { useActiveProject } from "../context/ProjectContext";
-import { generateBuildingMesh } from "../cad/parametricBuildingGenerator";
-import { generateFormworkQuantities, generateScaffoldQuantities, generateFormworkScaffoldReport, exportFormworkCSV, exportScaffoldCSV } from "../cad/formworkScaffold";
-import type { FormworkSummary, ScaffoldSummary, FormworkItem, ScaffoldItem } from "../cad/formworkScaffold";
-import type { MeshDocument } from "../cad/mesh";
-import { fmtBdt, fmtNum } from "../i18n";
-import { Progressive } from "../components/Progressive";
+import { fmtDec, fmtInt } from "../ui/format";
+import { csvCell, downloadText } from "../ui/download";
+import { Button, Callout, Card, EmptyState, PageHeader, Stat } from "../ui/kit";
+import { useDesign } from "./useDesign";
 
-interface TypeTotals {
-  areaM2: number;
-  shutteringM2: number;
-}
+const FAMILIES = [
+  { key: "footing", id: "formwork-footing", en: "Footings", bn: "ফুটিং" },
+  { key: "column", id: "formwork-column", en: "Columns", bn: "কলাম" },
+  { key: "beam", id: "formwork-beam", en: "Beams", bn: "বিম" },
+  { key: "slab", id: "formwork-slab", en: "Slabs (soffit)", bn: "স্ল্যাব (নিচের তল)" },
+  { key: "core", id: "formwork-core", en: "Lift shaft walls", bn: "লিফট শাফটের দেয়াল" },
+] as const;
 
-interface ScaffoldTotals {
-  areaM2: number;
-  volumeM3: number;
-}
-
+/**
+ * Formwork quantities from the designed members (bar schedule `formworkM2`), priced from the rate card's SoR steel-form
+ * rates. Same numbers as the BOQ: this screen reads the building model, not the 3D mesh.
+ */
 export function FormworkScaffoldScreen() {
-  const { t, lang } = useI18n();
-  const project = useActiveProject();
-  const [mesh, setMesh] = useState<MeshDocument | null>(null);
-  const [formwork, setFormwork] = useState<FormworkSummary | null>(null);
-  const [scaffold, setScaffold] = useState<ScaffoldSummary | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"formwork" | "scaffold" | "report">("formwork");
-  const [materialFilter, setMaterialFilter] = useState<string>("all");
+  const { lang } = useI18n();
+  const bn = lang === "bn";
+  const d = useDesign();
+  const title = bn ? "ফর্মওয়ার্ক" : "Formwork";
+  const subtitle = bn ? "কাঠামোর সদস্য থেকে ফর্মের সংস্পর্শ ক্ষেত্রফল ও খরচ" : "Form contact area and cost from the designed members";
 
-  useEffect(() => {
-    if (!project) {
-      setError(lang === "bn" ? "কোনো সক্রিয় প্রকল্প পাওয়া যায়নি" : "No active project found");
-      setLoading(false);
-      return;
-    }
-    
-    const loadData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const meshDoc = generateBuildingMesh(project, "final", project.customization);
-        setMesh(meshDoc);
-        
-        const formworkData = generateFormworkQuantities(meshDoc, project.id);
-        const scaffoldData = generateScaffoldQuantities(meshDoc, project.id);
-        
-        setFormwork(formworkData);
-        setScaffold(scaffoldData);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : String(err));
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    loadData();
-  }, [project]);
-  // Hooks must run on every render, so they live above the early returns below.
-  const filteredFormworkItems = useMemo(() => 
-    formwork?.items?.filter((item) => 
-      materialFilter === "all" || item.material === materialFilter
-    ) || [],
-  [formwork?.items, materialFilter]
-  );
-
-  const uniqueMaterials = useMemo(() => 
-    Array.from(new Set(formwork?.items?.map((item) => item.material) || [])),
-  [formwork?.items]
-  );
-
-  const avgReuse = useMemo(() => {
-    if (!formwork?.items?.length) return 0;
-    return Math.round(formwork.items.reduce((sum: number, i: FormworkItem) => sum + i.reuseCount, 0) / formwork.items.length);
-  }, [formwork?.items]);
-
-  const maxLoadClass = useMemo(() => {
-    if (!scaffold?.items) return "Light";
-    if (scaffold.items.some((i: ScaffoldItem) => i.loadClass === "heavy")) return "Heavy";
-    if (scaffold.items.some((i: ScaffoldItem) => i.loadClass === "medium")) return "Medium";
-    return "Light";
-  }, [scaffold?.items]);
-
-  const formworkMaterialCost = useMemo(() => {
-    if (!formwork?.byMaterial) return 0;
-    return Object.entries(formwork.byMaterial).reduce(
-      (sum: number, [mat, totals]: [string, TypeTotals]) => sum + totals.shutteringM2 * (mat === "aluminum" ? 8500 : mat === "steel" ? 3500 : mat === "plywood" ? 1200 : 850),
-      0
-    );
-  }, [formwork?.byMaterial]);
-
-  const totalEstimateCost = useMemo(() => {
-    const formworkCost = formwork?.byMaterial 
-      ? Object.entries(formwork.byMaterial).reduce(
-        (sum: number, [mat, totals]: [string, TypeTotals]) => sum + totals.shutteringM2 * (mat === "aluminum" ? 8500 : mat === "steel" ? 3500 : mat === "plywood" ? 1200 : 850),
-        0
-      )
-      : 0;
-    const scaffoldCost = (scaffold?.totalScaffoldAreaM2 || 0) * 250;
-    return formworkCost + scaffoldCost;
-  }, [formwork?.byMaterial, scaffold?.totalScaffoldAreaM2]);
-
-
-  if (error) {
+  if (d.state === "no_plan")
     return (
       <div className="screen">
-        <PageHeader title={t("formworkTitle")} subtitle={t("formworkSubtitle")} />
-        <Card>
-          <p className="muted">{error}</p>
-        </Card>
+        <PageHeader title={title} subtitle={subtitle} />
+        <EmptyState title={bn ? "এখনো কোনো প্ল্যান বাছাই হয়নি" : "No plan chosen yet"}>
+          {bn ? "জমির মাপ দিয়ে একটি প্ল্যান বাছাই করুন।" : "Enter the plot and pick a plan first."}
+        </EmptyState>
       </div>
     );
-  }
-
-  if (loading) {
+  if (d.state === "no_fit")
     return (
       <div className="screen">
-        <PageHeader title={t("formworkTitle")} subtitle={t("formworkSubtitle")} />
-        <div style={{ padding: "24px", textAlign: "center", opacity: 0.7 }}>
-          {lang === "bn" ? "ফর্মওয়ার্ক ও স্ক্যাফোল্ড গণনা হচ্ছে..." : "Calculating formwork & scaffold..."}
-        </div>
+        <PageHeader title={title} subtitle={subtitle} />
+        <Callout tone="bad" title={bn ? "প্ল্যানটি এই জমিতে আঁটে না" : "The plan does not fit this plot"}>{bn ? d.reasons.bn : d.reasons.en}</Callout>
       </div>
     );
-  }
+
+  const { bbs, boq } = d.data;
+  const rows = FAMILIES.map((f) => {
+    const area = bbs.totals.formworkM2[f.key];
+    const line = boq.lines.find((l) => l.id === f.id);
+    return { ...f, area, rate: line?.rateBdt ?? null, amount: line?.amountBdt ?? (area > 0 ? null : 0) };
+  }).filter((r) => r.area > 0);
+  const totalArea = rows.reduce((a, r) => a + r.area, 0);
+  const totalAmount = rows.reduce((a, r) => a + (r.amount ?? 0), 0);
+
+  const exportCsv = () => {
+    const lines = [["family", "area_m2", "rate_bdt_per_m2", "amount_bdt"].join(",")];
+    for (const r of rows) lines.push([csvCell(r.en), r.area.toFixed(2), r.rate ?? "", r.amount === null ? "" : r.amount.toFixed(0)].join(","));
+    lines.push(["total", totalArea.toFixed(2), "", totalAmount.toFixed(0)].join(","));
+    lines.push("note,Form contact areas from the bar schedule (simplified: no deductions at joints); rates are the PWD SoR 2022 steel-form items on the candidate rate card");
+    downloadText(`${d.projectName || "project"}-formwork.csv`, lines.join("\n"));
+  };
 
   return (
     <div className="screen">
-      <PageHeader
-        title={t("formworkTitle")}
-        subtitle={t("formworkSubtitle")}
-        actions={
-          <div className="row" style={{ gap: "8px" }}>
-            <Button variant="soft" onClick={() => {
-              const report = generateFormworkScaffoldReport(mesh!, project!.name, project!.id);
-              const blob = new Blob([report], { type: "text/markdown" });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement("a");
-              a.href = url;
-              a.download = `${project!.id}_formwork_scaffold_report.md`;
-              a.click();
-              URL.revokeObjectURL(url);
-            }}>
-              {lang === "bn" ? "রিপোর্ট ডাউনলোড" : "Download Report"}
-            </Button>
-            <Button variant="soft" onClick={() => {
-              if (formwork && scaffold) {
-                const csv = `${exportFormworkCSV(formwork)}\n\n---SCAFFOLD---\n${exportScaffoldCSV(scaffold)}`;
-                const blob = new Blob([csv], { type: "text/csv" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = `${project!.id}_formwork_scaffold.csv`;
-                a.click();
-                URL.revokeObjectURL(url);
-              }
-            }}>
-              {lang === "bn" ? "CSV এক্সপোর্ট" : "Export CSV"}
-            </Button>
-          </div>
-        }
-      />
-
-      {/* Tab Navigation */}
-      <div className="row" style={{ gap: "8px", marginBottom: "16px", borderBottom: "1px solid var(--border)", paddingBottom: "8px" }}>
-        <Button variant={activeTab === "formwork" ? "primary" : "soft"} onClick={() => setActiveTab("formwork")}>
-          {lang === "bn" ? "ফর্মওয়ার্ক" : "Formwork"} ({formwork?.items?.length || 0})
-        </Button>
-        <Button variant={activeTab === "scaffold" ? "primary" : "soft"} onClick={() => setActiveTab("scaffold")}>
-          {lang === "bn" ? "স্ক্যাফোল্ড" : "Scaffold"} ({scaffold?.items?.length || 0})
-        </Button>
-        <Button variant={activeTab === "report" ? "primary" : "soft"} onClick={() => setActiveTab("report")}>
-          {lang === "bn" ? "সারসংক্ষেপ" : "Summary"}
-        </Button>
+      <PageHeader title={title} subtitle={subtitle} />
+      <Callout tone="warn" title={bn ? "প্রাথমিক পরিমাণ" : "Screening quantities"}>
+        {bn
+          ? "ফর্মের ক্ষেত্রফল সরল ধরা হয়েছে: সংযোগস্থলে কোনো বাদ নেই, স্ল্যাবের কিনারা ও সিঁড়ির ধাপ ধরা হয়নি। দর এসওআর ২০২২-এর স্টিল ফর্ম আইটেম (কার্ড এখনো ‘candidate’)। স্ক্যাফোল্ডের পরিমাণ এই সংস্করণে নেই।"
+          : "Form areas are simplified: nothing is deducted where members meet, slab edges and stair steps are not counted. Rates are the SoR 2022 steel-form items (the card is still 'candidate'). Scaffold quantities are not computed in this version."}
+      </Callout>
+      <div className="row" style={{ gap: 16, margin: "16px 0", flexWrap: "wrap" }}>
+        <Stat label={bn ? "মোট ফর্ম (মি²)" : "Total form area (m²)"} value={fmtInt(totalArea)} />
+        <Stat label={bn ? "মোট খরচ (টাকা)" : "Total cost (BDT)"} value={fmtInt(totalAmount)} />
+        <Stat label={bn ? "তলা" : "Storeys"} value={String(d.data.model.storeys.length)} />
       </div>
-
-      {/* Summary Stats */}
-      <div className="row" style={{ gap: "16px", marginBottom: "16px", flexWrap: "wrap" }}>
-        <Stat label={lang === "bn" ? "মোট ফর্মওয়ার্ক এলাকা" : "Total Formwork Area"} value={`${formwork?.totalFormworkAreaM2?.toLocaleString() || 0} m²`} />
-        <Stat label={lang === "bn" ? "মোট শাটারিং (পুনর্ব্যবহার সহ)" : "Total Shuttering (with reuse)"} value={`${formwork?.totalShutteringM2?.toLocaleString() || 0} m²`} />
-        <Stat label={lang === "bn" ? "মোট স্ক্যাফোল্ড এলাকা" : "Total Scaffold Area"} value={`${scaffold?.totalScaffoldAreaM2?.toLocaleString() || 0} m²`} />
-        <Stat label={lang === "bn" ? "মোট স্ক্যাফোল্ড ভলিউম" : "Total Scaffold Volume"} value={`${scaffold?.totalScaffoldVolumeM3?.toLocaleString() || 0} m³`} />
-      </div>
-
-      {/* Formwork Tab */}
-      {activeTab === "formwork" && (
-        <div>
-          {/* Material Filter */}
-          <div className="row" style={{ gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
-            <span style={{ alignSelf: "center", opacity: 0.7 }}>{lang === "bn" ? "উপাদান দিয়ে ফিল্টার:" : "Filter by material:"}</span>
-            {["all", ...uniqueMaterials].map((mat) => (
-              <Button
-                key={mat}
-                variant={materialFilter === mat ? "primary" : "soft"}
-                onClick={() => setMaterialFilter(mat)}
-                style={{ textTransform: "capitalize" }}
-              >
-                {mat}
-              </Button>
+      <Card>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>{bn ? "সদস্য" : "Member"}</th>
+              <th className="num">{bn ? "ক্ষেত্রফল (মি²)" : "Area (m²)"}</th>
+              <th className="num">{bn ? "দর (টাকা/মি²)" : "Rate (BDT/m²)"}</th>
+              <th className="num">{bn ? "টাকা" : "Amount (BDT)"}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.key}>
+                <td>{bn ? r.bn : r.en}</td>
+                <td className="num">{fmtDec(r.area, 1)}</td>
+                <td className="num">{r.rate === null ? "-" : fmtInt(r.rate)}</td>
+                <td className="num">{r.amount === null ? "-" : fmtInt(r.amount)}</td>
+              </tr>
             ))}
-          </div>
-
-          {/* Formwork by Type */}
-          <Card className="stack" style={{ marginBottom: "16px" }}>
-            <h3 style={{ marginBottom: "8px", fontSize: "14px", opacity: 0.7 }}>
-              {lang === "bn" ? "ফর্মওয়ার্ক টাইপ অনুযায়ী" : "Formwork by Type"}
-            </h3>
-            <div className="row" style={{ gap: "12px", flexWrap: "wrap" }}>
-              {Object.entries(formwork?.byType || {}).map(([type, totals]: [string, TypeTotals]) => (
-                <Badge key={type} tone="sky">
-                  {type}: {totals.areaM2.toLocaleString()} m² (shuttering: {totals.shutteringM2.toLocaleString()} m²)
-                </Badge>
-              ))}
-            </div>
-          </Card>
-
-          {/* Formwork by Material */}
-          <Card className="stack" style={{ marginBottom: "16px" }}>
-            <h3 style={{ marginBottom: "8px", fontSize: "14px", opacity: 0.7 }}>
-              {lang === "bn" ? "উপাদান অনুযায়ী" : "By Material"}
-            </h3>
-            <div className="row" style={{ gap: "12px", flexWrap: "wrap" }}>
-              {Object.entries(formwork?.byMaterial || {}).map(([mat, totals]: [string, TypeTotals]) => (
-                <Badge key={mat} tone="sage">
-                  {mat}: {totals.areaM2.toLocaleString()} m² (shuttering: {totals.shutteringM2.toLocaleString()} m²)
-                </Badge>
-              ))}
-            </div>
-          </Card>
-
-          {/* Formwork Items Table with Progressive Rendering */}
-          <Card className="stack">
-            <Progressive
-              items={filteredFormworkItems}
-              pageSize={50}
-              resetKey={materialFilter}
-              showCount={true}
-              renderItem={(item, idx) => (
-                <tr key={item.elementId} style={{ borderBottom: "1px solid var(--border)" }}>
-                  <td style={{ padding: "10px", fontFamily: "var(--font-mono)", opacity: 0.6 }}>
-                    {idx + 1}
-                  </td>
-                  <td style={{ padding: "10px" }}>
-                    <strong>{item.label}</strong>
-                    <div className="faint small">{item.elementKind}</div>
-                  </td>
-                  <td style={{ padding: "10px" }}>
-                    <Badge tone="sky">{item.formworkType}</Badge>
-                  </td>
-                  <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                    {fmtNum(item.formworkAreaM2, lang)}
-                  </td>
-                  <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                    {fmtNum(item.concreteVolumeM3, lang)}
-                  </td>
-                  <td style={{ padding: "10px" }}>
-                    <Badge tone="amber">{item.material}</Badge>
-                  </td>
-                  <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                    {item.reuseCount}
-                  </td>
-                  <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                    {fmtNum(item.totalShutteringM2, lang)}
-                  </td>
-                </tr>
-              )}
-            >
-              {({ items: visibleItems }) => (
-                <>
-                  <table className="table" style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
-                    <thead>
-                      <tr style={{ borderBottom: "1px solid var(--border)", opacity: 0.8 }}>
-                        <th scope="col" style={{ padding: "10px" }}>#</th>
-                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "এলিমেন্ট" : "Element"}</th>
-                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "টাইপ" : "Type"}</th>
-                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "এলাকা (m²)" : "Area (m²)"}</th>
-                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "কংক্রিট (m³)" : "Concrete (m³)"}</th>
-                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "উপাদান" : "Material"}</th>
-                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "পুনর্ব্যবহার" : "Reuses"}</th>
-                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "শাটারিং (m²)" : "Shuttering (m²)"}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {visibleItems.map((item, idx) => (
-                        <tr key={item.elementId} style={{ borderBottom: "1px solid var(--border)" }}>
-                          <td style={{ padding: "10px", fontFamily: "var(--font-mono)", opacity: 0.6 }}>
-                            {idx + 1}
-                          </td>
-                          <td style={{ padding: "10px" }}>
-                            <strong>{item.label}</strong>
-                            <div className="faint small">{item.elementKind}</div>
-                          </td>
-                          <td style={{ padding: "10px" }}>
-                            <Badge tone="sky">{item.formworkType}</Badge>
-                          </td>
-                          <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                            {fmtNum(item.formworkAreaM2, lang)}
-                          </td>
-                          <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                            {fmtNum(item.concreteVolumeM3, lang)}
-                          </td>
-                          <td style={{ padding: "10px" }}>
-                            <Badge tone="amber">{item.material}</Badge>
-                          </td>
-                          <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                            {item.reuseCount}
-                          </td>
-                          <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                            {fmtNum(item.totalShutteringM2, lang)}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    <tfoot>
-                      <tr style={{ borderTop: "2px solid var(--border)", fontWeight: 700 }}>
-                        <td colSpan={3} style={{ padding: "12px", textAlign: "right" }}>
-                          {lang === "bn" ? "মোট:" : "Total:"}
-                        </td>
-                        <td style={{ padding: "12px", fontFamily: "var(--font-mono)" }}>
-                          {fmtNum(formwork?.totalFormworkAreaM2 || 0, lang)}
-                        </td>
-                        <td style={{ padding: "12px", fontFamily: "var(--font-mono)" }}>
-                          {fmtNum(formwork?.items?.reduce((sum: number, i: FormworkItem) => sum + i.concreteVolumeM3, 0) || 0, lang)}
-                        </td>
-                        <td colSpan={2} style={{ padding: "12px" }}></td>
-                        <td style={{ padding: "12px", fontFamily: "var(--font-mono)" }}>
-                          {fmtNum(formwork?.totalShutteringM2 || 0, lang)}
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </>
-              )}
-            </Progressive>
-          </Card>
-        </div>
-      )}
-
-      {/* Scaffold Tab */}
-      {activeTab === "scaffold" && (
-        <div>
-          {/* Scaffold by Type */}
-          <Card className="stack" style={{ marginBottom: "16px" }}>
-            <h3 style={{ marginBottom: "8px", fontSize: "14px", opacity: 0.7 }}>
-              {lang === "bn" ? "স্ক্যাফোল্ড টাইপ অনুযায়ী" : "Scaffold by Type"}
-            </h3>
-            <div className="row" style={{ gap: "12px", flexWrap: "wrap" }}>
-              {Object.entries(scaffold?.byType || {}).map(([type, totals]: [string, ScaffoldTotals]) => (
-                <Badge key={type} tone="amber">
-                  {type}: {totals.areaM2.toLocaleString()} m² ({totals.volumeM3.toLocaleString()} m³)
-                </Badge>
-              ))}
-            </div>
-          </Card>
-
-          {/* Scaffold Items Table with Progressive Rendering */}
-          <Card className="stack">
-            <Progressive
-              items={scaffold?.items || []}
-              pageSize={50}
-              showCount={true}
-              renderItem={(item, idx) => (
-                <tr key={item.elementId} style={{ borderBottom: "1px solid var(--border)" }}>
-                  <td style={{ padding: "10px", fontFamily: "var(--font-mono)", opacity: 0.6 }}>
-                    {idx + 1}
-                  </td>
-                  <td style={{ padding: "10px" }}>
-                    <strong>{item.label}</strong>
-                    <div className="faint small">{item.elementKind}</div>
-                  </td>
-                  <td style={{ padding: "10px" }}>
-                    <Badge tone="amber">{item.scaffoldType}</Badge>
-                  </td>
-                  <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                    {fmtNum(item.areaM2, lang)}
-                  </td>
-                  <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                    {item.heightM}
-                  </td>
-                  <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                    {fmtNum(item.areaM2 * item.heightM, lang)}
-                  </td>
-                  <td style={{ padding: "10px" }}>
-                    <Badge tone={item.loadClass === "heavy" ? "blush" : item.loadClass === "medium" ? "amber" : "sage"}>
-                      {item.loadClass}
-                    </Badge>
-                  </td>
-                  <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                    {item.durationDays}
-                  </td>
-                </tr>
-              )}
-            >
-              {({ items: visibleItems }) => (
-                <>
-                  <table className="table" style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
-                    <thead>
-                      <tr style={{ borderBottom: "1px solid var(--border)", opacity: 0.8 }}>
-                        <th scope="col" style={{ padding: "10px" }}>#</th>
-                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "এলিমেন্ট" : "Element"}</th>
-                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "টাইপ" : "Type"}</th>
-                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "এলাকা (m²)" : "Area (m²)"}</th>
-                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "উচ্চতা (m)" : "Height (m)"}</th>
-                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "ভলিউম (m³)" : "Volume (m³)"}</th>
-                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "লোড ক্লাস" : "Load Class"}</th>
-                        <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "সময় (দিন)" : "Duration (days)"}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {visibleItems.map((item, idx) => (
-                        <tr key={item.elementId} style={{ borderBottom: "1px solid var(--border)" }}>
-                          <td style={{ padding: "10px", fontFamily: "var(--font-mono)", opacity: 0.6 }}>
-                            {idx + 1}
-                          </td>
-                          <td style={{ padding: "10px" }}>
-                            <strong>{item.label}</strong>
-                            <div className="faint small">{item.elementKind}</div>
-                          </td>
-                          <td style={{ padding: "10px" }}>
-                            <Badge tone="amber">{item.scaffoldType}</Badge>
-                          </td>
-                          <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                            {fmtNum(item.areaM2, lang)}
-                          </td>
-                          <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                            {item.heightM}
-                          </td>
-                          <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                            {fmtNum(item.areaM2 * item.heightM, lang)}
-                          </td>
-                          <td style={{ padding: "10px" }}>
-                            <Badge tone={item.loadClass === "heavy" ? "blush" : item.loadClass === "medium" ? "amber" : "sage"}>
-                              {item.loadClass}
-                            </Badge>
-                          </td>
-                          <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                            {item.durationDays}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                    <tfoot>
-                      <tr style={{ borderTop: "2px solid var(--border)", fontWeight: 700 }}>
-                        <td colSpan={3} style={{ padding: "12px", textAlign: "right" }}>
-                          {lang === "bn" ? "মোট:" : "Total:"}
-                        </td>
-                        <td style={{ padding: "12px", fontFamily: "var(--font-mono)" }}>
-                          {fmtNum(scaffold?.totalScaffoldAreaM2 || 0, lang)}
-                        </td>
-                        <td style={{ padding: "12px" }}></td>
-                        <td style={{ padding: "12px", fontFamily: "var(--font-mono)" }}>
-                          {fmtNum(scaffold?.totalScaffoldVolumeM3 || 0, lang)}
-                        </td>
-                        <td colSpan={2} style={{ padding: "12px" }}></td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </>
-              )}
-            </Progressive>
-          </Card>
-        </div>
-      )}
-
-      {/* Report/Summary Tab */}
-      {activeTab === "report" && (
-        <Card className="stack">
-          <h3 style={{ marginBottom: "12px" }}>{lang === "bn" ? "প্রকল্প সারসংক্ষেপ" : "Project Summary"}</h3>
-          <div className="row" style={{ gap: "24px", flexWrap: "wrap" }}>
-            <div className="stack" style={{ flex: 1, minWidth: "280px" }}>
-              <h4>{lang === "bn" ? "ফর্মওয়ার্ক" : "Formwork"}</h4>
-              <p className="small muted" style={{ margin: "4px 0" }}>
-                {lang === "bn" ? "মোট যোগাযোগ এলাকা:" : "Total contact area:"} <strong>{formwork?.totalFormworkAreaM2?.toLocaleString() || 0} m²</strong>
-              </p>
-              <p className="small muted" style={{ margin: "4px 0" }}>
-                {lang === "bn" ? "মোট শাটারিং:" : "Total shuttering:"} <strong>{formwork?.totalShutteringM2?.toLocaleString() || 0} m²</strong>
-              </p>
-              <p className="small muted" style={{ margin: "4px 0" }}>
-                {lang === "bn" ? "উপাদান সংখ্যা:" : "Materials used:"} <strong>{Object.keys(formwork?.byMaterial || {}).length}</strong>
-              </p>
-              <p className="small muted" style={{ margin: "4px 0" }}>
-                {lang === "bn" ? "পুনর্ব্যবহার স্তর:" : "Avg reuse:"} <strong>{formwork?.items && formwork.items.length > 0 ? Math.round(formwork.items.reduce((sum: number, i: FormworkItem) => sum + i.reuseCount, 0) / formwork.items.length) : 0}x</strong>
-              </p>
-            </div>
-            <div className="stack" style={{ flex: 1, minWidth: "280px" }}>
-              <h4>{lang === "bn" ? "স্ক্যাফোল্ড" : "Scaffold"}</h4>
-              <p className="small muted" style={{ margin: "4px 0" }}>
-                {lang === "bn" ? "মোট এলাকা:" : "Total area:"} <strong>{scaffold?.totalScaffoldAreaM2?.toLocaleString() || 0} m²</strong>
-              </p>
-              <p className="small muted" style={{ margin: "4px 0" }}>
-                {lang === "bn" ? "মোট ভলিউম:" : "Total volume:"} <strong>{scaffold?.totalScaffoldVolumeM3?.toLocaleString() || 0} m³</strong>
-              </p>
-              <p className="small muted" style={{ margin: "4px 0" }}>
-                {lang === "bn" ? "টাইপ সংখ্যা:" : "Types used:"} <strong>{Object.keys(scaffold?.byType || {}).length}</strong>
-              </p>
-              <p className="small muted" style={{ margin: "4px 0" }}>
-                {lang === "bn" ? "গুরুতম লোড ক্লাস:" : "Max load class:"} <strong>{scaffold?.items?.some((i: ScaffoldItem) => i.loadClass === "heavy") ? "Heavy" : scaffold?.items?.some((i: ScaffoldItem) => i.loadClass === "medium") ? "Medium" : "Light"}</strong>
-              </p>
-            </div>
-            <div className="stack" style={{ flex: 1, minWidth: "280px" }}>
-              <h4>{lang === "bn" ? "অনুমানিত খরচ" : "Estimated Cost"}</h4>
-              <p className="small muted" style={{ margin: "4px 0" }}>
-                {lang === "bn" ? "ফর্মওয়ার্ক উপাদান খরচ:" : "Formwork material:"} <strong>৳{Object.entries(formwork?.byMaterial || {}).reduce((sum: number, [mat, totals]: [string, TypeTotals]) => sum + totals.shutteringM2 * (mat === "aluminum" ? 8500 : mat === "steel" ? 3500 : mat === "plywood" ? 1200 : 850), 0).toLocaleString()}</strong>
-              </p>
-              <p className="small muted" style={{ margin: "4px 0" }}>
-                {lang === "bn" ? "স্ক্যাফোল্ড ভাড়া (আনুমানিক):" : "Scaffold hire (est):"} <strong>৳{((scaffold?.totalScaffoldAreaM2 || 0) * 250).toLocaleString()}</strong>
-              </p>
-              <p className="small muted" style={{ margin: "4px 0" }}>
-                {lang === "bn" ? "মোট অনুমানিত:" : "Total estimate:"} <strong>৳{(Object.entries(formwork?.byMaterial || {}).reduce((sum: number, [mat, totals]: [string, TypeTotals]) => sum + totals.shutteringM2 * (mat === "aluminum" ? 8500 : mat === "steel" ? 3500 : mat === "plywood" ? 1200 : 850), 0) + (scaffold?.totalScaffoldAreaM2 || 0) * 250).toLocaleString()}</strong>
-              </p>
-            </div>
-          </div>
-        </Card>
-      )}
+          </tbody>
+        </table>
+      </Card>
+      <div style={{ marginTop: 16 }}>
+        <Button variant="soft" onClick={exportCsv}>{bn ? "CSV ডাউনলোড" : "Download CSV"}</Button>
+      </div>
     </div>
   );
 }

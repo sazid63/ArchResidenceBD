@@ -611,28 +611,49 @@ function detailLiftCore(model: BuildingModel, b: Builder): void {
   b.add({ family: "core", description: bi("Lift pit slab, bottom 12 mm at 150, along y", "লিফট পিট স্ল্যাব, নিচে ১২ মিমি @ ১৫০, y বরাবর"), dia: 12, shape: "00", dims: [sy - 2 * COVER], cut: sy - 2 * COVER, bars: Math.ceil(sx / 150) + 1, level: -1 });
 }
 
-function concreteM3(res: StructureResult, model: BuildingModel): number {
-  let m3 = 0;
-  for (const lv of res.levels) {
-    for (const p of lv.panels) m3 += ((p.x1 - p.x0) * (p.y1 - p.y0) * lv.slabThicknessMm) / 1e9;
-    for (const c of lv.cantilevers) m3 += ((c.x1 - c.x0) * (c.y1 - c.y0) * c.result.thicknessMm) / 1e9; // the balcony strips are slab too
-    m3 -= (holesAboveM2(model, lv.index) * lv.slabThicknessMm) / 1000; // the slab is cut where the stair, lift and shafts pass
-    for (const line of lv.beamLines) for (const sp of line.result.spans) m3 += (line.result.section.bMm * Math.max(line.result.section.hMm - lv.slabThicknessMm, 0) * sp.lengthMm) / 1e9;
-  }
-  for (const col of res.frame.columns) {
-    for (const st of col.storeys) m3 += (st.section.bx * st.section.by * model.input.floorToFloorMm) / 1e9;
-  }
-  // Column stubs from the pad top to the ground-floor finish, plinth beams, and the stair flights and landings of every storey.
-  for (const col of res.frame.columns) m3 += (col.storeys[0].section.bx * col.storeys[0].section.by * PAD_TOP_BELOW_FINISH_MM) / 1e9;
+/** One concrete pour of the building: the foundation, the columns of one storey, the beams, slab and stair of one level, or the lift shaft walls. */
+export interface ConcreteStep {
+  id: string;
+  kind: "foundation" | "columns" | "slab" | "core";
+  /** Storey (columns) or level (slab above that storey; the last is the roof). */
+  index?: number;
+  m3: number;
+}
+
+/** Concrete volumes in pouring order; their sum is the building total (concreteM3). */
+export function concreteSteps(res: StructureResult, model: BuildingModel): ConcreteStep[] {
+  const steps: ConcreteStep[] = [];
+  // Foundation: footings as built (merged footings once), column stubs to the ground-floor finish, plinth beams and the lift pit slab.
+  let foundation = 0;
+  for (const fo of res.foundation.footings) foundation += ((fo.x1 - fo.x0) * (fo.y1 - fo.y0) * fo.depthMm) / 1e9;
+  for (const col of res.frame.columns) foundation += (col.storeys[0].section.bx * col.storeys[0].section.by * PAD_TOP_BELOW_FINISH_MM) / 1e9;
   const typicalGeo = model.storeys[Math.min(1, model.storeys.length - 1)].geometry;
-  for (const bm of typicalGeo.beams) m3 += (PLINTH_BEAM_WIDTH_MM * PLINTH_BEAM_DEPTH_MM * bm.spanMm) / 1e9;
-  const sg = stairGeometry(model);
-  if (sg) m3 += sg.perStoreyM3 * model.storeys.length;
+  for (const bm of typicalGeo.beams) foundation += (PLINTH_BEAM_WIDTH_MM * PLINTH_BEAM_DEPTH_MM * bm.spanMm) / 1e9;
   const lc = liftCore(model);
-  if (lc) m3 += lc.wallM3 + lc.pitSlabM3;
-  // Footings as built: merged footings once, never the overlapping pads they replace.
-  for (const fo of res.foundation.footings) m3 += ((fo.x1 - fo.x0) * (fo.y1 - fo.y0) * fo.depthMm) / 1e9;
-  return m3;
+  if (lc) foundation += lc.pitSlabM3;
+  steps.push({ id: "foundation", kind: "foundation", m3: foundation });
+  const sg = stairGeometry(model);
+  for (const lv of res.levels) {
+    let cols = 0;
+    for (const col of res.frame.columns) {
+      const st = col.storeys[lv.index];
+      if (st) cols += (st.section.bx * st.section.by * model.input.floorToFloorMm) / 1e9;
+    }
+    steps.push({ id: `columns-${lv.index}`, kind: "columns", index: lv.index, m3: cols });
+    let slab = 0;
+    for (const p of lv.panels) slab += ((p.x1 - p.x0) * (p.y1 - p.y0) * lv.slabThicknessMm) / 1e9;
+    for (const c of lv.cantilevers) slab += ((c.x1 - c.x0) * (c.y1 - c.y0) * c.result.thicknessMm) / 1e9; // the balcony strips are slab too
+    slab -= (holesAboveM2(model, lv.index) * lv.slabThicknessMm) / 1000; // the slab is cut where the stair, lift and shafts pass
+    for (const line of lv.beamLines) for (const sp of line.result.spans) slab += (line.result.section.bMm * Math.max(line.result.section.hMm - lv.slabThicknessMm, 0) * sp.lengthMm) / 1e9;
+    if (sg) slab += sg.perStoreyM3;
+    steps.push({ id: `slab-${lv.index}`, kind: "slab", index: lv.index, m3: slab });
+  }
+  if (lc) steps.push({ id: "core", kind: "core", m3: lc.wallM3 });
+  return steps;
+}
+
+function concreteM3(res: StructureResult, model: BuildingModel): number {
+  return concreteSteps(res, model).reduce((a, s) => a + s.m3, 0);
 }
 
 /**

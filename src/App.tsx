@@ -21,9 +21,6 @@ const DrawingsScreen = lazy(() => import("./screens/DrawingsScreen").then((m) =>
 const FormworkScaffoldScreen = lazy(() => import("./screens/FormworkScaffoldScreen").then((m) => ({ default: m.FormworkScaffoldScreen })));
 const PourSequenceScreen = lazy(() => import("./screens/PourSequenceScreen").then((m) => ({ default: m.PourSequenceScreen })));
 const RebarScheduleScreen = lazy(() => import("./screens/RebarScheduleScreen").then((m) => ({ default: m.RebarScheduleScreen })));
-const ConnectionDetailingScreen = lazy(() => import("./screens/ConnectionDetailingScreen").then((m) => ({ default: m.ConnectionDetailingScreen })));
-const DaylightAnalysisScreen = lazy(() => import("./screens/DaylightAnalysisScreen").then((m) => ({ default: m.DaylightAnalysisScreen })));
-const UnitMixOptimizerScreen = lazy(() => import("./screens/UnitMixOptimizerScreen").then((m) => ({ default: m.UnitMixOptimizerScreen })));
 const ColumnGridOptimizerScreen = lazy(() => import("./screens/ColumnGridOptimizerScreen").then((m) => ({ default: m.ColumnGridOptimizerScreen })));
 const HelpScreen = lazy(() => import("./screens/HelpScreen").then((m) => ({ default: m.HelpScreen })));
 const LicencesScreen = lazy(() => import("./screens/LicencesScreen").then((m) => ({ default: m.LicencesScreen })));
@@ -45,9 +42,6 @@ const SCREEN_TITLES: Record<string, [string, string]> = {
   formwork: ["Formwork", "ফর্মওয়ার্ক"],
   pour: ["Pour Sequence", "পোর সিকোয়েন্স"],
   rebar: ["Rebar Schedule", "রিবার শিডিউল"],
-  connections: ["Connections", "সংযোগ"],
-  daylight: ["Daylight", "দিনের আলো"],
-  "unit-mix": ["Unit Mix", "ইউনিট মিক্স"],
   "column-grid": ["Column Grid", "কলাম গ্রিড"],
   settings: ["Settings", "সেটিংস"],
   units: ["Land Units", "জমির একক"],
@@ -182,9 +176,6 @@ function renderView(
   if (view === "formwork") return <FormworkScaffoldScreen />;
   if (view === "pour") return <PourSequenceScreen />;
   if (view === "rebar") return <RebarScheduleScreen />;
-  if (view === "connections") return <ConnectionDetailingScreen />;
-  if (view === "daylight") return <DaylightAnalysisScreen />;
-  if (view === "unit-mix") return <UnitMixOptimizerScreen />;
   if (view === "column-grid") return <ColumnGridOptimizerScreen onNavigate={navigate} />;
   if (view === "settings") return <SettingsScreen />;
   if (view === "licences") return <LicencesScreen />;

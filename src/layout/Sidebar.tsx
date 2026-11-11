@@ -91,8 +91,6 @@ export function Sidebar({ active, onNavigate, open = false }: Props) {
       bn: "নকশা",
       items: [
         { id: "design:final", icon: Box, en: "3D model", bn: "৩ডি মডেল", gated: true },
-        { id: "unit-mix", icon: Users, en: "Unit mix", bn: "ইউনিট মিক্স" },
-        { id: "daylight", icon: SunMedium, en: "Daylight", bn: "দিবালোক" },
         { id: "templates", icon: LayoutTemplate, en: "Plan library", bn: "প্ল্যান লাইব্রেরি" },
         { id: "assets", icon: Library, en: "Asset library", bn: "অ্যাসেট লাইব্রেরি" },
       ],
@@ -105,7 +103,6 @@ export function Sidebar({ active, onNavigate, open = false }: Props) {
         { id: "structure", icon: Building2, en: "Structure", bn: "কাঠামো" },
         { id: "column-grid", icon: Grid3x3, en: "Column grid", bn: "কলাম গ্রিড" },
         { id: "rebar", icon: Ruler, en: "Rebar schedule", bn: "রিবার শিডিউল" },
-        { id: "connections", icon: Link2, en: "Connections", bn: "সংযোগ" },
       ],
     },
     {

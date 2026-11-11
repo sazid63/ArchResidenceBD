@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useProject } from "../context/ProjectContext";
 import { useI18n } from "../i18n";
 import { isRecorded, recordDeviation, removeDeviation } from "../rules/deviations";
+import { RoomTable } from "./RoomTable";
 import { buildReport, filterItems, type ReportItem, type ReportSection, type ReportTab } from "../rules/report";
 import { Button, Callout, Card, EmptyState, PageHeader, ResultChip, SegmentedControl, Value, VerdictStrip } from "../ui/kit";
 
@@ -156,6 +157,8 @@ export function ComplianceScreen() {
       {shown.length === 0 ? (
         <Card><p className="muted">{bn ? "এই ট্যাবে কিছু নেই।" : "Nothing in this tab."}</p></Card>
       ) : null}
+
+      <RoomTable project={project} />
 
       <section className="stack" style={{ marginTop: 28, gap: 12 }} aria-label={bn ? "বিচ্যুতি তালিকা" : "Deviation register"}>
         <h2 className="section-title">{bn ? "বিচ্যুতি তালিকা" : "Deviation register"}</h2>

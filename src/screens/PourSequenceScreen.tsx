@@ -1,328 +1,96 @@
-import { useState, useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { useI18n } from "../i18n";
-import { Badge, Button, Card, PageHeader, Stat } from "../ui/kit";
-import { useActiveProject } from "../context/ProjectContext";
-import { generateBuildingMesh } from "../cad/parametricBuildingGenerator";
-import { generatePourSequence, generatePourSequenceReport, exportPourSequenceCSV, PourSequence, PourStep } from "../cad/pourSequence";
-import type { MeshDocument } from "../cad/mesh";
-import { fmtBdt, fmtNum } from "../i18n";
+import { planPours, POUR_ASSUMPTIONS, type PourRow } from "../structure/pourPlan";
+import { concreteSteps } from "../structure/bbs";
+import { fmtDec, fmtInt } from "../ui/format";
+import { csvCell, downloadText } from "../ui/download";
+import { Button, Callout, Card, EmptyState, PageHeader, Stat } from "../ui/kit";
+import { useDesign } from "./useDesign";
 
+function label(r: PourRow, storeys: number, bn: boolean): string {
+  const n = (r.index ?? 0) + 1;
+  const floor = bn ? `${n} তলা` : `storey ${n}`;
+  if (r.kind === "foundation") return bn ? "ফাউন্ডেশন: ফুটিং, কলামের গোড়া, প্লিন্থ বিম, লিফট পিট" : "Foundation: footings, column stubs, plinth beams, lift pit";
+  if (r.kind === "columns") return bn ? `কলাম, ${floor}` : `Columns, ${floor}`;
+  if (r.kind === "core") return bn ? "লিফট শাফটের দেয়াল" : "Lift shaft walls";
+  return r.index === storeys - 1 ? (bn ? "ছাদের বিম, স্ল্যাব ও সিঁড়ি" : "Roof beams, slab and stair") : bn ? `বিম, স্ল্যাব ও সিঁড়ি, ${floor}-এর উপরে` : `Beams, slab and stair above ${floor}`;
+}
+
+/** The pour order and its days, from the same concrete volumes as the BOQ. */
 export function PourSequenceScreen() {
-  const { t, lang } = useI18n();
-  const project = useActiveProject();
-  const [mesh, setMesh] = useState<MeshDocument | null>(null);
-  const [sequence, setSequence] = useState<PourSequence | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"schedule" | "phases" | "critical">("schedule");
-  const [filterPhase, setFilterPhase] = useState<string>("all");
+  const { lang } = useI18n();
+  const bn = lang === "bn";
+  const d = useDesign();
+  const plan = useMemo(() => (d.state === "ready" ? planPours(concreteSteps(d.data.structure, d.data.model)) : null), [d]);
+  const title = bn ? "ঢালাইয়ের ক্রম" : "Pour sequence";
+  const subtitle = bn ? "নকশাকৃত সদস্য থেকে ঢালাইয়ের ধাপ, আয়তন ও দিন" : "Pour steps, volumes and days from the designed members";
 
-  useEffect(() => {
-    if (!project) {
-      setError(lang === "bn" ? "কোনো সক্রিয় প্রকল্প পাওয়া যায়নি" : "No active project found");
-      setLoading(false);
-      return;
-    }
-    
-    const loadData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const meshDoc = generateBuildingMesh(project, "final", project.customization);
-        setMesh(meshDoc);
-        
-        const sequenceData = generatePourSequence(meshDoc, project);
-        setSequence(sequenceData);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : String(err));
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    loadData();
-  }, [project]);
-
-  if (!project) {
+  if (d.state === "no_plan")
     return (
       <div className="screen">
-        <PageHeader title={t("pourSequenceTitle")} subtitle={t("pourSequenceSubtitle")} />
-        <Card>
-          <p className="muted">{lang === "bn" ? "কোনো সক্রিয় প্রকল্প পাওয়া যায়নি" : "No active project found"}</p>
-        </Card>
+        <PageHeader title={title} subtitle={subtitle} />
+        <EmptyState title={bn ? "এখনো কোনো প্ল্যান বাছাই হয়নি" : "No plan chosen yet"}>{bn ? "জমির মাপ দিয়ে একটি প্ল্যান বাছাই করুন।" : "Enter the plot and pick a plan first."}</EmptyState>
       </div>
     );
-  }
-
-  if (error) {
+  if (d.state === "no_fit" || !plan)
     return (
       <div className="screen">
-        <PageHeader title={t("pourSequenceTitle")} subtitle={t("pourSequenceSubtitle")} />
-        <Card>
-          <p className="muted">{error}</p>
-        </Card>
+        <PageHeader title={title} subtitle={subtitle} />
+        <Callout tone="bad" title={bn ? "প্ল্যানটি এই জমিতে আঁটে না" : "The plan does not fit this plot"}>{d.state === "no_fit" ? (bn ? d.reasons.bn : d.reasons.en) : ""}</Callout>
       </div>
     );
-  }
 
-  if (loading) {
-    return (
-      <div className="screen">
-        <PageHeader title={t("pourSequenceTitle")} subtitle={t("pourSequenceSubtitle")} />
-        <div style={{ padding: "24px", textAlign: "center", opacity: 0.7 }}>
-          {lang === "bn" ? "পার্সিকোয়েন্স গণনা হচ্ছে..." : "Calculating pour sequence..."}
-        </div>
-      </div>
-    );
-  }
-
-  const phases = sequence?.phases || [];
-  const steps = sequence?.steps || [];
-
-  const filteredSteps = steps.filter((step: PourStep) => 
-    filterPhase === "all" || step.pourType === filterPhase
-  );
-
-  const uniquePourTypes = Array.from(new Set(steps.map((s: PourStep) => s.pourType)));
+  const storeys = d.data.model.storeys.length;
+  const A = POUR_ASSUMPTIONS;
+  const exportCsv = () => {
+    const lines = ["step,pour,m3,work_days,start_day,end_day,wait_days"];
+    plan.rows.forEach((r, i) => lines.push([i + 1, csvCell(label(r, storeys, false)), r.m3.toFixed(2), r.workDays, r.startDay, r.endDay, r.waitDays].join(",")));
+    lines.push(`note,"Pour rate ${A.m3PerDay} m3 per day and waits are assumptions"`);
+    downloadText(`${d.projectName || "project"}-pour-sequence.csv`, lines.join("\n"));
+  };
 
   return (
     <div className="screen">
-      <PageHeader
-        title={t("pourSequenceTitle")}
-        subtitle={t("pourSequenceSubtitle")}
-        actions={
-          <div className="row" style={{ gap: "8px" }}>
-            <Button variant="soft" onClick={() => {
-              const report = generatePourSequenceReport(sequence!, project);
-              const blob = new Blob([report], { type: "text/markdown" });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement("a");
-              a.href = url;
-              a.download = `${project.id}_pour_sequence_report.md`;
-              a.click();
-              URL.revokeObjectURL(url);
-            }}>
-              {lang === "bn" ? "রিপোর্ট ডাউনলোড" : "Download Report"}
-            </Button>
-            <Button variant="soft" onClick={() => {
-              const csv = exportPourSequenceCSV(sequence!);
-              const blob = new Blob([csv], { type: "text/csv" });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement("a");
-              a.href = url;
-              a.download = `${project.id}_pour_sequence.csv`;
-              a.click();
-              URL.revokeObjectURL(url);
-            }}>
-              {lang === "bn" ? "CSV এক্সপোর্ট" : "Export CSV"}
-            </Button>
-          </div>
-        }
-      />
-
-      {/* Tab Navigation */}
-      <div className="row" style={{ gap: "8px", marginBottom: "16px", borderBottom: "1px solid var(--border)", paddingBottom: "8px" }}>
-        <Button variant={activeTab === "schedule" ? "primary" : "soft"} onClick={() => setActiveTab("schedule")}>
-          {lang === "bn" ? "পার্সিকোয়েন্স" : "Schedule"} ({steps.length})
-        </Button>
-        <Button variant={activeTab === "phases" ? "primary" : "soft"} onClick={() => setActiveTab("phases")}>
-          {lang === "bn" ? "ফেজ" : "Phases"} ({phases.length})
-        </Button>
-        <Button variant={activeTab === "critical" ? "primary" : "soft"} onClick={() => setActiveTab("critical")}>
-          {lang === "bn" ? "ক্রিটিক্যাল পাথ" : "Critical Path"}
-        </Button>
+      <PageHeader title={title} subtitle={subtitle} />
+      <Callout tone="warn" title={bn ? "ধরে নেওয়া হিসাব" : "Assumed rates"}>
+        {bn
+          ? `ঢালাইয়ের হার দিনে ${A.m3PerDay} ঘনমিটার; অপেক্ষা: ফাউন্ডেশনের পর ${A.foundationCureDays} দিন, কলামের পর ${A.columnToSlabDays} দিন, স্ল্যাবের পর ${A.slabCureDays} দিন। এগুলো সাইটের সাধারণ অনুশীলন থেকে অনুমান, বিএনবিসির মান নয়; ঠিকাদারের সঙ্গে নিশ্চিত করুন। আয়তন বিওকিউ-র কংক্রিটের সমান।`
+          : `Pour rate ${A.m3PerDay} m³ per day; waits: ${A.foundationCureDays} days after the foundation, ${A.columnToSlabDays} day after the columns, ${A.slabCureDays} days after each slab. These are site-practice assumptions, not BNBC figures: confirm with the contractor. Volumes add up to the BOQ concrete.`}
+      </Callout>
+      <div className="row" style={{ gap: 16, margin: "16px 0", flexWrap: "wrap" }}>
+        <Stat label={bn ? "মোট কংক্রিট (ঘনমিটার)" : "Total concrete (m³)"} value={fmtDec(plan.totalM3, 1)} />
+        <Stat label={bn ? "মোট দিন" : "Total days"} value={fmtInt(plan.totalDays)} />
+        <Stat label={bn ? "ঢালাইয়ের ধাপ" : "Pours"} value={String(plan.rows.length)} />
       </div>
-
-      {/* Summary Stats */}
-      <div className="row" style={{ gap: "16px", marginBottom: "16px", flexWrap: "wrap" }}>
-        <Stat label={lang === "bn" ? "মোট ভলিউম" : "Total Volume"} value={`${sequence?.totalVolumeM3?.toLocaleString() || 0} m³`} />
-        <Stat label={lang === "bn" ? "মোট ধাপ" : "Total Steps"} value={String(sequence?.totalSteps || 0)} />
-        <Stat label={lang === "bn" ? "মেয়াদ" : "Duration"} value={`${sequence?.totalDurationDays || 0} days`} />
-        <Stat label={lang === "bn" ? "মান-ঘন্টা" : "Man-Hours"} value={`${sequence?.totalManHours?.toLocaleString() || 0} hrs`} />
-        <Stat label={lang === "bn" ? "অনুমানিত খরচ" : "Est. Cost"} value={sequence?.estimatedCostBDT ? `৳${sequence.estimatedCostBDT.toLocaleString()}` : "—"} />
-      </div>
-
-      {/* Schedule Tab */}
-      {activeTab === "schedule" && (
-        <div>
-          {/* Phase Filter */}
-          <div className="row" style={{ gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
-            <span style={{ alignSelf: "center", opacity: 0.7 }}>{lang === "bn" ? "ফেজ দিয়ে ফিল্টার:" : "Filter by phase:"}</span>
-            {["all", ...uniquePourTypes].map((pt) => (
-              <Button
-                key={pt}
-                variant={filterPhase === pt ? "primary" : "soft"}
-                onClick={() => setFilterPhase(pt)}
-                style={{ textTransform: "capitalize" }}
-              >
-                {pt}
-              </Button>
+      <Card>
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>{bn ? "ঢালাই" : "Pour"}</th>
+              <th className="num">{bn ? "ঘনমিটার" : "m³"}</th>
+              <th className="num">{bn ? "কাজের দিন" : "Work days"}</th>
+              <th className="num">{bn ? "শুরু–শেষ দিন" : "Day"}</th>
+              <th className="num">{bn ? "অপেক্ষা" : "Wait"}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {plan.rows.map((r, i) => (
+              <tr key={r.id}>
+                <td>{i + 1}</td>
+                <td>{label(r, storeys, bn)}</td>
+                <td className="num">{fmtDec(r.m3, 1)}</td>
+                <td className="num">{r.workDays}</td>
+                <td className="num">{r.startDay === r.endDay ? r.startDay : `${r.startDay}–${r.endDay}`}</td>
+                <td className="num">{r.waitDays || "-"}</td>
+              </tr>
             ))}
-          </div>
-
-          {/* Pour Schedule Table */}
-          <Card className="stack">
-            <table className="table" style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ borderBottom: "1px solid var(--border)", opacity: 0.8 }}>
-                  <th scope="col" style={{ padding: "10px" }}>#</th>
-                  <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "এলিমেন্ট" : "Element"}</th>
-                  <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "টাইপ" : "Type"}</th>
-                  <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "ভলিউম (m³)" : "Volume (m³)"}</th>
-                  <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "এলাকা (m²)" : "Area (m²)"}</th>
-                  <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "ঘন্টা" : "Hours"}</th>
-                  <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "ক্রু" : "Crew"}</th>
-                  <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "পাম্প" : "Pump"}</th>
-                  <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "শুরু" : "Start"}</th>
-                  <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "শেষ" : "End"}</th>
-                  <th scope="col" style={{ padding: "10px" }}>{lang === "bn" ? "ক্যুরিং" : "Cure (days)"}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredSteps.map((step: PourStep) => (
-                  <tr key={step.elementId} style={{ borderBottom: "1px solid var(--border)" }}>
-                    <td style={{ padding: "10px", fontFamily: "var(--font-mono)", opacity: 0.6 }}>
-                      {step.step}
-                    </td>
-                    <td style={{ padding: "10px" }}>
-                      <strong>{step.label}</strong>
-                      <div className="faint small">{step.elementKind}</div>
-                    </td>
-                    <td style={{ padding: "10px" }}>
-                      <Badge tone="sky">{step.pourType}</Badge>
-                    </td>
-                    <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                      {fmtNum(step.volumeM3, lang)}
-                    </td>
-                    <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                      {fmtNum(step.areaM2, lang)}
-                    </td>
-                    <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                      {step.estimatedHours} ({step.setupHours}+{step.pourHours}+{step.finishHours})
-                    </td>
-                    <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                      {step.crewSize}
-                    </td>
-                    <td style={{ padding: "10px" }}>
-                      {step.requiresPump ? <Badge tone="blush">✓</Badge> : <Badge tone="sage">✗</Badge>}
-                    </td>
-                    <td style={{ padding: "10px", fontFamily: "var(--font-mono)", fontSize: "11px" }}>
-                      {new Date(step.startTime).toLocaleDateString("en-GB", { day: '2-digit', month: '2-digit' })}
-                      <br/>{new Date(step.startTime).toLocaleTimeString("en-GB", { hour: '2-digit', minute: '2-digit' })}
-                    </td>
-                    <td style={{ padding: "10px", fontFamily: "var(--font-mono)", fontSize: "11px" }}>
-                      {new Date(step.endTime).toLocaleDateString("en-GB", { day: '2-digit', month: '2-digit' })}
-                      <br/>{new Date(step.endTime).toLocaleTimeString("en-GB", { hour: '2-digit', minute: '2-digit' })}
-                    </td>
-                    <td style={{ padding: "10px", fontFamily: "var(--font-mono)" }}>
-                      {step.curingDays} ({step.curingMethod})
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr style={{ borderTop: "2px solid var(--border)", fontWeight: 700 }}>
-                  <td colSpan={3} style={{ padding: "12px", textAlign: "right" }}>
-                    {lang === "bn" ? "মোট:" : "Total:"}
-                  </td>
-                  <td style={{ padding: "12px", fontFamily: "var(--font-mono)" }}>
-                    {fmtNum(sequence?.totalVolumeM3 || 0, lang)}
-                  </td>
-                  <td style={{ padding: "12px", fontFamily: "var(--font-mono)" }}>
-                    {fmtNum(steps.reduce((sum: number, s: PourStep) => sum + s.areaM2, 0), lang)}
-                  </td>
-                  <td style={{ padding: "12px", fontFamily: "var(--font-mono)" }}>
-                    {steps.reduce((sum: number, s: PourStep) => sum + s.estimatedHours, 0)}
-                  </td>
-                  <td style={{ padding: "12px", fontFamily: "var(--font-mono)" }}>
-                    {steps.reduce((sum: number, s: PourStep) => sum + s.crewSize, 0)}
-                  </td>
-                  <td style={{ padding: "12px" }}>
-                    {steps.filter((s: PourStep) => s.requiresPump).length} / {steps.length}
-                  </td>
-                  <td colSpan={3} style={{ padding: "12px" }}></td>
-                </tr>
-              </tfoot>
-            </table>
-          </Card>
-        </div>
-      )}
-
-      {/* Phases Tab */}
-      {activeTab === "phases" && (
-        <div className="stack" style={{ gap: "16px" }}>
-          {phases.map((phase) => (
-            <Card key={phase.phaseId} className="stack">
-              <div className="row-between" style={{ marginBottom: "8px" }}>
-                <div>
-                  <h3 style={{ margin: "0 0 4px 0" }}>{phase.name}</h3>
-                  <span className="faint small">{phase.description}</span>
-                </div>
-                <Badge tone="primary">Phase {phase.order}</Badge>
-              </div>
-              <div className="row" style={{ gap: "16px", marginBottom: "8px", flexWrap: "wrap" }}>
-                <Stat label={lang === "bn" ? "ভলিউম" : "Volume"} value={`${phase.totalVolumeM3.toLocaleString()} m³`} />
-                <Stat label={lang === "bn" ? "ধাপ" : "Steps"} value={String(phase.steps.length)} />
-                <Stat label={lang === "bn" ? "মেয়াদ" : "Duration"} value={`${phase.durationDays} days`} />
-                <Stat label={lang === "bn" ? "শুরু" : "Start"} value={new Date(phase.startDate).toLocaleDateString("en-GB")} />
-                <Stat label={lang === "bn" ? "শেষ" : "End"} value={new Date(phase.endDate).toLocaleDateString("en-GB")} />
-              </div>
-              <div className="row" style={{ gap: "8px", flexWrap: "wrap" }}>
-                {phase.steps.map((stepIdx: number) => {
-                  const step = steps[stepIdx];
-                  if (!step) return null;
-                  return (
-                    <Badge key={step.elementId} tone={step.requiresPump ? "amber" : "sage"}>
-                      {step.step}. {step.label} ({fmtNum(step.volumeM3, lang)} m³)
-                    </Badge>
-                  );
-                })}
-              </div>
-            </Card>
-          ))}
-        </div>
-      )}
-
-      {/* Critical Path Tab */}
-      {activeTab === "critical" && (
-        <Card className="stack">
-          <h3 style={{ marginBottom: "12px" }}>{lang === "bn" ? "ক্রিটিক্যাল পাথ এনালাইসিস" : "Critical Path Analysis"}</h3>
-          <p className="small muted" style={{ marginBottom: "16px" }}>
-            {lang === "bn" ? "সবচেয়ে বড় ভলিউম এবং পাম্পের প্রযোজ্যতার উপর ভিত্তি করে শনাক্ত করা হয়েছে।" : "Identified by largest volumes and pump requirements."}
-          </p>
-          <div className="stack" style={{ gap: "12px" }}>
-            {steps
-              .filter((s: PourStep) => s.volumeM3 > 2 || s.requiresPump)
-              .sort((a: PourStep, b: PourStep) => b.volumeM3 - a.volumeM3)
-              .slice(0, 10)
-              .map((step: PourStep, idx: number) => (
-                <Card key={step.elementId} className="stack" style={{ borderLeft: "4px solid var(--primary)" }}>
-                  <div className="row-between">
-                    <div>
-                      <strong>{idx + 1}. {step.label}</strong>
-                      <div className="faint small">{step.elementKind} · Step {step.step} · {step.pourType}</div>
-                    </div>
-                    <div className="row" style={{ gap: "12px" }}>
-                      <Badge tone="blush">{fmtNum(step.volumeM3, lang)} m³</Badge>
-                      <Badge tone={step.requiresPump ? "amber" : "sage"}>
-                        {step.requiresPump ? "Pump Required" : "No Pump"}
-                      </Badge>
-                      <Badge tone="sky">{step.crewSize} crew</Badge>
-                    </div>
-                  </div>
-                  <div className="row" style={{ gap: "16px", fontSize: "13px", opacity: 0.8, flexWrap: "wrap" }}>
-                    <span>Setup: {step.setupHours}h | Pour: {step.pourHours}h | Finish: {step.finishHours}h</span>
-                    <span>Start: {new Date(step.startTime).toLocaleDateString("en-GB")}</span>
-                    <span>Cure: {step.curingDays}d ({step.curingMethod})</span>
-                    {step.dependencies.length > 0 && (
-                      <span>Depends on: {step.dependencies.map(d => d + 1).join(", ")}</span>
-                    )}
-                  </div>
-                </Card>
-              ))}
-          </div>
-        </Card>
-      )}
+          </tbody>
+        </table>
+      </Card>
+      <div style={{ marginTop: 16 }}>
+        <Button variant="soft" onClick={exportCsv}>{bn ? "CSV ডাউনলোড" : "Download CSV"}</Button>
+      </div>
     </div>
   );
 }
