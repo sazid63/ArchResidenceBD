@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { saveFile } from "../platform/saveFile";
 import { useProject } from "../context/ProjectContext";
 import { useI18n } from "../i18n";
 import { buildSheets, buildPermitPackage, packageToZip, type Sheet } from "../drawings/permit";
@@ -9,12 +10,7 @@ import { analyzeStructure } from "../structure/analyze";
 import { Button, Callout, Card, EmptyState, PageHeader } from "../ui/kit";
 
 function save(name: string, data: BlobPart, type: string) {
-  const url = URL.createObjectURL(new Blob([data], { type }));
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = name;
-  a.click();
-  URL.revokeObjectURL(url);
+  void saveFile(name, typeof data === "string" ? data : data instanceof Uint8Array ? data : new Uint8Array(data as ArrayBuffer), type);
 }
 
 /** Local calendar date (Dhaka is UTC+6, so the UTC date is a day behind in the early morning). */

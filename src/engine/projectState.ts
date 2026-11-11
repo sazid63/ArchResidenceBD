@@ -14,6 +14,7 @@ import type { ProjectSpec } from "../model/projectSpec";
 import { getActiveProjectId, loadProjects, saveProjects, setActiveProjectId, STORAGE_KEYS, upsertProject, type KeyValueStore } from "../model/projectStore";
 import type { Deviation } from "../spec.gen";
 import type { BuildingCustomization } from "../types/customization";
+import { mergeImported } from "../model/projectFile";
 import { FEET_TO_M, planChoices } from "../model/planChoices";
 import {
   DEFAULT_ACCESSIBILITY,
@@ -469,6 +470,23 @@ export function activateSavedProject(id?: string): BuildingProject | null {
 export function getSavedProjects(): BuildingProject[] {
   const store = browserStore();
   return store ? guard(() => loadSpecs(store).map(specToLegacy), []) : [];
+}
+
+/** Every saved project as the v3 spec (what a project file holds). */
+export function getSavedSpecs(): ProjectSpec[] {
+  const store = browserStore();
+  return store ? guard(() => loadSpecs(store), []) : [];
+}
+
+/** Add imported projects to the saved ones without overwriting any (see mergeImported). Returns how many were added. */
+export function addImportedSpecs(imported: ProjectSpec[]): number {
+  const store = browserStore();
+  if (!store) return 0;
+  return guard(() => {
+    const { merged, added } = mergeImported(loadSpecs(store), imported, () => `p-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`);
+    saveProjects(store, merged);
+    return added.length;
+  }, 0);
 }
 
 export function deleteSavedProject(id: string): void {

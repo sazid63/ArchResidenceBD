@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { saveFile } from "../platform/saveFile";
 import { useProject } from "../context/ProjectContext";
 import { useI18n } from "../i18n";
 import { buildingForProject } from "../model/projectMesh";
@@ -28,12 +29,7 @@ const UNIT_LABEL: Record<string, { en: string; bn: string }> = {
 const num = (n: number, d = 0) => n.toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: d });
 
 function download(name: string, text: string) {
-  const url = URL.createObjectURL(new Blob([text], { type: "text/csv;charset=utf-8" }));
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = name;
-  a.click();
-  URL.revokeObjectURL(url);
+  void saveFile(name, text, "text/csv;charset=utf-8");
 }
 
 export function BoqScreen() {

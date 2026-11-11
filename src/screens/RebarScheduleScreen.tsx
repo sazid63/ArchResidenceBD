@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { saveFile } from "../platform/saveFile";
 import { useProject } from "../context/ProjectContext";
 import { useI18n } from "../i18n";
 import { buildingForProject } from "../model/projectMesh";
@@ -45,12 +46,7 @@ const CAUSES: Record<BbsIssue["cause"], { title: { en: string; bn: string }; cur
 const kg = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 0 });
 
 function download(name: string, text: string) {
-  const url = URL.createObjectURL(new Blob([text], { type: "text/csv;charset=utf-8" }));
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = name;
-  a.click();
-  URL.revokeObjectURL(url);
+  void saveFile(name, text, "text/csv;charset=utf-8");
 }
 
 function levelsText(levels: number[]): string {

@@ -1,4 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
+import { saveFile } from "../platform/saveFile";
 import { getActiveProject } from "../engine/projectState";
 
 interface Props {
@@ -53,15 +54,7 @@ export class ErrorBoundary extends Component<Props, State> {
       url: window.location.href,
     };
 
-    const blob = new Blob([JSON.stringify(debugInfo, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `archres-error-${Date.now()}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    void saveFile(`archres-error-${Date.now()}.json`, JSON.stringify(debugInfo, null, 2), "application/json");
   };
 
   private getProjectInfo = () => {

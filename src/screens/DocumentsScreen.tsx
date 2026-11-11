@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { saveFile } from "../platform/saveFile";
 import { useProject } from "../context/ProjectContext";
 import { useI18n } from "../i18n";
 import { buildPermitPackage, packageToZip, type PackageFile } from "../drawings/permit";
@@ -19,12 +20,7 @@ const GROUPS: Array<{ prefix: string; en: string; bn: string }> = [
 ];
 
 function save(name: string, data: BlobPart, type: string) {
-  const url = URL.createObjectURL(new Blob([data], { type }));
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = name;
-  a.click();
-  URL.revokeObjectURL(url);
+  void saveFile(name, typeof data === "string" ? data : data instanceof Uint8Array ? data : new Uint8Array(data as ArrayBuffer), type);
 }
 
 /**

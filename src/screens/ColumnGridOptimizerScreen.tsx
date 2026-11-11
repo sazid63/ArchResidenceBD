@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { saveFile } from "../platform/saveFile";
 import { useProject } from "../context/ProjectContext";
 import { useI18n } from "../i18n";
 import { buildingForProject } from "../model/projectMesh";
@@ -70,12 +71,7 @@ export function ColumnGridOptimizerScreen({ onNavigate }: { onNavigate?: (id: st
   const biggest = columns.reduce((m, c) => Math.max(m, c.storeys[0].section.bx * c.storeys[0].section.by), 0);
   const csv = () => {
     const rows = [["column", "x_mm", "y_mm", "ground_mm", "top_mm", "max_ratio", "footing_mm"], ...columns.map((c) => [c.id, c.xMm, c.yMm, sizeAt(c, 0), sizeAt(c, top), Math.max(...c.storeys.map((s) => s.util)).toFixed(3), c.footing.sideMm])];
-    const url = URL.createObjectURL(new Blob([rows.map((r) => r.join(",")).join("\n")], { type: "text/csv;charset=utf-8" }));
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${project.name.replace(/[^\w-]+/g, "_") || "project"}-columns.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    void saveFile(`${project.name.replace(/[^\w-]+/g, "_") || "project"}-columns.csv`, rows.map((r) => r.join(",")).join("\n"), "text/csv;charset=utf-8");
   };
 
   return (

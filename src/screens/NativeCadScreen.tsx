@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { saveFile } from "../platform/saveFile";
 import { sizeMm, volumeM3 } from "../cad/mesh";
 import type { MeshDocument, MeshObject } from "../cad/mesh";
 import { MeshViewer } from "../cad/viewer";
@@ -347,13 +348,7 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
 
   // Export FreeCAD Python Macro
   const downloadText = (text: string, filename: string, mime: string) => {
-    const blob = new Blob([text], { type: `${mime};charset=utf-8` });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    void saveFile(filename, text, `${mime};charset=utf-8`);
   };
   const exportBase = () => (project?.name ?? "building").replace(/[^a-zA-Z0-9]/g, "_");
   const exportMeta = () => ({
@@ -388,19 +383,6 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
             </Button>
             <Button variant="soft" onClick={() => setActiveTab("title-block")}>
               {lang === "bn" ? "টাইটেল ব্লক ✏️" : "Title Block ✏️"}
-            </Button>
-            <Button variant="soft" onClick={() => {
-              const phases = orderedPhases(mesh);
-              const ifc = buildIfcStep(mesh, { projectName: project.name, stories: project.stories, plotSize: project.plotSize, plotUnit: project.plotUnit });
-              const macro = buildFreeCadMacro(mesh, { projectName: project.name, stories: project.stories, plotSize: project.plotSize, plotUnit: project.plotUnit });
-              const summary = JSON.stringify({ project, phases, meshSummary: { objects: mesh.objects.length } }, null, 2);
-              const blob = new Blob([ifc, "---PEER-REVIEW-MARKER---\n", macro, "---PEER-REVIEW-MARKER---\n", summary], { type: "text/plain" });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement("a");
-              a.href = url; a.download = `${project.id}_peer-review.txt`; a.click();
-              URL.revokeObjectURL(url);
-            }}>
-              {lang === "bn" ? "সম্পাদক প্যাক 📋" : "Peer Review 📋"}
             </Button>
             <Button
               variant="primary"
@@ -914,11 +896,7 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
               <Button variant="soft" onClick={() => {
                 // Export title block as SVG
                 const svg = generateTitleBlockSVG(titleBlock);
-                const blob = new Blob([svg], { type: "image/svg+xml" });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url; a.download = `${titleBlock.drawingNumber}_title-block.svg`; a.click();
-                URL.revokeObjectURL(url);
+                void saveFile(`${titleBlock.drawingNumber}_title-block.svg`, svg, "image/svg+xml");
               }}>
                 {lang === "bn" ? "SVG এক্সপোর্ট" : "Export SVG"}
               </Button>

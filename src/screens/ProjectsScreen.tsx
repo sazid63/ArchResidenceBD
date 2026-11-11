@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
 import { fmtNum, useI18n } from "../i18n";
 import { Badge, Button, Card, PageHeader } from "../ui/kit";
-import { getSavedProjects, deleteSavedProject } from "../engine/projectState";
+import { getSavedProjects, getSavedSpecs, addImportedSpecs, deleteSavedProject } from "../engine/projectState";
+import { exportProjects, importProjectFile, projectFileName, FILE_EXTENSION } from "../model/projectFile";
+import { openTextFile, saveFile } from "../platform/saveFile";
+import { APP_VERSION } from "../version";
+import { Callout } from "../ui/kit";
 import type { BuildingProject } from "../engine/projectState";
 import { ConfirmDialog } from "../components/ConfirmDialog";
 
@@ -15,6 +19,29 @@ export function ProjectsScreen({ onNavigate }: { onNavigate: (id: string) => voi
   useEffect(() => {
     setProjects(getSavedProjects());
   }, []);
+
+  const [notice, setNotice] = useState<{ tone: "ok" | "bad"; en: string; bn: string } | null>(null);
+  const bn = lang === "bn";
+  const exportOne = async (id: string, name: string) => {
+    const spec = getSavedSpecs().find((p) => p.project.id === id);
+    if (spec) await saveFile(projectFileName(name), exportProjects([spec], APP_VERSION), "application/json", [{ name: "ArchResidenceBD project", extensions: [FILE_EXTENSION] }]);
+  };
+  const exportAll = async () => {
+    const all = getSavedSpecs();
+    if (all.length) await saveFile(projectFileName("ArchResidenceBD-backup"), exportProjects(all, APP_VERSION), "application/json", [{ name: "ArchResidenceBD project", extensions: [FILE_EXTENSION] }]);
+  };
+  const importFile = async () => {
+    const picked = await openTextFile(`.${FILE_EXTENSION},application/json`, [{ name: "ArchResidenceBD project", extensions: [FILE_EXTENSION, "json"] }]);
+    if (!picked.opened) return;
+    const result = importProjectFile(picked.text);
+    if (!result.ok) {
+      setNotice({ tone: "bad", en: result.error.en, bn: result.error.bn });
+      return;
+    }
+    const added = addImportedSpecs(result.projects);
+    setProjects(getSavedProjects());
+    setNotice({ tone: "ok", en: `Imported ${added} project(s)${result.skipped ? `; ${result.skipped} could not be read` : ""}.`, bn: `${added}টি প্রজেক্ট আমদানি হয়েছে${result.skipped ? `; ${result.skipped}টি পড়া যায়নি` : ""}।` });
+  };
 
   const [pendingDelete, setPendingDelete] = useState<BuildingProject | null>(null);
   const handleDelete = (e: React.MouseEvent<HTMLButtonElement>, project: BuildingProject) => {
@@ -57,11 +84,21 @@ export function ProjectsScreen({ onNavigate }: { onNavigate: (id: string) => voi
         title={t("projects")}
         subtitle={t("tagline")}
         actions={
-          <Button variant="primary" onClick={() => onNavigate("setup")}>
-            {t("newProject")}
-          </Button>
+          <>
+            <Button variant="ghost" onClick={importFile}>{bn ? "ফাইল থেকে খুলুন" : "Import file"}</Button>
+            {projects.length > 0 && <Button variant="ghost" onClick={exportAll}>{bn ? "সব প্রজেক্টের ব্যাকআপ" : "Back up all"}</Button>}
+            <Button variant="primary" onClick={() => onNavigate("setup")}>
+              {t("newProject")}
+            </Button>
+          </>
         }
       />
+
+      {notice && (
+        <Callout tone={notice.tone === "ok" ? "info" : "bad"} title={notice.tone === "ok" ? (bn ? "আমদানি সম্পন্ন" : "Import done") : bn ? "আমদানি করা যায়নি" : "Could not import"}>
+          {bn ? notice.bn : notice.en}
+        </Callout>
+      )}
 
       {projects.length === 0 ? (
         <Card className="stack" style={{ textAlign: "center", padding: "40px" }}>
@@ -108,6 +145,9 @@ export function ProjectsScreen({ onNavigate }: { onNavigate: (id: string) => voi
                   onClick={(e: React.MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); handleOpen(proj); }}
                 >
                   {lang === "bn" ? "খুলুন" : "Open"}
+                </Button>
+                <Button variant="ghost" size="small" onClick={(e: React.MouseEvent<HTMLButtonElement>) => { e.stopPropagation(); void exportOne(proj.id, proj.name); }}>
+                  {bn ? "এক্সপোর্ট" : "Export"}
                 </Button>
                 <Button
                   variant="ghost"
