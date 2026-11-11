@@ -38,6 +38,8 @@ export interface SheetOptions {
   lang?: Lang;
   /** Column section sizes by position and storey (from the structure result); otherwise 300 mm squares. */
   columnSize?: (x: number, y: number, storey: number) => { bx: number; by: number } | null;
+  /** Deepest beam under the slab above a storey (from the structure result), for the section; omitted when not designed. */
+  beamUnderSlab?: (storey: number) => { bMm: number; hMm: number } | null;
 }
 
 const T = (lang: Lang, en: string, bn: string) => (lang === "bn" ? bn : en);
@@ -143,12 +145,91 @@ export function planScene(model: BuildingModel, storey: number, opts: SheetOptio
     sb.text("TEXT", cx, cy + 80, 190, raw.charAt(0).toUpperCase() + raw.slice(1), "middle");
     if (room.def.kind !== "shaft") sb.text("TEXT", cx, cy - 220, 150, `${m2(geo.metrics[i].netAreaM2)} m2`, "middle");
   });
+  planAnnotations(sb, geo, lang);
   // Overall dimensions, 700 mm outside the walls.
   sb.dimension(0, -700, f.widthMm, -700, `${f.widthMm}`);
   sb.dimension(-700, 0, -700, f.depthMm, `${f.depthMm}`);
   sb.text("TEXT", f.widthMm / 2, -1300, 170, T(lang, "ROAD SIDE", "রাস্তার দিক"), "middle");
   const name = st.index === 0 ? T(lang, "Ground floor plan", "নিচতলার প্ল্যান") : T(lang, `Floor ${st.index} plan`, `${st.index} তলার প্ল্যান`);
   return sb.scene(`plan-${st.index}`, name);
+}
+
+const GRID_R = 330;
+
+/** A circle (24-gon) with a centred label: a grid bubble. */
+function bubble(sb: SceneBuilder, cx: number, cy: number, label: string) {
+  const pts: Array<[number, number]> = Array.from({ length: 24 }, (_, i) => [cx + GRID_R * Math.cos((2 * Math.PI * i) / 24), cy + GRID_R * Math.sin((2 * Math.PI * i) / 24)]);
+  sb.poly("DIMENSIONS", pts, true);
+  sb.text("DIMENSIONS", cx, cy - 85, 130, label, "middle");
+}
+
+const gridLetter = (i: number) => String.fromCharCode(65 + (i % 26));
+
+/** Grid bubbles (A, B, C along x; 1, 2, 3 along y) with the span between neighbouring grids, door and window tags with their schedules, and the stair arrow. */
+export function planAnnotations(sb: SceneBuilder, geo: BuildingModel["storeys"][number]["geometry"], lang: Lang): void {
+  const f = geo.fitted;
+  // Structural grids: lines through the columns.
+  const xs = f.structuralX.map((i) => f.xLines[i]);
+  const ys = f.structuralY.map((i) => f.yLines[i]);
+  xs.forEach((x, i) => {
+    sb.line("DIMENSIONS", x, f.depthMm + 200, x, f.depthMm + 1100);
+    bubble(sb, x, f.depthMm + 1100 + GRID_R, gridLetter(i));
+    if (i > 0) sb.dimension(xs[i - 1], f.depthMm + 1900 + GRID_R, x, f.depthMm + 1900 + GRID_R, `${x - xs[i - 1]}`, 110);
+  });
+  ys.forEach((y, i) => {
+    sb.line("DIMENSIONS", f.widthMm + 200, y, f.widthMm + 1100, y);
+    bubble(sb, f.widthMm + 1100 + GRID_R, y, String(i + 1));
+    if (i > 0) sb.dimension(f.widthMm + 1900 + GRID_R, ys[i - 1], f.widthMm + 1900 + GRID_R, y, `${y - ys[i - 1]}`, 110);
+  });
+  // Tags: one per distinct size, doors D1.., windows W1.. in order of first use.
+  const tag = (kind: "door" | "window", items: typeof geo.doors) => {
+    const sizes: Array<{ w: number; n: number }> = [];
+    for (const o of items) {
+      const w = o.to - o.from;
+      let s = sizes.find((q) => q.w === w);
+      if (!s) sizes.push((s = { w, n: 0 }));
+      s.n += 1;
+      const i = sizes.indexOf(s) + 1;
+      const mid = (o.from + o.to) / 2;
+      const x = o.orientation === "v" ? o.at + 200 : mid;
+      const y = o.orientation === "v" ? mid : o.at + 200;
+      sb.text("TEXT", x, y, 105, `${kind === "door" ? "D" : "W"}${i}`, "middle");
+    }
+    return sizes;
+  };
+  const doorSizes = tag("door", geo.doors);
+  const winSizes = tag("window", geo.windows);
+  // Schedules to the right of the plan.
+  const x0 = f.widthMm + 3600;
+  let y = f.depthMm;
+  const row = (cells: string[]) => {
+    cells.forEach((c, i) => sb.text("TEXT", x0 + i * 1500, y, 120, c));
+    y -= 330;
+  };
+  sb.text("TEXT", x0, y + 200, 150, lang === "bn" ? "দরজার তালিকা" : "Door schedule");
+  y -= 250;
+  row([lang === "bn" ? "চিহ্ন" : "Mark", lang === "bn" ? "মাপ (মিমি)" : "Size (mm)", lang === "bn" ? "সংখ্যা" : "Qty"]);
+  doorSizes.forEach((q, i) => row([`D${i + 1}`, `${q.w} x ${BOQ.doorHeightMm}`, String(q.n)]));
+  y -= 350;
+  sb.text("TEXT", x0, y + 200, 150, lang === "bn" ? "জানালার তালিকা" : "Window schedule");
+  y -= 250;
+  row([lang === "bn" ? "চিহ্ন" : "Mark", lang === "bn" ? "মাপ (মিমি)" : "Size (mm)", lang === "bn" ? "সংখ্যা" : "Qty"]);
+  winSizes.forEach((q, i) => row([`W${i + 1}`, `${q.w} x ${ELEVATION.windowHeightMm}`, String(q.n)]));
+  // Stair: an arrow along the longer side with UP.
+  const st = f.rooms.find((r) => r.def.kind === "stair");
+  if (st) {
+    const r = [...st.rects].sort((p, q) => (q.x1 - q.x0) * (q.y1 - q.y0) - (p.x1 - p.x0) * (p.y1 - p.y0))[0];
+    const horizontal = r.x1 - r.x0 >= r.y1 - r.y0;
+    const cx = (r.x0 + r.x1) / 2;
+    const cy = (r.y0 + r.y1) / 2;
+    const len = (horizontal ? r.x1 - r.x0 : r.y1 - r.y0) * 0.6;
+    const [ax, ay, bx, by] = horizontal ? [cx - len / 2, cy - 450, cx + len / 2, cy - 450] : [cx - 450, cy - len / 2, cx - 450, cy + len / 2];
+    sb.line("DIMENSIONS", ax, ay, bx, by);
+    const hx = horizontal ? 180 : 0;
+    const hy = horizontal ? 0 : 180;
+    sb.poly("DIMENSIONS", [[bx - hx - hy, by - hy - hx], [bx, by], [bx - hx + hy, by - hy + hx]], false);
+    sb.text("TEXT", horizontal ? cx : cx - 450 + 250, horizontal ? cy - 450 + 120 : cy, 130, lang === "bn" ? "উপরে" : "UP", "middle");
+  }
 }
 
 export function siteScene(model: BuildingModel, opts: SheetOptions = {}): Scene {
@@ -195,8 +276,15 @@ export function sectionScene(model: BuildingModel, slabMm: number, opts: SheetOp
 
   // Slabs run face to face: the plinth at level 0 and one at each storey top (the last is the roof).
   const slabLevels = [...model.storeys.map((s) => s.levelMm), roofL];
-  slabLevels.forEach((lv) => {
+  slabLevels.forEach((lv, i) => {
     sb.rect("CUT", xL, lv - slabMm, xR, lv, "#9aa3b5");
+    // The edge beams under the slab at both faces, from the structure result (when there is one).
+    const beam = i > 0 ? opts.beamUnderSlab?.(i - 1) : null;
+    if (beam) {
+      sb.rect("CUT", xL, lv - beam.hMm, xL + beam.bMm, lv - slabMm, "#9aa3b5");
+      sb.rect("CUT", xR - beam.bMm, lv - beam.hMm, xR, lv - slabMm, "#9aa3b5");
+      if (i === 1) sb.text("TEXT", xR + 150, lv - slabMm - 120, 120, T(lang, `slab ${slabMm}, edge beam ${beam.bMm} x ${beam.hMm}`, `স্ল্যাব ${slabMm}, প্রান্ত বিম ${beam.bMm} x ${beam.hMm}`));
+    }
   });
   // Walls cut by the plane: vertical walls (running along y) whose span holds cutY. A door or window of the wall
   // that spans the cut leaves a gap from its sill to its head, so only the wall above (and below, for a window) is cut.

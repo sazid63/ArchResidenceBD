@@ -46,9 +46,17 @@ export function columnSizer(res: StructureResult): NonNullable<SheetOptions["col
   };
 }
 
+/** The deepest beam under the slab above a storey, from the structure result. */
+export function beamUnder(res: StructureResult, storey: number): { bMm: number; hMm: number } | null {
+  const lv = res.levels[storey];
+  if (!lv || lv.beamLines.length === 0) return null;
+  const s = lv.beamLines.map((b) => b.result.section).reduce((a, c) => (c.hMm > a.hMm ? c : a));
+  return { bMm: s.bMm, hMm: s.hMm };
+}
+
 /** Every drawing sheet of the building, in sheet order, each with its title block. */
 export function buildSheets(model: BuildingModel, res: StructureResult, projectName: string, date: string, lang: Lang = "en"): Sheet[] {
-  const opts: SheetOptions = { lang, columnSize: columnSizer(res) };
+  const opts: SheetOptions = { lang, columnSize: columnSizer(res), beamUnderSlab: (storey) => beamUnder(res, storey) };
   const slabMm = res.levels[0]?.slabThicknessMm ?? 150;
   const raw: Scene[] = [
     siteScene(model, opts),
