@@ -7,6 +7,7 @@
  * knows. Window sill and head heights are assumptions (`ELEVATION`), the same window height as the BOQ.
  */
 
+import { requiredParking } from "../rules/check";
 import { layoutParking } from "../rules/parking";
 import type { BuildingModel } from "../model/building";
 import { BOQ } from "../quantities/takeoff";
@@ -123,11 +124,15 @@ export function planScene(model: BuildingModel, storey: number, opts: SheetOptio
   if (st.index === 0) {
     // B4: the car and motorcycle stalls the Compliance parking row counts.
     const lay = layoutParking(model);
-    lay.cars.forEach((q, n) => {
+    // Draw the stalls the building needs (Schedule 4), not every stall that would fit: the rest is shown as free floor.
+    const need = requiredParking(model);
+    const cars = need ? lay.cars.slice(0, need.cars) : lay.cars;
+    const motos = need ? lay.motorcycles.slice(0, need.motorcycles) : [];
+    cars.forEach((q, n) => {
       sb.rect("PARKING", q.x0, q.y0, q.x1, q.y1);
       sb.text("TEXT", (q.x0 + q.x1) / 2, (q.y0 + q.y1) / 2, 150, `P${n + 1}`, "middle");
     });
-    lay.motorcycles.forEach((q) => sb.rect("PARKING", q.x0, q.y0, q.x1, q.y1));
+    motos.forEach((q) => sb.rect("PARKING", q.x0, q.y0, q.x1, q.y1));
     if (lay.aisle && lay.aisle.y0 >= 0) sb.rect("PARKING", lay.aisle.x0, lay.aisle.y0, lay.aisle.x1, lay.aisle.y1);
   }
   f.rooms.forEach((room, i) => {

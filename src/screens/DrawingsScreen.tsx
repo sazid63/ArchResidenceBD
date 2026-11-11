@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { saveFile } from "../platform/saveFile";
 import { useProject } from "../context/ProjectContext";
 import { useI18n } from "../i18n";
-import { buildSheets, buildPermitPackage, packageToZip, type Sheet } from "../drawings/permit";
+import { buildSheets, buildPermitPackageWithPdf, packageToZip, type Sheet } from "../drawings/permit";
 import { sceneToDxf, sceneToSvg } from "../drawings/scene";
 import { buildingForProject } from "../model/projectMesh";
 import { renderPlanSvg } from "../plans/render";
@@ -64,11 +64,21 @@ export function DrawingsScreen() {
   const svg = planMatch ? renderPlanSvg(data.model.storeys[Number(planMatch[1])].geometry, { lang }) : sceneToSvg(sheet.scene);
   const base = `${slug(project.name)}-${sheet.sheetNo}-${sheet.id}`;
 
-  const downloadPackage = () => {
+  const downloadPackage = async () => {
     setBusy(true);
     try {
-      const files = buildPermitPackage(project, data.model, data.date, lang);
+      const files = await buildPermitPackageWithPdf(project, data.model, data.date, lang);
       save(`${slug(project.name)}-permit-package.zip`, new Uint8Array(packageToZip(files, data.date)), "application/zip");
+    } finally {
+      setBusy(false);
+    }
+  };
+  const downloadPdf = async () => {
+    setBusy(true);
+    try {
+      const [{ sheetsToPdf }, { loadPdfFonts }] = await Promise.all([import("../drawings/pdf"), import("../drawings/pdfFonts")]);
+      const pdf = await sheetsToPdf(data.sheets, { paper: "A3", fonts: await loadPdfFonts(), title: `${project.name}: drawings` });
+      save(`${slug(project.name)}-drawings-A3.pdf`, new Uint8Array(pdf), "application/pdf");
     } finally {
       setBusy(false);
     }
@@ -92,6 +102,7 @@ export function DrawingsScreen() {
               <option key={s.id} value={s.id}>{s.sheetNo} {s.title}</option>
             ))}
           </select>
+          <Button variant="ghost" disabled={busy} onClick={downloadPdf}>{bn ? "সব শিট পিডিএফ" : "Download all sheets (PDF)"}</Button>
           <Button variant="ghost" onClick={() => save(`${base}.svg`, svg, "image/svg+xml")}>{bn ? "এসভিজি ডাউনলোড" : "Download SVG"}</Button>
           <Button variant="ghost" onClick={() => save(`${base}.dxf`, sceneToDxf(buildSheets(data.model, data.res, project.name, data.date, "en").find((s) => s.id === sheet.id)!.scene), "application/dxf")}>
             {bn ? "ডিএক্সএফ ডাউনলোড" : "Download DXF"}

@@ -24,6 +24,8 @@ export interface PackageFile {
   path: string;
   mime: string;
   text: string;
+  /** Binary content (a PDF); when set it is stored instead of `text`. */
+  data?: Uint8Array;
 }
 
 export interface Sheet {
@@ -115,7 +117,7 @@ export function indexMarkdown(projectName: string, date: string, files: PackageF
 }
 
 /** Builds every file of the package for a project whose plan fits the plot. */
-export function buildPermitPackage(project: BuildingProject, model: BuildingModel, date: string, lang: Lang = "en"): PackageFile[] {
+export function buildPermitPackage(project: BuildingProject, model: BuildingModel, date: string, lang: Lang = "en", extra: PackageFile[] = []): PackageFile[] {
   const res = analyzeStructure(model);
   const bbs = buildBbs(res, model);
   const boq = buildBoq(model, bbs);
@@ -131,6 +133,7 @@ export function buildPermitPackage(project: BuildingProject, model: BuildingMode
     const svg = planMatch ? renderPlanSvg(model.storeys[Number(planMatch[1])].geometry, { lang }) : sceneToSvg(sheet.scene);
     files.push({ path: `drawings/${sheet.sheetNo}-${sheet.id}.svg`, mime: "image/svg+xml", text: svg });
   }
+  files.push(...extra); // e.g. the PDF drawing set, built asynchronously by buildPermitPackageWithPdf
   files.push({ path: "boq/boq.csv", mime: "text/csv", text: boqToCsv(boq) });
   files.push({ path: "structure/bar-schedule.csv", mime: "text/csv", text: bbsToCsv(bbs.rows) });
   files.push({ path: "compliance/report.md", mime: "text/markdown", text: reportToMarkdown(buildReport(project), name, date) });
@@ -143,7 +146,16 @@ export function buildPermitPackage(project: BuildingProject, model: BuildingMode
   return files;
 }
 
+/** The package with a PDF drawing set (all sheets, A3) in drawings/. Loads pdf-lib and the fonts on demand. */
+export async function buildPermitPackageWithPdf(project: BuildingProject, model: BuildingModel, date: string, lang: Lang = "en"): Promise<PackageFile[]> {
+  const [{ sheetsToPdf }, { loadPdfFonts }] = await Promise.all([import("./pdf"), import("./pdfFonts")]);
+  const name = project.name || "Project";
+  const sheets = buildSheets(model, analyzeStructure(model), name, date, lang);
+  const pdf = await sheetsToPdf(sheets, { paper: "A3", fonts: await loadPdfFonts(), title: `${name}: drawings` });
+  return buildPermitPackage(project, model, date, lang, [{ path: "drawings/drawings-A3.pdf", mime: "application/pdf", text: "", data: pdf }]);
+}
+
 export function packageToZip(files: PackageFile[], date: string): Uint8Array {
   const enc = new TextEncoder();
-  return makeZip(files.map((f) => ({ name: f.path, data: enc.encode(f.text) })), date);
+  return makeZip(files.map((f) => ({ name: f.path, data: f.data ?? enc.encode(f.text) })), date);
 }
