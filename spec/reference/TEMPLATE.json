@@ -1,0 +1,16 @@
+{
+  "_readme": "Copy this file to spec/reference/<name>.json and fill it in from a hand-calculated building. Leave a value null to skip that comparison. Run: npm run audit:reference",
+  "name": "Mirpur 4 storeys, 2 flats per floor",
+  "input": { "plotWidthMm": 14000, "plotDepthMm": 26000, "storeys": 4, "planId": "p2-2b-fb" },
+  "expected": {
+    "slabThicknessMm": null,
+    "deepestBeamMm": null,
+    "groundColumnMm": null,
+    "largestFootingSideMm": null,
+    "concreteM3": null,
+    "steelKg": null,
+    "steelKgPerM2Floor": null,
+    "formworkM2": null
+  },
+  "tolerancePercent": { "default": 15, "steelKg": 20 }
+}

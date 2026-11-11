@@ -134,3 +134,24 @@ describe("plan picker and building model agree on setbacks", () => {
     }
   });
 });
+
+describe("P2-5 adjoining road width (section 51(9))", () => {
+  it("passes at 6 m and above, fails below with the remedy, and FAR and coverage stay not checked on a narrow road", () => {
+    const r = fitRange(PLAN_LIBRARY[0]);
+    const built = deriveBuilding({ plotWidthMm: r.widthMm.pref + 3600, plotDepthMm: r.depthMm.pref + 5000, storeys: 4, planId: PLAN_LIBRARY[0].id });
+    if (!built.ok) throw new Error("fit");
+    const model = built.model;
+    const at = (w: number) => check(model, { roadWidthM: w });
+    expect(at(6).find((r) => r.ruleId === "rajuk.road")!.status).toBe("pass");
+    expect(at(9).find((r) => r.ruleId === "rajuk.road")!.status).toBe("pass");
+    const narrow = at(4.5);
+    const road = narrow.find((r) => r.ruleId === "rajuk.road")!;
+    expect(road.status).toBe("fail");
+    expect(road.expected).toEqual({ value: 6, unit: "m" });
+    expect(road.actual).toEqual({ value: 4.5, unit: "m" });
+    expect(road.note!.en).toMatch(/half the land/);
+    expect(narrow.find((r) => r.ruleId === "rajuk.far")!.status).toBe("not_checked");
+    expect(narrow.find((r) => r.ruleId === "rajuk.mgc")!.status).toBe("not_checked");
+    expect(check(model, {}).some((r) => r.ruleId === "rajuk.road")).toBe(false); // no road given: no row
+  });
+});

@@ -1,0 +1,62 @@
+{
+  "narrow-4st": {
+    "slabThicknessMm": 150,
+    "deepestBeamMm": 650,
+    "groundColumnMm": 450,
+    "largestFootingSideMm": 4175,
+    "concreteM3": 180.9,
+    "steelKg": 14497,
+    "steelKgPerM2Floor": 30.3,
+    "formworkM2": 1250.6
+  },
+  "narrow-6st-balcony": {
+    "slabThicknessMm": 150,
+    "deepestBeamMm": 650,
+    "groundColumnMm": 500,
+    "largestFootingSideMm": 6910,
+    "concreteM3": 410,
+    "steelKg": 36935,
+    "steelKgPerM2Floor": 34,
+    "formworkM2": 2518.2
+  },
+  "mid-2st": {
+    "slabThicknessMm": 150,
+    "deepestBeamMm": 650,
+    "groundColumnMm": 350,
+    "largestFootingSideMm": 2200,
+    "concreteM3": 201.3,
+    "steelKg": 14461,
+    "steelKgPerM2Floor": 27.9,
+    "formworkM2": 1547.4
+  },
+  "mid-4st": {
+    "slabThicknessMm": 150,
+    "deepestBeamMm": 650,
+    "groundColumnMm": 400,
+    "largestFootingSideMm": 6130,
+    "concreteM3": 380.1,
+    "steelKg": 29832,
+    "steelKgPerM2Floor": 28.8,
+    "formworkM2": 2795.2
+  },
+  "mid-7st": {
+    "slabThicknessMm": 150,
+    "deepestBeamMm": 700,
+    "groundColumnMm": 500,
+    "largestFootingSideMm": 7780,
+    "concreteM3": 775.2,
+    "steelKg": 68237,
+    "steelKgPerM2Floor": 33.9,
+    "formworkM2": 5111.4
+  },
+  "wide-5st": {
+    "slabThicknessMm": 125,
+    "deepestBeamMm": 600,
+    "groundColumnMm": 450,
+    "largestFootingSideMm": 4450,
+    "concreteM3": 718.1,
+    "steelKg": 59482,
+    "steelKgPerM2Floor": 26.7,
+    "formworkM2": 5688.3
+  }
+}

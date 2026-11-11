@@ -234,6 +234,29 @@ function parkingResult(model: BuildingModel): CheckResult {
   };
 }
 
+/** RAJUK 2008 section 51(9): approval needs an adjoining road of at least 6.00 m including the footpath. */
+export const MIN_ROAD_WIDTH_M = 6;
+
+function roadResult(ctx: CheckContext): CheckResult | null {
+  if (ctx.roadWidthM === undefined) return null;
+  const ok = ctx.roadWidthM >= MIN_ROAD_WIDTH_M;
+  return {
+    ruleId: "rajuk.road",
+    status: ok ? "pass" : "fail",
+    title: { en: "Adjoining road width", bn: "সংলগ্ন রাস্তার প্রস্থ" },
+    expected: { value: MIN_ROAD_WIDTH_M, unit: "m" },
+    actual: { value: ctx.roadWidthM, unit: "m" },
+    source: source("s51-9-14", "§51(9)-(15)", "§৫১(৯)-(১৫)"),
+    note: ok
+      ? undefined
+      : {
+          en: "Approval needs a road of at least 6.00 m including the footpath. For a DAP road under 6.00 m an undertaking to hand over half the land for widening to 6.00 m must be filed first, and the FAR and coverage are then worked out on the remaining plot (section 51(9)-(10)); land strips of at least 0.30 m given for widening raise the FAR by 0.05 each, up to 0.20. The app does not compute the narrow-road case, so FAR and coverage are shown as not checked.",
+          bn: "অনুমোদনের জন্য ফুটপাতসহ কমপক্ষে ৬.০০ মিটার রাস্তা লাগে। ড্যাপ-ভুক্ত রাস্তা ৬.০০ মিটারের কম হলে ৬.০০ মিটারে উন্নীত করতে অর্ধেক জমি হস্তান্তরের অঙ্গীকারপত্র আগে দাখিল করতে হয়, এবং FAR ও আচ্ছাদন অবশিষ্ট জমির উপর হিসাব হয় (ধারা ৫১(৯)-(১০)); ০.৩০ মিটার বা বেশি জমি দিলে প্রতিবার FAR ০.০৫ বাড়ে, সর্বোচ্চ ০.২০। অ্যাপ সংকীর্ণ রাস্তার হিসাব করে না, তাই FAR ও আচ্ছাদন যাচাই হয়নি দেখানো হয়।",
+        },
+  };
+}
+
 export function check(model: BuildingModel, ctx: CheckContext = {}): CheckResult[] {
-  return [...setbackResults(model), ...farAndCoverage(model, ctx), ...(ctx.skipParking ? [] : [parkingResult(model)])];
+  const road = roadResult(ctx);
+  return [...(road ? [road] : []), ...setbackResults(model), ...farAndCoverage(model, ctx), ...(ctx.skipParking ? [] : [parkingResult(model)])];
 }
