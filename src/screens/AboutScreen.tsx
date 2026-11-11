@@ -1,4 +1,4 @@
-import { APP_VERSION } from "../version";
+import { APP_BUILD, APP_VERSION } from "../version";
 import { useI18n } from "../i18n";
 import { Button, Card, PageHeader, Stat } from "../ui/kit";
 
@@ -17,7 +17,7 @@ export function AboutScreen({ onOpenLicences }: { onOpenLicences: () => void }) 
       <PageHeader title={t("aboutTitle")} subtitle={t("aboutTagline")} />
       <div className="row">
         <Stat label={t("aboutVersion")} value={APP_VERSION} />
-        <Stat label={t("aboutBuild")} value={t("aboutBuildValue")} />
+        <Stat label={t("aboutBuild")} value={APP_BUILD} />
       </div>
       <Card>
         <div className="grow">

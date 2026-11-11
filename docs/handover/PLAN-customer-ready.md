@@ -40,9 +40,9 @@ Ticket rules for every ticket: cite regulations or mark "assumption"; test every
 
 **P0-4 Entry bundle. [S] DONE, accepted:** the entry is 183 KB gzip because the rule packs and the engine that reads them are used synchronously by the project store and plan picker; budget set to 190 KB with the reason in `scripts/check-bundle-size.mjs`. No lazy pack loader (it would make project creation async for no offline benefit).
 
-**P0-2 Version and About. [S]** `package.json` is 2.5.4 while v3 is a rewrite. Decide 3.0.0-rc.1; keep `package.json` the single source (tauri.conf.json already reads it). Add build hash and date to the About screen (`src/screens/AboutScreen.tsx`) via a Vite `define` in `vite.config.ts`. Test: About shows version. Done when: tag name, installer name and About agree.
+**P0-2 Version and About. [S] DONE (version 3.0.0 plain semver because the MSI installer needs numeric versions; About shows commit and build date).** `package.json` is 2.5.4 while v3 is a rewrite. Decide 3.0.0-rc.1; keep `package.json` the single source (tauri.conf.json already reads it). Add build hash and date to the About screen (`src/screens/AboutScreen.tsx`) via a Vite `define` in `vite.config.ts`. Test: About shows version. Done when: tag name, installer name and About agree.
 
-**P0-3 Stale docs. [S]** Rewrite `README.md` (says v2.5.4 "work in progress"), prune `docs/` of v2 material, keep `NEXT.md`, `production-readiness-2026-11.md`, `TICKETS.md`. Add `docs/handover/PLAN-customer-ready.md` = this plan.
+**P0-3 Stale docs. [S] DONE (old reports moved to docs/archive).** Rewrite `README.md` (says v2.5.4 "work in progress"), prune `docs/` of v2 material, keep `NEXT.md`, `production-readiness-2026-11.md`, `TICKETS.md`. Add `docs/handover/PLAN-customer-ready.md` = this plan.
 
 ---
 

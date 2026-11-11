@@ -6,3 +6,8 @@
 declare const __APP_VERSION__: string | undefined;
 
 export const APP_VERSION: string = typeof __APP_VERSION__ === "string" ? __APP_VERSION__ : "dev";
+
+declare const __APP_BUILD__: string | undefined;
+
+/** Short commit and build date, e.g. "d4eafd3 · 2026-11-12"; "dev" when not built by Vite. */
+export const APP_BUILD: string = typeof __APP_BUILD__ === "string" ? __APP_BUILD__ : "dev";

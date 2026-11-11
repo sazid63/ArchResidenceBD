@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { APP_VERSION } from "../src/version";
+import { APP_BUILD, APP_VERSION } from "../src/version";
 
 const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const pkg = JSON.parse(read("package.json")) as { version: string };
@@ -12,6 +12,10 @@ describe("one version number", () => {
 
   it("is what the app shows", () => {
     expect(APP_VERSION).toBe(pkg.version);
+  });
+
+  it("has a build stamp for the About screen", () => {
+    expect(APP_BUILD.length).toBeGreaterThan(0);
   });
 
   it("is read by Tauri from package.json", () => {

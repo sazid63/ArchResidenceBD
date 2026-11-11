@@ -1,4 +1,4 @@
-# ArchResidenceBD v2.5.4 (v3 work in progress)
+# ArchResidenceBD v3.0.0
 
 A bilingual (English / Bangla) app for residential buildings in Dhaka. Enter a plot, pick a floor plan, and the app derives the 3D model, a structural screening, the RAJUK and BNBC checks, the bar schedule, a bill of quantities and drawings from that one choice. Everything runs in the browser (and in a Tauri desktop shell); there is no server, no account and no upload.
 
@@ -18,6 +18,8 @@ A bilingual (English / Bangla) app for residential buildings in Dhaka. Enter a p
 | Land units, Help | Katha / shotok / bigha / gonda converter and an offline manual |
 
 Known limits are written on the screens and in `docs/handover/NEXT.md`.
+
+The Windows installer is not code-signed yet: Windows SmartScreen may warn on first run (choose More info, Run anyway).
 
 ## Technology
 
@@ -60,7 +62,7 @@ scripts/          audits and tests run by npm run verify
 docs/handover/    NEXT.md (current state and open items) and TICKETS.md
 ```
 
-Older reports under `docs/` (audits, knowledge base, model card) describe earlier versions and are out of date; `docs/handover/NEXT.md` is the source of truth.
+Older reports are in `docs/archive/` and describe earlier versions; `docs/handover/NEXT.md` is the source of truth and `docs/handover/PLAN-customer-ready.md` is the plan to the first customer release.
 
 ## Regulatory sources
 

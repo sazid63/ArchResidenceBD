@@ -2,7 +2,7 @@
 Bilingual EN/BN Dhaka app: plot → plan → 3D → structure → RAJUK/BNBC → BOQ → drawings. React 19, TS, Vite 8, Tauri.
 
 Read `docs/handover/NEXT.md` first. Plan: `docs/audit/production-readiness-2026-11.md`. Do what the owner names.
-Find code: `node floorplan/query.mjs find "<words>"`, then grep + read line ranges. Never read whole `parametricBuildingGenerator.ts`, `NativeCadScreen.tsx`, `i18n.tsx`. Skip old docs (KNOWLEDGE_BASE, MODEL_CARD, docs/plan, docs/work).
+Find code: `node floorplan/query.mjs find "<words>"`, then grep + read line ranges. Never read whole `parametricBuildingGenerator.ts`, `NativeCadScreen.tsx`, `i18n.tsx`. Skip old docs (docs/archive, docs/plan, docs/work).
 
 Settled: no AI · Monsoon indigo tokens (`src/theme/tokens.css`) · RAJUK 2008; BNBC/DAP only with citation, else "not checked" · original plans only · Windows+web · Dhaka only.
 
