@@ -469,11 +469,25 @@ export function floorName(storeyIndex: number, lang: Lang): string {
   return storeyIndex === 0 ? "Ground Floor" : `Floor ${storeyIndex}`;
 }
 
+const LANG_KEY = "archres_lang";
+
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLang] = useState<Lang>("en");
+  // The language is remembered between launches (storage can be blocked: then it starts in English and just is not saved).
+  const [lang, setLang] = useState<Lang>(() => {
+    try {
+      return localStorage.getItem(LANG_KEY) === "bn" ? "bn" : "en";
+    } catch {
+      return "en";
+    }
+  });
 
   useEffect(() => {
     document.documentElement.lang = lang;
+    try {
+      localStorage.setItem(LANG_KEY, lang);
+    } catch {
+      /* not saved */
+    }
   }, [lang]);
 
   const value = useMemo<I18nCtx>(

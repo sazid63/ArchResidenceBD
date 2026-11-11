@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { fmtNum, useI18n } from "../i18n";
 import { Badge, Button, Card, PageHeader } from "../ui/kit";
-import { getSavedProjects, getSavedSpecs, addImportedSpecs, deleteSavedProject } from "../engine/projectState";
-import { exportProjects, importProjectFile, projectFileName, FILE_EXTENSION } from "../model/projectFile";
-import { openTextFile, saveFile } from "../platform/saveFile";
+import { getSavedProjects, getSavedSpecs, deleteSavedProject } from "../engine/projectState";
+import { pickAndImportProjects } from "../engine/projectImport";
+import { exportProjects, projectFileName, FILE_EXTENSION } from "../model/projectFile";
+import { saveFile } from "../platform/saveFile";
 import { APP_VERSION } from "../version";
 import { Callout } from "../ui/kit";
 import type { BuildingProject } from "../engine/projectState";
@@ -31,16 +32,10 @@ export function ProjectsScreen({ onNavigate }: { onNavigate: (id: string) => voi
     if (all.length) await saveFile(projectFileName("ArchResidenceBD-backup"), exportProjects(all, APP_VERSION), "application/json", [{ name: "ArchResidenceBD project", extensions: [FILE_EXTENSION] }]);
   };
   const importFile = async () => {
-    const picked = await openTextFile(`.${FILE_EXTENSION},application/json`, [{ name: "ArchResidenceBD project", extensions: [FILE_EXTENSION, "json"] }]);
-    if (!picked.opened) return;
-    const result = importProjectFile(picked.text);
-    if (!result.ok) {
-      setNotice({ tone: "bad", en: result.error.en, bn: result.error.bn });
-      return;
-    }
-    const added = addImportedSpecs(result.projects);
-    setProjects(getSavedProjects());
-    setNotice({ tone: "ok", en: `Imported ${added} project(s)${result.skipped ? `; ${result.skipped} could not be read` : ""}.`, bn: `${added}টি প্রজেক্ট আমদানি হয়েছে${result.skipped ? `; ${result.skipped}টি পড়া যায়নি` : ""}।` });
+    const result = await pickAndImportProjects();
+    if (!result) return;
+    if (result.added > 0) setProjects(getSavedProjects());
+    setNotice({ tone: result.tone, en: result.en, bn: result.bn });
   };
 
   const [pendingDelete, setPendingDelete] = useState<BuildingProject | null>(null);

@@ -48,3 +48,10 @@ jobs:
 
       - name: Offline check
         run: npm run test:offline
+
+      # P1-6: the app in a real browser (first run, results, project file, language).
+      - name: Install browser for end-to-end tests
+        run: npx playwright install --with-deps chromium
+
+      - name: End-to-end tests
+        run: npm run test:e2e

@@ -55,3 +55,7 @@ scripts/tests/exporter-out/
 
 # Design system sync output
 scripts/design-system/out/
+
+# Playwright
+test-results/
+playwright-report/

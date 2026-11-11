@@ -1,5 +1,6 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 
+import { WelcomeScreen } from "./screens/WelcomeScreen";
 import { Sidebar } from "./layout/Sidebar";
 import { activateSavedProject, getActiveProject, create4StoryBuildingProject } from "./engine/projectState";
 import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
@@ -132,12 +133,17 @@ function Shell() {
 }
 
 export function App() {
-  // First visit: create the demo 4-storey project once so the app opens on something real.
-  useState(() => {
-    // Reopen the most recent saved project; only a truly empty install gets the demo.
-    if (!getActiveProject() && !activateSavedProject()) create4StoryBuildingProject();
-    return null;
-  });
+  // An empty install (no open project and nothing saved) starts on the welcome screen; otherwise reopen the most recent project.
+  const [welcome, setWelcome] = useState(() => !getActiveProject() && !activateSavedProject());
+  if (welcome) {
+    return (
+      <WelcomeScreen
+        onNewProject={() => { window.location.hash = "#/setup"; setWelcome(false); }}
+        onSample={() => { create4StoryBuildingProject(); window.location.hash = "#/design:final"; setWelcome(false); }}
+        onImported={() => { activateSavedProject(); window.location.hash = "#/design:final"; setWelcome(false); }}
+      />
+    );
+  }
   return (
     <ProjectProvider>
       <Shell />

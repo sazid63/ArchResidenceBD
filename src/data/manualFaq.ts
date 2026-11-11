@@ -36,8 +36,8 @@ export const MANUAL_FAQ: ManualEntry[] = [
     id: "sizes", topic: "Structure", sourceKind: "app", source: "App behaviour (src/structure); BNBC 2020 Part 6",
     question: { en: "How are column and beam sizes chosen?", bn: "কলাম ও বিমের মাপ কীভাবে নির্ধারিত হয়?" },
     answer: {
-      en: "The Structure screen sizes slabs, beams, columns and footings for the loads and seismic rules of BNBC 2020 Part 6, with concrete fc' 20 MPa and Grade 420 bars as stated assumptions. It is a screening tool, not final design: torsion, wind, shear walls and the lift core are not modelled, and a licensed structural engineer must design and sign the structure. The screen lists every assumption.",
-      bn: "স্ট্রাকচার স্ক্রিন বিএনবিসি ২০২০ পার্ট ৬-এর লোড ও ভূমিকম্পের নিয়মে স্ল্যাব, বিম, কলাম ও ফুটিং-এর মাপ ঠিক করে, কংক্রিট fc' ২০ এমপিএ ও গ্রেড ৪২০ রড ধরে (ঘোষিত অনুমান)। এটি স্ক্রিনিং, চূড়ান্ত নকশা নয়: টরশন, বায়ু, শিয়ার ওয়াল ও লিফট কোর ধরা হয়নি; লাইসেন্সপ্রাপ্ত স্ট্রাকচারাল প্রকৌশলীকে নকশা করে স্বাক্ষর করতে হবে। সব অনুমান স্ক্রিনেই তালিকাভুক্ত।",
+      en: "The Structure screen sizes slabs, beams, columns and footings for the loads and seismic rules of BNBC 2020 Part 6, with concrete fc' 20 MPa and Grade 420 bars as stated assumptions. It is a screening tool, not final design: wind, dynamic analysis and core shear walls are not modelled (only balcony edge beams are checked for torsion), and a licensed structural engineer must design and sign the structure. The screen lists every assumption.",
+      bn: "স্ট্রাকচার স্ক্রিন বিএনবিসি ২০২০ পার্ট ৬-এর লোড ও ভূমিকম্পের নিয়মে স্ল্যাব, বিম, কলাম ও ফুটিং-এর মাপ ঠিক করে, কংক্রিট fc' ২০ এমপিএ ও গ্রেড ৪২০ রড ধরে (ঘোষিত অনুমান)। এটি স্ক্রিনিং, চূড়ান্ত নকশা নয়: বায়ু, ডায়নামিক বিশ্লেষণ ও কোর শিয়ার ওয়াল ধরা হয়নি (শুধু বারান্দার প্রান্ত-বিমের টরশন যাচাই হয়); লাইসেন্সপ্রাপ্ত স্ট্রাকচারাল প্রকৌশলীকে নকশা করে স্বাক্ষর করতে হবে। সব অনুমান স্ক্রিনেই তালিকাভুক্ত।",
     },
     keywords: ["column", "beam", "size", "structure", "grid", "footing", "slab", "কলাম", "বিম", "মাপ", "স্ট্রাকচার"],
   },
@@ -148,6 +148,69 @@ export const MANUAL_FAQ: ManualEntry[] = [
       bn: "না। প্রতিটি সংখ্যা নির্দিষ্ট নিয়ম ও সূত্র থেকে আসে যা পড়ে দেখা যায়, আর ইন্টারভিউ আপনার উত্তর সাধারণ নিয়মে বোঝে, কোনো মডেল দিয়ে নয়। সব কাজ আপনার ব্রাউজারেই হয়, কিছু আপলোড হয় না, আর এই সাহায্য অফলাইনেও চলে।",
     },
     keywords: ["ai", "artificial", "intelligence", "model", "privacy", "upload", "offline", "এআই", "ডেটা", "অফলাইন", "গোপনীয়তা"],
+  },
+  {
+    id: "project-files", topic: "Projects", sourceKind: "app", source: "App behaviour (Projects screen, .archres files)",
+    question: { en: "How do I back up a project or move it to another computer?", bn: "কীভাবে প্রকল্পের ব্যাকআপ রাখব বা অন্য কম্পিউটারে নেব?" },
+    answer: {
+      en: "On the Projects screen choose Export on a project, or Back up all. You get a .archres file. On the other computer choose Import file (or Open file on the first screen). An import never overwrites: if the same project is already there, the imported one is added as a copy marked (imported). Projects are kept only on this computer, so back up before clearing browser data or reinstalling.",
+      bn: "প্রকল্প স্ক্রিনে কোনো প্রকল্পে এক্সপোর্ট বা সব প্রকল্পের ব্যাকআপ বেছে নিন; একটি .archres ফাইল পাবেন। অন্য কম্পিউটারে ফাইল খুলুন (ইমপোর্ট) বেছে নিন। ইমপোর্ট কখনো পুরোনো কাজ মুছে ফেলে না: একই প্রকল্প থাকলে নতুনটি (imported) চিহ্নিত কপি হিসেবে যোগ হয়। প্রকল্প শুধু এই কম্পিউটারে থাকে, তাই ব্রাউজারের ডেটা মোছা বা নতুন করে ইনস্টলের আগে ব্যাকআপ রাখুন।",
+    },
+    keywords: ["backup", "export", "import", "file", "archres", "move", "save", "ব্যাকআপ", "এক্সপোর্ট", "ইমপোর্ট", "ফাইল"],
+  },
+  {
+    id: "pdf", topic: "Drawings", sourceKind: "app", source: "App behaviour (Drawings screen, src/drawings/pdf.ts)",
+    question: { en: "Can I get the drawings as PDF?", bn: "নকশা কি পিডিএফ আকারে পাওয়া যায়?" },
+    answer: {
+      en: "Yes. On the Drawings screen choose Download all sheets (PDF) for one A3 file with every sheet, each at a standard scale (the scale is printed on the sheet). The permit package zip also holds the PDF next to the DXF and SVG files. The drawings are schematic and say so: they are not for construction and must be checked and signed by licensed professionals.",
+      bn: "হ্যাঁ। ড্রয়িং স্ক্রিনে সব শিট পিডিএফ বেছে নিলে প্রতিটি শিট আদর্শ স্কেলে একটি এ৩ ফাইলে পাবেন (স্কেল শিটে ছাপা থাকে)। পারমিট প্যাকেজ জিপেও ডিএক্সএফ ও এসভিজির সঙ্গে পিডিএফ থাকে। নকশা প্রাথমিক এবং সেভাবেই লেখা: নির্মাণের জন্য নয়, লাইসেন্সপ্রাপ্ত পেশাজীবীর যাচাই ও স্বাক্ষর প্রয়োজন।",
+    },
+    keywords: ["pdf", "drawings", "print", "sheet", "a3", "permit", "পিডিএফ", "ড্রয়িং", "প্রিন্ট", "শিট"],
+  },
+  {
+    id: "formwork-pour", topic: "Construction", sourceKind: "app", source: "App behaviour (Formwork and Pour sequence screens)",
+    question: { en: "Where do the formwork and pour sequence numbers come from?", bn: "ফর্মওয়ার্ক ও ঢালাইয়ের ক্রমের সংখ্যা কোথা থেকে আসে?" },
+    answer: {
+      en: "From the same designed members as the Structure, Rebar and BOQ screens, so the totals agree. Formwork is the form contact area of footings, columns, beams, slabs and the lift shaft walls, priced at the SoR steel-form rates. The pour sequence lists the foundation, each storey's columns, each level's beams and slab, and the lift walls, with volumes that add up to the BOQ concrete. The pour rate (25 m³ a day) and the waiting days are assumptions: confirm with the contractor.",
+      bn: "স্ট্রাকচার, রিবার ও বিওকিউ স্ক্রিনের সেই একই নকশাকৃত সদস্য থেকে, তাই মোট সংখ্যা মেলে। ফর্মওয়ার্ক হলো ফুটিং, কলাম, বিম, স্ল্যাব ও লিফট শাফটের দেয়ালের ফর্মের সংস্পর্শ ক্ষেত্রফল, এসওআর স্টিল ফর্ম দরে। ঢালাইয়ের ক্রমে ফাউন্ডেশন, প্রতি তলার কলাম, প্রতি স্তরের বিম ও স্ল্যাব এবং লিফটের দেয়াল থাকে; আয়তনের যোগফল বিওকিউয়ের কংক্রিটের সমান। ঢালাইয়ের হার (দিনে ২৫ ঘনমিটার) ও অপেক্ষার দিন অনুমান: ঠিকাদারের সঙ্গে নিশ্চিত করুন।",
+    },
+    keywords: ["formwork", "shuttering", "pour", "concrete", "sequence", "cure", "ফর্মওয়ার্ক", "ঢালাই", "ক্রম", "কংক্রিট"],
+  },
+  {
+    id: "lift", topic: "Lift", sourceKind: "rule", source: "BNBC 2020 Part 8 Sec 4.2.1; src/model/lift.ts (assumptions)",
+    question: { en: "How is the lift sized?", bn: "লিফট কীভাবে নির্ধারিত হয়?" },
+    answer: {
+      en: "A lift is required above six storeys or 20 m (BNBC 2020 Part 8). The app counts the flats served (5 people a flat, one lift per 40 flats) and picks a 630 kg or 1000 kg car; above ten storeys or 32 m it uses a stretcher car (platform at least 1275 x 2000 mm, cited). Car and shaft sizes, the 1.5 m pit and the 4.2 m overhead are assumptions, because the rule pack has no passenger-lift tables: confirm with the supplier. The shaft is drawn and costed as 150 mm reinforced concrete with the pit slab.",
+      bn: "ছয় তলা বা ২০ মিটারের বেশি হলে লিফট বাধ্যতামূলক (বিএনবিসি ২০২০ পার্ট ৮)। অ্যাপ সেবা পাওয়া ফ্ল্যাট গোনে (প্রতি ফ্ল্যাটে ৫ জন, প্রতি ৪০ ফ্ল্যাটে একটি লিফট) এবং ৬৩০ বা ১০০০ কেজির কার বাছে; দশ তলা বা ৩২ মিটারের বেশিতে স্ট্রেচার কার (প্ল্যাটফর্ম কমপক্ষে ১২৭৫ x ২০০০ মিমি, সূত্রসহ)। কার ও শাফটের মাপ, ১.৫ মিটার পিট ও ৪.২ মিটার ওভারহেড অনুমান, কারণ নিয়ম-প্যাকে যাত্রীবাহী লিফটের সারণি নেই: সরবরাহকারীর সঙ্গে নিশ্চিত করুন। শাফট ১৫০ মিমি আরসিসি ও পিট স্ল্যাব হিসেবে আঁকা ও খরচে ধরা হয়।",
+    },
+    keywords: ["lift", "elevator", "shaft", "pit", "overrun", "stretcher", "লিফট", "শাফট", "পিট"],
+  },
+  {
+    id: "parking", topic: "Compliance", sourceKind: "rule", source: "RAJUK 2008 Schedule 4 and section 56; src/rules/parking.ts",
+    question: { en: "How is car parking checked?", bn: "গাড়ির পার্কিং কীভাবে যাচাই হয়?" },
+    answer: {
+      en: "The required spaces come from Schedule 4 (flats by size). The app then lays out real stalls on the open ground floor: cars 2.40 x 4.60 m and motorcycles 1.00 x 2.00 m (section 56), with a drive aisle along the building or from a front or side setback lane, columns taken as 600 mm squares, and stalls only inside the building footprint. The Compliance row is pass or fail with the counts. Ramp, gate and clearance rules are not checked.",
+      bn: "প্রয়োজনীয় জায়গা তফসিল-৪ থেকে (ফ্ল্যাটের আকার অনুযায়ী)। এরপর অ্যাপ খোলা নিচতলায় আসল স্টল সাজায়: গাড়ি ২.৪০ x ৪.৬০ মিটার, মোটরসাইকেল ১.০০ x ২.০০ মিটার (ধারা ৫৬); ভবনের পাশ দিয়ে বা সামনে/পাশের সেটব্যাক লেন থেকে ড্রাইভ আইল, কলাম ৬০০ মিমি বর্গ ধরে, স্টল কেবল ভবনের ফুটপ্রিন্টের ভিতরে। কমপ্লায়েন্সের সারিতে সংখ্যাসহ পাস বা ফেল দেখায়। র‍্যাম্প, গেট ও ক্লিয়ারেন্সের নিয়ম যাচাই হয় না।",
+    },
+    keywords: ["parking", "car", "stall", "motorcycle", "schedule 4", "পার্কিং", "গাড়ি", "মোটরসাইকেল", "স্টল"],
+  },
+  {
+    id: "balcony", topic: "Structure", sourceKind: "app", source: "App behaviour (src/structure/cantilever.ts, torsion.ts); BNBC 2020 Table 6.2.3",
+    question: { en: "How is a balcony designed?", bn: "বারান্দা কীভাবে নকশা হয়?" },
+    answer: {
+      en: "A balcony in front of the first column line is a cantilever slab with no tip columns: depth from the L/10 rule, bending and shear designed with the BNBC combinations, the balcony live load 4.8 kN/m² (Table 6.2.3, multifamily) and an assumed 1.0 kN/m railing load. The edge beam under it is checked for shear plus torsion (ACI 318-08 method, an assumption) and gets closed stirrups and torsion bars in the bar schedule; the moment left for the slab behind it is reported, not re-checked.",
+      bn: "প্রথম কলাম লাইনের সামনের বারান্দা প্রান্তে কলামহীন ক্যান্টিলিভার স্ল্যাব: গভীরতা L/10 নিয়মে, বেন্ডিং ও শিয়ার বিএনবিসি কম্বিনেশনে, বারান্দার লাইভ লোড ৪.৮ কিনি/মি² (সারণি ৬.২.৩, বহু-পরিবার) এবং ধরে নেওয়া ১.০ কিনি/মি রেলিং লোড। নিচের প্রান্ত-বিম শিয়ার ও টরশনের জন্য যাচাই হয় (ACI 318-08 পদ্ধতি, অনুমান) এবং রড-তালিকায় বদ্ধ স্টিরাপ ও টরশন রড পায়; পেছনের স্ল্যাবের জন্য বাকি মোমেন্ট দেখানো হয়, পুনরায় যাচাই হয় না।",
+    },
+    keywords: ["balcony", "cantilever", "torsion", "railing", "verandah", "বারান্দা", "ক্যান্টিলিভার", "টরশন", "রেলিং"],
+  },
+  {
+    id: "screening", topic: "About", sourceKind: "app", source: "App behaviour",
+    question: { en: "What does screening, not final design mean?", bn: "প্রাথমিক যাচাই, চূড়ান্ত নকশা নয় বলতে কী বোঝায়?" },
+    answer: {
+      en: "The app gives fast, consistent first answers from fixed rules: which plans fit your plot, whether RAJUK limits are met, member sizes, steel, quantities and schematic drawings. It does not replace a licensed architect and engineer: they must design, check and sign what goes to RAJUK or to site. Anything the rules cannot decide is shown as Not checked, and every assumption is listed on the screen or in the permit package.",
+      bn: "অ্যাপ নির্দিষ্ট নিয়ম থেকে দ্রুত ও সামঞ্জস্যপূর্ণ প্রথম উত্তর দেয়: কোন প্ল্যান আপনার প্লটে আঁটে, রাজউকের সীমা মানা হয়েছে কি না, সদস্যের মাপ, রড, পরিমাণ ও প্রাথমিক নকশা। এটি লাইসেন্সপ্রাপ্ত স্থপতি ও প্রকৌশলীর বিকল্প নয়: রাজউক বা সাইটে যা যাবে তা তাঁদের নকশা, যাচাই ও স্বাক্ষর করতে হবে। নিয়ম দিয়ে যা ঠিক করা যায় না তা যাচাই হয়নি হিসেবে দেখায়, এবং প্রতিটি অনুমান স্ক্রিনে বা পারমিট প্যাকেজে তালিকাভুক্ত।",
+    },
+    keywords: ["screening", "final", "design", "sign", "engineer", "licensed", "disclaimer", "প্রাথমিক", "চূড়ান্ত", "স্বাক্ষর", "প্রকৌশলী"],
   },
 ];
 

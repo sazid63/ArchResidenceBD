@@ -22,8 +22,11 @@ function browserDownload(name: string, data: BlobPart, type: string): void {
   const a = document.createElement("a");
   a.href = url;
   a.download = name;
+  document.body.appendChild(a);
   a.click();
-  URL.revokeObjectURL(url);
+  a.remove();
+  // Revoking at once can cancel the download in Chromium; give the browser a moment to start it.
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
 }
 
 /** Save text or bytes under a suggested file name. */
