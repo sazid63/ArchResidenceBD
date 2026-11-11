@@ -1,0 +1,141 @@
+# ArchResidenceBD: handover plan to customer-ready (for Sonnet)
+
+## Context
+
+ArchResidenceBD v3 (branch `v3`, `C:\1_SAJID\ArchResidenceBD\repo`) is a deterministic, bilingual (EN/BN) Dhaka residential-building tool: plot -> plan -> 3D -> RAJUK/BNBC compliance -> structure screening -> rebar -> BOQ -> drawings/permit package. No AI. All of M0-M7, production-readiness Phase A (except A5) and Phase B (B1-B5) are built and committed locally.
+
+Decisions from the owner (2026-11-12): first customers are Dhaka **architects/engineers**; delivery is a **signed Windows installer + web PWA**; **no in-app licensing** at launch (manual sale); the **owner does the engineering verification himself** (Sonnet builds the harness and review packs); stay a "screening, not final design" tool with the existing disclaimers.
+
+Goal of this plan: a ticket list Sonnet can execute one at a time until the app can be sold to an architect/engineer without embarrassment.
+
+## Current condition (surveyed 2026-11-11/12)
+
+**Built and working** (`npm run verify` green, 1,266+ tests, `audit:structural` 170 checks): 14 original plans + balcony variants (open living-dining where dining was interior), plot fit and plan picker with coverage, building model, RAJUK 2008 setbacks/FAR/coverage/parking (stalls laid out, `rules/parking.ts`), BNBC checks, Compliance screen, loads/slabs/beams/columns/footings/seismic (frame only), cantilever + edge-beam torsion, rebar schedule with torsion steel, lift sizing with RC shaft and pit, BOQ with PWD SoR 2022 card, schematic drawings (site/plans/section/elevations, SVG + DXF R12, permit zip), guided interview (deterministic parser), offline PWA, Tauri installer scripts, design system.
+
+**Git/GitHub:** `v3` is **76+ commits ahead of `origin/v3` and nothing has been pushed**; GitHub releases stop at v2.4b; CI last ran on v3 at M2; installers unsigned. Local backup of the repo is a real risk: the whole v3 work lives on one disk.
+
+**Unfinished, ranked by what a customer notices:**
+1. Four screens (Unit mix, Daylight, Formwork, Pour) still read the old v2 3D mesh via `src/cad` (`generateBuildingMesh` -> `meshForProject`), so their numbers can disagree with Structure/BOQ; Connections and the 3D screen also use `src/cad`.
+2. Projects live only in `localStorage` (`archres_v3_projects`): no file export/import, no backup, lost if browser data is cleared; Tauri has no dialog/fs plugin (`src-tauri/Cargo.toml` has only `tauri`), exports use browser download.
+3. No PDF output (only DXF/SVG/CSV/MD/zip); architects need PDF sheets.
+4. Buildings above ~7 storeys fail drift or are unchecked (C1 shear walls / core missing); no clean "not designed" message above the limit (C3); combined footings/raft not checked for bending/punching.
+5. Fire/egress and accessibility are mostly `not_checked` (no occupancy class); narrow-road rule §51(9)-(10) not modelled; DAP parked.
+6. Rate card `candidate`: BOQ total is a lower bound (no labour for concrete/brick/plaster, tiles, paint, doors, windows, MEP, lift cost).
+7. A5 hook factors (Sec 8.2.6.3) not transcribed: 4-30 hook warnings per building; steel not calibrated against hand-designed buildings (D1).
+8. Zero UI/component tests, no E2E; Help FAQ does not cover the 4 screens; some English-only strings (Formwork/Pour/Unit mix labels).
+9. Lift tables (car/shaft/pit/overhead) are assumptions; plans with >40 flats need a second lift cell.
+10. Release hardening: installers unsigned, release workflow untested (needs a pushed tag), version string 2.5.4 vs v3 not reconciled.
+
+## Plan structure and order
+
+Order rationale: (P0) protect the work and fix the foundation so every later ticket lands on a clean tree; (P1) remove the stale-number screens and add the customer-visible plumbing (save files, PDF); (P2) close the engineering gaps that bound what the app may be used for; (P3) the owner's verification, with Sonnet-built harness; (P4) ship. Run `npm run verify` before every commit; commit on `v3`; **never `git push` unless the owner types a push request in that session** (P0-1 asks for it explicitly).
+
+Ticket rules for every ticket: cite regulations or mark "assumption"; test every behaviour change; integer mm; UI text EN+BN; CRLF files (scripted edits must normalise); reply in <=5 lines; update `docs/handover/NEXT.md` and `TICKETS.md` when done.
+
+---
+
+## Phase P0: protect and clean (1 day)
+
+**P0-1 Push v3 and prove CI. [S]** Owner must say "push" in that session. Then `git push origin v3`; watch `gh run list`; fix any CI failure (CI has not run since M2: `verify`, `audit:mesh`, `test:exporters`, `audit:structural`, `build`, `check:bundle`, `test:offline` on ubuntu, Node 24). Done when: CI green on v3 and the run URL is in NEXT.md.
+
+**P0-2 Version and About. [S]** `package.json` is 2.5.4 while v3 is a rewrite. Decide 3.0.0-rc.1; keep `package.json` the single source (tauri.conf.json already reads it). Add build hash and date to the About screen (`src/screens/AboutScreen.tsx`) via a Vite `define` in `vite.config.ts`. Test: About shows version. Done when: tag name, installer name and About agree.
+
+**P0-3 Stale docs. [S]** Rewrite `README.md` (says v2.5.4 "work in progress"), prune `docs/` of v2 material, keep `NEXT.md`, `production-readiness-2026-11.md`, `TICKETS.md`. Add `docs/handover/PLAN-customer-ready.md` = this plan.
+
+---
+
+## Phase P1: one source of truth, files, PDF (about 2 weeks)
+
+**P1-1 Retire the mesh-reading screens. [L]** Files: `src/screens/UnitMixOptimizerScreen.tsx`, `DaylightAnalysisScreen.tsx`, `FormworkScaffoldScreen.tsx`, `PourSequenceScreen.tsx`, `ConnectionDetailingScreen.tsx`, `src/cad/{formworkScaffold,pourSequence,parametricBuildingGenerator,structuralEngine,sectionSizing}.ts`, `src/App.tsx`, `src/layout/Sidebar.tsx`, `src/hooks/useHashRoute.ts`, `src/i18n.tsx`. Recommendation per screen:
+- **Unit mix: delete.** It repeats the plan validator with hard-coded "assumed" room minimums (`BNBC_MIN_ROOM_SIZES`); the Compliance screen and `plans/validate.ts` already check cited minimums. Replace with a small "Dwelling summary" card inside Compliance (flats per floor, net area per flat from `liftSpec`-style model queries: `deriveGeometry` metrics).
+- **Daylight: delete.** `window_area_low` (Table 3.1.12) and the dining rule already cover cited daylight; the old screen uses a simplified factor method. Surface the per-room window area table on Compliance instead (data is in `geo.windows` + `OPENING_PERCENT`).
+- **Formwork: rewrite on the model.** `bbs.totals.formworkM2` (family split footing/column/beam/slab/core) is the source; show it by family and level with the SoR rates; CSV export. Scaffold quantities: derive from slab area x storey height (state as assumption) or drop scaffold.
+- **Pour sequence: rewrite on the model** as a simple ordered list per level (footing -> columns -> beams+slab per storey -> stair -> roof) with volumes from `analyzeStructure` + `buildBbs` (concrete per level; reuse `concreteM3` pieces in `structure/bbs.ts`: export a `concreteByLevel`), cure-days default 7 (assumption, BNBC Part 6 has the rule: check before citing).
+- **Connections: decide** after reading it: keep only if it reads `analyzeStructure` results; otherwise delete.
+Then `src/cad` shrinks to what the model still needs: `mesh.ts`, `meshParts.ts`, `solidKernel.ts`, `stairBuilder.ts`, `viewer.ts`, `exporters.ts` (IFC/FreeCAD), `assetsLibrary.ts`; delete `parametricBuildingGenerator.ts`, `structuralEngine.ts`, `sectionSizing.ts`, `formworkScaffold.ts`, `pourSequence.ts` once nothing imports them (`grep -rn "cad/"`), and make `NativeCadScreen.tsx` call `meshForProject` (`src/model/projectMesh.ts`) directly. Tests: model-based formwork test (agree with `bbs.totals.formworkM2`), pour totals sum to `bbs.totals.concreteM3`, route list test, no import of deleted files (`tsc`). Done when: no screen imports `generateBuildingMesh`, all remaining screens agree with Structure/BOQ numbers, Help and sidebar updated EN+BN.
+
+**P1-2 Project file export/import (.archres). [M]** Reuse `src/model/projectSpec.ts` (v3 format) and `src/model/migrate.ts`; add `exportProject(project): string` and `importProject(text): {ok, project|error}` in `src/model/projectFile.ts` with `{format:"archres", version:3, exportedAt, appVersion, project}`; validate and migrate; never trust fields (size cap, shape check). UI: Projects screen "Export" / "Import" buttons and a "Back up all" file. Platform layer `src/platform/saveFile.ts`: web = Blob download + `<input type=file>`; Tauri = native dialog via `@tauri-apps/plugin-dialog` + `@tauri-apps/plugin-fs` (add to `package.json`, `src-tauri/Cargo.toml`, `src-tauri/src/lib.rs` `.plugin(...)`, and `src-tauri/capabilities/default.json` with the minimal `dialog:default`, `fs:allow-write-file`/`read-file` scoped to user-chosen paths; CSP in `tauri.conf.json` needs no change for ipc). Route every existing download (`DrawingsScreen`, BOQ CSV, Rebar CSV, permit zip, error report) through `saveFile.ts`. Tests: round trip, corrupt file rejected, v2-save import migrates, future-version file rejected with a clear message. Done when: export in Tauri opens a save dialog (manual check, document in NEXT.md), web unchanged.
+
+**P1-3 PDF sheets. [M]** No PDF dependency exists. Choose **pdf-lib** (MIT, no DOM, works offline, small): convert `Scene` entities (`src/drawings/scene.ts`: line/poly/text on layers) to PDF vector pages at A3/A4 with the title block; embed Noto Sans (`@fontsource` files exist) so Bangla and English text render. New `src/drawings/pdf.ts` (`sceneToPdf(scene, paper)`, `packagePdf(model, project)` = one PDF with all sheets), add "PDF" to the permit package (`permit.ts`/`zip.ts`) and a download button in `DrawingsScreen`. Bundle: lazy-import so the first-load budget (`scripts/check-bundle-size.mjs`) holds; raise the budget only for the lazy chunk. Tests: PDF parses (`%PDF` header, page count = sheet count), text extraction contains the title and the "Not for construction" note, size under 5 MB for a 6-storey building. Done when: a PDF set opens in a viewer with all sheets, Bangla titles readable.
+
+**P1-4 Drawing quality pass. [M]** Architects will judge drawings first. Add to `src/drawings/sheets.ts`: door tags and window tags with schedule table (counts, sizes), room names + areas (exists), stair in plan with arrow and "UP", column grid bubbles (A,B,C / 1,2,3) with dimension strings between grids, section with beam depths and slab thickness from `analyzeStructure` (today walls/slabs/levels only), elevation with level markers and finished ground line. Pass the structure result into `sheets.ts` where it exists (`opts.columnSize` already does this for columns). Tests on entity presence per sheet. Done when: a sample 6-storey permit set shows grids, schedules and sections with beams; owner reviews screenshots.
+
+**P1-5 First-run and onboarding. [S]** Replace the silent demo project with a first-run card on the design screen: "Start with your plot" (frontage, depth, road width, storeys, soil bearing) and "Open sample building". Keep the interview (`PhaseChatScreen`) as the guided path. Test: first-run state renders both entries (hook-level test with the store, no DOM library needed; or see P1-6).
+
+**P1-6 UI test harness. [M]** Add `@testing-library/react` + `jsdom` (vitest `environment: "jsdom"` per file) and smoke tests per screen (renders with demo project, no console errors, language switch EN/BN changes a known label, plan-does-not-fit state shows the reasons callout). Add Playwright E2E (`e2e/`, `@playwright/test`): create project -> pick plan -> Compliance -> Structure -> BOQ -> export file; run against `vite preview` in CI (new job `e2e`, chromium only). Done when: both suites run in CI.
+
+**P1-7 i18n sweep. [S]** Grep screens for raw English (Formwork/Pour/Unit mix are being rewritten in P1-1; sweep NativeCad "Try again"/"Open drawings"/"Filter elements"/"Designed members", plan-library labels). Move to `src/i18n.tsx` or the existing inline `bn ? :` pattern; add a test that every key in `en` exists in `bn`.
+
+**P1-8 Help refresh. [S]** `src/data/manualFaq.ts`: add entries for the new Formwork/Pour screens, project files, PDF, lift, parking, balcony torsion, "what screening means", EN+BN, keywords, `sourceKind`. Test: `searchManual` returns each new entry for its keyword.
+
+---
+
+## Phase P2: engineering gaps that bound the product (about 4 weeks)
+
+**P2-1 C3 supported-height gate. [S]** `src/structure/analyze.ts` returns a `supported: {maxStoreys, reason}`; Structure/BOQ/Rebar screens show "not designed above N storeys: needs shear walls or a core" in place of ratios and green ticks; BOQ still computed but marked "quantities not designed". Initial N = 7 (audit: 8-12 storeys fail drift) until C1 raises it. Tests: 8 storeys shows the gate; 7 unchanged. Done when: no green result above the limit. **Do this first in P2** so nothing misleads while C1 is built.
+
+**P2-2 C1 core shear walls. [L]** Read `src/structure/frame.ts`, `seismic.ts`, `column.ts`, `analyze.ts`, `model/lift.ts` (the RC shaft exists: 150 mm walls). Minimal model: stair + lift core as RC walls resisting the seismic shear in each direction in proportion to stiffness (cantilever flexural + shear stiffness, `EI`, `GA` with cracked factor 0.35), frame takes the rest (dual system, BNBC Part 6 Table for R/Cd of dual systems: transcribe R, Cd, Omega0 for "dual system with special RC frames and special RC shear walls"; the owner confirmed R 8 / Cd 5.5 for frames only, **ask before using a dual-system R**). Check wall: boundary-element-free screening (Sec 8.? shear wall minimum steel and thickness 150/200 mm: transcribe from the gazette or mark assumption), drift limit with wall stiffness, overturning on the core footing (raft or pile cap not checked: say so). Plug in: `analyzeStructure(model, {systemId:"dual-core"})`, Structure screen section "Core walls", `bbs.ts` wall bars (generalise `detailLiftCore` to a `detailCoreWalls` with horizontal/vertical bars from the check), `toMesh.ts` (walls already tagged), takeoff concrete. Raise N in P2-1 only when audits for 8-12 storeys pass with a clear pass/fail. Tests: hand-worked cantilever wall stiffness; 10-storey sweep rows pass or fail for stated reasons in `engineering-scenarios.audit.ts`. Gazette work by the owner in `_backup/sources/bnbc-2020-gazette-39201.pdf`: list the pages needed in the ticket and ask.
+
+**P2-3 Foundations for taller buildings. [M]** `src/structure/foundation.ts`: combined footing bending between columns and punching per column (two-way shear, BNBC Part 6 Sec 8.? check clause), raft as a flat slab on soil with column punching and a simple strip method; display "raft: screening". Tests: hand-worked combined footing (two columns, resultant at centroid). Needed because pads overlap from about 7-8 storeys on narrow plots.
+
+**P2-4 C2 fire and egress. [M]** `src/rules/report.ts` fire section + `spec/rules/bnbc-2020.yaml` (`egress` rows A1-A5, `Table 4.3.8` travel path 45/60 m, corridor 915 mm, dead-end 12.19 m, occupant load factors). Add occupancy class input to the project (`phase-basics` flow: A1/A2 single/two-family, A3 multi-family flats (default for these buildings; **ask the owner to confirm A3**), A4/A5): `spec/flows/phase-flow-book.yaml` question, `projectSpec.ts` field, migration default. Evaluate: travel distance from each flat entrance door to the stair door (graph distance on `geo.doors` + corridor/lobby rects; add `src/rules/egress.ts`), corridor width (exists 915), second stair above 6 storeys or 23 m (cited in the pack? if not transcribed list as gap and show not_checked with the clause name), fire lift above 10 storeys (stretcher already cited), refuge area as not_checked. Done when: each clause row shows pass/fail/not_checked with citation and the plan data used.
+
+**P2-5 Remaining rules rows. [M]** (a) §51(9)-(10) road under 6 m: transcribe from the frozen RAJUK pack if present (`spec/rules/rajuk-2008.yaml`), else ask the owner for the text; implement in `src/rules/check.ts`/`setbacks.ts`. (b) Road-width FAR bonus §51(11) as an option, default off, labelled. (c) Accessible route: only cited items; otherwise explicit "not checked". Keep DAP out of scope and say so on Compliance.
+
+**P2-6 A5 hook factors. [S, owner-gated]** Owner supplies/approves Sec 8.2.6.3 text; implement in `structure/anchorage.ts` and `bbs.ts` so edge-column hook warnings disappear when valid. If not supplied by P3, leave warnings, document.
+
+**P2-7 BOQ completeness. [M]** Extend `spec/rates/pwd-sor-2022-civil-works-candidate.json` with lines the SoR does cover (tiles, paint/distemper, doors/windows by area, plumbing/electrical per sqft as clearly labelled allowances, lift allowance by class from `liftSpec`, site clearing/earthwork from excavation volumes in the foundation) and `takeoff.ts` items for each; every added rate carries `source` + `status:"candidate"`; owner reviews rates before `active`. BOQ screen shows "lower bound" or "complete for listed trades" explicitly and the list of excluded trades. Tests: totals reproducible; unpriced list correct. Needs owner input on rates (ask, do not invent prices).
+
+**P2-8 Lift: second cell and cited tables. [S/M]** Plans with >40 flats: allow `liftCount` 2 by adding a second lift cell to the larger plans (`p3-2b`, `p4-*`, `pn-2f`) and validator/geometry tests, or show "needs 2 lifts, not drawn" (current). Replace assumptions with supplier table values if the owner provides a datasheet.
+
+---
+
+## Phase P3: owner verification (parallel with P2, about 2 weeks of owner time)
+
+**P3-1 Reference-building harness (D1). [M]** `scripts/audits/reference.audit.ts` (vitest like `structural-sweep`): reads `spec/reference/*.json` (building input + owner's hand-calculated results: slab thickness, beam depths, column sizes, footing sizes, steel kg and kg/m2 per member family, concrete m3, drift), runs `deriveBuilding` -> `analyzeStructure` -> `buildBbs`, prints a table with %% difference and fails outside a per-quantity tolerance (default 15 %). `npm run audit:reference`; report to `scripts/audits/audit-out/reference.md`. Provide a template `spec/reference/TEMPLATE.json` and an owner guide `docs/handover/REFERENCE-HOWTO.md`. Owner prepares 3 buildings (4, 6, 8 storeys). Done when: harness runs on a stub and on the owner's first reference.
+
+**P3-2 Rule-pack review package. [S]** Script `scripts/export-review-pack.mjs` writes one markdown/HTML per pack (`rajuk-2008`, `bnbc-2020`, `bnbc-2020-structure`) listing every rule/value with its citation, status and the code using it, plus all `gaps`; owner marks each `frozen/candidate`. Fold decisions back (ticket P3-3).
+
+**P3-3 Calibration fixes. [M, after owner results]** Fix the steel/concrete deviations the harness shows (A4 steel calibration: confinement stirrup spacing Sec 8.3, laps, tie beams; kg/m2 target band 28-38 on 4-8 storeys). Narrow `engineering-scenarios.audit.ts` bands to the calibrated range.
+
+**P3-4 Architect plan review. [S]** Send the 14 plans and their drawings to a practising Dhaka architect (owner action); Sonnet records findings as tickets.
+
+---
+
+## Phase P4: ship (about 1 week)
+
+**P4-1 Code signing. [M, owner-gated]** Owner buys an OV/EV code-signing certificate (or uses Azure Trusted Signing). Fix `src-tauri/create-dev-cert.ps1` (audit F17: hard-coded test password; delete or generate a random one). In `release.yml` add a signing step using secrets (`WINDOWS_CERT_PFX_BASE64`, `WINDOWS_CERT_PASSWORD`) with `signtool` or Tauri `bundle.windows.signCommand`; `src-tauri/sign-release.ps1` already exists: wire it. Verify with `signtool verify /pa`. Until the cert exists, ship unsigned with the SmartScreen note in the README.
+
+**P4-2 Release dry run. [S]** Tag `v3.0.0-rc.1` on a branch, run `release.yml`, download the draft, install on a clean Windows VM (NSIS and MSI), open, create a project, export a file, print a PDF, uninstall. Record results in NEXT.md. `npm run test:offline` must be green.
+
+**P4-3 Web PWA hosting. [S]** Host `dist/` on any static host (Vercel is connected; or GitHub Pages): headers for the service worker (`Cache-Control: no-cache` for `sw.js`), HTTPS, a fixed `sw` cache version per build (`scripts/build-sw.mjs` already versions). Add `deploy` workflow job on tag. Test: offline reload after first visit.
+
+**P4-4 Updates policy. [S]** `docs/spec/updates-v0.md` is not active. For launch: manual updates (new installer); About shows the version; optional "check for updates" link opening the GitHub releases page. No auto-updater (needs signing keys and a feed): list as post-launch.
+
+**P4-5 Customer docs. [M]** A bilingual "Getting started" PDF/MD (plot -> plan -> compliance -> structure -> BOQ -> drawings), a one-page "What this tool does and does not do" (screening not final design; engineer signs), a sample project file `samples/*.archres`, a support/feedback address, and the licence/third-party notice (`docs/licenses/THIRD_PARTY.md` is current). Add the in-app disclaimer text to every export (exists for permit package; verify for CSVs and PDF).
+
+**P4-6 Pilot. [owner]** 3-5 Dhaka firms for two weeks with a feedback form; Sonnet fixes the top findings; then tag `v3.0.0`.
+
+---
+
+## Critical files (reuse, do not rewrite)
+
+- Model/entry: `src/model/building.ts` (`deriveBuilding`, `buildingForProject`), `src/model/projectMesh.ts` (`meshForProject`), `src/model/lift.ts`, `src/model/openings.ts`, `src/plans/geometry.ts` (`deriveGeometry`), `src/plans/validate.ts`.
+- Rules: `src/rules/check.ts`, `report.ts`, `parking.ts`, `spec/rules/*.yaml`.
+- Structure: `src/structure/analyze.ts` (`analyzeStructure`), `bbs.ts` (`buildBbs`, `formworkM2`, `concreteM3`), `frame.ts`, `foundation.ts`, `torsion.ts`, `cantilever.ts`.
+- Quantities/drawings: `src/quantities/takeoff.ts`, `spec/rates/`, `src/drawings/{scene,sheets,permit,zip}.ts`.
+- Packaging: `.github/workflows/{ci,release}.yml`, `src-tauri/{tauri.conf.json,Cargo.toml,sign-release.ps1}`, `scripts/{build-sw,check-bundle-size}.mjs`.
+
+## Verification (every ticket and at the end)
+
+1. `npx vitest run <path>` while working; `npx tsc --noEmit`.
+2. `npm run verify` before each commit; `npm run audit:structural` for any structure/plan/rules ticket; `npm run audit:reference` after P3-1.
+3. UI tickets: `npm run dev` (port 3000) and check in the browser: EN and BN, light/dark, the plan-does-not-fit state; unregister the service worker and clear caches before judging a UI change (see NEXT.md practical notes).
+4. Packaging tickets: `npx tauri build --bundles nsis,msi`, install, run; `npm run test:offline`; CI green on the pushed branch.
+5. Final gate before tagging 3.0.0: CI green, installer signed and installed on a clean VM, owner's three reference buildings within tolerance, no `not_checked` row without a stated reason, no screen reading `src/cad` generators, PDF + DXF + project file round trip verified.
+
+## Risks and owner decisions needed
+
+- Push approval (P0-1); code-signing certificate purchase (P4-1); rate prices for P2-7; gazette pages for C1 dual-system R, shear-wall detailing, fire clauses, A5 factors (P2-2, P2-4, P2-6); confirm occupancy class A3 for flats (P2-4); 3 hand-calculated reference buildings (P3-1).
+- Biggest technical risk: C1 (core walls) and raft/combined footing are real engineering features; if the owner's schedule is tight, ship v3.0.0 with the C3 gate (max 7 storeys, honestly labelled) and make C1 v3.1.
+- Parking: plans with a central core strip and 3.1 m column bays fail Schedule 4 on tight plots (a true result); consider a wider-bay ground-floor variant in a later plan ticket.
