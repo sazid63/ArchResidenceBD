@@ -75,8 +75,8 @@ describe("validator catches problems", () => {
 
   it("a stair too small for tall floors", () => {
     // 4.5 m floors still fit (needs 5.0 m, has 5.2 m at minimum width); 5.5 m floors need 5.75 m.
-    expect(codes(P1_4B, { widthMm: 10030, depthMm: 15650 }, 4500)).not.toContain("stair_too_small:stair");
-    expect(codes(P1_4B, { widthMm: 10030, depthMm: 15650 }, 5500)).toContain("stair_too_small:stair");
+    expect(codes(P1_4B, { widthMm: 10030, depthMm: 15750 }, 4500)).not.toContain("stair_too_small:stair");
+    expect(codes(P1_4B, { widthMm: 10030, depthMm: 15750 }, 5500)).toContain("stair_too_small:stair");
   });
 
   it("a dwelling without its own entrance", () => {

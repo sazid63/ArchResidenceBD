@@ -32,11 +32,11 @@ export interface StairParams {
 }
 
 export const DEFAULT_STAIR: StairParams = {
-  flightWidthMm: 1000,
+  flightWidthMm: 1120,
   maxRiserMm: 175,
   treadMm: 250,
   landingMm: 1000,
-  gapMm: 150,
+  gapMm: 100,
   extraSoffitMm: 150,
 };
 

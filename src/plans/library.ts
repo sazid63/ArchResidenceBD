@@ -42,7 +42,7 @@ export const P1_4B: PlanDefinition = {
   unitsPerFloor: 1,
   bedroomsPerUnit: 4,
   baysX: X4,
-  baysY: [bay(3600, 4200, 4500), bay(1500, 1500, 1800), bay(3300, 3450, 3900), bay(1500, 1500, 1800), bay(3300, 3450, 3900), bay(2450, 2550, 3000)],
+  baysY: [bay(3600, 4200, 4500), bay(1500, 1500, 1800), bay(3300, 3450, 3900), bay(1500, 1500, 1800), bay(3300, 3450, 3900), bay(2550, 2600, 3000)],
   structuralX: [0, 2, 3, 4],
   structuralY: [0, 1, 2, 4, 5, 6],
   rooms: [
@@ -92,7 +92,7 @@ export const P2_2B_FB: PlanDefinition = {
     bay(3600, 3900, 4200),
     bay(1500, 1500, 1800),
     bay(3300, 3450, 3900),
-    bay(2450, 2550, 3000),
+    bay(2550, 2600, 3000),
     bay(3300, 3450, 3900),
     bay(1500, 1500, 1800),
     bay(3600, 3900, 4200),
@@ -168,7 +168,7 @@ export const P1_3B: PlanDefinition = {
   unitsPerFloor: 1,
   bedroomsPerUnit: 3,
   baysX: X4,
-  baysY: [bay(3600, 4200, 4500), bay(1500, 1500, 1800), bay(3300, 3450, 3900), bay(1500, 1500, 1800), bay(3300, 3450, 3900), bay(2450, 2550, 3000)],
+  baysY: [bay(3600, 4200, 4500), bay(1500, 1500, 1800), bay(3300, 3450, 3900), bay(1500, 1500, 1800), bay(3300, 3450, 3900), bay(2550, 2600, 3000)],
   structuralX: [0, 2, 3, 4],
   structuralY: [0, 1, 2, 4, 5, 6],
   rooms: [
@@ -219,7 +219,7 @@ export const P1_4B_WIDE: PlanDefinition = {
   unitsPerFloor: 1,
   bedroomsPerUnit: 4,
   baysX: X5,
-  baysY: [bay(3600, 3900, 4200), bay(1500, 1500, 1800), bay(3300, 3450, 3900), bay(2450, 2550, 3000)],
+  baysY: [bay(3600, 3900, 4200), bay(1500, 1500, 1800), bay(3300, 3450, 3900), bay(2550, 2600, 3000)],
   structuralX: [0, 1, 2, 3, 4, 5],
   structuralY: [0, 1, 2, 3, 4],
   rooms: [
@@ -268,7 +268,7 @@ export const P2_3B_FB: PlanDefinition = {
     bay(3600, 3900, 4200),
     bay(1500, 1500, 1800),
     bay(3300, 3450, 3900),
-    bay(2450, 2550, 3000),
+    bay(2550, 2600, 3000),
     bay(3300, 3450, 3900),
     bay(1500, 1500, 1800),
     bay(3600, 3900, 4200),
@@ -320,9 +320,9 @@ export const P2_3B_FB: PlanDefinition = {
 };
 
 // Left and right flats with the core in a central strip.
-const XLR: Bay[] = [bay(3100, 3200, 3600), bay(3050, 3100, 3600), bay(2450, 2550, 2700), bay(3050, 3100, 3600), bay(3100, 3200, 3600)];
+const XLR: Bay[] = [bay(3100, 3200, 3600), bay(3050, 3100, 3600), bay(2550, 2600, 2700), bay(3050, 3100, 3600), bay(3100, 3200, 3600)];
 // Three-bedroom version: a wider outer column so the middle bedrooms reach 9.5 m².
-const XLR3: Bay[] = [bay(3200, 3300, 3600), bay(3050, 3100, 3600), bay(2450, 2550, 2700), bay(3050, 3100, 3600), bay(3200, 3300, 3600)];
+const XLR3: Bay[] = [bay(3200, 3300, 3600), bay(3050, 3100, 3600), bay(2550, 2600, 2700), bay(3050, 3100, 3600), bay(3200, 3300, 3600)];
 
 /** Two 2-bedroom flats side by side, stair/lobby/lift in a central strip. For wide plots. */
 export const P2_2B_LR: PlanDefinition = {
@@ -648,7 +648,7 @@ export const PN_2B: PlanDefinition = {
   unitsPerFloor: 1,
   bedroomsPerUnit: 2,
   baysX: XN,
-  baysY: [bay(3600, 3800, 3900), bay(1500, 1600, 1700), bay(3350, 3400, 3500), bay(1800, 2000, 2100), bay(2450, 2450, 2450), bay(1800, 1800, 1800)],
+  baysY: [bay(3600, 3800, 3900), bay(1500, 1600, 1700), bay(3350, 3400, 3500), bay(1800, 2000, 2100), bay(2550, 2550, 2550), bay(1800, 1800, 1800)],
   structuralX: [0, 2, 3],
   structuralY: [0, 2, 3, 5, 6],
   rooms: [
@@ -691,7 +691,7 @@ export const PN_2B_F: PlanDefinition = {
   unitsPerFloor: 1,
   bedroomsPerUnit: 2,
   baysX: XN,
-  baysY: [bay(2450, 2450, 2450), bay(1800, 1800, 1800), bay(1800, 2000, 2100), bay(3350, 3400, 3500), bay(1800, 1800, 1900), bay(3300, 3500, 3700)],
+  baysY: [bay(2550, 2550, 2550), bay(1800, 1800, 1800), bay(1800, 2000, 2100), bay(3350, 3400, 3500), bay(1800, 1800, 1900), bay(3300, 3500, 3700)],
   structuralX: [0, 2, 3],
   structuralY: [0, 2, 4, 6],
   rooms: [
@@ -732,7 +732,7 @@ export const PN_3B: PlanDefinition = {
   unitsPerFloor: 1,
   bedroomsPerUnit: 3,
   baysX: XN_TIGHT,
-  baysY: [bay(3600, 3800, 3800), bay(1500, 1600, 1600), bay(3350, 3400, 3400), bay(1800, 1800, 1800), bay(1800, 2000, 2000), bay(2450, 2450, 2450), bay(1800, 1800, 1800)],
+  baysY: [bay(3600, 3800, 3800), bay(1500, 1600, 1600), bay(3350, 3400, 3400), bay(1800, 1800, 1800), bay(1800, 2000, 2000), bay(2550, 2550, 2550), bay(1800, 1800, 1800)],
   structuralX: [0, 2, 3],
   structuralY: [0, 2, 3, 5, 7],
   rooms: [
@@ -782,7 +782,7 @@ export const PN_2F: PlanDefinition = {
     bay(3450, 3700, 3700),
     bay(1800, 1800, 1800),
     bay(3350, 3350, 3350),
-    bay(2450, 2450, 2450),
+    bay(2550, 2550, 2550),
     bay(1800, 1800, 1800),
     bay(3350, 3350, 3350),
     bay(1800, 1800, 1800),

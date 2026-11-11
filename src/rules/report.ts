@@ -9,6 +9,7 @@
 import { buildingForProject } from "../model/projectMesh";
 import { liftRequired } from "../plans/rules";
 import { LIFT_ASSUMPTIONS, liftSpec } from "../model/lift";
+import { PERSONS_PER_FLAT, evaluateEgress } from "./egress";
 import type { Issue, IssueCode } from "../plans/validate";
 import type { BuildingProject } from "../engine/projectState";
 import type { CheckResult as ResultKind } from "../theme/tokens";
@@ -144,16 +145,66 @@ export function buildReport(project: BuildingProject): Report {
     });
   }
 
-  // Fire: only what the model can decide; the rest is reported honestly as not checked.
+  // Fire and egress (P2-4): what the plan geometry can decide, as class A3 (apartment houses), not sprinklered.
+  const eg = evaluateEgress(model);
+  const m = (v: number) => (v / 1000).toFixed(1);
+  if (eg) {
+    const L = eg.limits;
+    const cite43 = { en: "BNBC 2020 Part 4 Table 4.3.8 (class A3, not sprinklered)", bn: "বিএনবিসি ২০২০ পার্ট ৪ সারণি ৪.৩.৮ (শ্রেণি এ৩, স্প্রিঙ্কলারবিহীন)" };
+    const assume = { en: "Occupancy class A3 and no sprinklers are assumed.", bn: "ব্যবহার-শ্রেণী এ৩ ও স্প্রিঙ্কলারবিহীন ধরা হয়েছে।" };
+    items.push({
+      id: "fire.travel",
+      section: "fire",
+      status: eg.travelMm / 1000 <= L.travelPathM ? "pass" : "fail",
+      title: { en: "Travel distance to the stair", bn: "সিঁড়ি পর্যন্ত চলাচলের দূরত্ব" },
+      expected: { value: L.travelPathM, unit: "m" },
+      actual: { value: Math.round((eg.travelMm / 1000) * 10) / 10, unit: "m" },
+      citation: cite43,
+      note: { en: `Longest walk from a room (${eg.travelFrom}) to the stair through the doors, measured between room centres and door centres. ${assume.en}`, bn: `কক্ষ (${eg.travelFrom}) থেকে দরজা দিয়ে সিঁড়ি পর্যন্ত দীর্ঘতম হাঁটা, কক্ষ ও দরজার কেন্দ্র ধরে মাপা। ${assume.bn}` },
+    });
+    if (eg.corridorMm !== null)
+      items.push({
+        id: "fire.corridor",
+        section: "fire",
+        status: eg.corridorMm >= L.corridorMinWidthMm ? "pass" : "fail",
+        title: { en: "Corridor width", bn: "করিডোরের প্রস্থ" },
+        expected: { value: L.corridorMinWidthMm, unit: "mm" },
+        actual: { value: Math.round(eg.corridorMm), unit: "mm" },
+        citation: cite43,
+        note: { en: "The printed 36 is read as inches (915 mm); the owner confirmed, an engineer should confirm. Dead-end length (12.19 m) is not measured.", bn: "ছাপা ৩৬ ইঞ্চি ধরা হয়েছে (৯১৫ মিমি); মালিক নিশ্চিত করেছেন, প্রকৌশলীরও নিশ্চিত করা উচিত। ডেড-এন্ডের দৈর্ঘ্য (১২.১৯ মিটার) মাপা হয়নি।" },
+      });
+    items.push({
+      id: "fire.stair-width",
+      section: "fire",
+      status: eg.stairFlightMm >= L.stairMinWidthMm ? "pass" : "fail",
+      title: { en: "Stair flight width", bn: "সিঁড়ির ফ্লাইটের প্রস্থ" },
+      expected: { value: L.stairMinWidthMm, unit: "mm" },
+      actual: { value: eg.stairFlightMm, unit: "mm" },
+      citation: { en: "BNBC 2020 Part 4 Table 4.3.6 (class A3)", bn: "বিএনবিসি ২০২০ পার্ট ৪ সারণি ৪.৩.৬ (শ্রেণি এ৩)" },
+      note: { en: `The plan library draws 1000 mm flights; the table asks ${L.stairMinWidthMm} mm for class A3. A wider stair needs a deeper stair bay.`, bn: `প্ল্যান লাইব্রেরিতে ১০০০ মিমি ফ্লাইট আঁকা; সারণিতে এ৩ শ্রেণির জন্য ${L.stairMinWidthMm} মিমি। চওড়া সিঁড়িতে সিঁড়ি-অংশ আরও গভীর লাগে।` },
+    });
+    items.push({
+      id: "fire.stair-capacity",
+      section: "fire",
+      status: eg.stairFlightMm >= eg.stairNeededMm ? "pass" : "fail",
+      title: { en: "Stair capacity for one floor", bn: "এক তলার জন্য সিঁড়ির ধারণক্ষমতা" },
+      expected: { value: eg.stairNeededMm, unit: "mm" },
+      actual: { value: eg.stairFlightMm, unit: "mm" },
+      citation: { en: "BNBC 2020 Part 4 Table 4.3.2 (stairways, not sprinklered)", bn: "বিএনবিসি ২০২০ পার্ট ৪ সারণি ৪.৩.২ (সিঁড়ি, স্প্রিঙ্কলারবিহীন)" },
+      note: { en: `${eg.persons} people on a floor (${PERSONS_PER_FLAT} a flat, assumption) at ${L.stairMmPerOccupant} mm each.`, bn: `এক তলায় ${eg.persons} জন (প্রতি ফ্ল্যাটে ${PERSONS_PER_FLAT} জন, অনুমান), জনপ্রতি ${L.stairMmPerOccupant} মিমি।` },
+    });
+  }
   items.push({
-    id: "fire.egress",
+    id: "fire.exits",
     section: "fire",
-    status: "not_checked",
-    title: { en: "Travel distance and number of exits", bn: "চলাচলের দূরত্ব ও বহির্গমন পথের সংখ্যা" },
+    status: model.input.storeys > 6 ? "not_checked" : "not_applicable",
+    title: { en: "Second exit, refuge area and fire lift", bn: "দ্বিতীয় বহির্গমন, আশ্রয়-এলাকা ও ফায়ার লিফট" },
     expected: null,
     actual: null,
-    citation: { en: "BNBC 2020 Part 4 Table 4.3.8", bn: "বিএনবিসি ২০২০ পার্ট ৪ সারণি ৪.৩.৮" },
-    note: { en: "The occupancy class used by the egress table is not set, so exit rules are not evaluated.", bn: "বহির্গমন সারণির জন্য ভবনের ব্যবহার-শ্রেণী ঠিক করা হয়নি, তাই বহির্গমনের বিধি যাচাই হয়নি।" },
+    citation: { en: "BNBC 2020 Part 4", bn: "বিএনবিসি ২০২০ পার্ট ৪" },
+    note: model.input.storeys > 6
+      ? { en: "Above six storeys these items matter; their clauses are not in the rule pack yet, so they are not evaluated. The stretcher lift above ten storeys is checked on the lift row.", bn: "ছয় তলার বেশিতে এগুলো প্রযোজ্য; এদের ধারা নিয়ম-প্যাকে এখনো নেই, তাই যাচাই হয়নি। দশ তলার বেশিতে স্ট্রেচার লিফট লিফটের সারিতে যাচাই হয়।" }
+      : { en: "Not required for a building of six storeys or fewer in the clauses held by the app.", bn: "ছয় তলা বা কমের ভবনে অ্যাপে থাকা ধারা অনুযায়ী প্রযোজ্য নয়।" },
   });
 
   // Accessibility: lift where required; other items not checked.

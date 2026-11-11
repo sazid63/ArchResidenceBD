@@ -160,8 +160,8 @@ describe("narrow-plot plans (Phase B1)", () => {
     }
   });
 
-  it("a 2-flat plan fits a 4 katha plot (11 x 25 m) within coverage", () => {
-    const c = planChoices(11, 25, { roadWidthM: 6, storeys: 5, unitsPerFloor: 2 }).find((x) => x.plan.id === "pn-2f")!;
+  it("a 2-flat plan fits a 4.3 katha plot (11 x 26 m) within coverage (stairs are 1120 mm wide since P2-4, which costs 100 mm of depth)", () => {
+    const c = planChoices(11, 26, { roadWidthM: 6, storeys: 5, unitsPerFloor: 2 }).find((x) => x.plan.id === "pn-2f")!;
     expect(c.fit.ok).toBe(true);
     expect(c.coverage?.status).toBe("pass");
   });

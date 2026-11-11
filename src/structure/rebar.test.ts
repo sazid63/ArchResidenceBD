@@ -228,7 +228,7 @@ describe("audit of the bar bending schedule", () => {
       const lap = lapTension(12, "B", { topBar: true });
       // the pieces carry total + (pieces - 1) laps between them
       const total = (r.dimsMm[0] * pieces) - (pieces - 1) * lap;
-      expect(total).toBeGreaterThan(STOCK_LENGTH_MM - r.dimsMm[1]);
+      expect(total).toBeGreaterThan(STOCK_LENGTH_MM - 2 * r.dimsMm[1]); // one piece with a hook at both ends would not fit
       expect(r.dimsMm[0] + r.dimsMm[1]).toBeLessThanOrEqual(STOCK_LENGTH_MM + 1e-6);
     }
   });

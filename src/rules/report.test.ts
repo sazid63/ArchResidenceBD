@@ -136,3 +136,22 @@ describe("B5 lift size row", () => {
     expect(row.note!.en).toMatch(/assumptions/);
   });
 });
+
+describe("P2-4 fire and egress rows", () => {
+  it("evaluates travel distance, corridor, stair width and capacity as class A3, and keeps the second exit as not checked above six storeys", () => {
+    const rows = ready(project({ stories: 8 })).items.filter((i) => i.section === "fire");
+    const by = (id: string) => rows.find((r) => r.id === id)!;
+    expect(by("fire.travel").status).toBe("pass");
+    expect(by("fire.travel").expected).toEqual({ value: 45, unit: "m" });
+    expect(by("fire.stair-width").status).toBe("pass"); // 1120 mm flights
+    expect(by("fire.stair-width").expected).toEqual({ value: 1120, unit: "mm" });
+    expect(by("fire.stair-capacity").status).toBe("pass");
+    expect(by("fire.exits").status).toBe("not_checked");
+    expect(by("fire.travel").note!.en).toMatch(/A3/);
+  });
+
+  it("a building of six storeys or fewer has no second-exit requirement row to worry about", () => {
+    const row = ready(project({ stories: 4 })).items.find((i) => i.id === "fire.exits")!;
+    expect(row.status).toBe("not_applicable");
+  });
+});

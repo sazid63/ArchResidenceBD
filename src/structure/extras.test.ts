@@ -13,7 +13,7 @@ function build(planId: string, storeys: number) {
 }
 
 describe("members the first schedule left out: stairs, plinth beams, column stubs", () => {
-  it("concrete is the sum of every member, recomputed independently (floor 3000: stair 1.4475 m3 per storey by hand)", () => {
+  it("concrete is the sum of every member, recomputed independently (floor 3000: stair 1.611 m3 per storey by hand)", () => {
     const { model, res, bbs } = build("p2-2b-fb", 4);
     let want = 0;
     for (const lv of res.levels) {
@@ -28,9 +28,9 @@ describe("members the first schedule left out: stairs, plinth beams, column stub
     }
     for (const bm of model.storeys[1].geometry.beams) want += (PLINTH_BEAM_WIDTH_MM * PLINTH_BEAM_DEPTH_MM * bm.spanMm) / 1e9;
     for (const fo of res.foundation.footings) want += ((fo.x1 - fo.x0) * (fo.y1 - fo.y0) * fo.depthMm) / 1e9;
-    // stairs: 18 risers of 166.7 mm, 9 per flight, tread 250: waist 150 x 2.5 m incline x 1 m + 9 steps of 0.5 x 0.1667 x 0.25 x 1 m, twice, plus a 1.0 x 2.15 x 0.15 landing
-    const stairPerStorey = 2 * (0.15 * 2.5 + 9 * 0.5 * (3 / 18) * 0.25) + 1.0 * 2.15 * 0.15;
-    expect(stairPerStorey).toBeCloseTo(1.4475, 4);
+    // stairs: 18 risers of 166.7 mm, 9 per flight, tread 250: waist 150 x 2.5 m incline x 1 m + 9 steps of 0.5 x 0.1667 x 0.25 x 1 m, twice at 1.12 m wide, plus a 1.0 x 2.34 x 0.15 landing
+    const stairPerStorey = 2 * 1.12 * (0.15 * 2.5 + 9 * 0.5 * (3 / 18) * 0.25) + 1.0 * 2.34 * 0.15; // flights 1.12 m wide, landing 2 x 1.12 + 0.10 m
+    expect(stairPerStorey).toBeCloseTo(1.611, 3);
     want += stairPerStorey * model.storeys.length;
     // lift shaft: 150 mm walls from the 1.5 m pit to the machine-room roof less one 0.9 x 2.1 m door per storey, and the 250 mm pit slab
     const lr = model.roof.liftRoom!;
