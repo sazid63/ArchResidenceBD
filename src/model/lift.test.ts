@@ -60,3 +60,34 @@ describe("B5 lift sizing, pit and overrun", () => {
   });
 
 });
+
+describe("several shafts in one lift cell (P2-8)", () => {
+  it("capacity counts shafts side by side with 150 mm walls; lifts provided is the need up to the capacity", () => {
+    const s = liftSpec(build("p4-2b", 12))!; // 4 flats on 11 floors = 44 flats: two lifts
+    expect(s.liftsNeeded).toBe(2);
+    const [sw, sd] = s.cls.shaftMm;
+    const t = LIFT_ASSUMPTIONS.shaftWallMm;
+    const [a, b] = s.netMm;
+    const hand = Math.max(
+      b >= sd ? Math.floor((a + t) / (sw + t)) : 0,
+      a >= sd ? Math.floor((b + t) / (sw + t)) : 0,
+      b >= sw ? Math.floor((a + t) / (sd + t)) : 0,
+      a >= sw ? Math.floor((b + t) / (sd + t)) : 0,
+    );
+    expect(s.capacity).toBe(hand);
+    expect(s.liftsProvided).toBe(Math.max(1, Math.min(2, hand)));
+    expect(s.enoughLifts).toBe(2 <= hand);
+  });
+
+  it("a second shaft adds a partition wall and a second door per floor to the concrete", () => {
+    const one = liftCore(build("p4-2b", 9))!; // 32 flats: one lift
+    const two = liftCore(build("p4-2b", 12))!;
+    if (two.spec.liftsProvided === 2) {
+      expect(two.doorM2).toBeCloseTo((12 * 2 * 0.9 * 2.1), 6);
+      expect(two.wallM3 / two.heightMm).toBeGreaterThan(one.wallM3 / one.heightMm); // more wall per metre of height
+    } else {
+      expect(two.doorM2).toBeCloseTo(12 * 0.9 * 2.1, 6);
+    }
+    expect(one.spec.liftsProvided).toBe(1);
+  });
+});

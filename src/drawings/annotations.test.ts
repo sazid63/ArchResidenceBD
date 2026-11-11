@@ -54,3 +54,15 @@ describe("plan and section annotations (P1-4)", () => {
     expect(line).toBe(`slab ${res.levels[0].slabThicknessMm}, edge beam ${sec.bMm} x ${sec.hMm}`);
   });
 });
+
+describe("elevation level markers", () => {
+  it("every floor, the roof and the parapet top have a level marker", () => {
+    const { model, res } = build();
+    const sheet = buildSheets(model, res, "T", "d", "en").find((s) => s.id === "elevation-front")!;
+    const t = texts(sheet.scene.entities);
+    for (const st of model.storeys) expect(t.some((x) => x.startsWith(`+${(st.levelMm / 1000).toFixed(2)}`)), `level ${st.index}`).toBe(true);
+    const roof = model.roof.levelMm;
+    expect(t).toContain(`+${(roof / 1000).toFixed(2)} roof`);
+    expect(t).toContain(`+${((roof + model.roof.parapetMm) / 1000).toFixed(2)} parapet top`);
+  });
+});

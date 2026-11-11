@@ -53,6 +53,10 @@ export interface LiftSpec {
   travelMm: number;
   /** Top landing to the underside of the machine-room slab as built, mm. */
   overheadMm: number;
+  /** How many shafts of this class fit side by side in the plan's lift cell (separated by 150 mm walls). */
+  capacity: number;
+  /** Lifts the cell will hold: the lifts needed, up to its capacity. */
+  liftsProvided: number;
   fitsShaft: boolean;
   fitsOverhead: boolean;
   enoughLifts: boolean;
@@ -78,6 +82,10 @@ export function liftSpec(model: BuildingModel): LiftSpec | null {
   const net: readonly [number, number] = [Math.round(m.netWidthMm), Math.round(m.netDepthMm)];
   const [sw, sd] = cls.shaftMm;
   const fits = (net[0] >= sw && net[1] >= sd) || (net[0] >= sd && net[1] >= sw);
+  // Shafts side by side: along either axis, each shaft plus a 150 mm wall; the other axis must hold one shaft.
+  const t = LIFT_ASSUMPTIONS.shaftWallMm;
+  const along = (a: number, b: number, ca: number, cb: number) => (b >= cb ? Math.floor((a + t) / (ca + t)) : 0);
+  const capacity = Math.max(0, along(net[0], net[1], sw, sd), along(net[1], net[0], sw, sd), along(net[0], net[1], sd, sw), along(net[1], net[0], sd, sw));
   return {
     flatsServed,
     floorsServed: model.input.storeys,
@@ -90,9 +98,11 @@ export function liftSpec(model: BuildingModel): LiftSpec | null {
     pitMm: LIFT_ASSUMPTIONS.pitMm,
     travelMm: topLanding,
     overheadMm: overhead,
+    capacity,
+    liftsProvided: Math.max(1, Math.min(liftsNeeded, capacity)),
     fitsShaft: fits,
     fitsOverhead: overhead >= LIFT_ASSUMPTIONS.overheadMm,
-    enoughLifts: liftsNeeded <= 1,
+    enoughLifts: liftsNeeded <= capacity,
   };
 }
 
@@ -105,14 +115,15 @@ export function liftCore(model: BuildingModel): { spec: LiftSpec; perimeterMm: n
   const d = cell.y1 - cell.y0;
   const perimeter = 2 * (w + d);
   const height = spec.pitMm + model.roof.levelMm + model.roof.coverHeightMm;
-  const doors = model.storeys.length; // one lift door per floor served
+  const doors = model.storeys.length * spec.liftsProvided; // one lift door per floor served and per lift
   const doorM2 = (doors * LIFT_ASSUMPTIONS.doorMm[0] * LIFT_ASSUMPTIONS.doorMm[1]) / 1e6;
   const t = LIFT_ASSUMPTIONS.shaftWallMm;
   return {
     spec,
     perimeterMm: perimeter,
     heightMm: height,
-    wallM3: (perimeter * height * t) / 1e9 - (doorM2 * t) / 1000,
+    // plus a partition between side-by-side shafts, across the shorter side of the cell
+    wallM3: (perimeter * height * t) / 1e9 + ((spec.liftsProvided - 1) * Math.min(w, d) * height * t) / 1e9 - (doorM2 * t) / 1000,
     pitSlabM3: ((w + t) * (d + t) * LIFT_ASSUMPTIONS.pitSlabMm) / 1e9,
     doorM2,
   };

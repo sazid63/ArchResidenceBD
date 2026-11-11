@@ -383,8 +383,15 @@ export function elevationScene(model: BuildingModel, side: ElevationSide, opts: 
       sb.line("WINDOWS", (u0 + u1) / 2, z0, (u0 + u1) / 2, z1);
     }
   }
-  for (const st of model.storeys) sb.text("TEXT", across + stub + 200, st.levelMm + 80, 170, levelLabel(st.levelMm));
-  sb.text("TEXT", across + stub + 200, roofL + 80, 170, levelLabel(roofL));
+  // Level markers: a triangle on the level line and its value, for every floor, the roof and the top of the parapet.
+  const marker = (z: number, label: string) => {
+    const x = across + stub + 80;
+    sb.poly("LEVELS", [[x, z], [x + 260, z + 260], [x - 260 + 260, z + 260]], true);
+    sb.text("TEXT", x + 450, z + 80, 170, label);
+  };
+  for (const st of model.storeys) marker(st.levelMm, st.index === 0 ? `${levelLabel(st.levelMm)} ${T(lang, "ground floor", "নিচতলা")}` : levelLabel(st.levelMm));
+  marker(roofL, `${levelLabel(roofL)} ${T(lang, "roof", "ছাদ")}`);
+  marker(roofL + model.roof.parapetMm, `${levelLabel(roofL + model.roof.parapetMm)} ${T(lang, "parapet top", "প্যারাপেটের মাথা")}`);
   sb.dimension(-stub - 700, 0, -stub - 700, roofL, `${roofL}`);
   sb.text("TEXT", across / 2, -700, 190, SIDE_NAME[side][lang], "middle");
   return sb.scene(`elevation-${side}`, SIDE_NAME[side][lang]);
