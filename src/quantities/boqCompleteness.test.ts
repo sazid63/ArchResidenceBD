@@ -110,7 +110,7 @@ describe("labour and machine lines from output norms", () => {
     const line = (id: string) => boq.lines.find((l) => l.id === id)!;
     expect(line("labour-mason-brick").rateBdt).toBe(940);
     expect(line("mixer-days").rateBdt).toBe(1200);
-    expect(line("operator-days").rateBdt).toBe(700);
+    expect(line("operator-days").rateBdt).toBe(940);
     expect(line("vibrator-days").rateBdt).toBe(550);
     expect(line("labour-helper-brick").rateBdt).toBe(800);
     expect(line("labour-helper-finishes").rateBdt).toBe(800);

@@ -25,7 +25,7 @@ describe("rate card", () => {
     expect(DEFAULT_RATE_CARD.currency).toBe("BDT");
     expect(DEFAULT_RATE_CARD.source.name).toMatch(/PWD Schedule of Rates 2022/);
     expect(DEFAULT_RATE_CARD.source.sha256).toMatch(/^[a-f0-9]{64}$/);
-    expect(DEFAULT_RATE_CARD.asOf).toBe("2026-10-21");
+    expect(DEFAULT_RATE_CARD.asOf).toBe("2026-11-13");
     const keys = DEFAULT_RATE_CARD.lines.map((l) => l.key);
     expect(new Set(keys).size).toBe(keys.length);
     for (const l of DEFAULT_RATE_CARD.lines) {
@@ -159,10 +159,10 @@ describe("takeoff", () => {
 });
 
 describe("sand rate (checked against the market)", () => {
-  it("the card prices sand per cft at the SoR figure per 100 cft divided by 100, inside the local market range", () => {
+  it("the card prices sand per cft at the 2026 market mid-point, inside the local market range", () => {
     const sand = DEFAULT_RATE_CARD.lines.find((l) => l.key === "sand-fine")!;
     expect(sand.unit).toBe("cft");
-    expect(sand.rateBdt).toBe(1900 / 100);
+    expect(sand.rateBdt).toBe(22);
     expect(sand.rateBdt).toBeGreaterThanOrEqual(17); // local sand, market 2026: BDT 17 to 27 per cft
     expect(sand.rateBdt).toBeLessThanOrEqual(27);
   });
@@ -184,15 +184,15 @@ describe("pricing", () => {
   it("amount = quantity x card rate; the total is the sum of priced lines; unpriced items are named", () => {
     const boq = buildBoq(m, bbs);
     const steel = boq.lines.find((l) => l.id === "steel")!;
-    expect(steel.rateBdt).toBe(89000);
-    expect(steel.amountBdt).toBeCloseTo(((bbs.totals.weightKg * (1 + BOQ.steelWastage)) / 1000) * 89000, 4);
+    expect(steel.rateBdt).toBe(92000);
+    expect(steel.amountBdt).toBeCloseTo(((bbs.totals.weightKg * (1 + BOQ.steelWastage)) / 1000) * 92000, 4);
     const cem = boq.lines.find((l) => l.id === "concrete-cement")!;
-    expect(cem.amountBdt).toBeCloseTo(cem.quantity * 520, 6);
+    expect(cem.amountBdt).toBeCloseTo(cem.quantity * 500, 6);
     expect(boq.totalBdt).toBeCloseTo(boq.lines.reduce((s, l) => s + (l.amountBdt ?? 0), 0), 4);
     expect(boq.byCategory.reduce((s, c) => s + c.amountBdt, 0)).toBeCloseTo(boq.totalBdt, 4);
     const stone = boq.lines.find((l) => l.id === "concrete-stone")!;
-    expect(stone.rateBdt).toBe(218.04);
-    expect(stone.amountBdt).toBeCloseTo(stone.quantity * 218.04, 6);
+    expect(stone.rateBdt).toBe(230);
+    expect(stone.amountBdt).toBeCloseTo(stone.quantity * 230, 6);
     expect(boq.unpriced).not.toContain("concrete-stone");
     expect(boq.unpriced).not.toContain("steel");
     expect(boq.card.status).toBe("candidate");
