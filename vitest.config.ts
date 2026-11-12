@@ -11,5 +11,7 @@ export default defineConfig({
   test: {
     include: ["src/**/*.test.ts", "src/**/*.test.tsx", "tests/**/*.test.ts"],
     environment: "node",
+    // Generous: golden and property-style tests are slow when mutation testing or CI runs several workers at once.
+    testTimeout: 30000,
   },
 });

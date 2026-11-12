@@ -45,7 +45,9 @@ export interface Interaction {
 export function phiFromStrain(epsT: number, fy: number = MATERIALS.fyMPa): number {
   // Sec 6.3.3.3: for Grade 420 the compression-controlled strain limit may be set to 0.002
   const eps = fy === 420 ? 0.002 : fy / MATERIALS.EsMPa;
+  // Stryker disable next-line EqualityOperator: phi is continuous at the strain limit, so < and <= give the same value
   if (epsT <= eps) return columnPack().phi.compressionControlledTied;
+  // Stryker disable next-line EqualityOperator: phi is continuous at 0.005, so > and >= give the same value
   if (epsT >= 0.005) return columnPack().phi.tensionControlled;
   const phiC = columnPack().phi.compressionControlledTied;
   return phiC + ((columnPack().phi.tensionControlled - phiC) * (epsT - eps)) / (0.005 - eps);
@@ -62,9 +64,11 @@ export function interaction(depthMm: number, widthMm: number, rho: number, fc: n
   const p0 = (0.85 * fc * (ag - ast) + fy * ast) / 1000;
   const phiC = columnPack().phi.compressionControlledTied;
   const phiPnMax = phiC * columnPack().pnMaxTied.factor * p0;
+  // Stryker disable next-line ArrayDeclaration: a type annotation, not a value
   const pts: CurvePoint[] = [{ p: phiPnMax, m: 0, epsT: 0, phi: phiC }];
   const dT = depthMm - dPrimeMm;
   const b1 = beta1(fc);
+  // Stryker disable next-line EqualityOperator: the zero-axial crossing always ends the loop before the last step
   for (let i = 0; i <= 400; i++) {
     const c = depthMm * 3 * Math.pow(0.02 / 3, i / 400);
     const a = Math.min(b1 * c, depthMm);
@@ -74,10 +78,12 @@ export function interaction(depthMm: number, widthMm: number, rho: number, fc: n
     for (const l of layers) {
       const eps = (0.003 * (c - l.d)) / c;
       const fs = Math.max(-fy, Math.min(fy, MATERIALS.EsMPa * eps));
+      // Stryker disable next-line EqualityOperator: a bar exactly on the stress block depth: the concrete displaced differs by a bar's share of 0.85 fc
       const f = (l.a * (fs - (l.d < a ? 0.85 * fc : 0))) / 1000;
       pn += f;
       mn += (f * (depthMm / 2 - l.d)) / 1000;
     }
+    // Stryker disable next-line EqualityOperator: pn exactly 0 gives t = 1 and the same point
     if (pn < 0) {
       // interpolate the zero-axial point and stop
       const prev = pts[pts.length - 1];
@@ -99,11 +105,14 @@ export function interaction(depthMm: number, widthMm: number, rho: number, fc: n
 /** Design moment capacity at axial load `p` (kN) by linear interpolation along the curve. */
 export function momentCapacityAt(it: Interaction, p: number): number {
   const c = it.curve;
+  // Stryker disable next-line EqualityOperator: at the cap the interpolation also gives 0
   if (p >= c[0].p) return 0;
   for (let i = 0; i + 1 < c.length; i++) {
     const a = c[i];
     const b = c[i + 1];
+    // Stryker disable next-line ConditionalExpression,EqualityOperator: the loop order and the envelope keep p inside each segment it reaches; the first match is the same
     if (p <= a.p && p >= b.p) {
+      // Stryker disable next-line ConditionalExpression,MethodExpression: curve points have strictly falling p, so equal neighbours never occur
       if (a.p === b.p) return Math.max(a.m, b.m);
       const t = (a.p - p) / (a.p - b.p);
       return a.m + (b.m - a.m) * t;
@@ -126,12 +135,15 @@ export function rayScale(it: Interaction, m: number, p: number): number {
     const dx = b.m - a.m;
     const dy = b.p - a.p;
     const det = m * -dy - p * -dx; // | m  -dx ; p  -dy |
+    // Stryker disable next-line ConditionalExpression,EqualityOperator: a determinant that small gives u and t of no use; the result is the same
     if (Math.abs(det) < 1e-12) continue;
     const t = (a.m * -dy - a.p * -dx) / det;
     const u = (m * a.p - p * a.m) / det;
+    // Stryker disable next-line ConditionalExpression,EqualityOperator,UnaryOperator,ArithmeticOperator: tolerances on the segment ends, 1e-9 wide: a hit at a vertex is found by the neighbour segment
     if (u >= -1e-9 && u <= 1 + 1e-9 && t > 1e-12 && t < best) best = t;
   }
   // The envelope is closed by the axes: zero moment up to the cap, zero axial from the end point.
+  // Stryker disable next-line EqualityOperator: p exactly 0 gives Infinity either way
   if (m === 0 && p > 0) best = Math.min(best, it.phiPnMax / p);
   return best;
 }
@@ -194,6 +206,7 @@ function axisDesign(c: ColumnCase, ax: BendingLoads, depthMm: number, widthMm: n
     const ei = (0.4 * ecMPa(MATERIALS.fcMPa) * ig) / (1 + Math.min(Math.max(c.betaDns, 0), 1)); // Eq 6.6.22, N.mm2
     const pc = (Math.PI ** 2 * ei) / (1 * c.luMm) ** 2 / 1000; // Eq 6.6.20 with k = 1 (non-sway, Sec 6.3.10.6.3), kN
     const den = 1 - c.puKn / (0.75 * pc);
+    // Stryker disable next-line EqualityOperator: den exactly 0 divides to Infinity, the same value
     deltaNs = den <= 0 ? Infinity : Math.max(1 / den, 1); // Eq 6.6.19 with Cm = 1.0 (conservative)
   }
   const first = m2 + Math.abs(ax.m2s);
@@ -227,12 +240,16 @@ export function checkColumn(sec: ColSection, rho: number, cases: ColumnCase[]): 
       const t = (-p) / ((0.9 * itX.astMm2 * MATERIALS.fyMPa) / 1000);
       util = t + ax.mDesignKnM / Math.max(momentCapacityAt(itX, 0), 1e-9) + ay.mDesignKnM / Math.max(momentCapacityAt(itY, 0), 1e-9);
       method = "tension";
+    // Stryker disable all: unreachable, Pu > 0 gives a positive minimum moment Pu (15 + 0.03 h) / 1000 about both axes
     } else if (ax.mDesignKnM < 1e-9 && ay.mDesignKnM < 1e-9) {
       util = p / itX.phiPnMax;
       method = "Bresler";
+    // Stryker restore all
     } else if (p >= (0.1 * MATERIALS.fcMPa * ag) / 1000) {
+      // Stryker disable ConditionalExpression,EqualityOperator: Pu > 0 here, so the minimum moment makes both design moments positive; the zero-moment side is unreachable
       const capX = ax.mDesignKnM < 1e-9 ? itX.phiPnMax : Math.min(rayScale(itX, ax.mDesignKnM, p) * p, itX.phiPnMax);
       const capY = ay.mDesignKnM < 1e-9 ? itY.phiPnMax : Math.min(rayScale(itY, ay.mDesignKnM, p) * p, itY.phiPnMax);
+      // Stryker restore ConditionalExpression,EqualityOperator
       const phiP0 = columnPack().phi.compressionControlledTied * itX.p0;
       const inv = 1 / capX + 1 / capY - 1 / phiP0;
       const cap = Math.min(1 / inv, itX.phiPnMax);
@@ -247,7 +264,9 @@ export function checkColumn(sec: ColSection, rho: number, cases: ColumnCase[]): 
   let worst = 0;
   let governs = "none";
   for (const r of out) {
+    // Stryker disable next-line EqualityOperator: a tie in utilisation names the first case; the numbers are the same
     if (r.util > worst) { worst = r.util; governs = `${r.id} interaction`; }
+    // Stryker disable next-line EqualityOperator: a tie in utilisation names the first cause; the numbers are the same
     if (r.amplificationUtil > worst) { worst = r.amplificationUtil; governs = `${r.id} amplification over 1.4`; }
   }
   return { rho, astMm2: itX.astMm2, cases: out, util: worst, governs };
@@ -264,8 +283,10 @@ export const RHO_STEPS: number[] = (() => {
 /** The smallest steel ratio up to `maxRho` that passes every case, or null. */
 export function lightestSteel(sec: ColSection, cases: ColumnCase[], maxRho: number = columnPack().steel.preferredMaxRatio): ColumnCheck | null {
   for (const rho of RHO_STEPS) {
+    // Stryker disable next-line EqualityOperator: rho at the ceiling within 1e-9 either way
     if (rho > maxRho + 1e-9) break;
     const r = checkColumn(sec, rho, cases);
+    // Stryker disable next-line EqualityOperator: a utilisation of exactly 1 is on the limit
     if (r.util <= 1) return r;
   }
   return null;

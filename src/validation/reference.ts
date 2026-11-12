@@ -91,8 +91,8 @@ export function refPureAxial(h: number, b: number, rho: number, fc: number, fy: 
 }
 
 /** Normalised spectrum from the four branch equations, written as a table of (period limit, value at limit) segments. */
-export function refCs(t: number, s: number, tb: number, tc: number, td: number): number {
-  const plateau = 2.5 * s;
+export function refCs(t: number, s: number, tb: number, tc: number, td: number, eta = 1): number {
+  const plateau = 2.5 * eta * s;
   if (t <= tb) return s + (plateau - s) * (t / tb);
   if (t <= tc) return plateau;
   if (t <= td) return plateau * (tc / t);

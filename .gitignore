@@ -63,3 +63,8 @@ playwright-report/
 # Code-signing certificates
 *.pfx
 src-tauri/dev-certificate.pfx
+
+# Mutation testing output
+.stryker-tmp/
+reports/
+stryker-setup-*.js
