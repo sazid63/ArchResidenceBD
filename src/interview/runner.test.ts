@@ -45,7 +45,7 @@ describe("flow book integrity", () => {
 
   it("loads every flow with unique question ids and Bangla beside English", () => {
     expect(book.flows.map((f) => f.id)).toEqual(["setup", "site-excavation", "foundation", "floor", "roof-boundary", "common-services"]);
-    expect(qs.length).toBe(60);
+    expect(qs.length).toBe(59);
     expect(new Set(qs.map((q) => q.id)).size).toBe(qs.length);
     for (const q of qs) {
       expect(q.ask.en && q.ask.bn).toBeTruthy();
@@ -353,7 +353,7 @@ describe("derive with nothing to derive from, and cross-flow conditions", () => 
     const pile = drive(startInterview(freshSpec(), "foundation"), { "foundation-system": "pile" }, 1).state;
     expect(pile.current?.key).toBe("pile-preference");
     const raft = drive(startInterview(freshSpec(), "foundation"), { "foundation-system": "raft" }, 1).state;
-    expect(raft.current?.key).toBe("rebar-grade");
+    expect(raft.current?.key).toBe("water-hit-digging");
     expect(raft.log.find((l) => l.key === "pile-preference")?.outcome).toBe("not_applicable");
   });
 

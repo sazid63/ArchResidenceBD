@@ -85,9 +85,9 @@ describe("a phase conversation", () => {
     let s = chatStart(spec(), "phase-foundation", "en", NOW);
     s = say(s, "phase-foundation", "raft");
     const again = JSON.parse(JSON.stringify(s)) as ProjectSpec;
-    expect(chatView(again, "phase-foundation", "en").step?.key).toBe("rebar-grade"); // pile-preference not applicable for raft
+    expect(chatView(again, "phase-foundation", "en").step?.key).toBe("water-hit-digging"); // pile-preference not applicable for raft
     const s2 = say(again, "phase-foundation", "jani na");
-    expect(chatView(s2, "phase-foundation", "en").answers.length).toBe(2);
+    expect(chatView(s2, "phase-foundation", "en").answers.length).toBe(1);
   });
 
   it("works in Bangla: Bangla questions, Bangla chips, Bangla answers", () => {

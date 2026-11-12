@@ -659,32 +659,6 @@ flows:
           kind: default
           value: no-preference
 
-      - id: rebar-grade
-        ask:
-          en: "Which rebar grade should we use?"
-          bn: "রিবারের গ্রেড কোনটি নেব?"
-        why:
-          en: "60 grade (B500) is the everyday standard; higher grade only if it is easy to source."
-          bn: "৬০ গ্রেড (B500) সাধারণ মান; বেশি গ্রেড তখনই, যদি সহজে জোগাড় হয়।"
-        type: choice
-        options:
-          - value: app-decides
-            label:
-              en: "Let the app decide"
-              bn: "অ্যাপ ঠিক করবে"
-          - value: grade60
-            label:
-              en: "60 grade (B500)"
-              bn: "৬০ গ্রেড (B500)"
-          - value: grade72
-            label:
-              en: "72.5 grade (B600), if available"
-              bn: "৭২.৫ গ্রেড (B600) — এলাকায় পেলে"
-        maps_to: /phases/foundation/data/rebarGradePref
-        fallback:
-          kind: default
-          value: app-decides
-
       - id: water-hit-digging
         ask:
           en: "While digging (or in an old well), did you see water rising?"
