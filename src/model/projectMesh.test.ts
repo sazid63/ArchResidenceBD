@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { createNewProject, type BuildingProject } from "../engine/projectState";
-import { generateBuildingMesh } from "../cad/parametricBuildingGenerator";
 import { buildingForProject, buildingInputFor, meshForProject } from "./projectMesh";
 
 const plot = { frontageM: 12.2, depthM: 19.8, roadWidthM: 6, roadSide: "south" as const };
@@ -39,15 +38,14 @@ describe("projectMesh", () => {
     expect(meshForProject(tiny, "final")!.objects).toEqual([]);
   });
 
-  it("is what generateBuildingMesh returns for a project with plot and plan", () => {
-    const p = project();
-    const viaGenerator = generateBuildingMesh(p, "final");
-    expect(viaGenerator.objects.length).toBe(meshForProject(p, "final")!.objects.length);
-    expect(viaGenerator.objects.some((o) => o.kind === "footing")).toBe(true);
+  it("gives a project with plot and plan a model-built mesh with footings", () => {
+    const mesh = meshForProject(project(), "final")!;
+    expect(mesh.objects.length).toBeGreaterThan(0);
+    expect(mesh.objects.some((o) => o.kind === "footing")).toBe(true);
   });
 
   it("gives a save with no plot shape an empty mesh, never a guessed building", () => {
     const old = project({ plot: undefined, planId: undefined });
-    expect(generateBuildingMesh(old, "final").objects).toEqual([]);
+    expect(meshForProject(old, "final")?.objects ?? []).toEqual([]);
   });
 });

@@ -1,5 +1,5 @@
 /** Quick smoke test for exporters + generator. */
-import { generateBuildingMesh } from "../../src/cad/parametricBuildingGenerator.js";
+import { meshForProject } from "../../src/model/projectMesh.js";
 import { generateRandomBuildingProject } from "../../src/engine/projectState.js";
 import { buildFreeCadMacro, buildIfcStep, validateIfcStep } from "../../src/cad/exporters.js";
 import { mkdirSync, writeFileSync, statSync } from "node:fs";
@@ -10,8 +10,8 @@ const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = join(SCRIPT_DIR, "exporter-out");
 mkdirSync(OUT_DIR, { recursive: true });
 
-const project = generateRandomBuildingProject();
-const doc = generateBuildingMesh(project);
+const project = generateRandomBuildingProject(() => 0.3); // fixed archetype: the same building every run
+const doc = meshForProject(project)!;
 console.log(`[exporter-test] objects=${doc.objects.length} notes=${(doc as any).notes?.length ?? 0}`);
 
 const meta = {

@@ -33,7 +33,7 @@ import { deriveBuilding, DEFAULT_SETBACKS_MM, type BuildingInput } from "../../s
 import { buildMesh } from "../../src/model/toMesh";
 import { fitRange } from "../../src/plans/fit";
 import { PLAN_LIBRARY, verandahVariants } from "../../src/plans/library";
-import type { BuildingCustomization } from "../../src/cad/parametricBuildingGenerator";
+import type { BuildingCustomization } from "../../src/types/customization";
 import { getColorForObject } from "../../src/cad/viewer";
 import type { MeshDocument, MeshObject } from "../../src/cad/mesh";
 

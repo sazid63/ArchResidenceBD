@@ -228,7 +228,8 @@ export function createNewProject(params: {
   return project;
 }
 
-export function generateRandomBuildingProject(): BuildingProject {
+/** A sample Dhaka project. `pick` chooses the archetype (default: random); pass a fixed function for a repeatable result. */
+export function generateRandomBuildingProject(pick: () => number = Math.random): BuildingProject {
   // Dhaka (RAJUK) plots; each is sized so at least one library plan fits.
   const archetypes = [
     { name: "Banani Family House (6-Storey)", address: "Road 11, Banani, Dhaka", stories: 6, frontageFt: 40, depthFt: 65, roadFt: 20, unitsPerFloor: 1 },
@@ -239,7 +240,7 @@ export function generateRandomBuildingProject(): BuildingProject {
     { name: "Mirpur Residential Block (5-Storey)", address: "Section 10, Mirpur, Dhaka", stories: 5, frontageFt: 45, depthFt: 80, roadFt: 20, unitsPerFloor: 2 },
   ];
 
-  const selected = archetypes[Math.floor(Math.random() * archetypes.length)];
+  const selected = archetypes[Math.min(archetypes.length - 1, Math.floor(pick() * archetypes.length))];
   const { name, address, stories, unitsPerFloor } = selected;
   const frontageM = Math.round(selected.frontageFt * FEET_TO_M * 100) / 100;
   const depthM = Math.round(selected.depthFt * FEET_TO_M * 100) / 100;

@@ -5,14 +5,15 @@ import { generateRandomBuildingProject } from "./projectState";
 describe("the random demo building", () => {
   it("always gets a plan that fits its plot, so the 3D model is never empty", () => {
     const seen = new Set<string>();
-    for (let i = 0; i < 80; i++) {
-      const p = generateRandomBuildingProject();
+    for (let i = 0; i < 6; i++) {
+      const p = generateRandomBuildingProject(() => (i + 0.5) / 6); // each of the six archetypes, no randomness
       seen.add(p.name);
       const b = buildingForProject(p);
       expect(p.planId, p.name).toBeTruthy();
       expect(b && b.ok, `${p.name}: ${b && !b.ok ? b.reasons.map((r) => r.message.en).join(" ") : "no building"}`).toBe(true);
     }
-    expect(seen.size).toBeGreaterThanOrEqual(5); // every archetype was drawn at least in passing
+    expect(seen.size).toBe(6);
+    expect(generateRandomBuildingProject(() => 0.1).name).toBe(generateRandomBuildingProject(() => 0.1).name);
   });
 });
 
