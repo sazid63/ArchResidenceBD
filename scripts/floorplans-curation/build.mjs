@@ -160,7 +160,7 @@ md.push('| bd-3u-017 | 2+ unit | 1-unit | "Type-A 1550 sqft 1st to 6th floor pla
 md.push('| bd-3u-020 | 2+ unit | 1-unit | the picked plan is a single dwelling on the floor |');
 md.push('| bd-3u-002 / bd-3u-005 | 2+ unit | 2+ unit | confirmed 3 units (Unit-A/B/C), two different renderings of one plan |');
 md.push('');
-fs.writeFileSync(path.join(REPO, 'FLOORPLAN_CURATION_RESULTS.md'), md.join('\n'));
+fs.writeFileSync(path.join(REPO, 'docs/notes/FLOORPLAN_CURATION_RESULTS.md'), md.join('\n'));
 
 console.log('saved', rows.length, 'files;', JSON.stringify(manifest.counts));
 console.log('skipped', skipped.length);

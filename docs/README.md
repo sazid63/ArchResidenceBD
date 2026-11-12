@@ -8,10 +8,10 @@ All project documentation, audit reports, and technical references.
 
 | File | Description |
 |------|-------------|
-| [FINAL_AUDIT_REPORT.md](FINAL_AUDIT_REPORT.md) | **Master summary** — complete audit across all 5 phases |
-| [CODE_AUDIT_REPORT.md](CODE_AUDIT_REPORT.md) | Initial line-by-line code audit (124 files, ~25k LOC) |
-| [CODE_QUALITY_AUDIT_REPORT.md](CODE_QUALITY_AUDIT_REPORT.md) | Code quality, duplication, bloat, and type safety analysis |
-| [CAD_ENGINE_AUDIT_REPORT.md](CAD_ENGINE_AUDIT_REPORT.md) | CAD engine audit — 27 issues fixed across 10 modules |
+| [FINAL_AUDIT_REPORT.md](audit-reports/FINAL_AUDIT_REPORT.md) | **Master summary** — complete audit across all 5 phases |
+| [CODE_AUDIT_REPORT.md](audit-reports/CODE_AUDIT_REPORT.md) | Initial line-by-line code audit (124 files, ~25k LOC) |
+| [CODE_QUALITY_AUDIT_REPORT.md](audit-reports/CODE_QUALITY_AUDIT_REPORT.md) | Code quality, duplication, bloat, and type safety analysis |
+| [CAD_ENGINE_AUDIT_REPORT.md](audit-reports/CAD_ENGINE_AUDIT_REPORT.md) | CAD engine audit — 27 issues fixed across 10 modules |
 | [BUGS_FOUND.md](BUGS_FOUND.md) | Structured bug report from Rafiq's user test |
 
 ---
