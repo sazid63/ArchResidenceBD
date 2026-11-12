@@ -12,14 +12,15 @@
 import type { BuildingModel } from "../model/building";
 import { columnPack, structurePack, type OccupancyGroup, type SiteClass } from "../rules/bnbcStructure";
 import type { LevelResult, MemberFailure } from "./analyze";
+import type { BeamSpanResult } from "./beam";
 import { analyseSpans } from "./continuousBeam";
 import { COLUMN_STOCK, checkColumn, D_PRIME_MM, interaction, lightestSteel, RHO_STEPS, type CaseResult, type ColSection, type ColumnCase, type Interaction } from "./column";
-import { beamMn, columnMnAt, strongColumnCheck } from "./capacity";
+import { beamMn, columnMnAt, PROBABLE_FY_FACTOR, strongColumnCheck } from "./capacity";
 import { ldCompression } from "./anchorage";
 import { pickBeamBars, pickColumnBars } from "./barSelect";
 import { designFooting, type ColumnPosition, type FootingResult } from "./footing";
 import { factoredLoad, liveReductionFactor } from "./loads";
-import { ecMPa, MATERIALS, UNIT_WEIGHTS } from "./materials";
+import { DESIGN, ecMPa, MATERIALS, UNIT_WEIGHTS } from "./materials";
 import { tBeamInertia } from "./tbeam";
 import { analyseSeismic, DHAKA_Z, liveWeightFraction, systemById, type SeismicResult } from "./seismic";
 import { checkCore, coreSection, dualLateral, wallProps, type CoreCheck, type CoreSection, type DualResult } from "./core";
@@ -80,6 +81,20 @@ export interface FrameResult {
   core: CoreResult | null;
   /** Eq 6.8.5 checks at the joints where Sec 8.3.5.2 applies and beams frame in that direction. */
   strongColumn: StrongColumnJoint[];
+  /** Joint shear checks (Sec 8.3.7.3) at each beam joint and direction. */
+  jointShear: JointShearCheck[];
+}
+
+export interface JointShearCheck {
+  level: number;
+  columnId: string;
+  dir: "x" | "y";
+  /** Confinement factor gamma (1.7, 1.2 or 1.0, times sqrt(fc') in MPa). */
+  gamma: number;
+  vuKn: number;
+  phiVnKn: number;
+  util: number;
+  ok: boolean;
 }
 
 export interface StrongColumnJoint {
@@ -121,6 +136,17 @@ interface Joint {
   /** Sum of nominal beam top-steel moments at the joint, kN.m, per direction (eq 6.8.5 beam side). */
   mnbX: number;
   mnbY: number;
+  /** Beam ends framing into the joint in each direction, for the joint shear check (Sec 8.3.7.3). */
+  endsX: JointEnd[];
+  endsY: JointEnd[];
+}
+
+interface JointEnd {
+  /** Beam width, mm. */
+  w: number;
+  /** Top bar area at this end and bottom bar area of the same beam, mm2. */
+  asTop: number;
+  asBot: number;
 }
 
 const MAX_ITERATIONS = 30;
@@ -128,7 +154,7 @@ const MAX_ITERATIONS = 30;
 export const FRAME_MIN_SHARE = 0.25;
 /** Buildings taller than this many storeys default to the dual system (special RC moment frames with special RC shear walls, Table 6.2.19 D.3). */
 export const DUAL_ABOVE_STOREYS = 7;
-const emptyJoint = (): Joint => ({ dead: 0, liveTable: 0, livePart: 0, area: 0, kbX: 0, kbY: 0, munbX: 0, munbY: 0, hX: 0, hY: 0, mnbX: 0, mnbY: 0 });
+const emptyJoint = (): Joint => ({ dead: 0, liveTable: 0, livePart: 0, area: 0, kbX: 0, kbY: 0, munbX: 0, munbY: 0, hX: 0, hY: 0, mnbX: 0, mnbY: 0, endsX: [], endsY: [] });
 const key = (x: number, y: number) => `${x},${y}`;
 const areaOf = (s: ColSection) => s.bx * s.by;
 
@@ -203,6 +229,10 @@ export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: 
         const topMn = (side: { asReqMm2: number }) => beamMn(pickBeamBars(side.asReqMm2, sec.bMm).areaMm2, sec.bMm, line.result.dMm);
         const mnb = (left >= 0 ? topMn(sp[left].negRight) : 0) + (right >= 0 ? topMn(sp[right].negLeft) : 0);
         if (horizontal) jt.mnbX += mnb; else jt.mnbY += mnb;
+        const ends = horizontal ? jt.endsX : jt.endsY;
+        const endOf = (side: { asReqMm2: number }, span: BeamSpanResult) => ({ w: sec.bMm, asTop: pickBeamBars(side.asReqMm2, sec.bMm).areaMm2, asBot: span.pos.asReqMm2 });
+        if (left >= 0) ends.push(endOf(sp[left].negRight, sp[left]));
+        if (right >= 0) ends.push(endOf(sp[right].negLeft, sp[right]));
         if (horizontal) { jt.kbX += kb; jt.munbX = Math.max(jt.munbX, munb); jt.hX = Math.max(jt.hX, sec.hMm); }
         else { jt.kbY += kb; jt.munbY = Math.max(jt.munbY, munb); jt.hY = Math.max(jt.hY, sec.hMm); }
       }
@@ -224,6 +254,49 @@ export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: 
       return Math.min(...cases.map((c) => columnMnAt(it!, c.puKn > 0 ? c.puKn / phi : c.puKn)));
     };
     return { x: lowest(sec.bx, sec.by), y: lowest(sec.by, sec.bx) };
+  };
+  /**
+   * Joint shear, Sec 8.3.7.3: Vn <= gamma sqrt(fc') Aj with gamma from the joint confinement (1.7 four faces, 1.2 three faces or two
+   * opposite faces, 1.0 others). Vu is the probable beam end force: 1.25 fy in the top bars of one beam end plus the bottom bars of
+   * the beam end on the opposite face (a single beam end gives its tension alone); column shear taken as zero (conservative).
+   * Aj = bj hc with bj = min(bc, bb + hc) (assumption: common simplified form). The joint core takes the column below the joint
+   * (storey k): sizing then grows that column until its joint passes, top down, without a feedback loop. A member covers a face
+   * when it spans at least three-quarters of the column face. The check is against phi Vn with DESIGN.phiShear.
+   */
+  const jointShearAt = (k: number, jt: Joint, below: ColSection, colId: string): JointShearCheck[] => {
+    const faceX = below.by; // face perpendicular to x beams
+    const faceY = below.bx; // face perpendicular to y beams
+    const covered = (ends: JointEnd[], face: number) => ends.filter((e) => e.w >= 0.75 * face).length;
+    const fx = covered(jt.endsX, faceX);
+    const fy = covered(jt.endsY, faceY);
+    const total = fx + fy;
+    const gamma = total >= 4 ? 1.7 : total === 3 || (total === 2 && (fx === 2 || fy === 2)) ? 1.2 : 1.0;
+    const fyProbable = PROBABLE_FY_FACTOR * MATERIALS.fyMPa;
+    const out: JointShearCheck[] = [];
+    for (const dir of ["x", "y"] as const) {
+      const ends = dir === "x" ? jt.endsX : jt.endsY;
+      if (ends.length === 0) continue;
+      let vuKn = 0;
+      for (let a = 0; a < ends.length; a++)
+        for (let b = 0; b < ends.length; b++) {
+          if (a === b && ends.length > 1) continue;
+          vuKn = Math.max(vuKn, (fyProbable * (ends[a].asTop + (ends.length > 1 ? ends[b].asBot : 0))) / 1000);
+        }
+      const hc = dir === "x" ? below.bx : below.by;
+      const bc = dir === "x" ? faceX : faceY;
+      const bb = Math.max(...ends.map((e) => e.w));
+      const aj = Math.min(bc, bb + hc) * hc;
+      const phiVnKn = (DESIGN.phiShear * gamma * Math.sqrt(MATERIALS.fcMPa) * aj) / 1000;
+      const util = phiVnKn > 0 ? vuKn / phiVnKn : Infinity;
+      out.push({ level: k, columnId: colId, dir, gamma, vuKn, phiVnKn, util, ok: util <= 1 });
+    }
+    return out;
+  };
+  /** Sizing gate: the joint at level i passes Sec 8.3.7.3 with the candidate column below it and the storey above as chosen. */
+  const jointHoldsAt = (i: number, ci: number, s: ColSection): boolean => {
+    const jt = joints[i].get(cols[ci].key);
+    if (!jt) return true;
+    return jointShearAt(i, jt, s, cols[ci].id).every((c) => c.ok);
   };
   /** Sec 8.3.5.2 applies to a joint where a framing column has Pu above 0.1 Ag fc'. */
   const eqAppliesAt = (sec: ColSection, pu: number): boolean => pu > (0.1 * sec.bx * sec.by * MATERIALS.fcMPa) / 1000;
@@ -470,7 +543,7 @@ export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: 
           if (areaOf(s) < start || inertiaX(s) < floorIx[i][ci] || inertiaY(s) < floorIy[i][ci]) continue;
           const { cases, pu } = casesFor(i, ci, s);
           const r = lightestSteel(s, cases);
-          if (r && scwbHolds(i, ci, s, r.rho, cases, pu)) { chosen = s; rho = r.rho; break; }
+          if (r && scwbHolds(i, ci, s, r.rho, cases, pu) && jointHoldsAt(i, ci, s)) { chosen = s; rho = r.rho; break; }
         }
         if (!chosen) {
           // nothing passes within 4 %: take the largest section at up to 6 % steel, reporting its (failing) utilisation
@@ -539,6 +612,18 @@ export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: 
       }
     });
 
+  // ---- joint shear, Sec 8.3.7.3 (see jointShearAt) ----------------------------------------------------------------
+  const jointShear: JointShearCheck[] = [];
+  for (let k = 0; k < n && k < levels.length; k++)
+    columns.forEach((c, ci) => {
+      const jt = joints[k].get(cols[ci].key);
+      if (!jt) return;
+      for (const chk of jointShearAt(k, jt, c.storeys[k].section, c.id)) {
+        jointShear.push(chk);
+        if (!chk.ok) failures.push({ level: k, member: "column", id: `${c.id}/joint-shear-L${k}-${chk.dir}`, util: chk.util, governs: "joint shear, Sec 8.3.7.3" });
+      }
+    });
+
   for (const [dir, seis] of [["x", ctx.seisX], ["y", ctx.seisY]] as const)
     for (const s of seis.storeys) {
       if (s.util > 1) failures.push({ level: s.storey, member: "seismic", id: `drift-${dir}/S${s.storey}`, util: s.util, governs: "drift" });
@@ -557,5 +642,5 @@ export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: 
   if (!ctx.seisX.permitted) failures.push({ level: -1, member: "seismic", id: "seismic-system", util: Infinity, governs: "system not permitted" });
   failures.sort((a, b) => b.util - a.util);
   const util = Math.max(0, ...columns.map((c) => c.util), ctx.seisX.util, ctx.seisY.util, coreResult?.x.util ?? 0, coreResult?.y.util ?? 0);
-  return { columns, seismicX: ctx.seisX, seismicY: ctx.seisY, options: o, failures, util, converged, iterations, core: coreResult, strongColumn };
+  return { columns, seismicX: ctx.seisX, seismicY: ctx.seisY, options: o, failures, util, converged, iterations, core: coreResult, strongColumn, jointShear };
 }

@@ -10,6 +10,7 @@ import { analyseSpans, envelope, midMoment } from "./continuousBeam";
 import { beamSelfWeightKnM, liveReductionFactor, wallLineLoadKnM } from "./loads";
 import { DESIGN, ecMPa, MATERIALS } from "./materials";
 import { beamMinAs, crackedInertia, flexure, shear, type FlexureResult, type ShearResult } from "./section";
+import { beamMpr, beamVe } from "./capacity";
 
 export interface BeamSection {
   bMm: number;
@@ -139,7 +140,10 @@ export function designBeamLine(input: BeamLineInput, sec: BeamSection): BeamLine
     const pos = flexure(mPos, sec.bMm, dMm, minAs);
     const negLeft = flexure(mNegL, sec.bMm, dMm, minAs);
     const negRight = flexure(mNegR, sec.bMm, dMm, minAs);
-    const sh = shear(vu, sec.bMm, dMm);
+    // Sec 8.3.8.1 (a): design shear of an SMF beam from the probable end moments and the factored gravity load, never below Vu
+    const clearLnMm = s.lengthMm - DESIGN.supportWidthMm;
+    const ve = beamVe(beamMpr(negLeft.asReqMm2, sec.bMm, dMm), beamMpr(negRight.asReqMm2, sec.bMm, dMm), clearLnMm, wFull, vu);
+    const sh = shear(ve, sec.bMm, dMm);
 
     const asProv = Number.isFinite(pos.asReqMm2) ? pos.asReqMm2 : minAs;
     const mDL = midMoment({ lengthM: L, w: dead[i] + live[i] }, service[i]);
@@ -162,7 +166,7 @@ export function designBeamLine(input: BeamLineInput, sec: BeamSection): BeamLine
       mPosKnM: mPos,
       mNegLeftKnM: mNegL,
       mNegRightKnM: mNegR,
-      vuKn: vu,
+      vuKn: ve,
       pos,
       negLeft,
       negRight,

@@ -29,3 +29,16 @@ describe("eq 6.8.5 strong column / weak beam, wired", () => {
     }
   });
 });
+
+// Joint shear, Sec 8.3.7.3: the sizing grows the column below each joint until Vu <= phi gamma sqrt(fc') Aj.
+describe("joint shear, Sec 8.3.7.3, wired", () => {
+  it("every checked joint passes after sizing, with a confinement factor of 1.0, 1.2 or 1.7", () => {
+    for (const storeys of [2, 4, 8]) {
+      const r = analyse(storeys);
+      expect(r.frame.jointShear.length).toBeGreaterThan(0);
+      expect(r.frame.jointShear.every((j) => j.ok && j.util <= 1)).toBe(true);
+      expect(r.frame.jointShear.every((j) => [1.0, 1.2, 1.7].includes(j.gamma))).toBe(true);
+      expect(r.failures.filter((f) => f.governs.startsWith("joint shear"))).toHaveLength(0);
+    }
+  });
+});

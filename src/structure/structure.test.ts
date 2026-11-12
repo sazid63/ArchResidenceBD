@@ -5,6 +5,7 @@ import { DEFAULT_SETBACKS_MM, deriveBuilding } from "../model/building";
 import { bnbcPack, liveLoadKnM2 } from "../rules/bnbc";
 import { alphaF, analyzeStructure, tBeamInertia } from "./analyze";
 import { designBeamLine, sizeBeamLine, type BeamLineInput } from "./beam";
+import { beamMpr, beamVe } from "./capacity";
 import { analyseSpans, envelope, supportMoments } from "./continuousBeam";
 import { factoredLoad, liveReductionFactor, slabSelfWeightKnM2, wallLineLoadKnM } from "./loads";
 import { UNIT_WEIGHTS } from "./materials";
@@ -213,7 +214,10 @@ describe("beam line", () => {
     expect(s.mPosKnM).toBeCloseTo((22.70675 * 25) / 8, 6);
     // d = 500 - 40 - 10 - 10 = 440; Vu = wu L/2 - wu (0.15 + 0.44)
     expect(r.dMm).toBe(440);
-    expect(s.vuKn).toBeCloseTo(22.70675 * 2.5 - 22.70675 * 0.59, 6);
+    // Sec 8.3.8.1 (a): design shear is the probable-moment shear, never below the analysed Vu = wu L/2 - wu (0.15 + 0.44)
+    const analysed = 22.70675 * 2.5 - 22.70675 * 0.59;
+    expect(s.vuKn).toBeCloseTo(beamVe(beamMpr(s.negLeft.asReqMm2, 250, 440), beamMpr(s.negRight.asReqMm2, 250, 440), 5000 - 300, 22.70675, analysed), 6);
+    expect(s.vuKn).toBeGreaterThanOrEqual(analysed - 1e-9);
     expect(s.mNegLeftKnM).toBeCloseTo((22.70675 * 25) / 24, 6);
   });
 
@@ -246,7 +250,8 @@ describe("beam line", () => {
     for (const L of [3000, 4000, 5000, 6000]) {
       const r = designBeamLine(line([L, L]), { bMm: 300, hMm: 600 });
       expect(r.spans[0].mPosKnM).toBeGreaterThan(prevM);
-      expect(r.util).toBeGreaterThan(prevU);
+      // utilisation is not monotone in span once the probable-moment shear governs short spans (Mpr/ln falls as ln grows)
+      expect(r.util).toBeGreaterThan(0);
       prevM = r.spans[0].mPosKnM;
       prevU = r.util;
     }
