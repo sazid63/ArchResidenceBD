@@ -202,9 +202,12 @@ export function designBoundaryElement(core: CoreSection, lwMm: number, stressMpa
   if (stressMpa <= limit) return null;
   const x0 = (lwMm / 2) * (1 - limit / stressMpa);
   const lengthMm = Math.max(Math.ceil(x0 / 50) * 50, 300);
-  const barDiaMm = [16, 20, 25, 28, 32].find((d) => Math.ceil(asEndMm2 / barArea(d)) <= 8) ?? 32;
-  const nAlong = Math.max(2, Math.ceil(lengthMm / 200) + 1);
-  const barsPerCorner = Math.max(Math.ceil(asEndMm2 / barArea(barDiaMm)), 4 * nAlong - 2);
+  // bars at most 300 mm apart along the element (every bar is tied: hx <= 350 mm, Sec 8.3.5.4 (c)), two faces, two legs per corner;
+  // the smallest bar (16 mm up) whose layout carries the flexural steel, so the layout is not over-provided
+  const nAlong = Math.max(2, Math.ceil(lengthMm / 300) + 1);
+  const layoutBars = 4 * nAlong - 2;
+  const barDiaMm = [16, 20, 25, 28, 32].find((d) => layoutBars * barArea(d) >= asEndMm2) ?? 32;
+  const barsPerCorner = Math.max(layoutBars, Math.ceil(asEndMm2 / barArea(barDiaMm)));
   const cover = BOUNDARY_COVER_MM;
   const spacing = Math.max(50, Math.floor(Math.min(core.tMm / 3, 6 * barDiaMm, 150) / 25) * 25);
   const bc = lengthMm - 2 * cover;
