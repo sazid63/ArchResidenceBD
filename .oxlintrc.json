@@ -1,0 +1,59 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": [
+    "typescript",
+    "react",
+    "jsx-a11y",
+    "import"
+  ],
+  "categories": {
+    "correctness": "error"
+  },
+  "rules": {
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+    "react/set-state-in-effect": "warn",
+    "react/purity": "warn",
+    "jsx-a11y/prefer-tag-over-role": "off",
+    "no-unused-vars": "warn",
+    "no-control-regex": "off",
+    "react/no-did-update-set-state": "warn",
+    "jsx-a11y/no-static-element-interactions": "off",
+    "jsx-a11y/click-events-have-key-events": "off",
+    "jsx-a11y/interactive-supports-focus": "off",
+    "jsx-a11y/label-has-associated-control": "off"
+  },
+  "overrides": [
+    {
+      "files": [
+        "src/{structure,rules,plans,model,drawings,quantities,interview}/**/*.ts"
+      ],
+      "rules": {
+        "no-restricted-globals": "off",
+        "no-restricted-properties": [
+          "error",
+          {
+            "object": "Math",
+            "property": "random",
+            "message": "Engine code must be deterministic"
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "**/*.test.ts",
+        "**/*.test.tsx"
+      ],
+      "rules": {
+        "no-unused-vars": "warn"
+      }
+    }
+  ],
+  "ignorePatterns": [
+    "dist",
+    "src-tauri",
+    "node_modules",
+    "scripts/audits/audit-out"
+  ]
+}

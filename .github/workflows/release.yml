@@ -49,6 +49,8 @@ jobs:
       - name: Types and unit tests
         run: |
           npx tsc --noEmit
+          npx oxlint src scripts
+          npm run audit:deps
           npm test
 
       - name: Web build, size budget and offline checks

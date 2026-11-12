@@ -25,6 +25,12 @@ jobs:
       - name: Install
         run: npm ci --no-audit --no-fund
 
+      - name: Lint
+        run: npx oxlint src scripts
+
+      - name: Dependency audit
+        run: npm run audit:deps
+
       # Type check, unit tests (Vitest) and the geometry/plan audits.
       - name: Verify
         run: npm run verify

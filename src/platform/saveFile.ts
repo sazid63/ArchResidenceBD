@@ -53,7 +53,7 @@ export async function openTextFile(accept: string, filters?: FileFilter[]): Prom
     const picked = await open({ multiple: false, filters });
     if (!picked || Array.isArray(picked)) return { opened: false, cancelled: true };
     const path = typeof picked === "string" ? picked : (picked as { path: string }).path;
-    return { opened: true, name: path.split(/[\/]/).pop() ?? path, text: await readTextFile(path) };
+    return { opened: true, name: path.split(/[/]/).pop() ?? path, text: await readTextFile(path) };
   }
   return new Promise<OpenResult>((resolve) => {
     const input = document.createElement("input");

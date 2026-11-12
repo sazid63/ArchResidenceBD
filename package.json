@@ -11,7 +11,7 @@
     "check:bundle": "node scripts/check-bundle-size.mjs",
     "test:e2e": "playwright test",
     "test:offline": "node scripts/tests/offline-check.mjs && node scripts/tests/sw-offline.mjs",
-    "lint": "tsc --noEmit",
+    "lint": "tsc --noEmit && oxlint src scripts",
     "clean": "rm -rf dist",
     "audit:mesh": "tsx --import ./scripts/loaders/raw.mjs scripts/audits/mesh-audit.ts",
     "audit:solid": "tsx --import ./scripts/loaders/raw.mjs scripts/audits/solid-audit.ts",
@@ -25,7 +25,8 @@
     "test:ui": "node scripts/tests/ui/ui-shell.mjs && node scripts/tests/ui/ui-screens.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
-    "fonts": "node scripts/copy-fonts.mjs"
+    "fonts": "node scripts/copy-fonts.mjs",
+    "audit:deps": "npm audit --omit=dev --audit-level=high"
   },
   "dependencies": {
     "@fontsource/noto-sans": "^5.3.0",
@@ -56,6 +57,7 @@
     "autoprefixer": "^10.4.21",
     "esbuild": "^0.27.0",
     "jsdom": "^31.0.0",
+    "oxlint": "^1.93.0",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.21.0",
     "typescript": "^7.0.2",
