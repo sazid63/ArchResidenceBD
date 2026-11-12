@@ -12,6 +12,7 @@
 
 import type { BuildingModel } from "../model/building";
 import { liftCore, LIFT_ASSUMPTIONS } from "../model/lift";
+import { barArea } from "./barSelect";
 import { ecMPa, MATERIALS } from "./materials";
 
 export interface CoreSection {
@@ -173,6 +174,108 @@ export function dualLateral(inp: DualInput): DualResult {
 
 // ---- wall design at the base -----------------------------------------------------------------------------------------
 
+/**
+ * Boundary element at each corner of the core (Sec 8.3.6.6; the length rule is the common stress form of ACI 318 18.10.6.3):
+ * it extends from the corner over the part of the wall where the flexural stress exceeds 0.15 fc', at least 300 mm, along both
+ * walls that meet at the corner, over the full wall height. Transverse steel: a closed tie with a cross tie at every bar line, spacing
+ * at most the least of one third of the wall thickness, 6 bar diameters and 150 mm (not below 50 mm), and the area of eqs 6.8.7 and
+ * 6.8.8 (Sec 8.3.5.4) across the thickness (bc = element length less cover) with a 25 mm cover. `fits` is false when the element is
+ * longer than half the wall or the ties cannot be met.
+ */
+export interface BoundaryElement {
+  lengthMm: number;
+  barDiaMm: number;
+  /** Longitudinal bars at each corner (both legs together). */
+  barsPerCorner: number;
+  tieDiaMm: number;
+  tieSpacingMm: number;
+  /** Cross ties per leg level (legs parallel to the wall length), per tie position. */
+  crossTiesPerLeg: number;
+  fits: boolean;
+  reason?: string;
+}
+
+export const BOUNDARY_COVER_MM = 25;
+
+export function designBoundaryElement(core: CoreSection, lwMm: number, stressMpa: number, asEndMm2: number, fc: number, heightMm: number): BoundaryElement | null {
+  const limit = 0.15 * fc;
+  if (stressMpa <= limit) return null;
+  const x0 = (lwMm / 2) * (1 - limit / stressMpa);
+  const lengthMm = Math.max(Math.ceil(x0 / 50) * 50, 300);
+  const barDiaMm = [16, 20, 25, 28, 32].find((d) => Math.ceil(asEndMm2 / barArea(d)) <= 8) ?? 32;
+  const nAlong = Math.max(2, Math.ceil(lengthMm / 200) + 1);
+  const barsPerCorner = Math.max(Math.ceil(asEndMm2 / barArea(barDiaMm)), 4 * nAlong - 2);
+  const cover = BOUNDARY_COVER_MM;
+  const spacing = Math.max(50, Math.floor(Math.min(core.tMm / 3, 6 * barDiaMm, 150) / 25) * 25);
+  const bc = lengthMm - 2 * cover;
+  const ratio = (lengthMm * core.tMm) / ((lengthMm - 2 * cover) * (core.tMm - 2 * cover)) - 1;
+  const fyt = MATERIALS.fytMPa;
+  const asReq = Math.max(0.3 * spacing * bc * ratio * (fc / fyt), 0.09 * spacing * bc * (fc / fyt));
+  const legs = nAlong; // a hoop leg or cross tie across the thickness at every bar line
+  const tieDiaMm = [10, 12].find((d) => legs * barArea(d) >= asReq) ?? 12;
+  const tiesOk = legs * barArea(tieDiaMm) >= asReq;
+  const tooLong = lengthMm > lwMm / 2;
+  const fits = tiesOk && !tooLong;
+  return {
+    lengthMm,
+    barDiaMm,
+    barsPerCorner,
+    tieDiaMm,
+    tieSpacingMm: spacing,
+    crossTiesPerLeg: Math.max(legs - 2, 0),
+    fits,
+    reason: tooLong ? "the boundary element would be longer than half the wall; thicken the core wall" : tiesOk ? undefined : "Ash cannot be met with 12 mm ties at this spacing",
+  };
+}
+
+/**
+ * Coupling beam (lintel) over a lift door (Sec 8.3.6.7 and the ACI 318 18.10.7 form): span = door width, depth = storey height less
+ * the door height. Diagonal reinforcement when ln/h < 4 and Vu > 0.33 sqrt(fc) Acw; then Vn = 2 Avd fy sin(alpha) with phi 0.75,
+ * at most 0.83 sqrt(fc) Acw. The shear demand is an assumption: the door web carries half the wall shear and the lintels of the
+ * shafts share it equally (not from a coupled-wall analysis). A lintel cannot carry more than its shear limit, so the design shear
+ * is the demand capped at that limit (`limited`); the rest goes to the piers beside the door, which are checked in the web shear
+ * with the door taken out of the web. `fits` is false when the diagonals cannot be placed in the wall thickness (two bars across,
+ * 25 mm gap) with at most 8 bars.
+ */
+export interface CouplingBeam {
+  lnMm: number;
+  hMm: number;
+  tMm: number;
+  /** Design shear, kN: the demand capped at the lintel's limit. */
+  vuKn: number;
+  demandKn: number;
+  limited: boolean;
+  diagonal: boolean;
+  avdMm2: number;
+  barDiaMm: number;
+  barsPerGroup: number;
+  /** phi x 0.83 sqrt(fc) Acw, kN, and Vu over it. */
+  phiVnMaxKn: number;
+  util: number;
+  fits: boolean;
+  reason?: string;
+}
+
+export function designCouplingBeam(core: CoreSection, storeyHeightMm: number, demandKn: number, fc = MATERIALS.fcMPa, fy = MATERIALS.fyMPa): CouplingBeam | null {
+  if (core.shafts <= 0) return null;
+  const lnMm = core.doorWidthMm;
+  const hMm = Math.max(storeyHeightMm - LIFT_ASSUMPTIONS.doorMm[1], 300);
+  const acw = core.tMm * hMm;
+  const sqrtFc = Math.sqrt(fc);
+  const phiVnMaxKn = (CORE_PHI_SHEAR * 0.83 * sqrtFc * acw) / 1000;
+  const vuKn = Math.min(demandKn, phiVnMaxKn);
+  const util = vuKn / phiVnMaxKn;
+  const diagonal = lnMm / hMm < 4 && vuKn > (0.33 * sqrtFc * acw) / 1000;
+  const base = { lnMm, hMm, tMm: core.tMm, vuKn, demandKn, limited: demandKn > phiVnMaxKn, diagonal, phiVnMaxKn, util };
+  if (!diagonal) return { ...base, avdMm2: 0, barDiaMm: 0, barsPerGroup: 0, fits: true };
+  const alpha = Math.atan((hMm - 2 * 60) / lnMm);
+  const avdMm2 = (vuKn * 1000) / (CORE_PHI_SHEAR * 2 * fy * Math.sin(alpha));
+  const across = Math.floor((core.tMm - 2 * (25 + 10) - 25) / 1) ; // room left after cover, tie and one 25 mm gap
+  const candidate = [12, 16, 20, 22, 25, 28, 32].find((d) => 2 * d <= across && Math.max(4, Math.ceil(avdMm2 / barArea(d))) <= 8);
+  if (!candidate) return { ...base, avdMm2, barDiaMm: 0, barsPerGroup: 0, fits: false, reason: "the diagonal bars do not fit in the wall thickness" };
+  return { ...base, avdMm2, barDiaMm: candidate, barsPerGroup: Math.max(4, Math.ceil(avdMm2 / barArea(candidate))), fits: true };
+}
+
 export interface CoreCheck {
   dir: "x" | "y";
   vuKn: number;
@@ -196,6 +299,8 @@ export interface CoreCheck {
    */
   boundaryStressMpa: number;
   boundaryElementRequired: boolean;
+  /** The boundary element detail when the stress is above 0.15 fc' (null otherwise); required above 0.2 fc'. */
+  boundary: BoundaryElement | null;
   util: number;
   governs: string;
 }
@@ -244,6 +349,7 @@ export function checkCore(core: CoreSection, dir: "x" | "y", vuKn: number, muKnM
     twoCurtains,
     boundaryStressMpa: boundaryStress,
     boundaryElementRequired: boundaryStress > 0.2 * fc,
+    boundary: designBoundaryElement(core, w.lwMm, boundaryStress, asPerFlange / 2, fc, heightMm),
     util,
     governs: flexureUtil >= shearUtil ? "flexure (boundary steel)" : "shear",
   };

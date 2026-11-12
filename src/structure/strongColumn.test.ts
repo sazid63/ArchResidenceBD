@@ -43,14 +43,27 @@ describe("joint shear, Sec 8.3.7.3, wired", () => {
   });
 });
 
-// Core boundary elements (Sec 8.3.6.6 stress screen): an 8-storey core edge is above 0.2 fc' and is flagged as a failure until detailed.
-describe("core boundary element screen", () => {
-  it("the 8-storey core needs boundary elements and the structure fails on that alone", () => {
+// Core boundary elements (Sec 8.3.6.6): an 8-storey core edge is above 0.2 fc', so boundary elements are detailed and in the bar schedule.
+describe("core boundary elements", () => {
+  it("the 8-storey core needs boundary elements; they are detailed with ties and the structure passes", () => {
     const r = analyse(8);
     const c = r.frame.core!;
     expect(c.x.boundaryStressMpa).toBeGreaterThan(0.2 * 20);
     expect(c.x.boundaryElementRequired).toBe(true);
-    expect(r.failures.some((f) => f.id === "boundary-element-x")).toBe(true);
-    expect(r.ok).toBe(false);
+    const be = c.x.boundary!;
+    expect(be.fits).toBe(true);
+    expect(be.lengthMm).toBeGreaterThanOrEqual(300);
+    expect(be.tieSpacingMm).toBeGreaterThanOrEqual(50);
+    expect(be.tieSpacingMm).toBeLessThanOrEqual(150);
+    expect(r.failures.some((f) => f.id.startsWith("boundary-element"))).toBe(false);
+  });
+
+  it("the boundary stress follows M / (flange x t x lw) and the element length covers the zone above 0.15 fc'", () => {
+    const r = analyse(8);
+    const c = r.frame.core!.x;
+    const limit = 0.15 * 20;
+    const lw = 2 * 1000; // sanity floor only: the element is never shorter than 300 mm
+    expect(c.boundary!.lengthMm).toBeGreaterThanOrEqual(Math.min(300, lw));
+    expect(c.boundaryStressMpa).toBeGreaterThan(limit);
   });
 });

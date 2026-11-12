@@ -4,6 +4,7 @@
  */
 
 import { reinforcementPack } from "../rules/bnbcStructure";
+import { crackControlSpacingMm } from "./section";
 import { DESIGN } from "./materials";
 
 export const STOCK_BARS: number[] = reinforcementPack().stockBarsMm;
@@ -63,7 +64,9 @@ export function pickBeamBars(asReq: number, widthMm: number, o: BeamBarOptions =
     for (let layers = 1; layers <= layersMax; layers++) {
       const req = need(layers, dia);
       if (!Number.isFinite(req)) continue;
-      const n = Math.max(minN, Math.ceil(req / barArea(dia)));
+      // crack control: the bars of the first layer are at most crackControlSpacingMm apart (ACI 318-19 24.3.2 form)
+      const nCrack = Math.ceil((widthMm - 2 * (cover + link) - dia) / crackControlSpacingMm(cover)) + 1;
+      const n = Math.max(minN, nCrack, Math.ceil(req / barArea(dia)));
       // one layer holds cap bars; a second layer is used only when one is not enough
       if (n + occupied > layers * cap) continue;
       if (layers === 1 && n + occupied > cap) continue;

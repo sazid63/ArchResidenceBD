@@ -18,6 +18,7 @@ import { CORE_ASSUMPTIONS } from "./core";
 import { analyzeFrame, type FrameOptions, type FrameResult } from "./frame";
 import { planFoundation, type FoundationResult } from "./foundation";
 import { analyseWind, type WindResult } from "./wind";
+import { designStairFlight, type StairDesign } from "./stair";
 import { roofLoads } from "../model/roofEquipment";
 import { slabWallKn } from "./slabWalls";
 import { edgeBeamTorsion, type TorsionResult } from "./torsion";
@@ -102,8 +103,10 @@ export interface StructureResult {
   foundation: FoundationResult;
   /** Wind on the lateral system (Sec 2.4), with its drift and its base shear against the seismic base shear. */
   wind: WindResult;
+  /** The stair flight designed as a one-way waist slab, null when the plan has no stair. */
+  stair: StairDesign | null;
   /** Vertical irregularities (common screening limits, ASCE 7 Table 12.3-2 style): soft storey and mass. Information, not failures. */
-  irregularities: Array<{ id: string; kind: "soft storey" | "mass"; storey: number; ratio: number }>;
+  irregularities: Array<{ id: string; kind: "soft storey" | "mass" | "torsion"; storey: number; ratio: number }>;
 }
 
 interface Panel {
@@ -413,15 +416,20 @@ export function analyzeStructureUncached(model: BuildingModel, frameOptions: Fra
   const wind = analyseWind({
     storeys: n,
     storeyHeightMm: model.input.floorToFloorMm,
-    planXMm: Math.max(...foundation.footings.map((f) => f.x1)) - Math.min(...foundation.footings.map((f) => f.x0)),
-    planYMm: Math.max(...foundation.footings.map((f) => f.y1)) - Math.min(...foundation.footings.map((f) => f.y0)),
+    planXMm: frame.windPlanMm.x,
+    planYMm: frame.windPlanMm.y,
     stiffnessXKnPerMm: stiff(frame.seismicX),
     stiffnessYKnPerMm: stiff(frame.seismicY),
   });
-  // boundary elements (Sec 8.3.6.6, stress screen): a core edge above 0.2 fc' needs boundary elements, not yet detailed here
+  // boundary elements (Sec 8.3.6.6, stress screen): a core edge above 0.2 fc' needs boundary elements, detailed in core.ts; the
+  // structure fails only when the element cannot be detailed (too long for the wall, or ties cannot be met)
   if (frame.core) for (const [dir, c] of [["x", frame.core.x], ["y", frame.core.y]] as const)
-    if (c.boundaryElementRequired) failures.push({ level: 0, member: "core", id: `boundary-element-${dir}`, util: c.boundaryStressMpa / (0.2 * MATERIALS.fcMPa), governs: "core boundary element required (Sec 8.3.6.6), not yet detailed" });
+    if (c.boundaryElementRequired && c.boundary && !c.boundary.fits) failures.push({ level: 0, member: "core", id: `boundary-element-${dir}`, util: c.boundaryStressMpa / (0.2 * MATERIALS.fcMPa), governs: `core boundary element cannot be detailed: ${c.boundary.reason ?? "ties"}` });
+  const hasStair = model.storeys[0].geometry.fitted.rooms.some((r) => r.def.kind === "stair");
+  const stair = hasStair ? designStairFlight(model.input.floorToFloorMm) : null;
+  if (stair && !stair.ok) failures.push({ level: 0, member: "slab", id: "stair-flight", util: stair.util, governs: "stair flight (waist slab 250 mm is not enough: widen the flight or shorten the span)" });
   const irregularities: StructureResult["irregularities"] = [];
+  for (const tr of frame.torsion) if (tr.irregular) irregularities.push({ id: `torsion-${tr.axis}/S${tr.storey}${tr.extreme ? "-extreme" : ""}`, kind: "torsion", storey: tr.storey, ratio: tr.ratio });
   for (const [dir, seis] of [["x", frame.seismicX], ["y", frame.seismicY]] as const) {
     const k = seis.storeys.map((s) => (s.elasticMm > 0 ? s.shearKn / s.elasticMm : 0));
     for (let i = 0; i + 1 < n; i++) {
@@ -436,12 +444,10 @@ export function analyzeStructureUncached(model: BuildingModel, frameOptions: Fra
       if (worst > 1.5) irregularities.push({ id: `mass-${dir}/S${i}`, kind: "mass", storey: i, ratio: worst });
     }
   }
-  for (const [dir, w, seis] of [["x", wind.x, frame.seismicX], ["y", wind.y, frame.seismicY]] as const) {
+  for (const [dir, w] of [["x", wind.x], ["y", wind.y]] as const) {
     w.driftUtil.forEach((u, i) => {
       if (u > 1) failures.push({ level: i, member: "seismic", id: `wind-drift-${dir}/S${i}`, util: u, governs: "wind drift h/500 (Sec 2.4 screen)" });
     });
-    // the frame is designed for seismic forces only: where wind base shear is larger, the frame is not checked for wind
-    if (w.baseShearKn > seis.baseShearKn) failures.push({ level: -1, member: "seismic", id: `wind-governs-${dir}`, util: w.baseShearKn / seis.baseShearKn, governs: "wind base shear exceeds seismic: frame not designed for wind" });
   }
   // overturning (screen): resisting moment 0.9 W x half the plan length over the seismic overturning moment at the base, FS 1.5
   const fx0 = Math.min(...foundation.footings.map((f) => f.x0));
@@ -460,5 +466,5 @@ export function analyzeStructureUncached(model: BuildingModel, frameOptions: Fra
   for (const fo of foundation.footings)
     if (fo.mergedCheck && fo.mergedCheck.util > 1) failures.push({ level: 0, member: "footing", id: fo.id, util: fo.mergedCheck.util, governs: `merged footing ${fo.mergedCheck.governs}` });
   failures.sort((a, b) => b.util - a.util);
-  return { levels, frame, failures, util: Math.max(util, ...foundation.footings.map((f) => f.mergedCheck?.util ?? 0)), ok: failures.length === 0, supported: structureSupported(n), assumptions: frame.core ? [...ASSUMPTIONS, ...CORE_ASSUMPTIONS] : ASSUMPTIONS, foundation, wind, irregularities };
+  return { levels, frame, failures, util: Math.max(util, ...foundation.footings.map((f) => f.mergedCheck?.util ?? 0)), ok: failures.length === 0, supported: structureSupported(n), assumptions: frame.core ? [...ASSUMPTIONS, ...CORE_ASSUMPTIONS] : ASSUMPTIONS, foundation, wind, irregularities, stair };
 }

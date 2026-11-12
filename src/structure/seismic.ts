@@ -92,6 +92,8 @@ export interface SeismicInput {
   storeyStiffnessKnPerMm: number[];
   /** Importance factor override; default Table 6.2.17. */
   importance?: number;
+  /** Wind base shear, kN: the design lateral force is the larger of the seismic and the wind base shear (strength level for both). */
+  minBaseShearKn?: number;
 }
 
 export interface SeismicStorey {
@@ -120,7 +122,11 @@ export interface SeismicResult {
   sa: number;
   saGoverns: "spectrum" | "lower bound";
   weightKn: number;
+  /** Design lateral base shear used, kN: the larger of the seismic and the wind base shear. */
   baseShearKn: number;
+  /** The seismic base shear on its own, kN, and whether wind governs the lateral design in this direction. */
+  seismicBaseShearKn: number;
+  windGoverns: boolean;
   k: number;
   /** Storey weights used, kN (index 0 = ground storey). */
   levelWeightsKn: number[];
@@ -154,7 +160,8 @@ export function analyseSeismic(inp: SeismicInput): SeismicResult {
   const sa = designSa({ z: inp.z, importance, r: sys.r, t, siteClass: inp.siteClass });
   const w = inp.levelWeightsKn;
   const weight = w.reduce((a, b) => a + b, 0);
-  const v = sa.sa * weight;
+  const seismicV = sa.sa * weight;
+  const v = Math.max(seismicV, inp.minBaseShearKn ?? 0);
   const k = distributionExponent(t);
   const levelH = w.map((_, i) => ((i + 1) * inp.storeyHeightMm) / 1000);
   const forces = distributeForces(v, w, levelH, k);
@@ -204,6 +211,8 @@ export function analyseSeismic(inp: SeismicInput): SeismicResult {
     saGoverns: sa.governs,
     weightKn: weight,
     baseShearKn: v,
+    seismicBaseShearKn: seismicV,
+    windGoverns: v > seismicV,
     k,
     forcesKn: forces,
     storeys,

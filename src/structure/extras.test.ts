@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { designStairFlight } from "./stair";
 import { deriveBuilding } from "../model/building";
 import { slabOpeningAreaM2 } from "../model/openings";
 import { analyzeStructure } from "./analyze";
@@ -45,7 +46,10 @@ describe("members the first schedule left out: stairs, plinth beams, column stub
     const { model, bbs } = build("p2-2b-fb", 4);
     const main = bbs.rows.find((r) => /Stair flights, main bars/.test(r.description.en))!;
     expect(main.members).toBe(model.storeys.length); // one set per storey
-    expect(main.diaMm).toBe(12);
+    // the main bars come from the flight design (stair.ts), not a fixed 12 mm at 150
+    const design = designStairFlight(model.input.floorToFloorMm);
+    expect(main.diaMm).toBe(design.main.dia);
+    expect(main.description.en).toContain(`at ${design.main.spacingMm}`);
     expect(bbs.rows.some((r) => /Stair landing/.test(r.description.en))).toBe(true);
     const plinthBars = bbs.rows.find((r) => /Plinth beams, 4 bars/.test(r.description.en))!;
     expect(plinthBars.totalBars).toBe(4 * model.storeys[1].geometry.beams.length);

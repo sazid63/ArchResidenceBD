@@ -22,8 +22,9 @@ import { designFooting, type ColumnPosition, type FootingResult } from "./footin
 import { factoredLoad, liveReductionFactor } from "./loads";
 import { DESIGN, ecMPa, MATERIALS, UNIT_WEIGHTS } from "./materials";
 import { tBeamInertia } from "./tbeam";
+import { windBaseShearKn } from "./wind";
 import { analyseSeismic, DHAKA_Z, liveWeightFraction, systemById, type SeismicResult } from "./seismic";
-import { checkCore, coreSection, dualLateral, wallProps, type CoreCheck, type CoreSection, type DualResult } from "./core";
+import { checkCore, coreSection, designCouplingBeam, dualLateral, wallProps, type CoreCheck, type CoreSection, type CouplingBeam, type DualResult } from "./core";
 
 export interface FrameOptions {
   siteClass?: SiteClass;
@@ -83,6 +84,20 @@ export interface FrameResult {
   strongColumn: StrongColumnJoint[];
   /** Joint shear checks (Sec 8.3.7.3) at each beam joint and direction. */
   jointShear: JointShearCheck[];
+  /** Plan extents used for the wind load, mm. */
+  windPlanMm: { x: number; y: number };
+  /** Torsion per storey and loading direction: edge-to-average drift ratio with the accidental eccentricity, and the amplification Ax. */
+  torsion: TorsionResult[];
+}
+
+export interface TorsionResult {
+  storey: number;
+  axis: "x" | "y";
+  /** Maximum to average drift ratio including the 5 % accidental eccentricity (above 1.2 is torsional irregularity, above 1.4 extreme). */
+  ratio: number;
+  ax: number;
+  irregular: boolean;
+  extreme: boolean;
 }
 
 export interface JointShearCheck {
@@ -120,6 +135,8 @@ export interface CoreResult {
   /** Share of the base shear carried by the walls, per direction (0..1). */
   wallShareX: number;
   wallShareY: number;
+  /** The lintel over each lift door (loading along x, where the door webs act); design shear assumed from the wall shear. */
+  coupling: CouplingBeam | null;
 }
 
 interface Joint {
@@ -344,6 +361,12 @@ export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: 
   const inertiaY = (s: ColSection) => (s.bx * s.by ** 3) / 12;
   let converged = false;
   let iterations = 0;
+  // plan extents for wind: the slab panels of the lowest floor (the building envelope the wind meets)
+  const px = levels[0].panels.flatMap((p) => [p.x0, p.x1]);
+  const py = levels[0].panels.flatMap((p) => [p.y0, p.y1]);
+  const windPlanMm = { x: Math.max(...px) - Math.min(...px), y: Math.max(...py) - Math.min(...py) };
+  // centre of mass taken at the plan centre (uniform floor weight); accidental eccentricity 5 % of the plan dimension (Sec 2.5.7 style)
+  const massCentre = { x: (Math.max(...px) + Math.min(...px)) / 2, y: (Math.max(...py) + Math.min(...py)) / 2 };
   let ctx = context();
 
   function context() {
@@ -425,18 +448,52 @@ export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: 
     });
     if (core) levelW.forEach((_w, k) => { levelW[k] += (wallProps(core, "x").agMm2 * hMm * 24) / 1e9; });
     const base = { z: o.z, siteClass: o.siteClass, group: o.group, systemId: o.systemId, storeys: n, storeyHeightMm: hMm, levelWeightsKn: levelW };
-    let seisX = analyseSeismic({ ...base, storeyStiffnessKnPerMm: dx.storey });
-    let seisY = analyseSeismic({ ...base, storeyStiffnessKnPerMm: dy.storey });
+    // wind along x meets the face whose width is the plan extent along y (Sec 2.4); the lateral design takes the larger of wind and seismic
+    const windX = windBaseShearKn(windPlanMm.y, hMm, n);
+    const windY = windBaseShearKn(windPlanMm.x, hMm, n);
+    let seisX = analyseSeismic({ ...base, storeyStiffnessKnPerMm: dx.storey, minBaseShearKn: windX });
+    let seisY = analyseSeismic({ ...base, storeyStiffnessKnPerMm: dy.storey, minBaseShearKn: windY });
     // dual system: the lateral force is shared with the core wall by stiffness; the forces do not depend on stiffness, the drift does
     let dualX: DualResult | null = null;
     let dualY: DualResult | null = null;
     if (core && isDual) {
       dualX = dualLateral({ forcesKn: seisX.forcesKn, hMm, frameKnPerMm: dx.storey, wall: wallProps(core, "x"), ecMPa: ec });
       dualY = dualLateral({ forcesKn: seisY.forcesKn, hMm, frameKnPerMm: dy.storey, wall: wallProps(core, "y"), ecMPa: ec });
-      seisX = analyseSeismic({ ...base, storeyStiffnessKnPerMm: dualX.effectiveKnPerMm });
-      seisY = analyseSeismic({ ...base, storeyStiffnessKnPerMm: dualY.effectiveKnPerMm });
+      seisX = analyseSeismic({ ...base, storeyStiffnessKnPerMm: dualX.effectiveKnPerMm, minBaseShearKn: windX });
+      seisY = analyseSeismic({ ...base, storeyStiffnessKnPerMm: dualY.effectiveKnPerMm, minBaseShearKn: windY });
     }
     return { take, live, kc, kSway, dx, dy, seisX, seisY, dualX, dualY };
+  }
+
+  /**
+   * Torsion of storey i for lateral load along `axis`, from the column stiffnesses of the D-method (rigid diaphragm): the centre of
+   * rigidity, the torsional stiffness J, the calculated eccentricity to the plan centre and the accidental eccentricity of 5 % of the plan
+   * dimension. The edge-to-average drift ratio is 1 + e ymax sumD / J; above 1.2 the accidental torsion is amplified by (ratio / 1.2)^2
+   * up to 3 (common practice, ASCE 7 12.8.4.3 style). `factor(ci)` is the multiplier on the direct shear of column ci, never below 1.
+   */
+  function torsionAt(i: number, axis: "x" | "y") {
+    const d = axis === "x" ? ctx.dx : ctx.dy;
+    const o2 = axis === "x" ? ctx.dy : ctx.dx;
+    const arm = (c: { x: number; y: number }) => (axis === "x" ? c.y : c.x);
+    const other = (c: { x: number; y: number }) => (axis === "x" ? c.x : c.y);
+    const sumD = d.dcol[i].reduce((a, b) => a + b, 0) || 1;
+    const sumO = o2.dcol[i].reduce((a, b) => a + b, 0) || 1;
+    const cr = cols.reduce((a, c, ci) => a + d.dcol[i][ci] * arm(c), 0) / sumD;
+    const crO = cols.reduce((a, c, ci) => a + o2.dcol[i][ci] * other(c), 0) / sumO;
+    const j = cols.reduce((a, c, ci) => a + d.dcol[i][ci] * (arm(c) - cr) ** 2 + o2.dcol[i][ci] * (other(c) - crO) ** 2, 0) || 1;
+    const planL = axis === "x" ? windPlanMm.y : windPlanMm.x;
+    const eCalc = Math.abs((axis === "x" ? massCentre.y : massCentre.x) - cr);
+    const eAcc = 0.05 * planL;
+    const yMax = Math.max(...cols.map((c) => Math.abs(arm(c) - cr)), 1);
+    const ratio = 1 + ((eCalc + eAcc) * yMax * sumD) / j;
+    const ax = ratio > 1.2 ? Math.min((ratio / 1.2) ** 2, 3) : 1;
+    return {
+      ratio,
+      ax,
+      eCalcMm: eCalc,
+      eAccMm: eAcc,
+      factor: (ci: number) => 1 + ((eCalc + ax * eAcc) * Math.abs(arm(cols[ci]) - cr) * sumD) / j,
+    };
   }
 
   /** Load cases of column ci in storey i for section `sec`, using the current context. */
@@ -459,13 +516,13 @@ export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: 
     const g: ColumnCase = { id: "1.2D+1.6L", puKn: pu, betaDns, luMm: lu, k: 1, x: { m2ns: mgX, m2s: 0, deltaS: 1 }, y: { m2ns: mgY, m2s: 0, deltaS: 1 } };
     // seismic: shear share, overturning axial, sway magnifier
     const frameFraction = (seis: SeismicResult, dual: DualResult | null) => (dual ? Math.max(dual.frameShearKn[i] / seis.storeys[i].shearKn, FRAME_MIN_SHARE) : 1);
-    const shear = (seis: SeismicResult, d: { storey: number[]; dcol: number[][] }, dual: DualResult | null) => {
+    const shear = (seis: SeismicResult, d: { storey: number[]; dcol: number[][] }, dual: DualResult | null, axis: "x" | "y") => {
       const share = d.dcol[i][ci] / d.storey[i];
-      const vc = seis.storeys[i].shearKn * share * frameFraction(seis, dual);
+      const vc = seis.storeys[i].shearKn * share * frameFraction(seis, dual) * torsionAt(i, axis).factor(ci);
       return vc * hM * (i === 0 ? 0.65 : 0.5);
     };
-    const msX = shear(ctx.seisX, ctx.dx, ctx.dualX);
-    const msY = shear(ctx.seisY, ctx.dy, ctx.dualY);
+    const msX = shear(ctx.seisX, ctx.dx, ctx.dualX, "x");
+    const msY = shear(ctx.seisY, ctx.dy, ctx.dualY, "y");
     const lever = (axis: "x" | "y", seis: SeismicResult, dual: DualResult | null) => {
       const coords = cols.map((q) => (axis === "x" ? q.x : q.y));
       const mean = coords.reduce((a, b) => a + b, 0) / coords.length;
@@ -594,6 +651,12 @@ export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: 
     if (footing.util > 1) failures.push({ level: -1, member: "footing", id: `${c.id}/footing`, util: footing.util, governs: footing.governs });
     return { id: c.id, ix: c.ix, iy: c.iy, xMm: c.x, yMm: c.y, position: c.position, storeys, footing, util: Math.max(footing.util, ...storeys.map((s) => s.util)) };
   });
+  const torsion: TorsionResult[] = [];
+  for (let i = 0; i < n; i++)
+    for (const axis of ["x", "y"] as const) {
+      const tt = torsionAt(i, axis);
+      torsion.push({ storey: i, axis, ratio: tt.ratio, ax: tt.ax, irregular: tt.ratio > 1.2, extreme: tt.ratio > 1.4 });
+    }
   // ---- eq 6.8.5 strong column / weak beam at each beam level (Sec 8.3.5.2) ---------------------------------------
   // Columns framing into a joint: the storey below and the storey above. Each column's nominal moment about the axis of
   // the beams is taken at the factored axial case that gives its lowest strength (nominal P = Pu / phi).
@@ -639,11 +702,14 @@ export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: 
     const sy = ctx.seisY.storeys[0].shearKn;
     const x = checkCore(core, "x", ctx.dualX.wallShearKn[0], ctx.dualX.wallMomentKnM[0], core.heightMm);
     const y = checkCore(core, "y", ctx.dualY.wallShearKn[0], ctx.dualY.wallMomentKnM[0], core.heightMm);
-    coreResult = { section: core, x, y, dualX: ctx.dualX, dualY: ctx.dualY, wallShareX: Math.abs(ctx.dualX.wallShearKn[0]) / sx, wallShareY: Math.abs(ctx.dualY.wallShearKn[0]) / sy };
+    // coupling beam shear: the door web carries half of the wall shear and the shaft lintels share it equally (assumption)
+    const coupling = designCouplingBeam(core, hMm, Math.abs(ctx.dualX.wallShearKn[0]) / (2 * Math.max(core.shafts, 1)));
+    coreResult = { section: core, x, y, dualX: ctx.dualX, dualY: ctx.dualY, wallShareX: Math.abs(ctx.dualX.wallShearKn[0]) / sx, wallShareY: Math.abs(ctx.dualY.wallShearKn[0]) / sy, coupling };
+    if (coupling && !coupling.fits) failures.push({ level: 0, member: "core", id: "coupling-beam", util: Infinity, governs: `coupling beam over the lift door: ${coupling.reason}` });
     for (const c of [x, y]) if (c.util > 1) failures.push({ level: 0, member: "core", id: `core-${c.dir}`, util: c.util, governs: c.governs });
   }
   if (!ctx.seisX.permitted) failures.push({ level: -1, member: "seismic", id: "seismic-system", util: Infinity, governs: "system not permitted" });
   failures.sort((a, b) => b.util - a.util);
   const util = Math.max(0, ...columns.map((c) => c.util), ctx.seisX.util, ctx.seisY.util, coreResult?.x.util ?? 0, coreResult?.y.util ?? 0);
-  return { columns, seismicX: ctx.seisX, seismicY: ctx.seisY, options: o, failures, util, converged, iterations, core: coreResult, strongColumn, jointShear };
+  return { columns, seismicX: ctx.seisX, seismicY: ctx.seisY, options: o, failures, util, converged, iterations, core: coreResult, strongColumn, jointShear, windPlanMm, torsion };
 }

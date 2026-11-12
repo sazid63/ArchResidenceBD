@@ -102,6 +102,11 @@ function direction(faceWidthMm: number, h: number, n: number, vMs: number, stiff
   };
 }
 
+/** Wind base shear, kN, for a face of the given width (no drift): the design lateral force the frame must also resist. */
+export function windBaseShearKn(faceWidthMm: number, storeyHeightMm: number, storeys: number, vMs: number = WIND_V_DHAKA_MS): number {
+  return direction(faceWidthMm, storeyHeightMm, storeys, vMs, new Array(storeys).fill(1)).baseShearKn;
+}
+
 export function analyseWind(inp: WindInput): WindResult {
   const v = inp.velocityMs ?? WIND_V_DHAKA_MS;
   return {

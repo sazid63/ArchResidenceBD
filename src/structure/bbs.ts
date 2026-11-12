@@ -18,6 +18,7 @@ import type { TorsionResult } from "./torsion";
 import type { BeamLinePlaced, PanelResult, StructureResult } from "./analyze";
 import { barArea, pickBeamBars, pickColumnBars, pickMatBars, unitWeightKgM, type BarPick, type SlabBarPick } from "./barSelect";
 import { planStair, DEFAULT_STAIR } from "../cad/stairBuilder";
+import { designStairFlight } from "./stair";
 import { PAD_TOP_BELOW_FINISH_MM, PLINTH_BEAM_DEPTH_MM, PLINTH_BEAM_WIDTH_MM } from "./foundation";
 import { DESIGN } from "./materials";
 import { LIFT_ASSUMPTIONS, liftCore } from "../model/lift";
@@ -559,20 +560,24 @@ function stairGeometry(model: BuildingModel) {
   const run = (lay.risersPerFlight - 1) * tread;
   const rise = (lay.risersPerFlight * lay.riserMm) / 1000;
   const incl = Math.hypot(run, rise);
-  const flightM3 = 0.15 * incl * w + lay.risersPerFlight * 0.5 * (lay.riserMm / 1000) * tread * w;
-  const landingM3 = (DEFAULT_STAIR.landingMm / 1000) * (lay.widthMm / 1000) * 0.15;
+  const waist = designStairFlight(model.input.floorToFloorMm).waistMm / 1000;
+  const flightM3 = waist * incl * w + lay.risersPerFlight * 0.5 * (lay.riserMm / 1000) * tread * w;
+  const landingM3 = (DEFAULT_STAIR.landingMm / 1000) * (lay.widthMm / 1000) * waist;
   return { lay, incl, perStoreyM3: 2 * flightM3 + landingM3, soffitM2: 2 * incl * w + (DEFAULT_STAIR.landingMm / 1000) * (lay.widthMm / 1000) };
 }
 
-/** Stair steel per storey: main bars 12 mm at 150 along the flight, distribution bars 10 mm at 200, landing mat 10 mm at 150 each way. */
+/** Stair steel per storey: main bars from the flight design (stair.ts) along the flight, distribution bars 10 mm at 200, landing mat 10 mm at 150 each way. */
 function detailStairs(model: BuildingModel, b: Builder): void {
   const g = stairGeometry(model);
   if (!g) return;
   const w = DEFAULT_STAIR.flightWidthMm;
   const mainLen = Math.round(g.incl * 1000) + 800; // along the flight, with anchorage into the landing and the floor
-  const nMain = 2 * (Math.floor(w / 150) + 1);
+  const sd = designStairFlight(model.input.floorToFloorMm);
+  const mainDia = sd.main.dia;
+  const mainSp = sd.main.spacingMm;
+  const nMain = 2 * (Math.floor(w / mainSp) + 1);
   for (let i = 0; i < model.storeys.length; i++) {
-    b.add({ family: "slab", description: bi(`Stair flights, main bars 12 mm at 150`, `সিঁড়ির ফ্লাইট, প্রধান রড ১২ মিমি @ ১৫০`), dia: 12, shape: "00", dims: [mainLen], cut: mainLen, bars: nMain, level: i });
+    b.add({ family: "slab", description: bi(`Stair flights, main bars ${mainDia} mm at ${mainSp}, waist ${sd.waistMm} mm`, `সিঁড়ির ফ্লাইট, প্রধান রড ${mainDia} মিমি @ ${mainSp}, ওয়েস্ট ${sd.waistMm} মিমি`), dia: mainDia, shape: "00", dims: [mainLen], cut: mainLen, bars: nMain, level: i });
     const nDist = 2 * (Math.floor((g.incl * 1000) / 200) + 1);
     b.add({ family: "slab", description: bi("Stair flights, distribution bars 10 mm at 200", "সিঁড়ির ফ্লাইট, বণ্টন রড ১০ মিমি @ ২০০"), dia: 10, shape: "00", dims: [w - 100], cut: w - 100, bars: nDist, level: i });
     const landW = g.lay.widthMm;
@@ -642,14 +647,38 @@ function detailLiftCore(model: BuildingModel, b: Builder, res: StructureResult):
   if (cr) {
     // boundary steel at the four corners: the larger per-flange requirement split over the two ends of each flange wall
     const asEnd = Math.max(cr.x.boundarySteelMm2, cr.y.boundarySteelMm2) / 2;
-    const bd = asEnd > 0 ? [16, 20, 25, 28, 32].find((d) => Math.ceil(asEnd / barArea(d)) <= 8) ?? 32 : 0;
+    const be = [cr.x.boundary, cr.y.boundary].filter((e): e is NonNullable<typeof e> => !!e).sort((p, q) => q.lengthMm - p.lengthMm)[0] ?? null;
+    const bd = be ? be.barDiaMm : asEnd > 0 ? [16, 20, 25, 28, 32].find((d) => Math.ceil(asEnd / barArea(d)) <= 8) ?? 32 : 0;
     if (bd) {
-      const n = Math.max(2, Math.ceil(asEnd / barArea(bd)));
+      const n = be ? be.barsPerCorner : Math.max(2, Math.ceil(asEnd / barArea(bd)));
       const bl = lapTension(bd, "B", {});
       const bp = Math.max(1, Math.ceil(core.heightMm / (STOCK_LENGTH_MM - bl)));
       const bLen = Math.round((core.heightMm + (bp - 1) * bl) / bp);
       b.add({ family: "core", description: bi(`Lift shaft wall, boundary bars ${bd} mm (${n} per corner)`, `লিফট শাফটের দেয়াল, প্রান্তের রড ${bd} মিমি (প্রতি কোণে ${n}টি)`), dia: bd, shape: "00", dims: [bLen], cut: bLen, bars: 4 * n * bp, level: -1 });
+      if (be) {
+        // boundary element ties (Sec 8.3.6.6, confinement.ts): closed ties on both legs of each corner, over the full wall height
+        const ties = Math.ceil(core.heightMm / be.tieSpacingMm) + 1;
+        const tail = tieHookTail(be.tieDiaMm);
+        const tbd = bendDiameter(be.tieDiaMm, true);
+        const a = LIFT_ASSUMPTIONS.shaftWallMm - 2 * 25;
+        const bb = be.lengthMm - 2 * 25;
+        const tieCut = 2 * a + 2 * bb + 2 * tail - 3 * bendDeduction(be.tieDiaMm, tbd, 90) - 2 * bendDeduction(be.tieDiaMm, tbd, 135);
+        b.add({ family: "core", description: bi(`Lift shaft wall, boundary element ties ${be.tieDiaMm} mm at ${be.tieSpacingMm}, leg length ${be.lengthMm} mm`, `লিফট শাফটের দেয়াল, প্রান্ত অংশের টাই ${be.tieDiaMm} মিমি @ ${be.tieSpacingMm}, বাহু ${be.lengthMm} মিমি`), dia: be.tieDiaMm, shape: "51", dims: [a, bb, tail], cut: tieCut, bars: 8 * ties, level: -1 });
+      }
     }
+  }
+  const cb = cr?.coupling;
+  if (cb && cb.diagonal && cb.fits) {
+    // lintel over each lift door, every storey: two crossing groups of diagonal bars (ACI 318 18.10.7.4 form), embedded in the piers,
+    // each group tied with closed 10 mm ties at 100 mm along its length
+    const lintels = core.spec.liftsProvided * res.levels.length;
+    const alpha = Math.atan((cb.hMm - 120) / cb.lnMm);
+    const emb = ldTension(cb.barDiaMm);
+    const len = Math.round((cb.hMm - 120) / Math.sin(alpha) + 2 * emb);
+    b.add({ family: "core", description: bi(`Coupling beam over lift door, diagonal bars ${cb.barDiaMm} mm (${cb.barsPerGroup} per group, 2 groups)`, `লিফট দরজার ওপরের কাপলিং বিম, কোণাকুণি রড ${cb.barDiaMm} মিমি (প্রতি গ্রুপে ${cb.barsPerGroup}টি, ২ গ্রুপ)`), dia: cb.barDiaMm, shape: "00", dims: [len], cut: len, bars: 2 * cb.barsPerGroup * lintels, level: -1 });
+    const groupW = 2 * cb.barDiaMm + 25 + 2 * 25;
+    const tieLen = 2 * (groupW + (cb.tMm - 2 * 25)) + 2 * tieHookTail(10) - 3 * bendDeduction(10, bendDiameter(10, true), 90) - 2 * bendDeduction(10, bendDiameter(10, true), 135);
+    b.add({ family: "core", description: bi("Coupling beam over lift door, diagonal group ties 10 mm at 100", "লিফট দরজার ওপরের কাপলিং বিম, কোণাকুণি গ্রুপের টাই ১০ মিমি @ ১০০"), dia: 10, shape: "51", dims: [groupW, cb.tMm - 2 * 25, tieHookTail(10)], cut: Math.round(tieLen), bars: 2 * Math.ceil(len / 100) * lintels, level: -1 });
   }
   const cell = core.spec.cell;
   const sx = cell.x1 - cell.x0 + LIFT_ASSUMPTIONS.shaftWallMm;

@@ -63,3 +63,22 @@ export function crackedInertia(bMm: number, dMm: number, asMm2: number, nRatio: 
   const x = (-bq + Math.sqrt(bq * bq + 4 * a * nRatio * asMm2 * dMm)) / (2 * a);
   return (bMm * x ** 3) / 3 + nRatio * asMm2 * (dMm - x) ** 2;
 }
+
+/**
+ * Crack control for beam tension bars (ACI 318-19 24.3.2 form, common practice; not transcribed from the gazette):
+ * centre-to-centre spacing s <= min(380 (280 / fs) - 2.5 cc, 300 (280 / fs)) with fs = 2/3 fy, cc the clear cover to the bar surface.
+ */
+export function crackControlSpacingMm(coverMm: number, fy: number = MATERIALS.fyMPa): number {
+  const fs = (2 / 3) * fy;
+  return Math.min(380 * (280 / fs) - 2.5 * coverMm, 300 * (280 / fs));
+}
+
+/** Centre-to-centre spacing of `n` bars of diameter `dia` in one layer of a beam of width `bMm`, mm (infinite for one bar). */
+export function barCentreSpacingMm(bMm: number, n: number, dia: number, coverMm: number = DESIGN.coverBeamMm, linkMm: number = DESIGN.stirrupMm): number {
+  if (n < 2) return Infinity;
+  return (bMm - 2 * (coverMm + linkMm) - dia) / (n - 1);
+}
+
+/** Beams deeper than this need side (skin) reinforcement: 750 mm (common practice; ACI 318-14 uses 900 mm). */
+export const SKIN_STEEL_ABOVE_MM = 750;
+export const needsSkinSteel = (hMm: number): boolean => hMm > SKIN_STEEL_ABOVE_MM;
