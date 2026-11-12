@@ -81,6 +81,9 @@ export interface MemberFailure {
  */
 export const SUPPORTED_MAX_STOREYS = 8;
 
+/** Overturning factor of safety used in the screen (common practice). */
+export const OVERTURNING_FS = 1.5;
+
 /** True when the structure engine designs a building of this many storeys. */
 export const structureSupported = (storeys: number): boolean => storeys <= SUPPORTED_MAX_STOREYS;
 
@@ -400,6 +403,20 @@ export function analyzeStructureUncached(model: BuildingModel, frameOptions: Fra
   failures.sort((a, b) => b.util - a.util);
   const util = Math.max(0, ...levels.map((l) => l.util), frame.util);
   const foundation = planFoundation(frame.columns, n);
+  // overturning (screen): resisting moment 0.9 W x half the plan length over the seismic overturning moment at the base, FS 1.5
+  const fx0 = Math.min(...foundation.footings.map((f) => f.x0));
+  const fx1 = Math.max(...foundation.footings.map((f) => f.x1));
+  const fy0 = Math.min(...foundation.footings.map((f) => f.y0));
+  const fy1 = Math.max(...foundation.footings.map((f) => f.y1));
+  for (const [dir, seis, span] of [["x", frame.seismicX, fx1 - fx0], ["y", frame.seismicY, fy1 - fy0]] as const) {
+    const mot = Math.max(0, ...seis.overturningKnM);
+    if (mot <= 0) continue;
+    const resisting = (0.9 * seis.weightKn * (span / 1000)) / 2;
+    const util = (OVERTURNING_FS * mot) / resisting;
+    if (util > 1) failures.push({ level: -1, member: "footing", id: `overturning-${dir}`, util, governs: `overturning factor of safety ${OVERTURNING_FS} (Sec 2.5.7 screen)` });
+  }
+  for (const tie of foundation.ties)
+    if (tie.util > 1) failures.push({ level: -1, member: "footing", id: `tie-${tie.a}-${tie.b}`, util: tie.util, governs: "tie beam tension (10 % of column load)" });
   for (const fo of foundation.footings)
     if (fo.mergedCheck && fo.mergedCheck.util > 1) failures.push({ level: 0, member: "footing", id: fo.id, util: fo.mergedCheck.util, governs: `merged footing ${fo.mergedCheck.governs}` });
   failures.sort((a, b) => b.util - a.util);

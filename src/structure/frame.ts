@@ -585,6 +585,9 @@ export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: 
       colByMm: sections[0][ci].by,
       position: c.position,
       allowableKpa: o.allowableBearingKpa,
+      // base moments: the largest magnified design moment about each axis over the storey-0 cases (gravity and seismic)
+      momentXKnM: Math.max(0, ...g.cases.map((k) => Math.abs(k.x.mDesignKnM))),
+      momentYKnM: Math.max(0, ...g.cases.map((k) => Math.abs(k.y.mDesignKnM))),
       // starter bars of the ground column must be developed in the pad: ldc + 75 mm cover + two 16 mm mat layers
       minDepthMm: ldCompression(pickColumnBars(g.astMm2, sections[0][ci].bx, sections[0][ci].by).dia) + 75 + 32,
     });

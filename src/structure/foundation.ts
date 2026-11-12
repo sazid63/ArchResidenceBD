@@ -19,6 +19,7 @@ import { BAR_MM, COVER_MM } from "./footing";
 import { footingPack } from "../rules/bnbcStructure";
 import { DESIGN, MATERIALS } from "./materials";
 import { flexure, slabMinAs } from "./section";
+import { pickBeamBars } from "./barSelect";
 
 /** The top of every pad sits this far below the ground-floor finish; the column stub rises from it. Plinth (tie) beams are this deep, below the finish. */
 export const PAD_TOP_BELOW_FINISH_MM = 1050;
@@ -51,8 +52,49 @@ export interface MergedFootingCheck {
   quKpa: number;
 }
 
+/**
+ * Tie beam between two neighbouring columns on a grid line (common practice: tie force 10 % of the larger column load; BNBC
+ * Part 6 Sec 6.4 not read for this rule). Tension steel = Tu / (phi fy), phi 0.9 (DESIGN.phiFlexure). The bars are picked
+ * from the stock bars (pickBeamBars, 250 mm wide plinth beam); `fits` is false when no stock arrangement carries the tension.
+ * Not yet in the bar schedule.
+ */
+export interface TieBeam {
+  a: string;
+  b: string;
+  forceKn: number;
+  asReqMm2: number;
+  asProvMm2: number;
+  fits: boolean;
+  util: number;
+}
+
+export const TIE_FORCE_FRACTION = 0.1;
+/** Plinth tie beam width, mm (the tie bars are picked for this width). */
+const TIE_WIDTH_MM = 250;
+
+export function planTies(columns: ColumnResult[]): TieBeam[] {
+  const ties: TieBeam[] = [];
+  for (const c of columns)
+    for (const d of columns) {
+      const adjacentX = d.iy === c.iy && d.ix === c.ix + 1;
+      const adjacentY = d.ix === c.ix && d.iy === c.iy + 1;
+      if (!adjacentX && !adjacentY) continue;
+      const forceKn = TIE_FORCE_FRACTION * Math.max(c.footing.puKn, d.footing.puKn);
+      const asReqMm2 = (forceKn * 1000) / (DESIGN.phiFlexure * MATERIALS.fyMPa);
+      const pick = pickBeamBars(asReqMm2, TIE_WIDTH_MM, { minN: 2 });
+      ties.push({ a: c.id, b: d.id, forceKn, asReqMm2, asProvMm2: pick.areaMm2, fits: pick.fits, util: pick.fits ? asReqMm2 / pick.areaMm2 : Infinity });
+    }
+  return ties;
+}
+
 export interface FoundationResult {
   footings: FoundationFooting[];
+  /** Tie beams between neighbouring columns on each grid line. */
+  ties: TieBeam[];
+  /** Largest and smallest service bearing pressure of the isolated pads, kPa, and the ratio: a screen for uneven settlement. */
+  pressureRatio: number;
+  /** True when the ratio exceeds 1.5 (screen only: a geotechnical check is needed; not a utilisation). */
+  settlementScreen: boolean;
   /** Number of footings that carry more than one column. */
   mergedCount: number;
   /** How many isolated pads would have overlapped a neighbour. */
@@ -110,8 +152,11 @@ export function checkMergedFooting(f: FoundationFooting, cols: ColumnResult[], h
     punch = Math.max(punch, vu / (DESIGN.phiShear * vc));
   }
   // Bending: the strip along x (width = footing depth in y) and along y, each carrying every column load.
-  const mx = stripMaxMomentKnM(cols.map((c) => ({ x: c.xMm, p: c.footing.puKn })), f.x0, f.x1);
-  const my = stripMaxMomentKnM(cols.map((c) => ({ x: c.yMm, p: c.footing.puKn })), f.y0, f.y1);
+  // the largest column base moment about each axis is added to that strip (screening; summing all columns is far too conservative)
+  const baseMx = Math.max(0, ...cols.map((c) => c.footing.momentXKnM));
+  const baseMy = Math.max(0, ...cols.map((c) => c.footing.momentYKnM));
+  const mx = stripMaxMomentKnM(cols.map((c) => ({ x: c.xMm, p: c.footing.puKn })), f.x0, f.x1) + baseMx;
+  const my = stripMaxMomentKnM(cols.map((c) => ({ x: c.yMm, p: c.footing.puKn })), f.y0, f.y1) + baseMy;
   const bendX = flexure(mx, L, d, slabMinAs(L, hMm)).util;
   const bendY = flexure(my, B, d, slabMinAs(B, hMm)).util;
   const bending = Math.max(bendX, bendY);
@@ -177,7 +222,9 @@ export function planFoundation(columns: ColumnResult[], storeys: number): Founda
     return { ...base, depthMm: done.depthMm, mergedCheck: done.check };
   });
   footings.sort((p, q) => p.y0 - q.y0 || p.x0 - q.x0);
-  return { footings, mergedCount: footings.filter((f) => f.kind !== "isolated").length, overlappingPads };
+  const pressures = columns.map((c) => c.footing.pressureKpa).filter((p) => p > 0);
+  const pressureRatio = pressures.length ? Math.max(...pressures) / Math.min(...pressures) : 1;
+  return { footings, ties: planTies(columns), pressureRatio, settlementScreen: pressureRatio > 1.5, mergedCount: footings.filter((f) => f.kind !== "isolated").length, overlappingPads };
 }
 
 /** Do any two footings of the plan overlap? (A built foundation must not.) */
