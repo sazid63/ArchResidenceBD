@@ -20,11 +20,12 @@ import {
 } from "./projectSpec";
 import { getPlan } from "../plans/library";
 import { landAreaToSqm, normaliseLandUnit } from "./units";
+import { specProblems } from "./specValidate";
 
 export class ProjectFormatError extends Error {
   constructor(
     message: string,
-    readonly reason: "unrecognised" | "newer_version",
+    readonly reason: "unrecognised" | "newer_version" | "invalid_values",
   ) {
     super(message);
     this.name = "ProjectFormatError";
@@ -180,8 +181,13 @@ export function migrateV2(p: V2Project, now: string = new Date().toISOString()):
 
 /** Any stored project (v2 or v3) → current ProjectSpec. Throws ProjectFormatError otherwise. */
 export function toProjectSpec(raw: unknown, now?: string): ProjectSpec {
-  if (isProjectSpec(raw)) return raw;
-  if (isV2Project(raw)) return migrateV2(raw, now);
+  const checked = (spec: ProjectSpec): ProjectSpec => {
+    const bad = specProblems(spec);
+    if (bad.length) throw new ProjectFormatError(`The project has values that are not valid (${bad.join(", ")}).`, "invalid_values");
+    return spec;
+  };
+  if (isProjectSpec(raw)) return checked(raw);
+  if (isV2Project(raw)) return checked(migrateV2(raw, now));
   const version = raw && typeof raw === "object" ? (raw as { schemaVersion?: unknown }).schemaVersion : undefined;
   if (typeof version === "number" && version > PROJECT_SCHEMA_VERSION) {
     throw new ProjectFormatError(

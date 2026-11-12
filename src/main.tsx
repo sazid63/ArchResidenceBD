@@ -7,6 +7,9 @@ import { ThemeProvider } from "./theme/theme";
 import "./theme/tokens.css";
 import "./theme/base.css";
 import "./index.css";
+import { installGlobalErrorCapture } from "./model/appHealth";
+
+installGlobalErrorCapture();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

@@ -17,6 +17,7 @@ import { buildMesh } from "./toMesh";
 /** Drop cached meshes (tests and audits). */
 export function clearProjectMeshCache(): void {
   cache.clear();
+  buildingCache.clear();
 }
 
 /** The model input for a project, or null when the project has no plot shape or plan yet. */
@@ -35,8 +36,19 @@ export function buildingInputFor(project: BuildingProject): BuildingInput | null
 /** The building for a project; null for a project without plot shape or plan. */
 export function buildingForProject(project: BuildingProject): BuildingResult | null {
   const input = buildingInputFor(project);
-  return input ? deriveBuilding(input) : null;
+  if (!input) return null;
+  // The same project asks for its building from every screen: derive once per input (the result is only read).
+  const key = JSON.stringify(input);
+  let hit = buildingCache.get(key);
+  if (!hit) {
+    hit = deriveBuilding(input);
+    if (buildingCache.size >= MAX_CACHE) buildingCache.delete(buildingCache.keys().next().value as string);
+    buildingCache.set(key, hit);
+  }
+  return hit;
 }
+
+const buildingCache = new Map<string, BuildingResult>();
 
 const MAX_CACHE = 8;
 const cache = new Map<string, MeshDocument>();

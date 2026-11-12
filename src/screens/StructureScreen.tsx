@@ -206,7 +206,7 @@ export function StructureScreen() {
           </label>
           <label className="stack" style={{ gap: 4 }}>
             <span className="small muted">{bn ? "অনুমোদিত মাটির ধারণক্ষমতা (কিপাস্কাল)" : "Allowable soil bearing (kPa)"}</span>
-            <input className="input" type="number" min={50} max={600} step={10} value={bearing} onChange={(e) => setBearing(Math.max(50, Number(e.target.value) || 150))} />
+            <input className="input" type="number" min={50} max={600} step={10} value={bearing} onChange={(e) => { const n = Number(e.target.value); setBearing(Number.isFinite(n) ? Math.min(Math.max(n, 50), 600) : 150); }} />
           </label>
         </div>
         <p className="small muted" style={{ margin: 0 }}>

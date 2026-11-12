@@ -132,7 +132,7 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
     <div className="field" style={{ flex: 1, minWidth: 120 }}>
       <label className="field-label" htmlFor={id}>{label}</label>
       <div className="row" style={{ gap: 6, alignItems: "center" }}>
-        <input id={id} type="number" step="0.5" min={0.5} className="input" style={{ width: 96 }} value={value} onChange={(e) => set(Number(e.target.value) || 0)} />
+        <input id={id} type="number" step="0.5" min={0.5} className="input" style={{ width: 96 }} value={value} onChange={(e) => { const n = Number(e.target.value); if (Number.isFinite(n)) set(Math.min(Math.max(n, 0), 2000)); }} />
         <span className="faint small">{unitLabel}</span>
       </div>
     </div>
@@ -170,7 +170,7 @@ export function ProjectSetupScreen({ onNavigate, onProjectCreated }: Props) {
           <div className="field">
             <label className="field-label" htmlFor="project-stories-input">{bn ? "তলা সংখ্যা" : "Number of Stories"}</label>
             <div className="row" style={{ gap: 8 }}>
-              <input id="project-stories-input" type="number" min={1} max={30} className="input" style={{ width: 110 }} value={stories} onChange={(e) => setStories(Number(e.target.value) || 1)} />
+              <input id="project-stories-input" type="number" min={1} max={30} className="input" style={{ width: 110 }} value={stories} onChange={(e) => { const n = Number(e.target.value); if (Number.isFinite(n)) setStories(Math.min(Math.max(Math.round(n), 1), 30)); }} />
               {[2, 4, 6, 8].map((s) => (
                 <Button key={s} variant={stories === s ? "primary" : "soft"} onClick={() => setStories(s)}>{s}</Button>
               ))}

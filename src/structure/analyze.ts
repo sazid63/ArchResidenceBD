@@ -343,7 +343,30 @@ function computeLevel(model: BuildingModel, k: number): Omit<LevelResult, "index
 
 const SITE_CLASSES: readonly string[] = ["SA", "SB", "SC", "SD", "SE"];
 
+// Keyed by the model object itself (a model is never edited after it is built; tests that edit one build another), then by the options.
+const analysisCache = new WeakMap<BuildingModel, Map<string, StructureResult>>();
+
+/** Drop remembered results (tests and audits). */
+export function clearStructureCache(): void {
+  /* a WeakMap has no clear: nothing to do, kept so callers need not know */
+}
+
+/**
+ * The structure of a building. The analysis is deterministic in the model and the options, so a repeat call on the same model (another
+ * screen, an export) returns the remembered result instead of running it again (70 to 250 ms per run). Callers must not change the result.
+ */
 export function analyzeStructure(model: BuildingModel, frameOptions: FrameOptions = {}): StructureResult {
+  const key = JSON.stringify(frameOptions);
+  let per = analysisCache.get(model);
+  if (!per) analysisCache.set(model, (per = new Map()));
+  const hit = per.get(key);
+  if (hit) return hit;
+  const result = analyzeStructureUncached(model, frameOptions);
+  per.set(key, result);
+  return result;
+}
+
+export function analyzeStructureUncached(model: BuildingModel, frameOptions: FrameOptions = {}): StructureResult {
   // Say what is wrong with an input instead of failing deep inside the seismic tables.
   if (frameOptions.siteClass !== undefined && !SITE_CLASSES.includes(frameOptions.siteClass))
     throw new RangeError(`Unknown site class "${frameOptions.siteClass}": use one of ${SITE_CLASSES.join(", ")} (class SF needs a site-specific study and is not supported).`);

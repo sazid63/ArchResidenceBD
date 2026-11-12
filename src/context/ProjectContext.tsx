@@ -5,7 +5,8 @@
  * directly. This fixes the prop-drilling of projectVersion and ensures proper
  * React render cycles when project state changes.
  */
-import { createContext, useContext, useState, useCallback, useMemo, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, useMemo, ReactNode } from "react";
+import { STORAGE_KEYS } from "../model/projectStore";
 import {
   getActiveProject,
   getActiveSpec,
@@ -40,6 +41,15 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     setSpec(getActiveSpec());
     setProjectVersion((v) => v + 1);
   }, []);
+
+  // Another tab saved: follow it, so this tab does not keep editing (and later overwrite) an old copy.
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEYS.projects || e.key === STORAGE_KEYS.activeId) refreshProject();
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, [refreshProject]);
 
   const saveCustomization = useCallback((patch: Partial<BuildingCustomization>) => {
     if (!project) return;

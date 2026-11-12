@@ -11,7 +11,8 @@ import { applyLegacy, specToLegacy } from "../model/legacyAdapter";
 import type { V2Project } from "../model/legacyV2";
 import { migrateV2 } from "../model/migrate";
 import type { ProjectSpec } from "../model/projectSpec";
-import { getActiveProjectId, loadProjects, saveProjects, setActiveProjectId, STORAGE_KEYS, upsertProject, type KeyValueStore } from "../model/projectStore";
+import { getActiveProjectId, loadProjects, saveProjects, setActiveProjectId, STORAGE_KEYS, StorageConflictError, upsertProject, type KeyValueStore } from "../model/projectStore";
+import { reportHealth } from "../model/appHealth";
 import type { Deviation } from "../spec.gen";
 import type { BuildingCustomization } from "../types/customization";
 import { mergeImported } from "../model/projectFile";
@@ -388,9 +389,26 @@ function guard<T>(fn: () => T, fallback: T): T {
   }
 }
 
+/** The same for a write, but a failure is reported to the user instead of vanishing (appHealth, shown by the banner). */
+function guardWrite<T>(fn: () => T, fallback: T): T {
+  try {
+    return fn();
+  } catch (e) {
+    if (e instanceof StorageConflictError)
+      reportHealth("conflict", "This project was changed in another tab or window, so your last change was NOT saved. Reload the page to see the newest version.", "প্রজেক্টটি অন্য ট্যাব বা উইন্ডোতে বদলেছে, তাই আপনার শেষ পরিবর্তন সংরক্ষিত হয়নি। নতুন সংস্করণ দেখতে পেজ রিলোড করুন।");
+    else
+      reportHealth("write_failed", "Your last change could NOT be saved: browser storage is full or blocked. Use Back up all on the Your projects screen to keep a copy.", "আপনার শেষ পরিবর্তন সংরক্ষিত হয়নি: ব্রাউজারের স্টোরেজ ভরা বা বন্ধ। কপি রাখতে “আমার প্রজেক্ট” স্ক্রিনে ব্যাকআপ করুন।", e instanceof Error ? e.message : undefined);
+    return fallback;
+  }
+}
+
 /** The v3 projects, migrating v2 saves into the v3 keys the first time. */
 function loadSpecs(store: KeyValueStore): ProjectSpec[] {
   const loaded = loadProjects(store);
+  if (loaded.damaged)
+    reportHealth("damaged", "The saved project list on this device is damaged and could not be read. It is kept as a separate copy and will not be deleted.", "এই ডিভাইসে সংরক্ষিত প্রজেক্ট তালিকা নষ্ট, পড়া যায়নি। এটি আলাদা কপি হিসেবে রাখা আছে, মুছে ফেলা হবে না।");
+  else if (loaded.skipped > 0)
+    reportHealth("skipped", `${loaded.skipped} saved project(s) could not be read and are not shown (damaged or from a newer version).`, `${loaded.skipped}টি সংরক্ষিত প্রজেক্ট পড়া যায়নি, তাই দেখানো হচ্ছে না (নষ্ট বা নতুন সংস্করণের)।`);
   if (loaded.source === "v2") {
     saveProjects(store, loaded.projects);
     let active: string | null = null;
@@ -432,7 +450,7 @@ export function getActiveSpec(): ProjectSpec | null {
 export function saveActiveSpec(spec: ProjectSpec): ProjectSpec | null {
   const store = browserStore();
   if (!store) return null;
-  return guard(() => {
+  return guardWrite(() => {
     const saved = upsertProject(store, spec);
     setActiveProjectId(store, saved.project.id);
     return saved;
@@ -443,7 +461,7 @@ export function saveActiveProject(project: BuildingProject): void {
   project.updatedAt = new Date().toISOString();
   const store = browserStore();
   if (!store) return;
-  guard(() => {
+  guardWrite(() => {
     const existing = loadSpecs(store).find((s) => s.project.id === project.id);
     const base = existing ?? migrateV2(project as unknown as V2Project, project.updatedAt);
     const saved = upsertProject(store, applyLegacy(base, project), project.updatedAt);
@@ -482,7 +500,7 @@ export function getSavedSpecs(): ProjectSpec[] {
 export function addImportedSpecs(imported: ProjectSpec[]): number {
   const store = browserStore();
   if (!store) return 0;
-  return guard(() => {
+  return guardWrite(() => {
     const { merged, added } = mergeImported(loadSpecs(store), imported, () => `p-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`);
     saveProjects(store, merged);
     return added.length;
@@ -492,7 +510,7 @@ export function addImportedSpecs(imported: ProjectSpec[]): number {
 export function deleteSavedProject(id: string): void {
   const store = browserStore();
   if (!store) return;
-  guard(() => {
+  guardWrite(() => {
     saveProjects(store, loadSpecs(store).filter((s) => s.project.id !== id));
     if (getActiveProjectId(store) === id) store.removeItem(STORAGE_KEYS.activeId);
   }, undefined);
@@ -501,7 +519,7 @@ export function deleteSavedProject(id: string): void {
 export function clearAllProjects(): void {
   const store = browserStore();
   if (!store) return;
-  guard(() => {
+  guardWrite(() => {
     saveProjects(store, []);
     store.removeItem(STORAGE_KEYS.activeId);
   }, undefined);

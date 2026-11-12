@@ -5,6 +5,7 @@ import { Sidebar } from "./layout/Sidebar";
 import { activateSavedProject, getActiveProject, create4StoryBuildingProject } from "./engine/projectState";
 import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import { ErrorBoundary } from "./components/ErrorBoundary";
+import { HealthBanner } from "./components/HealthBanner";
 import { useHashRoute } from "./hooks/useHashRoute";
 import { useI18n } from "./i18n";
 import { useActiveProject } from "./context/ProjectContext";
@@ -115,6 +116,7 @@ function Shell() {
           </button>
           <span className="mobile-bar-title">{title}</span>
         </header>
+        <HealthBanner />
         <main id="main-content" ref={mainRef} tabIndex={-1} className="app-main">
           <ErrorBoundary
             resetKey={view}
