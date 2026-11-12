@@ -108,14 +108,14 @@ describe("labour and machine lines from output norms", () => {
     const { model, bbs } = build(4);
     const boq = buildBoq(model, bbs);
     const line = (id: string) => boq.lines.find((l) => l.id === id)!;
-    expect(line("labour-mason-brick").rateBdt).toBe(700);
+    expect(line("labour-mason-brick").rateBdt).toBe(940);
     expect(line("mixer-days").rateBdt).toBe(1200);
     expect(line("operator-days").rateBdt).toBe(700);
     expect(line("vibrator-days").rateBdt).toBe(550);
     expect(line("labour-helper-brick").rateBdt).toBe(800);
     expect(line("labour-helper-finishes").rateBdt).toBe(800);
-    expect(line("labour-painter").rateBdt).toBe(700);
-    expect(line("labour-mason-brick").amountBdt).toBeCloseTo(line("labour-mason-brick").quantity * 700, 6);
+    expect(line("labour-painter").rateBdt).toBe(940);
+    expect(line("labour-mason-brick").amountBdt).toBeCloseTo(line("labour-mason-brick").quantity * 940, 6);
     expect(boq.lines.some((l) => l.id === "labour-excavation")).toBe(false);
     expect(boq.unpriced.some((id) => id.startsWith("labour"))).toBe(false);
   });

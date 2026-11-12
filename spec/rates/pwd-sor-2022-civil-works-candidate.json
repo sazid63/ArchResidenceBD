@@ -88,11 +88,11 @@
       "costType": "labour",
       "key": "mason",
       "label": {
-        "bn": "রাজমিস্ত্রি (দৈনিক)",
-        "en": "Mason (daily)"
+        "en": "Mason, urban daily wage (per day)",
+        "bn": "রাজমিস্ত্রি, শহরের দৈনিক মজুরি (প্রতি দিন)"
       },
-      "note": "C1 labour and man-power, per day; the book also lists a head mason at item 1. Source: PWD SoR 2022 (Revised) Part A, item 2, PDF page 14.",
-      "rateBdt": 700,
+      "note": "Urban daily wage for a mason, Tk 940 (wage board announced Aug 2021, Prothom Alo and Bhorer Kagoj; rural Tk 870). Replaces the SoR 2022 value of Tk 700. Tile masons are Tk 1,105 in the same source; not split here.",
+      "rateBdt": 940,
       "regionalMultipliers": {
         "chattogram": 1,
         "khulna": 0.928571,
@@ -262,7 +262,7 @@
         "en": "Helper (unskilled labourer, day)",
         "bn": "সহকারী (অদক্ষ শ্রমিক, দিন)"
       },
-      "note": "ASSUMPTION from web sources, not the SoR: Dhaka city corporation daily labour wage of Tk 800 (bdnews24, \"Daily wage for labourers in government jobs rises by Tk 225\"). Private helpers may be paid less; confirm with a local contractor."
+      "note": "Daily wage for an unskilled labourer or helper: Tk 800 a day for Dhaka and Chattogram city corporations under the 2025 policy for daily-based workers (bdnews24 and Prothom Alo reporting, 2025-26). Within the 600 to 900 range quoted for Bangladesh labour in web cost guides."
     },
     {
       "regionalMultipliers": {
@@ -407,6 +407,38 @@
       },
       "note": "DERIVED from this card: 1:3:6 by dry volume, 1.54 dry factor. Cement 4.44 bags x Tk 520 = Tk 2,309; sand 16.3 cft x Tk 19 = Tk 310; stone chips 32.6 cft x Tk 218 = Tk 7,107. Total Tk 9,726 per m3, materials only. Mixing and placing labour are not included.",
       "key": "lean-concrete"
+    },
+    {
+      "regionalMultipliers": {
+        "chattogram": 1,
+        "khulna": 1,
+        "rajshahi": 1
+      },
+      "key": "electrical",
+      "costType": "subcontract",
+      "unit": "m2",
+      "rateBdt": 3122,
+      "label": {
+        "en": "Electrical wiring, points and fittings (per m2 of floor)",
+        "bn": "বৈদ্যুতিক ওয়্যারিং, পয়েন্ট ও ফিটিংস (প্রতি বর্গমিটার মেঝে)"
+      },
+      "note": "ASSUMPTION, low confidence: web cost guides give Tk 180 to 400 per sq ft for electrical work (mid Tk 290), 2026 Bangladesh; x 10.764 = Tk 3,122 per m2. A benchmark for the whole floor area, not a quantity take-off."
+    },
+    {
+      "regionalMultipliers": {
+        "chattogram": 1,
+        "khulna": 1,
+        "rajshahi": 1
+      },
+      "key": "plumbing",
+      "costType": "subcontract",
+      "unit": "m2",
+      "rateBdt": 3767,
+      "label": {
+        "en": "Plumbing and sanitary fittings (per m2 of floor)",
+        "bn": "প্লাম্বিং ও স্যানিটারি ফিটিংস (প্রতি বর্গমিটার মেঝে)"
+      },
+      "note": "ASSUMPTION, low confidence: web cost guides give Tk 200 to 500 per sq ft for plumbing and sanitary work (mid Tk 350), 2026 Bangladesh; x 10.764 = Tk 3,767 per m2. Excludes septic tank, soak well and tanks, which are not priced."
     }
   ],
   "notes": "Transcribed from the PWD Schedule of Rates 2022 (Revised), Part A: Civil Works (16th edition, revised, effective 23 February 2023) on 2026-10-21. The four official price zones (Dhaka and Mymensingh / Chattogram and Sylhet / Khulna, Barisal and Gopalgonj / Rajshahi and Rangpur) become each line's regional multipliers. These are works rates: the contractor's profit, overhead and VAT are listed separately in the book and are not included. Stone chips added 2026-11-09 from the same copy (hash checked). Formwork (steel, per sqm) and rebar fixing (derived) added 2026-11-09; the book has no man-day norms, it prices works as composite rates. A candidate card until a human marks it active.",

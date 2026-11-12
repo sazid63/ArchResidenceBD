@@ -19,6 +19,7 @@ const CATEGORY_LABEL: Record<BoqCategory, { en: string; bn: string }> = {
   finishes: { en: "Finishes", bn: "ফিনিশ" },
   earthwork: { en: "Earthwork", bn: "মাটির কাজ" },
   fittings: { en: "Doors, windows and lift", bn: "দরজা, জানালা ও লিফট" },
+  services: { en: "Services (electrical, plumbing)", bn: "সার্ভিস (বৈদ্যুতিক, প্লাম্বিং)" },
   labour: { en: "Labour and machines", bn: "শ্রম ও যন্ত্র" },
 };
 
@@ -92,8 +93,8 @@ export function BoqScreen() {
       )}
       <Callout tone="warn" title={bn ? "রেট কার্ড এখনো যাচাই হয়নি, মোট একটি নিম্নসীমা" : "Rate card not yet verified; the total is a lower bound"}>
         {bn
-          ? `দাম "${c.source.name}" থেকে (অবস্থা: ${c.status}, কার্যকর ${c.effectiveFrom}, তথ্য ${c.asOf ?? "—"})। ওয়েব থেকে নেওয়া দর রেট কার্ডে ASSUMPTION চিহ্নিত। এখনও ধরা হয়নি: বারান্দার রেলিং, প্লাম্বিং, বৈদ্যুতিক ও ড্রেনেজ সার্ভিস।`
-          : `Prices are from "${c.source.name}" (status ${c.status}, effective ${c.effectiveFrom}, as of ${c.asOf ?? "n/a"}), plus web-sourced rates marked ASSUMPTION in the rate card. Not in the total yet: balcony railing, and plumbing, electrical and drainage services.`}
+          ? `দাম "${c.source.name}" থেকে (অবস্থা: ${c.status}, কার্যকর ${c.effectiveFrom}, তথ্য ${c.asOf ?? "—"})। ওয়েব থেকে নেওয়া দর রেট কার্ডে ASSUMPTION চিহ্নিত। এখনও ধরা হয়নি: বারান্দার রেলিং, সেপটিক ট্যাংক ও সোক ওয়েল, পানির ট্যাংক ও পাম্প, ড্রেনেজ। বৈদ্যুতিক ও প্লাম্বিং প্রতি বর্গফুটের আনুমানিক হারে।`
+          : `Prices are from "${c.source.name}" (status ${c.status}, effective ${c.effectiveFrom}, as of ${c.asOf ?? "n/a"}), plus web-sourced rates marked ASSUMPTION in the rate card. Not in the total yet: balcony railing, septic tank and soak well, water tanks and pump, and drainage. Electrical and plumbing use benchmark rates per sq ft.`}
       </Callout>
 
       <div className="row" style={{ gap: 16, margin: "16px 0", flexWrap: "wrap" }}>
