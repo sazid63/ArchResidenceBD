@@ -19,10 +19,12 @@ const BUDGET = {
   entryCss: 14 * KB,
   /** Any one lazy chunk (a screen or a shared engine). Largest at M7-1: the structural analysis, 34 KB. */
   chunkJs: 50 * KB,
+  /** The design worker (structure, bars and BOQ engine in its own file, loaded when a design screen opens). 68 KB at the worker change (it carries its own copy of the engine and rule packs); off the first-load path. */
+  workerJs: 80 * KB,
   /** The PDF libraries (pdf-lib, fontkit for the Bangla font, pako), loaded only when a PDF is made: each file is allowed this much. */
   pdfChunkJs: 340 * KB,
   /** All JavaScript together. Measured 325 KB at M7-1; 823 KB with the PDF libraries (P1-3), which load on demand. */
-  totalJs: 880 * KB,
+  totalJs: 960 * KB,
 };
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -48,9 +50,10 @@ const check = (label, value, limit) => {
 
 check(`entry script`, gz(join(dist, entryJs)), BUDGET.entryJs);
 if (entryCss) check(`entry stylesheet`, gz(join(dist, entryCss)), BUDGET.entryCss);
+const isWorker = (f) => f.startsWith("assets/designWorker-");
 const isPdfLib = (f) => /^assets\/(fontkit\.es|es|pako)-/.test(f);
-for (const s of sizes.filter((s) => s.file !== entryJs).slice(0, 4)) check(s.file.replace(/-[\w-]{8}\.js$/, ".js"), s.gzip, isPdfLib(s.file) ? BUDGET.pdfChunkJs : BUDGET.chunkJs);
-const biggest = sizes.find((s) => s.file !== entryJs && !isPdfLib(s.file));
+for (const s of sizes.filter((s) => s.file !== entryJs).slice(0, 4)) check(s.file.replace(/-[\w-]{8}\.js$/, ".js"), s.gzip, isPdfLib(s.file) ? BUDGET.pdfChunkJs : isWorker(s.file) ? BUDGET.workerJs : BUDGET.chunkJs);
+const biggest = sizes.find((s) => s.file !== entryJs && !isPdfLib(s.file) && !isWorker(s.file));
 if (biggest && biggest.gzip > BUDGET.chunkJs) failures.push(biggest.file);
 check(`all JavaScript (${js.length} files)`, total, BUDGET.totalJs);
 

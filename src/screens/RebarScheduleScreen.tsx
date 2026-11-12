@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { saveFile } from "../platform/saveFile";
 import { useProject } from "../context/ProjectContext";
+import { useDesignAsync } from "../design/useDesignAsync";
+import { DesignPending } from "./DesignPending";
 import { useI18n } from "../i18n";
 import { buildingForProject } from "../model/projectMesh";
 import { SUPPORTED_MAX_STOREYS, analyzeStructure, structureSupported } from "../structure/analyze";
@@ -62,11 +64,8 @@ export function RebarScheduleScreen() {
   const [filter, setFilter] = useState<Filter>("all");
 
   const built = useMemo(() => (project && project.plot && project.planId ? buildingForProject(project) : null), [project]);
-  const data = useMemo<{ bbs: BbsResult; assumptions: Array<{ id: string; en: string; bn: string }>; ok: boolean } | null>(() => {
-    if (!built || !built.ok) return null;
-    const res = analyzeStructure(built.model);
-    return { bbs: buildBbs(res, built.model), assumptions: res.assumptions, ok: res.ok };
-  }, [built]);
+  const pending = useDesignAsync(built && built.ok ? built.model : null);
+  const data = pending.status === "ready" ? { bbs: pending.result.bbs, assumptions: pending.result.structure.assumptions, ok: pending.result.structure.ok } : null;
 
   const title = bn ? "রিবার শিডিউল" : "Rebar schedule";
   const subtitle = bn ? "কাঠামোর ফলাফল থেকে বার বেন্ডিং শিডিউল" : "Bar bending schedule from the structural results";
@@ -81,6 +80,8 @@ export function RebarScheduleScreen() {
       </div>
     );
   }
+  if (built.ok && (pending.status === "running" || pending.status === "idle")) return <DesignPending title={title} subtitle={project.name} />;
+  if (pending.status === "error") return <DesignPending title={title} subtitle={project.name} error={pending.message} />;
   if (!built.ok || !data) {
     return (
       <div className="screen">

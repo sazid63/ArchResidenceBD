@@ -1,10 +1,12 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { useProject } from "../context/ProjectContext";
+import { useDesignAsync } from "../design/useDesignAsync";
+import { DesignPending } from "./DesignPending";
 import { useI18n } from "../i18n";
 import { buildingForProject } from "../model/projectMesh";
 import type { OccupancyGroup, SiteClass } from "../rules/bnbcStructure";
 import { seismicPack } from "../rules/bnbcStructure";
-import { SUPPORTED_MAX_STOREYS, analyzeStructure, type LevelResult, type MemberFailure } from "../structure/analyze";
+import { SUPPORTED_MAX_STOREYS, type LevelResult, type MemberFailure, type StructureResult } from "../structure/analyze";
 import type { SeismicResult } from "../structure/seismic";
 import type { CheckResult } from "../theme/tokens";
 import { Callout, Card, EmptyState, PageHeader, ResultChip, Stat, Value, VerdictStrip } from "../ui/kit";
@@ -109,10 +111,8 @@ export function StructureScreen() {
   const group: OccupancyGroup = "I_II";
 
   const built = useMemo(() => (project && project.plot && project.planId ? buildingForProject(project) : null), [project]);
-  const result = useMemo(
-    () => (built && built.ok ? analyzeStructure(built.model, { siteClass, ...(systemChoice ? { systemId: systemChoice } : {}), allowableBearingKpa: bearing, group }) : null),
-    [built, siteClass, systemChoice, bearing],
-  );
+  const pending = useDesignAsync(built && built.ok ? built.model : null, { siteClass, ...(systemChoice ? { systemId: systemChoice } : {}), allowableBearingKpa: bearing, group });
+  const result: StructureResult | null = pending.status === "ready" ? pending.result.structure : null;
 
   const footingText = (colId: string, side: number, depth: number, util: number): string => {
     const fo = result?.foundation.footings.find((f) => f.columnIds.includes(colId));
@@ -133,6 +133,8 @@ export function StructureScreen() {
       </div>
     );
   }
+  if (built.ok && (pending.status === "running" || pending.status === "idle")) return <DesignPending title={title} subtitle={project.name} />;
+  if (pending.status === "error") return <DesignPending title={title} subtitle={project.name} error={pending.message} />;
   if (!built.ok || !result) {
     return (
       <div className="screen">

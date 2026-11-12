@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { saveFile } from "../platform/saveFile";
 import { useProject } from "../context/ProjectContext";
+import { useDesignAsync } from "../design/useDesignAsync";
+import { DesignPending } from "./DesignPending";
 import { useI18n } from "../i18n";
 import { buildSheets, buildPermitPackageWithPdf, packageToZip, type Sheet } from "../drawings/permit";
 import { sceneToDxf, sceneToSvg } from "../drawings/scene";
@@ -28,12 +30,13 @@ export function DrawingsScreen() {
   const [busy, setBusy] = useState(false);
 
   const built = useMemo(() => (project && project.plot && project.planId ? buildingForProject(project) : null), [project]);
+  const pending = useDesignAsync(built && built.ok ? built.model : null);
   const data = useMemo(() => {
-    if (!project || !built || !built.ok) return null;
-    const res = analyzeStructure(built.model);
+    if (!project || !built || !built.ok || pending.status !== "ready") return null;
+    const res = pending.result.structure;
     const date = today();
     return { model: built.model, res, sheets: buildSheets(built.model, res, project.name, date, lang), date };
-  }, [project, built, lang]);
+  }, [project, built, lang, pending]);
 
   const title = bn ? "ড্রয়িং ও পারমিট প্যাকেজ" : "Drawings and permit package";
   const subtitle = bn ? "মডেল থেকে সাইট প্ল্যান, প্ল্যান, সেকশন ও এলিভেশন" : "Site plan, floor plans, section and elevations from the model";
@@ -48,6 +51,8 @@ export function DrawingsScreen() {
       </div>
     );
   }
+  if (built.ok && (pending.status === "running" || pending.status === "idle")) return <DesignPending title={title} subtitle={project.name} />;
+  if (pending.status === "error") return <DesignPending title={title} subtitle={project.name} error={pending.message} />;
   if (!built.ok || !data) {
     return (
       <div className="screen">

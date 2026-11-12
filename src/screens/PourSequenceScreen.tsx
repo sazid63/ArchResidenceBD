@@ -5,6 +5,7 @@ import { concreteSteps } from "../structure/bbs";
 import { fmtDec, fmtInt } from "../ui/format";
 import { csvCell, downloadText } from "../ui/download";
 import { Button, Callout, Card, EmptyState, PageHeader, Stat } from "../ui/kit";
+import { DesignPending } from "./DesignPending";
 import { useDesign } from "./useDesign";
 
 function label(r: PourRow, storeys: number, bn: boolean): string {
@@ -32,6 +33,8 @@ export function PourSequenceScreen() {
         <EmptyState title={bn ? "এখনো কোনো প্ল্যান বাছাই হয়নি" : "No plan chosen yet"}>{bn ? "জমির মাপ দিয়ে একটি প্ল্যান বাছাই করুন।" : "Enter the plot and pick a plan first."}</EmptyState>
       </div>
     );
+  if (d.state === "running") return <DesignPending title={title} subtitle={subtitle} />;
+  if (d.state === "error") return <DesignPending title={title} subtitle={subtitle} error={d.message} />;
   if (d.state === "no_fit" || !plan)
     return (
       <div className="screen">

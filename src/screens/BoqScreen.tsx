@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import { saveFile } from "../platform/saveFile";
 import { useProject } from "../context/ProjectContext";
+import { useDesignAsync } from "../design/useDesignAsync";
+import { DesignPending } from "./DesignPending";
 import { useI18n } from "../i18n";
 import { buildingForProject } from "../model/projectMesh";
 import { BOQ_ASSUMPTIONS, boqToCsv, buildBoq, type Boq, type BoqCategory } from "../quantities/takeoff";
@@ -39,10 +41,8 @@ export function BoqScreen() {
   const { project } = useProject();
 
   const built = useMemo(() => (project && project.plot && project.planId ? buildingForProject(project) : null), [project]);
-  const boq = useMemo<Boq | null>(() => {
-    if (!built || !built.ok) return null;
-    return buildBoq(built.model, buildBbs(analyzeStructure(built.model), built.model));
-  }, [built]);
+  const pending = useDesignAsync(built && built.ok ? built.model : null);
+  const boq: Boq | null = pending.status === "ready" ? pending.result.boq : null;
 
   const title = bn ? "বিল অব কোয়ান্টিটিজ" : "Bill of quantities";
   const subtitle = bn ? "মডেল ও রিবার শিডিউল থেকে পরিমাণ, রেট কার্ড থেকে দাম" : "Quantities from the model and the bar schedule, prices from the rate card";
@@ -57,6 +57,8 @@ export function BoqScreen() {
       </div>
     );
   }
+  if (built.ok && (pending.status === "running" || pending.status === "idle")) return <DesignPending title={title} subtitle={project.name} />;
+  if (pending.status === "error") return <DesignPending title={title} subtitle={project.name} error={pending.message} />;
   if (!built.ok || !boq) {
     return (
       <div className="screen">

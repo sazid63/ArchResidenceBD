@@ -2,6 +2,7 @@ import { useI18n } from "../i18n";
 import { fmtDec, fmtInt } from "../ui/format";
 import { csvCell, downloadText } from "../ui/download";
 import { Button, Callout, Card, EmptyState, PageHeader, Stat } from "../ui/kit";
+import { DesignPending } from "./DesignPending";
 import { useDesign } from "./useDesign";
 
 const FAMILIES = [
@@ -32,6 +33,8 @@ export function FormworkScaffoldScreen() {
         </EmptyState>
       </div>
     );
+  if (d.state === "running") return <DesignPending title={title} subtitle={subtitle} />;
+  if (d.state === "error") return <DesignPending title={title} subtitle={subtitle} error={d.message} />;
   if (d.state === "no_fit")
     return (
       <div className="screen">
