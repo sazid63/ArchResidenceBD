@@ -223,7 +223,8 @@ describe("permit package", () => {
   const paths = files.map((f) => f.path);
 
   it("has drawings (SVG and DXF per sheet), BOQ, bar schedule, compliance report, assumptions and an index", () => {
-    const sheets = 1 + m.storeys.length + 1 + 4;
+    // site + plans + section + 4 elevations, then the structural sheets: notes, columns, footings and one beam layout per level
+    const sheets = 1 + m.storeys.length + 1 + 4 + 3 + m.storeys.length;
     expect(paths.filter((x) => x.endsWith(".dxf")).length).toBe(sheets);
     expect(paths.filter((x) => x.endsWith(".svg")).length).toBe(sheets);
     for (const f of ["README.md", "boq/boq.csv", "structure/bar-schedule.csv", "compliance/report.md", "assumptions.md"]) expect(paths).toContain(f);

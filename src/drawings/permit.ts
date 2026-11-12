@@ -17,6 +17,7 @@ import { bbsToCsv } from "../structure/bbsCsv";
 import { ASSUMPTIONS } from "../structure/materials";
 import { sceneToDxf, sceneToSvg, type Scene } from "./scene";
 import { elevationScene, planScene, sectionScene, siteScene, withTitleBlock, type ElevationSide, type Lang, type SheetOptions, type TitleInfo } from "./sheets";
+import { structuralScenes } from "./structSheets";
 import { makeZip } from "./zip";
 
 export interface PackageFile {
@@ -63,11 +64,14 @@ export function buildSheets(model: BuildingModel, res: StructureResult, projectN
     ...model.storeys.map((s) => planScene(model, s.index, opts)),
     sectionScene(model, slabMm, opts),
     ...(["front", "rear", "left", "right"] as ElevationSide[]).map((side) => elevationScene(model, side, opts)),
+    ...structuralScenes(model, res, lang),
   ];
   let planN = 0;
   let elevN = 0;
+  let beamN = 0;
+  const structNo = (id: string) => (id === "struct-notes" ? "S-001" : id === "struct-columns" ? "S-101" : id === "struct-footings" ? "S-102" : `S-2${String(++beamN).padStart(2, "0")}`);
   return raw.map((scene) => {
-    const sheetNo = scene.id === "site" ? "A-001" : scene.id.startsWith("plan-") ? `A-1${String(++planN).padStart(2, "0")}` : scene.id.startsWith("section") ? "A-301" : `A-2${String(++elevN).padStart(2, "0")}`;
+    const sheetNo = scene.id.startsWith("struct-") ? structNo(scene.id) : scene.id === "site" ? "A-001" : scene.id.startsWith("plan-") ? `A-1${String(++planN).padStart(2, "0")}` : scene.id.startsWith("section") ? "A-301" : `A-2${String(++elevN).padStart(2, "0")}`;
     const info: TitleInfo = { project: projectName, sheetNo, title: scene.title, date, scale: lang === "bn" ? "১ একক = ১ মিমি (প্লটের সময় শিটে বসান)" : "1 unit = 1 mm (fit to sheet when plotting)" };
     return { id: scene.id, sheetNo, title: scene.title, scene: withTitleBlock(scene, info, lang) };
   });
