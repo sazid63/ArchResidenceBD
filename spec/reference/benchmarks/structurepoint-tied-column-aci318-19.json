@@ -1,0 +1,43 @@
+{
+  "id": "structurepoint-tied-column-aci318-19",
+  "kind": "column-interaction",
+  "source": {
+    "title": "Interaction Diagram - Tied Reinforced Concrete Column Design Strength (ACI 318-19)",
+    "publisher": "StructurePoint",
+    "version": "May-24-2022",
+    "url": "https://structurepoint.org/publication/pdf/Interaction-Diagram-Tied-Reinforced-Concrete-Column-Design-Strength-ACI-318-19.pdf",
+    "reference": "Wight, Reinforced Concrete Mechanics and Design, 8th ed., 2021, Example 11-1; results also equal spColumn v10",
+    "accessed": "2026-11-12"
+  },
+  "units": { "length": "in", "stress": "ksi", "force": "kip", "moment": "kip.ft" },
+  "inputs": {
+    "hIn": 16,
+    "bIn": 16,
+    "barsPerLayer": 4,
+    "layers": 2,
+    "barAreaIn2": 1.0,
+    "barCentreFromFaceIn": 2.5,
+    "fcKsi": 5,
+    "fyKsi": 60,
+    "esKsi": 29000,
+    "ecu": 0.003,
+    "tiedColumnPhiCompression": 0.65
+  },
+  "printed": {
+    "P0": 1534.0,
+    "phiP0": 997.1,
+    "phiPnMax": 797.7,
+    "maxTensionPhiPnt": 432.0,
+    "points": [
+      { "name": "fs = 0", "cIn": 13.5, "Pn": 957.4, "phiPn": 622.3, "Mn": 261.33, "phiMn": 169.86 },
+      { "name": "fs = 0.5 fy", "cIn": 10.04, "Pn": 649.1, "phiPn": 421.9, "Mn": 338.54, "phiMn": 220.05 },
+      { "name": "balanced, fs = fy", "cIn": 7.99, "Pn": 416.8, "phiPn": 270.9, "Mn": 385.81, "phiMn": 250.77 },
+      { "name": "tension controlled, es = ey + 0.003", "cIn": 5.02, "Pn": 190.7, "phiPn": 171.6, "Mn": 318.61, "phiMn": 286.75 },
+      { "name": "pure bending", "cIn": 3.25, "Pn": 0, "phiPn": 0, "Mn": 237.73, "phiMn": 213.96 }
+    ]
+  },
+  "notes": [
+    "ACI 318-19 uses the tension-controlled strain ey + 0.003 = 0.00507 for phi = 0.90; the engine uses 0.005 (BNBC 2020 Sec 6.2.3.2). At this section the two give the same phi at the printed strain.",
+    "Wight's textbook values (rounded) agree with these to the digits shown in the document's Table 1."
+  ]
+}

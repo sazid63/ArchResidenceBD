@@ -1,0 +1,37 @@
+{
+  "id": "structurepoint-spread-footing-aci318-14",
+  "kind": "pad-footing",
+  "source": {
+    "title": "Reinforced Concrete Spread Footing (Isolated Footing) Analysis and Design (ACI 318-14)",
+    "publisher": "StructurePoint",
+    "url": "https://structurepoint.org/publication/pdf/Reinforced-Concrete-Square-Spread-Footing-Analysis-Design-ACI318-14.pdf",
+    "accessed": "2026-11-12",
+    "note": "Hand-calculation values; the example also compares spMats finite element results, which are not used here."
+  },
+  "units": { "length": "in", "stress": "psi", "force": "kip", "moment": "kip.ft", "pressure": "psf" },
+  "inputs": {
+    "deadKip": 400,
+    "liveKip": 270,
+    "columnSideIn": 18,
+    "footingFcPsi": 3000,
+    "fyPsi": 60000,
+    "allowableBearingPsf": 6000,
+    "footingSideFt": 11.17,
+    "footingThicknessIn": 32,
+    "averageEffectiveDepthIn": 28,
+    "barDiaIn": 1.0,
+    "coverIn": 3
+  },
+  "printed": {
+    "PuKip": 912,
+    "netServicePressurePsf": 5370,
+    "factoredNetPressurePsf": 7310,
+    "twoWay": { "boIn": 184, "VuKip": 805, "vuPsi": 156, "phiVcPsiByTerm": { "fourRootFc": 164, "twoPlusFourOverBetaRootFc": 246, "alphaSdOverBoPlus2RootFc": 332 }, "phiVcPsiGoverning": 164 },
+    "oneWay": { "VuKip": 204, "phiVcKip": 308 },
+    "flexure": { "MuKipFt": 954, "AsRequiredIn2": 7.76, "aIn": 1.36, "AsMinIn2": 7.72 }
+  },
+  "notes": [
+    "The example prints the allowable pressure as 6,000 psi; its arithmetic (5370 psf net) shows it means psf.",
+    "The example sizes the footing with the actual footing, fill and floor weights deducted; the engine uses a 10 % self-weight allowance."
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "id": "structurepoint-simple-beam-aci318-14",
+  "kind": "beam-flexure-shear",
+  "source": {
+    "title": "Simply Supported Reinforced Concrete Beam Analysis and Design (ACI 318-14)",
+    "publisher": "StructurePoint",
+    "version": "April-08-2021",
+    "url": "https://structurepoint.org/publication/pdf/Simply%20Supported%20Reinforced%20Concrete%20Beam%20Analysis%20and%20Design%20(ACI%20318-14).pdf",
+    "reference": "Chaallal, Reinforced Concrete Structures, 2nd ed., 2018",
+    "accessed": "2026-11-12"
+  },
+  "units": { "length": "in", "stress": "ksi", "force": "kip", "moment": "kip.ft", "areaPerLength": "in2/in" },
+  "inputs": {
+    "spanFt": 25,
+    "bIn": 12,
+    "hIn": 20,
+    "fcKsi": 4.35,
+    "fyKsi": 60,
+    "fytKsi": 60,
+    "deadKipFt": 0.82,
+    "liveKipFt": 1.0,
+    "barDiaIn": 1.128,
+    "stirrupDiaIn": 0.375,
+    "clearCoverIn": 1.5,
+    "phiFlexure": 0.9,
+    "phiShear": 0.75
+  },
+  "printed": {
+    "wuKipFt": 2.58,
+    "VuKip": 32.3,
+    "MuKipFt": 201.88,
+    "dIn": 17.56,
+    "AsRequiredIn2": 2.872,
+    "aIn": 3.88,
+    "etTension": 0.0083,
+    "AsMinIn2": 0.702,
+    "VuAtDKip": 28.52,
+    "phiVcKip": 20.85,
+    "halfPhiVcKip": 10.42,
+    "VsKip": 10.23,
+    "AvPerSRequiredIn2PerIn": 0.0097,
+    "AvPerSMinIn2PerIn": 0.01,
+    "stirrupsEndNotNeededFromSupportIn": 101.59
+  },
+  "notes": [
+    "Self-weight is neglected in the printed loads (as the example states)."
+  ]
+}

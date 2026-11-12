@@ -53,17 +53,17 @@ export function phiFromStrain(epsT: number, fy: number = MATERIALS.fyMPa): numbe
 
 /**
  * Interaction curve for bending in the plane of `depthMm` (steel in two layers at D_PRIME from each face, ratio
- * `rho` on the gross area). Points run from pure compression (capped at phi Pn,max) down to zero axial load.
+ * `rho` on the gross area; `dPrimeMm` is the bar-centre distance, default the engine cover). Points run from pure compression (capped at phi Pn,max) down to zero axial load.
  */
-export function interaction(depthMm: number, widthMm: number, rho: number, fc: number = MATERIALS.fcMPa, fy: number = MATERIALS.fyMPa): Interaction {
+export function interaction(depthMm: number, widthMm: number, rho: number, fc: number = MATERIALS.fcMPa, fy: number = MATERIALS.fyMPa, dPrimeMm: number = D_PRIME_MM): Interaction {
   const ag = depthMm * widthMm;
   const ast = rho * ag;
-  const layers = [{ d: D_PRIME_MM, a: ast / 2 }, { d: depthMm - D_PRIME_MM, a: ast / 2 }];
+  const layers = [{ d: dPrimeMm, a: ast / 2 }, { d: depthMm - dPrimeMm, a: ast / 2 }];
   const p0 = (0.85 * fc * (ag - ast) + fy * ast) / 1000;
   const phiC = columnPack().phi.compressionControlledTied;
   const phiPnMax = phiC * columnPack().pnMaxTied.factor * p0;
   const pts: CurvePoint[] = [{ p: phiPnMax, m: 0, epsT: 0, phi: phiC }];
-  const dT = depthMm - D_PRIME_MM;
+  const dT = depthMm - dPrimeMm;
   const b1 = beta1(fc);
   for (let i = 0; i <= 400; i++) {
     const c = depthMm * 3 * Math.pow(0.02 / 3, i / 400);

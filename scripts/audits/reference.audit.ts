@@ -66,7 +66,7 @@ const SNAPSHOT_CASES: Array<{ id: string; input: BuildingInput }> = [
 ];
 
 describe("reference buildings (hand calculations)", () => {
-  const files = existsSync(refDir) ? readdirSync(refDir).filter((f) => f.endsWith(".json") && f !== "TEMPLATE.json" && f !== "snapshot.json") : [];
+  const files = existsSync(refDir) ? readdirSync(refDir).filter((f) => f.endsWith(".json") && !["TEMPLATE.json", "snapshot.json", "golden.json"].includes(f)) : [];
   it("compares each filled-in reference inside its tolerance", () => {
     const lines = ["# Reference audit", "", `Date: ${new Date().toISOString().slice(0, 10)}`, ""];
     if (files.length === 0) lines.push("No hand-calculated references yet (spec/reference/TEMPLATE.json explains how to add one).", "");
