@@ -19,6 +19,7 @@ const CATEGORY_LABEL: Record<BoqCategory, { en: string; bn: string }> = {
   finishes: { en: "Finishes", bn: "ফিনিশ" },
   earthwork: { en: "Earthwork", bn: "মাটির কাজ" },
   fittings: { en: "Doors, windows and lift", bn: "দরজা, জানালা ও লিফট" },
+  labour: { en: "Labour and machines", bn: "শ্রম ও যন্ত্র" },
 };
 
 const UNIT_LABEL: Record<string, { en: string; bn: string }> = {
@@ -29,6 +30,9 @@ const UNIT_LABEL: Record<string, { en: string; bn: string }> = {
   ton: { en: "ton", bn: "টন" },
   kg: { en: "kg", bn: "কেজি" },
   each: { en: "nos", bn: "টি" },
+  nr: { en: "nos", bn: "টি" },
+  m: { en: "m", bn: "মি" },
+  day: { en: "day", bn: "দিন" },
 };
 
 const num = (n: number, d = 0) => n.toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: d });

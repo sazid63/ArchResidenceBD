@@ -79,3 +79,41 @@ describe("BOQ completeness lines", () => {
     expect(boq.unpriced.some((id) => quantityOnly.some((l) => l.id === id))).toBe(false);
   });
 });
+
+describe("labour and machine lines from output norms", () => {
+  it("mason days follow the norms: 1 m3 of wall, 9 m2 plaster, 12 m2 screed, 6 m2 tiles a day", () => {
+    const { model, bbs } = build(4);
+    const env = envelopeQuantities(model);
+    const items = takeoff(model, bbs);
+    const q = (id: string) => items.find((i) => i.id === id)!.quantity;
+    const floors = env.screedM2 - env.roofM2;
+    expect(q("labour-mason-brick")).toBeCloseTo(env.wallM3 / 1, 9);
+    expect(q("labour-mason-plaster")).toBeCloseTo(env.plasterM2 / 9, 9);
+    expect(q("labour-mason-screed")).toBeCloseTo(env.screedM2 / 12, 9);
+    expect(q("labour-mason-tiles")).toBeCloseTo(floors / 6, 9);
+    expect(q("labour-painter")).toBeCloseTo((env.plasterM2 + floors) / 15, 9);
+    expect(q("labour-helper-finishes")).toBeCloseTo(q("labour-mason-plaster") + q("labour-mason-screed") + q("labour-mason-tiles"), 9);
+  });
+
+  it("concrete machine days: 8 m3 a day for the mixer and operator, 10 m3 a day for the vibrator", () => {
+    const { model, bbs } = build(4);
+    const items = takeoff(model, bbs);
+    const conc = items.find((i) => i.id === "concrete")!.quantity;
+    expect(items.find((i) => i.id === "mixer-days")!.quantity).toBeCloseTo(conc / 8, 9);
+    expect(items.find((i) => i.id === "operator-days")!.quantity).toBeCloseTo(conc / 8, 9);
+    expect(items.find((i) => i.id === "vibrator-days")!.quantity).toBeCloseTo(conc / 10, 9);
+  });
+
+  it("masons, mixer, operator and vibrator are priced from the day rates; helpers, painters and diggers are quantities only", () => {
+    const { model, bbs } = build(4);
+    const boq = buildBoq(model, bbs);
+    const line = (id: string) => boq.lines.find((l) => l.id === id)!;
+    expect(line("labour-mason-brick").rateBdt).toBe(700);
+    expect(line("mixer-days").rateBdt).toBe(1200);
+    expect(line("operator-days").rateBdt).toBe(700);
+    expect(line("vibrator-days").rateBdt).toBe(550);
+    expect(line("labour-mason-brick").amountBdt).toBeCloseTo(line("labour-mason-brick").quantity * 700, 6);
+    for (const id of ["labour-helper-brick", "labour-helper-finishes", "labour-painter", "labour-excavation"]) expect(line(id).amountBdt).toBeNull();
+    expect(boq.unpriced.some((id) => id.startsWith("labour"))).toBe(false);
+  });
+});

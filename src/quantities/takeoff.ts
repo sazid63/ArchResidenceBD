@@ -71,19 +71,27 @@ export const BOQ = {
   partitionMm: 125,
   plasterMm: 12,
   screedMm: 50,
+  /**
+   * Labour and machine output per day (common practice in Bangladesh; the rate card has day rates but no norms). Assumptions,
+   * listed in BOQ_ASSUMPTIONS: a mason lays 500 bricks (1 m3) a day; plasters 9 m2 of 12 mm; screeds 12 m2 of 50 mm; fixes 6 m2 of tiles;
+   * a painter finishes 15 m2 of wall or ceiling; a diesel mixer turns out 8 m3 of concrete a day (one operator) and a vibrator
+   * serves 10 m3; a labourer digs 3 m3 a day. A helper works with every mason day (brickwork, plaster, screed, tiles).
+   */
+  labour: { masonM3PerDay: 1, plasterM2PerDay: 9, screedM2PerDay: 12, tileM2PerDay: 6, paintM2PerDay: 15, mixerM3PerDay: 8, vibratorM3PerDay: 10, excavationM3PerDay: 3 },
 } as const;
 
 export const BOQ_ASSUMPTIONS: Array<{ id: string; en: string; bn: string }> = [
   { id: "concrete-mix", en: "Concrete 1 : 1.5 : 3 (cement : sand : stone chips) by volume, dry volume 1.54 x wet; one 50 kg bag = 0.0347 m3.", bn: "কংক্রিট ১ : ১.৫ : ৩ (সিমেন্ট : বালি : পাথর) আয়তনে, শুকনো আয়তন ভেজার ১.৫৪ গুণ; ৫০ কেজির ব্যাগ = ০.০৩৪৭ ঘনমিটার।" },
   { id: "mortar", en: "Mortar 1 : 4 for brickwork, plaster and screed, dry volume 1.27 x wet; brickwork takes 0.25 m3 mortar per m3 of wall and 500 bricks per m3.", bn: "ইটের গাঁথুনি, প্লাস্টার ও স্ক্রিডে মর্টার ১ : ৪, শুকনো আয়তন ভেজার ১.২৭ গুণ; গাঁথুনিতে প্রতি ঘনমিটারে ০.২৫ ঘনমিটার মর্টার ও ৫০০টি ইট।" },
   { id: "wall-height", en: "Wall height = storey height - 500 mm (beam or slab above); doors 2.1 m and windows 1.2 m high are deducted from wall and plaster at the thickness of the wall they sit in. The roof parapet (1 m) and the stair and lift cover walls are 125 mm.", bn: "দেয়ালের উচ্চতা = তলার উচ্চতা - ৫০০ মিমি; ২.১ মিটার দরজা ও ১.২ মিটার জানালা নিজ দেয়ালের পুরুত্বে বাদ। ছাদের ১ মিটার প্যারাপেট এবং সিঁড়ি ও লিফট ঘরের দেয়াল ১২৫ মিমি।" },
-  { id: "finishes", en: "Plaster 12 mm on both wall faces; 50 mm screed on every floor and the roof. Slab soffit plaster, tiles, paint, doors, windows, services and earthwork are not taken off.", bn: "দেয়ালের দুই পাশে ১২ মিমি প্লাস্টার; প্রতি তলা ও ছাদে ৫০ মিমি স্ক্রিড। সিলিং প্লাস্টার, টাইলস, রং, দরজা-জানালা, সার্ভিস ও মাটির কাজ ধরা হয়নি।" },
+  { id: "finishes", en: "Plaster 12 mm on both wall faces; 50 mm screed on every floor and the roof. Floor tiles, paint on walls and ceilings, roof waterproofing, doors, windows, the lift and foundation earthwork are quantities from the model and the plan; services (plumbing, electrical, drainage) are not taken off.", bn: "দেয়ালের দুই পাশে ১২ মিমি প্লাস্টার; প্রতি তলা ও ছাদে ৫০ মিমি স্ক্রিড। মেঝের টাইলস, দেয়াল ও সিলিংয়ের রং, ছাদের ওয়াটারপ্রুফিং, দরজা-জানালা, লিফট ও ফুটিংয়ের মাটির কাজ মডেল ও প্ল্যান থেকে পরিমাণ; সার্ভিস (পানি, বিদ্যুৎ, ড্রেনেজ) ধরা হয়নি।" },
+  { id: "labour", en: "Labour and machines in man-days from output norms (common practice): mason 1 m3 of brickwork, 9 m2 of plaster, 12 m2 of screed or 6 m2 of tiles a day; painter 15 m2; diesel mixer 8 m3 and vibrator 10 m3 of concrete a day with one operator; labourer 3 m3 of digging. Masons, mixer, vibrator and operator are priced at the card's day rates; helpers, painters and diggers have no rate on the card.", bn: "শ্রম ও যন্ত্র জনদিবসে, দৈনিক উৎপাদন হারে (প্রচলিত অনুশীলন): রাজমিস্ত্রি দিনে ১ ঘনমিটার গাঁথুনি, ৯ বর্গমিটার প্লাস্টার, ১২ বর্গমিটার স্ক্রিড বা ৬ বর্গমিটার টাইলস; রংমিস্ত্রি ১৫ বর্গমিটার; ডিজেল মিক্সার ৮ ঘনমিটার ও ভাইব্রেটর ১০ ঘনমিটার কংক্রিট, একজন অপারেটরসহ; শ্রমিক ৩ ঘনমিটার মাটি কাটা। মিস্ত্রি, মিক্সার, ভাইব্রেটর ও অপারেটর কার্ডের দৈনিক দরে; সহকারী, রংমিস্ত্রি ও মাটি কাটার শ্রমিকের দর কার্ডে নেই।" },
   { id: "formwork", en: "Formwork is the contact area of slab soffits, beam bottoms and sides below the slab, column faces and footing sides, priced at the book's steel-form rates; nothing is deducted where members meet and slab edges and stair flights are not counted. Rebar fixing is derived from the book (item 08.1.2 minus the bar).", bn: "ফর্মওয়ার্ক হলো স্ল্যাবের নিচ, বিমের তলা ও স্ল্যাবের নিচের দুই পাশ, কলামের চার পাশ ও ফুটিংয়ের পাশের সংস্পর্শ ক্ষেত্রফল, বইয়ের স্টিল ফর্মের দরে; সংযোগস্থলে বাদ দেওয়া হয়নি, স্ল্যাবের কিনারা ও সিঁড়ি ধরা হয়নি। রড বাঁধার দাম বই থেকে হিসাবকৃত (আইটেম ০৮.১.২ থেকে রডের দাম বাদ)।" },
   { id: "steel", en: "Steel is the bar bending schedule total plus 3 % cutting wastage (assumption); binding wire is in the fixing rate; the card's rod line (Schedule of Rates item 289) covers Grade 400/420.", bn: "রড বার বেন্ডিং শিডিউলের মোট ও ৩% কাটার অপচয় (অনুমান); বাইন্ডিং তার বাঁধার দরে ধরা; কার্ডের রডের লাইন (রেট শিডিউল আইটেম ২৮৯) গ্রেড ৪০০/৪২০ দুটোই ধরে।" },
-  { id: "rates", en: "Prices come from the rate card (source and date shown). Cement, sand, stone chips, rods and bricks are priced; labour for concrete, brickwork and plaster, machinery, joinery, tiles, paint and services have no line in the card (the book has no man-day norms), so the total is a lower bound.", bn: "দাম রেট কার্ড থেকে (উৎস ও তারিখ দেখানো)। সিমেন্ট, বালি, পাথর, রড ও ইটের দাম ধরা হয়েছে; কংক্রিট, গাঁথুনি ও প্লাস্টারের শ্রম, যন্ত্র, দরজা-জানালা, টাইলস, রং ও সার্ভিসের লাইন কার্ডে নেই (বইয়ে জনদিবসের হার নেই), তাই মোট একটি নিম্নসীমা।" },
+  { id: "rates", en: "Prices come from the rate card (source and date shown). Cement, sand, stone chips, rods and bricks are priced; the materials, the masons, the mixer, vibrator and operator are priced from the day rates; helpers, painters, diggers, joinery, tiles, paint, waterproofing, earthwork, the lift and services have no line in the card, so the total is a lower bound.", bn: "দাম রেট কার্ড থেকে (উৎস ও তারিখ দেখানো)। উপকরণ, মিস্ত্রি, মিক্সার, ভাইব্রেটর ও অপারেটর দৈনিক দরে; সহকারী, রংমিস্ত্রি, মাটি কাটার শ্রমিক, দরজা-জানালা, টাইলস, রং, ওয়াটারপ্রুফিং, মাটির কাজ, লিফট ও সার্ভিসের লাইন কার্ডে নেই, তাই মোট একটি নিম্নসীমা।" },
 ];
 
-export type BoqCategory = "earthwork" | "concrete" | "formwork" | "steel" | "masonry" | "finishes" | "fittings";
+export type BoqCategory = "earthwork" | "concrete" | "formwork" | "steel" | "masonry" | "finishes" | "fittings" | "labour";
 
 export interface TakeoffItem {
   id: string;
@@ -208,8 +216,32 @@ export function takeoff(model: BuildingModel, bbs: BbsResult): TakeoffItem[] {
     { id: "windows", category: "fittings" as const, description: bi("Windows with grills and glazing (supply and fix)", "গ্রিল ও কাচসহ জানালা (সরবরাহ ও স্থাপন)"), unit: "nr", quantity: env.windowsNr, basis: bi(`${env.windowsM2.toFixed(1)} m2 at 1.2 m high, from the plan openings; no rate on the card yet`, `পরিকল্পনার খোলা অংশ থেকে ১.২ মি উচ্চতায় ${env.windowsM2.toFixed(1)} বর্গমি; কার্ডে এখনো দর নেই`) },
     ...(lift ? [{ id: "lift", category: "fittings" as const, description: bi("Passenger lift, supply, install and commission", "যাত্রীবাহী লিফট, সরবরাহ, স্থাপন ও চালু"), unit: "nr", quantity: lift.spec.liftsProvided, basis: bi(`${model.storeys.length} stops each; a supplier allowance, ${quantityOnly.en}`, `প্রতিটি ${model.storeys.length} স্টপ; সরবরাহকারীর বরাদ্দ, ${quantityOnly.bn}`) }] : []),
   ];
+  const L = BOQ.labour;
+  const labour = (id: string, en: string, bnText: string, days: number, rateKey: string | undefined, norm: string): TakeoffItem => ({
+    id,
+    category: "labour",
+    description: bi(en, bnText),
+    unit: "day",
+    quantity: days,
+    ...(rateKey ? { rateKey } : {}),
+    basis: bi(`${norm}${rateKey ? "" : "; no rate on the card yet"}`, `${norm}${rateKey ? "" : "; কার্ডে এখনো দর নেই"}`),
+  });
+  const labourItems: TakeoffItem[] = [
+    labour("labour-mason-brick", "Mason, brickwork", "রাজমিস্ত্রি, ইটের গাঁথুনি", env.wallM3 / L.masonM3PerDay, "mason", "1 m3 of wall per mason-day"),
+    labour("labour-helper-brick", "Helper, brickwork", "সহকারী, ইটের গাঁথুনি", env.wallM3 / L.masonM3PerDay, undefined, "one helper per mason-day"),
+    labour("labour-mason-plaster", "Mason, plaster 12 mm", "রাজমিস্ত্রি, প্লাস্টার ১২ মিমি", env.plasterM2 / L.plasterM2PerDay, "mason", "9 m2 per mason-day"),
+    labour("labour-mason-screed", "Mason, screed 50 mm", "রাজমিস্ত্রি, স্ক্রিড ৫০ মিমি", env.screedM2 / L.screedM2PerDay, "mason", "12 m2 per mason-day"),
+    labour("labour-mason-tiles", "Mason, floor tiles", "রাজমিস্ত্রি, মেঝের টাইলস", floorsM2 / L.tileM2PerDay, "mason", "6 m2 per mason-day"),
+    labour("labour-helper-finishes", "Helper, plaster, screed and tiles", "সহকারী, প্লাস্টার, স্ক্রিড ও টাইলস", env.plasterM2 / L.plasterM2PerDay + env.screedM2 / L.screedM2PerDay + floorsM2 / L.tileM2PerDay, undefined, "one helper per mason-day"),
+    labour("labour-painter", "Painter, putty and emulsion", "রংমিস্ত্রি, পুটি ও ইমালশন", (env.plasterM2 + floorsM2) / L.paintM2PerDay, undefined, "15 m2 per painter-day"),
+    labour("mixer-days", "Diesel concrete mixer", "ডিজেল কংক্রিট মিক্সার", conc / L.mixerM3PerDay, "mixer-diesel", "8 m3 of concrete per day"),
+    labour("operator-days", "Machine operator, mixer", "মেশিন অপারেটর, মিক্সার", conc / L.mixerM3PerDay, "machine-operator", "one operator per mixer-day"),
+    labour("vibrator-days", "Concrete vibrator", "কংক্রিট ভাইব্রেটর", conc / L.vibratorM3PerDay, "vibrator", "10 m3 of concrete per day"),
+    ...(ew ? [labour("labour-excavation", "Labourer, excavation and backfill", "শ্রমিক, মাটি কাটা ও ভরাট", (ew.excavationM3 + ew.backfillM3) / L.excavationM3PerDay, undefined, "3 m3 per labourer-day")] : []),
+  ];
   return [
     ...more,
+    ...labourItems,
     { id: "concrete", category: "concrete", description: bi("Structural concrete, 1:1.5:3 (footings, columns, beams, slabs)", "কাঠামোগত কংক্রিট ১:১.৫:৩ (ফুটিং, কলাম, বিম, স্ল্যাব)"), unit: "m3", quantity: conc, basis: bi("from the bar schedule volumes", "বার শিডিউলের আয়তন থেকে") },
     { id: "concrete-cement", category: "concrete", description: bi("Cement in concrete", "কংক্রিটে সিমেন্ট"), unit: "bag", quantity: cementConcM3 / BAG_M3, rateKey: "cement-opc-43", basis: bi("dry volume / 0.0347 m3 per bag", "শুকনো আয়তন / প্রতি ব্যাগ ০.০৩৪৭ ঘনমিটার") },
     { id: "concrete-sand", category: "concrete", description: bi("Sand in concrete", "কংক্রিটে বালি"), unit: "cft", quantity: sandConcM3 * CFT_PER_M3, rateKey: "sand-fine", basis: bi("m3 x 35.31", "ঘনমিটার × ৩৫.৩১") },
