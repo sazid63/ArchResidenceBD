@@ -13,7 +13,7 @@ import type { BuildingModel } from "../model/building";
 import { columnPack, structurePack, type OccupancyGroup, type SiteClass } from "../rules/bnbcStructure";
 import type { LevelResult, MemberFailure } from "./analyze";
 import { analyseSpans } from "./continuousBeam";
-import { COLUMN_STOCK, checkColumn, D_PRIME_MM, interaction, lightestSteel, RHO_STEPS, type CaseResult, type ColSection, type ColumnCase } from "./column";
+import { COLUMN_STOCK, checkColumn, D_PRIME_MM, interaction, lightestSteel, RHO_STEPS, type CaseResult, type ColSection, type ColumnCase, type Interaction } from "./column";
 import { beamMn, columnMnAt, strongColumnCheck } from "./capacity";
 import { ldCompression } from "./anchorage";
 import { pickBeamBars, pickColumnBars } from "./barSelect";
@@ -210,6 +210,44 @@ export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: 
     return m;
   });
   const jointOf = (k: number, ck: string): Joint => joints[k].get(ck) ?? emptyJoint();
+
+  // ---- eq 6.8.5 helpers (Sec 8.3.5.2) -------------------------------------------------------------------------------
+  // Nominal column moment about the x and y axes at the factored axial case that gives the lowest strength (nominal P = Pu / phi,
+  // tension cases at Pu). Bending about x uses the x dimension as depth.
+  const itCache = new Map<string, Interaction>();
+  const lowestMnc = (sec: ColSection, rho: number, cases: Array<{ puKn: number }>): { x: number; y: number } => {
+    const phi = columnPack().phi.compressionControlledTied;
+    const lowest = (depth: number, width: number) => {
+      const key = `${depth}|${width}|${rho}`;
+      let it = itCache.get(key);
+      if (!it) { it = interaction(depth, width, rho, MATERIALS.fcMPa, MATERIALS.fyMPa, D_PRIME_MM); itCache.set(key, it); }
+      return Math.min(...cases.map((c) => columnMnAt(it!, c.puKn > 0 ? c.puKn / phi : c.puKn)));
+    };
+    return { x: lowest(sec.bx, sec.by), y: lowest(sec.by, sec.bx) };
+  };
+  /** Sec 8.3.5.2 applies to a joint where a framing column has Pu above 0.1 Ag fc'. */
+  const eqAppliesAt = (sec: ColSection, pu: number): boolean => pu > (0.1 * sec.bx * sec.by * MATERIALS.fcMPa) / 1000;
+  /**
+   * Eq 6.8.5 at beam level i for a candidate column (section s, steel rho, cases) below it, against the storey above at its
+   * current size. True when the joint passes or does not apply. Used while sizing so that columns grow to meet it.
+   */
+  const scwbHolds = (i: number, ci: number, s: ColSection, rho: number, cases: ColumnCase[], pu: number): boolean => {
+    const jt = joints[i].get(cols[ci].key);
+    if (!jt) return true;
+    const framing = [{ sec: s, rho, cases, pu }];
+    if (i + 1 < n) {
+      const up = casesFor(i + 1, ci, sections[i + 1][ci]);
+      framing.push({ sec: sections[i + 1][ci], rho: rhos[i + 1][ci], cases: up.cases, pu: up.pu });
+    }
+    if (!framing.some((f) => eqAppliesAt(f.sec, f.pu))) return true;
+    for (const dir of ["x", "y"] as const) {
+      const sumMnb = dir === "x" ? jt.mnbX : jt.mnbY;
+      if (sumMnb <= 0) continue;
+      const sumMnc = framing.reduce((a, f) => a + lowestMnc(f.sec, f.rho, f.cases)[dir], 0);
+      if (!strongColumnCheck(sumMnc, sumMnb).ok) return false;
+    }
+    return true;
+  };
 
   // ---- seismic level weights that do not depend on the columns ---------------------------------------------------
   const beamWeight = levels.map((lv, k) => {
@@ -425,11 +463,14 @@ export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: 
         const start = Math.max(areaOf(sections[i][ci]), floor);
         let chosen: ColSection | null = null;
         let rho = RHO_STEPS[0];
-        for (const s of COLUMN_STOCK) {
+        // keep the current section ahead of any equal-area twin so that a swapped pair cannot flip back and forth
+        const curSec = sections[i][ci];
+        const isCur = (s: ColSection) => s.bx === curSec.bx && s.by === curSec.by;
+        for (const s of [...COLUMN_STOCK.filter(isCur), ...COLUMN_STOCK.filter((s) => !isCur(s))]) {
           if (areaOf(s) < start || inertiaX(s) < floorIx[i][ci] || inertiaY(s) < floorIy[i][ci]) continue;
-          const { cases } = casesFor(i, ci, s);
+          const { cases, pu } = casesFor(i, ci, s);
           const r = lightestSteel(s, cases);
-          if (r) { chosen = s; rho = r.rho; break; }
+          if (r && scwbHolds(i, ci, s, r.rho, cases, pu)) { chosen = s; rho = r.rho; break; }
         }
         if (!chosen) {
           // nothing passes within 4 %: take the largest section at up to 6 % steel, reporting its (failing) utilisation
@@ -480,35 +521,18 @@ export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: 
   // ---- eq 6.8.5 strong column / weak beam at each beam level (Sec 8.3.5.2) ---------------------------------------
   // Columns framing into a joint: the storey below and the storey above. Each column's nominal moment about the axis of
   // the beams is taken at the factored axial case that gives its lowest strength (nominal P = Pu / phi).
-  const mncCache = new Map<ColumnStoreyResult, { x: number; y: number }>();
-  const mncOf = (s: ColumnStoreyResult): { x: number; y: number } => {
-    let v = mncCache.get(s);
-    if (!v) {
-      const phi = columnPack().phi.compressionControlledTied;
-      const lowest = (dir: "x" | "y") => {
-        const depth = dir === "x" ? s.section.bx : s.section.by;
-        const width = dir === "x" ? s.section.by : s.section.bx;
-        const it = interaction(depth, width, s.rho, MATERIALS.fcMPa, MATERIALS.fyMPa, D_PRIME_MM);
-        return Math.min(...s.cases.map((c) => columnMnAt(it, c.puKn > 0 ? c.puKn / phi : c.puKn)));
-      };
-      v = { x: lowest("x"), y: lowest("y") };
-      mncCache.set(s, v);
-    }
-    return v;
-  };
   const strongColumn: StrongColumnJoint[] = [];
   for (let k = 0; k < n && k < levels.length; k++)
     columns.forEach((c, ci) => {
       const jt = joints[k].get(cols[ci].key);
       if (!jt) return;
       const framing = k + 1 < n ? [c.storeys[k], c.storeys[k + 1]] : [c.storeys[k]];
-      // Sec 8.3.5.2 applies where the factored axial load exceeds 0.1 Ag fc' in a framing column
-      const applies = framing.some((s) => s.puKn > (0.1 * s.section.bx * s.section.by * MATERIALS.fcMPa) / 1000);
+      const applies = framing.some((s) => eqAppliesAt(s.section, s.puKn));
       if (!applies) return;
       for (const dir of ["x", "y"] as const) {
         const sumMnb = dir === "x" ? jt.mnbX : jt.mnbY;
         if (sumMnb <= 0) continue;
-        const sumMnc = framing.reduce((a, s) => a + mncOf(s)[dir], 0);
+        const sumMnc = framing.reduce((a, s) => a + lowestMnc(s.section, s.rho, s.cases)[dir], 0);
         const chk = strongColumnCheck(sumMnc, sumMnb);
         strongColumn.push({ level: k, columnId: c.id, dir, sumMncKnM: sumMnc, sumMnbKnM: sumMnb, ratio: chk.ratio, ok: chk.ok });
         if (!chk.ok) failures.push({ level: k, member: "column", id: `${c.id}/joint-L${k}-${dir}`, util: sumMnc > 0 ? (1.2 * sumMnb) / sumMnc : Infinity, governs: "strong column / weak beam, eq 6.8.5" });

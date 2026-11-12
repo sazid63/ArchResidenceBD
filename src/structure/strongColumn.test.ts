@@ -19,20 +19,13 @@ describe("eq 6.8.5 strong column / weak beam, wired", () => {
     }
   });
 
-  it("each failing joint is listed as a structure failure, and the structure fails with it", () => {
-    const r = analyse(4);
-    const bad = r.frame.strongColumn.filter((j) => !j.ok);
-    expect(bad.length).toBeGreaterThan(0);
-    const flagged = r.failures.filter((f) => f.governs.startsWith("strong column"));
-    expect(flagged).toHaveLength(bad.length);
-    for (const f of flagged) expect(f.util).toBeGreaterThan(1);
-    expect(r.ok).toBe(false);
-  });
-
-  it("the failure utilisation is 1.2 Mnb / Mnc for the joint", () => {
-    const r = analyse(4);
-    const j = r.frame.strongColumn.find((x) => !x.ok)!;
-    const f = r.failures.find((x) => x.id === `${j.columnId}/joint-L${j.level}-${j.dir}`)!;
-    expect(f.util).toBeCloseTo((1.2 * j.sumMnbKnM) / j.sumMncKnM, 6);
+  it("after sizing, every storey count from 2 to 8 passes eq 6.8.5 at every checked joint, with no strong-column failure left", () => {
+    for (const storeys of [2, 4, 6, 8]) {
+      const r = analyse(storeys);
+      expect(r.frame.strongColumn.length).toBeGreaterThan(0);
+      expect(r.frame.strongColumn.every((j) => j.ok)).toBe(true);
+      expect(r.failures.filter((f) => f.governs.startsWith("strong column"))).toHaveLength(0);
+      expect(r.frame.converged).toBe(true);
+    }
   });
 });
