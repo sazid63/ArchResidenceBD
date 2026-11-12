@@ -26,7 +26,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "fonts": "node scripts/copy-fonts.mjs",
-    "audit:deps": "npm audit --omit=dev --audit-level=high"
+    "audit:deps": "npm audit --omit=dev --audit-level=high",
+    "test:properties": "vitest run --config vitest.validation.config.ts"
   },
   "dependencies": {
     "@fontsource/noto-sans": "^5.3.0",
@@ -57,6 +58,7 @@
     "@types/react-dom": "^19.3.0",
     "autoprefixer": "^10.4.21",
     "esbuild": "^0.27.0",
+    "fast-check": "^4.10.2",
     "jsdom": "^31.0.0",
     "oxlint": "^1.93.0",
     "tailwindcss": "^4.3.3",

@@ -45,6 +45,10 @@ jobs:
       - name: Structural audit
         run: npm run audit:structural
 
+      # Phase 2: properties of the whole design pipeline over generated projects.
+      - name: Property tests
+        run: npm run test:properties
+
       - name: Build
         run: npm run build
 
