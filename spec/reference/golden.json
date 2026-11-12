@@ -1,8 +1,8 @@
 {
   "narrow-2st": {
-    "structure": "a671ce6d9a41cc1f",
-    "bbsCsv": "b81a8302336d52f6",
-    "boqCsv": "e9f7d268f3836943",
+    "structure": "73447a1df675a2a1",
+    "bbsCsv": "a1099e679b547bbe",
+    "boqCsv": "93dffba1c9fc48cd",
     "svg:site": "506ef3d775a8d496",
     "dxf:site": "400942c190ada8bc",
     "svg:plan-0": "8fc106716cbbd125",
@@ -21,9 +21,9 @@
     "dxf:elevation-right": "88cae6ee4206679a"
   },
   "narrow-4st": {
-    "structure": "32ede46ffa977f30",
-    "bbsCsv": "f9e2d1f33fc4b86c",
-    "boqCsv": "bccf74e07297a895",
+    "structure": "bc6289512987306e",
+    "bbsCsv": "40c042d6d2434347",
+    "boqCsv": "d63c936130781075",
     "svg:site": "8820c2ec2dfacce4",
     "dxf:site": "e52297d75a2c2752",
     "svg:plan-0": "93c5ff96aef953fe",
@@ -46,9 +46,9 @@
     "dxf:elevation-right": "c966076ffa673d22"
   },
   "narrow-6st-balcony": {
-    "structure": "97a45700f10485fc",
-    "bbsCsv": "6a97cb85f3b29852",
-    "boqCsv": "d6fecf5449759bc7",
+    "structure": "5251fb0fe0b9e61f",
+    "bbsCsv": "d85ef2d59c525324",
+    "boqCsv": "fdceb2692d250d7c",
     "svg:site": "3f1d2c3386da065b",
     "dxf:site": "718a998d19d4204b",
     "svg:plan-0": "8c6535437ecb80cb",
@@ -75,9 +75,9 @@
     "dxf:elevation-right": "bc28587197ce18ea"
   },
   "mid-2st": {
-    "structure": "03ea7896cdd72216",
-    "bbsCsv": "0d4b611f122cf8e3",
-    "boqCsv": "c90534282df9bb6e",
+    "structure": "364fb83d8aeb4883",
+    "bbsCsv": "5038bd9def5b0a1b",
+    "boqCsv": "e70e93a297f15d2a",
     "svg:site": "8dcbc6d980746c58",
     "dxf:site": "8995d4ed97136c7b",
     "svg:plan-0": "4d33ad6acc13e1c0",
@@ -96,9 +96,9 @@
     "dxf:elevation-right": "d4b45c3589c65c3a"
   },
   "mid-4st": {
-    "structure": "da7a1ea26e017d3b",
-    "bbsCsv": "6c0a7d54c0323b41",
-    "boqCsv": "45cf39c139fc397f",
+    "structure": "385cfa156435f1b0",
+    "bbsCsv": "72e3e02def95ef84",
+    "boqCsv": "cdf9b4caa4776bcc",
     "svg:site": "c8da7559ba7f0054",
     "dxf:site": "762117bbe7a413df",
     "svg:plan-0": "cdd021951413324c",
@@ -121,9 +121,9 @@
     "dxf:elevation-right": "ea412c214da92a6a"
   },
   "mid-7st": {
-    "structure": "cf3dd8ecf23c7b6b",
-    "bbsCsv": "cf0f8e41e03c8469",
-    "boqCsv": "e6dbb34bd83ed477",
+    "structure": "cfe0629eb41cb441",
+    "bbsCsv": "0e2e1f740f40bbcb",
+    "boqCsv": "f73e90f38347c449",
     "svg:site": "3eadbeabecfabf98",
     "dxf:site": "d5bfd89ab055e731",
     "svg:plan-0": "23eb927267098dc5",
@@ -152,9 +152,9 @@
     "dxf:elevation-right": "719dd84fbea50a14"
   },
   "mid-8st-dual": {
-    "structure": "e6e6a628a9a225cf",
-    "bbsCsv": "39ebd8712520b75c",
-    "boqCsv": "2ed1d7aa2d6905e0",
+    "structure": "fc2ec45cfbeea0db",
+    "bbsCsv": "a219af22c3e5b9e1",
+    "boqCsv": "97884f75afc6eabb",
     "svg:site": "005523afcbb2617d",
     "dxf:site": "c80b51c1f9f55439",
     "svg:plan-0": "bd7f1a1e9024f0d8",
@@ -185,9 +185,9 @@
     "dxf:elevation-right": "72bee164e81dc80b"
   },
   "wide-3st": {
-    "structure": "8d3ec0b41ce72962",
-    "bbsCsv": "ef5987fae94c9291",
-    "boqCsv": "60627ce4e7a64802",
+    "structure": "7e8b1e432da2fe44",
+    "bbsCsv": "7cbe0adb7de952e3",
+    "boqCsv": "f8375331babe3e8e",
     "svg:site": "2efae97111611dc3",
     "dxf:site": "955fd46f97562852",
     "svg:plan-0": "9ca7798541974e78",
@@ -208,9 +208,9 @@
     "dxf:elevation-right": "f33b8e8d5229ac60"
   },
   "wide-5st": {
-    "structure": "2a86dc0c51c4ddda",
-    "bbsCsv": "b037500ba386ec4e",
-    "boqCsv": "4df2d3a5a9cc9551",
+    "structure": "5c7817276234b25e",
+    "bbsCsv": "5c499f4574c475f1",
+    "boqCsv": "8a3a2ae852859f0a",
     "svg:site": "fc08ae279a428d5e",
     "dxf:site": "af3c587c04400296",
     "svg:plan-0": "07db0666e65eefb1",
@@ -235,9 +235,9 @@
     "dxf:elevation-right": "fa824b42cbf90609"
   },
   "wide-5st-mirrored": {
-    "structure": "d3b2a53ba3b28892",
-    "bbsCsv": "e185b039dae8be28",
-    "boqCsv": "4df2d3a5a9cc9551",
+    "structure": "8c6e5420950badcd",
+    "bbsCsv": "2c51db92a013fe16",
+    "boqCsv": "8a3a2ae852859f0a",
     "svg:site": "fc08ae279a428d5e",
     "dxf:site": "af3c587c04400296",
     "svg:plan-0": "d8ca8e4da163b614",

@@ -21,6 +21,7 @@ import { planStair, DEFAULT_STAIR } from "../cad/stairBuilder";
 import { PAD_TOP_BELOW_FINISH_MM, PLINTH_BEAM_DEPTH_MM, PLINTH_BEAM_WIDTH_MM } from "./foundation";
 import { DESIGN } from "./materials";
 import { LIFT_ASSUMPTIONS, liftCore } from "../model/lift";
+import { barsPerFace, confinementDesign } from "./confinement";
 import { beamMinAs, flexure, slabMinAs } from "./section";
 
 export type ShapeCode = "00" | "11" | "21" | "51";
@@ -458,20 +459,31 @@ function detailColumns(res: StructureResult, model: BuildingModel, b: Builder): 
       }
       b.add({ family: "column", description: bi(`Column ${col.id} storey ${i}, main bars ${bx} x ${by}`, `কলাম ${col.id} তলা ${i}, মূল রড ${bx} × ${by}`), dia: p.dia, shape, dims, cut: cutLength(dims, p.dia, bends), bars: p.n, level: i });
 
-      // ties: 10 mm closed with 135 degree hooks; 100 mm over the end zones, wider in between
-      const dt = DESIGN.stirrupMm;
-      const lu = st.luMm;
-      const lo = Math.max(Math.max(bx, by), lu / 6, 450);
-      const mid = Math.min(16 * p.dia, 48 * dt, Math.min(bx, by));
-      const nEnds = 2 * Math.ceil(lo / 100);
-      const nMid = Math.max(Math.ceil((hMm - 2 * lo) / mid) - 1, 0);
+      // ties: closed hoops with 135 degree hooks and cross ties for interior bars, spaced to Sec 8.3.5.4 (confinement.ts)
+      const cf = confinementDesign({ bxMm: bx, byMm: by, luMm: st.luMm, longDiaMm: p.dia, ...barsPerFace(p.n, bx, by) });
+      const endSpacing = cf.ok ? cf.endSpacingMm : 50;
+      if (!cf.ok) b.issue({ ref: `${col.id} storey ${i}`, cause: "no_bars", severity: "fail", en: `${col.id} storey ${i}: ${cf.reason ?? "confinement cannot be met"}.`, bn: `${col.id} তলা ${i}: সীমাবদ্ধকরণ (Sec 8.3.5.4) মেটানো যায়নি; কলাম বড় করুন।` }, i);
+      const dt = cf.tieDiaMm;
+      const lo = cf.loMm;
+      const nEnds = 2 * Math.ceil(lo / endSpacing);
+      const nMid = Math.max(Math.ceil((hMm - 2 * lo) / cf.midSpacingMm) - 1, 0);
+      const hoops = nEnds + nMid + 1;
       const a = by - 2 * COVER;
       const bb = bx - 2 * COVER;
       const tail = tieHookTail(dt);
       const bd = bendDiameter(dt, true);
       const tieDims = [a, bb, tail];
       const tieCut = 2 * a + 2 * bb + 2 * tail - 3 * bendDeduction(dt, bd, 90) - 2 * bendDeduction(dt, bd, 135);
-      b.add({ family: "column", description: bi(`Column ${col.id} storey ${i}, ties ${bx} x ${by}`, `কলাম ${col.id} তলা ${i}, টাই ${bx} × ${by}`), dia: dt, shape: "51", dims: tieDims, cut: tieCut, bars: nEnds + nMid + 1, level: i });
+      b.add({ family: "column", description: bi(`Column ${col.id} storey ${i}, ties ${bx} x ${by}`, `কলাম ${col.id} তলা ${i}, টাই ${bx} × ${by}`), dia: dt, shape: "51", dims: tieDims, cut: tieCut, bars: hoops, level: i });
+      // cross ties: one per interior bar line at each hoop position, 135 degree hooks at both ends
+      const crossCount = (cf.crossTiesY + cf.crossTiesX) * hoops;
+      if (crossCount > 0) {
+        const spanY = by - 2 * COVER;
+        const spanX = bx - 2 * COVER;
+        const crossCut = (span: number): number => span + 2 * tail - 2 * bendDeduction(dt, bd, 135);
+        if (cf.crossTiesY > 0) b.add({ family: "column", description: bi(`Column ${col.id} storey ${i}, cross ties parallel to y`, `কলাম ${col.id} তলা ${i}, ক্রস টাই (y)`), dia: dt, shape: "00", dims: [spanY], cut: crossCut(spanY), bars: cf.crossTiesY * hoops, level: i });
+        if (cf.crossTiesX > 0) b.add({ family: "column", description: bi(`Column ${col.id} storey ${i}, cross ties parallel to x`, `কলাম ${col.id} তলা ${i}, ক্রস টাই (x)`), dia: dt, shape: "00", dims: [spanX], cut: crossCut(spanX), bars: cf.crossTiesX * hoops, level: i });
+      }
     }
   }
 }
