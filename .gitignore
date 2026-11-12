@@ -68,3 +68,7 @@ src-tauri/dev-certificate.pfx
 .stryker-tmp/
 reports/
 stryker-setup-*.js
+
+# Generated test output and logs
+scripts/tests/audit-out/
+*.log

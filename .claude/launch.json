@@ -1,0 +1,6 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    { "name": "vite", "runtimeExecutable": "npx", "runtimeArgs": ["vite", "--configLoader=native", "--port", "5173", "--strictPort", "--force"], "port": 5173 }
+  ]
+}
