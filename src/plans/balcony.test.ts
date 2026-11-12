@@ -96,7 +96,8 @@ describe("front verandah (B2: balcony cantilevered off the old front beam line)"
     expect(envBase.railingM).toBe(0);
 
     const res = analyzeStructure(withV.model);
-    expect(res.ok).toBe(true);
+    // the only failure is the wind-governs flag (see the structure test below); the rest of the chain is checked as before
+    expect(res.failures.every((f) => f.id.startsWith("wind-governs"))).toBe(true);
     const bbs = buildBbs(res, withV.model);
     const boq = buildBoq(withV.model, bbs);
     expect(boq.lines.find((l) => l.id === "balcony-railing")!.quantity).toBeCloseTo(envV.railingM, 6);
@@ -114,7 +115,9 @@ describe("front verandah (B2: balcony cantilevered off the old front beam line)"
     if (!r.ok || !base.ok) throw new Error("fit");
     const res = analyzeStructure(r.model);
     const resBase = analyzeStructure(base.model);
-    expect(res.ok).toBe(true);
+    // Wind governs this narrow plan in x (wind base shear just above the seismic one): the frame is not yet designed for wind,
+    // so the only failure allowed here is the wind flag.
+    expect(res.failures.every((f) => f.id.startsWith("wind-governs"))).toBe(true);
     expect(res.levels.every((l) => l.cantilevers.length === 1)).toBe(true);
     for (const l of res.levels) {
       const c = l.cantilevers[0].result;

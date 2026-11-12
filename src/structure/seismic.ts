@@ -122,15 +122,26 @@ export interface SeismicResult {
   weightKn: number;
   baseShearKn: number;
   k: number;
+  /** Storey weights used, kN (index 0 = ground storey). */
+  levelWeightsKn: number[];
   /** Lateral force at each level, kN. */
   forcesKn: number[];
   storeys: SeismicStorey[];
   /** Overturning moment at the base of each storey, kN.m (Eq 6.2.47). */
   overturningKnM: number[];
   staticApplicable: boolean;
+  /** Rayleigh period from the storey weights and the elastic storey displacements, s (Sec 6.2.5 style estimate). */
+  rayleighPeriodS: number;
+  /** Upper limit Cu Ta on the period for the static method, s. The design uses Ta itself, which is the shorter and so more conservative choice. */
+  periodLimitS: number;
+  /** True when the Rayleigh period exceeds the limit (information: the design still uses Ta, which is the conservative choice). */
+  rayleighAboveLimit: boolean;
   /** Worst storey ratio of design drift and of stability coefficient to their limits (never clamped). */
   util: number;
 }
+
+/** Cu for the period limit (ASCE 7 Table 12.8-1 value for S_D1 at or below 0.1, which covers Dhaka; common practice, not transcribed from BNBC). */
+export const CU_STATIC = 1.7;
 
 export function analyseSeismic(inp: SeismicInput): SeismicResult {
   const pack = seismicPack();
@@ -168,7 +179,19 @@ export function analyseSeismic(inp: SeismicInput): SeismicResult {
     return forces.reduce((a, f, i) => (i >= x ? a + f * (levelH[i] - hx) : a), 0);
   });
   const perm = systemPermitted(sys, category, heightM);
+  // Rayleigh period: T = 2 pi sqrt(sum w d^2 / (g sum f d)), d the elastic displacement of each level (m)
+  const disp: number[] = [];
+  let acc = 0;
+  for (const s of storeys) { acc += s.elasticMm / 1000; disp.push(acc); }
+  const num = w.reduce((a, wi, i) => a + wi * disp[i] * disp[i], 0);
+  const den = forces.reduce((a, fi, i) => a + fi * disp[i], 0) * 9.81;
+  const rayleigh = den > 0 ? 2 * Math.PI * Math.sqrt(num / den) : Infinity;
+  const periodLimit = CU_STATIC * t;
   return {
+    rayleighPeriodS: rayleigh,
+    periodLimitS: periodLimit,
+    rayleighAboveLimit: rayleigh > periodLimit,
+    levelWeightsKn: w,
     z: inp.z,
     importance,
     system: sys,

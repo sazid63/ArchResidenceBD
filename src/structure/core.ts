@@ -189,6 +189,13 @@ export interface CoreCheck {
   /** Vertical and horizontal distributed ratios (Sec 8.3.6.2: at least 0.0025 each way). */
   rhoVertical: number;
   twoCurtains: boolean;
+  /**
+   * Boundary element screen (Sec 8.3.6.6, stress form as in ACI 318 18.10.6.2): edge stress from the base moment on the flange
+   * area, against 0.2 fc'. Gravity axial load on the core is not added (conservative). Above the limit the flange is a
+   * boundary element and needs closed ties over its length (detailed by the designer; not yet in the bar schedule).
+   */
+  boundaryStressMpa: number;
+  boundaryElementRequired: boolean;
   util: number;
   governs: string;
 }
@@ -220,6 +227,8 @@ export function checkCore(core: CoreSection, dir: "x" | "y", vuKn: number, muKnM
   const flexureUtil = asPerFlange / asMax;
   const util = Math.max(shearUtil, flexureUtil);
   const twoCurtains = vu > 0.17 * sqrtFc * w.acvMm2;
+  // edge stress of the flanged wall: I / (lw / 2) = flange area x lw (two flanges at lw/2), so sigma = M / (flange x t x lw)
+  const boundaryStress = (Math.abs(muKnM) * 1e6) / (w.flangeMm * core.tMm * w.lwMm);
   return {
     dir,
     vuKn: Math.abs(vuKn),
@@ -233,6 +242,8 @@ export function checkCore(core: CoreSection, dir: "x" | "y", vuKn: number, muKnM
     flexureUtil,
     rhoVertical: RHO_MIN,
     twoCurtains,
+    boundaryStressMpa: boundaryStress,
+    boundaryElementRequired: boundaryStress > 0.2 * fc,
     util,
     governs: flexureUtil >= shearUtil ? "flexure (boundary steel)" : "shear",
   };

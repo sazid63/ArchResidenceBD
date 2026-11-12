@@ -42,3 +42,15 @@ describe("joint shear, Sec 8.3.7.3, wired", () => {
     }
   });
 });
+
+// Core boundary elements (Sec 8.3.6.6 stress screen): an 8-storey core edge is above 0.2 fc' and is flagged as a failure until detailed.
+describe("core boundary element screen", () => {
+  it("the 8-storey core needs boundary elements and the structure fails on that alone", () => {
+    const r = analyse(8);
+    const c = r.frame.core!;
+    expect(c.x.boundaryStressMpa).toBeGreaterThan(0.2 * 20);
+    expect(c.x.boundaryElementRequired).toBe(true);
+    expect(r.failures.some((f) => f.id === "boundary-element-x")).toBe(true);
+    expect(r.ok).toBe(false);
+  });
+});

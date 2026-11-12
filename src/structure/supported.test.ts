@@ -26,10 +26,10 @@ describe("C3 supported height", () => {
 });
 
 describe("P2-2 dual system with the lift core", () => {
-  it("8 storeys default to the dual system, and the core is checked in both directions; only eq 6.8.5 joints can fail", () => {
+  it("8 storeys default to the dual system and the core is checked in both directions; the only failure left is the core boundary element, not yet detailed", () => {
     const r = analyse(8);
     expect(r.frame.options.systemId).toBe("dual-special-rc-walls");
-    expect(r.failures.every((f) => f.governs.startsWith("strong column"))).toBe(true);
+    expect(r.failures.every((f) => f.id.startsWith("boundary-element-"))).toBe(true);
     const c = r.frame.core!;
     expect(c).not.toBeNull();
     expect(c.wallShareX).toBeGreaterThan(0.25); // the wall takes a real share of the base shear
