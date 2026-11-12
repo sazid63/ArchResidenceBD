@@ -52,3 +52,7 @@ Thumbs.db
 # generated audit/test output
 scripts/audits/audit-out/
 scripts/tests/exporter-out/
+
+# Generated test output and logs
+scripts/tests/audit-out/
+*.log
