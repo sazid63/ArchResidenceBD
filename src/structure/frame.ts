@@ -13,9 +13,10 @@ import type { BuildingModel } from "../model/building";
 import { columnPack, structurePack, type OccupancyGroup, type SiteClass } from "../rules/bnbcStructure";
 import type { LevelResult, MemberFailure } from "./analyze";
 import { analyseSpans } from "./continuousBeam";
-import { COLUMN_STOCK, checkColumn, lightestSteel, RHO_STEPS, type CaseResult, type ColSection, type ColumnCase } from "./column";
+import { COLUMN_STOCK, checkColumn, D_PRIME_MM, interaction, lightestSteel, RHO_STEPS, type CaseResult, type ColSection, type ColumnCase } from "./column";
+import { beamMn, columnMnAt, strongColumnCheck } from "./capacity";
 import { ldCompression } from "./anchorage";
-import { pickColumnBars } from "./barSelect";
+import { pickBeamBars, pickColumnBars } from "./barSelect";
 import { designFooting, type ColumnPosition, type FootingResult } from "./footing";
 import { factoredLoad, liveReductionFactor } from "./loads";
 import { ecMPa, MATERIALS, UNIT_WEIGHTS } from "./materials";
@@ -77,6 +78,22 @@ export interface FrameResult {
   iterations: number;
   /** The lift-core shear wall of a dual system, with its base shear and moment checks; null for a frame-only system. */
   core: CoreResult | null;
+  /** Eq 6.8.5 checks at the joints where Sec 8.3.5.2 applies and beams frame in that direction. */
+  strongColumn: StrongColumnJoint[];
+}
+
+export interface StrongColumnJoint {
+  /** Beam level (joint at the top of storey `level`). */
+  level: number;
+  columnId: string;
+  /** Direction of the beams framing in: x beams need column moments about the y axis, and the reverse for y. */
+  dir: "x" | "y";
+  /** Sum of nominal column moments (kN.m) and sum of nominal beam moments (kN.m) at the joint. */
+  sumMncKnM: number;
+  sumMnbKnM: number;
+  /** Sum Mnc / sum Mnb; the check passes at 1.2 or more. */
+  ratio: number;
+  ok: boolean;
 }
 
 export interface CoreResult {
@@ -101,6 +118,9 @@ interface Joint {
   munbY: number;
   hX: number;
   hY: number;
+  /** Sum of nominal beam top-steel moments at the joint, kN.m, per direction (eq 6.8.5 beam side). */
+  mnbX: number;
+  mnbY: number;
 }
 
 const MAX_ITERATIONS = 30;
@@ -108,7 +128,7 @@ const MAX_ITERATIONS = 30;
 export const FRAME_MIN_SHARE = 0.25;
 /** Buildings taller than this many storeys default to the dual system (special RC moment frames with special RC shear walls, Table 6.2.19 D.3). */
 export const DUAL_ABOVE_STOREYS = 7;
-const emptyJoint = (): Joint => ({ dead: 0, liveTable: 0, livePart: 0, area: 0, kbX: 0, kbY: 0, munbX: 0, munbY: 0, hX: 0, hY: 0 });
+const emptyJoint = (): Joint => ({ dead: 0, liveTable: 0, livePart: 0, area: 0, kbX: 0, kbY: 0, munbX: 0, munbY: 0, hX: 0, hY: 0, mnbX: 0, mnbY: 0 });
 const key = (x: number, y: number) => `${x},${y}`;
 const areaOf = (s: ColSection) => s.bx * s.by;
 
@@ -179,6 +199,10 @@ export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: 
           left >= 0 && right >= 0
             ? Math.max(Math.abs(fem(left, true) - fem(right, false)), Math.abs(fem(left, false) - fem(right, true)))
             : fem(left >= 0 ? left : right, true);
+        // eq 6.8.5 beam side: nominal top-steel moments of the beam ends at this joint (fy, phi 1.0)
+        const topMn = (side: { asReqMm2: number }) => beamMn(pickBeamBars(side.asReqMm2, sec.bMm).areaMm2, sec.bMm, line.result.dMm);
+        const mnb = (left >= 0 ? topMn(sp[left].negRight) : 0) + (right >= 0 ? topMn(sp[right].negLeft) : 0);
+        if (horizontal) jt.mnbX += mnb; else jt.mnbY += mnb;
         if (horizontal) { jt.kbX += kb; jt.munbX = Math.max(jt.munbX, munb); jt.hX = Math.max(jt.hX, sec.hMm); }
         else { jt.kbY += kb; jt.munbY = Math.max(jt.munbY, munb); jt.hY = Math.max(jt.hY, sec.hMm); }
       }
@@ -453,6 +477,44 @@ export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: 
     if (footing.util > 1) failures.push({ level: -1, member: "footing", id: `${c.id}/footing`, util: footing.util, governs: footing.governs });
     return { id: c.id, ix: c.ix, iy: c.iy, xMm: c.x, yMm: c.y, position: c.position, storeys, footing, util: Math.max(footing.util, ...storeys.map((s) => s.util)) };
   });
+  // ---- eq 6.8.5 strong column / weak beam at each beam level (Sec 8.3.5.2) ---------------------------------------
+  // Columns framing into a joint: the storey below and the storey above. Each column's nominal moment about the axis of
+  // the beams is taken at the factored axial case that gives its lowest strength (nominal P = Pu / phi).
+  const mncCache = new Map<ColumnStoreyResult, { x: number; y: number }>();
+  const mncOf = (s: ColumnStoreyResult): { x: number; y: number } => {
+    let v = mncCache.get(s);
+    if (!v) {
+      const phi = columnPack().phi.compressionControlledTied;
+      const lowest = (dir: "x" | "y") => {
+        const depth = dir === "x" ? s.section.bx : s.section.by;
+        const width = dir === "x" ? s.section.by : s.section.bx;
+        const it = interaction(depth, width, s.rho, MATERIALS.fcMPa, MATERIALS.fyMPa, D_PRIME_MM);
+        return Math.min(...s.cases.map((c) => columnMnAt(it, c.puKn > 0 ? c.puKn / phi : c.puKn)));
+      };
+      v = { x: lowest("x"), y: lowest("y") };
+      mncCache.set(s, v);
+    }
+    return v;
+  };
+  const strongColumn: StrongColumnJoint[] = [];
+  for (let k = 0; k < n && k < levels.length; k++)
+    columns.forEach((c, ci) => {
+      const jt = joints[k].get(cols[ci].key);
+      if (!jt) return;
+      const framing = k + 1 < n ? [c.storeys[k], c.storeys[k + 1]] : [c.storeys[k]];
+      // Sec 8.3.5.2 applies where the factored axial load exceeds 0.1 Ag fc' in a framing column
+      const applies = framing.some((s) => s.puKn > (0.1 * s.section.bx * s.section.by * MATERIALS.fcMPa) / 1000);
+      if (!applies) return;
+      for (const dir of ["x", "y"] as const) {
+        const sumMnb = dir === "x" ? jt.mnbX : jt.mnbY;
+        if (sumMnb <= 0) continue;
+        const sumMnc = framing.reduce((a, s) => a + mncOf(s)[dir], 0);
+        const chk = strongColumnCheck(sumMnc, sumMnb);
+        strongColumn.push({ level: k, columnId: c.id, dir, sumMncKnM: sumMnc, sumMnbKnM: sumMnb, ratio: chk.ratio, ok: chk.ok });
+        if (!chk.ok) failures.push({ level: k, member: "column", id: `${c.id}/joint-L${k}-${dir}`, util: sumMnc > 0 ? (1.2 * sumMnb) / sumMnc : Infinity, governs: "strong column / weak beam, eq 6.8.5" });
+      }
+    });
+
   for (const [dir, seis] of [["x", ctx.seisX], ["y", ctx.seisY]] as const)
     for (const s of seis.storeys) {
       if (s.util > 1) failures.push({ level: s.storey, member: "seismic", id: `drift-${dir}/S${s.storey}`, util: s.util, governs: "drift" });
@@ -471,5 +533,5 @@ export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: 
   if (!ctx.seisX.permitted) failures.push({ level: -1, member: "seismic", id: "seismic-system", util: Infinity, governs: "system not permitted" });
   failures.sort((a, b) => b.util - a.util);
   const util = Math.max(0, ...columns.map((c) => c.util), ctx.seisX.util, ctx.seisY.util, coreResult?.x.util ?? 0, coreResult?.y.util ?? 0);
-  return { columns, seismicX: ctx.seisX, seismicY: ctx.seisY, options: o, failures, util, converged, iterations, core: coreResult };
+  return { columns, seismicX: ctx.seisX, seismicY: ctx.seisY, options: o, failures, util, converged, iterations, core: coreResult, strongColumn };
 }
