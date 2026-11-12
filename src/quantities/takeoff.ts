@@ -10,6 +10,7 @@
 import cardText from "../../spec/rates/pwd-sor-2022-civil-works-candidate.json?raw";
 import type { BuildingModel } from "../model/building";
 import { slabOpeningAreaM2 } from "../model/openings";
+import { liftCore } from "../model/lift";
 import type { BbsResult } from "../structure/bbs";
 
 export interface Bilingual {
@@ -82,7 +83,7 @@ export const BOQ_ASSUMPTIONS: Array<{ id: string; en: string; bn: string }> = [
   { id: "rates", en: "Prices come from the rate card (source and date shown). Cement, sand, stone chips, rods and bricks are priced; labour for concrete, brickwork and plaster, machinery, joinery, tiles, paint and services have no line in the card (the book has no man-day norms), so the total is a lower bound.", bn: "দাম রেট কার্ড থেকে (উৎস ও তারিখ দেখানো)। সিমেন্ট, বালি, পাথর, রড ও ইটের দাম ধরা হয়েছে; কংক্রিট, গাঁথুনি ও প্লাস্টারের শ্রম, যন্ত্র, দরজা-জানালা, টাইলস, রং ও সার্ভিসের লাইন কার্ডে নেই (বইয়ে জনদিবসের হার নেই), তাই মোট একটি নিম্নসীমা।" },
 ];
 
-export type BoqCategory = "concrete" | "formwork" | "steel" | "masonry" | "finishes";
+export type BoqCategory = "earthwork" | "concrete" | "formwork" | "steel" | "masonry" | "finishes" | "fittings";
 
 export interface TakeoffItem {
   id: string;
@@ -123,6 +124,10 @@ export function envelopeQuantities(model: BuildingModel) {
   let plasterM2 = 0;
   let railingM = 0;
   let liftWallM3 = 0; // masonry-equivalent volume of the shaft walls that are concrete instead
+  let doorsNr = 0;
+  let doorsM2 = 0;
+  let windowsNr = 0;
+  let windowsM2 = 0;
   for (const st of model.storeys) {
     const h = Math.max(st.heightMm - BOQ.wallDeductMm, 0);
     const g = st.geometry;
@@ -142,6 +147,7 @@ export function envelopeQuantities(model: BuildingModel) {
       const host = g.walls.find((w) => w.orientation === o.orientation && w.at === o.at && w.from <= o.from && w.to >= o.to);
       const area = ((o.to - o.from) * oh) / 1e6;
       openingM2 += area;
+      if (o.kind === "door") { doorsNr++; doorsM2 += area; } else { windowsNr++; windowsM2 += area; }
       if (host && (isLift(host.a) || isLift(host.b))) { liftWallM3 -= (area * host.thicknessMm) / 1000; continue; }
       wallM3 -= (area * (host?.thicknessMm ?? BOQ.partitionMm)) / 1000;
     }
@@ -158,9 +164,11 @@ export function envelopeQuantities(model: BuildingModel) {
   }
   // Screed on every floor slab and the roof, less the stair, lift and shaft openings (the ground slab has none).
   const typical = model.storeys[Math.min(1, model.storeys.length - 1)].geometry;
-  let screedM2 = model.footprintAreaM2 - slabOpeningAreaM2(typical, model); // the roof
+  const roofM2 = model.footprintAreaM2 - slabOpeningAreaM2(typical, model);
+  let screedM2 = roofM2;
   model.storeys.forEach((st, i) => { screedM2 += model.footprintAreaM2 - (i > 0 ? slabOpeningAreaM2(st.geometry, model) : 0); });
-  return { wallM3: Math.max(wallM3, 0), liftWallM3, plasterM2, screedM2, railingM };
+  const roofPerimeterM = (2 * (model.widthMm + model.depthMm)) / 1000;
+  return { wallM3: Math.max(wallM3, 0), liftWallM3, plasterM2, screedM2, railingM, roofM2, roofPerimeterM, doorsNr, doorsM2, windowsNr, windowsM2 };
 }
 
 export function takeoff(model: BuildingModel, bbs: BbsResult): TakeoffItem[] {
@@ -183,7 +191,25 @@ export function takeoff(model: BuildingModel, bbs: BbsResult): TakeoffItem[] {
   const railing: TakeoffItem[] = env.railingM > 0
     ? [{ id: "balcony-railing", category: "finishes", description: bi("Balcony railing, 1.0 m high (MS or aluminium, supply and fix)", "বারান্দার রেলিং, ১.০ মিটার উঁচু (এমএস বা অ্যালুমিনিয়াম, সরবরাহ ও স্থাপন)"), unit: "m", quantity: env.railingM, basis: bi("running metres of balcony edge on every floor; no rate on the card yet", "প্রতি তলায় বারান্দার কিনারার চলমান মিটার; কার্ডে এখনো দর নেই") }]
     : [];
+  const floorsM2 = Math.max(env.screedM2 - env.roofM2, 0);
+  const ew = bbs.totals.earthwork;
+  const lift = liftCore(model);
+  const quantityOnly = bi("quantity only: no rate on the card yet", "শুধু পরিমাণ: কার্ডে এখনো দর নেই");
+  const more: TakeoffItem[] = [
+    ...(ew ? [
+      { id: "excavation", category: "earthwork" as const, description: bi("Earth excavation for footings, with 300 mm working space", "ফুটিংয়ের মাটি খনন, ৩০০ মিমি কাজের জায়গাসহ"), unit: "m3", quantity: ew.excavationM3, basis: bi("footing plan + working space each side, from ground-floor finish to the underside of the lean concrete; no rate on the card yet", "ফুটিংয়ের প্ল্যান + দুই পাশে কাজের জায়গা, নিচতলার ফিনিশ থেকে লিন কংক্রিটের নিচ পর্যন্ত; কার্ডে এখনো দর নেই") },
+      { id: "backfill", category: "earthwork" as const, description: bi("Backfilling and compaction round footings and stubs", "ফুটিং ও স্টাবের চারপাশে মাটি ভরাট ও চাপ দেওয়া"), unit: "m3", quantity: ew.backfillM3, basis: bi("excavation less footing, stub and lean concrete; no rate on the card yet", "খননের পরিমাণ থেকে ফুটিং, স্টাব ও লিন কংক্রিট বাদ; কার্ডে এখনো দর নেই") },
+      { id: "lean-concrete", category: "concrete" as const, description: bi("Lean concrete bed 75 mm under footings (1:3:6)", "ফুটিংয়ের নিচে ৭৫ মিমি লিন কংক্রিট (১:৩:৬)"), unit: "m3", quantity: ew.leanConcreteM3, basis: bi("footing plan + 100 mm each side x 75 mm; no rate on the card yet", "ফুটিংয়ের প্ল্যান + দুই পাশে ১০০ মিমি × ৭৫ মিমি; কার্ডে এখনো দর নেই") },
+    ] : []),
+    { id: "floor-finish", category: "finishes" as const, description: bi("Floor tiles (supply and fix) on the screed, all floors", "স্ক্রিডের ওপর মেঝের টাইলস (সরবরাহ ও স্থাপন), সব তলা"), unit: "m2", quantity: floorsM2, basis: bi("screed area less the roof; ordinary tile, no rate on the card yet", "ছাদ বাদে স্ক্রিডের ক্ষেত্রফল; সাধারণ টাইলস, কার্ডে এখনো দর নেই") },
+    { id: "paint", category: "finishes" as const, description: bi("Putty and emulsion paint, walls and ceilings", "পুটি ও ইমালশন রং, দেয়াল ও সিলিং"), unit: "m2", quantity: env.plasterM2 + floorsM2, basis: bi("plastered wall area plus the ceiling under every floor slab; no rate on the card yet", "প্লাস্টার করা দেয়ালের ক্ষেত্রফল ও প্রতি তলার ছাদের নিচের সিলিং; কার্ডে এখনো দর নেই") },
+    { id: "roof-waterproofing", category: "finishes" as const, description: bi("Roof waterproofing membrane with 300 mm upstand at the parapet", "ছাদের ওয়াটারপ্রুফিং মেমব্রেন, প্যারাপেটে ৩০০ মিমি উঠানো"), unit: "m2", quantity: env.roofM2 + env.roofPerimeterM * 0.3, basis: bi("roof area plus 0.3 m x perimeter; no rate on the card yet", "ছাদের ক্ষেত্রফল + ০.৩ মি × পরিসীমা; কার্ডে এখনো দর নেই") },
+    { id: "doors", category: "fittings" as const, description: bi("Doors with frames and shutters (supply and fix)", "ফ্রেম ও পাল্লাসহ দরজা (সরবরাহ ও স্থাপন)"), unit: "nr", quantity: env.doorsNr, basis: bi(`${env.doorsM2.toFixed(1)} m2 of door leaf at 2.1 m high, from the plan openings; no rate on the card yet`, `পরিকল্পনার খোলা অংশ থেকে ২.১ মি উচ্চতায় ${env.doorsM2.toFixed(1)} বর্গমি; কার্ডে এখনো দর নেই`) },
+    { id: "windows", category: "fittings" as const, description: bi("Windows with grills and glazing (supply and fix)", "গ্রিল ও কাচসহ জানালা (সরবরাহ ও স্থাপন)"), unit: "nr", quantity: env.windowsNr, basis: bi(`${env.windowsM2.toFixed(1)} m2 at 1.2 m high, from the plan openings; no rate on the card yet`, `পরিকল্পনার খোলা অংশ থেকে ১.২ মি উচ্চতায় ${env.windowsM2.toFixed(1)} বর্গমি; কার্ডে এখনো দর নেই`) },
+    ...(lift ? [{ id: "lift", category: "fittings" as const, description: bi("Passenger lift, supply, install and commission", "যাত্রীবাহী লিফট, সরবরাহ, স্থাপন ও চালু"), unit: "nr", quantity: lift.spec.liftsProvided, basis: bi(`${model.storeys.length} stops each; a supplier allowance, ${quantityOnly.en}`, `প্রতিটি ${model.storeys.length} স্টপ; সরবরাহকারীর বরাদ্দ, ${quantityOnly.bn}`) }] : []),
+  ];
   return [
+    ...more,
     { id: "concrete", category: "concrete", description: bi("Structural concrete, 1:1.5:3 (footings, columns, beams, slabs)", "কাঠামোগত কংক্রিট ১:১.৫:৩ (ফুটিং, কলাম, বিম, স্ল্যাব)"), unit: "m3", quantity: conc, basis: bi("from the bar schedule volumes", "বার শিডিউলের আয়তন থেকে") },
     { id: "concrete-cement", category: "concrete", description: bi("Cement in concrete", "কংক্রিটে সিমেন্ট"), unit: "bag", quantity: cementConcM3 / BAG_M3, rateKey: "cement-opc-43", basis: bi("dry volume / 0.0347 m3 per bag", "শুকনো আয়তন / প্রতি ব্যাগ ০.০৩৪৭ ঘনমিটার") },
     { id: "concrete-sand", category: "concrete", description: bi("Sand in concrete", "কংক্রিটে বালি"), unit: "cft", quantity: sandConcM3 * CFT_PER_M3, rateKey: "sand-fine", basis: bi("m3 x 35.31", "ঘনমিটার × ৩৫.৩১") },

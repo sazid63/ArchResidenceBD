@@ -2,7 +2,7 @@
   "narrow-2st": {
     "structure": "488eb5d77cd2a63e",
     "bbsCsv": "bb8b4acb2006a3ac",
-    "boqCsv": "f2322888cd59e669",
+    "boqCsv": "5cf670e406ada4b1",
     "svg:site": "506ef3d775a8d496",
     "dxf:site": "400942c190ada8bc",
     "svg:plan-0": "0ab06d0f7fc8e423",
@@ -23,7 +23,7 @@
   "narrow-4st": {
     "structure": "a9430090b303ead9",
     "bbsCsv": "0bfde89b15dd2216",
-    "boqCsv": "cc6dc59b693f2aa6",
+    "boqCsv": "c39ef780a2662205",
     "svg:site": "8820c2ec2dfacce4",
     "dxf:site": "e52297d75a2c2752",
     "svg:plan-0": "bf57a843a741fb3d",
@@ -48,7 +48,7 @@
   "narrow-6st-balcony": {
     "structure": "856640c08fb5c6c2",
     "bbsCsv": "fe2ce32560bc7aa1",
-    "boqCsv": "f0ea8b155347a0a4",
+    "boqCsv": "607160e39759fac3",
     "svg:site": "3f1d2c3386da065b",
     "dxf:site": "718a998d19d4204b",
     "svg:plan-0": "bc61fed956c9aaf2",
@@ -77,7 +77,7 @@
   "mid-2st": {
     "structure": "e750a686d30c9730",
     "bbsCsv": "ee3ad1a272e23b7f",
-    "boqCsv": "1f603b0a9b13debe",
+    "boqCsv": "4e6eb8204f6e6c1b",
     "svg:site": "8dcbc6d980746c58",
     "dxf:site": "8995d4ed97136c7b",
     "svg:plan-0": "ba94976e6918c649",
@@ -98,7 +98,7 @@
   "mid-4st": {
     "structure": "d9a6d8735e8467c0",
     "bbsCsv": "21565f216a1db9d9",
-    "boqCsv": "21ed6b134ba1a17e",
+    "boqCsv": "7a68c1dd1e0adb6f",
     "svg:site": "c8da7559ba7f0054",
     "dxf:site": "762117bbe7a413df",
     "svg:plan-0": "12a9bf883b32ac2e",
@@ -123,7 +123,7 @@
   "mid-7st": {
     "structure": "042a8271f8c8da84",
     "bbsCsv": "dca17b75b08a7be2",
-    "boqCsv": "dc4833de0a1f0a96",
+    "boqCsv": "53c36a98c0a0eceb",
     "svg:site": "3eadbeabecfabf98",
     "dxf:site": "d5bfd89ab055e731",
     "svg:plan-0": "e9bd0d4524897965",
@@ -154,7 +154,7 @@
   "mid-8st-dual": {
     "structure": "f4fe8c672ee2e997",
     "bbsCsv": "59fea0ac190817f8",
-    "boqCsv": "4acd22655f76f144",
+    "boqCsv": "37b3077b304eb5e2",
     "svg:site": "005523afcbb2617d",
     "dxf:site": "c80b51c1f9f55439",
     "svg:plan-0": "cfd49ed05e086ca5",
@@ -187,7 +187,7 @@
   "wide-3st": {
     "structure": "e940d1cf7ba8c535",
     "bbsCsv": "1139be2b9b7b595b",
-    "boqCsv": "9f52b2132fab0fe8",
+    "boqCsv": "08042c412ce2e7be",
     "svg:site": "2efae97111611dc3",
     "dxf:site": "955fd46f97562852",
     "svg:plan-0": "67d81d91ee9b68c3",
@@ -210,7 +210,7 @@
   "wide-5st": {
     "structure": "a55bb343d9f6fe69",
     "bbsCsv": "cbd4bbe85e126044",
-    "boqCsv": "6a07c7e5edc96cf9",
+    "boqCsv": "7e5e0b0a9b0ac1ef",
     "svg:site": "fc08ae279a428d5e",
     "dxf:site": "af3c587c04400296",
     "svg:plan-0": "dc8c89d5eaee14c4",
@@ -237,7 +237,7 @@
   "wide-5st-mirrored": {
     "structure": "a4a22167b1c73c8f",
     "bbsCsv": "a46d4ac6e6a56d85",
-    "boqCsv": "6a07c7e5edc96cf9",
+    "boqCsv": "7e5e0b0a9b0ac1ef",
     "svg:site": "fc08ae279a428d5e",
     "dxf:site": "af3c587c04400296",
     "svg:plan-0": "9706e3e91ca80913",

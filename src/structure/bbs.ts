@@ -91,7 +91,35 @@ export interface BbsResult {
     kgPerM3: number;
     /** Form contact areas by member family, m2 (simplified, see formworkM2). */
     formworkM2: { footing: number; column: number; beam: number; slab: number; core: number };
+    /** Foundation earthwork, m3 (see foundationEarthwork). */
+    earthwork: { excavationM3: number; backfillM3: number; leanConcreteM3: number };
   };
+}
+
+/** Working space left each side of a footing in the pit, and the lean concrete bed under it (common practice). */
+export const PIT_WORKING_SPACE_MM = 300;
+export const LEAN_CONCRETE_MM = 75;
+export const LEAN_CONCRETE_MARGIN_MM = 100;
+
+/**
+ * Foundation earthwork: each footing's pit is its plan plus the working space each side, dug from the ground-floor finish down to the
+ * underside of the footing (PAD_TOP_BELOW_FINISH_MM + footing depth + the lean concrete); backfill is the pit less the footing,
+ * lean concrete and column stub concrete. The lean concrete bed is 75 mm, 100 mm wider each side than the footing.
+ */
+export function foundationEarthwork(res: StructureResult): { excavationM3: number; backfillM3: number; leanConcreteM3: number } {
+  let excavation = 0;
+  let lean = 0;
+  let inPit = 0;
+  for (const fo of res.foundation.footings) {
+    const w = fo.x1 - fo.x0;
+    const l = fo.y1 - fo.y0;
+    const depth = PAD_TOP_BELOW_FINISH_MM + fo.depthMm + LEAN_CONCRETE_MM;
+    excavation += ((w + 2 * PIT_WORKING_SPACE_MM) * (l + 2 * PIT_WORKING_SPACE_MM) * depth) / 1e9;
+    lean += ((w + 2 * LEAN_CONCRETE_MARGIN_MM) * (l + 2 * LEAN_CONCRETE_MARGIN_MM) * LEAN_CONCRETE_MM) / 1e9;
+    inPit += (w * l * fo.depthMm) / 1e9;
+  }
+  for (const col of res.frame.columns) inPit += (col.storeys[0].section.bx * col.storeys[0].section.by * PAD_TOP_BELOW_FINISH_MM) / 1e9;
+  return { excavationM3: excavation, backfillM3: Math.max(excavation - inPit - lean, 0), leanConcreteM3: lean };
 }
 
 const bi = (en: string, bn: string): Bilingual => ({ en, bn });
@@ -801,6 +829,7 @@ export function buildBbs(res: StructureResult, model: BuildingModel): BbsResult 
       concreteM3: concrete,
       kgPerM3: concrete > 0 ? weight / concrete : 0,
       formworkM2: formworkM2(res, model),
+      earthwork: foundationEarthwork(res),
     },
   };
 }

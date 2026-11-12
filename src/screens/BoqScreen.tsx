@@ -17,6 +17,8 @@ const CATEGORY_LABEL: Record<BoqCategory, { en: string; bn: string }> = {
   steel: { en: "Reinforcement", bn: "রড" },
   masonry: { en: "Masonry", bn: "গাঁথুনি" },
   finishes: { en: "Finishes", bn: "ফিনিশ" },
+  earthwork: { en: "Earthwork", bn: "মাটির কাজ" },
+  fittings: { en: "Doors, windows and lift", bn: "দরজা, জানালা ও লিফট" },
 };
 
 const UNIT_LABEL: Record<string, { en: string; bn: string }> = {
