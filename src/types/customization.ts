@@ -49,6 +49,8 @@ export interface ConstructionMgmtSettings {
 }
 
 export interface BuildingCustomization {
+  /** The user's own rates by rate-card key, in BDT. A key that is absent uses the 2026 default card rate. */
+  rateOverrides?: Record<string, number>;
   columnWidthMm?: number;
   columnDepthMm?: number;
   footingSizeMm?: number;

@@ -48,7 +48,7 @@ describe("BOQ completeness lines", () => {
     const env = envelopeQuantities(model);
     const q = (id: string) => takeoff(model, bbs).find((i) => i.id === id)!.quantity;
     expect(q("floor-finish")).toBeCloseTo(env.screedM2 - env.roofM2, 9);
-    expect(q("paint")).toBeCloseTo(env.plasterM2 + (env.screedM2 - env.roofM2), 9);
+    expect(q("paint")).toBeCloseTo(env.interiorPaintM2 + (env.screedM2 - env.roofM2) + env.stairsM2, 9);
     expect(q("roof-waterproofing")).toBeCloseTo(env.roofM2 + env.roofPerimeterM * 0.3, 9);
   });
 
@@ -91,7 +91,7 @@ describe("labour and machine lines from output norms", () => {
     expect(q("labour-mason-plaster")).toBeCloseTo(env.plasterM2 / 9, 9);
     expect(q("labour-mason-screed")).toBeCloseTo(env.screedM2 / 12, 9);
     expect(q("labour-mason-tiles")).toBeCloseTo(floors / 6, 9);
-    expect(q("labour-painter")).toBeCloseTo((env.plasterM2 + floors) / 15, 9);
+    expect(q("labour-painter")).toBeCloseTo((env.interiorPaintM2 + floors + env.stairsM2 + env.exteriorM2) / 15, 9);
     expect(q("labour-helper-finishes")).toBeCloseTo(q("labour-mason-plaster") + q("labour-mason-screed") + q("labour-mason-tiles"), 9);
   });
 

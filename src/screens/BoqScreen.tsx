@@ -1,11 +1,11 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { saveFile } from "../platform/saveFile";
 import { useProject } from "../context/ProjectContext";
 import { useDesignAsync } from "../design/useDesignAsync";
 import { DesignPending } from "./DesignPending";
 import { useI18n } from "../i18n";
 import { buildingForProject } from "../model/projectMesh";
-import { BOQ_ASSUMPTIONS, boqToCsv, buildBoq, type Boq, type BoqCategory } from "../quantities/takeoff";
+import { BOQ_ASSUMPTIONS, DEFAULT_RATE_CARD, boqToCsv, buildBoq, priceTakeoff, withRateOverrides, type Boq, type BoqCategory } from "../quantities/takeoff";
 import { analyzeStructure } from "../structure/analyze";
 import { buildBbs } from "../structure/bbs";
 import { SUPPORTED_MAX_STOREYS, structureSupported } from "../structure/analyze";
@@ -38,6 +38,30 @@ const UNIT_LABEL: Record<string, { en: string; bn: string }> = {
 
 const num = (n: number, d = 0) => n.toLocaleString("en-US", { maximumFractionDigits: d, minimumFractionDigits: d });
 
+/** One rate cell: blank means the 2026 default rate applies; the value is saved when the cell loses focus. */
+function RateInput({ label, value, defaultRate, onCommit }: { label: string; value: number | undefined; defaultRate: number; onCommit: (v: number | undefined) => void }) {
+  const [draft, setDraft] = useState(value === undefined ? "" : String(value));
+  useEffect(() => setDraft(value === undefined ? "" : String(value)), [value]);
+  return (
+    <input
+      aria-label={label}
+      type="number"
+      min={0}
+      step="any"
+      inputMode="decimal"
+      value={draft}
+      placeholder={num(defaultRate)}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={() => {
+        const t = draft.trim();
+        const n = Number(t);
+        onCommit(t === "" || !Number.isFinite(n) || n < 0 ? undefined : n);
+      }}
+      style={{ width: 110, textAlign: "right" }}
+    />
+  );
+}
+
 function download(name: string, text: string) {
   void saveFile(name, text, "text/csv;charset=utf-8");
 }
@@ -45,11 +69,24 @@ function download(name: string, text: string) {
 export function BoqScreen() {
   const { lang } = useI18n();
   const bn = lang === "bn";
-  const { project } = useProject();
+  const { project, saveCustomization } = useProject();
+  const overrides = project?.customization?.rateOverrides;
 
   const built = useMemo(() => (project && project.plot && project.planId ? buildingForProject(project) : null), [project]);
   const pending = useDesignAsync(built && built.ok ? built.model : null);
-  const boq: Boq | null = pending.status === "ready" ? pending.result.boq : null;
+  const boqDefault: Boq | null = pending.status === "ready" ? pending.result.boq : null;
+  // Prices are re-run on every change of the user's rates; quantities do not depend on them.
+  const boq: Boq | null = useMemo(
+    () => (boqDefault ? priceTakeoff(boqDefault.lines, withRateOverrides(DEFAULT_RATE_CARD, overrides ?? {})) : null),
+    [boqDefault, overrides],
+  );
+  const setRateOverride = (key: string, v: number | undefined) => {
+    const next: Record<string, number> = { ...(overrides ?? {}) };
+    if (v === undefined) delete next[key];
+    else next[key] = v;
+    saveCustomization({ rateOverrides: next });
+  };
+  const defaultRateOf = (key: string) => DEFAULT_RATE_CARD.lines.find((l) => l.key === key)?.rateBdt ?? 0;
 
   const title = bn ? "বিল অব কোয়ান্টিটিজ" : "Bill of quantities";
   const subtitle = bn ? "মডেল ও রিবার শিডিউল থেকে পরিমাণ, রেট কার্ড থেকে দাম" : "Quantities from the model and the bar schedule, prices from the rate card";
@@ -91,10 +128,10 @@ export function BoqScreen() {
           {bn ? "এই সংখ্যাগুলো কেবল আনুমানিক: এই ভবনের কাঠামো (কোর শিয়ার ওয়াল সহ) এই সংস্করণে নকশা করা হয় না। কাঠামো প্রকৌশলীর নকশা দরকার।" : "These quantities are indicative only: the structure of this building (with core shear walls) is not designed in this version. A structural engineer's design is needed."}
         </Callout>
       )}
-      <Callout tone="warn" title={bn ? "রেট কার্ড এখনো যাচাই হয়নি, মোট একটি নিম্নসীমা" : "Rate card not yet verified; the total is a lower bound"}>
+      <Callout tone="warn" title={bn ? "২০২৬ সালের ডিফল্ট রেট কার্ড; কিছু দর অনুমান" : "2026 default rate card; some rates are assumptions"}>
         {bn
-          ? `দাম "${c.source.name}" থেকে (অবস্থা: ${c.status}, কার্যকর ${c.effectiveFrom}, তথ্য ${c.asOf ?? "—"})। ওয়েব থেকে নেওয়া দর রেট কার্ডে ASSUMPTION চিহ্নিত। এখনও ধরা হয়নি: বারান্দার রেলিং, সেপটিক ট্যাংক ও সোক ওয়েল, পানির ট্যাংক ও পাম্প, ড্রেনেজ। বৈদ্যুতিক ও প্লাম্বিং প্রতি বর্গফুটের আনুমানিক হারে।`
-          : `Prices are from "${c.source.name}" (status ${c.status}, effective ${c.effectiveFrom}, as of ${c.asOf ?? "n/a"}), plus web-sourced rates marked ASSUMPTION in the rate card. Not in the total yet: septic tank and soak well, water tanks and pump, and drainage. Balcony railing is priced per running metre as an assumption. Electrical and plumbing use benchmark rates per sq ft.`}
+          ? `দাম "${c.source.name}" থেকে (অবস্থা: ${c.status}, কার্যকর ${c.effectiveFrom}, তথ্য ${c.asOf ?? "—"})। ওয়েব থেকে নেওয়া দর রেট কার্ডে ASSUMPTION চিহ্নিত। বৈদ্যুতিক ও প্লাম্বিং প্ল্যান থেকে পয়েন্ট ও ফিক্সচার গুনে হিসাব; ওয়াশ বেসিন, শাওয়ার ও সিংকের দর অনুমান। সেপটিক ট্যাংক, সোক ওয়েল, পানির ট্যাংক ও পাম্প উপাদান থেকে হিসাব। আপনি নিজের দর লিখতে পারেন।`
+          : `Prices are from "${c.source.name}" (status ${c.status}, effective ${c.effectiveFrom}, as of ${c.asOf ?? "n/a"}), plus web-sourced rates marked ASSUMPTION in the rate card. Electrical and plumbing are counted from the plan: points and fixtures. Wash basin, shower and kitchen sink prices are assumptions. Septic tank, soak well, water tank, pump and drainage are built up from material rates. You can enter your own rates in the table.`}
       </Callout>
 
       <div className="row" style={{ gap: 16, margin: "16px 0", flexWrap: "wrap" }}>
@@ -132,7 +169,18 @@ export function BoqScreen() {
                   </td>
                   <td>{u(l.unit)}</td>
                   <td style={{ textAlign: "right" }}>{num(l.quantity, l.quantity < 100 ? 2 : 0)}</td>
-                  <td style={{ textAlign: "right" }}>{l.rateBdt === null ? <span className="faint">–</span> : num(l.rateBdt)}</td>
+                  <td style={{ textAlign: "right" }}>
+                    {l.rateKey && DEFAULT_RATE_CARD.lines.some((x) => x.key === l.rateKey) ? (
+                      <RateInput
+                        label={bn ? `${l.description.bn} দর` : `${l.description.en} rate`}
+                        value={overrides?.[l.rateKey]}
+                        defaultRate={defaultRateOf(l.rateKey)}
+                        onCommit={(v) => setRateOverride(l.rateKey as string, v)}
+                      />
+                    ) : (
+                      <span className="faint">–</span>
+                    )}
+                  </td>
                   <td style={{ textAlign: "right" }}>
                     {l.amountBdt !== null ? num(l.amountBdt) : l.rateKey ? (bn ? "কার্ডে দাম নেই" : "no rate in card") : <span className="muted">{bn ? "পরিমাণ মাত্র" : "quantity only"}</span>}
                   </td>
@@ -147,6 +195,15 @@ export function BoqScreen() {
             </tfoot>
           </table>
         </div>
+      </Card>
+
+      <Card className="stack" style={{ marginTop: 16 }}>
+        <h2 className="section-title">{bn ? "দর আপনার মতো করুন" : "Your own rates"}</h2>
+        <p className="muted" style={{ margin: 0 }}>
+          {bn
+            ? "দর কলামে নিজের দাম লিখুন; ফাঁকা থাকলে ২০২৬ সালের ডিফল্ট দর ব্যবহার হবে। পরিমাণ বদলায় না।"
+            : "Type your own price in the rate column. A blank cell uses the 2026 default rate. Quantities do not change."}
+        </p>
       </Card>
 
       <Card className="stack" style={{ marginTop: 16 }}>

@@ -20,11 +20,11 @@ function model(planId: string, storeys: number) {
 }
 
 describe("rate card", () => {
-  it("is the PWD SoR 2022 candidate card with source, date and hash shown", () => {
+  it("is the 2026 default rate card with source and date shown", () => {
     expect(DEFAULT_RATE_CARD.status).toBe("candidate");
     expect(DEFAULT_RATE_CARD.currency).toBe("BDT");
-    expect(DEFAULT_RATE_CARD.source.name).toMatch(/PWD Schedule of Rates 2022/);
-    expect(DEFAULT_RATE_CARD.source.sha256).toMatch(/^[a-f0-9]{64}$/);
+    expect(DEFAULT_RATE_CARD.cardId).toBe("bd-2026-rates");
+    expect(DEFAULT_RATE_CARD.source.name).toMatch(/2026 market survey/);
     expect(DEFAULT_RATE_CARD.asOf).toBe("2026-11-13");
     const keys = DEFAULT_RATE_CARD.lines.map((l) => l.key);
     expect(new Set(keys).size).toBe(keys.length);
@@ -249,7 +249,7 @@ describe("pricing", () => {
     const rows = boqToCsv(boq).split("\n");
     expect(rows[0]).toMatch(/^item,category,description,unit,quantity,rate_bdt,amount_bdt,basis$/);
     expect(rows.length).toBe(1 + boq.lines.length + 2);
-    expect(rows.some((r) => r.startsWith("rate_card,pwd-sor-2022-civil-works"))).toBe(true);
+    expect(rows.some((r) => r.startsWith("rate_card,bd-2026-rates"))).toBe(true);
     expect(rows[rows.length - 1]).toMatch(/all items priced/);
   });
 });

@@ -1,8 +1,18 @@
 {
-  "asOf": "2026-11-13",
-  "cardId": "pwd-sor-2022-civil-works",
+  "schemaVersion": "0.1.0",
+  "cardId": "bd-2026-rates",
+  "region": "dhaka",
   "currency": "BDT",
-  "effectiveFrom": "2023-02-23",
+  "status": "candidate",
+  "effectiveFrom": "2026-11-13",
+  "asOf": "2026-11-13",
+  "source": {
+    "kind": "web_survey",
+    "name": "Bangladesh 2026 market survey (web sources, no official 2026 schedule found); PWD SoR 2022 (Revised) kept only where marked NOT UPDATED",
+    "retrievedAt": "2026-11-13",
+    "note": "Each line states its source in its note. Lines marked ASSUMPTION are estimates; lines marked NOT UPDATED still hold PWD SoR 2022 values."
+  },
+  "notes": "2026 default rate card for ArchResidenceBD. Users can enter their own rate for any line; a blank entry uses the value here. Replaces the PWD SoR 2022 candidate card (deleted). Common practice in Bangladesh: engineers use current market rates from supplier and web listings when no official 2026 schedule exists.",
   "lines": [
     {
       "costType": "material",
@@ -167,6 +177,22 @@
         "rajshahi": 0.909091
       },
       "unit": "day"
+    },
+    {
+      "costType": "subcontract",
+      "key": "balcony-railing",
+      "label": {
+        "bn": "বারান্দার রেলিং, ১.০ মিটার উঁচু (এমএস, সরবরাহ ও স্থাপন)",
+        "en": "Balcony railing, 1.0 m high (MS, supply and fix)"
+      },
+      "note": "ASSUMPTION from web sources, 2026: no Bangladesh per-metre railing rate found in 2026 searches (Jasmine Enterprise and Shahid Engineering list MS railing only per piece, no price). Indian listings give MS railing Tk-equivalent of about Tk 350 to 450 per running foot (Rs 350 to 450 per running foot at about Tk 1.4 per rupee = Tk 490 to 630 per foot = Tk 1,600 to 2,070 per m); mid Tk 1,840 per running metre. Low confidence: check with a Dhaka fabricator quote.",
+      "rateBdt": 1840,
+      "regionalMultipliers": {
+        "chattogram": 1,
+        "khulna": 1,
+        "rajshahi": 1
+      },
+      "unit": "m"
     },
     {
       "costType": "subcontract",
@@ -409,64 +435,196 @@
       "key": "lean-concrete"
     },
     {
+      "costType": "material",
+      "key": "chun-hydrated-lime",
+      "label": {
+        "en": "Chun (hydrated lime, white), for outside walls and parapets",
+        "bn": "চুন (সাদা হাইড্রেটেড), বাইরের দেয়াল ও প্যারাপেটের জন্য"
+      },
+      "note": "2026 web: limestone/lime powder 50 kg bag Tk 2,000 to 2,500 (bdstall.com, Lime Powder 2026); Tk 25 per kg in 50 kg+ lots; Tk 60 per kg for 1 to 49 kg. Mid Tk 40 per kg. Chun is the calcium-based white coating used outside and on surfaces that are hard to clean.",
+      "rateBdt": 40,
       "regionalMultipliers": {
         "chattogram": 1,
         "khulna": 1,
         "rajshahi": 1
       },
-      "key": "electrical",
-      "costType": "subcontract",
-      "unit": "m2",
-      "rateBdt": 3122,
-      "label": {
-        "en": "Electrical wiring, points and fittings (per m2 of floor)",
-        "bn": "বৈদ্যুতিক ওয়্যারিং, পয়েন্ট ও ফিটিংস (প্রতি বর্গমিটার মেঝে)"
-      },
-      "note": "ASSUMPTION, low confidence: web cost guides give Tk 180 to 400 per sq ft for electrical work (mid Tk 290), 2026 Bangladesh; x 10.764 = Tk 3,122 per m2. A benchmark for the whole floor area, not a quantity take-off."
+      "unit": "kg"
     },
     {
+      "costType": "material",
+      "key": "water-pump-1hp",
+      "label": {
+        "en": "Submersible or jet water pump, 1 HP",
+        "bn": "সাবমার্সিবল বা জেট পানির পাম্প, ১ এইচপি"
+      },
+      "note": "2026 web quotes: Wadfow 8,200; Walton jet 8,740 to 8,930; LEO 9,270; Walton submersible 9,570; RFL 12,000 to 16,000 (bdstall.com, othoba.com, ula.com.bd). Median Tk 9,400.",
+      "rateBdt": 9400,
       "regionalMultipliers": {
         "chattogram": 1,
         "khulna": 1,
         "rajshahi": 1
       },
-      "key": "plumbing",
-      "costType": "subcontract",
-      "unit": "m2",
-      "rateBdt": 3767,
-      "label": {
-        "en": "Plumbing and sanitary fittings (per m2 of floor)",
-        "bn": "প্লাম্বিং ও স্যানিটারি ফিটিংস (প্রতি বর্গমিটার মেঝে)"
-      },
-      "note": "ASSUMPTION, low confidence: web cost guides give Tk 200 to 500 per sq ft for plumbing and sanitary work (mid Tk 350), 2026 Bangladesh; x 10.764 = Tk 3,767 per m2. Excludes septic tank, soak well and tanks, which are not priced."
+      "unit": "nr"
     },
     {
-      "costType": "subcontract",
-      "key": "balcony-railing",
+      "costType": "material",
+      "key": "overhead-tank-2000l",
       "label": {
-        "bn": "বারান্দার রেলিং, ১.০ মিটার উঁচু (এমএস, সরবরাহ ও স্থাপন)",
-        "en": "Balcony railing, 1.0 m high (MS, supply and fix)"
+        "en": "Plastic overhead water tank, 2,000 litre (supply and place)",
+        "bn": "প্লাস্টিকের ওভারহেড পানির ট্যাংক, ২,০০০ লিটার (সরবরাহ ও স্থাপন)"
       },
-      "note": "ASSUMPTION from web sources: no Bangladesh per-metre railing rate found in 2026 searches (Jasmine Enterprise and Shahid Engineering list MS railing only per piece, no price). Indian listings give MS railing Tk-equivalent of about Tk 350 to 450 per running foot (Rs 350 to 450 per running foot at about Tk 1.4 per rupee = Tk 490 to 630 per foot = Tk 1,600 to 2,070 per m); mid Tk 1,840 per running metre. Low confidence: check with a Dhaka fabricator quote.",
-      "rateBdt": 1840,
+      "note": "2026 web: 2,000 L tanks Tk 18,000 to 25,000 by brand (bdstall.com, Water Tank Price 2026; constructionmart.com.bd). Mid Tk 21,500. Stand and fixing not included.",
+      "rateBdt": 21500,
+      "regionalMultipliers": {
+        "chattogram": 1,
+        "khulna": 1,
+        "rajshahi": 1
+      },
+      "unit": "nr"
+    },
+    {
+      "costType": "material",
+      "key": "pvc-pipe-4in",
+      "label": {
+        "en": "uPVC drainage pipe, 4 inch, supply",
+        "bn": "ইউপিভিসি ড্রেনেজ পাইপ, ৪ ইঞ্চি, সরবরাহ"
+      },
+      "note": "2026 web: 4 inch uPVC pipe Tk 1,200 to 1,800 per length (RFL, othoba.com). ASSUMPTION: one 10 ft (3.05 m) length at Tk 1,500, so Tk 492 per m. Fittings not included.",
+      "rateBdt": 492,
       "regionalMultipliers": {
         "chattogram": 1,
         "khulna": 1,
         "rajshahi": 1
       },
       "unit": "m"
+    },
+    {
+      "costType": "material",
+      "key": "cable-2-5mm",
+      "label": {
+        "en": "House wiring cable 2.5 mm2, supply (per metre)",
+        "bn": "বাড়ির ওয়্যারিং ক্যাবল ২.৫ মিমি২, সরবরাহ (প্রতি মিটার)"
+      },
+      "note": "2026 web: 2.5 mm2 coil Tk 1,800 to 2,400 (Bizli; BRB/RFL coils Tk 1,200 to 2,800) (techlandbd, othoba.com). ASSUMPTION: coil of 90 m at Tk 2,100, so Tk 23 per m.",
+      "rateBdt": 23,
+      "regionalMultipliers": {
+        "chattogram": 1,
+        "khulna": 1,
+        "rajshahi": 1
+      },
+      "unit": "m"
+    },
+    {
+      "costType": "material",
+      "key": "cable-1-5mm",
+      "label": {
+        "en": "House wiring cable 1.5 mm2, supply (per metre)",
+        "bn": "বাড়ির ওয়্যারিং ক্যাবল ১.৫ মিমি২, সরবরাহ (প্রতি মিটার)"
+      },
+      "note": "2026 web: 1.5 mm2 coil Tk 1,300 to 1,700 (Bizli) (techlandbd, othoba.com). ASSUMPTION: coil of 90 m at Tk 1,500, so Tk 17 per m.",
+      "rateBdt": 17,
+      "regionalMultipliers": {
+        "chattogram": 1,
+        "khulna": 1,
+        "rajshahi": 1
+      },
+      "unit": "m"
+    },
+    {
+      "costType": "material",
+      "key": "electrical-device",
+      "label": {
+        "en": "Switch or socket with box and fixing, supply and fit",
+        "bn": "সুইচ বা সকেট, বক্স ও স্থাপনসহ"
+      },
+      "note": "2026 web: Walton socket with switch Tk 305 (2 pin) to Tk 774 (3 pin) and Tk 850 (5 pin); plain switches Tk 50 to 300 (ula.com.bd, constructionmart.com.bd). ASSUMPTION: mid Tk 400 for a device with box and fixing.",
+      "rateBdt": 400,
+      "regionalMultipliers": {
+        "chattogram": 1,
+        "khulna": 1,
+        "rajshahi": 1
+      },
+      "unit": "nr"
+    },
+    {
+      "costType": "material",
+      "key": "conduit-20mm",
+      "label": {
+        "en": "PVC conduit 20 mm, supply (per metre)",
+        "bn": "পিভিসি কন্ডুইট ২০ মিমি, সরবরাহ (প্রতি মিটার)"
+      },
+      "note": "2026 web: 20 mm PVC conduit Tk 50 to 150 per length (constructionmart.com.bd, lntsufin.com). ASSUMPTION: 3 m length at Tk 100, so Tk 33 per m.",
+      "rateBdt": 33,
+      "regionalMultipliers": {
+        "chattogram": 1,
+        "khulna": 1,
+        "rajshahi": 1
+      },
+      "unit": "m"
+    },
+    {
+      "costType": "material",
+      "key": "commode-ceramic",
+      "label": {
+        "en": "Commode (water closet) with flush tank, supply and fix",
+        "bn": "কমোড, ফ্লাশ ট্যাংকসহ, সরবরাহ ও স্থাপন"
+      },
+      "note": "2026 web: RFL commodes Tk 1,200 to 7,000; high commodes Tk 3,000 to 10,000; basic ceramic dual-flush from Tk 8,000 (bdstall.com, rosa-bd.com). ASSUMPTION: Tk 4,500 for a mid-range set.",
+      "rateBdt": 4500,
+      "regionalMultipliers": {
+        "chattogram": 1,
+        "khulna": 1,
+        "rajshahi": 1
+      },
+      "unit": "nr"
+    },
+    {
+      "costType": "material",
+      "key": "wash-basin",
+      "label": {
+        "en": "Wash basin with pedestal and tap, supply and fix",
+        "bn": "ওয়াশ বেসিন, পেডেস্টাল ও ট্যাপসহ, সরবরাহ ও স্থাপন"
+      },
+      "note": "ASSUMPTION, low confidence: no 2026 Bangladesh price found in searches. Mid-range basin with tap, Tk 2,500 (estimate). Check with a Dhaka sanitary shop.",
+      "rateBdt": 2500,
+      "regionalMultipliers": {
+        "chattogram": 1,
+        "khulna": 1,
+        "rajshahi": 1
+      },
+      "unit": "nr"
+    },
+    {
+      "costType": "material",
+      "key": "shower-set",
+      "label": {
+        "en": "Shower set with mixer and head, supply and fix",
+        "bn": "শাওয়ার সেট, মিক্সার ও শাওয়ার হেডসহ, সরবরাহ ও স্থাপন"
+      },
+      "note": "ASSUMPTION, low confidence: no 2026 Bangladesh price found in searches. Mid-range shower set, Tk 2,000 (estimate). Check with a Dhaka sanitary shop.",
+      "rateBdt": 2000,
+      "regionalMultipliers": {
+        "chattogram": 1,
+        "khulna": 1,
+        "rajshahi": 1
+      },
+      "unit": "nr"
+    },
+    {
+      "costType": "material",
+      "key": "kitchen-sink",
+      "label": {
+        "en": "Kitchen sink with tap, supply and fix",
+        "bn": "কিচেন সিংক, ট্যাপসহ, সরবরাহ ও স্থাপন"
+      },
+      "note": "ASSUMPTION, low confidence: no 2026 Bangladesh price found in searches. Stainless steel single-bowl sink with tap, Tk 4,000 (estimate). Check with a Dhaka sanitary shop.",
+      "rateBdt": 4000,
+      "regionalMultipliers": {
+        "chattogram": 1,
+        "khulna": 1,
+        "rajshahi": 1
+      },
+      "unit": "nr"
     }
-  ],
-  "notes": "Transcribed from the PWD Schedule of Rates 2022 (Revised), Part A: Civil Works (16th edition, revised, effective 23 February 2023) on 2026-10-21. The four official price zones (Dhaka and Mymensingh / Chattogram and Sylhet / Khulna, Barisal and Gopalgonj / Rajshahi and Rangpur) become each line's regional multipliers. These are works rates: the contractor's profit, overhead and VAT are listed separately in the book and are not included. Stone chips added 2026-11-09 from the same copy (hash checked). Formwork (steel, per sqm) and rebar fixing (derived) added 2026-11-09; the book has no man-day norms, it prices works as composite rates. A candidate card until a human marks it active. Updated 2026-11-13: material prices (cement, TMT rod, sand, stone chips, brick) and labour and machinery where a 2026 source was found now use 2026 market values, each line notes its source. Lines still on SoR 2022 values are marked NOT UPDATED in their note. The card is still a candidate until a human marks it active.",
-  "region": "dhaka",
-  "schemaVersion": "0.1.0",
-  "source": {
-    "kind": "official_list",
-    "name": "PWD Schedule of Rates 2022 (Revised), Part A: Civil Works (16th edition, revised)",
-    "note": "the fetched artefact is 10435417 bytes; the hash is the provenance record (plan section 5.10).",
-    "retrievedAt": "2026-10-21",
-    "sha256": "bf7524a24d20a5b1d9f4b345a9ca6fa3bbeccebf6dabe44d84cb06fc3b82b47f",
-    "url": "https://ss.pwd.gov.bd/document/sor/PWDSoR2022-Revised-2.3.23-Website.pdf"
-  },
-  "status": "candidate"
+  ]
 }

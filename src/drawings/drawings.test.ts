@@ -247,7 +247,7 @@ describe("permit package", () => {
   it("the BOQ file is the BOQ CSV, and assumptions name the rate card in English and Bengali", () => {
     expect(files.find((f) => f.path === "boq/boq.csv")!.text).toMatch(/^item,category,description/);
     const a = files.find((f) => f.path === "assumptions.md")!.text;
-    expect(a).toContain("pwd-sor-2022-civil-works");
+    expect(a).toContain("bd-2026-rates");
     expect(a).toContain("candidate");
     expect(a).toMatch(/\(BN\)/);
     expect(a).toMatch(/[ঀ-৿]/);
