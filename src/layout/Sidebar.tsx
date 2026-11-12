@@ -11,7 +11,7 @@ import {
   Info,
   Layers,
   LayoutTemplate,
-  Library,
+  DoorOpen,
   Link2,
   Lock,
   MessagesSquare,
@@ -92,7 +92,7 @@ export function Sidebar({ active, onNavigate, open = false }: Props) {
       items: [
         { id: "design:final", icon: Box, en: "3D model", bn: "৩ডি মডেল", gated: true },
         { id: "templates", icon: LayoutTemplate, en: "Plan library", bn: "প্ল্যান লাইব্রেরি" },
-        { id: "assets", icon: Library, en: "Asset library", bn: "অ্যাসেট লাইব্রেরি" },
+        { id: "schedules", icon: DoorOpen, en: "Door and window schedule", bn: "দরজা-জানালার তালিকা" },
       ],
     },
     {

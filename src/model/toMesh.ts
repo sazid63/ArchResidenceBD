@@ -43,11 +43,11 @@ export const PLACEHOLDER = {
   plinthDepth: 450,
 } as const;
 
-const DOOR_HEIGHT = 2100;
-const WINDOW_SILL = 900;
-const WINDOW_HEIGHT = 1200;
-const VENT_SILL = 1800;
-const VENT_HEIGHT = 600;
+export const DOOR_HEIGHT = 2100;
+export const WINDOW_SILL = 900;
+export const WINDOW_HEIGHT = 1200;
+export const VENT_SILL = 1800;
+export const VENT_HEIGHT = 600;
 
 const meshPhase = (index: number) => (index === 0 ? "ground_floor" : `floor_${index}`);
 

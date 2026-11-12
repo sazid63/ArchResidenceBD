@@ -34,7 +34,7 @@ export function auditSource(fileName: string, text: string): string[] {
     const name = m[1] ?? m[2];
     // body = until the first line at column 0 that closes the declaration
     let end = i + 1;
-    while (end < lines.length && !/^[}\)]/.test(lines[end])) end++;
+    while (end < lines.length && !/^[})]/.test(lines[end])) end++;
     let earlyReturnAt = -1;
     for (let j = i + 1; j < end; j++) {
       const l = lines[j];
@@ -49,7 +49,7 @@ export function auditSource(fileName: string, text: string): string[] {
         const single = !t.endsWith("{");
         const block: string[] = single ? [t] : [];
         if (!single) while (k < end && !/^ {2}\}/.test(lines[k])) block.push(lines[k++]);
-        if (block.some((b) => HOOK.test(b.trim()) && /^\s*(?:const|let|var)?\s*[\w\[\]{}, ]*=?\s*use[A-Z]/.test(b) ))
+        if (block.some((b) => HOOK.test(b.trim()) && /^\s*(?:const|let|var)?\s*[\w[\]{}, ]*=?\s*use[A-Z]/.test(b) ))
           problems.push(`${fileName} ${name}: hook called inside a condition/loop (compiled line ${j + 1})`);
         if (earlyReturnAt < 0 && block.some((b) => /^\s*return\b/.test(b) || /\)\s*return\b/.test(b))) earlyReturnAt = j;
       }

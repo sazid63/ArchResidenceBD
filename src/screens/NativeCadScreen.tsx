@@ -4,71 +4,22 @@ import { sizeMm, volumeM3 } from "../cad/mesh";
 import type { MeshDocument, MeshObject } from "../cad/mesh";
 import { MeshViewer } from "../cad/viewer";
 import { useI18n } from "../i18n";
-import type { BuildingProject } from "../engine/projectState";
 import { Badge, Button, Card, PageHeader, Stat } from "../ui/kit";
-import { useActiveProject, useProject } from "../context/ProjectContext";
-import { generateBuildingMesh } from "../cad/parametricBuildingGenerator";
-import { buildingForProject } from "../model/projectMesh";
+import { useActiveProject } from "../context/ProjectContext";
+import { buildingForProject, meshForProject } from "../model/projectMesh";
 import { analyzeStructure } from "../structure/analyze";
 import { PlotShapeCallout } from "../components/PlotShapeCallout";
 import { PlanCard } from "../components/PlanCard";
-import type { BuildingCustomization } from "../types/customization";
-import {
-  DEFAULT_ACCESSIBILITY,
-  DEFAULT_SUSTAINABILITY_DHAKA,
-  DEFAULT_FIRE_SAFETY,
-  DEFAULT_VALUE_ENGINEERING,
-  DEFAULT_CONSTRUCTION_MGMT,
-} from "../types/customization";
-import { buildIfcStep, buildFreeCadMacro, orderedPhases } from "../cad/exporters";
+import { buildIfcStep, buildFreeCadMacro } from "../cad/exporters";
 import type { Vec3 } from "../cad/viewer";
 import "../cad/workspace.css";
-
-interface TitleBlockData {
-  projectName: string;
-  projectAddress: string;
-  projectNumber: string;
-  drawingNumber: string;
-  drawingTitle: string;
-  scale: string;
-  drawnBy: string;
-  checkedBy: string;
-  approvedBy: string;
-  date: string;
-  revision: string;
-  revisionDate: string;
-  revisionNote: string;
-  northArrow: boolean;
-  logoPath: string;
-}
-
-function generateTitleBlockSVG(tb: TitleBlockData) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 594" style="background:white;font-family:Arial,sans-serif">
-    <rect x="0" y="0" width="840" height="594" fill="white" stroke="#333" stroke-width="2"/>
-    <rect x="10" y="10" width="820" height="80" fill="none" stroke="#333" stroke-width="1"/>
-    <text x="20" y="35" font-size="16" font-weight="bold">${tb.projectName}</text>
-    <text x="20" y="55" font-size="10">${tb.projectAddress}</text>
-    <text x="20" y="75" font-size="10">Project No: ${tb.projectNumber}</text>
-    <rect x="650" y="10" width="180" height="80" fill="none" stroke="#333" stroke-width="1"/>
-    <text x="660" y="30" font-size="10">${tb.drawingNumber}</text>
-    <text x="660" y="45" font-size="10">${tb.drawingTitle}</text>
-    <text x="660" y="60" font-size="10">Scale: ${tb.scale}</text>
-    <text x="660" y="75" font-size="10">Date: ${tb.date}</text>
-    <rect x="10" y="100" width="400" height="50" fill="none" stroke="#333" stroke-width="1"/>
-    <text x="20" y="120" font-size="10">Drawn: ${tb.drawnBy}</text>
-    <text x="20" y="135" font-size="10">Checked: ${tb.checkedBy}</text>
-    <text x="20" y="115" font-size="10">Approved: ${tb.approvedBy}</text>
-    <rect x="420" y="100" width="410" height="50" fill="none" stroke="#333" stroke-width="1"/>
-    <text x="430" y="120" font-size="10">Rev: ${tb.revision}</text>
-    <text x="430" y="135" font-size="10">Date: ${tb.revisionDate}</text>
-    <text x="430" y="150" font-size="10">${tb.revisionNote}</text>
-  </svg>`;
-}
 
 interface Props {
   designPhaseId?: string;
   onNavigate?: (id: string) => void;
 }
+
+const EMPTY_MESH: MeshDocument = { schemaVersion: "0.1.0", units: "mm", objects: [] };
 
 export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) {
   const { t, lang } = useI18n();
@@ -76,7 +27,6 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
   const viewerRef = useRef<MeshViewer | null>(null);
 
   const project = useActiveProject();
-  const { saveCustomization, refreshProject } = useProject();
 
   // All hooks MUST be called unconditionally — Rules of Hooks
   const [activeTab, setActiveTab] = useState<string>(designPhaseId);
@@ -107,70 +57,8 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
     ];
   }, [design]);
 
-  // Title block state
-  const [titleBlock, setTitleBlock] = useState<TitleBlockData>({
-    projectName: project?.name || "Residential Building",
-    projectAddress: project?.address || "Dhaka, Bangladesh",
-    projectNumber: project?.id?.slice(0, 8).toUpperCase() || "DEMO",
-    drawingNumber: "A-101",
-    drawingTitle: "Ground Floor Plan",
-    scale: "1:100",
-    drawnBy: "ArchResidenceBD",
-    checkedBy: "",
-    approvedBy: "",
-    date: new Date().toLocaleDateString("en-GB"),
-    revision: "0",
-    revisionDate: "",
-    revisionNote: "",
-    northArrow: true,
-    logoPath: "",
-  });
-
-  const [customParams, setCustomParams] = useState<BuildingCustomization>(() => {
-    const stories = project?.stories || 6;
-    const base = stories >= 6 ? {
-      columnWidthMm: 350, columnDepthMm: 350,
-      footingSizeMm: 2000, footingDepthMm: 2000,
-      balconyDepthMm: 1200,
-    } : {
-      columnWidthMm: 300, columnDepthMm: 300,
-      footingSizeMm: 1800, footingDepthMm: 1600,
-      balconyDepthMm: 1200,
-    };
-    return { ...base, ...(project?.customization || {}) };
-  });
-
-  // Pre-generate mesh synchronously so state is never null
-  const [mesh, setMesh] = useState<MeshDocument>(() =>
-    project ? generateBuildingMesh(project, designPhaseId, customParams) : generateBuildingMesh({
-      id: "demo",
-      name: "Demo Building",
-      address: "Dhaka, Bangladesh",
-      stories: 6,
-      plotSize: 3.5,
-      plotUnit: "katha",
-      plotSqm: 234.115,
-      unitsPerFloor: 2,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      phases: [],
-      designStarted: true,
-      customization: {
-        columnWidthMm: 300,
-        columnDepthMm: 300,
-        footingSizeMm: 1800,
-        footingDepthMm: 1600,
-        balconyDepthMm: 1200,
-        concreteGrade: 25,
-        steelGrade: 415,
-        accessibility: DEFAULT_ACCESSIBILITY,
-        sustainability: DEFAULT_SUSTAINABILITY_DHAKA,
-        fireSafety: DEFAULT_FIRE_SAFETY,
-        valueEngineering: DEFAULT_VALUE_ENGINEERING,
-        constructionMgmt: DEFAULT_CONSTRUCTION_MGMT,
-      },
-    } as BuildingProject, designPhaseId, customParams),
-  );
+  const meshOf = (tab: string): MeshDocument => (project ? meshForProject(project, tab) : null) ?? EMPTY_MESH;
+  const [mesh, setMesh] = useState<MeshDocument>(() => meshOf(designPhaseId));
 
   // 3D model tree state: hooks must stay above the early `if (!project)` return further down.
   const [treeFilter, setTreeFilter] = useState("");
@@ -200,8 +88,7 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
     try {
       viewer = new MeshViewer(canvas);
       viewerRef.current = viewer;
-      const initialMesh = project ? generateBuildingMesh(project, activeTab, customParams) : mesh;
-      viewer.setMesh(initialMesh);
+      viewer.setMesh(meshOf(activeTab));
       viewer.setCameraPreset("iso");
       viewer.resize();
     } catch (reason: unknown) {
@@ -287,7 +174,7 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
   useEffect(() => {
     if (!project) return;
     try {
-      const generated = generateBuildingMesh(project, activeTab, customParams);
+      const generated = meshOf(activeTab);
       setMesh(generated);
 
       if (viewerRef.current) {
@@ -297,7 +184,8 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     }
-  }, [project, activeTab, customParams]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [project, activeTab]);
 
   // Object visibility toggles
   useEffect(() => {
@@ -380,9 +268,6 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
             </Button>
             <Button variant="soft" onClick={exportIfc}>
               {lang === "bn" ? "আইএফসি (.ifc)" : "Export IFC (.ifc)"}
-            </Button>
-            <Button variant="soft" onClick={() => setActiveTab("title-block")}>
-              {lang === "bn" ? "টাইটেল ব্লক ✏️" : "Title Block ✏️"}
             </Button>
             <Button
               variant="primary"
@@ -755,156 +640,6 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
         </div>
       </div>
 
-      {/* Title Block Editor Modal */}
-      {activeTab === "title-block" && (
-        <div className="modal-overlay" style={{
-          position: "fixed", inset: 0, background: "color-mix(in srgb, #0b0f19 45%, transparent)",
-          display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000
-        }} onClick={() => setActiveTab(designPhaseId)}>
-        <div className="modal" style={{
-          background: "var(--surface)", padding: "24px", borderRadius: "var(--r-lg)",
-          width: "90%", maxWidth: "600px", maxHeight: "90vh", overflow: "auto",
-          boxShadow: "var(--shadow-xl)"
-        }} onClick={e => e.stopPropagation()}>
-          <h2 style={{ marginBottom: "20px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            {lang === "bn" ? "টাইটেল ব্লক এডিটর" : "Title Block Editor"}
-            <Button variant="ghost" onClick={() => setActiveTab(designPhaseId)} style={{ padding: "4px 8px", fontSize: "12px" }}>✕</Button>
-          </h2>
-
-          <div className="stack" style={{ gap: "12px" }}>
-            <div className="row" style={{ gap: "12px" }}>
-              <div style={{ flex: 1 }}>
-                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-project-name">
-                  {lang === "bn" ? "প্রকল্পের নাম" : "Project Name"}
-                </label>
-                <input className="input" id="title-project-name" value={titleBlock.projectName} onChange={e => setTitleBlock({ ...titleBlock, projectName: e.target.value })} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-project-number">
-                  {lang === "bn" ? "প্রকল্প নম্বর" : "Project No."}
-                </label>
-                <input className="input" id="title-project-number" value={titleBlock.projectNumber} onChange={e => setTitleBlock({ ...titleBlock, projectNumber: e.target.value })} />
-              </div>
-            </div>
-
-            <div className="row" style={{ gap: "12px" }}>
-              <div style={{ flex: 1 }}>
-                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-drawing-number">
-                  {lang === "bn" ? "ড্রয়িং নম্বর" : "Drawing No."}
-                </label>
-                <input className="input" id="title-drawing-number" value={titleBlock.drawingNumber} onChange={e => setTitleBlock({ ...titleBlock, drawingNumber: e.target.value })} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-drawing-title">
-                  {lang === "bn" ? "ড্রয়িং শিরোনাম" : "Drawing Title"}
-                </label>
-                <input className="input" id="title-drawing-title" value={titleBlock.drawingTitle} onChange={e => setTitleBlock({ ...titleBlock, drawingTitle: e.target.value })} />
-              </div>
-            </div>
-
-            <div className="row" style={{ gap: "12px" }}>
-              <div style={{ flex: 1 }}>
-                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-scale">
-                  {lang === "bn" ? "স্কেল" : "Scale"}
-                </label>
-                <input className="input" id="title-scale" value={titleBlock.scale} onChange={e => setTitleBlock({ ...titleBlock, scale: e.target.value })} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-date">
-                  {lang === "bn" ? "তারিখ" : "Date"}
-                </label>
-                <input className="input" type="date" id="title-date" value={titleBlock.date} onChange={e => setTitleBlock({ ...titleBlock, date: e.target.value })} />
-              </div>
-            </div>
-
-            <div className="row" style={{ gap: "12px" }}>
-              <div style={{ flex: 1 }}>
-                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-drawn-by">
-                  {lang === "bn" ? "ড্রাফটসম্যান" : "Drawn By"}
-                </label>
-                <input className="input" id="title-drawn-by" value={titleBlock.drawnBy} onChange={e => setTitleBlock({ ...titleBlock, drawnBy: e.target.value })} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-checked-by">
-                  {lang === "bn" ? "চেক করা" : "Checked By"}
-                </label>
-                <input className="input" id="title-checked-by" value={titleBlock.checkedBy} onChange={e => setTitleBlock({ ...titleBlock, checkedBy: e.target.value })} />
-              </div>
-            </div>
-
-            <div className="row" style={{ gap: "12px" }}>
-              <div style={{ flex: 1 }}>
-                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-approved-by">
-                  {lang === "bn" ? "অনুমোদিত" : "Approved By"}
-                </label>
-                <input className="input" id="title-approved-by" value={titleBlock.approvedBy} onChange={e => setTitleBlock({ ...titleBlock, approvedBy: e.target.value })} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-revision">
-                  {lang === "bn" ? "রিভিশন" : "Revision"}
-                </label>
-                <input className="input" id="title-revision" value={titleBlock.revision} onChange={e => setTitleBlock({ ...titleBlock, revision: e.target.value })} />
-              </div>
-            </div>
-
-            <div className="row" style={{ gap: "12px" }}>
-              <div style={{ flex: 1 }}>
-                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-revision-date">
-                  {lang === "bn" ? "রিভিশন তারিখ" : "Revision Date"}
-                </label>
-                <input className="input" type="date" id="title-revision-date" value={titleBlock.revisionDate} onChange={e => setTitleBlock({ ...titleBlock, revisionDate: e.target.value })} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-revision-note">
-                  {lang === "bn" ? "রিভিশন নোট" : "Revision Note"}
-                </label>
-                <input className="input" id="title-revision-note" value={titleBlock.revisionNote} onChange={e => setTitleBlock({ ...titleBlock, revisionNote: e.target.value })} />
-              </div>
-            </div>
-
-            <div className="row" style={{ gap: "12px", alignItems: "flex-end" }}>
-              <div style={{ flex: 1 }}>
-                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-north-arrow">
-                  {lang === "bn" ? "উত্তর বাণ" : "North Arrow"}
-                </label>
-                <select className="input" id="title-north-arrow" value={String(titleBlock.northArrow)} onChange={e => setTitleBlock({ ...titleBlock, northArrow: e.target.value === "true" })}>
-                  <option value="true">{lang === "bn" ? "হ্যাঁ" : "Yes"}</option>
-                  <option value="false">{lang === "bn" ? "না" : "No"}</option>
-                </select>
-              </div>
-              <div style={{ flex: 1 }}>
-                <label className="small muted" style={{ display: "block", marginBottom: "4px" }} htmlFor="title-project-address">
-                  {lang === "bn" ? "প্রকল্প ঠিকানা" : "Project Address"}
-                </label>
-                <input className="input" id="title-project-address" value={titleBlock.projectAddress} onChange={e => setTitleBlock({ ...titleBlock, projectAddress: e.target.value })} />
-              </div>
-            </div>
-
-            <div style={{ marginTop: "16px", display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-              <Button variant="soft" onClick={() => setActiveTab(designPhaseId)}>
-                {lang === "bn" ? "বাতিল" : "Cancel"}
-              </Button>
-              <Button variant="primary" onClick={() => {
-                // Save title block to project
-                // Note: titleBlock is not part of BuildingCustomization, so we'd need to extend the type
-                // For now, just refresh to trigger re-render
-                refreshProject();
-                setActiveTab(designPhaseId);
-              }}>
-                {lang === "bn" ? "সংরক্ষণ করুন" : "Save Title Block"}
-              </Button>
-              <Button variant="soft" onClick={() => {
-                // Export title block as SVG
-                const svg = generateTitleBlockSVG(titleBlock);
-                void saveFile(`${titleBlock.drawingNumber}_title-block.svg`, svg, "image/svg+xml");
-              }}>
-                {lang === "bn" ? "SVG এক্সপোর্ট" : "Export SVG"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-      )}
     </div>
   );
 }

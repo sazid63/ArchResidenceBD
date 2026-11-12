@@ -11,7 +11,7 @@
     "check:bundle": "node scripts/check-bundle-size.mjs",
     "test:e2e": "playwright test",
     "test:offline": "node scripts/tests/offline-check.mjs && node scripts/tests/sw-offline.mjs",
-    "lint": "tsc --noEmit && oxlint src scripts",
+    "lint": "tsc --noEmit && oxlint src scripts e2e",
     "clean": "rm -rf dist",
     "audit:mesh": "tsx --import ./scripts/loaders/raw.mjs scripts/audits/mesh-audit.ts",
     "audit:solid": "tsx --import ./scripts/loaders/raw.mjs scripts/audits/solid-audit.ts",
@@ -46,6 +46,7 @@
     "vite": "^8.3.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@playwright/test": "^1.65.0",
     "@tauri-apps/cli": "^2.12.4",
     "@testing-library/dom": "^10.4.2",

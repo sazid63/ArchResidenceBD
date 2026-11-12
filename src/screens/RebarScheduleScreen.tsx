@@ -165,7 +165,7 @@ export function RebarScheduleScreen() {
 
       <section className="stack" style={{ marginTop: 24, gap: 12 }} aria-label={bn ? "মোট" : "Totals"}>
         <h2 className="section-title">{bn ? "ব্যাস অনুযায়ী মোট" : "Totals by diameter"}</h2>
-        <div style={{ overflowX: "auto" }}>
+        <div style={{ overflowX: "auto" }} tabIndex={0} role="region" aria-label={bn ? "ব্যাস অনুযায়ী মোটের সারণি" : "Totals by diameter table"}>
           <table className="data-table">
             <thead>
               <tr>
@@ -201,7 +201,7 @@ export function RebarScheduleScreen() {
           </Button>
         </div>
         <SegmentedControl<Filter> aria-label={bn ? "সদস্যের ধরন" : "Member type"} options={tabs} value={filter} onChange={setFilter} />
-        <div style={{ overflowX: "auto" }}>
+        <div style={{ overflowX: "auto" }} tabIndex={0} role="region" aria-label={bn ? "বার শিডিউল সারণি" : "Bar schedule table"}>
           <table className="data-table">
             <thead>
               <tr>

@@ -14,7 +14,7 @@ import "./app.css";
 
 // Screens load on demand so the first paint ships only the shell (see scripts/check-bundle-size.mjs).
 const AboutScreen = lazy(() => import("./screens/AboutScreen").then((m) => ({ default: m.AboutScreen })));
-const AssetsLibraryScreen = lazy(() => import("./screens/AssetsLibraryScreen").then((m) => ({ default: m.AssetsLibraryScreen })));
+const ScheduleScreen = lazy(() => import("./screens/ScheduleScreen").then((m) => ({ default: m.ScheduleScreen })));
 const BoqScreen = lazy(() => import("./screens/BoqScreen").then((m) => ({ default: m.BoqScreen })));
 const ComplianceScreen = lazy(() => import("./screens/ComplianceScreen").then((m) => ({ default: m.ComplianceScreen })));
 const StructureScreen = lazy(() => import("./screens/StructureScreen").then((m) => ({ default: m.StructureScreen })));
@@ -38,7 +38,7 @@ const SCREEN_TITLES: Record<string, [string, string]> = {
   setup: ["New project", "নতুন প্রকল্প"],
   projects: ["My Projects", "আমার প্রকল্পসমূহ"],
   boq: ["Bill of Quantities", "বিল অব কোয়ান্টিটিজ"],
-  assets: ["Asset Library", "অ্যাসেট লাইব্রেরি"],
+  schedules: ["Door and window schedule", "দরজা-জানালার তালিকা"],
   compliance: ["Code Compliance", "কোড কমপ্লায়েন্স"],
   structure: ["Structure", "কাঠামো"],
   formwork: ["Formwork", "ফর্মওয়ার্ক"],
@@ -178,7 +178,7 @@ function renderView(
   }
   if (view === "projects") return <ProjectsScreen onNavigate={navigate} />;
   if (view === "boq") return <BoqScreen />;
-  if (view === "assets") return <AssetsLibraryScreen />;
+  if (view === "schedules") return <ScheduleScreen />;
   if (view === "compliance") return <ComplianceScreen />;
   if (view === "structure") return <StructureScreen />;
   if (view === "formwork") return <FormworkScaffoldScreen />;
