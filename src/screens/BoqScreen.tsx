@@ -92,8 +92,8 @@ export function BoqScreen() {
       )}
       <Callout tone="warn" title={bn ? "রেট কার্ড এখনো যাচাই হয়নি, মোট একটি নিম্নসীমা" : "Rate card not yet verified; the total is a lower bound"}>
         {bn
-          ? `দাম "${c.source.name}" থেকে (অবস্থা: ${c.status}, কার্যকর ${c.effectiveFrom}, তথ্য ${c.asOf ?? "—"})। কংক্রিট, গাঁথুনি ও প্লাস্টারের শ্রম, যন্ত্র, সার্ভিস, দরজা-জানালা, টাইলস ও রং ধরা হয়নি।`
-          : `Prices are from "${c.source.name}" (status ${c.status}, effective ${c.effectiveFrom}, as of ${c.asOf ?? "n/a"}). Labour for concrete, brickwork and plaster, machinery, services, joinery, tiles and paint, are not in the total.`}
+          ? `দাম "${c.source.name}" থেকে (অবস্থা: ${c.status}, কার্যকর ${c.effectiveFrom}, তথ্য ${c.asOf ?? "—"})। ওয়েব থেকে নেওয়া দর রেট কার্ডে ASSUMPTION চিহ্নিত। এখনও ধরা হয়নি: বারান্দার রেলিং, প্লাম্বিং, বৈদ্যুতিক ও ড্রেনেজ সার্ভিস।`
+          : `Prices are from "${c.source.name}" (status ${c.status}, effective ${c.effectiveFrom}, as of ${c.asOf ?? "n/a"}), plus web-sourced rates marked ASSUMPTION in the rate card. Not in the total yet: balcony railing, and plumbing, electrical and drainage services.`}
       </Callout>
 
       <div className="row" style={{ gap: 16, margin: "16px 0", flexWrap: "wrap" }}>

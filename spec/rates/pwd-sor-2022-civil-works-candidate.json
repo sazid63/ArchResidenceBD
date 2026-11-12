@@ -247,6 +247,166 @@
         "rajshahi": 0.96875
       },
       "unit": "kg"
+    },
+    {
+      "regionalMultipliers": {
+        "chattogram": 1,
+        "khulna": 1,
+        "rajshahi": 1
+      },
+      "key": "helper",
+      "costType": "labour",
+      "unit": "day",
+      "rateBdt": 800,
+      "label": {
+        "en": "Helper (unskilled labourer, day)",
+        "bn": "সহকারী (অদক্ষ শ্রমিক, দিন)"
+      },
+      "note": "ASSUMPTION from web sources, not the SoR: Dhaka city corporation daily labour wage of Tk 800 (bdnews24, \"Daily wage for labourers in government jobs rises by Tk 225\"). Private helpers may be paid less; confirm with a local contractor."
+    },
+    {
+      "regionalMultipliers": {
+        "chattogram": 1,
+        "khulna": 1,
+        "rajshahi": 1
+      },
+      "key": "floor-tile",
+      "costType": "material",
+      "unit": "m2",
+      "rateBdt": 968,
+      "label": {
+        "en": "Ceramic floor tile, supply (per m2)",
+        "bn": "সিরামিক মেঝের টাইলস, সরবরাহ (প্রতি বর্গমিটার)"
+      },
+      "note": "ASSUMPTION from web sources: ordinary ceramic floor tile Tk 60 to 120 per sq ft in Dhaka (costnest.site, 2026; ConstructionMart listing), mid Tk 90 per sq ft x 10.764 = Tk 968 per m2. Fixing labour is in the mason and helper lines."
+    },
+    {
+      "regionalMultipliers": {
+        "chattogram": 1,
+        "khulna": 1,
+        "rajshahi": 1
+      },
+      "key": "emulsion-paint",
+      "costType": "material",
+      "unit": "m2",
+      "rateBdt": 194,
+      "label": {
+        "en": "Putty and emulsion paint, supply (per m2)",
+        "bn": "পুটি ও ইমালশন রং, সরবরাহ (প্রতি বর্গমিটার)"
+      },
+      "note": "ASSUMPTION from web sources: plastic emulsion Tk 12 to 25 per sq ft (aapkapainter.com and other 2025-26 pages), mid Tk 18 per sq ft x 10.764 = Tk 194 per m2, covering putty and emulsion coats. Painter labour is in the painter line."
+    },
+    {
+      "regionalMultipliers": {
+        "chattogram": 1,
+        "khulna": 1,
+        "rajshahi": 1
+      },
+      "key": "roof-waterproofing",
+      "costType": "material",
+      "unit": "m2",
+      "rateBdt": 700,
+      "label": {
+        "en": "Roof waterproofing membrane, supply and apply (per m2)",
+        "bn": "ছাদের ওয়াটারপ্রুফিং, সরবরাহ ও প্রয়োগ (প্রতি বর্গমিটার)"
+      },
+      "note": "ASSUMPTION from web sources: roof waterproofing Tk 40 to 90 per sq ft in Bangladesh (FOUNTECH, Duconchemical and other 2026 pages), mid Tk 65 per sq ft x 10.764 = Tk 700 per m2."
+    },
+    {
+      "regionalMultipliers": {
+        "chattogram": 1,
+        "khulna": 1,
+        "rajshahi": 1
+      },
+      "key": "excavation",
+      "costType": "labour",
+      "unit": "m3",
+      "rateBdt": 512,
+      "label": {
+        "en": "Manual earth excavation, foundation (per m3)",
+        "bn": "হাতে মাটি খনন, ফাউন্ডেশন (প্রতি ঘনমিটার)"
+      },
+      "note": "From the PWD RSoR 2022 Chapter 04 (ss.pwd.gov.bd), Zone A (Dhaka), manual excavation up to 1.5 m: Tk 396 (constrained) to Tk 512 per m3, as shown in a search summary. The upper value is used. The PDF itself was not opened; verify the item before relying on it. Includes labour."
+    },
+    {
+      "regionalMultipliers": {
+        "chattogram": 1,
+        "khulna": 1,
+        "rajshahi": 1
+      },
+      "key": "backfill",
+      "costType": "labour",
+      "unit": "m3",
+      "rateBdt": 494,
+      "label": {
+        "en": "Earth backfill and compaction (per m3)",
+        "bn": "মাটি ভরাট ও ঠাসা (প্রতি ঘনমিটার)"
+      },
+      "note": "ASSUMPTION from web sources: soil filling Tk 10 to 18 per cft in Dhaka 2026 (pricetodayhub.com), mid Tk 14 per cft x 35.3147 = Tk 494 per m3, compaction included."
+    },
+    {
+      "regionalMultipliers": {
+        "chattogram": 1,
+        "khulna": 1,
+        "rajshahi": 1
+      },
+      "key": "door-set",
+      "costType": "material",
+      "unit": "nr",
+      "rateBdt": 11000,
+      "label": {
+        "en": "Wooden door with frame and shutter, installed (each)",
+        "bn": "কাঠের দরজা, ফ্রেম ও শাটারসহ, বসানো (প্রতিটি)"
+      },
+      "note": "ASSUMPTION from web sources: complete 7 x 3 ft wooden door with frame, installed, Tk 7,500 to 15,000 in Dhaka (dreamdoor.com.bd, Jasmine Enterprise, HATIM Furniture, 2025-26 pages); mid Tk 11,000."
+    },
+    {
+      "regionalMultipliers": {
+        "chattogram": 1,
+        "khulna": 1,
+        "rajshahi": 1
+      },
+      "key": "window",
+      "costType": "material",
+      "unit": "nr",
+      "rateBdt": 13450,
+      "label": {
+        "en": "Aluminium sliding window with glass and MS grill (each)",
+        "bn": "অ্যালুমিনিয়াম স্লাইডিং জানালা, কাচ ও এমএস গ্রিলসহ (প্রতিটি)"
+      },
+      "note": "ASSUMPTION from web sources, per window: basic aluminium window with glass Tk 300 per sq ft (clickbd, accio 2026) x average window area 61.2 m2 / 40 = 1.53 m2 (16.5 sq ft) = Tk 4,950; plus one MS grill at the mid of Tk 5,000 to 12,000 (ConstructionMart, Shahid Engineering) = Tk 8,500. Total Tk 13,450."
+    },
+    {
+      "regionalMultipliers": {
+        "chattogram": 1,
+        "khulna": 1,
+        "rajshahi": 1
+      },
+      "key": "lift",
+      "costType": "subcontract",
+      "unit": "nr",
+      "rateBdt": 1400000,
+      "label": {
+        "en": "Passenger lift, 4 to 6 person, installed (each)",
+        "bn": "যাত্রী লিফট, ৪-৬ জন, বসানোসহ (প্রতিটি)"
+      },
+      "note": "ASSUMPTION from web sources: 4 to 6 person residential lift serving 4 to 8 floors, Tk 9 to 20 lakh installed in Bangladesh 2026 (rocketliftsbd.com, hemsbd.com, starelevatorglobal.com); mid Tk 14 lakh. Shaft and pit work is not included."
+    },
+    {
+      "regionalMultipliers": {
+        "chattogram": 1,
+        "khulna": 1,
+        "rajshahi": 1
+      },
+      "costType": "material",
+      "unit": "m3",
+      "rateBdt": 9726,
+      "label": {
+        "en": "Lean concrete 1:3:6, materials (per m3)",
+        "bn": "লিন কংক্রিট ১:৩:৬, উপকরণ (প্রতি ঘনমিটার)"
+      },
+      "note": "DERIVED from this card: 1:3:6 by dry volume, 1.54 dry factor. Cement 4.44 bags x Tk 520 = Tk 2,309; sand 16.3 cft x Tk 19 = Tk 310; stone chips 32.6 cft x Tk 218 = Tk 7,107. Total Tk 9,726 per m3, materials only. Mixing and placing labour are not included.",
+      "key": "lean-concrete"
     }
   ],
   "notes": "Transcribed from the PWD Schedule of Rates 2022 (Revised), Part A: Civil Works (16th edition, revised, effective 23 February 2023) on 2026-10-21. The four official price zones (Dhaka and Mymensingh / Chattogram and Sylhet / Khulna, Barisal and Gopalgonj / Rajshahi and Rangpur) become each line's regional multipliers. These are works rates: the contractor's profit, overhead and VAT are listed separately in the book and are not included. Stone chips added 2026-11-09 from the same copy (hash checked). Formwork (steel, per sqm) and rebar fixing (derived) added 2026-11-09; the book has no man-day norms, it prices works as composite rates. A candidate card until a human marks it active.",
