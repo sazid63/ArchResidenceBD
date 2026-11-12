@@ -204,7 +204,12 @@ function optionHits(q: Question, norm: string) {
     for (const lang of ["en", "bn"] as const) {
       const text = String(o.label[lang] ?? "");
       out.add(normalize(text));
-      if (!full) out.add(normalize(baseLabel(text)));
+      if (!full) {
+        out.add(normalize(baseLabel(text)));
+        // "Yes, stairs reach the roof" answers to "yes": the words before the first comma name the choice.
+        const head = baseLabel(text).split(",")[0].trim();
+        if (head && head !== baseLabel(text)) out.add(normalize(head));
+      }
     }
     return [...out].filter(Boolean);
   };

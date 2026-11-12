@@ -254,3 +254,11 @@ describe("text, files and empties", () => {
     expect(normalize("১,২০০")).toBe("1200");
   });
 });
+
+describe("a choice whose label starts with a yes or no", () => {
+  it("answers to the words before the comma: yes and no reach the right option", () => {
+    expect(parse("roof-access", "Yes")).toMatchObject({ decision: "accept", value: "stairs-reach" });
+    expect(parse("roof-access", "no")).toMatchObject({ decision: "accept", value: "hatch-only" });
+    expect(parse("roof-access", "Yes, stairs reach the roof")).toMatchObject({ decision: "accept", value: "stairs-reach" });
+  });
+});

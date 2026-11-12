@@ -823,6 +823,7 @@ flows:
           bn: "না বললে বিল্ডিংয়ের সেটিংই ধরে নেওয়া হবে।"
         type: integer
         maps_to: /phases/floor-<n>/data/unitsPerFloor
+        when: "floor-usage != parking"
         fallback:
           kind: derive
           value: "<building.unitsPerFloor>"
@@ -836,6 +837,7 @@ flows:
           bn: "এটা দিয়েই ঘরের বিন্যাস তৈরি হবে; আমাদের এখানে ৩ বেডরুমই বেশি প্রচলিত।"
         type: integer
         maps_to: /phases/floor-<n>/data/bedroomsPerUnit
+        when: "floor-usage != parking"
         fallback:
           kind: default
           value: 3
@@ -849,6 +851,7 @@ flows:
           bn: "এখন এটাই চালু; প্লাম্বিং খরচ একটু বাড়ে।"
         type: yes_no
         maps_to: /phases/floor-<n>/data/attachedBathPerBedroom
+        when: "floor-usage != parking"
         fallback:
           kind: default
           value: true
@@ -875,6 +878,7 @@ flows:
               en: "No balcony"
               bn: "বারান্দা লাগবে না"
         maps_to: /phases/floor-<n>/data/balcony
+        when: "floor-usage != parking"
         fallback:
           kind: default
           value: front-only
@@ -909,6 +913,7 @@ flows:
               en: "South"
               bn: "দক্ষিণ"
         maps_to: /phases/floor-<n>/data/kitchenPref
+        when: "floor-usage != parking"
         fallback:
           kind: default
           value: no-preference

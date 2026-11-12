@@ -12,6 +12,7 @@ import type { BuildingProject } from "../engine/projectState";
 import { deriveBuilding, type BuildingInput, type BuildingResult } from "./building";
 import { mToMm } from "./planChoices";
 import { analyzeStructure } from "../structure/analyze";
+import { buildBbs } from "../structure/bbs";
 import { buildMesh } from "./toMesh";
 
 /** Drop cached meshes (tests and audits). */
@@ -65,7 +66,13 @@ export function meshForProject(project: BuildingProject, phaseFilter?: string): 
   let full = cache.get(key);
   if (!full) {
     const b = deriveBuilding(input);
-    full = b.ok ? buildMesh(b.model, analyzeStructure(b.model)) : { schemaVersion: "0.1.0", units: "mm", objects: [] };
+    if (b.ok) {
+      // The concrete figure is the BOQ's (bar schedule volumes, no overlap counted twice), not the sum of the 3D solids.
+      const structure = analyzeStructure(b.model);
+      full = { ...buildMesh(b.model, structure), structuralConcreteM3: buildBbs(structure, b.model).totals.concreteM3 };
+    } else {
+      full = { schemaVersion: "0.1.0", units: "mm", objects: [] };
+    }
     if (cache.size >= MAX_CACHE) cache.delete(cache.keys().next().value as string);
     cache.set(key, full);
   }

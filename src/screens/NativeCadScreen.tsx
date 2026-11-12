@@ -203,7 +203,9 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
     const volume = objects.reduce((sum, object) => sum + volumeM3(object), 0);
     // Only reinforced-concrete elements count as concrete (walls, tanks and fixtures are not).
     const RCC = new Set(["footing", "column", "pier", "beam", "lintel", "slab", "balcony", "canopy", "stair"]);
-    const concrete = objects.filter((o) => RCC.has(o.kind)).reduce((sum, object) => sum + volumeM3(object), 0);
+    // The solids overlap (a beam's full depth includes the slab it carries), so their sum is not the concrete: use the BOQ's figure.
+    const solids = objects.filter((o) => RCC.has(o.kind)).reduce((sum, object) => sum + volumeM3(object), 0);
+    const concrete = mesh?.structuralConcreteM3 ?? solids;
     return { objects: objects.length, triangles, volume, concrete };
   }, [mesh]);
 
@@ -260,7 +262,7 @@ export function NativeCadScreen({ designPhaseId = "final", onNavigate }: Props) 
     <div className="screen">
       <PageHeader
         title={lang === "bn" ? "নেটিভক্যাড ৩D পূর্ণাঙ্গ ভবন ডিজাইন" : "NativeCAD 3D Full Building Architecture"}
-        subtitle={`${project.name} · ${project.stories} ${lang === "bn" ? "তলা পূর্ণাঙ্গ স্ট্রাকচারাল ফ্রেম" : "Storey Full Building Frame"} · ${totals.objects} elements · ${totals.concrete.toFixed(1)} m³ RCC`}
+        subtitle={`${project.name} · ${project.stories} ${lang === "bn" ? "তলা পূর্ণাঙ্গ স্ট্রাকচারাল ফ্রেম" : "Storey Full Building Frame"} · ${totals.objects} elements · ${totals.concrete.toFixed(1)} m³ ${lang === "bn" ? "কংক্রিট (BOQ অনুযায়ী)" : "concrete (as in the BOQ)"}`}
         actions={
           <div className="row" style={{ gap: "8px" }}>
             <Button variant="soft" onClick={exportFreeCadMacro}>

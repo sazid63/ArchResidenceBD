@@ -40,8 +40,14 @@ export function PhaseChatScreen({ phaseId, onNavigate, onProjectUpdated }: Props
   const nextPhase = project && phaseIndex >= 0 && phaseIndex < project.phases.length - 1 ? project.phases[phaseIndex + 1] : null;
 
   // Open the phase with its goal and first question, once.
+  // StrictMode runs this effect twice on mount with the same (already stale) spec: the second save would
+  // be a revision conflict and show the "changed in another tab" banner. One start per saved revision.
+  const startedFor = useRef<string | null>(null);
   useEffect(() => {
     if (!spec || !phase) return;
+    const key = `${spec.project.id}:${spec.revision}:${phase.id}:${lang}`;
+    if (startedFor.current === key) return;
+    startedFor.current = key;
     const next = chatStart(spec, phase.id, lang, new Date().toISOString());
     if (next !== spec) {
       saveSpec(next);

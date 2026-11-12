@@ -318,6 +318,14 @@ describe("the floor flow runs once per storey", () => {
     expect(out.phases.find((p) => p.id === "phase-floor-1")!.data.unitsPerFloor).toBe(2);
     expect(out.provenance["/phases/floor-1/data/unitsPerFloor"]).toMatchObject({ source: "engine", confidence: "medium" });
   });
+
+  it("a parking storey asks no per-unit questions (units, bedrooms, bathroom, balcony, kitchen)", () => {
+    const atGround = run.turns.map((t) => t.key).filter((k) => k.endsWith("@0")).map((k) => k.split("@")[0]);
+    expect(atGround).toEqual(["ground-floor-height", "floor-usage", "mep-points-note"]);
+    const atFirst = run.turns.map((t) => t.key).filter((k) => k.endsWith("@1")).map((k) => k.split("@")[0]);
+    expect(atFirst).toContain("units-override");
+    expect(atFirst).toContain("bedrooms-per-unit");
+  });
 });
 
 describe("derive with nothing to derive from, and cross-flow conditions", () => {

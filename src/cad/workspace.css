@@ -65,3 +65,15 @@
 .cad-eye:hover {
   background: var(--surface-3);
 }
+
+/* Narrow windows (the 3D view was squeezed beside the tree at ~450 px): one column, the viewport keeps a usable height. */
+@media (max-width: 900px) {
+  .cad-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cad-viewport {
+    height: min(520px, 75vh);
+    min-height: 320px;
+  }
+}

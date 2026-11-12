@@ -33,6 +33,8 @@ export interface MeshDocument {
   schemaVersion: string;
   units: string;
   objects: MeshObject[];
+  /** Whole-building structural concrete, m³, from the bar schedule (the BOQ figure). Set for building meshes only. */
+  structuralConcreteM3?: number;
 }
 
 /** The value the design carries: a number with its provenance. */

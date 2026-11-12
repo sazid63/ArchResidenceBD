@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { createNewProject, type BuildingProject } from "../engine/projectState";
 import { buildingForProject, buildingInputFor, meshForProject } from "./projectMesh";
+import { analyzeStructure } from "../structure/analyze";
+import { buildBbs } from "../structure/bbs";
 
 const plot = { frontageM: 12.2, depthM: 19.8, roadWidthM: 6, roadSide: "south" as const };
 
@@ -47,5 +49,15 @@ describe("projectMesh", () => {
   it("gives a save with no plot shape an empty mesh, never a guessed building", () => {
     const old = project({ plot: undefined, planId: undefined });
     expect(meshForProject(old, "final")?.objects ?? []).toEqual([]);
+  });
+
+  it("states the structural concrete as the BOQ figure (the bar schedule's total), not the sum of the 3D solids", () => {
+    const p = project();
+    const built = buildingForProject(p)!;
+    if (!built.ok) throw new Error("the sample plan should fit");
+    const model = built.model;
+    const res = analyzeStructure(model);
+    const mesh = meshForProject(p, "final")!;
+    expect(mesh.structuralConcreteM3).toBeCloseTo(buildBbs(res, model).totals.concreteM3, 6);
   });
 });
