@@ -94,7 +94,7 @@ export function BoqScreen() {
       <Callout tone="warn" title={bn ? "রেট কার্ড এখনো যাচাই হয়নি, মোট একটি নিম্নসীমা" : "Rate card not yet verified; the total is a lower bound"}>
         {bn
           ? `দাম "${c.source.name}" থেকে (অবস্থা: ${c.status}, কার্যকর ${c.effectiveFrom}, তথ্য ${c.asOf ?? "—"})। ওয়েব থেকে নেওয়া দর রেট কার্ডে ASSUMPTION চিহ্নিত। এখনও ধরা হয়নি: বারান্দার রেলিং, সেপটিক ট্যাংক ও সোক ওয়েল, পানির ট্যাংক ও পাম্প, ড্রেনেজ। বৈদ্যুতিক ও প্লাম্বিং প্রতি বর্গফুটের আনুমানিক হারে।`
-          : `Prices are from "${c.source.name}" (status ${c.status}, effective ${c.effectiveFrom}, as of ${c.asOf ?? "n/a"}), plus web-sourced rates marked ASSUMPTION in the rate card. Not in the total yet: balcony railing, septic tank and soak well, water tanks and pump, and drainage. Electrical and plumbing use benchmark rates per sq ft.`}
+          : `Prices are from "${c.source.name}" (status ${c.status}, effective ${c.effectiveFrom}, as of ${c.asOf ?? "n/a"}), plus web-sourced rates marked ASSUMPTION in the rate card. Not in the total yet: septic tank and soak well, water tanks and pump, and drainage. Balcony railing is priced per running metre as an assumption. Electrical and plumbing use benchmark rates per sq ft.`}
       </Callout>
 
       <div className="row" style={{ gap: 16, margin: "16px 0", flexWrap: "wrap" }}>

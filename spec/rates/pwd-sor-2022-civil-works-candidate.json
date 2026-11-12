@@ -439,6 +439,22 @@
         "bn": "প্লাম্বিং ও স্যানিটারি ফিটিংস (প্রতি বর্গমিটার মেঝে)"
       },
       "note": "ASSUMPTION, low confidence: web cost guides give Tk 200 to 500 per sq ft for plumbing and sanitary work (mid Tk 350), 2026 Bangladesh; x 10.764 = Tk 3,767 per m2. Excludes septic tank, soak well and tanks, which are not priced."
+    },
+    {
+      "costType": "subcontract",
+      "key": "balcony-railing",
+      "label": {
+        "bn": "বারান্দার রেলিং, ১.০ মিটার উঁচু (এমএস, সরবরাহ ও স্থাপন)",
+        "en": "Balcony railing, 1.0 m high (MS, supply and fix)"
+      },
+      "note": "ASSUMPTION from web sources: no Bangladesh per-metre railing rate found in 2026 searches (Jasmine Enterprise and Shahid Engineering list MS railing only per piece, no price). Indian listings give MS railing Tk-equivalent of about Tk 350 to 450 per running foot (Rs 350 to 450 per running foot at about Tk 1.4 per rupee = Tk 490 to 630 per foot = Tk 1,600 to 2,070 per m); mid Tk 1,840 per running metre. Low confidence: check with a Dhaka fabricator quote.",
+      "rateBdt": 1840,
+      "regionalMultipliers": {
+        "chattogram": 1,
+        "khulna": 1,
+        "rajshahi": 1
+      },
+      "unit": "m"
     }
   ],
   "notes": "Transcribed from the PWD Schedule of Rates 2022 (Revised), Part A: Civil Works (16th edition, revised, effective 23 February 2023) on 2026-10-21. The four official price zones (Dhaka and Mymensingh / Chattogram and Sylhet / Khulna, Barisal and Gopalgonj / Rajshahi and Rangpur) become each line's regional multipliers. These are works rates: the contractor's profit, overhead and VAT are listed separately in the book and are not included. Stone chips added 2026-11-09 from the same copy (hash checked). Formwork (steel, per sqm) and rebar fixing (derived) added 2026-11-09; the book has no man-day norms, it prices works as composite rates. A candidate card until a human marks it active.",
