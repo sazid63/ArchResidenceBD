@@ -13,7 +13,7 @@
 
 import type { BuildingModel } from "../model/building";
 import { slabOpeningAreaM2 } from "../model/openings";
-import { bendDeduction, bendDiameter, hookTail, lapCompression, lapTension, ldCompression, ldHook, ldTension, tieHookTail } from "./anchorage";
+import { bendDeduction, bendDiameter, hookTail, lapCompression, lapTension, ldCompression, ldHook, ldTension, tieHookTail, type HookConditions } from "./anchorage";
 import type { TorsionResult } from "./torsion";
 import type { BeamLinePlaced, PanelResult, StructureResult } from "./analyze";
 import { barArea, pickBeamBars, pickColumnBars, pickMatBars, unitWeightKgM, type BarPick, type SlabBarPick } from "./barSelect";
@@ -163,10 +163,10 @@ function beamD(hMm: number, dia: number, layers: number): number {
 }
 
 /** Beam bars whose hook fits the column at an exterior end when any stock bar can; otherwise the unrestricted pick (a warning follows). */
-function pickWithHook(asReq: number, width: number, colAvail: number[], opts: Parameters<typeof pickBeamBars>[2] = {}): BarPick {
+function pickWithHook(asReq: number, width: number, colAvail: number[], opts: Parameters<typeof pickBeamBars>[2] = {}, hookLd: (dia: number) => number = (d) => ldHook(d)): BarPick {
   const all = opts.dias ?? [12, 16, 20, 22, 25, 28, 32];
   const room = Math.min(...colAvail);
-  const hookable = all.filter((d) => ldHook(d) <= room);
+  const hookable = all.filter((d) => hookLd(d) <= room);
   if (hookable.length) {
     const p = pickBeamBars(asReq, width, { ...opts, dias: hookable });
     if (p.fits) return p;
@@ -211,6 +211,15 @@ function beamLine(line: BeamLinePlaced, k: number, colAt: (k: number, x: number,
     return c ? (line.orientation === "h" ? c.bx : c.by) : 300;
   };
   const exterior = (j: number) => j === 0 || j === n;
+  // Sec 8.2.6.3 conditions at the column j: side cover of the hooked bar, 40 mm cover on its extension, ties at 100 mm
+  const perpAt = (j: number): number => {
+    const x = line.orientation === "h" ? line.stations[j] : line.at;
+    const y = line.orientation === "h" ? line.at : line.stations[j];
+    const c = colAt(k, x, y);
+    return c ? (line.orientation === "h" ? c.by : c.bx) : 300;
+  };
+  const hookCond = (j: number): HookConditions => ({ sideCoverMm: (perpAt(j) - sec.bMm) / 2 + COVER + DESIGN.stirrupMm, extensionCoverMm: COVER, tieSpacingMm: 100 });
+  const hookLdAt = (j: number, dia: number): number => ldHook(dia, undefined, undefined, hookCond(j));
   const needAt = (mu: number, dia: number, layers: number) => flexure(mu, sec.bMm, beamD(sec.hMm, dia, layers), beamMinAs(sec.bMm, beamD(sec.hMm, dia, layers))).asReqMm2;
 
   // bottom bars, one group per span
@@ -219,7 +228,7 @@ function beamLine(line: BeamLinePlaced, k: number, colAt: (k: number, x: number,
     const cr = depthAt(i + 1);
     const ln = sp.lengthMm - cl / 2 - cr / 2;
     const ends = [exterior(i) ? cl - COVER : Infinity, exterior(i + 1) ? cr - COVER : Infinity];
-    const p = pickWithHook(sp.pos.asReqMm2, sec.bMm, ends, { minN: 2, asReqFor: (layers, dia) => needAt(sp.mPosKnM, dia, layers) });
+    const p = pickWithHook(sp.pos.asReqMm2, sec.bMm, ends, { minN: 2, asReqFor: (layers, dia) => needAt(sp.mPosKnM, dia, layers) }, (d) => Math.max(exterior(i) ? hookLdAt(i, d) : 0, exterior(i + 1) ? hookLdAt(i + 1, d) : 0));
     bld.pick({ family: "beam", ref: `B ${ref} span ${i + 1} bottom`, requiredMm2: needAt(sp.mPosKnM, p.dia, p.layers), providedMm2: p.areaMm2, fits: p.fits, level: k, muKnM: sp.mPosKnM, widthMm: sec.bMm, dMm: beamD(sec.hMm, p.dia, p.layers) });
     const ld = ldTension(p.dia);
     const embed = (j: number, col: number) => (exterior(j) ? col - COVER : Math.min(ld, col - COVER));
@@ -228,7 +237,7 @@ function beamLine(line: BeamLinePlaced, k: number, colAt: (k: number, x: number,
     const straight = ln + embed(i, cl) + embed(i + 1, cr);
     const bend = { deg: 90, bendDia: bendDiameter(p.dia) };
     for (const [j, col] of [[i, cl], [i + 1, cr]] as const)
-      if (exterior(j) && ldHook(p.dia) > col - COVER) bld.issue({ ref: `B ${ref}`, cause: "hook", severity: "warn", en: `B ${ref}: the hook of the ${p.dia} mm bottom bar needs ${ldHook(p.dia).toFixed(0)} mm of column but only ${(col - COVER).toFixed(0)} mm is available.`, bn: `B ${ref}: ${p.dia} মিমি নিচের রডের হুকের জন্য ${ldHook(p.dia).toFixed(0)} মিমি কলাম লাগে, আছে ${(col - COVER).toFixed(0)} মিমি।` }, k);
+      if (exterior(j) && hookLdAt(j, p.dia) > col - COVER) bld.issue({ ref: `B ${ref}`, cause: "hook", severity: "warn", en: `B ${ref}: the hook of the ${p.dia} mm bottom bar needs ${hookLdAt(j, p.dia).toFixed(0)} mm of column but only ${(col - COVER).toFixed(0)} mm is available.`, bn: `B ${ref}: ${p.dia} মিমি নিচের রডের হুকের জন্য ${hookLdAt(j, p.dia).toFixed(0)} মিমি কলাম লাগে, আছে ${(col - COVER).toFixed(0)} মিমি।` }, k);
     const shape: ShapeCode = hooks === 0 ? "00" : hooks === 1 ? "11" : "21";
     const dims = hooks === 0 ? [straight] : hooks === 1 ? [straight, leg] : [leg, straight, leg];
     bld.add({ family: "beam", description: bi(`Beam ${ref}, bottom bars, span ${i + 1}`, `বিম ${ref}, নিচের রড, স্প্যান ${i + 1}`), dia: p.dia, shape, dims, cut: cutLength(dims, p.dia, Array(hooks).fill(bend)), bars: p.n, level: k });
@@ -268,13 +277,13 @@ function beamLine(line: BeamLinePlaced, k: number, colAt: (k: number, x: number,
       continue;
     }
     const col = depthAt(j);
-    const p = pickWithHook(needHanger - hangerArea, sec.bMm, [exterior(j) ? col - COVER : Infinity], { minN: 1, occupied: 2, asReqFor: (layers, dia) => needAt(mu, dia, layers) - hangerArea });
+    const p = pickWithHook(needHanger - hangerArea, sec.bMm, [exterior(j) ? col - COVER : Infinity], { minN: 1, occupied: 2, asReqFor: (layers, dia) => needAt(mu, dia, layers) - hangerArea }, (d) => (exterior(j) ? hookLdAt(j, d) : 0));
     bld.pick({ family: "beam", ref: refTop, requiredMm2: needAt(mu, p.dia, p.layers), providedMm2: hangerArea + p.areaMm2, fits: p.fits, level: k, muKnM: mu, widthMm: sec.bMm, dMm: beamD(sec.hMm, p.dia, p.layers) });
     const cutOff = (span: number) => 0.25 * span + Math.max(d, 12 * p.dia);
     if (exterior(j)) {
       const inner = spans[j === 0 ? 0 : n - 1].lengthMm;
       const leg = hookTail(p.dia, "90");
-      if (ldHook(p.dia) > col - COVER) bld.issue({ ref: `B ${ref}`, cause: "hook", severity: "warn", en: `B ${ref}: the hook of the ${p.dia} mm top bar needs ${ldHook(p.dia).toFixed(0)} mm of column but only ${(col - COVER).toFixed(0)} mm is available.`, bn: `B ${ref}: ${p.dia} মিমি উপরের রডের হুকের জন্য ${ldHook(p.dia).toFixed(0)} মিমি কলাম লাগে, আছে ${(col - COVER).toFixed(0)} মিমি।` }, k);
+      if (hookLdAt(j, p.dia) > col - COVER) bld.issue({ ref: `B ${ref}`, cause: "hook", severity: "warn", en: `B ${ref}: the hook of the ${p.dia} mm top bar needs ${hookLdAt(j, p.dia).toFixed(0)} mm of column but only ${(col - COVER).toFixed(0)} mm is available.`, bn: `B ${ref}: ${p.dia} মিমি উপরের রডের হুকের জন্য ${hookLdAt(j, p.dia).toFixed(0)} মিমি কলাম লাগে, আছে ${(col - COVER).toFixed(0)} মিমি।` }, k);
       const dims = [cutOff(inner) + col - COVER, leg];
       bld.add({ family: "beam", description: bi(`Beam ${ref}, extra top bars at end support`, `বিম ${ref}, প্রান্ত অবলম্বনে বাড়তি উপরের রড`), dia: p.dia, shape: "11", dims, cut: cutLength(dims, p.dia, [{ deg: 90, bendDia: bendDiameter(p.dia) }]), bars: p.n, level: k });
     } else {
@@ -590,11 +599,25 @@ function detailPlinthBeams(model: BuildingModel, b: Builder): void {
 }
 
 /** Lift shaft: 150 mm RC walls with 10 mm bars at 200 mm each way on both faces (0.52 percent, above the 0.25 percent assumed minimum), and the pit slab with 12 mm at 150 each way. */
-function detailLiftCore(model: BuildingModel, b: Builder): void {
+function detailLiftCore(model: BuildingModel, b: Builder, res: StructureResult): void {
   const core = liftCore(model);
   if (!core) return;
   const dia = 10;
   const sp = 200;
+  // dual system (P2-2): the wall is a shear wall. Horizontal ratio from the base shear check (at least 0.25 %, Sec 8.3.6.2), spacing in steps
+  // of 25 mm down to 100 mm (a bigger bar when that is not enough), and extra boundary bars in the four corners for the base moment.
+  const cr = res.frame.core;
+  const rhoH = cr ? Math.max(cr.x.rhoHorizontal, cr.y.rhoHorizontal) : 0;
+  let hDia = dia;
+  let hSp = sp;
+  if (rhoH > 0) {
+    for (const d of [10, 12, 16]) {
+      hDia = d;
+      hSp = Math.min(200, Math.floor((2 * barArea(d) * 1000) / (rhoH * LIFT_ASSUMPTIONS.shaftWallMm * 1000) / 25) * 25);
+      if (hSp >= 100) break;
+    }
+    hSp = Math.max(hSp, 100);
+  }
   const lap = lapTension(dia, "B", {});
   const pieces = Math.max(1, Math.ceil(core.heightMm / (STOCK_LENGTH_MM - lap)));
   const pieceLen = Math.round((core.heightMm + (pieces - 1) * lap) / pieces);
@@ -603,7 +626,19 @@ function detailLiftCore(model: BuildingModel, b: Builder): void {
   const ring = core.perimeterMm - 2 * COVER;
   const ringPieces = Math.max(1, Math.ceil((ring + lap) / (STOCK_LENGTH_MM - lap)));
   const ringLen = Math.round((ring + ringPieces * lap) / ringPieces);
-  b.add({ family: "core", description: bi("Lift shaft wall, horizontal 10 mm at 200, both faces", "লিফট শাফটের দেয়াল, আনুভূমিক ১০ মিমি @ ২০০, দুই পাশে"), dia, shape: "00", dims: [ringLen], cut: ringLen, bars: 2 * Math.ceil(core.heightMm / sp) * ringPieces, level: -1 });
+  b.add({ family: "core", description: bi(`Lift shaft wall, horizontal ${hDia} mm at ${hSp}, both faces`, `লিফট শাফটের দেয়াল, আনুভূমিক ${hDia} মিমি @ ${hSp}, দুই পাশে`), dia: hDia, shape: "00", dims: [ringLen], cut: ringLen, bars: 2 * Math.ceil(core.heightMm / hSp) * ringPieces, level: -1 });
+  if (cr) {
+    // boundary steel at the four corners: the larger per-flange requirement split over the two ends of each flange wall
+    const asEnd = Math.max(cr.x.boundarySteelMm2, cr.y.boundarySteelMm2) / 2;
+    const bd = asEnd > 0 ? [16, 20, 25, 28, 32].find((d) => Math.ceil(asEnd / barArea(d)) <= 8) ?? 32 : 0;
+    if (bd) {
+      const n = Math.max(2, Math.ceil(asEnd / barArea(bd)));
+      const bl = lapTension(bd, "B", {});
+      const bp = Math.max(1, Math.ceil(core.heightMm / (STOCK_LENGTH_MM - bl)));
+      const bLen = Math.round((core.heightMm + (bp - 1) * bl) / bp);
+      b.add({ family: "core", description: bi(`Lift shaft wall, boundary bars ${bd} mm (${n} per corner)`, `লিফট শাফটের দেয়াল, প্রান্তের রড ${bd} মিমি (প্রতি কোণে ${n}টি)`), dia: bd, shape: "00", dims: [bLen], cut: bLen, bars: 4 * n * bp, level: -1 });
+    }
+  }
   const cell = core.spec.cell;
   const sx = cell.x1 - cell.x0 + LIFT_ASSUMPTIONS.shaftWallMm;
   const sy = cell.y1 - cell.y0 + LIFT_ASSUMPTIONS.shaftWallMm;
@@ -700,7 +735,7 @@ export function buildBbs(res: StructureResult, model: BuildingModel): BbsResult 
   detailCantilevers(res, b);
   detailStairs(model, b);
   detailPlinthBeams(model, b);
-  detailLiftCore(model, b);
+  detailLiftCore(model, b, res);
   const rows = b.rows();
   const byDia = new Map<number, { lengthM: number; weightKg: number }>();
   const byFam = new Map<BbsFamily, number>();

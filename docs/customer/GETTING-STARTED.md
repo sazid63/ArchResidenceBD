@@ -25,7 +25,7 @@ Every other screen is worked out from the plan you pick, so they always agree. C
 | Screen | What to look at |
 |---|---|
 | Code compliance | RAJUK setbacks, FAR, ground coverage, parking stalls, road width; BNBC room, daylight, fire and egress, lift. Each row says Pass, Fail or **Not checked** (the app never guesses). |
-| Structure | Member sizes, seismic checks, footings. Up to 7 storeys. Above that the screen says *Not designed*. |
+| Structure | Member sizes, seismic checks, footings. Up to 8 storeys (from 8 with the lift core as a shear wall). Above that the screen says *Not designed*. |
 | Rebar schedule | Bar bending schedule, with CSV download. |
 | Bill of quantities | Quantities and cost from the rate card. The total is a **lower bound** until the card is complete. |
 | Formwork, Pour sequence | Form areas and the concrete pour order and days (pour rate and waits are assumptions). |

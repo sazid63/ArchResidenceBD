@@ -90,7 +90,7 @@ describe("structural sweep", () => {
             expect(Math.abs(sx.baseShearKn - sx.sa * sx.weightKn)).toBeLessThan(1e-6);
             const perM2 = sx.weightKn / (n * m.footprintAreaM2);
             expect(perM2).toBeGreaterThan(8);
-            expect(perM2).toBeLessThan(20);
+            expect(perM2).toBeLessThan(22); // the dual system adds the 150 mm lift core walls to the weight (about 0.5 kN/m2 at 12 storeys)
 
             // 4. nothing clamped, and consistent failure listing
             for (const f of res.failures) expect(f.util).toBeGreaterThan(1);

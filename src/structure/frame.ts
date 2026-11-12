@@ -20,7 +20,8 @@ import { designFooting, type ColumnPosition, type FootingResult } from "./footin
 import { factoredLoad, liveReductionFactor } from "./loads";
 import { ecMPa, MATERIALS, UNIT_WEIGHTS } from "./materials";
 import { tBeamInertia } from "./tbeam";
-import { analyseSeismic, DHAKA_Z, liveWeightFraction, type SeismicResult } from "./seismic";
+import { analyseSeismic, DHAKA_Z, liveWeightFraction, systemById, type SeismicResult } from "./seismic";
+import { checkCore, coreSection, dualLateral, wallProps, type CoreCheck, type CoreSection, type DualResult } from "./core";
 
 export interface FrameOptions {
   siteClass?: SiteClass;
@@ -74,6 +75,19 @@ export interface FrameResult {
   /** True when the sizing loop stopped because sections stopped changing (false: iteration cap reached). */
   converged: boolean;
   iterations: number;
+  /** The lift-core shear wall of a dual system, with its base shear and moment checks; null for a frame-only system. */
+  core: CoreResult | null;
+}
+
+export interface CoreResult {
+  section: CoreSection;
+  x: CoreCheck;
+  y: CoreCheck;
+  dualX: DualResult;
+  dualY: DualResult;
+  /** Share of the base shear carried by the walls, per direction (0..1). */
+  wallShareX: number;
+  wallShareY: number;
 }
 
 interface Joint {
@@ -90,6 +104,10 @@ interface Joint {
 }
 
 const MAX_ITERATIONS = 30;
+/** Dual systems: the moment frames resist at least this share of the prescribed force (Table 6.2.19, group D heading). */
+export const FRAME_MIN_SHARE = 0.25;
+/** Buildings taller than this many storeys default to the dual system (special RC moment frames with special RC shear walls, Table 6.2.19 D.3). */
+export const DUAL_ABOVE_STOREYS = 7;
 const emptyJoint = (): Joint => ({ dead: 0, liveTable: 0, livePart: 0, area: 0, kbX: 0, kbY: 0, munbX: 0, munbY: 0, hX: 0, hY: 0 });
 const key = (x: number, y: number) => `${x},${y}`;
 const areaOf = (s: ColSection) => s.bx * s.by;
@@ -102,11 +120,14 @@ function stiffer(sec: ColSection, needX: boolean, needY: boolean): ColSection {
 }
 
 export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: FrameOptions = {}): FrameResult {
-  const o = { ...FRAME_DEFAULTS, ...opts } as Required<FrameOptions>;
   const n = model.storeys.length;
+  // above DUAL_ABOVE_STOREYS the default seismic system is the dual one (frame plus lift-core shear wall); the caller may still choose
+  const o = { ...FRAME_DEFAULTS, systemId: n > DUAL_ABOVE_STOREYS ? "dual-special-rc-walls" : FRAME_DEFAULTS.systemId, ...opts } as Required<FrameOptions>;
   const hMm = model.input.floorToFloorMm;
   const hM = hMm / 1000;
   const ec = ecMPa(MATERIALS.fcMPa);
+  const isDual = o.systemId.startsWith("dual");
+  const core = isDual ? coreSection(model) : null;
   const f = model.storeys[0].geometry.fitted;
   const gamma = UNIT_WEIGHTS.frameConcrete;
   const kllCol = structurePack().liveLoadReduction.kll.interiorColumns;
@@ -267,10 +288,20 @@ export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: 
       });
       return w;
     });
+    if (core) levelW.forEach((_w, k) => { levelW[k] += (wallProps(core, "x").agMm2 * hMm * 24) / 1e9; });
     const base = { z: o.z, siteClass: o.siteClass, group: o.group, systemId: o.systemId, storeys: n, storeyHeightMm: hMm, levelWeightsKn: levelW };
-    const seisX = analyseSeismic({ ...base, storeyStiffnessKnPerMm: dx.storey });
-    const seisY = analyseSeismic({ ...base, storeyStiffnessKnPerMm: dy.storey });
-    return { take, live, kc, kSway, dx, dy, seisX, seisY };
+    let seisX = analyseSeismic({ ...base, storeyStiffnessKnPerMm: dx.storey });
+    let seisY = analyseSeismic({ ...base, storeyStiffnessKnPerMm: dy.storey });
+    // dual system: the lateral force is shared with the core wall by stiffness; the forces do not depend on stiffness, the drift does
+    let dualX: DualResult | null = null;
+    let dualY: DualResult | null = null;
+    if (core && isDual) {
+      dualX = dualLateral({ forcesKn: seisX.forcesKn, hMm, frameKnPerMm: dx.storey, wall: wallProps(core, "x"), ecMPa: ec });
+      dualY = dualLateral({ forcesKn: seisY.forcesKn, hMm, frameKnPerMm: dy.storey, wall: wallProps(core, "y"), ecMPa: ec });
+      seisX = analyseSeismic({ ...base, storeyStiffnessKnPerMm: dualX.effectiveKnPerMm });
+      seisY = analyseSeismic({ ...base, storeyStiffnessKnPerMm: dualY.effectiveKnPerMm });
+    }
+    return { take, live, kc, kSway, dx, dy, seisX, seisY, dualX, dualY };
   }
 
   /** Load cases of column ci in storey i for section `sec`, using the current context. */
@@ -292,21 +323,22 @@ export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: 
     const mgY = (top.munbY * kcY) / (kcY + kcAboveY + top.kbY || 1);
     const g: ColumnCase = { id: "1.2D+1.6L", puKn: pu, betaDns, luMm: lu, k: 1, x: { m2ns: mgX, m2s: 0, deltaS: 1 }, y: { m2ns: mgY, m2s: 0, deltaS: 1 } };
     // seismic: shear share, overturning axial, sway magnifier
-    const shear = (seis: SeismicResult, d: { storey: number[]; dcol: number[][] }) => {
+    const frameFraction = (seis: SeismicResult, dual: DualResult | null) => (dual ? Math.max(dual.frameShearKn[i] / seis.storeys[i].shearKn, FRAME_MIN_SHARE) : 1);
+    const shear = (seis: SeismicResult, d: { storey: number[]; dcol: number[][] }, dual: DualResult | null) => {
       const share = d.dcol[i][ci] / d.storey[i];
-      const vc = seis.storeys[i].shearKn * share;
+      const vc = seis.storeys[i].shearKn * share * frameFraction(seis, dual);
       return vc * hM * (i === 0 ? 0.65 : 0.5);
     };
-    const msX = shear(ctx.seisX, ctx.dx);
-    const msY = shear(ctx.seisY, ctx.dy);
-    const lever = (axis: "x" | "y", seis: SeismicResult) => {
+    const msX = shear(ctx.seisX, ctx.dx, ctx.dualX);
+    const msY = shear(ctx.seisY, ctx.dy, ctx.dualY);
+    const lever = (axis: "x" | "y", seis: SeismicResult, dual: DualResult | null) => {
       const coords = cols.map((q) => (axis === "x" ? q.x : q.y));
       const mean = coords.reduce((a, b) => a + b, 0) / coords.length;
       const sumSq = coords.reduce((a, b) => a + (b - mean) ** 2, 0) || 1;
-      return (Math.abs((axis === "x" ? c.x : c.y) - mean) / sumSq) * seis.overturningKnM[i];
+      return (Math.abs((axis === "x" ? c.x : c.y) - mean) / sumSq) * seis.overturningKnM[i] * frameFraction(seis, dual);
     };
-    const dnX = lever("x", ctx.seisX);
-    const dnY = lever("y", ctx.seisY);
+    const dnX = lever("x", ctx.seisX, ctx.dualX);
+    const dnY = lever("y", ctx.seisY, ctx.dualY);
     const sumPu = cols.reduce((a, _q, qi) => a + 1.2 * ctx.take[qi][i].dead + ctx.live(qi, i).l, 0);
     const delta = (axis: "x" | "y") => {
       let sumPc = 0;
@@ -426,8 +458,18 @@ export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: 
       if (s.util > 1) failures.push({ level: s.storey, member: "seismic", id: `drift-${dir}/S${s.storey}`, util: s.util, governs: "drift" });
       if (s.thetaUtil > 1) failures.push({ level: s.storey, member: "seismic", id: `stability-${dir}/S${s.storey}`, util: s.thetaUtil, governs: "stability" });
     }
+  let coreResult: CoreResult | null = null;
+  if (isDual && !core) failures.push({ level: -1, member: "core", id: "core-wall", util: Infinity, governs: "dual system needs a lift core and the plan has none" });
+  if (core && ctx.dualX && ctx.dualY) {
+    const sx = ctx.seisX.storeys[0].shearKn;
+    const sy = ctx.seisY.storeys[0].shearKn;
+    const x = checkCore(core, "x", ctx.dualX.wallShearKn[0], ctx.dualX.wallMomentKnM[0], core.heightMm);
+    const y = checkCore(core, "y", ctx.dualY.wallShearKn[0], ctx.dualY.wallMomentKnM[0], core.heightMm);
+    coreResult = { section: core, x, y, dualX: ctx.dualX, dualY: ctx.dualY, wallShareX: Math.abs(ctx.dualX.wallShearKn[0]) / sx, wallShareY: Math.abs(ctx.dualY.wallShearKn[0]) / sy };
+    for (const c of [x, y]) if (c.util > 1) failures.push({ level: 0, member: "core", id: `core-${c.dir}`, util: c.util, governs: c.governs });
+  }
   if (!ctx.seisX.permitted) failures.push({ level: -1, member: "seismic", id: "seismic-system", util: Infinity, governs: "system not permitted" });
   failures.sort((a, b) => b.util - a.util);
-  const util = Math.max(0, ...columns.map((c) => c.util), ctx.seisX.util, ctx.seisY.util);
-  return { columns, seismicX: ctx.seisX, seismicY: ctx.seisY, options: o, failures, util, converged, iterations };
+  const util = Math.max(0, ...columns.map((c) => c.util), ctx.seisX.util, ctx.seisY.util, coreResult?.x.util ?? 0, coreResult?.y.util ?? 0);
+  return { columns, seismicX: ctx.seisX, seismicY: ctx.seisY, options: o, failures, util, converged, iterations, core: coreResult };
 }

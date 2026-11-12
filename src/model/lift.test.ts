@@ -91,3 +91,25 @@ describe("several shafts in one lift cell (P2-8)", () => {
     expect(one.spec.liftsProvided).toBe(1);
   });
 });
+
+describe("P2-8 a second lift cell is never needed inside the supported height", () => {
+  it("every plan with a lift cell needs one lift at 8 storeys (at most 4 flats x 7 floors = 28 flats, one lift per 40)", async () => {
+    const { PLAN_LIBRARY } = await import("../plans/library");
+    const { fitRange } = await import("../plans/fit");
+    const { DEFAULT_SETBACKS_MM } = await import("./building");
+    const { SUPPORTED_MAX_STOREYS } = await import("../structure/analyze");
+    let withLift = 0;
+    for (const plan of PLAN_LIBRARY) {
+      const r = fitRange(plan);
+      const S = DEFAULT_SETBACKS_MM;
+      const b = deriveBuilding({ planId: plan.id, storeys: SUPPORTED_MAX_STOREYS, plotWidthMm: r.widthMm.pref + S.left + S.right, plotDepthMm: r.depthMm.pref + S.front + S.rear, setbacksMm: S });
+      if (!b.ok) continue;
+      const s = liftSpec(b.model);
+      if (!s) continue;
+      withLift++;
+      expect(s.liftsNeeded, plan.id).toBe(1);
+      expect(s.enoughLifts, plan.id).toBe(true);
+    }
+    expect(withLift).toBeGreaterThan(5);
+  });
+});

@@ -17,6 +17,7 @@ const MEMBER_LABEL: Record<MemberFailure["member"], { en: string; bn: string }> 
   column: { en: "Column", bn: "কলাম" },
   footing: { en: "Footing", bn: "ফুটিং" },
   seismic: { en: "Seismic", bn: "ভূমিকম্প" },
+  core: { en: "Core wall", bn: "কোর ওয়াল" },
 };
 
 /** Demand / capacity as a percentage, never clamped (130 % stays 130 %). */
@@ -99,7 +100,8 @@ export function StructureScreen() {
   const bn = lang === "bn";
   const { project, spec } = useProject();
   const [siteClass, setSiteClass] = useState<SiteClass>("SD");
-  const [systemId, setSystemId] = useState("special-rc-mrf");
+  // null = automatic: the moment frame up to 7 storeys, the dual frame-and-core system from 8
+  const [systemChoice, setSystemChoice] = useState<string | null>(null);
   // The soil report's allowable bearing, when the project basics have it; otherwise the screening default.
   const [bearing, setBearing] = useState(spec?.site.soil.sbcKpa ?? 150);
   const [levelIdx, setLevelIdx] = useState(0);
@@ -108,8 +110,8 @@ export function StructureScreen() {
 
   const built = useMemo(() => (project && project.plot && project.planId ? buildingForProject(project) : null), [project]);
   const result = useMemo(
-    () => (built && built.ok ? analyzeStructure(built.model, { siteClass, systemId, allowableBearingKpa: bearing, group }) : null),
-    [built, siteClass, systemId, bearing],
+    () => (built && built.ok ? analyzeStructure(built.model, { siteClass, ...(systemChoice ? { systemId: systemChoice } : {}), allowableBearingKpa: bearing, group }) : null),
+    [built, siteClass, systemChoice, bearing],
   );
 
   const footingText = (colId: string, side: number, depth: number, util: number): string => {
@@ -149,8 +151,8 @@ export function StructureScreen() {
         <PageHeader title={title} subtitle={subtitle} />
         <Callout tone="bad" title={bn ? `${SUPPORTED_MAX_STOREYS} তলার বেশি: কাঠামো নকশা করা হয়নি` : `Not designed above ${SUPPORTED_MAX_STOREYS} storeys`}>
           {bn
-            ? `এই ভবন ${model.storeys.length} তলার। ${SUPPORTED_MAX_STOREYS} তলার বেশি ভবনে শুধু ফ্রেম অতিরিক্ত বিচ্যুত হয়; কোর শিয়ার ওয়াল বা গভীর বিম লাগে, যা এই সংস্করণে নেই। তাই এখানে কোনো অনুপাত বা পাস চিহ্ন দেখানো হয় না। কাঠামো প্রকৌশলীর নকশা করা কাঠামো দরকার। রড, কংক্রিট ও বিওকিউয়ের সংখ্যা কেবল আনুমানিক।`
-            : `This building has ${model.storeys.length} storeys. Above ${SUPPORTED_MAX_STOREYS} storeys a frame alone drifts too much and needs core shear walls or deeper members, which this version does not model, so no ratios or passes are shown. A structural engineer must design this structure. Steel, concrete and BOQ quantities are indicative only.`}
+            ? `এই ভবন ${model.storeys.length} তলার। ${SUPPORTED_MAX_STOREYS} তলার বেশি ভবনে ফ্রেম ও লিফট কোর মিলেও কিছু প্ল্যানে অতিরিক্ত বিচ্যুতি হয়; সিঁড়ির পাশে আরও শিয়ার ওয়াল বা গভীর বিম লাগে, যা এই সংস্করণে নেই। তাই এখানে কোনো অনুপাত বা পাস চিহ্ন দেখানো হয় না। কাঠামো প্রকৌশলীর নকশা করা কাঠামো দরকার। রড, কংক্রিট ও বিওকিউয়ের সংখ্যা কেবল আনুমানিক।`
+            : `This building has ${model.storeys.length} storeys. Above ${SUPPORTED_MAX_STOREYS} storeys the frame and the lift core alone drift too much on some plans; more shear walls (for example around the stairs) or deeper members are needed, which this version does not model, so no ratios or passes are shown. A structural engineer must design this structure. Steel, concrete and BOQ quantities are indicative only.`}
         </Callout>
       </div>
     );
@@ -160,6 +162,7 @@ export function StructureScreen() {
   const sIdx = Math.min(storeyIdx, model.storeys.length - 1);
   const failures = result.failures;
   const sys = seismicPack().systems.rows;
+  const systemId = systemChoice ?? result?.frame.options.systemId ?? "special-rc-mrf";
   const columnsAt = fr.columns.map((c) => ({ id: c.id, x: c.xMm, y: c.yMm, util: c.storeys[Math.min(levelIdx, c.storeys.length - 1)].util }));
 
   return (
@@ -197,7 +200,7 @@ export function StructureScreen() {
           </label>
           <label className="stack" style={{ gap: 4 }}>
             <span className="small muted">{bn ? "কাঠামো পদ্ধতি (সারণি ৬.২.১৯)" : "Structural system (Table 6.2.19)"}</span>
-            <select className="input" value={systemId} onChange={(e) => setSystemId(e.target.value)}>
+            <select className="input" value={systemId} onChange={(e) => setSystemChoice(e.target.value)}>
               {sys.map((s) => <option key={s.id} value={s.id}>{`${s.label} (R ${s.r})`}</option>)}
             </select>
           </label>
@@ -231,7 +234,7 @@ export function StructureScreen() {
         {failures.length > 20 ? <p className="small muted">{(bn ? "আরও " : "and ") + (failures.length - 20) + (bn ? "টি" : " more")}</p> : null}
         {failures.some((f) => f.member === "seismic") ? (
           <Callout title={bn ? "ভূমিকম্প ড্রিফট বা স্থিতিশীলতা" : "Seismic drift or stability"}>
-            {bn ? "সবচেয়ে বড় কলাম নিয়েও সীমা পার হলে শিয়ার ওয়াল বা গভীরতর বিম লাগবে; এই যাচাই সেগুলো বসায় না।" : "When the largest stock column still exceeds the limit, the building needs shear walls or deeper beams; this screening does not add them."}
+            {bn ? "সবচেয়ে বড় কলাম নিয়েও সীমা পার হলে শিয়ার ওয়াল বা গভীরতর বিম লাগবে; এই যাচাই শুধু লিফট কোরকে শিয়ার ওয়াল ধরে, আর বসায় না।" : "When the largest stock column still exceeds the limit, the building needs more shear walls (this screening only uses the lift core) or deeper beams; it does not add them."}
           </Callout>
         ) : null}
       </section>
@@ -338,6 +341,34 @@ export function StructureScreen() {
         <SeismicTable s={fr.seismicX} dir="x" bn={bn} />
         <SeismicTable s={fr.seismicY} dir="y" bn={bn} />
       </section>
+
+      {fr.core ? (
+        <section className="stack" style={{ marginTop: 24, gap: 12 }} aria-label={bn ? "কোর ওয়াল" : "Core wall"}>
+          <h2 className="section-title">{bn ? "কোর শিয়ার ওয়াল (লিফট শ্যাফট)" : "Core shear wall (lift shaft)"}</h2>
+          <p className="small muted" style={{ margin: 0 }}>
+            {bn
+              ? `ডুয়াল সিস্টেম (সারণি ৬.২.১৯): ফ্রেম ও কোর দৃঢ়তা অনুপাতে ভার ভাগ করে, ফ্রেম অন্তত ২৫ %। কোর ${fr.core.section.lxMm} × ${fr.core.section.lyMm} মিমি, দেয়াল ${fr.core.section.tMm} মিমি, উচ্চতা ${(fr.core.section.heightMm / 1000).toFixed(1)} মি।`
+              : `Dual system (Table 6.2.19): frame and core share the force by stiffness and the frame resists at least 25 %. Core ${fr.core.section.lxMm} × ${fr.core.section.lyMm} mm, walls ${fr.core.section.tMm} mm, height ${(fr.core.section.heightMm / 1000).toFixed(1)} m.`}
+          </p>
+          <Table
+            head={[bn ? "দিক" : "Direction", bn ? "দেয়ালের ভিত্তি শিয়ার (কিনি)" : "Wall base shear (kN)", bn ? "দেয়ালের অংশ" : "Wall share", bn ? "ভিত্তি মোমেন্ট (কিনিমি)" : "Base moment (kN·m)", bn ? "শিয়ার φVn (কিনি)" : "Shear φVn (kN)", bn ? "আড়াআড়ি রড অনুপাত" : "Horizontal ρ", bn ? "প্রান্ত খাড়া রড (মিমি², প্রতি ফ্ল্যাঞ্জ)" : "Boundary steel (mm², per flange)", bn ? "অনুপাত" : "Ratio", bn ? "নিয়ন্ত্রক" : "Governs"]}
+            rows={([[fr.core.x, fr.core.wallShareX], [fr.core.y, fr.core.wallShareY]] as const).map(([c, share]) => [
+              c.dir,
+              c.vuKn.toFixed(0),
+              `${(share * 100).toFixed(0)} %`,
+              c.muKnM.toFixed(0),
+              c.phiVnKn.toFixed(0),
+              `${(c.rhoHorizontal * 100).toFixed(2)} %`,
+              `${c.boundarySteelMm2.toFixed(0)} / ${c.boundarySteelMaxMm2.toFixed(0)}`,
+              <ResultChip key="r" result={ratioResult(c.util)} lang={lang}>{ratioText(c.util)}</ResultChip>,
+              c.governs,
+            ])}
+          />
+          <p className="small muted" style={{ margin: 0 }}>
+            {bn ? "বাউন্ডারি এলিমেন্ট, দরজার ওপরের কাপলিং বিম এবং কোরের ফুটিং/র‍্যাফট এখানে নকশা করা হয়নি; নির্মাণের আগে প্রকৌশলীর বিস্তারিত নকশা লাগবে।" : "Boundary elements, the coupling beams over the doors and the core footing or raft are not designed here; an engineer's detailed design is needed before building."}
+          </p>
+        </section>
+      ) : null}
 
       <section className="stack" style={{ marginTop: 24, gap: 8 }} aria-label={bn ? "অনুমান" : "Assumptions"}>
         <h2 className="section-title">{bn ? "অনুমান" : "Assumptions"}</h2>

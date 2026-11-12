@@ -389,7 +389,7 @@ reinforcement:
     lambda: 1.0
     psiS: {upTo19: 0.8, from20: 1.0}
   compression: {cite: dev-compress, coefficient: 0.24, minCoefficient: 0.043, minMm: 200}
-  hookDevelopment: {cite: dev-hook, coefficient: 0.24, minDb: 8, minMm: 150, factorSideCover65: 0.7, factorTies3db: 0.8}
+  hookDevelopment: {cite: dev-hook, coefficient: 0.24, minDb: 8, minMm: 150, factorSideCover65: 0.7, factorTies3db: 0.8, sideCoverMm: 65, extensionCoverMm: 50, tieSpacingDb: 3}   # Sec 8.2.6.3 (a) 0.7 for 90 degree hooks with side cover >= 65 and extension cover >= 50 mm; (b) 0.8 with ties at <= 3 db along ldh
   flexuralExtension: {cite: dev-flexural, beyondCutoff: "not less than d nor less than 12 db"}
   lap:
     cite: lap-splices

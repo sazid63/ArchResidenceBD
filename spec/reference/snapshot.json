@@ -49,6 +49,16 @@
     "steelKgPerM2Floor": 33.9,
     "formworkM2": 5111.4
   },
+  "mid-8st-dual": {
+    "slabThicknessMm": 150,
+    "deepestBeamMm": 700,
+    "groundColumnMm": 600,
+    "largestFootingSideMm": 8160,
+    "concreteM3": 898.1,
+    "steelKg": 83242,
+    "steelKgPerM2Floor": 36.2,
+    "formworkM2": 5772.9
+  },
   "wide-5st": {
     "slabThicknessMm": 125,
     "deepestBeamMm": 600,

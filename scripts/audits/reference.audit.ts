@@ -54,13 +54,14 @@ function figures(input: BuildingInput): Figures {
   };
 }
 
-/** The regression set: narrow, mid and wide plots, 2 to 7 storeys (the supported range), a balcony variant included. */
+/** The regression set: narrow, mid and wide plots, 2 to 8 storeys (the supported range; 8 uses the dual frame-and-core system), a balcony variant included. */
 const SNAPSHOT_CASES: Array<{ id: string; input: BuildingInput }> = [
   { id: "narrow-4st", input: { plotWidthMm: 10000, plotDepthMm: 20000, storeys: 4, planId: "pn-2b" } },
   { id: "narrow-6st-balcony", input: { plotWidthMm: 11000, plotDepthMm: 27000, storeys: 6, planId: "pn-2f+v" } },
   { id: "mid-2st", input: { plotWidthMm: 14000, plotDepthMm: 26000, storeys: 2, planId: "p2-2b-fb" } },
   { id: "mid-4st", input: { plotWidthMm: 14000, plotDepthMm: 26000, storeys: 4, planId: "p2-2b-fb" } },
   { id: "mid-7st", input: { plotWidthMm: 16000, plotDepthMm: 28000, storeys: 7, planId: "p2-2b-fb" } },
+  { id: "mid-8st-dual", input: { plotWidthMm: 16000, plotDepthMm: 28000, storeys: 8, planId: "p2-2b-fb" } },
   { id: "wide-5st", input: { plotWidthMm: 24000, plotDepthMm: 32000, storeys: 5, planId: "p3-2b" } },
 ];
 

@@ -14,6 +14,7 @@ import { ASSUMPTIONS, UNIT_WEIGHTS, type Assumption } from "./materials";
 import { liveLoadForKind, partitionAllowanceKnM2, roofLiveKnM2 } from "./loads";
 import { designSlab, type Continuity, type SlabInput, type SlabResult } from "./slab";
 import { alphaF, tBeamInertia } from "./tbeam";
+import { CORE_ASSUMPTIONS } from "./core";
 import { analyzeFrame, type FrameOptions, type FrameResult } from "./frame";
 import { planFoundation, type FoundationResult } from "./foundation";
 import { roofLoads } from "../model/roofEquipment";
@@ -65,18 +66,20 @@ export interface LevelResult {
 
 export interface MemberFailure {
   level: number;
-  member: "slab" | "beam" | "column" | "footing" | "seismic";
+  member: "slab" | "beam" | "column" | "footing" | "seismic" | "core";
   id: string;
   util: number;
   governs: string;
 }
 
 /**
- * The tallest building the structure engine designs (C3). A frame alone drifts too much above this height on the narrow plots the plans
- * fit (see engineering-scenarios.audit.ts: 8 to 12 storeys fail drift), and core shear walls are not modelled yet (plan P2-2), so above it
- * the screens say "not designed" instead of showing ratios.
+ * The tallest building the structure engine designs (C3). Up to 7 storeys the special RC moment frame alone is used; at 8 storeys the dual
+ * system (frame plus the lift-core shear wall, plan P2-2) is the default and passes on every scenario plan in
+ * engineering-scenarios.audit.ts. From 9 storeys some plans fail drift in the middle storeys because a 150 mm lift core with 2 to 3 m sides
+ * is too flexible; the stair core, boundary elements and a core raft are not modelled, so the screens say "not designed" above 8
+ * instead of showing ratios.
  */
-export const SUPPORTED_MAX_STOREYS = 7;
+export const SUPPORTED_MAX_STOREYS = 8;
 
 /** True when the structure engine designs a building of this many storeys. */
 export const structureSupported = (storeys: number): boolean => storeys <= SUPPORTED_MAX_STOREYS;
@@ -377,5 +380,5 @@ export function analyzeStructure(model: BuildingModel, frameOptions: FrameOption
   for (const fo of foundation.footings)
     if (fo.mergedCheck && fo.mergedCheck.util > 1) failures.push({ level: 0, member: "footing", id: fo.id, util: fo.mergedCheck.util, governs: `merged footing ${fo.mergedCheck.governs}` });
   failures.sort((a, b) => b.util - a.util);
-  return { levels, frame, failures, util: Math.max(util, ...foundation.footings.map((f) => f.mergedCheck?.util ?? 0)), ok: failures.length === 0, supported: structureSupported(n), assumptions: ASSUMPTIONS, foundation };
+  return { levels, frame, failures, util: Math.max(util, ...foundation.footings.map((f) => f.mergedCheck?.util ?? 0)), ok: failures.length === 0, supported: structureSupported(n), assumptions: frame.core ? [...ASSUMPTIONS, ...CORE_ASSUMPTIONS] : ASSUMPTIONS, foundation };
 }

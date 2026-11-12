@@ -81,3 +81,15 @@ describe("welcome screen (first run)", () => {
     expect(screen.getByText("Open file")).toBeTruthy();
   });
 });
+
+describe("Structure screen with the lift core as a shear wall", () => {
+  it("an 8-storey building shows the dual system and the core wall table", async () => {
+    const { saveActiveProject, getActiveProject } = await import("../engine/projectState");
+    const p = getActiveProject()!;
+    saveActiveProject({ ...p, stories: 8 });
+    render(wrap(<StructureScreen />));
+    await waitFor(() => expect(screen.getAllByText(/Core shear wall \(lift shaft\)/).length).toBeGreaterThan(0), { timeout: 20000 });
+    expect(screen.getAllByText(/Dual system \(Table 6\.2\.19\)/).length).toBeGreaterThan(0);
+    expect(errors).toEqual([]);
+  }, 40000);
+});

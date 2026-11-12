@@ -147,7 +147,7 @@ export interface ReinforcementSection {
     lambda: number;
   };
   compression: { coefficient: number; minCoefficient: number; minMm: number };
-  hookDevelopment: { coefficient: number; minDb: number; minMm: number };
+  hookDevelopment: { coefficient: number; minDb: number; minMm: number; factorSideCover65: number; factorTies3db: number; sideCoverMm: number; extensionCoverMm: number; tieSpacingDb: number };
   lap: {
     tension: { classA: number; classB: number; minMm: number };
     compression: { coefficientFy420OrLess: number; minMm: number; lowStrengthFactor: { fcBelowMPa: number; multiplier: number } };

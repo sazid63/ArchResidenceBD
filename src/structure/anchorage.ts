@@ -33,10 +33,23 @@ export function ldCompression(db: number, fc: number = MATERIALS.fcMPa, fy: numb
   return Math.max(Math.max((c.coefficient * fy * db) / (R().development.lambda * Math.sqrt(fc)), c.minCoefficient * fy * db), c.minMm);
 }
 
-/** Development length of a standard hook in tension, Sec 8.2.6.2: 0.24 psi_e fy db / (lambda sqrt fc), at least 8 db and 150 mm. */
-export function ldHook(db: number, fc: number = MATERIALS.fcMPa, fy: number = MATERIALS.fyMPa): number {
+/**
+ * Development length of a standard hook in tension, Sec 8.2.6.2: 0.24 psi_e fy db / (lambda sqrt fc), at least 8 db and 150 mm.
+ * Sec 8.2.6.3 factors apply only when the conditions are given and met: 0.7 for a 90 degree hook with side cover of at least 65 mm
+ * and cover on the bar extension of at least 50 mm; 0.8 with ties or stirrups spaced at most 3 db along the hook. Without conditions
+ * no factor is taken (the safe side).
+ */
+export interface HookConditions { sideCoverMm?: number; extensionCoverMm?: number; tieSpacingMm?: number }
+export function hookFactor(db: number, c: HookConditions = {}): number {
   const h = R().hookDevelopment;
-  const ldh = (h.coefficient * R().development.psiE.uncoated * fy * db) / (R().development.lambda * Math.sqrt(fc));
+  let f = 1;
+  if ((c.sideCoverMm ?? 0) >= h.sideCoverMm && (c.extensionCoverMm ?? 0) >= h.extensionCoverMm) f *= h.factorSideCover65;
+  if (c.tieSpacingMm !== undefined && c.tieSpacingMm <= h.tieSpacingDb * db) f *= h.factorTies3db;
+  return f;
+}
+export function ldHook(db: number, fc: number = MATERIALS.fcMPa, fy: number = MATERIALS.fyMPa, cond: HookConditions = {}): number {
+  const h = R().hookDevelopment;
+  const ldh = ((h.coefficient * R().development.psiE.uncoated * fy * db) / (R().development.lambda * Math.sqrt(fc))) * hookFactor(db, cond);
   return Math.max(ldh, h.minDb * db, h.minMm);
 }
 

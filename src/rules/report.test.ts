@@ -155,3 +155,17 @@ describe("P2-4 fire and egress rows", () => {
     expect(row.status).toBe("not_applicable");
   });
 });
+
+describe("accessible route rows (BNBC 2020 Part 3 Appendix D)", () => {
+  it("route width and entrance door are evaluated; the site-level items stay not checked", () => {
+    const rows = ready(project({ stories: 8 })).items;
+    const w = rows.find((i) => i.id === "access.route-width")!;
+    expect(["pass", "fail"]).toContain(w.status);
+    expect(w.expected).toEqual({ value: 1200, unit: "mm" });
+    expect(w.citation!.en).toMatch(/Appendix D/);
+    const d = rows.find((i) => i.id === "access.door")!;
+    expect(d.expected).toEqual({ value: 900, unit: "mm" });
+    expect(d.status).toBe("pass"); // 1000 mm opening - 50 mm
+    expect(rows.find((i) => i.id === "access.route")!.status).toBe("not_checked");
+  });
+});

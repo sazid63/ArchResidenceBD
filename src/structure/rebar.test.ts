@@ -233,3 +233,16 @@ describe("audit of the bar bending schedule", () => {
     }
   });
 });
+
+describe("hook development factors, Sec 8.2.6.3", () => {
+  it("takes no factor without conditions, and 0.7 / 0.8 only when their conditions hold", async () => {
+    const { hookFactor } = await import("./anchorage");
+    expect(hookFactor(20)).toBe(1);
+    expect(hookFactor(20, { sideCoverMm: 65, extensionCoverMm: 40 })).toBe(1); // 40 mm on the extension is not enough
+    expect(hookFactor(20, { sideCoverMm: 65, extensionCoverMm: 50 })).toBe(0.7);
+    expect(hookFactor(20, { tieSpacingMm: 60 })).toBe(0.8);
+    expect(hookFactor(20, { tieSpacingMm: 100 })).toBe(1);
+    expect(ldHook(20, 20, 420, { sideCoverMm: 70, extensionCoverMm: 50 })).toBeCloseTo(ldHook(20) * 0.7, 6);
+    expect(ldHook(10, 20, 420, { sideCoverMm: 70, extensionCoverMm: 50 })).toBeGreaterThanOrEqual(150);
+  });
+});

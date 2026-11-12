@@ -240,15 +240,59 @@ export function buildReport(project: BuildingProject): Report {
       },
     });
   }
+  // Accessible route (BNBC 2020 Part 3 Appendix D, Table 3.D.1: apartments A3 with a lift, from the lift lobby to every housing unit).
+  const citeD = { en: "BNBC 2020 Part 3 Appendix D, Table 3.D.1 and Sec D.4.1 (accessible route at least 1200 mm)", bn: "বিএনবিসি ২০২০ পার্ট ৩ পরিশিষ্ট ডি, সারণি ৩.ডি.১ ও ধারা ডি.৪.১ (প্রবেশগম্য পথ ন্যূনতম ১২০০ মিমি)" };
+  const typicalGeo = model.storeys[Math.min(1, model.storeys.length - 1)].geometry;
+  const routeWidths = typicalGeo.fitted.rooms
+    .map((r, i) => (r.def.kind === "corridor" || r.def.kind === "lobby" ? typicalGeo.metrics[i].netWidthMm : null))
+    .filter((v): v is number => v !== null);
+  const entranceOpenings = typicalGeo.doors.filter((d) => d.main).map((d) => d.to - d.from);
+  if (!hasLift) {
+    items.push({
+      id: "access.route-width",
+      section: "access",
+      status: "not_applicable",
+      title: { en: "Accessible route width, lift lobby to flats", bn: "প্রবেশগম্য পথের প্রস্থ, লিফট লবি থেকে ফ্ল্যাট" },
+      expected: null,
+      actual: null,
+      citation: citeD,
+      note: { en: "Table 3.D.1 excludes apartments without a lift.", bn: "সারণি ৩.ডি.১ লিফটবিহীন অ্যাপার্টমেন্টকে বাদ দিয়েছে।" },
+    });
+  } else {
+    if (routeWidths.length)
+      items.push({
+        id: "access.route-width",
+        section: "access",
+        status: Math.min(...routeWidths) >= 1200 ? "pass" : "fail",
+        title: { en: "Accessible route width, lift lobby to flats", bn: "প্রবেশগম্য পথের প্রস্থ, লিফট লবি থেকে ফ্ল্যাট" },
+        expected: { value: 1200, unit: "mm" },
+        actual: { value: Math.round(Math.min(...routeWidths)), unit: "mm" },
+        citation: citeD,
+        note: { en: "Narrowest corridor or lobby on the typical floor, net of the walls. Turning space (1500 x 1500 mm) and the clear floor spaces at doors are not measured.", bn: "সাধারণ তলার সবচেয়ে সরু করিডোর বা লবি, দেয়াল বাদে। ঘোরার জায়গা (১৫০০ x ১৫০০ মিমি) ও দরজার সামনের খালি জায়গা মাপা হয়নি।" },
+      });
+    if (entranceOpenings.length) {
+      const clear = Math.min(...entranceOpenings) - 50;
+      items.push({
+        id: "access.door",
+        section: "access",
+        status: clear >= 900 ? "pass" : "fail",
+        title: { en: "Flat entrance door, clear width", bn: "ফ্ল্যাটের প্রবেশ দরজা, পরিষ্কার প্রস্থ" },
+        expected: { value: 900, unit: "mm" },
+        actual: { value: clear, unit: "mm" },
+        citation: { en: "BNBC 2020 Part 3 Appendix D Sec D.8.2: 900 mm measured between the leaf open at 90 degrees and the opposite jamb", bn: "বিএনবিসি ২০২০ পার্ট ৩ পরিশিষ্ট ডি ধারা ডি.৮.২: ৯০° খোলা পাল্লা থেকে বিপরীত চৌকাঠ পর্যন্ত ন্যূনতম ৯০০ মিমি" },
+        note: { en: "Clear width taken as the opening minus 50 mm for the open leaf (assumption).", bn: "খোলা পাল্লার জন্য ৫০ মিমি বাদ দিয়ে পরিষ্কার প্রস্থ ধরা হয়েছে (অনুমান)।" },
+      });
+    }
+  }
   items.push({
     id: "access.route",
     section: "access",
     status: "not_checked",
-    title: { en: "Accessible route, ramp and toilet", bn: "প্রবেশগম্য পথ, র‍্যাম্প ও শৌচাগার" },
+    title: { en: "Accessible route from the footpath and parking, ramp and toilet", bn: "ফুটপাথ ও পার্কিং থেকে প্রবেশগম্য পথ, র‍্যাম্প ও শৌচাগার" },
     expected: null,
     actual: null,
-    citation: null,
-    note: { en: "No cited figure is in the rule packs yet.", bn: "নিয়ম-প্যাকে এখনো এর কোনো সূত্রসহ মান নেই।" },
+    citation: { en: "BNBC 2020 Part 3 Appendix D, Table 3.D.1: footpath and parking to the lift, and one accessible toilet per housing unit", bn: "বিএনবিসি ২০২০ পার্ট ৩ পরিশিষ্ট ডি, সারণি ৩.ডি.১: ফুটপাথ ও পার্কিং থেকে লিফট এবং প্রতি ফ্ল্যাটে একটি প্রবেশগম্য শৌচাগার" },
+    note: { en: "The site entrance level, ramps (1 in 12) and the toilet's wheelchair space are not in the plan data, so they are not checked.", bn: "সাইটের প্রবেশ স্তর, র‍্যাম্প (১:১২) ও শৌচাগারের হুইলচেয়ার জায়গা প্ল্যানের তথ্যে নেই, তাই যাচাই হয়নি।" },
   });
 
   return { state: "ready", items, summary: summarise(items) };
