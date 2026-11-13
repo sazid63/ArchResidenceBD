@@ -85,7 +85,7 @@ describe("column interaction: strain compatibility from first principles", () =>
         fc.double({ min: 0.01, max: 0.04, noNaN: true }),
         fc.double({ min: 0.08, max: 1.8, noNaN: true }),
         (h, b, rho, cOverH) => {
-          const it = interaction(h, b, rho);
+          const it = interaction(h, b, rho, 20);
           const ast = rho * h * b;
           const pt = refColumnPoint(h, b, ast, D_PRIME_MM, cOverH * h, 20, 420);
           const phi = refPhiColumn(pt.epsT);
@@ -103,7 +103,7 @@ describe("column interaction: strain compatibility from first principles", () =>
 
   it("pure axial strength and the 0.80 cap agree", () => {
     fc.assert(fc.property(fc.integer({ min: 250, max: 800 }), fc.integer({ min: 250, max: 800 }), fc.double({ min: 0.01, max: 0.04, noNaN: true }), (h, b, rho) => {
-      const it = interaction(h, b, rho);
+      const it = interaction(h, b, rho, 20);
       const ref = refPureAxial(h, b, rho, 20, 420);
       expect(it.p0).toBeCloseTo(ref.p0, 6);
       expect(it.phiPnMax).toBeCloseTo(ref.phiPnMax, 6);
@@ -166,7 +166,7 @@ describe("pad footing", () => {
 
   it("the pad is the smallest 50 mm side that keeps the service pressure within the allowable", () => {
     fc.assert(fc.property(input, ({ service, bx, by, allowable, position }) => {
-      const r = designFooting({ serviceKn: service, serviceSeismicKn: service, puKn: 1.45 * service, colBxMm: bx, colByMm: by, position, allowableKpa: allowable });
+      const r = designFooting({ serviceKn: service, serviceSeismicKn: service, puKn: 1.45 * service, colBxMm: bx, colByMm: by, position, allowableKpa: allowable, fcMPa: 20 });
       const refSide = Math.max(refPadSide(service, 0.1, allowable), Math.max(bx, by) + 300);
       expect(r.sideMm).toBe(refSide);
       expect(r.pressureKpa).toBeLessThanOrEqual(allowable * 1.0000001 + (refSide === Math.max(bx, by) + 300 ? 1e9 : 0));
@@ -176,7 +176,7 @@ describe("pad footing", () => {
   it("an independent recomputation of shear and flexure at the returned size passes, and 50 mm shallower does not (unless at the minimum depth)", () => {
     fc.assert(fc.property(input, ({ service, bx, by, allowable, position }) => {
       const pu = 1.45 * service;
-      const r = designFooting({ serviceKn: service, serviceSeismicKn: service, puKn: pu, colBxMm: bx, colByMm: by, position, allowableKpa: allowable });
+      const r = designFooting({ serviceKn: service, serviceSeismicKn: service, puKn: pu, colBxMm: bx, colByMm: by, position, allowableKpa: allowable, fcMPa: 20 });
       const util = (h: number) => {
         const b = r.sideMm;
         const d = h - 75 - 16 - 8;
@@ -206,7 +206,7 @@ describe("pad footing", () => {
 
   it("a lower bearing capacity never gives a smaller footing, and more load never gives a smaller footing", () => {
     fc.assert(fc.property(input, fc.integer({ min: 1, max: 100 }), ({ service, bx, by, allowable, position }, extra) => {
-      const mk = (s: number, q: number) => designFooting({ serviceKn: s, serviceSeismicKn: s, puKn: 1.45 * s, colBxMm: bx, colByMm: by, position, allowableKpa: q });
+      const mk = (s: number, q: number) => designFooting({ serviceKn: s, serviceSeismicKn: s, puKn: 1.45 * s, colBxMm: bx, colByMm: by, position, allowableKpa: q, fcMPa: 20 });
       expect(mk(service, allowable - 10 >= 50 ? allowable - 10 : allowable).sideMm).toBeGreaterThanOrEqual(mk(service, allowable).sideMm);
       expect(mk(service + extra * 10, allowable).sideMm).toBeGreaterThanOrEqual(mk(service, allowable).sideMm);
     }), runs);

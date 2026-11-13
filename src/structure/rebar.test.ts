@@ -1,3 +1,4 @@
+import { MATERIALS } from "./materials";
 import { describe, expect, it } from "vitest";
 import { fitRange } from "../plans/fit";
 import { PLAN_LIBRARY } from "../plans/library";
@@ -11,31 +12,31 @@ const S = DEFAULT_SETBACKS_MM;
 
 describe("anchorage (Sec 8.1.2, 8.2)", () => {
   it("hand example, 20 mm bar, fc 20, fy 420: ld = 420 / (1.7 sqrt 20) x 20 = 1105 mm; ldh = 0.24 x 420 x 20 / sqrt 20 = 451 mm", () => {
-    expect(ldTension(20)).toBeCloseTo(((420 / (1.7 * Math.sqrt(20))) * 20), 6);
-    expect(ldTension(20)).toBeCloseTo(1104.9, 0);
-    expect(ldHook(20)).toBeCloseTo((0.24 * 420 * 20) / Math.sqrt(20), 6);
-    expect(ldHook(20)).toBeCloseTo(450.8, 0);
+    expect(ldTension(20, { fc: 20 })).toBeCloseTo(((420 / (1.7 * Math.sqrt(20))) * 20), 6);
+    expect(ldTension(20, { fc: 20 })).toBeCloseTo(1104.9, 0);
+    expect(ldHook(20, 20)).toBeCloseTo((0.24 * 420 * 20) / Math.sqrt(20), 6);
+    expect(ldHook(20, 20)).toBeCloseTo(450.8, 0);
   });
 
   it("19 mm and smaller bars use 2.1; top bars carry psi_t 1.3; the 300 mm minimum applies", () => {
-    expect(ldTension(12)).toBeCloseTo((420 / (2.1 * Math.sqrt(20))) * 12, 6); // 536.7
-    expect(ldTension(12, { topBar: true })).toBeCloseTo(ldTension(12) * 1.3, 6);
-    expect(ldTension(8)).toBeCloseTo((420 / (2.1 * Math.sqrt(20))) * 8, 6); // 357.8 mm
+    expect(ldTension(12, { fc: 20 })).toBeCloseTo((420 / (2.1 * Math.sqrt(20))) * 12, 6); // 536.7
+    expect(ldTension(12, { topBar: true, fc: 20 })).toBeCloseTo(ldTension(12, { fc: 20 }) * 1.3, 6);
+    expect(ldTension(8, { fc: 20 })).toBeCloseTo((420 / (2.1 * Math.sqrt(20))) * 8, 6); // 357.8 mm
     expect(ldTension(8, { fc: 40 })).toBe(300); // 253 mm raised to the 300 mm minimum
   });
 
   it("compression development and laps, with the one-third increase below 21 MPa", () => {
     // ldc = max(0.24 x 420 x 20 / sqrt 20 = 450.8, 0.043 x 420 x 20 = 361) ; lap = 0.071 x 420 x 20 x 4/3 = 795.2
-    expect(ldCompression(20)).toBeCloseTo(450.8, 0);
-    expect(lapCompression(20)).toBeCloseTo(0.071 * 420 * 20 * (4 / 3), 3);
+    expect(ldCompression(20, 20)).toBeCloseTo(450.8, 0);
+    expect(lapCompression(20, 20)).toBeCloseTo(0.071 * 420 * 20 * (4 / 3), 3);
     expect(lapCompression(20, 25)).toBeCloseTo(0.071 * 420 * 20, 3);
-    expect(lapCompression(8)).toBeCloseTo(0.071 * 420 * 8 * (4 / 3), 2); // 318 mm
+    expect(lapCompression(8, 20)).toBeCloseTo(0.071 * 420 * 8 * (4 / 3), 2); // 318 mm
     expect(lapCompression(8, 25)).toBe(300); // 238.6 mm raised to the minimum
   });
 
   it("tension laps: Class B 1.3 ld without the 300 mm minimum, Class A 1.0 ld", () => {
-    expect(lapTension(20, "B")).toBeCloseTo(1.3 * 1104.9, 0);
-    expect(lapTension(20, "A")).toBeCloseTo(1104.9, 0);
+    expect(lapTension(20, "B", { fc: 20 })).toBeCloseTo(1.3 * 1104.9, 0);
+    expect(lapTension(20, "A", { fc: 20 })).toBeCloseTo(1104.9, 0);
     expect(lapTension(8, "A", { fc: 40 })).toBe(300);
   });
 
@@ -191,7 +192,7 @@ describe("bar bending schedule", () => {
 
 /** Independent capacity: phi Mn = 0.9 As fy (d - a/2), a = As fy / (0.85 fc b), from the bars as placed (not the design routine). */
 function phiMn(asMm2: number, widthMm: number, dMm: number): number {
-  const a = (asMm2 * 420) / (0.85 * 20 * widthMm);
+  const a = (asMm2 * 420) / (0.85 * MATERIALS.fcMPa * widthMm);
   return (0.9 * asMm2 * 420 * (dMm - a / 2)) / 1e6;
 }
 
@@ -242,7 +243,7 @@ describe("hook development factors, Sec 8.2.6.3", () => {
     expect(hookFactor(20, { sideCoverMm: 65, extensionCoverMm: 50 })).toBe(0.7);
     expect(hookFactor(20, { tieSpacingMm: 60 })).toBe(0.8);
     expect(hookFactor(20, { tieSpacingMm: 100 })).toBe(1);
-    expect(ldHook(20, 20, 420, { sideCoverMm: 70, extensionCoverMm: 50 })).toBeCloseTo(ldHook(20) * 0.7, 6);
+    expect(ldHook(20, 20, 420, { sideCoverMm: 70, extensionCoverMm: 50 })).toBeCloseTo(ldHook(20, 20) * 0.7, 6);
     expect(ldHook(10, 20, 420, { sideCoverMm: 70, extensionCoverMm: 50 })).toBeGreaterThanOrEqual(150);
   });
 });

@@ -22,7 +22,7 @@ describe("structural drawing sheets", () => {
 
   it("the notes state the materials, cover, seismic and wind basis and that it is a screening set", () => {
     const t = texts(scenes[0]).join("\n");
-    expect(t).toContain("fc' 20 MPa");
+    expect(t).toContain("fc' 25 MPa");
     expect(t).toContain("Grade 420");
     expect(t).toContain("Z 0.2");
     expect(t).toMatch(/screening set/);

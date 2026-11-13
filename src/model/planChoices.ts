@@ -84,6 +84,15 @@ function coverageOf(frontageM: number, depthM: number, plan: PlanDefinition, opt
 }
 
 /** Every library plan (optionally one unit count) with the result of fitting it to the plot. Plans that fit and keep to the coverage limit first, then plans that fit but exceed it, then the rest. */
+/** Lift is required above six storeys (BNBC 2020 Part 8 Sec 4.2.1.1); a plan with no lift cell is not built above six storeys in Dhaka. */
+export const LIFT_FREE_MAX_STOREYS = 6;
+const noLiftReason = {
+  code: "no_lift" as const,
+  message: { en: "This plan has no lift, so it is limited to 6 storeys (a lift is required above six).", bn: "এই প্ল্যানে লিফট নেই, তাই ৬ তলা পর্যন্ত (ছয় তলার বেশি হলে লিফট বাধ্যতামূলক)।" },
+};
+export const noLiftAbove6 = (plan: { rooms: { kind: string }[] }, storeys: number | undefined): boolean =>
+  (storeys ?? 0) > LIFT_FREE_MAX_STOREYS && !plan.rooms.some((r) => r.kind === "lift");
+
 export function planChoices(frontageM: number, depthM: number, opts: ChoiceOptions = {}): PlanChoice[] {
   const sideOk = (m: number) => Number.isFinite(m) && mToMm(m) >= PLOT_SIDE_LIMITS_MM.min && mToMm(m) <= PLOT_SIDE_LIMITS_MM.max;
   if (!sideOk(frontageM) || !sideOk(depthM)) {
@@ -95,7 +104,7 @@ export function planChoices(frontageM: number, depthM: number, opts: ChoiceOptio
   // Every plan, then the same plans with a front verandah where the front row belongs to one flat (B2).
   const list = [...PLAN_LIBRARY, ...verandahVariants()].filter((p) => opts.unitsPerFloor === undefined || p.unitsPerFloor === opts.unitsPerFloor);
   const choices: PlanChoice[] = list.map((plan) => {
-    const fit = fitPlan(plan, env, { mirror: opts.mirror });
+    const fit = noLiftAbove6(plan, opts.storeys) ? { ok: false as const, reasons: [noLiftReason] } : fitPlan(plan, env, { mirror: opts.mirror });
     return { plan, fit, coverage: fit.ok ? coverageOf(frontageM, depthM, plan, opts) : null };
   });
   const rank = (c: PlanChoice) => (!c.fit.ok ? 2 : c.coverage?.status === "fail" ? 1 : 0);

@@ -40,6 +40,12 @@ const rows: string[] = [];
 // New path (M2-2): building model → mesh, every library plan swept across its fit range.
 for (const c of modelCases()) {
   const b = deriveBuilding(c.input);
+  // a plan with no lift stops at six storeys by design (BNBC Part 8 Sec 4.2.1.1): that rejection is the expected result above six
+  const expectedLiftReject = !b.ok && (c.input.storeys ?? 0) > 6 && b.reasons[0].message.en.includes("lift is required");
+  if (expectedLiftReject) {
+    rows.push(`PASS ${c.caseId}: rejected as designed (no lift above six storeys)`);
+    continue;
+  }
   if (!b.ok) {
     failures++;
     rows.push(`FAIL ${c.caseId}: ${b.reasons[0].message.en}`);

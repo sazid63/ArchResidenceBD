@@ -16,7 +16,8 @@ export const LIFT_ASSUMPTIONS = {
   pitMm: 1500,
   /** Top landing to the underside of the machine-room slab. */
   overheadMm: 4200,
-  shaftWallMm: 150,
+  /** 200 mm: a core wall must be at least the storey height / 16 thick (ACI 318-14 18.10.6.4, web-sourced; printed BNBC text not located). 3000 / 16 = 188 mm. */
+  shaftWallMm: 200,
   pitSlabMm: 250,
   /** Lift door opening in the shaft wall (width x height), mm. */
   doorMm: [900, 2100] as const,

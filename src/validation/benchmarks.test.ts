@@ -157,10 +157,18 @@ describe("benchmark: StructurePoint spread footing, ACI 318-14", () => {
       colByMm: col,
       position: "interior",
       allowableKpa: i.allowableBearingPsf * 0.04788026,
+      fcMPa: i.footingFcPsi * 0.006894757, // 3000 psi = 20.7 MPa
     });
     near(r.sideMm, side, 0.01, "side");
     // thickness differs because the example places #8 bars (d = h - 4 in.) and the engine 16 mm bars, and the two size the self-weight differently
-    expect(r.governs).toBe("punching");
+    // the depth loop stops at the first depth that passes, so bearing (0.998, set by the pad side) and punching (0.987) are near the limit together:
+    // the governing check must be the largest reported utilisation, not whichever a rounding step favours
+    const punch = r.punchVuKn / r.punchPhiVcKn;
+    const checks = { bearing: r.bearingUtil, punching: punch, "one-way shear": r.oneWayVuKn / r.oneWayPhiVcKn, flexure: r.flexure.util };
+    expect(r.util).toBeCloseTo(Math.max(...Object.values(checks)), 9);
+    expect(checks[r.governs as keyof typeof checks]).toBeCloseTo(r.util, 9);
+    expect(punch).toBeLessThanOrEqual(1);
+    expect(r.bearingUtil).toBeLessThanOrEqual(1);
     near(r.depthMm, i.footingThicknessIn * IN, 0.03, "thickness");
     expect(r.util).toBeLessThanOrEqual(1);
   });

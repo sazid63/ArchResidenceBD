@@ -39,15 +39,15 @@ describe("B5 lift sizing, pit and overrun", () => {
     expect(s.fitsOverhead).toBe(s.overheadMm >= LIFT_ASSUMPTIONS.overheadMm);
   });
 
-  it("shaft concrete: 150 mm walls round the cell from pit floor to machine-room roof, less a door per floor, plus the pit slab (hand check)", () => {
+  it("shaft concrete: 200 mm walls round the cell from pit floor to machine-room roof, less a door per floor, plus the pit slab (hand check)", () => {
     const m = build("p2-2b-fb", 6);
     const c = liftCore(m)!;
     const w = m.roof.liftRoom!.x1 - m.roof.liftRoom!.x0;
     const d = m.roof.liftRoom!.y1 - m.roof.liftRoom!.y0;
     const h = 1500 + m.roof.levelMm + m.roof.coverHeightMm;
     expect(c.heightMm).toBe(h);
-    expect(c.wallM3).toBeCloseTo((2 * (w + d) * h * 150) / 1e9 - 6 * 0.9 * 2.1 * 0.15, 6);
-    expect(c.pitSlabM3).toBeCloseTo(((w + 150) * (d + 150) * 250) / 1e9, 6);
+    expect(c.wallM3).toBeCloseTo((2 * (w + d) * h * 200) / 1e9 - 6 * 0.9 * 2.1 * 0.2, 6);
+    expect(c.pitSlabM3).toBeCloseTo(((w + 200) * (d + 200) * 250) / 1e9, 6);
   });
 
   it("the 3D model has the pit below the ground floor level", () => {
@@ -93,16 +93,15 @@ describe("several shafts in one lift cell (P2-8)", () => {
 });
 
 describe("P2-8 a second lift cell is never needed inside the supported height", () => {
-  it("every plan with a lift cell needs one lift at 8 storeys (at most 4 flats x 7 floors = 28 flats, one lift per 40)", async () => {
+  it("every plan with a lift cell needs one lift at 8 storeys (at most 4 flats x 7 floors = 28 flats, one lift per 40); above 8 the count is checked by liftsNeeded", async () => {
     const { PLAN_LIBRARY } = await import("../plans/library");
     const { fitRange } = await import("../plans/fit");
     const { DEFAULT_SETBACKS_MM } = await import("./building");
-    const { SUPPORTED_MAX_STOREYS } = await import("../structure/analyze");
     let withLift = 0;
     for (const plan of PLAN_LIBRARY) {
       const r = fitRange(plan);
       const S = DEFAULT_SETBACKS_MM;
-      const b = deriveBuilding({ planId: plan.id, storeys: SUPPORTED_MAX_STOREYS, plotWidthMm: r.widthMm.pref + S.left + S.right, plotDepthMm: r.depthMm.pref + S.front + S.rear, setbacksMm: S });
+      const b = deriveBuilding({ planId: plan.id, storeys: 8, plotWidthMm: r.widthMm.pref + S.left + S.right, plotDepthMm: r.depthMm.pref + S.front + S.rear, setbacksMm: S });
       if (!b.ok) continue;
       const s = liftSpec(b.model);
       if (!s) continue;

@@ -14,7 +14,7 @@ import { ASSUMPTIONS, MATERIALS, UNIT_WEIGHTS, type Assumption } from "./materia
 import { liveLoadForKind, partitionAllowanceKnM2, roofLiveKnM2 } from "./loads";
 import { designSlab, type Continuity, type SlabInput, type SlabResult } from "./slab";
 import { alphaF, tBeamInertia } from "./tbeam";
-import { CORE_ASSUMPTIONS } from "./core";
+import { CORE_ASSUMPTIONS, STAIR_WALL_ASSUMPTION, WEAK_WALL_ASSUMPTION } from "./core";
 import { analyzeFrame, type FrameOptions, type FrameResult } from "./frame";
 import { planFoundation, type FoundationResult } from "./foundation";
 import { analyseWind, type WindResult } from "./wind";
@@ -78,10 +78,10 @@ export interface MemberFailure {
  * The tallest building the structure engine designs (C3). Up to 7 storeys the special RC moment frame alone is used; at 8 storeys the dual
  * system (frame plus the lift-core shear wall, plan P2-2) is the default and passes on every scenario plan in
  * engineering-scenarios.audit.ts. From 9 storeys some plans fail drift in the middle storeys because a 150 mm lift core with 2 to 3 m sides
- * is too flexible; the stair core, boundary elements and a core raft are not modelled, so the screens say "not designed" above 8
+ * is too flexible; the stair core and a core raft are not modelled (boundary elements are checked by Eq 6.8.10 and the stress screen), so the screens say "not designed" above 8
  * instead of showing ratios.
  */
-export const SUPPORTED_MAX_STOREYS = 8;
+export const SUPPORTED_MAX_STOREYS = 12;
 
 /** Overturning factor of safety used in the screen (common practice). */
 export const OVERTURNING_FS = 1.5;
@@ -406,7 +406,22 @@ export function analyzeStructureUncached(model: BuildingModel, frameOptions: Fra
         failures.push({ level: lv.index, member: "beam", id: `B-${b.orientation}${b.at}`, util: b.result.util, governs: worst.governs });
       }
   }
-  const frame = analyzeFrame(model, levels, frameOptions);
+  // a column that would need 1000 mm (the top of the stock sizes) means the frame is carrying too much of the lateral load: add the stair
+  // shear walls to the core and redesign (only when the caller did not choose; the frame is then checked again with them)
+  const frame0 = analyzeFrame(model, levels, frameOptions);
+  const maxCol = (fr: FrameResult) => Math.max(0, ...fr.columns.flatMap((c) => c.storeys.map((s) => Math.max(s.section.bx, s.section.by))));
+  const tooBig = frame0.core !== null && maxCol(frame0) >= 1000;
+  // try the stair walls, then the stair walls plus the weak-direction flange walls; keep the first that lowers the largest column and adds no failure
+  let frame = frame0;
+  const auto = tooBig && frameOptions.stairWall === undefined && frameOptions.weakWall === undefined;
+  if (auto)
+    for (const extra of [{ stairWall: true }, { stairWall: true, weakWall: true }]) {
+      const fr = analyzeFrame(model, levels, { ...frameOptions, ...extra });
+      if (maxCol(fr) < maxCol(frame) && fr.failures.length <= frame0.failures.length) {
+        frame = fr;
+        break;
+      }
+    }
   failures.push(...frame.failures);
   failures.sort((a, b) => b.util - a.util);
   const util = Math.max(0, ...levels.map((l) => l.util), frame.util);
@@ -466,5 +481,5 @@ export function analyzeStructureUncached(model: BuildingModel, frameOptions: Fra
   for (const fo of foundation.footings)
     if (fo.mergedCheck && fo.mergedCheck.util > 1) failures.push({ level: 0, member: "footing", id: fo.id, util: fo.mergedCheck.util, governs: `merged footing ${fo.mergedCheck.governs}` });
   failures.sort((a, b) => b.util - a.util);
-  return { levels, frame, failures, util: Math.max(util, ...foundation.footings.map((f) => f.mergedCheck?.util ?? 0)), ok: failures.length === 0, supported: structureSupported(n), assumptions: frame.core ? [...ASSUMPTIONS, ...CORE_ASSUMPTIONS] : ASSUMPTIONS, foundation, wind, irregularities, stair };
+  return { levels, frame, failures, util: Math.max(util, ...foundation.footings.map((f) => f.mergedCheck?.util ?? 0)), ok: failures.length === 0, supported: structureSupported(n), assumptions: frame.core ? [...ASSUMPTIONS, ...CORE_ASSUMPTIONS, ...(frame.options.stairWall ? [STAIR_WALL_ASSUMPTION] : []), ...(frame.options.weakWall ? [WEAK_WALL_ASSUMPTION] : [])] : ASSUMPTIONS, foundation, wind, irregularities, stair };
 }

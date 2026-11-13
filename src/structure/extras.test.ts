@@ -38,7 +38,7 @@ describe("members the first schedule left out: stairs, plinth beams, column stub
     const lw = lr.x1 - lr.x0;
     const ld = lr.y1 - lr.y0;
     const lh = 1500 + model.roof.levelMm + model.roof.coverHeightMm;
-    want += (2 * (lw + ld) * lh * 150) / 1e9 - (model.storeys.length * 0.9 * 2.1 * 0.15) + ((lw + 150) * (ld + 150) * 250) / 1e9;
+    want += (2 * (lw + ld) * lh * 200) / 1e9 - (model.storeys.length * 0.9 * 2.1 * 0.2) + ((lw + 200) * (ld + 200) * 250) / 1e9;
     expect(bbs.totals.concreteM3).toBeCloseTo(want, 6);
   });
 

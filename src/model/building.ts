@@ -136,6 +136,8 @@ export function deriveBuilding(input: BuildingInput): BuildingResult {
   if (!plan) return reject(`Unknown plan "${input.planId}".`, `অজানা প্ল্যান "${input.planId}"।`);
   if (!Number.isInteger(input.storeys) || input.storeys < 1 || input.storeys > 30)
     return reject("Storeys must be a whole number from 1 to 30.", "তলার সংখ্যা ১ থেকে ৩০ এর মধ্যে পূর্ণসংখ্যা হতে হবে।");
+  if (input.storeys > 6 && !plan.rooms.some((r) => r.kind === "lift"))
+    return reject(`Plan ${plan.id} has no lift, so it is limited to 6 storeys (a lift is required above six).`, "এই প্ল্যানে লিফট নেই, তাই ৬ তলা পর্যন্ত (ছয় তলার বেশি হলে লিফট বাধ্যতামূলক)।");
   const floorToFloorMm = input.floorToFloorMm ?? 3000;
   if (!(floorToFloorMm >= 2700 && floorToFloorMm <= 5500))
     return reject("Floor-to-floor height must be between 2.7 m and 5.5 m.", "তল থেকে তলার উচ্চতা ২.৭ থেকে ৫.৫ মিটারের মধ্যে হতে হবে।");

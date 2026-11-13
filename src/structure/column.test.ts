@@ -1,3 +1,4 @@
+import { MATERIALS } from "./materials";
 import { describe, expect, it } from "vitest";
 import { checkColumn, interaction, lightestSteel, momentCapacityAt, phiFromStrain, rayScale, type ColumnCase, type Interaction } from "./column";
 import { ecMPa } from "./materials";
@@ -105,7 +106,7 @@ describe("interaction curve", () => {
   });
   it("the cap is 0.65 * 0.80 * P0 with P0 = (0.85 fc (Ag - Ast) + fy Ast) / 1000", () => {
     const ast = 0.02 * 160000;
-    const p0 = (0.85 * 20 * (160000 - ast) + 420 * ast) / 1000;
+    const p0 = (0.85 * MATERIALS.fcMPa * (160000 - ast) + 420 * ast) / 1000;
     expect(it0.p0).toBeCloseTo(p0, 9);
     expect(it0.phiPnMax).toBeCloseTo(0.65 * 0.8 * p0, 9);
     expect(it0.astMm2).toBe(ast);
@@ -165,7 +166,7 @@ describe("slenderness (Sec 6.3.10): a column is slender when k lu / r exceeds 22
     const pu = 800;
     const lu = 5000;
     const ig = (400 * 400 ** 3) / 12;
-    const ei = (0.4 * ecMPa(20) * ig) / 1.5;
+    const ei = (0.4 * ecMPa(MATERIALS.fcMPa) * ig) / 1.5;
     const pc = (Math.PI ** 2 * ei) / lu ** 2 / 1000;
     const delta = 1 / (1 - pu / (0.75 * pc));
     const r = checkColumn({ bx: 400, by: 400 }, 0.02, [base({ puKn: pu, luMm: lu, betaDns: 0.5, x: { m2ns: 80, m2s: 0, deltaS: 1 } })]).cases[0];
@@ -238,7 +239,7 @@ describe("combining the two bending axes", () => {
   });
 
   it("from 0.1 fc Ag the reciprocal load method applies, 1/Pn = 1/Pnx + 1/Pny - 1/P0", () => {
-    const pu = 360;
+    const pu = (0.1 * MATERIALS.fcMPa * 180000) / 1000 + 10; // just above 0.1 fc Ag
     const c = base({ puKn: pu, luMm: 1500, x: { m2ns: 30, m2s: 0, deltaS: 1 }, y: { m2ns: 50, m2s: 0, deltaS: 1 } });
     const r = checkColumn(sec, 0.02, [c]).cases[0];
     expect(r.method).toBe("Bresler");

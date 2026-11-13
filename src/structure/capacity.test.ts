@@ -7,15 +7,15 @@ import { D_PRIME_MM, interaction, momentCapacityAt } from "./column";
 
 describe("beam probable and nominal moments", () => {
   it("Mpr with 1000 mm2 at 1.25 fy: a = 525000/5100 = 102.9 mm, Mpr = 525000 (440 - 51.5)/1e6 = 204.0 kN.m", () => {
-    expect(beamMpr(1000, 300, 440)).toBeCloseTo(203.98, 1);
+    expect(beamMpr(1000, 300, 440, 20)).toBeCloseTo(203.98, 1);
   });
 
   it("nominal Mn with 1000 mm2 at fy: a = 420000/5100 = 82.4 mm, Mn = 420000 (440 - 41.2)/1e6 = 167.5 kN.m", () => {
-    expect(beamMn(1000, 300, 440)).toBeCloseTo(167.5, 1);
+    expect(beamMn(1000, 300, 440, 20)).toBeCloseTo(167.5, 1);
   });
 
   it("Mpr is larger than Mn for the same steel (1.25 fy against fy)", () => {
-    expect(beamMpr(1000, 300, 440)).toBeGreaterThan(beamMn(1000, 300, 440));
+    expect(beamMpr(1000, 300, 440, 20)).toBeGreaterThan(beamMn(1000, 300, 440, 20));
   });
 });
 

@@ -1,3 +1,4 @@
+import { MATERIALS } from "./materials";
 /** M4-1 audit: independent checks that do not reuse the formulas under test. */
 import { describe, expect, it } from "vitest";
 import { coefficient, structurePack } from "../rules/bnbcStructure";
@@ -98,7 +99,7 @@ describe("audit: deflection formula", () => {
       { bMm: 250, hMm: 900 },
     );
     const w = r.spans[0].dKnM; // self weight only, kN/m = N/mm
-    const ec = 4700 * Math.sqrt(20);
+    const ec = 4700 * Math.sqrt(MATERIALS.fcMPa);
     const ig = (250 * 900 ** 3) / 12;
     const exact = (5 * w * 4000 ** 4) / (384 * ec * ig);
     expect(r.spans[0].deflection.afterPartitionsMm).toBeCloseTo(2 * exact, 6);

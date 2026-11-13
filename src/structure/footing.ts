@@ -33,6 +33,8 @@ export interface FootingInput {
   allowableKpa: number;
   /** Footing, backfill and slab on top as a fraction of the column service load (assumption). */
   selfWeightFraction?: number;
+  /** Concrete cylinder strength, MPa (default: the model grade, MATERIALS.fcMPa). */
+  fcMPa?: number;
   /** Depth the column starter bars need: development length in compression plus cover and the two mat layers, mm (Sec 8.2.4). */
   minDepthMm?: number;
   /** Factored column base moments about x and y, kN.m (magnitudes; the worst direction is used). */
@@ -114,7 +116,7 @@ export function designFooting(inp: FootingInput): FootingResult {
   const b = side;
   const Bm = b / 1000;
   const bearingUtil = bf.util;
-  const fc = MATERIALS.fcMPa;
+  const fc = inp.fcMPa ?? MATERIALS.fcMPa;
   const alphaS = footingPack().alphaS[inp.position];
   const beta = Math.max(inp.colBxMm, inp.colByMm) / Math.min(inp.colBxMm, inp.colByMm);
 

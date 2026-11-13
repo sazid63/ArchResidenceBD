@@ -57,6 +57,28 @@ function gridAndColumns(sb: SceneBuilder, res: StructureResult, label: boolean):
   }
 }
 
+/** Shear walls: the lift shaft (outer box and inner face) and the stair and end walls on their centrelines (screening, WALLS layer). */
+function drawWalls(sb: SceneBuilder, res: StructureResult, lang: Lang): void {
+  const cr = res.frame.core;
+  if (!cr) return;
+  const s = cr.section;
+  const t = s.tMm;
+  const ox0 = s.cxMm - s.lxMm / 2;
+  const ox1 = s.cxMm + s.lxMm / 2;
+  const oy0 = s.cyMm - s.lyMm / 2;
+  const oy1 = s.cyMm + s.lyMm / 2;
+  sb.rect("WALLS", ox0, oy0, ox1, oy1);
+  sb.rect("WALLS", ox0 + t, oy0 + t, ox1 - t, oy1 - t);
+  sb.text("TEXT", s.cxMm, oy1 + 90, TEXT_H, T(lang, "Lift shaft wall", "লিফট শ্যাফটের দেয়াল"), "middle");
+  (s.extraWalls ?? []).forEach((w, i) => {
+    if (!w.span) return;
+    const { x0, y0, x1, y1 } = w.span;
+    sb.rect("WALLS", Math.min(x0, x1) - t / 2, Math.min(y0, y1) - t / 2, Math.max(x0, x1) + t / 2, Math.max(y0, y1) + t / 2);
+    const flange = (w.kind ?? "web") === "flange";
+    sb.text("TEXT", (x0 + x1) / 2, (y0 + y1) / 2 + t, TEXT_H, `W${i + 1} ${flange ? "end wall" : "stair wall"}`, "middle");
+  });
+}
+
 /** The drawing's lower-left corner, for placing the schedule under it. */
 function floorY(res: StructureResult): { x: number; y: number } {
   return { x: Math.min(...res.frame.columns.map((c) => c.xMm)) - 1500, y: Math.min(...res.frame.columns.map((c) => c.yMm)) - 2200 };
@@ -68,6 +90,7 @@ export function notesScene(model: BuildingModel, res: StructureResult, lang: Lan
   const o = res.frame.options;
   const lap = (d: number) => Math.ceil(lapTension(d, "B", {}) / 50) * 50;
   const hasCore = !!res.frame.core;
+  const hasExtraWalls = (res.frame.core?.stairWalls?.length ?? 0) > 0;
   const notes: Array<[string, string]> = [
     ["GENERAL STRUCTURAL NOTES", "সাধারণ কাঠামোগত নোট"],
     [`1. Concrete: cylinder strength fc' ${MATERIALS.fcMPa} MPa (assumed; the gazette gives exposure minima, not a grade).`, `১. কংক্রিট: সিলিন্ডার শক্তি fc' ${MATERIALS.fcMPa} এমপিএ (অনুমিত)।`],
@@ -79,7 +102,7 @@ export function notesScene(model: BuildingModel, res: StructureResult, lang: Lan
     ["7. Beams: stirrups are designed for the probable-moment shear (Sec 8.3.8.1); the first stirrup is 50 mm from the column face.", "৭. বিম: স্টিরাপ সম্ভাব্য-মোমেন্ট শিয়ারে নকশা (ধারা ৮.৩.৮.১); প্রথম স্টিরাপ কলামের মুখ থেকে ৫০ মিমি।"],
     [`8. Seismic: Dhaka Z ${o.z}, site class ${o.siteClass}, system ${res.frame.seismicX.system.id}; wind Dhaka V ${res.wind.velocityMs} m/s, Exposure B. Lateral design is the larger of the two.`, `৮. ভূমিকম্প: ঢাকা Z ${o.z}, সাইট শ্রেণি ${o.siteClass}; বাতাস ঢাকা V ${res.wind.velocityMs} মি/সে, এক্সপোজার B। পার্শ্ব নকশা দুটির বড়টি।`],
     [`9. Foundation: isolated and combined pads on 75 mm lean concrete, allowable bearing ${o.allowableBearingKpa} kPa (site value to be confirmed by a soil test). Tie beams join the footings.`, `৯. ভিত্তি: ৭৫ মিমি লিন কংক্রিটের ওপর প্যাড, অনুমোদিত বিয়ারিং ${o.allowableBearingKpa} কিলোপাসকাল (মাটি পরীক্ষায় নিশ্চিত করতে হবে)। ফুটিংগুলো টাই বিমে যুক্ত।`],
-    ...(hasCore ? ([["10. Lift core: 150 mm reinforced concrete walls with boundary elements at the corners and coupling beams over the doors, as scheduled.", "১০. লিফট কোর: ১৫০ মিমি আরসিসি দেয়াল, কোণে প্রান্ত অংশ ও দরজার ওপরে কাপলিং বিম, সূচি অনুযায়ী।"]] as Array<[string, string]>) : []),
+    ...(hasCore ? ([["10. Lift core: 150 mm reinforced concrete walls with boundary elements at the corners and coupling beams over the doors, as scheduled." + (hasExtraWalls ? " Stair and end walls are shown on the column sheet and in its wall schedule; they are screening walls for architectural review." : ""), "১০. লিফট কোর: ১৫০ মিমি আরসিসি দেয়াল, কোণে প্রান্ত অংশ ও দরজার ওপরে কাপলিং বিম, সূচি অনুযায়ী।" + (hasExtraWalls ? " সিঁড়ি ও প্রান্তের দেয়াল কলাম শিটে ও দেয়াল সূচিতে দেখানো; স্থাপত্য পর্যালোচনার জন্য প্রাথমিক নকশা।" : "")]] as Array<[string, string]>) : []),
     [`${hasCore ? 11 : 10}. This is a screening set from ArchResidenceBD. It must be checked, completed and signed by a licensed structural engineer before construction.`, `${hasCore ? "১১" : "১০"}. এটি প্রাথমিক নকশা। নির্মাণের আগে লাইসেন্সপ্রাপ্ত কাঠামো প্রকৌশলীকে যাচাই, সম্পূর্ণ ও স্বাক্ষর করতে হবে।`],
   ];
   let y = 0;
@@ -95,6 +118,7 @@ export function columnPlanScene(model: BuildingModel, res: StructureResult, lang
   void model;
   const sb = new SceneBuilder();
   gridAndColumns(sb, res, true);
+  drawWalls(sb, res, lang);
   const types = new Map<string, string[]>();
   for (const c of res.frame.columns) {
     // consecutive storeys with the same section, bars and ties are one range
@@ -124,6 +148,15 @@ export function columnPlanScene(model: BuildingModel, res: StructureResult, lang
     const mark = `T${++n}`;
     cy = rows(sb, x, cy, [`${mark}: ${sig}`, ...wrap(ids).map((l) => "     " + l)]);
     cy -= 60;
+  }
+  const walls = res.frame.core?.stairWalls ?? [];
+  if (walls.length) {
+    cy = rows(sb, x, cy - 60, [T(lang, "WALL SCHEDULE (shear walls outside the lift shaft; lengths and thickness mm; end steel per end)", "দেয়াল সূচি (লিফট শ্যাফটের বাইরের শিয়ার ওয়াল; দৈর্ঘ্য ও পুরুত্ব মিমি; প্রতি প্রান্তে ইস্পাত)"),
+      ...walls.map((w, i) => {
+        const along = w.kind === "flange" ? (w.dir === "x" ? "y" : "x") : w.dir;
+        const be = w.boundary ? `, boundary element ${w.boundary.lengthMm} mm` : "";
+        return `W${i + 1}: ${w.kind === "flange" ? "end wall (across the load)" : "stair wall (web)"}, along ${along}, ${w.lengthMm} x ${w.tMm}, end steel ${Math.round(w.asEndMm2)} mm2 each end, horizontal ${(w.rhoHorizontal * 100).toFixed(2)} %${be}`;
+      })]);
   }
   return sb.scene("struct-columns", T(lang, "Column layout and schedule", "কলামের বিন্যাস ও সূচি"));
 }

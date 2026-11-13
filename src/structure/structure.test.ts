@@ -1,3 +1,4 @@
+import { MATERIALS } from "./materials";
 import { describe, expect, it } from "vitest";
 import { fitRange } from "../plans/fit";
 import { PLAN_LIBRARY } from "../plans/library";
@@ -59,7 +60,7 @@ describe("loads and combinations", () => {
 describe("section checks", () => {
   it("flexure hand example: b 250, d 400, Mu 100 kN.m -> As 726.6 mm2, capacity 163.9 kN.m", () => {
     // Rn = 100e6 / (0.9 x 250 x 400^2) = 2.7778; rho = (17/420)(1 - sqrt(1 - 2 x 2.7778 / 17)) = 0.0072658
-    const r = flexure(100, 250, 400, 0);
+    const r = flexure(100, 250, 400, 0, 20);
     expect(r.asCalcMm2).toBeCloseTo(726.6, 0);
     // rho_tc = 0.85 x 0.85 x (20/420) x 0.375 = 0.012902; phi.Mn = 0.9 x rho fy b d^2 (1 - 0.59 rho fy/fc)
     expect(r.capacityKnM).toBeCloseTo(163.9, 0);
@@ -67,14 +68,14 @@ describe("section checks", () => {
   });
 
   it("never clamps utilisation: 250 kN.m on the same section is about 1.5 and has no singly-reinforced steel", () => {
-    const r = flexure(250, 250, 400, 0);
+    const r = flexure(250, 250, 400, 0, 20);
     expect(r.util).toBeGreaterThan(1.5);
     expect(r.asCalcMm2).toBe(Infinity);
   });
 
   it("shear hand example: b 250, d 400 -> phiVc 57.0 kN, section limit 278.4 kN", () => {
-    // Vc = 0.17 x sqrt(20) x 250 x 400 = 76.03 kN; Vs,max = 0.66 x sqrt(20) x 100000 = 295.2 kN
-    const r = shear(100, 250, 400);
+    // Vc = 0.17 x sqrt(MATERIALS.fcMPa) x 250 x 400 = 76.03 kN; Vs,max = 0.66 x sqrt(MATERIALS.fcMPa) x 100000 = 295.2 kN
+    const r = shear(100, 250, 400, 20);
     expect(r.phiVcKn).toBeCloseTo(57.02, 1);
     expect(r.capacityKn).toBeCloseTo(278.4, 0);
     expect(r.avPerMm).toBeGreaterThan(0);
@@ -83,7 +84,7 @@ describe("section checks", () => {
 
   it("cracked inertia is below gross inertia", () => {
     const ig = (250 * 500 ** 3) / 12;
-    expect(crackedInertia(250, 440, 1200, 200000 / (4700 * Math.sqrt(20)))).toBeLessThan(ig);
+    expect(crackedInertia(250, 440, 1200, 200000 / (4700 * Math.sqrt(MATERIALS.fcMPa)))).toBeLessThan(ig);
   });
 });
 

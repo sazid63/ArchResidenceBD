@@ -1,3 +1,4 @@
+import { MATERIALS } from "./materials";
 import { describe, expect, it } from "vitest";
 import { ecMPa } from "./materials";
 import { checkColumn, interaction, lightestSteel, momentCapacityAt, phiFromStrain, rayScale, type ColumnCase } from "./column";
@@ -119,28 +120,28 @@ describe("columns: interaction, slenderness, biaxial bending (Sec 6.3)", () => {
 
   it("hand example, 400 x 400 with 2 % steel: P0 = 4009.6 kN, phi Pn,max = 0.65 x 0.80 x P0 = 2085 kN (Eq 6.6.9)", () => {
     // P0 = 0.85 x 20 x (160000 - 3200) + 420 x 3200 = 2 665 600 + 1 344 000 N
-    const it = interaction(400, 400, 0.02);
+    const it = interaction(400, 400, 0.02, 20);
     expect(it.p0).toBeCloseTo(4009.6, 6);
     expect(it.phiPnMax).toBeCloseTo(0.65 * 0.8 * 4009.6, 6);
     expect(it.curve[0].p).toBeCloseTo(it.phiPnMax, 6);
   });
 
   it("pure-bending capacity is near the singly-reinforced estimate: phi x 1600 x 420 x (340 - 49.4) = 176 kN.m, plus compression steel", () => {
-    const m0 = momentCapacityAt(interaction(400, 400, 0.02), 0);
+    const m0 = momentCapacityAt(interaction(400, 400, 0.02, 20), 0);
     expect(m0).toBeGreaterThan(170);
     expect(m0).toBeLessThan(215);
   });
 
   it("the curve falls monotonically from the cap to zero axial load and grows with steel and section", () => {
-    const it = interaction(400, 400, 0.02);
+    const it = interaction(400, 400, 0.02, 20);
     for (let i = 1; i < it.curve.length; i++) expect(it.curve[i].p).toBeLessThanOrEqual(it.curve[i - 1].p + 1e-9);
     expect(it.curve[it.curve.length - 1].p).toBe(0);
-    expect(interaction(400, 400, 0.04).phiPnMax).toBeGreaterThan(interaction(400, 400, 0.02).phiPnMax);
-    expect(momentCapacityAt(interaction(500, 500, 0.02), 1000)).toBeGreaterThan(momentCapacityAt(interaction(400, 400, 0.02), 1000));
+    expect(interaction(400, 400, 0.04).phiPnMax).toBeGreaterThan(interaction(400, 400, 0.02, 20).phiPnMax);
+    expect(momentCapacityAt(interaction(500, 500, 0.02), 1000)).toBeGreaterThan(momentCapacityAt(interaction(400, 400, 0.02, 20), 1000));
   });
 
   it("a ray through a point on the curve scales back to 1", () => {
-    const it = interaction(400, 400, 0.02);
+    const it = interaction(400, 400, 0.02, 20);
     const pt = it.curve[Math.floor(it.curve.length / 2)];
     expect(rayScale(it, pt.m, pt.p)).toBeCloseTo(1, 3);
   });
@@ -154,7 +155,7 @@ describe("columns: interaction, slenderness, biaxial bending (Sec 6.3)", () => {
   });
 
   it("hand example magnifier Eq 6.6.19-6.6.22: lu 3000, 400 sq, Pu 1000, beta_dns 0.6 -> slender (25 > 22), delta_ns = 1 / (1 - Pu / 0.75 Pc)", () => {
-    const ec = ecMPa(20);
+    const ec = ecMPa(MATERIALS.fcMPa);
     const ig = (400 * 400 ** 3) / 12;
     const ei = (0.4 * ec * ig) / 1.6;
     const pc = (Math.PI ** 2 * ei) / 3000 ** 2 / 1000; // kN

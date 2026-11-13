@@ -7,8 +7,8 @@ import { structurePack } from "../rules/bnbcStructure";
  */
 
 export const MATERIALS = {
-  /** Cylinder strength, MPa. Assumption (the gazette sets minima by exposure, not a grade): common Dhaka residential grade. */
-  fcMPa: 20,
+  /** Cylinder strength, MPa. Not below 21 MPa for special moment frames and special structural walls (BNBC 2020 Part 6 Sec 8.3.3.3); 25 MPa is the common Dhaka grade used here (assumption). */
+  fcMPa: 25,
   /** Longitudinal and stirrup yield strength, MPa: Grade 420, the grade the gazette equations are written for. */
   fyMPa: 420,
   fytMPa: 420,

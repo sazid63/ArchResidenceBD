@@ -19,6 +19,7 @@
  */
 
 import { mkdirSync, writeFileSync } from "node:fs";
+import { MATERIALS } from "../../src/structure/materials";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -35,10 +36,11 @@ const S = DEFAULT_SETBACKS_MM;
 const STOREYS = [3, 5, 7, 9, 12];
 const SITES: SiteClass[] = ["SC", "SD"];
 
-function build(planId: string, storeys: number) {
+function build(planId: string, storeys: number, allowReject = false) {
   const plan = PLAN_LIBRARY.find((p) => p.id === planId)!;
   const r = fitRange(plan);
   const out = deriveBuilding({ planId, storeys, setbacksMm: S, plotWidthMm: r.widthMm.pref + S.left + S.right, plotDepthMm: r.depthMm.pref + S.front + S.rear });
+  if (allowReject) return out;
   if (!out.ok) throw new Error(`${planId} x${storeys} does not fit its preferred plot`);
   return out.model;
 }
@@ -61,6 +63,9 @@ interface Row {
 
 const rows: Row[] = [];
 
+/** Lift cell or six storeys or fewer: a plan without a lift is not built above six storeys (BNBC Part 8). */
+const eligible = (planId: string, n: number): boolean => n <= 6 || PLAN_LIBRARY.find((p) => p.id === planId)!.rooms.some((r) => r.kind === "lift");
+
 describe("structural sweep", () => {
   for (const plan of PLAN_LIBRARY)
     for (const site of SITES)
@@ -68,6 +73,13 @@ describe("structural sweep", () => {
         const history: Array<{ n: number; load: number; shear: number; side: number }> = [];
 
         for (const n of STOREYS) {
+          // a plan without a lift cell is not built above six storeys (BNBC Part 8 Sec 4.2.1.1): the rule itself is the invariant
+          if (n > 6 && !PLAN_LIBRARY.find((p) => p.id === plan.id)!.rooms.some((r) => r.kind === "lift")) {
+            it(`${n} storeys: no lift, so not offered`, () => {
+              expect(build(plan.id, n, true).ok).toBe(false);
+            });
+            continue;
+          }
           it(`${n} storeys: invariants hold`, () => {
             const m = build(plan.id, n);
             const res = analyzeStructure(m, { siteClass: site });
@@ -87,10 +99,12 @@ describe("structural sweep", () => {
 
             // 3. seismic: V = Sa W, plausible weight per m2 of floor
             const sx = fr.seismicX;
-            expect(Math.abs(sx.baseShearKn - sx.sa * sx.weightKn)).toBeLessThan(1e-6);
+            // the design base shear is the larger of Sa W and the wind base shear (Sec 2.4), so it is never below Sa W
+            expect(sx.baseShearKn).toBeGreaterThanOrEqual(sx.sa * sx.weightKn - 1e-6);
             const perM2 = sx.weightKn / (n * m.footprintAreaM2);
             expect(perM2).toBeGreaterThan(8);
-            expect(perM2).toBeLessThan(22); // the dual system adds the 150 mm lift core walls to the weight (about 0.5 kN/m2 at 12 storeys)
+            // upper band 25: at 12 storeys the drift fix needs 900 mm columns on dense grids, which puts the wide plans near 24 kN/m2 per floor
+            expect(perM2).toBeLessThan(25);
 
             // 4. nothing clamped, and consistent failure listing
             for (const f of res.failures) expect(f.util).toBeGreaterThan(1);
@@ -108,8 +122,8 @@ describe("structural sweep", () => {
             if (res.ok) expect(bbs.issues.filter((i) => i.severity === "fail")).toHaveLength(0);
             // independent capacity of each flexural member as detailed: phi Mn = 0.9 As fy (d - a/2), a = As fy / (0.85 fc b)
             for (const pk of bbs.picks.filter((q) => q.muKnM !== undefined && q.fits)) {
-              const a = (pk.providedMm2 * 420) / (0.85 * 20 * pk.widthMm!);
-              expect((0.9 * pk.providedMm2 * 420 * (pk.dMm! - a / 2)) / 1e6, pk.ref).toBeGreaterThanOrEqual(pk.muKnM! - 1e-6);
+              const a = (pk.providedMm2 * MATERIALS.fyMPa) / (0.85 * MATERIALS.fcMPa * pk.widthMm!);
+              expect((0.9 * pk.providedMm2 * MATERIALS.fyMPa * (pk.dMm! - a / 2)) / 1e6, pk.ref).toBeGreaterThanOrEqual(pk.muKnM! - 1e-6);
             }
             for (const r of bbs.rows) expect(r.cutLengthMm, r.description.en).toBeLessThanOrEqual(STOCK_LENGTH_MM);
 
@@ -134,7 +148,7 @@ describe("structural sweep", () => {
         }
 
         it("more storeys never lower the total base column load, base shear or footing size", () => {
-          expect(history.length).toBe(STOREYS.length);
+          expect(history.length).toBe(STOREYS.filter((n) => eligible(plan.id, n)).length);
           for (let i = 1; i < history.length; i++) {
             expect(history[i].load).toBeGreaterThan(history[i - 1].load * 0.999);
             expect(history[i].shear).toBeGreaterThan(history[i - 1].shear);
@@ -152,6 +166,6 @@ describe("structural sweep", () => {
       .join("\n");
     const pass = rows.filter((r) => r.outcome === "pass").length;
     writeFileSync(join(dir, "structural-sweep.md"), `# Structural sweep\n\n${pass} of ${rows.length} cases pass every member check (the rest are reported, not asserted: tall frames need shear walls).\n\n${head}${body}\n`);
-    expect(rows.length).toBe(PLAN_LIBRARY.length * SITES.length * STOREYS.length);
+    expect(rows.length).toBe(PLAN_LIBRARY.reduce((a, p) => a + STOREYS.filter((n) => eligible(p.id, n)).length, 0) * SITES.length);
   });
 });

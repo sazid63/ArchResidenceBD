@@ -17,14 +17,15 @@ import { analyseSpans } from "./continuousBeam";
 import { COLUMN_STOCK, checkColumn, D_PRIME_MM, interaction, lightestSteel, RHO_STEPS, type CaseResult, type ColSection, type ColumnCase, type Interaction } from "./column";
 import { beamMn, columnMnAt, PROBABLE_FY_FACTOR, strongColumnCheck } from "./capacity";
 import { ldCompression } from "./anchorage";
+import { barsPerFace, confinementDesign } from "./confinement";
 import { pickBeamBars, pickColumnBars } from "./barSelect";
 import { designFooting, type ColumnPosition, type FootingResult } from "./footing";
 import { factoredLoad, liveReductionFactor } from "./loads";
 import { DESIGN, ecMPa, MATERIALS, UNIT_WEIGHTS } from "./materials";
 import { tBeamInertia } from "./tbeam";
-import { windBaseShearKn } from "./wind";
+import { analyseWind, windBaseShearKn } from "./wind";
 import { analyseSeismic, DHAKA_Z, liveWeightFraction, systemById, type SeismicResult } from "./seismic";
-import { checkCore, coreSection, designCouplingBeam, dualLateral, wallProps, type CoreCheck, type CoreSection, type CouplingBeam, type DualResult } from "./core";
+import { checkCore, checkStairWall, coreSection, designCouplingBeam, dualLateral, extraAcv, extraInertia, wallProps, type CoreCheck, type CoreSection, type CouplingBeam, type DualResult, type ExtraWall, type StairWallCheck } from "./core";
 
 export interface FrameOptions {
   siteClass?: SiteClass;
@@ -33,6 +34,10 @@ export interface FrameOptions {
   /** Allowable soil bearing pressure, kPa. */
   allowableBearingKpa?: number;
   z?: number;
+  /** Add the stair shear walls to the lift core (screening assumption, see core.ts stairWallMm). Used by analyzeStructure when a column would reach 1000 mm. */
+  stairWall?: boolean;
+  /** Add the weak-direction flange walls (end walls, screening assumption, see core.ts weakWallsMm). Used with the stair walls when a column would reach 1000 mm. */
+  weakWall?: boolean;
 }
 
 export const FRAME_DEFAULTS = { siteClass: "SD" as SiteClass, group: "I_II" as OccupancyGroup, systemId: "special-rc-mrf", allowableBearingKpa: 150, z: DHAKA_Z };
@@ -137,6 +142,8 @@ export interface CoreResult {
   wallShareY: number;
   /** The lintel over each lift door (loading along x, where the door webs act); design shear assumed from the wall shear. */
   coupling: CouplingBeam | null;
+  /** The stair shear walls, each designed for its share of the wall shear and moment; absent unless the stair-wall design is used. */
+  stairWalls?: StairWallCheck[];
 }
 
 interface Joint {
@@ -176,6 +183,12 @@ const key = (x: number, y: number) => `${x},${y}`;
 const areaOf = (s: ColSection) => s.bx * s.by;
 
 /** Smallest stock section that is stiffer than `sec` in every direction that needs it (I = b h3 / 12 about the bending plane). */
+/** Can a column of this section and steel area be tied (bars from pickColumnBars, ties from confinementDesign)? Same inputs as bbs.ts. */
+function confinedAt(s: ColSection, astMm2: number, luMm: number): boolean {
+  const p = pickColumnBars(astMm2, s.bx, s.by);
+  return p.fits && confinementDesign({ bxMm: s.bx, byMm: s.by, luMm, longDiaMm: p.dia, ...barsPerFace(p.n, s.bx, s.by) }).ok;
+}
+
 function stiffer(sec: ColSection, needX: boolean, needY: boolean): ColSection {
   const ix = (s: ColSection) => (s.by * s.bx ** 3) / 12;
   const iy = (s: ColSection) => (s.bx * s.by ** 3) / 12;
@@ -190,7 +203,7 @@ export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: 
   const hM = hMm / 1000;
   const ec = ecMPa(MATERIALS.fcMPa);
   const isDual = o.systemId.startsWith("dual");
-  const core = isDual ? coreSection(model) : null;
+  const core = isDual ? coreSection(model, { stairWall: o.stairWall === true, weakWall: o.weakWall === true }) : null;
   const f = model.storeys[0].geometry.fitted;
   const gamma = UNIT_WEIGHTS.frameConcrete;
   const kllCol = structurePack().liveLoadReduction.kll.interiorColumns;
@@ -570,13 +583,19 @@ export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: 
     return { cases, lu, pu };
   }
 
+  // wind drift screen (Sec 2.4) on the current storey stiffness, so that the sizing loop also stiffens storeys that fail it
+  const windDrift = (c: typeof ctx) => {
+    const stiff = (r: SeismicResult) => r.storeys.map((st) => (st.elasticMm > 0 ? st.shearKn / st.elasticMm : 0));
+    return analyseWind({ storeys: n, storeyHeightMm: hMm, planXMm: windPlanMm.x, planYMm: windPlanMm.y, stiffnessXKnPerMm: stiff(c.seisX), stiffnessYKnPerMm: stiff(c.seisY) });
+  };
   for (iterations = 1; iterations <= MAX_ITERATIONS; iterations++) {
     ctx = context();
     let changed = false;
-    // storeys that fail drift or stability get stiffer columns
+    const wd = windDrift(ctx);
+    // storeys that fail drift, wind drift or stability get stiffer columns
     for (let i = 0; i < n; i++) {
-      const needX = ctx.seisX.storeys[i].util > 1 || ctx.seisX.storeys[i].thetaUtil > 1;
-      const needY = ctx.seisY.storeys[i].util > 1 || ctx.seisY.storeys[i].thetaUtil > 1;
+      const needX = ctx.seisX.storeys[i].util > 1 || ctx.seisX.storeys[i].thetaUtil > 1 || wd.x.driftUtil[i] > 1;
+      const needY = ctx.seisY.storeys[i].util > 1 || ctx.seisY.storeys[i].thetaUtil > 1 || wd.y.driftUtil[i] > 1;
       if (needX || needY)
         cols.forEach((_c, ci) => {
           const nx = stiffer(sections[i][ci], needX, needY);
@@ -599,9 +618,10 @@ export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: 
         const isCur = (s: ColSection) => s.bx === curSec.bx && s.by === curSec.by;
         for (const s of [...COLUMN_STOCK.filter(isCur), ...COLUMN_STOCK.filter((s) => !isCur(s))]) {
           if (areaOf(s) < start || inertiaX(s) < floorIx[i][ci] || inertiaY(s) < floorIy[i][ci]) continue;
-          const { cases, pu } = casesFor(i, ci, s);
+          const { cases, pu, lu } = casesFor(i, ci, s);
           const r = lightestSteel(s, cases);
-          if (r && scwbHolds(i, ci, s, r.rho, cases, pu) && jointHoldsAt(i, ci, s)) { chosen = s; rho = r.rho; break; }
+          // the section must also take its ties (Sec 8.3.5.4 confinement) with the bars the detailing picks for it
+          if (r && scwbHolds(i, ci, s, r.rho, cases, pu) && jointHoldsAt(i, ci, s) && confinedAt(s, r.astMm2, lu)) { chosen = s; rho = r.rho; break; }
         }
         if (!chosen) {
           // nothing passes within 4 %: take the largest section at up to 6 % steel, reporting its (failing) utilisation
@@ -701,13 +721,45 @@ export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: 
   if (core && ctx.dualX && ctx.dualY) {
     const sx = ctx.seisX.storeys[0].shearKn;
     const sy = ctx.seisY.storeys[0].shearKn;
-    const x = checkCore(core, "x", ctx.dualX.wallShearKn[0], ctx.dualX.wallMomentKnM[0], core.heightMm);
-    const y = checkCore(core, "y", ctx.dualY.wallShearKn[0], ctx.dualY.wallMomentKnM[0], core.heightMm);
+    // Eq 6.8.10 demand: design roof drift (Cd delta / I, summed over storeys), building height, and the core's share of the factored
+    // gravity (1.4 x seismic weight x core area / footprint; an assumption, the core is not load-traced)
+    const buildingHeightMm = n * hMm;
+    const footprintMm2 = model.footprintAreaM2 * 1e6;
+    const axialKn = (x: number) => (1.4 * ctx.seisX.weightKn * x) / footprintMm2;
+    const roof = (s: { storeys: { designDriftMm: number }[] }) => s.storeys.reduce((a, r) => a + r.designDriftMm, 0);
+    // stair shear walls (when present) take their share of each direction's base shear and moment by inertia; the lift box takes the rest
+    // moment is shared by inertia about the core centre (webs and flanges); shear by area (a flange takes no shear); the lift box takes the rest
+    const split = (dir: "x" | "y") => {
+      const all = wallProps(core, dir).igMm4;
+      const mine = (core.extraWalls ?? []).filter((w) => w.dir === dir);
+      const acvTot = wallProps(core, dir).acvMm2;
+      const coreAcv = wallProps({ ...core, extraWalls: [] }, dir).acvMm2;
+      const shareOf = (w: ExtraWall) => ({ i: extraInertia(w) / all, v: extraAcv(w) / acvTot });
+      const walls = mine.map((w) => ({ w, ...shareOf(w) }));
+      const coreI = 1 - walls.reduce((a, b) => a + b.i, 0);
+      return { coreI, coreV: coreAcv / acvTot, walls };
+    };
+    const sX = split("x");
+    const sY = split("y");
+    const coreBase: CoreSection = { ...core, extraWalls: [] };
+    const vX = ctx.dualX.wallShearKn[0];
+    const mX = ctx.dualX.wallMomentKnM[0];
+    const vY = ctx.dualY.wallShearKn[0];
+    const mY = ctx.dualY.wallMomentKnM[0];
+    const x = checkCore(coreBase, "x", vX * sX.coreV, mX * sX.coreI, core.heightMm, undefined, undefined, { roofDriftMm: roof(ctx.seisX), buildingHeightMm, axialKn: axialKn(wallProps(core, "x").agMm2) });
+    const y = checkCore(coreBase, "y", vY * sY.coreV, mY * sY.coreI, core.heightMm, undefined, undefined, { roofDriftMm: roof(ctx.seisY), buildingHeightMm, axialKn: axialKn(wallProps(core, "y").agMm2) });
+    const stairWalls = [
+      ...sX.walls.map(({ w, i, v }) => checkStairWall(w, i, vX * v, mX * i, core.heightMm, undefined, undefined, v)),
+      ...sY.walls.map(({ w, i, v }) => checkStairWall(w, i, vY * v, mY * i, core.heightMm, undefined, undefined, v)),
+    ];
     // coupling beam shear: the door web carries half of the wall shear and the shaft lintels share it equally (assumption)
     const coupling = designCouplingBeam(core, hMm, Math.abs(ctx.dualX.wallShearKn[0]) / (2 * Math.max(core.shafts, 1)));
-    coreResult = { section: core, x, y, dualX: ctx.dualX, dualY: ctx.dualY, wallShareX: Math.abs(ctx.dualX.wallShearKn[0]) / sx, wallShareY: Math.abs(ctx.dualY.wallShearKn[0]) / sy, coupling };
+    coreResult = { section: core, x, y, dualX: ctx.dualX, dualY: ctx.dualY, wallShareX: Math.abs(ctx.dualX.wallShearKn[0]) / sx, wallShareY: Math.abs(ctx.dualY.wallShearKn[0]) / sy, coupling, ...(stairWalls.length ? { stairWalls } : {}) };
     if (coupling && !coupling.fits) failures.push({ level: 0, member: "core", id: "coupling-beam", util: Infinity, governs: `coupling beam over the lift door: ${coupling.reason}` });
     for (const c of [x, y]) if (c.util > 1) failures.push({ level: 0, member: "core", id: `core-${c.dir}`, util: c.util, governs: c.governs });
+    stairWalls.forEach((sw, i) => { if (sw.util > 1) failures.push({ level: 0, member: "core", id: `stair-wall-${sw.dir}-${i}`, util: sw.util, governs: `stair wall ${sw.dir}: ${sw.governs}` }); });
+    // thickness: at least storey height / 16 (ACI 318-14 18.10.6.4 fallback; BNBC text not located)
+    if (core.tMm * 16 < hMm) failures.push({ level: 0, member: "core", id: "core-thickness", util: hMm / 16 / core.tMm, governs: `core wall ${core.tMm} mm is under storey height ${hMm} mm / 16` });
   }
   if (!ctx.seisX.permitted) failures.push({ level: -1, member: "seismic", id: "seismic-system", util: Infinity, governs: "system not permitted" });
   failures.sort((a, b) => b.util - a.util);

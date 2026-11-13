@@ -118,7 +118,7 @@ export interface FittedPlan {
 }
 
 export interface FitRejection {
-  code: "too_narrow" | "too_shallow" | "invalid_plan";
+  code: "too_narrow" | "too_shallow" | "invalid_plan" | "no_lift";
   message: Text;
   requiredMm?: number;
   availableMm?: number;

@@ -96,7 +96,7 @@ describe("merged footing: punching and bending between columns", () => {
   it("every merged footing carries its check; it passes unless it reached the 2000 mm limit, and the depth never shrinks below the pad rule", async () => {
     const { deriveBuilding } = await import("../model/building");
     const { analyzeStructure } = await import("./analyze");
-    const b = deriveBuilding({ plotWidthMm: 12000, plotDepthMm: 22000, storeys: 7, planId: "pn-3b" });
+    const b = deriveBuilding({ plotWidthMm: 12000, plotDepthMm: 22000, storeys: 6, planId: "pn-3b" });
     if (!b.ok) throw new Error("fit");
     const res = analyzeStructure(b.model);
     const merged = res.foundation.footings.filter((f) => f.kind !== "isolated");

@@ -644,6 +644,65 @@ function detailPlinthBeams(model: BuildingModel, b: Builder): void {
 }
 
 /** Lift shaft: 150 mm RC walls with 10 mm bars at 200 mm each way on both faces (0.52 percent, above the 0.25 percent assumed minimum), and the pit slab with 12 mm at 150 each way. */
+/**
+ * Stair shear walls (core.ts checkStairWall): horizontal web steel from the wall's shear ratio (both faces, at least 0.25 %), vertical 10 mm
+ * at 200 both faces, end steel in the boundary element (or plain end bars when no element is needed), and the element's ties.
+ */
+function detailStairWalls(b: Builder, res: StructureResult): void {
+  const cr = res.frame.core;
+  const walls = cr?.stairWalls ?? [];
+  if (!cr || walls.length === 0) return;
+  const h = cr.section.heightMm;
+  const lap = lapTension(10, "B", {});
+  walls.forEach((sw, i) => {
+    const L = sw.lengthMm;
+    const t = sw.tMm;
+    const no = i + 1;
+    // a flange runs across its load direction; a web runs along it
+    const along = sw.kind === "flange" ? (sw.dir === "x" ? "y" : "x") : sw.dir;
+    const dirEn = `along ${along}`;
+    const dirBn = `${along} বরাবর`;
+    const nameEn = sw.kind === "flange" ? "Weak-direction wall" : "Stair shear wall";
+    const nameBn = sw.kind === "flange" ? "দুর্বল দিকের দেয়াল" : "সিঁড়ির শিয়ার ওয়াল";
+    // horizontal web steel: the spacing in 25 mm steps down to 100 mm (a bigger bar when that is not enough)
+    let hDia = 10;
+    let hSp = 200;
+    for (const d of [10, 12, 16]) {
+      hDia = d;
+      hSp = Math.min(200, Math.floor((2 * barArea(d) * 1000) / (sw.rhoHorizontal * t * 1000) / 25) * 25);
+      if (hSp >= 100) break;
+    }
+    hSp = Math.max(hSp, 100);
+    const hLen = L - 2 * COVER;
+    const hPieces = Math.max(1, Math.ceil((hLen + lap) / (STOCK_LENGTH_MM - lap)));
+    const hPieceLen = Math.round((hLen + (hPieces - 1) * lap) / hPieces);
+    b.add({ family: "core", description: bi(`${nameEn} ${no} (${dirEn}), horizontal ${hDia} mm at ${hSp}, both faces`, `${nameBn} ${no} (${dirBn}), আনুভূমিক ${hDia} মিমি @ ${hSp}, দুই পাশে`), dia: hDia, shape: "00", dims: [hPieceLen], cut: hPieceLen, bars: 2 * Math.ceil(h / hSp) * hPieces, level: -1 });
+    // vertical bars at 200 both faces along the wall length, full height (lapped in stock lengths)
+    const vPieces = Math.max(1, Math.ceil((h + lap) / (STOCK_LENGTH_MM - lap)));
+    const vLen = Math.round((h + (vPieces - 1) * lap) / vPieces);
+    b.add({ family: "core", description: bi(`${nameEn} ${no} (${dirEn}), vertical 10 mm at 200, both faces`, `${nameBn} ${no} (${dirBn}), খাড়া ১০ মিমি @ ২০০, দুই পাশে`), dia: 10, shape: "00", dims: [vLen], cut: vLen, bars: 2 * (Math.ceil(L / 200) + 1) * vPieces, level: -1 });
+    // end steel: two ends, the boundary element bars when it is needed, otherwise plain end bars for the moment
+    const be = sw.boundary;
+    if (sw.asEndMm2 > 0 || be) {
+      const bd = be ? be.barDiaMm : [16, 20, 25, 28, 32].find((d) => Math.ceil(sw.asEndMm2 / barArea(d)) <= 8) ?? 32;
+      const n = be ? be.barsPerCorner : Math.max(2, Math.ceil(sw.asEndMm2 / barArea(bd)));
+      const bl = lapTension(bd, "B", {});
+      const bp = Math.max(1, Math.ceil(h / (STOCK_LENGTH_MM - bl)));
+      const bLen = Math.round((h + (bp - 1) * bl) / bp);
+      b.add({ family: "core", description: bi(`${nameEn} ${no}, end bars ${bd} mm (${n} per end)`, `${nameBn} ${no}, প্রান্তের রড ${bd} মিমি (প্রতি প্রান্তে ${n}টি)`), dia: bd, shape: "00", dims: [bLen], cut: bLen, bars: 2 * n * bp, level: -1 });
+      if (be) {
+        const ties = Math.ceil(h / be.tieSpacingMm) + 1;
+        const tail = tieHookTail(be.tieDiaMm);
+        const tbd = bendDiameter(be.tieDiaMm, true);
+        const a = t - 2 * 25;
+        const bb = be.lengthMm - 2 * 25;
+        const tieCut = 2 * a + 2 * bb + 2 * tail - 3 * bendDeduction(be.tieDiaMm, tbd, 90) - 2 * bendDeduction(be.tieDiaMm, tbd, 135);
+        b.add({ family: "core", description: bi(`${nameEn} ${no}, boundary element ties ${be.tieDiaMm} mm at ${be.tieSpacingMm}`, `${nameBn} ${no}, প্রান্ত অংশের টাই ${be.tieDiaMm} মিমি @ ${be.tieSpacingMm}`), dia: be.tieDiaMm, shape: "51", dims: [a, bb, tail], cut: tieCut, bars: 4 * ties, level: -1 });
+      }
+    }
+  });
+}
+
 function detailLiftCore(model: BuildingModel, b: Builder, res: StructureResult): void {
   const core = liftCore(model);
   if (!core) return;
@@ -753,6 +812,9 @@ export function concreteSteps(res: StructureResult, model: BuildingModel): Concr
     steps.push({ id: `slab-${lv.index}`, kind: "slab", index: lv.index, m3: slab });
   }
   if (lc) steps.push({ id: "core", kind: "core", m3: lc.wallM3 });
+  // stair shear walls: length x thickness x height (cast with the core)
+  const cr = res.frame.core;
+  if (cr) for (const [i, sw] of (cr.stairWalls ?? []).entries()) steps.push({ id: "stair-wall-" + i, kind: "core", m3: (sw.lengthMm * sw.tMm * cr.section.heightMm) / 1e9 });
   return steps;
 }
 
@@ -786,6 +848,9 @@ function formworkM2(res: StructureResult, model: BuildingModel): { footing: numb
   if (sg) f.slab += sg.soffitM2 * model.storeys.length;
   const lc = liftCore(model);
   if (lc) f.core += (2 * lc.perimeterMm * lc.heightMm) / 1e6; // both faces of the shaft walls (priced at the column form rate)
+  // both faces of the stair shear walls
+  const cr = res.frame.core;
+  if (cr) for (const sw of cr.stairWalls ?? []) f.core += (2 * sw.lengthMm * cr.section.heightMm) / 1e6;
   return f;
 }
 
@@ -805,6 +870,7 @@ export function buildBbs(res: StructureResult, model: BuildingModel): BbsResult 
   detailStairs(model, b);
   detailPlinthBeams(model, b);
   detailLiftCore(model, b, res);
+  detailStairWalls(b, res);
   const rows = b.rows();
   const byDia = new Map<number, { lengthM: number; weightKg: number }>();
   const byFam = new Map<BbsFamily, number>();

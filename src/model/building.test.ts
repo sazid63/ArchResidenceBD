@@ -110,13 +110,21 @@ describe("deriveBuilding", () => {
 
   for (const plan of PLAN_LIBRARY)
     for (const storeys of [1, 2, 6, 10])
-      for (const mirror of [false, true])
+      for (const mirror of [false, true]) {
+        // a plan without a lift cell is not built above six storeys (a lift is required above six): the rule is the expectation there
+        if (storeys > 6 && !plan.rooms.some((r) => r.kind === "lift")) {
+          it(`${plan.id}: ${storeys} storeys${mirror ? " mirrored" : ""} is rejected (no lift)`, () => {
+            expect(deriveBuilding({ storeys, setbacksMm: S, ...plotFor(plan.id), planId: plan.id, mirror }).ok).toBe(false);
+          });
+          continue;
+        }
         it(`${plan.id}: ${storeys} storeys${mirror ? " mirrored" : ""} has no validator errors on any storey`, () => {
           const { model } = build({ planId: plan.id, storeys, mirror });
           expect(model.storeys).toHaveLength(storeys);
           for (const s of model.storeys)
             expect(s.issues.filter((i) => i.severity === "error").map((i) => `${s.phaseId}: ${i.message}`)).toEqual([]);
         });
+      }
 });
 
 describe("groundFloorPlan", () => {

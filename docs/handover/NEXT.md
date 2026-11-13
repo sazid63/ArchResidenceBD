@@ -33,6 +33,13 @@ for common values and methods and use them.
 - Stair: simply supported waist slab, span = run + 300, live 4.0 kN/m2, finishes 1.5 kN/m2, bars at most 200 mm apart.
 - BOQ labour norms (mason 1 m3 brick / 9 m2 plaster / 12 m2 screed / 6 m2 tiles per day, mixer 8 m3/day, vibrator 10 m3/day).
 
+## Owner decision: weak-direction end walls (accepted 2026-11-13)
+- Owner accepted end walls as a plan change. Stair shear walls and flange end walls are used automatically when a column would reach 1000 mm
+  (`analyzeStructure`: stair walls first, then stair plus end walls; each kept only if it lowers the largest column with no new failure).
+- Result: p2-2b-fb and p4-1b at 12 storeys drop to 600 / 500 mm columns and pass; p1-4b-wide uses stair walls only (600 mm).
+- Not done: the end walls are not drawn in the plans or structural sheets; the architect has not placed them; the bar schedule and BOQ include them.
+- Assumptions in `core.ts`: `WEAK_WALL_ASSUMPTION`, `STAIR_WALL_ASSUMPTION`; shear split by area, moment split by inertia about the core centre.
+
 ## Known facts and open items
 - Sample steel moved a lot across the session (e.g. mid-2st 14,461 to 17,334 kg; mid-8st-dual 83,242 to about 104,476 kg incl. core boundary elements).
   Ground columns grow big (600 mm on a 2-storey sample): worth a sizing review.

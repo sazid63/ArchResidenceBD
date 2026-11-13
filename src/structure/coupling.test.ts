@@ -6,7 +6,7 @@ const core: CoreSection = { lxMm: 2300, lyMm: 2400, tMm: 150, shafts: 1, heightM
 
 describe("coupling beam over a lift door", () => {
   it("shear limit phi 0.83 sqrt(fc) Acw = 0.75 x 0.83 x 4.472 x 135000 / 1000 = 375.8 kN", () => {
-    const c = designCouplingBeam(core, 3000, 100)!;
+    const c = designCouplingBeam(core, 3000, 100, 20)!;
     expect(c.hMm).toBe(900);
     expect(c.phiVnMaxKn).toBeCloseTo(375.83, 1);
   });

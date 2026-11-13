@@ -18,7 +18,7 @@ describe("column confinement, Sec 8.3.5.4", () => {
     // so = min(450/4 = 112, 6 x 16 = 96, 150) = 96, rounded down to 75 mm.
     // Ash req at s = 75 with bc = 370: 0.3 x 75 x 370 x (202500/136900 - 1) x 20/420 = 190 mm2 (eq 6.8.7 governs over 6.8.8 = 119 mm2).
     // Provided: closed hoop plus one cross tie each way = 3 legs x 78.5 = 236 mm2.
-    const r = confinementDesign({ bxMm: 450, byMm: 450, luMm: 3000, longDiaMm: 16, barsPerXFace: 3, barsPerYFace: 3 });
+    const r = confinementDesign({ fcMPa: 20, bxMm: 450, byMm: 450, luMm: 3000, longDiaMm: 16, barsPerXFace: 3, barsPerYFace: 3 });
     expect(r.ok).toBe(true);
     expect(r.loMm).toBe(500);
     expect(r.tieDiaMm).toBe(10);
@@ -34,7 +34,7 @@ describe("column confinement, Sec 8.3.5.4", () => {
   it("300 x 300 with 4 corner bars: no cross ties, so the 10 mm closed hoop cannot meet Ash at 75 mm; 12 mm at 75 mm is chosen", () => {
     // lo = max(300, 2700/6 = 450, 450) = 450. hx = 200, cap = 150, so = min(75, 96, 150) = 75.
     // Ash req at 75 mm, bc = 220: eq 6.8.7 gives 203 mm2. 10 mm legs: 2 x 78.5 = 157 (fails); 12 mm legs: 2 x 113.1 = 226 (passes).
-    const r = confinementDesign({ bxMm: 300, byMm: 300, luMm: 2700, longDiaMm: 16, barsPerXFace: 2, barsPerYFace: 2 });
+    const r = confinementDesign({ fcMPa: 20, bxMm: 300, byMm: 300, luMm: 2700, longDiaMm: 16, barsPerXFace: 2, barsPerYFace: 2 });
     expect(r.ok).toBe(true);
     expect(r.loMm).toBe(450);
     expect(r.tieDiaMm).toBe(12);
@@ -44,7 +44,7 @@ describe("column confinement, Sec 8.3.5.4", () => {
   });
 
   it("25 mm bars: the 6 db limit (150) does not govern a 450 column, so the 1/4 width rule gives 112 -> 100 mm", () => {
-    const r = confinementDesign({ bxMm: 450, byMm: 450, luMm: 3000, longDiaMm: 25, barsPerXFace: 3, barsPerYFace: 3 });
+    const r = confinementDesign({ fcMPa: 20, bxMm: 450, byMm: 450, luMm: 3000, longDiaMm: 25, barsPerXFace: 3, barsPerYFace: 3 });
     expect(r.ok).toBe(true);
     expect(r.endSpacingMm).toBe(100);
     // Outside the zone, (f) allows min(6 db, 150) = 150 for 25 mm bars.
@@ -52,7 +52,7 @@ describe("column confinement, Sec 8.3.5.4", () => {
   });
 
   it("the zone is never shorter than 450 mm nor than the largest side", () => {
-    const r = confinementDesign({ bxMm: 600, byMm: 600, luMm: 1200, longDiaMm: 16, barsPerXFace: 3, barsPerYFace: 3 });
+    const r = confinementDesign({ fcMPa: 20, bxMm: 600, byMm: 600, luMm: 1200, longDiaMm: 16, barsPerXFace: 3, barsPerYFace: 3 });
     expect(r.loMm).toBe(600);
   });
 });

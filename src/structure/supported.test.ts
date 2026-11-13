@@ -10,12 +10,12 @@ const analyse = (storeys: number) => {
 };
 
 describe("C3 supported height", () => {
-  it("the limit is 8 storeys and the flag follows it", () => {
-    expect(SUPPORTED_MAX_STOREYS).toBe(8);
-    expect(structureSupported(8)).toBe(true);
-    expect(structureSupported(9)).toBe(false);
-    expect(analyse(8).supported).toBe(true);
-    expect(analyse(9).supported).toBe(false);
+  it("the limit is 12 storeys and the flag follows it", () => {
+    expect(SUPPORTED_MAX_STOREYS).toBe(12);
+    expect(structureSupported(12)).toBe(true);
+    expect(structureSupported(13)).toBe(false);
+    expect(analyse(12).supported).toBe(true);
+    expect(analyse(13).supported).toBe(false);
   });
 
   it("the permit package assumptions say NOT DESIGNED above the limit and not below it", () => {
