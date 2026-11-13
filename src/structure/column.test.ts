@@ -323,3 +323,11 @@ describe("lightest steel", () => {
     if (heavy) expect(heavy.rho).toBeGreaterThan(0.01);
   });
 });
+
+describe("column stock", () => {
+  it("includes 250 x 300 mm (and 300 x 250) for 2-storey ground columns, the smallest section in the stock", async () => {
+    const { COLUMN_STOCK } = await import("./column");
+    expect(COLUMN_STOCK[0]).toEqual({ bx: 250, by: 300 });
+    expect(COLUMN_STOCK).toContainEqual({ bx: 300, by: 250 });
+  });
+});

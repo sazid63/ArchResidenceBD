@@ -352,7 +352,8 @@ export function analyzeFrame(model: BuildingModel, levels: LevelResult[], opts: 
   });
 
   // ---- sizing loop ---------------------------------------------------------------------------------------------
-  const sections: ColSection[][] = Array.from({ length: n }, () => cols.map(() => ({ ...COLUMN_STOCK[1] })));
+  const start = COLUMN_STOCK.find((s) => s.bx === 350 && s.by === 350) ?? COLUMN_STOCK[1];
+  const sections: ColSection[][] = Array.from({ length: n }, () => cols.map(() => ({ ...start })));
   const rhos: number[][] = Array.from({ length: n }, () => cols.map(() => RHO_STEPS[0]));
   // stiffness floors set by drift bumps, so the gravity sizing cannot flip a column back to a weaker orientation
   const floorIx: number[][] = Array.from({ length: n }, () => cols.map(() => 0));

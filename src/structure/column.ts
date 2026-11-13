@@ -17,7 +17,8 @@ export interface ColSection {
 /** Stock sections, smallest area first. Special moment frames need at least 300 mm and a side ratio of 0.4 (assumption: not in the pages read). */
 export const COLUMN_STOCK: ColSection[] = (() => {
   const sq = [300, 350, 400, 450, 500, 550, 600, 700].map((s) => ({ bx: s, by: s }));
-  const rect = [[300, 450], [300, 600], [350, 500], [400, 600], [450, 700], [500, 750]].flatMap(([a, b]) => [{ bx: a, by: b }, { bx: b, by: a }]);
+  // 250 x 300: BNBC 2020 IMRF minimum ground column (web-sourced, not checked against the printed code); 2-storey ground columns.
+  const rect = [[250, 300], [300, 450], [300, 600], [350, 500], [400, 600], [450, 700], [500, 750]].flatMap(([a, b]) => [{ bx: a, by: b }, { bx: b, by: a }]);
   return [...sq, ...rect].sort((p, q) => p.bx * p.by - q.bx * q.by || p.bx - q.bx);
 })();
 
